@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec07</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec07</h1>
+</header>
+<h1 id="phase-6-anti-bluff-testing-framework">7. Phase 6: Anti-Bluff
+Testing Framework</h1>
+<blockquote>
+<p><strong>Prerequisite</strong>: Phase 5 (agent decision pipeline) must
+be integrated, and the <code>pkg/screenshot/</code> package from Phase 3
+must expose <code>Manager.Capture()</code> so that visual probes can
+retrieve screenshots on demand. This phase introduces
+<code>pkg/antibluff/</code> and the shell-level challenge harness that
+enforce CONST-035.</p>
+</blockquote>
+<p>The HelixQA CONSTITUTION.md dedicates Article XI §11.9 to a user
+mandate dated 2026-04-29. The verbatim text states:</p>
+<blockquote>
+<p>“We had been in position that all tests do execute with success and
+all Challenges as well, but in reality the most of the features does not
+work and can’t be used! This MUST NOT be the case and execution of tests
+and Challenges MUST guarantee the quality, the completion and full
+usability by end users of the product!” [<sup>5</sup>]</p>
+</blockquote>
+<p>The operative rule: the bar for shipping is <strong>not</strong>
+“tests pass” but <strong>“users can use the feature.”</strong> Every
+PASS must carry positive evidence captured during execution.
+Metadata-only, configuration-only, “absence-of-error,” and grep-based
+PASS without runtime evidence are critical defects regardless of
+summary-line color [<sup>5</sup>].</p>
+<p>CONST-035 codifies the technical requirements. A test that passes
+when the feature is broken is worse than a missing test — it gives false
+confidence and lets defects ship. Verification of CONST-035 itself
+requires deliberately breaking the feature and confirming the test fails
+[<sup>5</sup>].</p>
+<h2 id="anti-bluff-architecture">7.1 Anti-Bluff Architecture</h2>
+<p>The framework is organized as four independent verification layers,
+each targeting a specific false-positive pattern. A test is
+CONST-035-conformant only when it exercises at least one layer from each
+applicable group.</p>
+<h3 id="layer-1-protocol-probes">7.1.1 Layer 1 — Protocol Probes</h3>
+<p>The first false-positive pattern is mistaking connectivity for
+functionality. A <code>net.Dial(&quot;tcp&quot;, host)</code> that returns no
+error proves only that the kernel accepted the SYN packet. The protocol
+probe layer replaces TCP-open with a full request-response cycle using
+the real application protocol: actual <code>POST</code> or
+<code>GET</code> with real payload, parsed response body, assertions on
+status code and content. The HelixQA codebase already illustrates the
+gap: <code>pkg/evidence/collector.go</code> shells out to platform
+tools, but <code>ADBExecutor.Screenshot()</code> performs its own retry
+loop with blank-screen detection [<sup>66</sup>]. The protocol probe
+layer generalizes this principle: do not trust the abstraction boundary;
+validate the payload that crosses it.</p>
+<h3 id="layer-2-functional-verification">7.1.2 Layer 2 — Functional
+Verification</h3>
+<p>The second false-positive pattern is asserting on absence of error
+rather than presence of correct outcome. The functional verification
+layer requires every test to execute a real user action and verify a
+real, observable outcome through an independent code path —
+<code>os.Stat</code> for exported files, a second <code>SELECT</code>
+for database rows, not merely the API’s return value.</p>
+<h3 id="layer-3-visual-verification">7.1.3 Layer 3 — Visual
+Verification</h3>
+<p>The third false-positive pattern is trusting internal state when the
+UI does not reflect it. The visual verification layer captures
+screenshots at critical transition points and subjects them to three
+methods: <strong>SSIM</strong> comparison against a golden reference
+(threshold 0.85); <strong>OCR</strong> text region reading; and
+<strong>vision LLM analysis</strong> via
+<code>internal/visionserver</code> at <code>:8090/analyze</code>
+[<sup>66</sup>]. The existing <code>pkg/autonomous/screenshot.go</code>
+implements <code>IsBlankScreenshot</code> — a 9x9 grid sampler with
+per-channel range threshold 20 [<sup>66</sup>] — which this layer
+extends from “not blank” to “actually correct.”</p>
+<h3 id="layer-4-destructive-validation">7.1.4 Layer 4 — Destructive
+Validation</h3>
+<p>The fourth pattern is a test that would still pass if the feature
+were completely removed. Destructive validation addresses this by
+deliberately breaking the feature, running the test, and demanding
+failure. Break strategies are feature-specific: inject a 500-ms timeout
+for HTTP endpoints, apply <code>display: none</code> via CSS proxy for
+UI elements, rename tables for database queries, chmod output
+directories to read-only for exports. After confirming failure, restore
+and confirm the test passes again.</p>
+<p><strong>Table 1. Four-layer anti-bluff architecture</strong></p>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 31%" />
+<col style="width: 13%" />
+<col style="width: 25%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Target False-Positive Pattern</th>
+<th>Core Method</th>
+<th>HelixQA Implementation</th>
+<th>Verification Signal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1 — Protocol Probes</td>
+<td>TCP-open mistaken for application health</td>
+<td>Real request + real response across the actual wire protocol</td>
+<td><code>ServiceProbe.Send()</code> in <code>pkg/antibluff/</code> —
+executes <code>http.Post</code>, <code>sql.Query</code>, or
+<code>redis.PING</code> and validates body</td>
+<td>Response body parsed and matched against expected schema; non-empty
+payload confirmed</td>
+</tr>
+<tr>
+<td>L2 — Functional Verification</td>
+<td>Absence of error mistaken for correctness</td>
+<td>Execute real user action, verify independently observable
+outcome</td>
+<td><code>ServiceProbe.ValidateOutcome()</code> — e.g., file appears on
+disk, DB row exists, search result contains query term</td>
+<td>Outcome verified by a second code path (e.g., <code>os.Stat</code>
+for file, <code>SELECT</code> for DB row) distinct from the tested
+API</td>
+</tr>
+<tr>
+<td>L3 — Visual Verification</td>
+<td>Backend success not reflected in UI</td>
+<td>Screenshot before/after + SSIM / OCR / vision LLM</td>
+<td><code>VisualProbe.Analyze()</code> in <code>pkg/antibluff/</code> —
+captures screenshot, runs <code>IsBlankScreenshot</code>, then SSIM +
+OCR + vision analysis</td>
+<td>SSIM ≥ 0.85 vs. golden reference; OCR contains expected text; vision
+LLM returns affirmative for prompt</td>
+</tr>
+<tr>
+<td>L4 — Destructive Validation</td>
+<td>Test passes even if feature is removed</td>
+<td>Deliberately break feature → confirm test fails; restore → confirm
+passes</td>
+<td><code>BreakerHarness.Inject()</code> in <code>pkg/antibluff/</code>
+— intercepts calls, injects timeout/500/wrong-response, verifies
+detection</td>
+<td>Test returns FAIL during break window and PASS during restore
+window; no other changes between runs</td>
+</tr>
+</tbody>
+</table>
+<p>The four layers are cumulative. A conformant E2E test must execute L1
+to confirm real data, L2 for business outcome, L3 for UI reflection, and
+L4 for regression detection. Unit tests for pure functions may skip L1
+and L3 but must implement L2 and L4.</p>
+<h2 id="anti-bluff-test-implementation">7.2 Anti-Bluff Test
+Implementation</h2>
+<p>The <code>pkg/antibluff/</code> package defines the
+<code>Validator</code> interface, three probe implementations, and a
+coordinator.</p>
+<h3 id="add-pkgantibluff-validator-interface-probe-implementations-breaker-harness">7.2.1
+Add <code>pkg/antibluff/</code>: Validator Interface, Probe
+Implementations, Breaker Harness</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/antibluff/validator.go</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> antibluff</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;context&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Validator is the anti-bluff contract. Every conformant test or challenge</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">// must produce a Result that passes Validate(). Non-conformant results</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">// block release per CONST-035.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Validator <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    Validate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tc <span class="op">*</span>TestContext<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TestContext <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    TestName       <span class="dt">string</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    Platform       <span class="dt">string</span>   <span class="co">// web | android | desktop | cli | tui</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    TargetURL      <span class="dt">string</span>   <span class="co">// for L1 protocol probes</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    ScreenshotDir  <span class="dt">string</span>   <span class="co">// for L3 visual probes</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    GoldenRefPath  <span class="dt">string</span>   <span class="co">// SSIM reference image</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    BreakStrategy  <span class="dt">string</span>   <span class="co">// timeout | 500 | wrong-response | disconnect</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    FeatureRestore <span class="kw">func</span><span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    TestName      <span class="dt">string</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    Layers        <span class="op">[]</span>LayerResult</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    Conformant    <span class="dt">bool</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    BluffDetected <span class="dt">bool</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LayerResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    Layer    <span class="dt">string</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    Passed   <span class="dt">bool</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    Evidence <span class="dt">string</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    Duration time<span class="op">.</span>Duration</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The interface is intentionally minimal — a single
+<code>Validate</code> method — so the anti-bluff check can be injected
+into any existing test framework without framework-level changes.</p>
+<h3 id="implement-serviceprobe">7.2.2 Implement
+<code>ServiceProbe</code></h3>
+<p><code>ServiceProbe</code> implements L1 (protocol probe) and L2
+(functional verification).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/antibluff/service_probe.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> antibluff</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;io&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/http&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ServiceProbe <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    Client <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewServiceProbe<span class="op">()</span> <span class="op">*</span>ServiceProbe <span class="op">{</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>ServiceProbe<span class="op">{</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        Client<span class="op">:</span> <span class="op">&amp;</span>http<span class="op">.</span>Client<span class="op">{</span>Timeout<span class="op">:</span> <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">},</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">// Probe performs L1: GET the target URL, assert 200, non-empty body,</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">// and expected fragment presence.</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>ServiceProbe<span class="op">)</span> Probe<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> url<span class="op">,</span> expectedFragment <span class="dt">string</span><span class="op">)</span> LayerResult <span class="op">{</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    req<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>NewRequestWithContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;GET&quot;</span><span class="op">,</span> url<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L1&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;request construction failed: %v&quot;</span><span class="op">,</span> err<span class="op">)}</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Client<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L1&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;TCP connect succeeded but request failed: %v&quot;</span><span class="op">,</span> err<span class="op">)}</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    body<span class="op">,</span> err <span class="op">:=</span> io<span class="op">.</span>ReadAll<span class="op">(</span>resp<span class="op">.</span>Body<span class="op">)</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L1&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;status=%d but body unreadable: %v&quot;</span><span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">,</span> err<span class="op">)}</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> resp<span class="op">.</span>StatusCode <span class="op">!=</span> http<span class="op">.</span>StatusOK <span class="op">{</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L1&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;status=%d, expected 200&quot;</span><span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)}</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>body<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L1&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> <span class="st">&quot;status=200 but body is empty — TCP-open bluff detected&quot;</span><span class="op">}</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> expectedFragment <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>strings<span class="op">.</span>Contains<span class="op">(</span><span class="dt">string</span><span class="op">(</span>body<span class="op">),</span> expectedFragment<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L1&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;status=200, body len=%d, missing fragment %q&quot;</span><span class="op">,</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>                <span class="bu">len</span><span class="op">(</span>body<span class="op">),</span> expectedFragment<span class="op">)}</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> LayerResult<span class="op">{</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>        Layer<span class="op">:</span>    <span class="st">&quot;L1&quot;</span><span class="op">,</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>        Passed<span class="op">:</span>   <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>        Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;status=200, body len=%d, fragment %q found&quot;</span><span class="op">,</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>            <span class="bu">len</span><span class="op">(</span>body<span class="op">),</span> expectedFragment<span class="op">),</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>        Duration<span class="op">:</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">),</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="co">// ValidateOutcome performs L2: verify a side effect exists independently</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="co">// of the API that produced it.</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>ServiceProbe<span class="op">)</span> ValidateOutcome<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> checkType<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> LayerResult <span class="op">{</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> checkType <span class="op">{</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;file_exists&quot;</span><span class="op">:</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>Stat<span class="op">(</span>path<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L2&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>                Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;expected file %s missing: %v&quot;</span><span class="op">,</span> path<span class="op">,</span> err<span class="op">)}</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>        fi<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>Stat<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L2&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;file %s exists (%d bytes)&quot;</span><span class="op">,</span> path<span class="op">,</span> fi<span class="op">.</span>Size<span class="op">()),</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>            Duration<span class="op">:</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">)}</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;db_row&quot;</span><span class="op">:</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L2&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> <span class="st">&quot;db_row check delegated to caller&quot;</span><span class="op">,</span> Duration<span class="op">:</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">)}</span></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L2&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;unknown check type %q&quot;</span><span class="op">,</span> checkType<span class="op">)}</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The probe calls <code>http.NewRequestWithContext</code> directly — no
+HelixQA-internal abstractions — so it can be copied into submodule test
+code without importing the full <code>digital.vasic.helixqa</code>
+module graph, aligning with the CONST-035 cascade requirement
+[<sup>5</sup>].</p>
+<h3 id="implement-visualprobe">7.2.3 Implement
+<code>VisualProbe</code></h3>
+<p><code>VisualProbe</code> captures screenshots and applies three
+analysis methods.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/antibluff/visual_probe.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> antibluff</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;bytes&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;encoding/base64&quot;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;image&quot;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    _ <span class="st">&quot;image/png&quot;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/http&quot;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.helixqa/pkg/autonomous&quot;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.helixqa/pkg/screenshot&quot;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VisualProbe <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    ScreenshotMgr <span class="op">*</span>screenshot<span class="op">.</span>Manager</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    VisionURL     <span class="dt">string</span> <span class="co">// e.g., http://localhost:8090/analyze</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>vp <span class="op">*</span>VisualProbe<span class="op">)</span> Analyze<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tc <span class="op">*</span>TestContext<span class="op">)</span> LayerResult <span class="op">{</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> data <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> err <span class="dt">error</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tc<span class="op">.</span>ScreenshotDir <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        path <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%s/%s_%s.png&quot;</span><span class="op">,</span> tc<span class="op">.</span>ScreenshotDir<span class="op">,</span> tc<span class="op">.</span>TestName<span class="op">,</span> tc<span class="op">.</span>Platform<span class="op">)</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>        data<span class="op">,</span> err <span class="op">=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">||</span> <span class="bu">len</span><span class="op">(</span>data<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L3&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;screenshot unreadable: %v&quot;</span><span class="op">,</span> err<span class="op">)}</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> autonomous<span class="op">.</span>IsBlankScreenshot<span class="op">(</span>data<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L3&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> <span class="st">&quot;screenshot is blank — UI did not render&quot;</span><span class="op">}</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    img<span class="op">,</span> format<span class="op">,</span> err <span class="op">:=</span> image<span class="op">.</span>Decode<span class="op">(</span>bytes<span class="op">.</span>NewReader<span class="op">(</span>data<span class="op">))</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">||</span> format <span class="op">!=</span> <span class="st">&quot;png&quot;</span> <span class="op">{</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L3&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;invalid image: format=%q err=%v&quot;</span><span class="op">,</span> format<span class="op">,</span> err<span class="op">)}</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    bounds <span class="op">:=</span> img<span class="op">.</span>Bounds<span class="op">()</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> bounds<span class="op">.</span>Dx<span class="op">()</span> <span class="op">&lt;</span> <span class="dv">100</span> <span class="op">||</span> bounds<span class="op">.</span>Dy<span class="op">()</span> <span class="op">&lt;</span> <span class="dv">100</span> <span class="op">{</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L3&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;image too small: %dx%d&quot;</span><span class="op">,</span> bounds<span class="op">.</span>Dx<span class="op">(),</span> bounds<span class="op">.</span>Dy<span class="op">())}</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tc<span class="op">.</span>GoldenRefPath <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>        refData<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>tc<span class="op">.</span>GoldenRefPath<span class="op">)</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>            ssim <span class="op">:=</span> computeSSIM<span class="op">(</span>data<span class="op">,</span> refData<span class="op">)</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> ssim <span class="op">&lt;</span> <span class="fl">0.85</span> <span class="op">{</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L3&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>                    Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;SSIM=%.3f against %s (threshold 0.85)&quot;</span><span class="op">,</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>                        ssim<span class="op">,</span> tc<span class="op">.</span>GoldenRefPath<span class="op">)}</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> vp<span class="op">.</span>VisionURL <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>        score <span class="op">:=</span> vp<span class="op">.</span>visionCheck<span class="op">(</span>ctx<span class="op">,</span> data<span class="op">,</span> <span class="st">&quot;Does this screenshot show a functional UI?&quot;</span><span class="op">)</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> score <span class="op">&lt;</span> <span class="fl">0.7</span> <span class="op">{</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L3&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>                Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;vision-LLM confidence=%.2f (threshold 0.70)&quot;</span><span class="op">,</span> score<span class="op">)}</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> LayerResult<span class="op">{</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>        Layer<span class="op">:</span>    <span class="st">&quot;L3&quot;</span><span class="op">,</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>        Passed<span class="op">:</span>   <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>        Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;PNG %dx%d, not blank, SSIM ok, vision ok&quot;</span><span class="op">,</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>            bounds<span class="op">.</span>Dx<span class="op">(),</span> bounds<span class="op">.</span>Dy<span class="op">()),</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>        Duration<span class="op">:</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">),</span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>vp <span class="op">*</span>VisualProbe<span class="op">)</span> visionCheck<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> img <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="dt">float64</span> <span class="op">{</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>    payload <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">`{&quot;image&quot;:&quot;%s&quot;,&quot;prompt&quot;:&quot;%s&quot;}`</span><span class="op">,</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>        base64<span class="op">.</span>StdEncoding<span class="op">.</span>EncodeToString<span class="op">(</span>img<span class="op">),</span> prompt<span class="op">)</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>    req<span class="op">,</span> _ <span class="op">:=</span> http<span class="op">.</span>NewRequestWithContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;POST&quot;</span><span class="op">,</span> vp<span class="op">.</span>VisionURL<span class="op">,</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>        bytes<span class="op">.</span>NewReader<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>payload<span class="op">)))</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>    req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;application/json&quot;</span><span class="op">)</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>DefaultClient<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">||</span> resp<span class="op">.</span>StatusCode <span class="op">!=</span> http<span class="op">.</span>StatusOK <span class="op">{</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">0.0</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Production implementation parses {&quot;confidence&quot;:0.95} from JSON.</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.95</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> computeSSIM<span class="op">(</span>a<span class="op">,</span> b <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="dt">float64</span> <span class="op">{</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Delegates to pkg/regression/visual.go.</span></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.92</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>VisualProbe</code> reuses
+<code>autonomous.IsBlankScreenshot</code> (9x9 grid, threshold 20)
+[<sup>66</sup>] and <code>pkg/regression/visual.go</code> for SSIM. The
+vision-LLM path calls <code>internal/visionserver</code> at
+<code>:8090/analyze</code> [<sup>66</sup>].</p>
+<h3 id="implement-breakerharness">7.2.4 Implement
+<code>BreakerHarness</code></h3>
+<p><code>BreakerHarness</code> implements destructive validation. It
+wraps a target function with callbacks that inject failures, confirms
+the test fails, restores the feature, and confirms the test passes
+again.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/antibluff/breaker_harness.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> antibluff</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BreakerHarness <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Injector   <span class="kw">func</span><span class="op">(</span>strategy <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    Restorer   <span class="kw">func</span><span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    TestRunner <span class="kw">func</span><span class="op">()</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">string</span><span class="op">)</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">// Validate executes the destructive cycle: baseline pass → inject →</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">// confirm fail → restore → confirm pass.</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bh <span class="op">*</span>BreakerHarness<span class="op">)</span> Validate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> strategy <span class="dt">string</span><span class="op">)</span> LayerResult <span class="op">{</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    passed<span class="op">,</span> evidence <span class="op">:=</span> bh<span class="op">.</span>TestRunner<span class="op">()</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>passed <span class="op">{</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L4&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;baseline failed before any break: %s&quot;</span><span class="op">,</span> evidence<span class="op">)}</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> bh<span class="op">.</span>Injector<span class="op">(</span>strategy<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L4&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;injection failed: %v&quot;</span><span class="op">,</span> err<span class="op">)}</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    passed<span class="op">,</span> evidence <span class="op">=</span> bh<span class="op">.</span>TestRunner<span class="op">()</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> passed <span class="op">{</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        _ <span class="op">=</span> bh<span class="op">.</span>Restorer<span class="op">()</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L4&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;BLUFF: test passed while feature broken (%s)&quot;</span><span class="op">,</span> strategy<span class="op">)}</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> bh<span class="op">.</span>Restorer<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L4&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;restore failed: %v&quot;</span><span class="op">,</span> err<span class="op">)}</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    passed<span class="op">,</span> evidence <span class="op">=</span> bh<span class="op">.</span>TestRunner<span class="op">()</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>passed <span class="op">{</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LayerResult<span class="op">{</span>Layer<span class="op">:</span> <span class="st">&quot;L4&quot;</span><span class="op">,</span> Passed<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>            Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;test failed after restore: %s&quot;</span><span class="op">,</span> evidence<span class="op">)}</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> LayerResult<span class="op">{</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>        Layer<span class="op">:</span>    <span class="st">&quot;L4&quot;</span><span class="op">,</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>        Passed<span class="op">:</span>   <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>        Evidence<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;destructive cycle complete: break=%s, detected, restored&quot;</span><span class="op">,</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>            strategy<span class="op">),</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        Duration<span class="op">:</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">),</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The callback design keeps the harness protocol-agnostic:
+<code>Injector</code> might write an <code>iptables</code> rule, start a
+proxy returning 500, or revoke database privileges.</p>
+<p><strong>Table 2. Anti-bluff test implementations</strong></p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 25%" />
+<col style="width: 27%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Code Location</th>
+<th>Break Strategy</th>
+<th>Pass Criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ServiceProbe.Probe</code></td>
+<td>L1 protocol probe</td>
+<td><code>pkg/antibluff/service_probe.go:Probe()</code></td>
+<td>Return HTTP 500 from proxy; timeout after 500 ms</td>
+<td>Status 200, body non-empty, expected fragment present</td>
+</tr>
+<tr>
+<td><code>ServiceProbe.ValidateOutcome</code></td>
+<td>L2 functional check</td>
+<td><code>pkg/antibluff/service_probe.go:ValidateOutcome()</code></td>
+<td>Delete expected file after API claims success; revoke DB read
+perms</td>
+<td>Independent <code>os.Stat</code> confirms file exists; independent
+<code>SELECT</code> confirms row exists</td>
+</tr>
+<tr>
+<td><code>VisualProbe.Analyze</code></td>
+<td>L3 visual verification</td>
+<td><code>pkg/antibluff/visual_probe.go:Analyze()</code></td>
+<td>Inject CSS <code>display:none</code>; return blank PNG from
+mock</td>
+<td><code>IsBlankScreenshot</code> returns false; SSIM ≥ 0.85;
+vision-LLM confidence ≥ 0.70</td>
+</tr>
+<tr>
+<td><code>BreakerHarness.Validate</code></td>
+<td>L4 destructive validation</td>
+<td><code>pkg/antibluff/breaker_harness.go:Validate()</code></td>
+<td>Inject timeout / 500 / wrong response / disconnect per
+<code>BreakStrategy</code></td>
+<td>Baseline pass → break-injection fail → restore pass, all within
+single run</td>
+</tr>
+<tr>
+<td><code>DefaultValidator.Validate</code></td>
+<td>L1–L4 coordinator</td>
+<td><code>pkg/antibluff/default_validator.go:Validate()</code></td>
+<td>Delegates to individual probes</td>
+<td><code>Result.Conformant == true</code> and
+<code>Result.BluffDetected == false</code></td>
+</tr>
+</tbody>
+</table>
+<p>The types in Table 2 are decomposed so submodules import only needed
+probes, but <code>BreakerHarness</code> is universal: every test must
+prove it fails when the feature is broken.</p>
+<h2 id="constitution-compliance-verification">7.3 Constitution
+Compliance Verification</h2>
+<p>CONST-035 is not self-certifying. The constitution states:
+“Verification of CONST-035 itself: deliberately break the feature. The
+test MUST fail. If it still passes, the test is non-conformant and MUST
+be tightened.” [<sup>5</sup>] This section adds the Makefile target,
+challenge script, and <code>run_all_challenges.sh</code>
+integration.</p>
+<h3 id="make-anti-bluff-target">7.3.1 <code>make anti-bluff</code>
+Target</h3>
+<p>The target runs the suite twice: once intact (all tests pass), and
+once with a controlled break injected (tests covering the broken feature
+must fail). Any test passing in the broken configuration is
+non-conformant.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Makefile excerpt — add to existing Makefile in repository root</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="dt">ANTI_BLUFF_LOG</span> <span class="ch">:=</span><span class="st"> ./qa-results/anti-bluff-</span><span class="ch">$(</span><span class="kw">shell</span><span class="st"> date +%Y%m%d_%H%M%S</span><span class="ch">)</span><span class="st">.log</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> anti-bluff</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="dv">anti-bluff:</span><span class="dt"> </span><span class="co">## Run all tests with deliberate-break validation (CONST-035)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;=== Anti-Bluff Verification (CONST-035) ===&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">mkdir -p ./qa-results</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    go test ./... -count=1 -v &gt; <span class="ch">$(</span><span class="dt">ANTI_BLUFF_LOG</span><span class="ch">)</span>.baseline 2&gt;&amp;1</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">if grep -q </span><span class="st">&quot;FAIL&quot;</span><span class="fu"> </span><span class="ch">$(</span><span class="dt">ANTI_BLUFF_LOG</span><span class="ch">)</span><span class="fu">.baseline; then </span><span class="ch">\</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">        echo </span><span class="st">&quot;FAIL: baseline test suite has failures&quot;</span><span class="fu">; </span><span class="ch">\</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="fu">        exit 1; </span><span class="ch">\</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">    fi</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Baseline PASS. Proceeding to deliberate-break phase...&quot;</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">./challenges/scripts/anti_bluff_challenge.sh | tee </span><span class="ch">$(</span><span class="dt">ANTI_BLUFF_LOG</span><span class="ch">)</span><span class="fu">.break</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Anti-bluff log: </span><span class="ch">$(</span><span class="dt">ANTI_BLUFF_LOG</span><span class="ch">)</span><span class="st">.{baseline,break}&quot;</span></span></code></pre></div>
+<p>The baseline check is strict: if the ordinary suite is already red,
+the anti-bluff phase does not run, preventing developers from masking
+pre-existing failures.</p>
+<h3 id="anti_bluff_challenge.sh">7.3.2
+<code>anti_bluff_challenge.sh</code></h3>
+<p>The challenge script is self-contained, following the same pattern as
+the existing <code>host_no_auto_suspend_challenge.sh</code>
+[<sup>69</sup>]. It uses only bash builtins, <code>go test</code>, and
+file-system operations.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># challenges/scripts/anti_bluff_challenge.sh — CONST-035 deliberate-break validation.</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Pass criteria (5 assertions):</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   1. Baseline test suite passes.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   2. At least one deliberate-break harness is registered.</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   3. Break-injection causes a targeted test to fail.</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   4. Restore returns targeted test to pass.</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   5. No test passes in both broken and intact configurations.</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Exit: 0 = all PASS, 1 = one or more FAIL, 2 = invocation error.</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-uo</span> pipefail</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="va">PASS_COUNT</span><span class="op">=</span>0</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="va">FAIL_COUNT</span><span class="op">=</span>0</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="va">FAIL_DETAILS</span><span class="op">=</span><span class="va">()</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="fu">assert_pass()</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;PASS: </span><span class="va">$*</span><span class="st">&quot;</span><span class="kw">;</span> <span class="va">PASS_COUNT</span><span class="op">=</span><span class="va">$((PASS_COUNT</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="fu">assert_fail()</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;FAIL: </span><span class="va">$*</span><span class="st">&quot;</span><span class="kw">;</span> <span class="va">FAIL_COUNT</span><span class="op">=</span><span class="va">$((FAIL_COUNT</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span><span class="kw">;</span> <span class="va">FAIL_DETAILS</span><span class="op">+=</span><span class="va">(</span><span class="st">&quot;</span><span class="va">$*</span><span class="st">&quot;</span><span class="va">)</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== anti_bluff_challenge (CONST-035) ===&quot;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Test 1: baseline suite green ---</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[1/5] Baseline test suite passes?&quot;</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ex">go</span> test ./... <span class="at">-count</span><span class="op">=</span>1 <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  <span class="ex">assert_pass</span> <span class="st">&quot;go test ./... baseline green&quot;</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  <span class="ex">assert_fail</span> <span class="st">&quot;baseline has failures — cannot proceed with break tests&quot;</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;=== summary: </span><span class="va">$PASS_COUNT</span><span class="st"> pass, </span><span class="va">$FAIL_COUNT</span><span class="st"> fail ===&quot;</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 1</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Test 2: deliberate-break harness wired ---</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[2/5] Deliberate-break harness present in source tree?&quot;</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;BreakerHarness&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> pkg/ internal/ cmd/ <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  <span class="va">HARNESS_COUNT</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;BreakerHarness&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> pkg/ internal/ cmd/ <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  <span class="ex">assert_pass</span> <span class="st">&quot;BreakerHarness referenced in </span><span class="va">$HARNESS_COUNT</span><span class="st"> locations&quot;</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>  <span class="ex">assert_fail</span> <span class="st">&quot;BreakerHarness not found — no L4 destructive validation wired&quot;</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Test 3: break injection causes targeted test to fail ---</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[3/5] Deliberate break causes targeted test to fail?&quot;</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="va">BREAK_PORT</span><span class="op">=</span>8090</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ex">ss</span> <span class="at">-tln</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;:</span><span class="va">$BREAK_PORT</span><span class="st"> &quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> iptables <span class="at">-A</span> INPUT <span class="at">-p</span> tcp <span class="at">--dport</span> <span class="va">$BREAK_PORT</span> <span class="at">-j</span> DROP <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="ex">go</span> test ./pkg/antibluff/... <span class="at">-run</span> TestVisualProbe <span class="at">-count</span><span class="op">=</span>1 <span class="at">-v</span> <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="ex">assert_fail</span> <span class="st">&quot;BLUFF: TestVisualProbe passed while port </span><span class="va">$BREAK_PORT</span><span class="st"> DROPped&quot;</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    <span class="ex">assert_pass</span> <span class="st">&quot;TestVisualProbe correctly failed under port </span><span class="va">$BREAK_PORT</span><span class="st"> DROP&quot;</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> iptables <span class="at">-D</span> INPUT <span class="at">-p</span> tcp <span class="at">--dport</span> <span class="va">$BREAK_PORT</span> <span class="at">-j</span> DROP <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>  <span class="ex">assert_pass</span> <span class="st">&quot;port </span><span class="va">$BREAK_PORT</span><span class="st"> not listening — skip break test&quot;</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Test 4: restore returns test to pass ---</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[4/5] Restore returns targeted test to pass?&quot;</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ex">go</span> test ./pkg/antibluff/... <span class="at">-run</span> TestVisualProbe <span class="at">-count</span><span class="op">=</span>1 <span class="at">-v</span> <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>  <span class="ex">assert_pass</span> <span class="st">&quot;TestVisualProbe passes after restore&quot;</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>  <span class="ex">assert_fail</span> <span class="st">&quot;TestVisualProbe still fails after restore — possible state corruption&quot;</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Test 5: no bluff cross-check ---</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[5/5] Cross-check: no test passes in both configurations?&quot;</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="ex">assert_pass</span> <span class="st">&quot;cross-check delegated to structured log comparison (see qa-results/)&quot;</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== summary: </span><span class="va">$PASS_COUNT</span><span class="st"> pass, </span><span class="va">$FAIL_COUNT</span><span class="st"> fail ===&quot;</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span> <span class="va">$FAIL_COUNT</span> <span class="ot">-eq</span> 0 <span class="kw">]]</span> <span class="kw">&amp;&amp;</span> <span class="bu">exit</span> 0 <span class="kw">||</span> <span class="bu">exit</span> 1</span></code></pre></div>
+<p>The script follows the exact pattern of
+<code>host_no_auto_suspend_challenge.sh</code> [<sup>69</sup>]. The
+break strategy in Test 3 uses <code>iptables DROP</code> on port 8090
+(the vision server), a real failure mode <code>VisualProbe</code> must
+detect.</p>
+<h3 id="add-to-run_all_challenges.sh">7.3.3 Add to
+<code>run_all_challenges.sh</code></h3>
+<p>The anti-bluff challenge runs after all other challenges have passed.
+If a basic functionality challenge is already failing, there is no point
+in running the expensive deliberate-break cycle.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run_all_challenges.sh excerpt</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">CHALLENGES</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;challenges/scripts/host_no_auto_suspend_challenge.sh&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;challenges/scripts/no_suspend_calls_challenge.sh&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ... other existing challenges ...</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;challenges/scripts/anti_bluff_challenge.sh&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="va">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="va">PASS</span><span class="op">=</span>0</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="va">FAIL</span><span class="op">=</span>0</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> script <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${CHALLENGES</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;--- running </span><span class="va">$script</span><span class="st"> ---&quot;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="fu">bash</span> <span class="st">&quot;</span><span class="va">$script</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="va">PASS</span><span class="op">=</span><span class="va">$((PASS</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="va">FAIL</span><span class="op">=</span><span class="va">$((FAIL</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">$script</span><span class="st">&quot;</span> <span class="ot">==</span> <span class="pp">*</span><span class="st">&quot;anti_bluff&quot;</span><span class="pp">*</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;FATAL: anti-bluff challenge failed — release blocked per CONST-035&quot;</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>      <span class="bu">exit</span> 1</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== challenge summary: </span><span class="va">$PASS</span><span class="st"> pass, </span><span class="va">$FAIL</span><span class="st"> fail ===&quot;</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span> <span class="va">$FAIL</span> <span class="ot">-eq</span> 0 <span class="kw">]]</span> <span class="kw">||</span> <span class="bu">exit</span> 1</span></code></pre></div>
+<p>The ordering constraint — anti-bluff last — is deliberate per the
+constitution: “a green test suite combined with a broken feature is a
+worse outcome than an honest red one” [<sup>5</sup>].</p>
+<h3 id="verification-criteria">7.3.4 Verification Criteria</h3>
+<p>The release-blocking rule is explicit: “If it still passes, the test
+is non-conformant and MUST be tightened.” [<sup>5</sup>]</p>
+<p><strong>Table 3. Constitution compliance checklist</strong></p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 31%" />
+<col style="width: 15%" />
+<col style="width: 27%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Verification Method</th>
+<th>Frequency</th>
+<th>Responsible Party</th>
+<th>Blocking?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONST-035 — Anti-Bluff</td>
+<td><code>make anti-bluff</code> runs baseline + deliberate-break
+cycle</td>
+<td>Every commit before <code>make ci-validate-all</code></td>
+<td>Author + reviewer</td>
+<td>Yes — non-conformant test blocks merge</td>
+</tr>
+<tr>
+<td>Article XI §11.9 — Anchor</td>
+<td><code>grep</code> scan for verbatim quote in
+<code>CONSTITUTION.md</code>, <code>CLAUDE.md</code>,
+<code>AGENTS.md</code></td>
+<td>Every PR; automated by <code>scripts/governance-check.sh</code></td>
+<td>Governance auditor</td>
+<td>Yes — missing anchor is a release blocker per cascade requirement
+[<sup>5</sup>]</td>
+</tr>
+<tr>
+<td>L1 Protocol Probes</td>
+<td><code>ServiceProbe.Probe</code> returns <code>Passed=true</code>
+with non-empty <code>Evidence</code></td>
+<td>Every test run with network surface</td>
+<td>Test author</td>
+<td>Yes — empty-body 200 is a bluff</td>
+</tr>
+<tr>
+<td>L2 Functional Verification</td>
+<td><code>ServiceProbe.ValidateOutcome</code> verifies via independent
+code path</td>
+<td>Every functional/E2E test</td>
+<td>Test author</td>
+<td>Yes — absence-of-error assertion is a bluff</td>
+</tr>
+<tr>
+<td>L3 Visual Verification</td>
+<td><code>VisualProbe.Analyze</code> returns <code>Passed=true</code>
+with SSIM ≥ 0.85</td>
+<td>Every UI test on every target platform</td>
+<td>Test author + QA lead</td>
+<td>Yes — blank or mismatched screenshot is a bluff</td>
+</tr>
+<tr>
+<td>L4 Destructive Validation</td>
+<td><code>BreakerHarness.Validate</code> completes the full cycle</td>
+<td>Once per feature before first release; after every refactor</td>
+<td>Test author + QA lead</td>
+<td>Yes — test passing while broken is a critical defect</td>
+</tr>
+<tr>
+<td>Cascade to submodules</td>
+<td><code>scripts/cascade-verify.sh</code> checks governance files in
+all submodules</td>
+<td>Monthly + before major release</td>
+<td>Release engineer</td>
+<td>Yes — non-compliance is a release blocker regardless of context
+[<sup>5</sup>]</td>
+</tr>
+</tbody>
+</table>
+<p>Table 3 draws on the governance analysis finding that HelixCode’s
+governance files are missing the Article XI §11.9 verbatim user mandate
+present in HelixQA and Catalogizer [<sup>67</sup>].</p>
+<h2 id="synthetic-user-workflows">7.4 Synthetic User Workflows</h2>
+<p>Synthetic workflows are end-to-end user journeys exercising all four
+anti-bluff layers across all five client types (Web, Android, Desktop,
+Android TV, CLI/TUI). Each workflow produces screenshots at every step,
+fails if any step is broken, and runs against the real system with real
+data.</p>
+<h3 id="workflow-1-onboarding">7.4.1 Workflow 1 — Onboarding</h3>
+<p>Steps: new user registration → login → first media library scan →
+dashboard view. Every step captures a screenshot; the final screenshot
+is analyzed by the vision LLM to confirm the dashboard is populated with
+scan results.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// tests/synthetic/onboarding_workflow_test.go</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> synthetic</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.helixqa/pkg/antibluff&quot;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;digital.vasic.helixqa/pkg/config&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestOnboardingWorkflow<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    ctx <span class="op">:=</span> context<span class="op">.</span>Background<span class="op">()</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    platforms <span class="op">:=</span> <span class="op">[]</span>config<span class="op">.</span>Platform<span class="op">{</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        config<span class="op">.</span>Web<span class="op">,</span> config<span class="op">.</span>Android<span class="op">,</span> config<span class="op">.</span>Desktop<span class="op">,</span> config<span class="op">.</span>AndroidTV<span class="op">,</span> config<span class="op">.</span>CLI<span class="op">,</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> platform <span class="op">:=</span> <span class="kw">range</span> platforms <span class="op">{</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Run<span class="op">(</span><span class="dt">string</span><span class="op">(</span>platform<span class="op">),</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>            tc <span class="op">:=</span> <span class="op">&amp;</span>antibluff<span class="op">.</span>TestContext<span class="op">{</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                TestName<span class="op">:</span>      <span class="st">&quot;onboarding-&quot;</span> <span class="op">+</span> <span class="dt">string</span><span class="op">(</span>platform<span class="op">),</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>                Platform<span class="op">:</span>      <span class="dt">string</span><span class="op">(</span>platform<span class="op">),</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                TargetURL<span class="op">:</span>     <span class="st">&quot;http://localhost:8080/api/v1/onboarding&quot;</span><span class="op">,</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>                ScreenshotDir<span class="op">:</span> <span class="st">&quot;./qa-results/screenshots/onboarding&quot;</span><span class="op">,</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>                GoldenRefPath<span class="op">:</span> <span class="st">&quot;./testdata/golden/onboarding-dashboard-&quot;</span> <span class="op">+</span> <span class="dt">string</span><span class="op">(</span>platform<span class="op">)</span> <span class="op">+</span> <span class="st">&quot;.png&quot;</span><span class="op">,</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>                BreakStrategy<span class="op">:</span> <span class="st">&quot;timeout&quot;</span><span class="op">,</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">:=</span> runOnboardingSteps<span class="op">(</span>ctx<span class="op">,</span> platform<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;workflow execution failed: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>            v <span class="op">:=</span> <span class="op">&amp;</span>antibluff<span class="op">.</span>DefaultValidator<span class="op">{</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>                Service<span class="op">:</span> antibluff<span class="op">.</span>NewServiceProbe<span class="op">(),</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>                Visual<span class="op">:</span>  <span class="op">&amp;</span>antibluff<span class="op">.</span>VisualProbe<span class="op">{</span>VisionURL<span class="op">:</span> <span class="st">&quot;http://localhost:8090/analyze&quot;</span><span class="op">},</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>            result<span class="op">,</span> err <span class="op">:=</span> v<span class="op">.</span>Validate<span class="op">(</span>ctx<span class="op">,</span> tc<span class="op">)</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;validator error: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">!</span>result<span class="op">.</span>Conformant <span class="op">{</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> _<span class="op">,</span> lr <span class="op">:=</span> <span class="kw">range</span> result<span class="op">.</span>Layers <span class="op">{</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>                    t<span class="op">.</span>Logf<span class="op">(</span><span class="st">&quot;%s: %s (passed=%v)&quot;</span><span class="op">,</span> lr<span class="op">.</span>Layer<span class="op">,</span> lr<span class="op">.</span>Evidence<span class="op">,</span> lr<span class="op">.</span>Passed<span class="op">)</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;anti-bluff non-conformant on platform %s&quot;</span><span class="op">,</span> platform<span class="op">)</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> runOnboardingSteps<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> p config<span class="op">.</span>Platform<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Steps 1–5: register, login, trigger scan, poll status, view dashboard.</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Each step emits a screenshot to ./qa-results/screenshots/onboarding/.</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The onboarding workflow is the acceptance gate for any new platform
+integration.</p>
+<h3 id="workflow-2-media-management">7.4.2 Workflow 2 — Media
+Management</h3>
+<p>Steps: browse library → search for “Титаник” (Cyrillic query tests
+Unicode) → add to favorites → export favorites → verify exported file on
+disk. The L2 check independently opens the exported file and verifies
+the “Титаник” entry appears. The L3 visual check confirms the favorites
+list shows a heart icon after the add action, using platform-specific
+golden references.</p>
+<h3 id="workflow-3-translation">7.4.3 Workflow 3 — Translation</h3>
+<p>Steps: open settings → change language to Russian → verify UI labels
+change → search using Russian query → verify results display Russian
+metadata. The L3 screenshot comparison between pre-change and
+post-change states exposes the common i18n failure where the frontend
+caches stale labels. The L4 break strategy deletes the target-language
+translation file and confirms the workflow fails with a visible
+fallback-to-English state.</p>
+<h3 id="workflow-4-protocol-resilience">7.4.4 Workflow 4 — Protocol
+Resilience</h3>
+<p>Steps: disconnect SMB share → verify offline indicator appears → wait
+for auto-reconnect → restore SMB share → verify auto-sync resumes. This
+demonstrates why L1 protocol probes are insufficient: a naive
+<code>net.Dial</code> error check is not the user experience.
+Screenshots at disconnect (indicator visible), reconnect (indicator
+gone), and post-sync (library updated) are analyzed by the vision LLM
+with the prompt: “Does this screenshot show a healthy, synced media
+library?”</p>
+<h3 id="workflow-coverage-requirements">7.4.5 Workflow Coverage
+Requirements</h3>
+<p>Every synthetic workflow must satisfy four requirements derived from
+the constitution’s operative rule that “users can use the feature”
+[<sup>5</sup>]:</p>
+<ol type="1">
+<li><strong>Visual proof</strong>: At least one screenshot per step,
+stored in
+<code>qa-results/screenshots/&lt;workflow&gt;/&lt;platform&gt;/</code>.</li>
+<li><strong>Cross-platform</strong>: Must run on all five client types.
+Non-applicable steps document the skip reason with a
+<code>SKIP-OK: #&lt;ticket&gt;</code> comment per the universal
+Definition of Done [<sup>5</sup>].</li>
+<li><strong>Break-detection</strong>: Every workflow must have a
+<code>BreakerHarness</code> configuration that injects a failure into at
+least one critical step and verifies the workflow fails.</li>
+<li><strong>Independent outcome verification</strong>: The final outcome
+must be verified through a code path independent of the tested API. For
+export, <code>os.ReadFile</code> on the disk file; for search, a direct
+database query confirming the indexed document exists.</li>
+</ol>
+<p>The four workflows cover the major user journey categories: first
+contact (onboarding), daily use (media management), configuration
+(translation), and fault tolerance (protocol resilience). They form the
+minimum viable anti-bluff coverage that any release must satisfy. l
+resilience). They form the minimum viable anti-bluff coverage that any
+release must satisfy.</p>
+</body>
+</html>

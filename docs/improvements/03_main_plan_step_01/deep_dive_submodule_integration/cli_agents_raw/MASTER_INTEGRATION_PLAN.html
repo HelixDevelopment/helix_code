@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MASTER_INTEGRATION_PLAN</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">MASTER_INTEGRATION_PLAN</h1>
+</header>
+<h1 id="helixagent-master-integration-plan">HelixAgent Master
+Integration Plan</h1>
+<blockquote>
+<p><strong>Comprehensive plan for porting CLI agent features into
+HelixAgent</strong> <strong>Date</strong>: 2026-04-04 <strong>Based
+on</strong>: Analysis of 50+ CLI agents</p>
+</blockquote>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>After analyzing <strong>50+ CLI agents</strong> across 5 tiers, we
+have identified <strong>50+ unique features</strong> to port into
+HelixAgent. This plan provides a prioritized roadmap for
+implementation.</p>
+<h2 id="phase-1-foundation-complete">Phase 1: Foundation ✅
+COMPLETE</h2>
+<h3 id="implemented-features">Implemented Features</h3>
+<ol type="1">
+<li>✅ <strong>Tool System</strong> - 30+ tools from CLI agents</li>
+<li>✅ <strong>Permission System</strong> - 4-layer architecture</li>
+<li>✅ <strong>Plan Mode</strong> - Multi-step planning with
+verification</li>
+<li>✅ <strong>Team Management</strong> - Agent swarms with
+consensus</li>
+<li>✅ <strong>KAIROS Service</strong> - Always-on background
+assistant</li>
+<li>✅ <strong>Dream System</strong> - Memory consolidation</li>
+<li>✅ <strong>SubAgent System</strong> - Full lifecycle management</li>
+<li>✅ <strong>Comprehensive Tests</strong> - All passing</li>
+</ol>
+<p><strong>Status</strong>: Complete and committed to all upstreams</p>
+<hr />
+<h2 id="phase-2-advanced-features-next-2-4-weeks">Phase 2: Advanced
+Features (Next 2-4 weeks)</h2>
+<h3 id="repository-mapping-from-aider">2.1 Repository Mapping (From
+Aider)</h3>
+<p><strong>Priority</strong>: CRITICAL</p>
+<p><strong>Features to Port</strong>: - Tree-sitter integration for code
+parsing - Repository structure analysis - Intelligent file context
+selection - Language detection (100+ languages)</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/repomap/</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RepoMap <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    RootPath     <span class="dt">string</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Languages    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>LanguageInfo</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    Files        <span class="op">[]</span>FileInfo</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Symbols      <span class="op">[]</span>Symbol</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    Dependencies <span class="op">[]</span>Dependency</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Symbol <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    Name       <span class="dt">string</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    Type       <span class="dt">string</span> <span class="co">// function, class, variable</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    File       <span class="dt">string</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    Line       <span class="dt">int</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    Language   <span class="dt">string</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    Signature  <span class="dt">string</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Files to Create</strong>: -
+<code>internal/tools/repomap/repomap.go</code> -
+<code>internal/tools/repomap/parser.go</code> -
+<code>internal/tools/repomap/symbols.go</code></p>
+<hr />
+<h3 id="sandboxed-execution-from-codex">2.2 Sandboxed Execution (From
+Codex)</h3>
+<p><strong>Priority</strong>: CRITICAL</p>
+<p><strong>Features to Port</strong>: - Container-based sandboxing -
+Seatbelt integration (macOS) - Network isolation - Resource limits -
+Audit logging</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/sandbox/</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    EnableNetwork    <span class="dt">bool</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    ResourceLimits   ResourceLimits</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    WorkingDir       <span class="dt">string</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Mounts           <span class="op">[]</span>Mount</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Sandbox <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    Runtime    <span class="dt">string</span> <span class="co">// docker, podman, seatbelt</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    Config     SandboxConfig</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    Container  <span class="dt">string</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Sandbox<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cmd Command<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Files to Create</strong>: -
+<code>internal/tools/sandbox/sandbox.go</code> -
+<code>internal/tools/sandbox/docker.go</code> -
+<code>internal/tools/sandbox/seatbelt.go</code></p>
+<hr />
+<h3 id="browser-automation-from-clineopenhands">2.3 Browser Automation
+(From Cline/OpenHands)</h3>
+<p><strong>Priority</strong>: HIGH</p>
+<p><strong>Features to Port</strong>: - Headless browser control -
+Screenshot capture - DOM interaction - Web navigation - Content
+extraction</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/browser/</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserTool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Headless <span class="dt">bool</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Timeout  time<span class="op">.</span>Duration</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserAction <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    Type    <span class="dt">string</span> <span class="co">// navigate, click, type, screenshot</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    Target  <span class="dt">string</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    Value   <span class="dt">string</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>BrowserTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> action BrowserAction<span class="op">)</span> <span class="op">(*</span>BrowserResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Files to Create</strong>: -
+<code>internal/tools/browser/browser.go</code> -
+<code>internal/tools/browser/actions.go</code></p>
+<hr />
+<h3 id="edit-block-format-from-aidercodex">2.4 Edit Block Format (From
+Aider/Codex)</h3>
+<p><strong>Priority</strong>: HIGH</p>
+<p><strong>Features to Port</strong>: - Search/replace blocks - Surgical
+code modifications - Minimal diff generation - Multi-file editing</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/editblock/</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EditBlock <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    FilePath    <span class="dt">string</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Search      <span class="dt">string</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Replace     <span class="dt">string</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Context     <span class="dt">int</span> <span class="co">// lines of context</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EditBlockResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    Success     <span class="dt">bool</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    Blocks      <span class="op">[]</span>AppliedBlock</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Failed      <span class="op">[]</span>FailedBlock</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ApplyEditBlocks<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> blocks <span class="op">[]</span>EditBlock<span class="op">)</span> <span class="op">(*</span>EditBlockResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Files to Create</strong>: -
+<code>internal/tools/editblock/editblock.go</code> -
+<code>internal/tools/editblock/parser.go</code></p>
+<hr />
+<h2 id="phase-3-enhanced-features-weeks-4-6">Phase 3: Enhanced Features
+(Weeks 4-6)</h2>
+<h3 id="voice-commands-from-aider">3.1 Voice Commands (From Aider)</h3>
+<p><strong>Priority</strong>: MEDIUM</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/agents/voice/</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VoiceService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    Recognizer SpeechRecognizer</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    Commands   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>VoiceCommand</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h3 id="auto-commit-workflow-from-aidercodex">3.2 Auto-Commit Workflow
+(From Aider/Codex)</h3>
+<p><strong>Priority</strong>: MEDIUM</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/git/</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> AutoCommit<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> changes <span class="op">[]</span>Change<span class="op">)</span> <span class="op">(*</span>Commit<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> GenerateCommitMessage<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> diff <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<hr />
+<h3 id="evaluation-framework-from-openhandsswe-agent">3.3 Evaluation
+Framework (From OpenHands/SWE-agent)</h3>
+<p><strong>Priority</strong>: MEDIUM</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/benchmark/</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Evaluator <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    Benchmarks <span class="op">[]</span>Benchmark</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    Metrics    <span class="op">[]</span>Metric</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Benchmark <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> agent Agent<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h3 id="context-providers-from-continue">3.4 Context Providers (From
+Continue)</h3>
+<p><strong>Priority</strong>: MEDIUM</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/context/</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ContextProvider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    Resolve<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> query <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>ContextItem<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FileProvider <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> URLProvider <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DocsProvider <span class="kw">struct</span><span class="op">{}</span></span></code></pre></div>
+<hr />
+<h2 id="phase-4-integration-weeks-6-8">Phase 4: Integration (Weeks
+6-8)</h2>
+<h3 id="multi-agent-swarm-from-claude-code">4.1 Multi-Agent Swarm (From
+Claude Code)</h3>
+<p><strong>Priority</strong>: MEDIUM</p>
+<p>Enhance existing Team Management with: - XML-based communication -
+Shared scratchpad - Color assignment - Role-based agents</p>
+<h3 id="agent-modes-from-roo-code">4.2 Agent Modes (From Roo Code)</h3>
+<p><strong>Priority</strong>: LOW</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/agents/modes/</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    ModeCode      AgentMode <span class="op">=</span> <span class="st">&quot;code&quot;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    ModeArchitect AgentMode <span class="op">=</span> <span class="st">&quot;architect&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    ModeAsk       AgentMode <span class="op">=</span> <span class="st">&quot;ask&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    ModeDebug     AgentMode <span class="op">=</span> <span class="st">&quot;debug&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="yolo-classifier-from-claude-code">4.3 YOLO Classifier (From
+Claude Code)</h3>
+<p><strong>Priority</strong>: LOW</p>
+<p>ML-based auto-approval system for tool execution.</p>
+<hr />
+<h2 id="implementation-schedule">Implementation Schedule</h2>
+<table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Feature</th>
+<th>Priority</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Repository Mapping</td>
+<td>CRITICAL</td>
+<td>⏳</td>
+</tr>
+<tr>
+<td>1-2</td>
+<td>Sandboxed Execution</td>
+<td>CRITICAL</td>
+<td>⏳</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Browser Automation</td>
+<td>HIGH</td>
+<td>⏳</td>
+</tr>
+<tr>
+<td>2-3</td>
+<td>Edit Block Format</td>
+<td>HIGH</td>
+<td>⏳</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Voice Commands</td>
+<td>MEDIUM</td>
+<td>⏳</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Auto-Commit</td>
+<td>MEDIUM</td>
+<td>⏳</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Evaluation Framework</td>
+<td>MEDIUM</td>
+<td>⏳</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Context Providers</td>
+<td>MEDIUM</td>
+<td>⏳</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>Integration &amp; Polish</td>
+<td>LOW</td>
+<td>⏳</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="file-structure">File Structure</h2>
+<pre><code>internal/
+├── tools/
+│   ├── repomap/         # Repository mapping
+│   ├── sandbox/         # Sandboxed execution
+│   ├── browser/         # Browser automation
+│   ├── editblock/       # Edit block format
+│   └── git/             # Enhanced git ops
+├── agents/
+│   ├── voice/           # Voice commands
+│   ├── modes/           # Agent modes
+│   └── swarm/           # Multi-agent coordination
+├── context/
+│   └── providers/       # Context providers
+└── benchmark/
+    └── evaluators/      # Evaluation framework</code></pre>
+<hr />
+<h2 id="testing-strategy">Testing Strategy</h2>
+<ol type="1">
+<li><strong>Unit Tests</strong> - Each component</li>
+<li><strong>Integration Tests</strong> - Component interactions</li>
+<li><strong>E2E Tests</strong> - Full workflows</li>
+<li><strong>Benchmark Tests</strong> - Performance evaluation</li>
+<li><strong>Security Tests</strong> - Sandbox isolation</li>
+</ol>
+<hr />
+<h2 id="success-metrics">Success Metrics</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>90%+ test coverage</label></li>
+<li><label><input type="checkbox"></input>All critical features
+implemented</label></li>
+<li><label><input type="checkbox"></input>Security audit passed</label></li>
+<li><label><input type="checkbox"></input>Performance benchmarks
+met</label></li>
+<li><label><input type="checkbox"></input>Documentation complete</label></li>
+</ul>
+<hr />
+<h2 id="next-immediate-actions">Next Immediate Actions</h2>
+<ol type="1">
+<li>Start <strong>Repository Mapping</strong> implementation</li>
+<li>Begin <strong>Sandboxed Execution</strong> design</li>
+<li>Research <strong>Browser Automation</strong> libraries</li>
+<li>Draft <strong>Edit Block</strong> specification</li>
+</ol>
+<hr />
+<p><strong>Status</strong>: Ready to begin Phase 2 implementation</p>
+</body>
+</html>

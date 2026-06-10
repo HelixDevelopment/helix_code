@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stream3_buildsubs</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stream3_buildsubs</h1>
+</header>
+<h1 id="stream-flat-build-subs-build-verify-helix_agent-helix_qa-bash-ok-no-edit-propose-patches-as-text">Stream
+FLAT-BUILD-SUBS — build-verify helix_agent + helix_qa (Bash ok; NO Edit
+— propose patches as text)</h1>
+<p>Repo: /Users/milosvasic/Projects/HelixCode. Two relocated Go
+submodules now at <code>submodules/helix_agent/</code> and
+<code>submodules/helix_qa/</code>. - helix_agent/go.mod: 37 replaces
+rewritten <code>../dependencies/{org}/X</code> → sibling
+<code>../X</code>; plus
+<code>../dependencies/HelixDevelopment/llms_verifier/llm-verifier</code>
+→ <code>../llms_verifier/llm-verifier</code>. - helix_qa/go.mod: dual
+capital/lowercase replace blocks normalized to ONE lowercase block;
+<code>LLMsVerifier</code> → <code>llms_verifier</code>; sibling
+<code>../X</code> form.</p>
+<p>Pasted terminal output is REQUIRED evidence — no verdict without
+actual output.</p>
+<ol type="A">
+<li>helix_agent:</li>
+</ol>
+<ol type="1">
+<li><code>cat submodules/helix_agent/go.mod</code> — paste replace
+section; flag any line still containing <code>dependencies/</code> or a
+capitalized leaf.</li>
+<li><code>cd /Users/milosvasic/Projects/HelixCode/submodules/helix_agent &amp;&amp; go build ./... 2&gt;&amp;1 | tail -120 &amp;&amp; echo &quot;---VET---&quot; &amp;&amp; go vet ./... 2&gt;&amp;1 | tail -60</code>.
+PASS/FAIL + output.</li>
+<li>Files <code>.trivy.yaml</code> and
+<code>challenges/scripts/challenge_framework.sh</code> had stale refs —
+quote lines; state decoupled-own-layout (leave per CONST-051) vs
+genuinely broken. Do NOT propose parent-layout rewrites for decoupled
+files.</li>
+</ol>
+<ol start="2" type="A">
+<li>helix_qa:</li>
+</ol>
+<ol type="1">
+<li><code>cat submodules/helix_qa/go.mod</code> — paste replace section;
+confirm single lowercase block (no duplicate capital block), no
+<code>LLMsVerifier</code>, sibling <code>../X</code>. Flag
+deviations.</li>
+<li><code>cd /Users/milosvasic/Projects/HelixCode/submodules/helix_qa &amp;&amp; go build ./... 2&gt;&amp;1 | tail -120 &amp;&amp; echo &quot;---VET---&quot; &amp;&amp; go vet ./... 2&gt;&amp;1 | tail -60</code>.
+If go.work errors on workspace, note it + the modified go.work.sum
+state. PASS/FAIL + output.</li>
+<li>File <code>helix-deps.yaml</code>: quote relevant lines;
+decoupled-vs-broken verdict.</li>
+</ol>
+<p>Per submodule: verdict + minimal go.mod patch proposal if needed.
+Note: a fix here = a commit INSIDE that submodule repo (I apply
+serially).</p>
+<p>Output: compact markdown.</p>
+</body>
+</html>

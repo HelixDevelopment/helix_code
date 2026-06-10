@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>USER_MANUAL_EXPANSION_PLAN</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">USER_MANUAL_EXPANSION_PLAN</h1>
+</header>
+<h1 id="user-manual-expansion-plan">User Manual Expansion Plan</h1>
+<p><strong>Goal:</strong> Update documentation to cover new features and
+providers.</p>
+<h2 id="new-provider-guides">1. New Provider Guides</h2>
+<ul>
+<li><strong>Anthropic/Claude</strong>:
+<ul>
+<li>Configuration (<code>config.yaml</code> settings).</li>
+<li>Enabling “Extended Thinking”.</li>
+<li>Using Prompt Caching.</li>
+</ul></li>
+<li><strong>Google Gemini</strong>:
+<ul>
+<li>Setup and API Keys.</li>
+<li>Using Multimodal features (Images/Video).</li>
+</ul></li>
+<li><strong>Enterprise Providers (AWS/Azure)</strong>:
+<ul>
+<li>IAM/Entra ID Authentication setup.</li>
+<li>Region selection and deployment.</li>
+</ul></li>
+</ul>
+<h2 id="advanced-feature-guides">2. Advanced Feature Guides</h2>
+<ul>
+<li><strong>Memory System</strong>:
+<ul>
+<li>“Choosing the Right Vector DB” (Comparison of Zep, Weaviate,
+etc.).</li>
+<li>Configuring persistence.</li>
+</ul></li>
+<li><strong>Tool Usage</strong>:
+<ul>
+<li>“Safe Shell Execution”: How to configure the sandbox.</li>
+<li>“Web Tools”: How to enable and use search.</li>
+</ul></li>
+</ul>
+<h2 id="developer-guides">3. Developer Guides</h2>
+<ul>
+<li><strong>“Creating a Custom Provider”</strong>: Step-by-step
+tutorial.</li>
+<li><strong>“Adding a New Tool”</strong>: Using the MCP SDK.</li>
+</ul>
+<h2 id="troubleshooting">4. Troubleshooting</h2>
+<ul>
+<li>Common errors with SSH workers.</li>
+<li>Debugging LLM connection issues.</li>
+<li>Rate limit handling.</li>
+</ul>
+<hr />
+<h2 id="sources-verified-2026-05-29-project-go.mod-claude.md-3.1-planning-doc-no-third-party-operator-instructions">Sources
+verified 2026-05-29: project go.mod + CLAUDE.md §3.1 (planning doc; no
+third-party operator instructions)</h2>
+<p>Reviewed against Constitution §11.4.99. This is a forward-looking
+<strong>expansion plan</strong> — a checklist of guides still to be
+written (Anthropic/Gemini/AWS/Azure setup, Memory System / vector-DB
+comparison, sandbox, custom-provider). It contains <strong>no executable
+third-party setup instructions and no version pins</strong> to
+cross-reference against a vendor doc yet — those obligations attach to
+the future guides when they are authored, at which point each MUST carry
+its own §11.4.99 footer (fetched Anthropic / Google / AWS / Azure / Zep
+/ Weaviate official docs). Negative finding: nothing in this plan
+required (or could be) verified against a vendor source this run.
+Version authority for any guide produced from this plan is
+<code>go.mod</code> + CLAUDE.md §3.1 (Go 1.26 / go1.26.3 latest,
+PostgreSQL 15+, Redis 7+); provider/model IDs remain
+LLMsVerifier-runtime-sourced per CONST-036.</p>
+</body>
+</html>

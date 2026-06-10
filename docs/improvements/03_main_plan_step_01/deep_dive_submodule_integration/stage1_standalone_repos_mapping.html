@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage1_standalone_repos_mapping</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage1_standalone_repos_mapping</h1>
+</header>
+<h1 id="standalone-repository-analysis-report">Standalone Repository
+Analysis Report</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>All 8 required standalone repositories have been analyzed via GitHub
+API and partial clones. This document provides the structural and
+technical overview for each repository.</p>
+<hr />
+<h2 id="helixagent-github.comhelixdevelopmenthelixagent">1. HelixAgent
+(github.com/HelixDevelopment/HelixAgent)</h2>
+<table>
+<colgroup>
+<col style="width: 58%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>Go + JavaScript (Playwright)</td>
+</tr>
+<tr>
+<td><strong>Go Version</strong></td>
+<td>Latest (from go.mod head)</td>
+</tr>
+<tr>
+<td><strong>Top-Level Items</strong></td>
+<td>150+ files/directories</td>
+</tr>
+<tr>
+<td><strong>Submodules</strong></td>
+<td>26+ declared in .gitmodules</td>
+</tr>
+<tr>
+<td><strong>Key Directory</strong></td>
+<td><code>cli_agents/</code> - 60+ agent integrations + 20+ analysis
+Markdown files</td>
+</tr>
+<tr>
+<td><strong>Special</strong></td>
+<td>Playwright dependency for browser automation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="submodules-declared">Submodules Declared</h3>
+<ul>
+<li>containers (vasic-digital)</li>
+<li>Challenges (vasic-digital)</li>
+<li>EventBus, Concurrency, Observability</li>
+<li>Auth, Storage, Streaming, Security</li>
+<li>VectorDB, Embeddings, Database, Cache</li>
+<li>Messaging, Formatters, MCP_Module</li>
+<li>RAG, Memory, Optimization, Plugins</li>
+<li>Toolkit/SiliconFlow, Toolkit/Chutes</li>
+<li>LLMsVerifier (vasic-digital)</li>
+<li>External: modelcontextprotocol/servers</li>
+</ul>
+<h3 id="cli_agents-directory-contents">cli_agents Directory
+Contents</h3>
+<p><strong>60+ CLI agent integration modules including analysis
+of:</strong> - Claude Code, Claude Squad - Aider, Cline, Codex -
+Plandex, GPT Engineer - Continue.dev, Cursor - And many more…</p>
+<p><strong>20+ analysis Markdown files documenting:</strong> - Feature
+comparisons - Architecture analysis - Porting strategies - API
+mappings</p>
+<h3 id="key-insight">Key Insight</h3>
+<p>HelixAgent is the ANCESTOR project of HelixCode. The root
+<code>AGENTS.md</code> in HelixCode explicitly states: “Derived from
+HelixAgent AGENTS.md with HelixCode-specific enhancements”. HelixAgent’s
+<code>cli_agents</code> directory contains deep analysis of every major
+CLI agent in the ecosystem.</p>
+<hr />
+<h2 id="helixllm-github.comhelixdevelopmenthelixllm">2. HelixLLM
+(github.com/HelixDevelopment/HelixLLM)</h2>
+<table>
+<colgroup>
+<col style="width: 58%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>Go</td>
+</tr>
+<tr>
+<td><strong>Go Version</strong></td>
+<td>1.26.1</td>
+</tr>
+<tr>
+<td><strong>Web Framework</strong></td>
+<td>Gin Gonic v1.12.0</td>
+</tr>
+<tr>
+<td><strong>Network</strong></td>
+<td>quic-go v0.59.0</td>
+</tr>
+<tr>
+<td><strong>Coverage</strong></td>
+<td>91% threshold</td>
+</tr>
+<tr>
+<td><strong>Submodules</strong></td>
+<td>43 via <code>replace</code> directives in go.mod</td>
+</tr>
+<tr>
+<td><strong>Operating Modes</strong></td>
+<td>6 (full, gateway, brain, knowledge, agents, control)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture">Architecture</h3>
+<ul>
+<li>Single binary with 6 operating modes</li>
+<li>Modular LLM gateway with provider abstraction</li>
+<li>QUIC transport support</li>
+<li>Knowledge management backend</li>
+<li>Agent orchestration capabilities</li>
+</ul>
+<h3 id="submodules-partial-list">Submodules (Partial List)</h3>
+<p>Config, EventBus, Observability, Concurrency, Auth, Storage,
+Streaming, Security, VectorDB, Embeddings, Database, Cache, Messaging,
+Formatters, MCP_Module, RAG, Memory, Optimization, Plugins, TOON,
+Watcher, I18n, RateLimiter, Document, Filesystem, HelixQA, Lazy,
+LLMOrchestrator, LLMProvider, Middleware, Planning, Recovery,
+ToolSchema, Agentic, BackgroundTasks, Containers, Conversation</p>
+<hr />
+<h2 id="helixmemory-github.comhelixdevelopmenthelixmemory">3.
+HelixMemory (github.com/HelixDevelopment/HelixMemory)</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>Go</td>
+</tr>
+<tr>
+<td><strong>Go Version</strong></td>
+<td>1.25</td>
+</tr>
+<tr>
+<td><strong>Backends</strong></td>
+<td>Mem0, Cognee, Letta, Graphiti</td>
+</tr>
+<tr>
+<td><strong>Interface</strong></td>
+<td><code>digital.vasic.memory</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture-1">Architecture</h3>
+<ul>
+<li>Drop-in memory replacement interface</li>
+<li>Multi-backend fusion architecture</li>
+<li>Graph-based memory (Graphiti)</li>
+<li>Structured memory (Cognee)</li>
+<li>Agent memory (Letta)</li>
+<li>Simple memory (Mem0)</li>
+</ul>
+<hr />
+<h2 id="helixspecifier-github.comhelixdevelopmenthelixspecifier">4.
+HelixSpecifier (github.com/HelixDevelopment/HelixSpecifier)</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>Go</td>
+</tr>
+<tr>
+<td><strong>Go Version</strong></td>
+<td>1.24.0</td>
+</tr>
+<tr>
+<td><strong>Packages</strong></td>
+<td>27 (21 core + 6 test suites)</td>
+</tr>
+<tr>
+<td><strong>Engine</strong></td>
+<td>3-pillar fusion</td>
+</tr>
+</tbody>
+</table>
+<h3 id="core-components">Core Components</h3>
+<ol type="1">
+<li><strong>SpecKit</strong> - Specification generation and parsing</li>
+<li><strong>Superpowers</strong> - Extended capability system</li>
+<li><strong>GSD</strong> (Get Shit Done) - Execution engine</li>
+</ol>
+<hr />
+<h2 id="helix_qa-github.comhelixdevelopmenthelixqa">5. helix_qa
+(github.com/HelixDevelopment/HelixQA)</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>Go</td>
+</tr>
+<tr>
+<td><strong>Features</strong></td>
+<td>Docker, Kubernetes, OpenCV integration</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Testing framework with test banks</td>
+</tr>
+<tr>
+<td><strong>Top-Level Items</strong></td>
+<td>30+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="capabilities">Capabilities</h3>
+<ul>
+<li>Automated QA session framework</li>
+<li>Test bank management</li>
+<li>Containerized testing</li>
+<li>Visual regression (OpenCV)</li>
+<li>Kubernetes test orchestration</li>
+</ul>
+<hr />
+<h2 id="llmsverifier-github.comvasic-digitalllmsverifier">6.
+LLMsVerifier (github.com/vasic-digital/LLMsVerifier)</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>Go</td>
+</tr>
+<tr>
+<td><strong>Provider Adapters</strong></td>
+<td>12</td>
+</tr>
+<tr>
+<td><strong>Protocol</strong></td>
+<td>ACP (Agent Communication Protocol)</td>
+</tr>
+<tr>
+<td><strong>Compression</strong></td>
+<td>Brotli</td>
+</tr>
+<tr>
+<td><strong>Deployment</strong></td>
+<td>Kubernetes manifests included</td>
+</tr>
+<tr>
+<td><strong>Top-Level Items</strong></td>
+<td>80+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="features">Features</h3>
+<ul>
+<li>Multi-provider LLM verification</li>
+<li>ACP protocol implementation</li>
+<li>Response compression</li>
+<li>Benchmarking suite</li>
+<li>Kubernetes-native deployment</li>
+</ul>
+<hr />
+<h2 id="challenges-github.comvasic-digitalchallenges">7. Challenges
+(github.com/vasic-digital/Challenges)</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>Go</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Challenge/test framework</td>
+</tr>
+<tr>
+<td><strong>Architecture</strong></td>
+<td>Plugin-based</td>
+</tr>
+</tbody>
+</table>
+<h3 id="purpose">Purpose</h3>
+<ul>
+<li>Generic challenge framework for testing AI systems</li>
+<li>Plugin architecture for extensible test types</li>
+<li>Used by HelixCode for capability verification</li>
+<li>Test suite definitions and validators</li>
+</ul>
+<hr />
+<h2 id="containers-github.comvasic-digitalcontainers">8. containers
+(github.com/vasic-digital/Containers)</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language</strong></td>
+<td>Go</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Container orchestration module</td>
+</tr>
+<tr>
+<td><strong>Backends</strong></td>
+<td>Docker, Podman, Kubernetes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="purpose-1">Purpose</h3>
+<ul>
+<li>Generic container abstraction layer</li>
+<li>Runtime-agnostic deployment</li>
+<li>Used by HelixCode and helix_qa for test isolation</li>
+<li>Infrastructure abstraction</li>
+</ul>
+<hr />
+<h2 id="cross-repository-relationship-matrix">Cross-Repository
+Relationship Matrix</h2>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 27%" />
+<col style="width: 25%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Is Submodule Of</th>
+<th>Has Submodules</th>
+<th>Integrates With</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixCode</td>
+<td>-</td>
+<td>87</td>
+<td>All</td>
+</tr>
+<tr>
+<td>HelixAgent</td>
+<td>NOT IN HELIXCODE</td>
+<td>26+</td>
+<td>All (ancestor)</td>
+</tr>
+<tr>
+<td>HelixLLM</td>
+<td>NOT IN HELIXCODE</td>
+<td>43 (replace)</td>
+<td>HelixCode, HelixAgent</td>
+</tr>
+<tr>
+<td>HelixMemory</td>
+<td>NOT IN HELIXCODE</td>
+<td>Unknown</td>
+<td>HelixCode, HelixAgent</td>
+</tr>
+<tr>
+<td>HelixSpecifier</td>
+<td>NOT IN HELIXCODE</td>
+<td>Unknown</td>
+<td>HelixCode, HelixAgent</td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td>IN HELIXCODE</td>
+<td>Unknown</td>
+<td>HelixCode, Challenges, containers</td>
+</tr>
+<tr>
+<td>LLMsVerifier</td>
+<td>IN HELIXCODE</td>
+<td>Unknown</td>
+<td>HelixCode, HelixLLM</td>
+</tr>
+<tr>
+<td>Challenges</td>
+<td>IN HELIXCODE</td>
+<td>Unknown</td>
+<td>HelixCode, helix_qa</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>IN HELIXCODE</td>
+<td>Unknown</td>
+<td>HelixCode, HelixQA, HelixAgent</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="submodule-status-summary">Submodule Status Summary</h2>
+<h3 id="present-in-helixcode-48">Present in HelixCode (4/8)</h3>
+<ul>
+<li>LLMsVerifier</li>
+<li>HelixQA</li>
+<li>Challenges</li>
+<li>Containers</li>
+</ul>
+<h3 id="missing-from-helixcode-48---critical">Missing from HelixCode
+(4/8) - CRITICAL</h3>
+<ul>
+<li>HelixAgent (ancestor project, 60+ cli_agents)</li>
+<li>HelixLLM (LLM gateway, 43 submodules)</li>
+<li>HelixMemory (memory fusion)</li>
+<li>HelixSpecifier (specification engine)</li>
+</ul>
+<h2 id="integration-priority">Integration Priority</h2>
+<ol type="1">
+<li><strong>CRITICAL</strong>: HelixAgent - Contains all CLI agent
+analysis and porting guides</li>
+<li><strong>HIGH</strong>: HelixLLM - Core LLM infrastructure with 43
+submodules</li>
+<li><strong>HIGH</strong>: HelixMemory - Memory systems for context
+persistence</li>
+<li><strong>HIGH</strong>: HelixSpecifier - Specification and contract
+system</li>
+<li><strong>MEDIUM</strong>: challenges/containers/helix_qa/LLMsVerifier
+- Already present, need full initialization</li>
+</ol>
+</body>
+</html>

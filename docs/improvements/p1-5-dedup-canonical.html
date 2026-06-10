@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>p1-5-dedup-canonical</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">p1-5-dedup-canonical</h1>
+</header>
+<h1 id="phase-1.5-submodule-deduplication-canonical-paths">Phase 1.5 —
+Submodule Deduplication: Canonical Paths</h1>
+<p><strong>Captured:</strong> 2026-05-06 <strong>Source:</strong> Plan
+<code>docs/superpowers/plans/2026-05-06-p1-5-foundation-cleanup.md</code>
+§WP1.T01.04 <strong>Purpose:</strong> WP3 reads this file to know which
+copy stays and which copies are removed.</p>
+<hr />
+<h2 id="the-5-dedup-sets">The 5 dedup sets</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Submodule</th>
+<th>Canonical path</th>
+<th>Removed paths</th>
+<th>Consumers to update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>LLMsVerifier</td>
+<td><code>submodules/llms_verifier/</code> (root)</td>
+<td><code>helix_agent/LLMsVerifier/</code></td>
+<td><code>helix_agent/Makefile</code>,
+<code>helix_agent/scripts/*</code>, any <code>internal/...</code> refs
+to old path</td>
+</tr>
+<tr>
+<td>2</td>
+<td>containers</td>
+<td><code>containers/</code> (root)</td>
+<td><code>challenges/containers/</code>,
+<code>helix_agent/containers/</code>,
+<code>helix_agent/HelixLLM/submodules/containers/</code></td>
+<td>Each removed parent’s Makefile + nested verifier scripts (per-WP2
+audit)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Security</td>
+<td><code>security/</code> (root)</td>
+<td><code>helix_agent/security/</code>,
+<code>helix_agent/HelixLLM/submodules/security/</code> (if present)</td>
+<td>helix_agent/scripts/security-*.sh, root cmd/security_test
+wiring</td>
+</tr>
+<tr>
+<td>4</td>
+<td>helix_qa</td>
+<td><code>helix_qa/</code> (root)</td>
+<td><code>helix_agent/helix_qa/</code></td>
+<td><code>helix_agent/Makefile</code> test wiring; root
+<code>scripts/run-all-tests.sh</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>mcp_servers</td>
+<td>TBD at WP3.T03.05 — current candidates: <code>mcp_servers/</code>
+(root, may not exist), <code>helix_agent/mcp_servers/</code>,
+<code>helix_agent/MCP/submodules/...</code> (per-server)</td>
+<td>TBD per resolution</td>
+<td>TBD per resolution</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note on set #5 (MCP-Servers):</strong> The HelixAgent
+submodule tree has both <code>mcp_servers/</code> (potentially a single
+aggregator) and <code>MCP/submodules/&lt;NAME&gt;/</code> (per-server
+child entries: airtable-mcp, all-in-one-mcp, atlassian-mcp, etc.).
+Whether these are duplicates or whether <code>mcp_servers/</code> is
+<em>the</em> aggregator that links the per-server entries is not
+resolvable from <code>.gitmodules</code> alone — the plan defers the
+canonical decision to WP3.T03.05 with audit-at-execution.</p>
+<h2 id="dependency-edges-read-these-before-wp3">Dependency edges (read
+these BEFORE WP3)</h2>
+<ul>
+<li>LLMsVerifier dedup blocks WP3 until
+<code>make verify-llmsverifier-pin-parity</code> is reproduced from the
+new canonical path.</li>
+<li>containers dedup affects all three Helix* submodules; per-removal
+rebuild required (T03.0X completion gate).</li>
+<li>helix_qa dedup affects HelixAgent’s test wiring; integration test
+must still pass post-dedup.</li>
+<li>mcp_servers TBD blocks any consumer code that imports MCP servers
+(CONST-040 capability flags) until canonical chosen.</li>
+</ul>
+<h2 id="rollback-per-dedup">Rollback per dedup</h2>
+<p>For each canonical decision, the rollback is:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="op">&lt;</span>parent-of-removed-path<span class="op">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">-f</span> <span class="op">&lt;</span>url-from-captured-snapshot<span class="op">&gt;</span> <span class="op">&lt;</span>removed-path<span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span> <span class="op">&lt;</span>removed-path<span class="op">&gt;</span></span></code></pre></div>
+<p>URLs are captured in
+<code>docs/improvements/p1-5-snapshot-pre.md</code> and the verbatim
+<code>.gitmodules</code> content snapshots referenced from there.</p>
+<h2 id="what-this-list-does-not-decide">What this list does NOT
+decide</h2>
+<ul>
+<li>Per-removal commit ordering (left to WP3 task graph).</li>
+<li>Whether to also dedup any <code>MCP/submodules/&lt;NAME&gt;</code>
+entries where a root-level copy now exists (audit at WP3.T03.05).</li>
+<li>Whether <code>Toolkit/Toolkit/Chutes</code> (a dup-path-typo seen in
+HelixAgent <code>.gitmodules</code>) is fixed in WP3 or in WP2
+restructuring — owned by WP2.</li>
+</ul>
+</body>
+</html>

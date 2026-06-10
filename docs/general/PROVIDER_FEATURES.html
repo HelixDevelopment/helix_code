@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PROVIDER_FEATURES</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PROVIDER_FEATURES</h1>
+</header>
+<h1 id="provider-feature-matrix">Provider Feature Matrix</h1>
+<p>This document provides a comprehensive overview of which advanced
+features are supported by each LLM provider in HelixCode.</p>
+<h2 id="feature-support-matrix">Feature Support Matrix</h2>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 22%" />
+<col style="width: 28%" />
+<col style="width: 22%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Prompt Caching</th>
+<th>Reasoning/Thinking</th>
+<th>Token Budgets</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anthropic</strong></td>
+<td>✅ Full</td>
+<td>✅ Extended Thinking</td>
+<td>✅ Full</td>
+<td>Supports ephemeral cache, thinking budgets</td>
+</tr>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td>✅ Automatic</td>
+<td>✅ O-series (o1/o3)</td>
+<td>✅ Full</td>
+<td>Prompt caching auto-enabled since Oct 2024; reasoning on
+o-series</td>
+</tr>
+<tr>
+<td><strong>Azure</strong></td>
+<td>✅ Automatic</td>
+<td>✅ O-series support</td>
+<td>✅ Full</td>
+<td>Prompt caching enabled by default on GPT-4o+ (Azure OpenAI /
+Foundry)</td>
+</tr>
+<tr>
+<td><strong>Gemini</strong></td>
+<td>✅ Context caching</td>
+<td>✅ Native reasoning</td>
+<td>✅ Full</td>
+<td>Implicit caching default on Gemini 2.5+; explicit caching
+available</td>
+</tr>
+<tr>
+<td><strong>VertexAI</strong></td>
+<td>⚠️ Via Gemini</td>
+<td>✅ Via Gemini</td>
+<td>✅ Full</td>
+<td>GCP-hosted AI models</td>
+</tr>
+<tr>
+<td><strong>Bedrock</strong></td>
+<td>⚠️ Via provider</td>
+<td>✅ Model-dependent</td>
+<td>✅ Full</td>
+<td>AWS-hosted models (Claude, etc.)</td>
+</tr>
+<tr>
+<td><strong>Groq</strong></td>
+<td>⚠️ Automatic (subset)</td>
+<td>✅ Model-dependent</td>
+<td>✅ Full</td>
+<td>Prompt caching auto on GPT-OSS models (50% cached discount)</td>
+</tr>
+<tr>
+<td><strong>Qwen</strong></td>
+<td>❌ Not supported</td>
+<td>✅ QwQ-32B</td>
+<td>✅ Full</td>
+<td>Alibaba Cloud models</td>
+</tr>
+<tr>
+<td><strong>xAI</strong></td>
+<td>❌ Not supported</td>
+<td>✅ Model-dependent</td>
+<td>✅ Full</td>
+<td>Grok models</td>
+</tr>
+<tr>
+<td><strong>OpenRouter</strong></td>
+<td>⚠️ Via upstream</td>
+<td>✅ Via upstream</td>
+<td>✅ Full</td>
+<td>Aggregator, feature depends on model</td>
+</tr>
+<tr>
+<td><strong>Copilot</strong></td>
+<td>❌ Not supported</td>
+<td>✅ GPT-4 based</td>
+<td>✅ Full</td>
+<td>GitHub Copilot integration</td>
+</tr>
+<tr>
+<td><strong>Local</strong></td>
+<td>❌ Not applicable</td>
+<td>✅ Model-dependent</td>
+<td>✅ Full</td>
+<td>Ollama, llama.cpp</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Legend:</strong> - ✅ <strong>Full</strong>: Feature is fully
+supported with native implementation - ⚠️
+<strong>Planned/Limited</strong>: Feature is planned or has limited
+support - ❌ <strong>Not supported</strong>: Feature is not available
+for this provider - <strong>Via</strong>: Feature available through
+underlying provider</p>
+<h2 id="feature-details">Feature Details</h2>
+<h3 id="prompt-caching">1. Prompt Caching</h3>
+<p>Prompt caching reduces costs by caching frequently used context
+(system prompts, tool definitions, conversation history).</p>
+<h4 id="anthropic-claude">Anthropic Claude</h4>
+<ul>
+<li><p><strong>Support</strong>: Full native support via
+<code>cache_control</code> directive</p></li>
+<li><p><strong>Strategies</strong>: System, Tools, Context,
+Aggressive</p></li>
+<li><p><strong>Cost Savings</strong>: Up to 90% reduction on cached
+input tokens</p></li>
+<li><p><strong>Configuration</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cacheConfig <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>CacheConfig<span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Strategy<span class="op">:</span> llm<span class="op">.</span>CacheStrategyTools<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    MinTokensForCache<span class="op">:</span> <span class="dv">1024</span><span class="op">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    CacheTTL<span class="op">:</span> <span class="dv">300</span><span class="op">,</span> <span class="co">// 5 minutes</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+<li><p><strong>Minimum tokens</strong>: model-dependent per Anthropic’s
+official docs — 1,024 tokens for Claude Sonnet 4.x / Opus 4.1 / earlier;
+4,096 tokens for the newest Opus and Haiku 4.5 models. The
+<code>MinTokensForCache: 1024</code> example above is the lower bound
+and may be rejected by the newest models.</p></li>
+<li><p><strong>TTL</strong>: 5 minutes default; an optional 1-hour TTL
+is available at 2x base input-token price
+(<code>{&quot;cache_control&quot;:{&quot;type&quot;:&quot;ephemeral&quot;,&quot;ttl&quot;:&quot;1h&quot;}}</code>)</p></li>
+</ul>
+<h4 id="openai">OpenAI</h4>
+<ul>
+<li><strong>Support</strong>: Automatic prompt caching (enabled by
+default, no opt-out) for prompts ≥ 1,024 tokens with an identical
+leading prefix; cache hits reported as <code>cached_tokens</code> under
+<code>prompt_tokens_details</code>. Released October 2024.</li>
+<li><strong>Note</strong>: Caching is automatic — no
+<code>cache_control</code> directive is required (unlike Anthropic). The
+HelixCode <code>CacheConfig</code> integration is therefore advisory for
+OpenAI (prefix structuring) rather than an explicit cache
+directive.</li>
+</ul>
+<h4 id="geminivertexai">Gemini/VertexAI</h4>
+<ul>
+<li><strong>Support</strong>: Two mechanisms per Google’s official docs
+— <em>implicit caching</em> (enabled by default on Gemini 2.5 and newer,
+no developer action) and <em>explicit caching</em> (developer-managed
+cached content with a configurable TTL, default 1 hour)</li>
+<li><strong>Configuration</strong>: Explicit caching via API; implicit
+caching automatic</li>
+<li><strong>Cost</strong>: Reduced pricing for cached context</li>
+</ul>
+<h4 id="azure-openai">Azure OpenAI</h4>
+<ul>
+<li><strong>Support</strong>: Prompt caching enabled by default (no
+opt-out) for all GPT-4o-or-newer models; minimum 1,024 tokens with
+identical first-1,024-token prefix. In-memory retention cleared within
+5–10 min of inactivity (≤1h); extended retention (up to 24h) available
+on GPT-5.x / GPT-4.1 family.</li>
+<li><strong>Status</strong>: Generally available (Microsoft Foundry /
+Azure OpenAI)</li>
+</ul>
+<h3 id="reasoningthinking-mode">2. Reasoning/Thinking Mode</h3>
+<p>Advanced reasoning capabilities for complex problem-solving
+tasks.</p>
+<h4 id="anthropic-claude-1">Anthropic Claude</h4>
+<ul>
+<li><p><strong>Support</strong>: Extended thinking mode
+(claude-4-sonnet, claude-3-7-sonnet)</p></li>
+<li><p><strong>Configuration</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>reasoningConfig <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>ReasoningConfig<span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    ThinkingBudget<span class="op">:</span> <span class="dv">5000</span><span class="op">,</span> <span class="co">// tokens for thinking</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    ExtractThinking<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    HideFromUser<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ReasoningEffort<span class="op">:</span> <span class="st">&quot;medium&quot;</span><span class="op">,</span> <span class="co">// low, medium, high</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+<li><p><strong>Thinking Budget</strong>: Separate token allocation for
+internal reasoning</p></li>
+<li><p><strong>Auto-detection</strong>: Enabled automatically for
+thinking-related keywords</p></li>
+<li><p><strong>Extraction</strong>: Thinking blocks can be separated
+from final output</p></li>
+</ul>
+<h4 id="openai-o-series">OpenAI O-Series</h4>
+<ul>
+<li><p><strong>Models</strong>: o1, o1-preview, o1-mini, o3, o4
+(planned)</p></li>
+<li><p><strong>Support</strong>: Native reasoning models with automatic
+thinking</p></li>
+<li><p><strong>Configuration</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>reasoningConfig <span class="op">:=</span> llm<span class="op">.</span>NewReasoningConfig<span class="op">(</span>llm<span class="op">.</span>ReasoningModelOpenAI_O1<span class="op">)</span></span></code></pre></div></li>
+<li><p><strong>Thinking tokens</strong>: Counted separately in
+usage</p></li>
+<li><p><strong>Cost</strong>: Higher per-token cost for
+reasoning</p></li>
+</ul>
+<h4 id="deepseek-r1">DeepSeek R1</h4>
+<ul>
+<li><strong>Support</strong>: Via OpenRouter or compatible APIs</li>
+<li><strong>Thinking tags</strong>: Uses <code>&lt;think&gt;</code> tags
+for reasoning</li>
+<li><strong>Configuration</strong>: Automatic when model name contains
+“deepseek” and “r1”</li>
+</ul>
+<h4 id="qwq-32b-qwen">QwQ-32B (Qwen)</h4>
+<ul>
+<li><strong>Support</strong>: Dedicated reasoning model</li>
+<li><strong>Configuration</strong>: Auto-detected by model name</li>
+<li><strong>Budget</strong>: 7000 tokens default for thinking</li>
+</ul>
+<h3 id="token-budgets">3. Token Budgets</h3>
+<p>Comprehensive token and cost tracking across all providers.</p>
+<h4 id="features">Features</h4>
+<ul>
+<li><strong>Per-request limits</strong>: Maximum tokens per single
+request</li>
+<li><strong>Session limits</strong>: Total tokens across a session</li>
+<li><strong>Cost tracking</strong>: USD cost estimation per
+provider</li>
+<li><strong>Rate limiting</strong>: Requests per minute throttling</li>
+<li><strong>Warning thresholds</strong>: Configurable alerts at X%
+usage</li>
+</ul>
+<h4 id="configuration">Configuration</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>budget <span class="op">:=</span> llm<span class="op">.</span>TokenBudget<span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    MaxTokensPerRequest<span class="op">:</span> <span class="dv">10000</span><span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    MaxTokensPerSession<span class="op">:</span> <span class="dv">100000</span><span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    MaxCostPerSession<span class="op">:</span> <span class="fl">10.0</span><span class="op">,</span>  <span class="co">// $10 USD</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    MaxCostPerDay<span class="op">:</span> <span class="fl">50.0</span><span class="op">,</span>       <span class="co">// $50 USD</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    MaxRequestsPerMinute<span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    WarnThreshold<span class="op">:</span> <span class="fl">80.0</span><span class="op">,</span>       <span class="co">// Warn at 80%</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>pm <span class="op">:=</span> llm<span class="op">.</span>NewProviderManagerWithBudget<span class="op">(</span>config<span class="op">,</span> budget<span class="op">)</span></span></code></pre></div>
+<h4 id="usage-tracking">Usage Tracking</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Get session usage</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>usage<span class="op">,</span> err <span class="op">:=</span> pm<span class="op">.</span>GetSessionUsage<span class="op">(</span>sessionID<span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Tokens used: %d / %d</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> usage<span class="op">.</span>TotalTokens<span class="op">,</span> budget<span class="op">.</span>MaxTokensPerSession<span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Cost: $%.2f / $%.2f</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> usage<span class="op">.</span>TotalCost<span class="op">,</span> budget<span class="op">.</span>MaxCostPerSession<span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Get budget status</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>status <span class="op">:=</span> pm<span class="op">.</span>GetBudgetStatus<span class="op">(</span>sessionID<span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Token usage: %.1f%%</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> status<span class="op">.</span>TokenUsagePercent<span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Cost usage: %.1f%%</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> status<span class="op">.</span>CostUsagePercent<span class="op">)</span></span></code></pre></div>
+<h4 id="cost-estimation">Cost Estimation</h4>
+<p>Costs are estimated based on published provider pricing: -
+<strong>Anthropic Claude 3.5 Sonnet</strong>: $3/$15 per 1M tokens
+(input/output) - <strong>OpenAI GPT-4o</strong>: $2.50/$10 per 1M tokens
+- <strong>OpenAI O1</strong>: $15/$60 per 1M tokens (with thinking) -
+<strong>Gemini Pro</strong>: $0.50/$1.50 per 1M tokens -
+<strong>Groq</strong>: Often free tier available, then $0.10/$0.10 per
+1M tokens</p>
+<h2 id="implementation-guide">Implementation Guide</h2>
+<h3 id="updating-llmrequest">Updating LLMRequest</h3>
+<p>All new features are integrated via the <code>LLMRequest</code>
+structure:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>request <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Model<span class="op">:</span> <span class="st">&quot;claude-3-5-sonnet-20241022&quot;</span><span class="op">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Messages<span class="op">:</span> messages<span class="op">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">:</span> <span class="dv">4096</span><span class="op">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Reasoning configuration</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    Reasoning<span class="op">:</span> <span class="op">&amp;</span>llm<span class="op">.</span>ReasoningConfig<span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        ThinkingBudget<span class="op">:</span> <span class="dv">5000</span><span class="op">,</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        ReasoningEffort<span class="op">:</span> <span class="st">&quot;medium&quot;</span><span class="op">,</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Cache configuration</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    CacheConfig<span class="op">:</span> <span class="op">&amp;</span>llm<span class="op">.</span>CacheConfig<span class="op">{</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        Strategy<span class="op">:</span> llm<span class="op">.</span>CacheStrategyTools<span class="op">,</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Token budget (set session ID for tracking)</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    SessionID<span class="op">:</span> sessionID<span class="op">,</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    ThinkingBudget<span class="op">:</span> <span class="dv">5000</span><span class="op">,</span> <span class="co">// Override reasoning budget</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>response<span class="op">,</span> err <span class="op">:=</span> providerManager<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> request<span class="op">)</span></span></code></pre></div>
+<h3 id="auto-detection">Auto-Detection</h3>
+<p>HelixCode automatically detects reasoning models and applies
+appropriate configurations:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// These model names trigger automatic reasoning mode:</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">// - OpenAI: &quot;o1&quot;, &quot;o1-preview&quot;, &quot;o1-mini&quot;, &quot;o3&quot;, &quot;o4&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">// - Anthropic: &quot;claude-4-sonnet&quot;, &quot;claude-3-7-sonnet&quot;, &quot;opus&quot; (with keywords)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">// - DeepSeek: &quot;deepseek-r1&quot;, &quot;deepseek-reasoner&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">// - Qwen: &quot;qwq-32b&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>request <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    Model<span class="op">:</span> <span class="st">&quot;o1-preview&quot;</span><span class="op">,</span> <span class="co">// Automatically enables reasoning</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    Messages<span class="op">:</span> messages<span class="op">,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="cache-strategy-selection">Cache Strategy Selection</h3>
+<p>Choose caching strategy based on use case:</p>
+<ul>
+<li><strong>CacheStrategyNone</strong>: Disable caching</li>
+<li><strong>CacheStrategySystem</strong>: Cache only system
+messages</li>
+<li><strong>CacheStrategyTools</strong>: Cache system + tool definitions
+(recommended)</li>
+<li><strong>CacheStrategyContext</strong>: Cache system + tools + recent
+messages</li>
+<li><strong>CacheStrategyAggressive</strong>: Cache everything
+possible</li>
+</ul>
+<h3 id="budget-management">Budget Management</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Initialize with budget</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>pm <span class="op">:=</span> llm<span class="op">.</span>NewProviderManagerWithBudget<span class="op">(</span>config<span class="op">,</span> llm<span class="op">.</span>DefaultTokenBudget<span class="op">())</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Track requests</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>request<span class="op">.</span>SessionID <span class="op">=</span> <span class="st">&quot;user-session-123&quot;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>response<span class="op">,</span> err <span class="op">:=</span> pm<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> request<span class="op">)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Monitor usage</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> status <span class="op">:=</span> pm<span class="op">.</span>GetBudgetStatus<span class="op">(</span>request<span class="op">.</span>SessionID<span class="op">);</span> status <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> status<span class="op">.</span>TokenUsagePercent <span class="op">&gt;</span> <span class="dv">90</span> <span class="op">{</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Warning: %s approaching token limit&quot;</span><span class="op">,</span> request<span class="op">.</span>SessionID<span class="op">)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Reset session when done</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>pm<span class="op">.</span>ResetSession<span class="op">(</span>request<span class="op">.</span>SessionID<span class="op">)</span></span></code></pre></div>
+<h2 id="testing">Testing</h2>
+<p>Integration tests verify feature support across providers:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/llm <span class="at">-run</span> TestReasoningFeatures</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/llm <span class="at">-run</span> TestCacheControl</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/llm <span class="at">-run</span> TestTokenBudgets</span></code></pre></div>
+<h2 id="migration-notes">Migration Notes</h2>
+<h3 id="existing-code">Existing Code</h3>
+<p>Existing code continues to work without changes:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Old code - still works</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>request <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    Model<span class="op">:</span> <span class="st">&quot;claude-3-5-sonnet-20241022&quot;</span><span class="op">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    Messages<span class="op">:</span> messages<span class="op">,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">:</span> <span class="dv">4096</span><span class="op">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>response<span class="op">,</span> err <span class="op">:=</span> provider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> request<span class="op">)</span></span></code></pre></div>
+<h3 id="opt-in-features">Opt-in Features</h3>
+<p>New features are opt-in via configuration:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// New code - with advanced features</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>request <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    Model<span class="op">:</span> <span class="st">&quot;claude-3-5-sonnet-20241022&quot;</span><span class="op">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    Messages<span class="op">:</span> messages<span class="op">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">:</span> <span class="dv">4096</span><span class="op">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    Reasoning<span class="op">:</span> llm<span class="op">.</span>NewReasoningConfig<span class="op">(</span>llm<span class="op">.</span>ReasoningModelClaude_Sonnet<span class="op">),</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    CacheConfig<span class="op">:</span> <span class="op">&amp;</span>llm<span class="op">.</span>CacheConfig<span class="op">{</span>Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> Strategy<span class="op">:</span> llm<span class="op">.</span>CacheStrategyTools<span class="op">},</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    SessionID<span class="op">:</span> sessionID<span class="op">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="performance-impact">Performance Impact</h2>
+<h3 id="prompt-caching-1">Prompt Caching</h3>
+<ul>
+<li><strong>First request</strong>: ~5-10ms overhead to create
+cache</li>
+<li><strong>Cached requests</strong>: 2-5x faster response time</li>
+<li><strong>Cost savings</strong>: 80-90% on cached input tokens</li>
+<li><strong>Best for</strong>: Multi-turn conversations, repeated system
+prompts</li>
+</ul>
+<h3 id="reasoning-mode">Reasoning Mode</h3>
+<ul>
+<li><strong>Latency</strong>: 2-3x longer due to thinking phase</li>
+<li><strong>Quality</strong>: Significantly better for complex
+tasks</li>
+<li><strong>Cost</strong>: Higher token usage (thinking + output)</li>
+<li><strong>Best for</strong>: Planning, analysis, complex
+problem-solving</li>
+</ul>
+<h3 id="token-budgets-1">Token Budgets</h3>
+<ul>
+<li><strong>Overhead</strong>: &lt;1ms per request for tracking</li>
+<li><strong>Memory</strong>: ~1KB per session</li>
+<li><strong>Best for</strong>: Multi-user systems, cost control</li>
+</ul>
+<h2 id="roadmap">Roadmap</h2>
+<h3 id="planned-improvements">Planned Improvements</h3>
+<ol type="1">
+<li><strong>Anthropic</strong>
+<ul>
+<li>✅ Full prompt caching</li>
+<li>✅ Extended thinking</li>
+<li>⬜ Batch API support</li>
+<li>⬜ Tool caching optimization</li>
+</ul></li>
+<li><strong>OpenAI</strong>
+<ul>
+<li>⬜ Prompt caching (when available)</li>
+<li>✅ O-series reasoning</li>
+<li>⬜ Structured outputs</li>
+<li>⬜ Batch API integration</li>
+</ul></li>
+<li><strong>Cross-Provider</strong>
+<ul>
+<li>⬜ Unified caching layer</li>
+<li>⬜ Cost optimization engine</li>
+<li>⬜ Automatic failover with feature preservation</li>
+<li>⬜ Provider-agnostic reasoning interface</li>
+</ul></li>
+</ol>
+<h3 id="experimental-features">Experimental Features</h3>
+<ul>
+<li><strong>Reasoning trace visualization</strong>: Display thinking
+process to users</li>
+<li><strong>Dynamic budget allocation</strong>: Adjust budgets based on
+task complexity</li>
+<li><strong>Multi-provider reasoning</strong>: Combine reasoning from
+multiple models</li>
+<li><strong>Cache analytics dashboard</strong>: Visualize cache hit
+rates and savings</li>
+</ul>
+<h2 id="support">Support</h2>
+<p>For issues or questions about provider features: - Create an issue on
+GitHub - Check the integration tests for examples - Review
+provider-specific documentation in <code>/docs/providers/</code></p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching">Anthropic
+Prompt Caching</a></li>
+<li><a href="https://openai.com/research/learning-to-reason">OpenAI
+O-Series Models</a></li>
+<li><a href="https://ai.google.dev/gemini-api/docs/caching">Google
+Gemini Context Caching</a></li>
+<li><a href="https://docs.aws.amazon.com/bedrock/">AWS Bedrock
+Documentation</a></li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29:
+https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching
+; https://ai.google.dev/gemini-api/docs/caching ;
+https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/prompt-caching
+; https://console.groq.com/docs/prompt-caching ;
+https://api-docs.deepseek.com/guides/reasoning_model ;
+https://github.com/ollama/ollama/blob/main/docs/api.md ;
+https://docs.x.ai/docs/models — Confirmed against official sources on
+2026-05-29: (1) Anthropic <code>cache_control</code> prompt caching with
+model-dependent minimum (1,024 tokens for Sonnet 4.x/Opus 4.1/earlier;
+4,096 for newest Opus and Haiku 4.5), default 5-min TTL + optional 1-h
+TTL at 2x price — the prior blanket “1024 minimum” was corrected. (2)
+Gemini implicit caching default on 2.5+ and explicit caching (default
+1-h TTL). (3) Azure OpenAI prompt caching is enabled-by-default on
+GPT-4o+ (was wrongly listed “Planned”). (4) DeepSeek
+<code>deepseek-reasoner</code> exposes <code>reasoning_content</code>
+CoT — matches doc. (5) Ollama <code>/api/tags</code> +
+<code>think</code> parameter confirmed. (6) xAI Grok reasoning +
+1M-token context confirmed.</p>
+<p><strong>Negative findings / could-not-verify (§11.4.99(B)):</strong>
+- <strong>OpenAI official prompt-caching docs unreachable</strong> —
+both <code>https://platform.openai.com/docs/guides/prompt-caching</code>
+and <code>https://openai.com/index/api-prompt-caching/</code> returned
+HTTP 403 to the fetcher. The OpenAI/Azure automatic-caching claims here
+are corroborated from the official <strong>Azure OpenAI</strong>
+(Microsoft Learn) page (<code>prompt_cache_retention</code>,
+<code>cached_tokens</code>, “enabled by default”, 1,024-token minimum)
+and Anthropic’s own multi-cloud doc, NOT from a directly-fetched
+openai.com page. Treat the OpenAI-platform-specific wording as
+cross-corroborated, not first-party-confirmed in this session. -
+<strong>Groq prompt caching is model-scoped</strong> — Groq’s official
+docs confirm automatic caching ONLY on GPT-OSS 20B/120B +
+GPT-OSS-Safeguard 20B (50% cached-token discount, ~2-h volatile
+retention), NOT on all Groq models. The prior matrix entry “❌ Not
+supported” was stale; corrected to “⚠️ Automatic (subset)”. -
+<strong>xAI prompt caching: not documented</strong> —
+<code>docs.x.ai/docs/models</code> does not address prompt caching, so
+the matrix “❌ Not supported” for xAI is unconfirmed-either-way (absence
+of documentation, not a confirmed negative). - <strong>AWS Bedrock page
+body not extractable</strong> —
+<code>https://docs.aws.amazon.com/bedrock/latest/userguide/inference-prompt-caching.html</code>
+returned only the page title to the fetcher (JS-rendered body not
+captured); Bedrock-as-a-caching-surface is corroborated only indirectly
+via Anthropic’s multi-cloud doc.</p>
+<p><strong>CONST-036/037 caveat:</strong> This matrix hardcodes
+per-provider capability claims. Per CONST-036/037, capability flags MUST
+be sourced at runtime from LLMsVerifier
+(<code>VerificationResult</code>), not from a static doc. This file is
+descriptive/operator-facing reference only and MUST NOT be used as the
+runtime source of truth for capability gating; treat any divergence
+between this matrix and LLMsVerifier as LLMsVerifier-wins.</p>
+</body>
+</html>

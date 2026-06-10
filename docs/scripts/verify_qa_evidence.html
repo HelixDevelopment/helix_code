@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>verify_qa_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">verify_qa_evidence</h1>
+</header>
+<h1 id="verify_qa_evidence.sh-companion-guide"><code>verify_qa_evidence.sh</code>
+— companion guide</h1>
+<p><strong>Revision:</strong> 2 <strong>Last modified:</strong>
+2026-05-28T00:00:00Z</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Script</td>
+<td><code>scripts/verify_qa_evidence.sh</code></td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>constitution submodule <code>Constitution.md</code> §11.4.83
+(docs/qa/ end-user evidence mandate); §11.4.18 (script documentation
+mandate)</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active — ADVISORY by default, ENFORCING (blocking) under
+<code>--enforce --since &lt;baseline&gt;</code> (operator-authorised
+release gate, HXC-019)</td>
+</tr>
+<tr>
+<td>Last verified</td>
+<td>2026-05-28</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#usage-examples">Usage examples</a></li>
+<li><a href="#enforcing-mode--baseline-scoping">Enforcing mode +
+baseline scoping</a></li>
+<li><a href="#per-commit-opt-out">Per-commit opt-out</a></li>
+<li><a href="#edge-cases">Edge cases</a></li>
+<li><a href="#internal-behaviour">Internal behaviour</a></li>
+<li><a href="#release-gate-wiring--meta-test">Release-gate wiring +
+meta-test</a></li>
+<li><a href="#related-scripts">Related scripts</a></li>
+</ul>
+<h2 id="overview">Overview</h2>
+<p><code>scripts/verify_qa_evidence.sh</code> is the enforcement seam
+for the §11.4.83 <code>docs/qa/</code> end-user evidence mandate. It
+scans feature-shipping commits and reports when a feature commit has no
+matching <code>docs/qa/&lt;run-id&gt;/</code> directory carrying its
+end-user evidence transcript.</p>
+<p>Two modes:</p>
+<ul>
+<li><strong>Advisory (default)</strong> — ALWAYS exits 0; prints a
+warn-mode notice. For ad-hoc visibility; not wired into any git
+hook.</li>
+<li><strong>Enforcing</strong>
+(<code>--enforce --since &lt;ref&gt;</code>) — exits <strong>1</strong>
+on any in-scope violation, <strong>0</strong> when clean. This is the
+§11.4.83 operative-rule-(5) release gate. The operator
+<strong>authorised</strong> the blocking gate on 2026-05-28
+(HXC-019).</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Run from inside the HelixCode git repository (any cwd — the script
+resolves the repo root via
+<code>git rev-parse --show-toplevel</code>).</li>
+<li><code>git</code> and POSIX coreutils on <code>PATH</code>.</li>
+<li><code>bash</code> (the shebang is honest — the script uses bash and
+<code>set -u</code>).</li>
+</ul>
+<h2 id="usage-examples">Usage examples</h2>
+<p>Scan the default window (last 20 commits):</p>
+<pre><code>scripts/verify_qa_evidence.sh</code></pre>
+<p>Scan a custom window (last 50 commits):</p>
+<pre><code>scripts/verify_qa_evidence.sh 50</code></pre>
+<p>Expected output is a per-commit advisory report ending with a
+<code>RESULT: advisory scan complete (exit 0 — warn-mode).</code>
+line.</p>
+<p>Run the enforcing release gate scoped to the convention baseline:</p>
+<pre><code>scripts/verify_qa_evidence.sh --enforce --since ed84f90e</code></pre>
+<p>Exits 0 when every in-range feature commit carries its
+<code>docs/qa/&lt;run-id&gt;/</code> directory; exits 1 (with per-commit
+<code>VIOL</code> lines on stderr) on any violation.</p>
+<h2 id="enforcing-mode-baseline-scoping">Enforcing mode + baseline
+scoping</h2>
+<p><code>--enforce</code> evaluates only the range
+<code>&lt;since&gt;..HEAD</code> — commits that are descendants of the
+<code>--since</code> baseline by merge-ancestry (not author-date
+sorting). The baseline is the commit that introduced the convention by
+<strong>adding <code>docs/qa/README.md</code></strong>:</p>
+<pre><code>git log --diff-filter=A --format=&#39;%H %cI %s&#39; -- docs/qa/README.md
+# ed84f90e  2026-05-28T16:09:55+03:00  feat(qa): establish docs/qa/ ... (HXC-019)</code></pre>
+<p><code>--since</code> is <strong>mandatory</strong> in enforcing mode.
+Running <code>--enforce</code> without it is a misuse error (exit 2):
+enforcing over the whole history would block on thousands of
+pre-convention legacy feature commits and make <code>HEAD</code>
+un-releasable. <code>--since</code> accepts any git revision (SHA, tag)
+<strong>or</strong> an approxidate such as <code>2026-05-28</code>.</p>
+<h2 id="per-commit-opt-out">Per-commit opt-out</h2>
+<p>A commit whose message (subject <strong>or</strong> body) contains
+the literal token <code>[no-qa-evidence]</code> is
+<strong>exempt</strong> from the gate. Use it for a change that trips
+the feature-shipping heuristic but ships no user-facing feature (pure
+refactor, governance-only, doc-only). It is the single documented escape
+hatch; an untagged feature commit with no evidence directory always
+fails the enforcing gate.</p>
+<h2 id="edge-cases">Edge cases</h2>
+<ul>
+<li><strong>Not in a git repo</strong> — prints a notice and exits
+0.</li>
+<li><strong>No <code>docs/qa/</code> tree</strong> — every feature
+commit is reported as a WARN (no run-id directories exist to match
+against); still exits 0.</li>
+<li><strong>Pure refactor that touches watched paths</strong> — may
+produce a false positive WARN. Acceptable for a warn-mode advisory
+notice.</li>
+<li><strong>Run-id matched by commit subject</strong> — a commit whose
+subject contains a known <code>docs/qa/&lt;run-id&gt;/</code> directory
+name (e.g. <code>HXC-019</code>) is reported <code>ok</code>.</li>
+</ul>
+<h2 id="internal-behaviour">Internal behaviour</h2>
+<ol type="1">
+<li>Resolves repo root and <code>cd</code>s into it.</li>
+<li>Enumerates existing <code>docs/qa/&lt;run-id&gt;/</code>
+directories.</li>
+<li>Determines the commit window — advisory: the last N commits;
+enforcing: the <code>&lt;since&gt;..HEAD</code> range.</li>
+<li>A commit is “feature-shipping” if it touches non-test code under
+<code>helix_code/internal/**</code>, <code>helix_code/cmd/**</code>, or
+<code>helix_code/applications/**</code> (excluding
+<code>*_test.go</code>). File listing uses
+<code>git diff-tree --no-commit-id --name-only -r</code> (robust across
+git versions).</li>
+<li>A commit carrying <code>[no-qa-evidence]</code> is reported
+<code>exempt</code> and skipped.</li>
+<li>For each remaining feature commit, checks whether its subject
+references a known run-id directory; prints <code>ok</code> /
+<code>WARN</code> (advisory) or <code>ok</code> / <code>VIOL</code>
+(enforcing).</li>
+<li>Advisory: prints a summary and ALWAYS exits 0. Enforcing: exits 1 if
+any <code>VIOL</code> was recorded, else 0.</li>
+</ol>
+<h2 id="release-gate-wiring-meta-test">Release-gate wiring +
+meta-test</h2>
+<p>Per the §11.4.83 mandate wording (“release gates”), the enforcing
+gate is wired into the release gate <strong>only</strong> — never into
+pre-commit / pre-push hooks:</p>
+<ul>
+<li><code>scripts/gates/qa_evidence_gate.sh</code> — release-gate
+wrapper that runs
+<code>verify_qa_evidence.sh --enforce --since &lt;baseline&gt;</code>
+and propagates the exit code. Baseline overridable via
+<code>$QA_EVIDENCE_BASELINE</code> or <code>$1</code>.</li>
+<li><code>scripts/release-gate-test.sh</code> — invokes the wrapper; a
+non-zero result forces the whole release gate red regardless of the
+Go-test outcome.</li>
+<li><code>scripts/tests/verify_qa_evidence_meta_test.sh</code> — §1.1
+paired-mutation meta-test in a throwaway temp git repo, asserting the
+gate FAILs when evidence is missing, PASSes when present, and honours
+the <code>[no-qa-evidence]</code> opt-out and the mandatory
+<code>--since</code> baseline.</li>
+</ul>
+<h2 id="related-scripts">Related scripts</h2>
+<ul>
+<li><code>docs/qa/README.md</code> — the convention this script
+enforces.</li>
+<li><code>scripts/gates/qa_evidence_gate.sh</code> — release-gate
+wrapper.</li>
+<li><code>scripts/tests/verify_qa_evidence_meta_test.sh</code> — §1.1
+meta-test.</li>
+<li><code>scripts/release-gate-test.sh</code> — meta-repo release gate
+that calls it.</li>
+<li><code>scripts/verify-governance-cascade.sh</code> — the cascade gate
+exercised in the <code>docs/qa/HXC-016/</code> seed example.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TIER_1_SUMMARY</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">TIER_1_SUMMARY</h1>
+</header>
+<h1 id="tier-1-cli-agents---analysis-summary">Tier 1 CLI Agents -
+Analysis Summary</h1>
+<blockquote>
+<p><strong>10 Tier 1 agents analyzed</strong> All agents are top-tier,
+production-ready CLI coding assistants</p>
+</blockquote>
+<h2 id="agents-analyzed">Agents Analyzed</h2>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 15%" />
+<col style="width: 22%" />
+<col style="width: 11%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Agent</th>
+<th>Language</th>
+<th>LOC</th>
+<th>Key Differentiator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>claude-code-source</strong></td>
+<td>TypeScript</td>
+<td>513K</td>
+<td>Internal features (KAIROS, Dream, Teams)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>aider</strong></td>
+<td>Python</td>
+<td>20K</td>
+<td>Git-native pair programming</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>codex</strong></td>
+<td>TS/Rust</td>
+<td>~10K</td>
+<td>OpenAI official, sandboxed</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>openhands</strong></td>
+<td>Python</td>
+<td>~50K</td>
+<td>Autonomous SWE, evaluation</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>cline</strong></td>
+<td>TypeScript</td>
+<td>~15K</td>
+<td>Browser automation, VS Code</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>continue</strong></td>
+<td>TypeScript</td>
+<td>~30K</td>
+<td>Universal IDE support</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>gemini-cli</strong></td>
+<td>TypeScript</td>
+<td>~5K</td>
+<td>Google official, simple</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>roo-code</strong></td>
+<td>TypeScript</td>
+<td>~15K</td>
+<td>Multi-file editing</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>swe-agent</strong></td>
+<td>Python</td>
+<td>~10K</td>
+<td>SWE-bench focused</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>vtcode</strong></td>
+<td>Swift</td>
+<td>~2K</td>
+<td>Minimal, fast</td>
+</tr>
+</tbody>
+</table>
+<h2 id="key-features-matrix">Key Features Matrix</h2>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 11%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 7%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>claude</th>
+<th>aider</th>
+<th>codex</th>
+<th>oh</th>
+<th>cline</th>
+<th>cont</th>
+<th>gem</th>
+<th>roo</th>
+<th>swe</th>
+<th>vtc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Git Integration</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Browser Automation</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Sandbox/Security</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Voice Commands</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Multi-file Edit</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Repository Mapping</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Evaluation Framework</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Team/Swarm</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Plan Mode</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Auto-commit</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h2 id="critical-features-to-port-to-helixagent">Critical Features to
+Port to HelixAgent</h2>
+<h3 id="from-claude-code-source">1. From Claude Code Source</h3>
+<ul>
+<li><strong>KAIROS</strong>: Always-on background assistant</li>
+<li><strong>Dream System</strong>: Memory consolidation with 3-gate
+triggers</li>
+<li><strong>Team Management</strong>: Multi-agent swarms with
+consensus</li>
+<li><strong>Plan Mode</strong>: Multi-step planning with verification
+gates</li>
+<li><strong>YOLO Classifier</strong>: ML-based auto-approval</li>
+<li><strong>Permission System</strong>: 4-layer permission
+architecture</li>
+</ul>
+<h3 id="from-aider">2. From Aider</h3>
+<ul>
+<li><strong>Repository Mapping</strong>: Tree-sitter based codebase
+analysis</li>
+<li><strong>Edit Block Format</strong>: Surgical code modifications</li>
+<li><strong>Git-Native Workflow</strong>: Automatic commits, diff
+reviews</li>
+<li><strong>Voice Commands</strong>: Speech-to-code integration</li>
+<li><strong>Lint/Test Integration</strong>: Automatic quality
+checks</li>
+</ul>
+<h3 id="from-codex">3. From Codex</h3>
+<ul>
+<li><strong>Sandboxed Execution</strong>: Secure command isolation</li>
+<li><strong>Approval System</strong>: Multi-level approval gates</li>
+<li><strong>Protocol Architecture</strong>: JSON-RPC communication</li>
+<li><strong>TUI</strong>: Rich terminal UI with ratatui</li>
+</ul>
+<h3 id="from-openhands">4. From OpenHands</h3>
+<ul>
+<li><strong>Agent System</strong>: Pluggable agent architecture</li>
+<li><strong>Evaluation Framework</strong>: SWE-bench integration</li>
+<li><strong>Event-Driven</strong>: Action-observation loop</li>
+<li><strong>Runtime Environment</strong>: Docker-based sandboxing</li>
+<li><strong>Browser Automation</strong>: Headless browser
+integration</li>
+</ul>
+<h3 id="from-cline">5. From Cline</h3>
+<ul>
+<li><strong>Browser Integration</strong>: Web navigation for
+research</li>
+<li><strong>Autonomous Execution</strong>: Self-directed task
+completion</li>
+<li><strong>Context Management</strong>: Smart file selection</li>
+</ul>
+<h3 id="from-continue">6. From Continue</h3>
+<ul>
+<li><strong>Context Providers</strong>: Modular context system (<span class="citation" data-cites="file">@file</span>, <span class="citation" data-cites="url">@url</span>, <span class="citation" data-cites="docs">@docs</span>)</li>
+<li><strong>Action System</strong>: Slash command framework</li>
+<li><strong>Universal IDE</strong>: Works across editors</li>
+</ul>
+<h3 id="from-roo-code">7. From Roo Code</h3>
+<ul>
+<li><strong>Multi-file Editing</strong>: Simultaneous file
+modifications</li>
+<li><strong>Context Optimization</strong>: Token management</li>
+<li><strong>Agent Modes</strong>: Specialized behaviors</li>
+</ul>
+<h3 id="from-swe-agent">8. From SWE-agent</h3>
+<ul>
+<li><strong>Issue Resolution</strong>: GitHub issue fixing</li>
+<li><strong>Computer Interface</strong>: Filesystem + terminal</li>
+<li><strong>Thought-Action Loop</strong>: Reasoning before acting</li>
+</ul>
+<h2 id="implementation-priority-for-helixagent">Implementation Priority
+for HelixAgent</h2>
+<h3 id="phase-1-foundation-already-done">Phase 1: Foundation (Already
+Done ✅)</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>Tool system with 30+
+tools</label></li>
+<li><label><input type="checkbox" checked></input>Permission system with
+rules</label></li>
+<li><label><input type="checkbox" checked></input>Plan Mode with
+verification</label></li>
+<li><label><input type="checkbox" checked></input>Team
+management</label></li>
+<li><label><input type="checkbox" checked></input>KAIROS
+service</label></li>
+<li><label><input type="checkbox" checked></input>Dream system</label></li>
+</ul>
+<h3 id="phase-2-advanced-features-next">Phase 2: Advanced Features
+(Next)</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Repository mapping with
+tree-sitter</label></li>
+<li><label><input type="checkbox"></input>Edit block format</label></li>
+<li><label><input type="checkbox"></input>Sandboxed execution</label></li>
+<li><label><input type="checkbox"></input>Browser automation</label></li>
+<li><label><input type="checkbox"></input>Voice commands</label></li>
+<li><label><input type="checkbox"></input>Auto-commit workflow</label></li>
+</ul>
+<h3 id="phase-3-integration-future">Phase 3: Integration (Future)</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Context providers</label></li>
+<li><label><input type="checkbox"></input>Action system</label></li>
+<li><label><input type="checkbox"></input>Evaluation framework</label></li>
+<li><label><input type="checkbox"></input>SWE-bench integration</label></li>
+<li><label><input type="checkbox"></input>Agent modes</label></li>
+</ul>
+<h2 id="feature-count-by-agent">Feature Count by Agent</h2>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Total Features</th>
+<th>Unique Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code-source</td>
+<td>25</td>
+<td>8 (KAIROS, Dream, Teams, etc.)</td>
+</tr>
+<tr>
+<td>aider</td>
+<td>18</td>
+<td>4 (Voice, Repomap, etc.)</td>
+</tr>
+<tr>
+<td>codex</td>
+<td>12</td>
+<td>3 (Sandbox, Protocol)</td>
+</tr>
+<tr>
+<td>openhands</td>
+<td>20</td>
+<td>5 (Evaluation, Event system)</td>
+</tr>
+<tr>
+<td>cline</td>
+<td>14</td>
+<td>2 (Browser automation)</td>
+</tr>
+<tr>
+<td>continue</td>
+<td>15</td>
+<td>3 (Context providers)</td>
+</tr>
+<tr>
+<td>roo-code</td>
+<td>12</td>
+<td>2 (Multi-file edit)</td>
+</tr>
+<tr>
+<td>swe-agent</td>
+<td>10</td>
+<td>2 (SWE-bench)</td>
+</tr>
+<tr>
+<td>gemini-cli</td>
+<td>6</td>
+<td>0</td>
+</tr>
+<tr>
+<td>vtcode</td>
+<td>4</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="total-estimated-work">Total Estimated Work</h2>
+<ul>
+<li><strong>Features to port</strong>: ~50 unique capabilities</li>
+<li><strong>Already implemented</strong>: ~15 (30%)</li>
+<li><strong>Remaining</strong>: ~35 features (70%)</li>
+<li><strong>Estimated time</strong>: 4-6 weeks for full porting</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<ol type="1">
+<li>✅ Complete Tier 1 analysis</li>
+<li>⏳ Analyze Tier 2 agents</li>
+<li>⏳ Analyze Tier 3-5 agents</li>
+<li>⏳ Create master integration plan</li>
+<li>⏳ Implement features in priority order</li>
+</ol>
+</body>
+</html>

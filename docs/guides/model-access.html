@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>model-access</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">model-access</h1>
+</header>
+<h1 id="user-guide-model-access-making-provider-models-available">User
+Guide — Model Access (Making Provider Models Available)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>TARGET-STATE GUIDE — mixes IMPLEMENTED and PLANNED behaviour; every
+clause is labelled</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td><code>helix_code/</code> (inner Go app <code>dev.helix.code</code>)
++ <code>submodules/helix_agent</code>
+(<code>dev.helix.agent</code>)</td>
+</tr>
+<tr>
+<td>Source plans</td>
+<td><code>docs/superpowers/specs/plans/2026-06-10-SP1-model-access-plan.md</code>,
+<code>…-SP2-helixagent-exposure-plan.md</code></td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>Cascades from <code>constitution/</code> + root
+<code>CLAUDE.md</code>/<code>CONSTITUTION.md</code>. Anti-bluff §11.4
+governs: nothing here is claimed “working” without it being verifiable
+in the current tree.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4 / §11.4.123).</strong> This is a guide
+to how model access <em>is meant to work</em>. Where a behaviour is not
+yet wired in the current codebase it is marked <strong>PLANNED</strong>
+with the defect id (D-1..D-7) and the plan task that delivers it. Do NOT
+read a <strong>PLANNED</strong> clause as a description of working
+behaviour. The <strong>IMPLEMENTED TODAY</strong> subsections describe
+behaviour confirmed against the live tree on 2026-06-10 (file:line
+cited). When in doubt, the cited code is the source of truth, not this
+prose.</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ol type="1">
+<li><a href="#1-what-model-access-means">What “model access”
+means</a></li>
+<li><a href="#2-status-legend--defect-cross-reference">Status legend
+&amp; defect cross-reference</a></li>
+<li><a href="#3-step-1--supply-or-recognize-an-api-key">Step 1 — Supply
+or recognize an API key</a></li>
+<li><a href="#4-step-2--key-presence-makes-a-provider-visible">Step 2 —
+Key presence makes a provider visible</a></li>
+<li><a href="#5-step-3--working-models-are-dynamically-discovered--verified-llmsverifier">Step
+3 — Working models are dynamically discovered + verified
+(LLMsVerifier)</a></li>
+<li><a href="#6-step-4--per-provider-exposure">Step 4 — Per-provider
+exposure</a></li>
+<li><a href="#7-step-5--the-unified-catalog-get-v1catalog">Step 5 — The
+unified catalog (<code>GET /v1/catalog</code>)</a></li>
+<li><a href="#8-worked-example-env-var--provider-visible--model-usable">Worked
+example: env var → provider visible → model usable</a></li>
+<li><a href="#9-behaviour-when-the-verifier-is-disabled">Behaviour when
+the verifier is disabled</a></li>
+<li><a href="#10-reference-per-provider-env-var-aliases">Reference:
+per-provider env-var aliases</a></li>
+<li><a href="#11-what-is-working-today-vs-planned-summary">What is
+working today vs planned (summary)</a></li>
+</ol>
+<hr />
+<h2 id="what-model-access-means">1. What “model access” means</h2>
+<p>A model becomes usable to you through a <strong>funnel</strong> of
+conditions. The intended (target) rule is:</p>
+<blockquote>
+<p>A provider’s <strong>WORKING models</strong> become available
+<strong>iff</strong> an API key for that provider is recognized
+(supplied directly, or read from <code>.env</code> /
+<code>api_keys.sh</code> / a shell export) <strong>AND</strong> the
+model is dynamically discovered and verified by
+<strong>LLMsVerifier</strong> (<code>Verified == true</code>, status
+<code>verified</code>, score ≥ the configured minimum).</p>
+</blockquote>
+<p>This single rule is the goal of sub-program <strong>SP1</strong>
+(model-access refinement). The exposure of those working models as
+uniformly-named, individually-selectable targets is the goal of
+sub-program <strong>SP2</strong> (HelixAgent exposure). Both are
+planning-approved designs; their implementation status is tracked
+clause-by-clause below.</p>
+<p>The funnel (target design, SP1 plan §3):</p>
+<pre><code>startup
+  └─ secrets.LoadAPIKeys()            reads $HOME/api_keys.sh → else walked-up .env → os.Setenv each
+  └─ config.Load()                    viper AutomaticEnv + per-provider BindEnv now sees the loaded keys
+  └─ keyrec.PresentProviders()        provider visible iff any of its env-var aliases is set &amp; not a placeholder
+  └─ verifier.GetWorkingModels()      keep model iff present[provider] ∧ Verified ∧ status==&quot;verified&quot; ∧ score≥min
+  └─ expose                           CLI --list-models, server handlers, unified /v1/catalog</code></pre>
+<hr />
+<h2 id="status-legend-defect-cross-reference">2. Status legend &amp;
+defect cross-reference</h2>
+<table>
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th>Label</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IMPLEMENTED TODAY</strong></td>
+<td>Confirmed present in the live tree on 2026-06-10 (file:line
+cited).</td>
+</tr>
+<tr>
+<td><strong>PARTIAL</strong></td>
+<td>The building block exists but is not wired into the user-facing
+path.</td>
+</tr>
+<tr>
+<td><strong>PLANNED</strong></td>
+<td>Designed in an approved plan but ABSENT from the current tree.
+Carries the defect id + delivering task.</td>
+</tr>
+</tbody>
+</table>
+<p>Defects this guide depends on (roadmap ledger; see SP1/SP2/SP7
+plans):</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 13%" />
+<col style="width: 55%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Defect</th>
+<th>Summary</th>
+<th>Current state (verified 2026-06-10)</th>
+<th>Delivered by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D-1</strong></td>
+<td><code>/v1/completion/models</code> returns a hardcoded 3-model
+list</td>
+<td>PRESENT —
+<code>submodules/helix_agent/internal/handlers/completion.go:406</code>
+hardcodes
+<code>deepseek-coder</code>/<code>claude-3-sonnet-20240229</code>/<code>gemini-pro</code></td>
+<td>SP2 P2.0</td>
+</tr>
+<tr>
+<td><strong>D-2</strong></td>
+<td>CLI <code>--list-models</code> shows
+<code>failed</code>/<code>pending</code> models as available</td>
+<td>PRESENT — <code>helix_code/cmd/cli/main.go:1361/1392</code></td>
+<td>SP1 P1.3.2</td>
+</tr>
+<tr>
+<td><strong>D-3</strong></td>
+<td><code>secrets.LoadAPIKeys</code> is dead — never called in a prod
+startup path</td>
+<td>PRESENT — defined at
+<code>helix_code/internal/secrets/loader.go:30</code>, no prod
+call-site</td>
+<td>SP1 P1.1.1</td>
+</tr>
+<tr>
+<td><strong>D-4</strong></td>
+<td>Working-model filter (<code>Verified ∧ score≥min</code>) loaded but
+never applied</td>
+<td>PRESENT — <code>helix_code/internal/verifier/adapter.go:175</code>
+<code>GetMinAcceptableScore</code> exists, never invoked in a listing
+path</td>
+<td>SP1 P1.3.1</td>
+</tr>
+<tr>
+<td><strong>D-5</strong></td>
+<td>Hardcoded provider model lists (CONST-036)</td>
+<td>PRESENT —
+<code>openai_provider.go</code>/<code>anthropic_provider.go</code>
+literal slices</td>
+<td>SP1 P1.3.4</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="step-1-supply-or-recognize-an-api-key">3. Step 1 — Supply or
+recognize an API key</h2>
+<p>You can make a key available to HelixCode in any of three ways. The
+intended precedence (SP1 DECISION-1, recommended
+<strong>gap-fill</strong>: an already-exported shell var is NOT
+overwritten by a file) is <strong>PLANNED</strong>; the loader mechanism
+itself is <strong>IMPLEMENTED TODAY</strong> but not yet invoked at
+startup.</p>
+<h3 id="a.-shell-export-recommended-for-ad-hoc-ci">3a. Shell export
+(recommended for ad-hoc / CI)</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-ant-…&quot;</span></span></code></pre></div>
+<ul>
+<li><strong>IMPLEMENTED TODAY:</strong> config binds per-provider env
+vars via Viper <code>AutomaticEnv</code> +
+<code>SetEnvPrefix(&quot;HELIX&quot;)</code> and explicit <code>BindEnv</code> for
+the 8 cloud providers —
+<code>helix_code/internal/config/config.go:307-345</code>. A shell
+export of a bound variable is read at config load.</li>
+</ul>
+<h3 id="b.-api_keys.sh-in-your-home-directory">3b.
+<code>api_keys.sh</code> in your home directory</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># $HOME/api_keys.sh</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-…&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-ant-…&quot;</span></span></code></pre></div>
+<ul>
+<li><strong>PARTIAL:</strong> the loader that reads
+<code>$HOME/api_keys.sh</code> exists —
+<code>helix_code/internal/secrets/loader.go:30</code>
+(<code>LoadAPIKeys()</code> → reads <code>api_keys.sh</code> first). It
+does <strong>not</strong> log values (CONST-042-clean).</li>
+<li><strong>PLANNED (D-3):</strong> <code>LoadAPIKeys()</code> is
+<strong>not yet called</strong> from any binary’s <code>main()</code>
+(verified: only its own definition + doc-comments reference it in the
+non-test tree). Until SP1 task <strong>T1.1.1</strong> wires it as the
+first statement of <code>cmd/server/main.go</code> and
+<code>cmd/cli/main.go</code>, an <code>api_keys.sh</code>-only key is
+<strong>not</strong> recognized — you must
+<code>source ~/api_keys.sh</code> yourself so it reaches the shell
+environment.</li>
+</ul>
+<h3 id="c.-.env-file-walked-up-from-the-working-directory">3c.
+<code>.env</code> file (walked up from the working directory)</h3>
+<pre class="dotenv"><code># .env
+ANTHROPIC_API_KEY=sk-ant-…</code></pre>
+<ul>
+<li><strong>PARTIAL:</strong> <code>LoadAPIKeys()</code> falls back to a
+walked-up <code>.env</code> (<code>loader.go</code>
+<code>findEnvFile</code> / <code>loadFromEnv</code>).</li>
+<li><strong>PLANNED (D-3):</strong> same wiring gap as 3b — auto-load at
+startup arrives with <strong>T1.1.1</strong>.</li>
+</ul>
+<blockquote>
+<p><strong>CONST-042 (no-secret-leak):</strong> never commit a real key.
+<code>.env</code> is gitignored mode 0600; <code>.env.example</code>
+carries placeholders only. The loader never prints key values at any log
+level.</p>
+</blockquote>
+<hr />
+<h2 id="step-2-key-presence-makes-a-provider-visible">4. Step 2 — Key
+presence makes a provider visible</h2>
+<p>The intended rule: a provider appears <strong>only if</strong> at
+least one of its env-var aliases is set to a non-placeholder value. A
+user with only an Anthropic key must NOT see OpenAI, Gemini, etc.</p>
+<ul>
+<li><strong>PLANNED (no-key-presence-gate gap, SP1 §1):</strong> today
+there is <strong>no</strong> key-presence gate in front of the listing
+path, and the provider factory
+(<code>helix_code/internal/llm/factory.go</code>) builds
+<strong>one</strong> provider by <code>config.Type</code> rather than
+enumerating every key-present provider.</li>
+<li><strong>PLANNED:</strong> SP1 adds:
+<ul>
+<li><code>helix_code/internal/llm/keyrecognition.go</code> —
+<code>PresentProviders() map[string]bool</code> + the multi-alias
+<code>{provider → []envVarAlias}</code> table +
+<code>isPlaceholder()</code> (task <strong>T1.1.2</strong>).
+<strong>ABSENT today</strong> (file does not exist). The alias table is
+lifted, decoupled, from helix_agent
+<code>SupportedProviders.EnvVars</code>
+(<code>submodules/helix_agent/internal/verifier/provider_types.go</code>)
+per §11.4.74.</li>
+<li><code>BuildPresentProviders(configs, present)</code> in
+<code>factory.go</code> — builds <strong>every</strong> key-present
+provider, not one (task <strong>T1.2.2</strong>).</li>
+</ul></li>
+</ul>
+<p>See <a href="#10-reference-per-provider-env-var-aliases">§10</a> for
+the alias table.</p>
+<hr />
+<h2 id="step-3-working-models-are-dynamically-discovered-verified-llmsverifier">5.
+Step 3 — Working models are dynamically discovered + verified
+(LLMsVerifier)</h2>
+<p><strong>LLMsVerifier is the single source of truth</strong> for model
+metadata, verification status, and scoring (CONST-036). No hardcoded
+model lists are permitted as the user-facing source.</p>
+<h3 id="what-exists-today">What exists today</h3>
+<ul>
+<li><strong>IMPLEMENTED TODAY:</strong>
+<code>helix_code/internal/verifier/adapter.go</code>
+<ul>
+<li><code>GetVerifiedModels(ctx)</code> (<code>adapter.go:183</code>) —
+gated on <code>IsEnabled()</code>, served from cache → live → stale →
+fallback, then <code>filterByProviderConfig</code>.</li>
+<li><code>GetMinAcceptableScore()</code> (<code>adapter.go:175</code>) —
+returns the configured minimum (default 6.0).</li>
+<li><code>VerifiedModel</code> carries the “working” fields:
+<code>Verified bool</code>, <code>VerificationStatus string</code>,
+<code>OverallScore float64</code>, <code>ContextSize</code>,
+<code>LastVerified</code> (<code>verifier/types.go</code>).</li>
+</ul></li>
+<li>The verifier client makes <strong>real HTTP</strong> calls
+(<code>verifier/client.go</code>) — this is real discovery, not a
+simulation.</li>
+</ul>
+<h3 id="the-gap-d-2-d-4">The gap (D-2, D-4)</h3>
+<ul>
+<li><p><strong>PARTIAL / PLANNED:</strong> the working-model predicate
+exists only in <em>pieces</em>. <code>GetMinAcceptableScore()</code> is
+<strong>never invoked</strong> in any listing path, and
+<code>filterByProviderConfig</code> drops only providers with
+<code>Enabled == false</code> — it applies <strong>no</strong>
+<code>Verified</code>/status/score filter and <strong>no</strong>
+key-presence gate.</p></li>
+<li><p><strong>PLANNED (D-4):</strong> SP1 task <strong>T1.3.1</strong>
+adds <code>GetWorkingModels(ctx, present)</code> to
+<code>adapter.go</code>, keeping a model iff:</p>
+<pre><code>present[m.Provider]                       (key-presence gate — NEW)
+∧ m.Verified == true
+∧ m.VerificationStatus == &quot;verified&quot;
+∧ m.OverallScore &gt;= GetMinAcceptableScore()
+∧ config.Providers[m.Provider].Enabled != false</code></pre>
+<p><code>GetWorkingModels</code> is <strong>ABSENT today</strong>
+(verified: <code>adapter.go</code> has <code>GetVerifiedModels</code> +
+<code>GetMinAcceptableScore</code> but no
+<code>GetWorkingModels</code>).</p></li>
+<li><p><strong>PLANNED (D-2):</strong> until then, the CLI lists models
+straight from <code>GetVerifiedModels</code> and the printer
+(<code>cmd/cli/main.go:1392 printVerifiedModels</code>) renders
+<code>failed</code>/<code>pending</code>/<code>rate-limited</code> rows
+as if available. Treat the current <code>--list-models</code> output as
+a raw catalog, NOT a working-model list.</p></li>
+</ul>
+<p>Freshness guarantees (target): verified within 24h (CONST-037),
+status reflected within 60s / poll ≤60s (CONST-038), honoured via the
+adapter cache TTL.</p>
+<hr />
+<h2 id="step-4-per-provider-exposure">6. Step 4 — Per-provider
+exposure</h2>
+<p>HelixAgent (<code>submodules/helix_agent</code>) exposes the runtime
+providers over Gin <code>/v1</code> routes.</p>
+<ul>
+<li><strong>IMPLEMENTED TODAY:</strong> <code>GET /v1/providers</code>
+(<code>submodules/helix_agent/internal/router/router.go</code> ~:773)
+lists providers, reading live
+<code>GetCapabilities().SupportedModels</code> from the runtime
+<code>services.ProviderRegistry</code>
+(<code>internal/services/provider_registry.go</code>).</li>
+<li><strong>IMPLEMENTED TODAY (but a bluff):</strong>
+<code>GET /v1/completion/models</code>
+(<code>internal/handlers/completion.go:406</code>) returns a
+<strong>hardcoded</strong> 3-model list (<strong>D-1</strong>, CONST-036
+/ BLUFF-002 violation). Do not rely on it as an authoritative model
+list.</li>
+<li><strong>PLANNED (D-1):</strong> SP2 task <strong>T2.0.2</strong>
+rewrites <code>CompletionHandler.Models</code> to return the live
+verifier-sourced (<code>Verified==true</code>) list joined with the
+registry — never a literal map.</li>
+</ul>
+<p>HelixLLM is currently a gated provider named <code>&quot;helixllm&quot;</code>
+(enabled by <code>USE_HELIX_LLM=true</code>,
+<code>provider_registry.go:750-764</code>); <strong>PLANNED (SP2
+T2.2.4):</strong> promote it to a first-class root entry
+(<code>helixllm</code> + <code>helixllm/&lt;model&gt;</code>).</p>
+<hr />
+<h2 id="step-5-the-unified-catalog-get-v1catalog">7. Step 5 — The
+unified catalog (<code>GET /v1/catalog</code>)</h2>
+<p>The intended single entry point that joins <strong>ensemble +
+HelixLLM + every provider + every verified model</strong> into one list
+of uniformly-named, individually-selectable targets.</p>
+<ul>
+<li><p><strong>PLANNED (SP2 P2.1):</strong> <code>GET /v1/catalog</code>
+is <strong>ABSENT today</strong> (verified: no <code>/v1/catalog</code>
+route in <code>router.go</code>, and
+<code>submodules/helix_agent/internal/catalog/</code> does not exist).
+The root path itself is an operator decision (SP2 OP-1; default
+<code>GET /v1/catalog</code>).</p></li>
+<li><p><strong>PLANNED — naming scheme</strong> (SP2 §0, confirmed
+against existing conventions). The request asks for the form
+<code>ensemble//helixllm//&lt;provider&gt;/&lt;model&gt;</code>; the
+catalog grammar that realises it is:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Target class</th>
+<th>Name form</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI-debate ensemble (aggregate)</td>
+<td><code>ensemble</code></td>
+<td><code>ensemble</code></td>
+</tr>
+<tr>
+<td>Ensemble preset</td>
+<td><code>ensemble/&lt;preset&gt;</code></td>
+<td><code>ensemble/confidence_weighted</code></td>
+</tr>
+<tr>
+<td>HelixLLM root</td>
+<td><code>helixllm</code></td>
+<td><code>helixllm</code></td>
+</tr>
+<tr>
+<td>HelixLLM model</td>
+<td><code>helixllm/&lt;model&gt;</code></td>
+<td><code>helixllm/helixllm-default</code></td>
+</tr>
+<tr>
+<td>Provider (individual)</td>
+<td><code>&lt;provider&gt;</code></td>
+<td><code>anthropic</code>, <code>groq</code></td>
+</tr>
+<tr>
+<td>Provider working model</td>
+<td><code>&lt;provider&gt;/&lt;model_id&gt;</code></td>
+<td><code>anthropic/claude-3-sonnet-20240229</code></td>
+</tr>
+<tr>
+<td>Already-namespaced model id</td>
+<td><code>&lt;provider&gt;/&lt;vendor&gt;/&lt;model&gt;</code></td>
+<td><code>openrouter/x-ai/grok-4</code></td>
+</tr>
+</tbody>
+</table>
+<p>A model entry is emitted <strong>only</strong> for
+<code>DiscoveredModel.Verified == true</code> — never from a static
+<code>SupportedModels</code> slice, never hardcoded.</p></li>
+<li><p><strong>PLANNED — selector resolution</strong> (SP2 T2.1.4): the
+existing free-text <code>model</code> field on a completion request
+resolves any catalog <code>Name</code> to the right target. An unknown
+selector returns <code>400</code> with the candidate list (no silent
+guess; §11.4.6 / §11.4.105).</p></li>
+</ul>
+<hr />
+<h2 id="worked-example-env-var-provider-visible-model-usable">8. Worked
+example: env var → provider visible → model usable</h2>
+<p>This is the <strong>target</strong> end-to-end flow (the SP1 E2E
+case, <code>tests/e2e/challenges/sp1_working_models</code>). Steps
+marked <strong>(today)</strong> already behave as shown; steps marked
+<strong>(after SP1/SP2)</strong> require the planned wiring.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Supply exactly ONE provider key.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-ant-…&quot;</span>          <span class="co"># (today) bound via config.go:307-345</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. (after SP1 T1.1.1) startup auto-loads api_keys.sh / .env too — gap-fill precedence,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#    so this shell export is NOT overwritten by a file value.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. List models.</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--list-models</span></span></code></pre></div>
+<p>Intended output <strong>after SP1</strong>:</p>
+<pre><code># Only Anthropic appears (key-presence gate, Step 2), and only its VERIFIED, score≥min models —
+# NO openai/gemini/etc rows, NO failed/pending rows.
+anthropic/claude-3-5-sonnet-20241022   ✓ verified   (context: 200000, score: 8.7)
+anthropic/claude-3-sonnet-20240229     ✓ verified   (context: 200000, score: 7.9)</code></pre>
+<p>Intended output <strong>today</strong> (current tree, before SP1):
+the CLI prints the whole verifier catalog via
+<code>GetVerifiedModels</code>, including
+<code>failed</code>/<code>pending</code> rows and providers you have no
+key for (D-2, D-4). So treat today’s list as unfiltered.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Use a model — make a REAL generation call.</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> generate <span class="at">--model</span> anthropic/claude-3-5-sonnet-20241022 <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--prompt</span> <span class="st">&quot;What is 2+2?&quot;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># (today) handleGenerate calls provider.Generate / GenerateStream directly — real HTTP, real output</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># (BLUFF-001 is resolved). The answer is real model output, never a simulated string.</span></span></code></pre></div>
+<p>The anti-bluff acceptance bar (§11.4.107): a model is only “working”
+once a <strong>real generate returns real output</strong> — listing it
+is necessary but not sufficient.</p>
+<hr />
+<h2 id="behaviour-when-the-verifier-is-disabled">9. Behaviour when the
+verifier is disabled</h2>
+<p><code>HELIX_VERIFIER_ENABLED=false</code> (default per
+<code>.env.example</code>) removes the only authoritative “working”
+signal.</p>
+<ul>
+<li><strong>PLANNED (SP1 DECISION-2):</strong> the working-models
+command MUST NOT present the verifier’s <code>FallbackModels</code> as
+“working” — doing so is a CONST-035 / §11.4 PASS-bluff and is explicitly
+rejected. The recommended behaviour: return an <strong>empty</strong>
+list plus an honest notice (e.g. “enable
+<code>HELIX_VERIFIER_ENABLED</code> to see working models”), with a
+per-provider live <code>GetModels()</code> path available only behind an
+explicit <code>--include-unverified</code> flag (labelled
+<code>unverified</code>).</li>
+<li><strong>Current tree (D-2):</strong>
+<code>cmd/cli/main.go:1387</code> falls back to
+<code>verifier.FallbackModels</code> and prints it — the exact bluff SP1
+T1.3.3 removes. Until then, do not interpret the disabled-verifier list
+as verified.</li>
+</ul>
+<hr />
+<h2 id="reference-per-provider-env-var-aliases">10. Reference:
+per-provider env-var aliases</h2>
+<p>The intended multi-alias recognition table (SP1 task T1.1.2, lifted
+decoupled from helix_agent
+<code>provider_types.go SupportedProviders.EnvVars</code>).
+<strong>PLANNED</strong> — <code>keyrecognition.go</code> is ABSENT
+today; the table below documents the target. Setting
+<strong>any</strong> alias for a provider (to a non-placeholder value)
+makes it present.</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Recognized env-var aliases (target)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>openai</td>
+<td><code>OPENAI_API_KEY</code></td>
+</tr>
+<tr>
+<td>anthropic</td>
+<td><code>ANTHROPIC_API_KEY</code>, <code>CLAUDE_API_KEY</code></td>
+</tr>
+<tr>
+<td>gemini</td>
+<td><code>GEMINI_API_KEY</code>, <code>GOOGLE_API_KEY</code></td>
+</tr>
+<tr>
+<td>deepseek</td>
+<td><code>DEEPSEEK_API_KEY</code></td>
+</tr>
+<tr>
+<td>groq</td>
+<td><code>GROQ_API_KEY</code></td>
+</tr>
+<tr>
+<td>mistral</td>
+<td><code>MISTRAL_API_KEY</code></td>
+</tr>
+<tr>
+<td>xai</td>
+<td><code>XAI_API_KEY</code></td>
+</tr>
+<tr>
+<td>openrouter</td>
+<td><code>OPENROUTER_API_KEY</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>The authoritative alias set is the helix_agent
+<code>SupportedProviders.EnvVars</code> map; the table above mirrors the
+8 providers explicitly bound in
+<code>helix_code/internal/config/config.go:338-345</code>. Local
+providers (Ollama, Llama.cpp) need no key and are handled by their own
+discovery paths. When <code>keyrecognition.go</code> lands, that file —
+not this table — is the source of truth.</p>
+</blockquote>
+<hr />
+<h2 id="what-is-working-today-vs-planned-summary">11. What is working
+today vs planned (summary)</h2>
+<p><strong>Working today (verified 2026-06-10):</strong> - Real LLM
+generation via the CLI (BLUFF-001 resolved — <code>handleGenerate</code>
+calls <code>provider.Generate</code>). - Config binds the 8
+cloud-provider env vars (<code>config.go:307-345</code>); a shell export
+is read at config load. - The <code>secrets.LoadAPIKeys</code> loader
+(reads <code>api_keys.sh</code> then <code>.env</code>, CONST-042-clean)
+— exists but is <strong>not invoked at startup</strong>. - The verifier
+adapter makes real HTTP discovery (<code>GetVerifiedModels</code>,
+<code>GetMinAcceptableScore</code>) and carries the
+<code>Verified</code>/status/score fields. -
+<code>GET /v1/providers</code> lists runtime providers from live
+capabilities.</p>
+<p><strong>Planned (ABSENT or unwired today):</strong> - D-3:
+auto-loading <code>api_keys.sh</code>/<code>.env</code> at startup
+(T1.1.1). - Key-presence gate + multi-alias
+<code>keyrecognition.go</code> + key-present provider enumerator (T1.1.2
+/ T1.2.x). - D-4: <code>GetWorkingModels</code> applying
+<code>Verified ∧ status ∧ score≥min</code> (T1.3.1). - D-2: CLI/server
+listing only working models, dropping
+<code>failed</code>/<code>pending</code>/no-key providers (T1.3.2). -
+D-5: de-hardcoding provider model lists (T1.3.4). - D-1:
+verifier-sourced <code>/v1/completion/models</code> (SP2 T2.0.2). - The
+unified <code>GET /v1/catalog</code> +
+<code>ensemble</code>/<code>helixllm</code>/<code>&lt;provider&gt;/&lt;model&gt;</code>
+naming + selector resolution (SP2 P2.1). - HelixLLM promotion to a
+first-class root (SP2 T2.2.4).</p>
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<ul>
+<li>Plans:
+<code>docs/superpowers/specs/plans/2026-06-10-SP1-model-access-plan.md</code>,
+<code>…-SP2-helixagent-exposure-plan.md</code>.</li>
+<li>Live tree: <code>helix_code/internal/secrets/loader.go:30</code>,
+<code>helix_code/internal/verifier/adapter.go:175,183</code>,
+<code>helix_code/internal/config/config.go:307-345</code>,
+<code>helix_code/cmd/cli/main.go:1361,1387,1392</code>,
+<code>submodules/helix_agent/internal/handlers/completion.go:406</code>,
+<code>submodules/helix_agent/internal/router/router.go</code> (no
+<code>/v1/catalog</code>), <code>keyrecognition.go</code> /
+<code>internal/catalog/</code> confirmed ABSENT.</li>
+</ul>
+</body>
+</html>

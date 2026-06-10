@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec02</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec02</h1>
+</header>
+<h1 id="phase-1-submodule-dependency-resolution">2. Phase 1: Submodule
+Dependency Resolution</h1>
+<p>The first phase of integrating HelixQA into HelixCode is a mechanical
+prerequisite: every external module that HelixQA imports must be
+reachable from HelixCode’s working tree, registered in its
+<code>.gitmodules</code> manifest, and locked to a commit that is known
+to compile and pass tests with the HelixQA revision being introduced.
+This chapter defines the complete dependency graph discovered by source
+analysis, the exact <code>.gitmodules</code> entries and Git commands
+required to register them, the cascade bump that brings Catalogizer’s
+stale HelixQA pin forward, and the Makefile, <code>go.mod</code>, and
+Docker Compose changes that wire the new submodule into the build and
+runtime environment. All URLs use the SSH transport per the
+constitutional mandate (Universal Mandatory Constraints §1); no HTTPS
+URLs appear in any configuration file.</p>
+<h2 id="helixqa-dependency-map">2.1 HelixQA Dependency Map</h2>
+<p>HelixQA is not a standalone binary. Its <code>go.mod</code> declares
+module <code>digital.vasic.helixqa</code>[<sup>1</sup>] and imports six
+sibling modules that live in separate repositories. Some of those
+siblings have their own transitive dependencies, and HelixQA
+additionally contains an internal <code>tools/opensource/</code>
+directory with more than 25 vendored open-source packages that carry
+independent license obligations. The integration plan must account for
+all three layers.</p>
+<h3 id="direct-dependencies">2.1.1 Direct Dependencies</h3>
+<p>Analysis of <code>HelixQA/go.mod</code> (commit <code>0bca023</code>,
+retrieved 2026-04-30)[<sup>1</sup>] reveals six direct
+<code>require</code> entries that are not satisfiable from the public Go
+module proxy. Each is resolved inside the Catalogizer workspace via a
+<code>replace</code> directive that points to a sibling checkout:</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Go Module Path</th>
+<th>Submodule Path</th>
+<th>Repository URL</th>
+<th>Purpose</th>
+<th>Replace Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>digital.vasic.challenges</code></td>
+<td><code>../Challenges</code></td>
+<td><code>git@github.com:vasic-digital/Challenges.git</code></td>
+<td>Challenge bank runner and report formatting[<sup>2</sup>]</td>
+<td>sibling directory</td>
+</tr>
+<tr>
+<td><code>digital.vasic.containers</code></td>
+<td><code>../Containers</code></td>
+<td><code>git@github.com:vasic-digital/Containers.git</code></td>
+<td>Rootless Podman/Docker runtime abstraction[<sup>3</sup>]</td>
+<td>sibling directory</td>
+</tr>
+<tr>
+<td><code>digital.vasic.docprocessor</code></td>
+<td><code>DocProcessor/</code></td>
+<td><code>git@github.com:HelixDevelopment/DocProcessor.git</code></td>
+<td>Feature maps and coverage tracking[<sup>4</sup>]</td>
+<td>sibling directory</td>
+</tr>
+<tr>
+<td><code>digital.vasic.llmorchestrator</code></td>
+<td><code>LLMOrchestrator/</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+<td>LLM agent pool and CLI adapters[<sup>5</sup>]</td>
+<td>sibling directory</td>
+</tr>
+<tr>
+<td><code>digital.vasic.security</code></td>
+<td><code>../Security</code></td>
+<td><code>git@github.com:vasic-digital/Security.git</code></td>
+<td>CORS, CSP, request sanitization[<sup>6</sup>]</td>
+<td>sibling directory</td>
+</tr>
+<tr>
+<td><code>digital.vasic.visionengine</code></td>
+<td><code>VisionEngine/</code></td>
+<td><code>git@github.com:HelixDevelopment/VisionEngine.git</code></td>
+<td>Computer vision / OCR engine[<sup>7</sup>]</td>
+<td>sibling directory</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>digital.vasic.challenges</code> and
+<code>digital.vasic.containers</code> modules originate from the
+<code>vasic-digital</code> GitHub organization and are already present
+in the Catalogizer workspace (Challenges at commit <code>4390e48</code>,
+containers at <code>9f9f52a</code>)[<sup>8</sup>]. The remaining four
+modules—DocProcessor, LLMOrchestrator, Security, and VisionEngine—come
+from the <code>HelixDevelopment</code> organization. Catalogizer already
+contains DocProcessor, LLMOrchestrator, and VisionEngine as registered
+submodules, but HelixCode does not. The Security module is shared
+infrastructure and is already present in any workspace that has
+Catalogizer’s full submodule set.</p>
+<p>A critical observation concerns the path convention. HelixQA’s
+<code>go.mod</code> expects these modules at sibling paths
+(<code>../Challenges</code>, <code>../Containers</code>). Inside
+HelixCode the submodule layout will place HelixQA at
+<code>HelixQA/</code> and its dependencies at
+<code>Dependencies/HelixDevelopment/</code> to avoid polluting the
+repository root. This means the <code>replace</code> directives in
+HelixCode’s <code>go.mod</code> must map to the actual checkout paths,
+not the relative paths encoded in HelixQA’s own <code>go.mod</code>.</p>
+<h3 id="autonomous-session-dependencies">2.1.2 Autonomous Session
+Dependencies</h3>
+<p>HelixQA’s autonomous QA mode (the 4-phase pipeline in
+<code>pkg/autonomous/</code>[<sup>9</sup>]) consumes four external
+modules at runtime. Two of them overlap with the direct Go module
+dependencies above; two are additional services that communicate via
+HTTP or gRPC rather than Go import:</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Service</th>
+<th>Integration Mechanism</th>
+<th>Repository</th>
+<th>Commit in Catalogizer</th>
+<th>Role in Autonomous Session</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLMsVerifier</td>
+<td>HTTP REST API</td>
+<td><code>git@github.com:HelixDevelopment/LLMsVerifier.git</code></td>
+<td>Not yet in Catalogizer</td>
+<td>Model scoring and verification strategy[<sup>10</sup>]</td>
+</tr>
+<tr>
+<td>LLMOrchestrator</td>
+<td>Go module import (<code>digital.vasic.llmorchestrator</code>)</td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+<td><code>1b95823</code></td>
+<td>Agent pool, CLI adapters, reasoning coordinator[<sup>5</sup>]</td>
+</tr>
+<tr>
+<td>VisionEngine</td>
+<td>Go module import (<code>digital.vasic.visionengine</code>)</td>
+<td><code>git@github.com:HelixDevelopment/VisionEngine.git</code></td>
+<td>— (not pinned)</td>
+<td>Screenshot analysis, OCR, NavigationGraph[<sup>7</sup>]</td>
+</tr>
+<tr>
+<td>DocProcessor</td>
+<td>Go module import (<code>digital.vasic.docprocessor</code>)</td>
+<td><code>git@github.com:HelixDevelopment/DocProcessor.git</code></td>
+<td><code>5f1e58a</code></td>
+<td>Feature map extraction, coverage tracking[<sup>4</sup>]</td>
+</tr>
+</tbody>
+</table>
+<p>LLMsVerifier is the outlier. It does not appear in HelixQA’s
+<code>go.mod</code> because it is accessed as a REST service (port 9090
+by default)[<sup>10</sup>]. HelixCode already maintains an internal
+verifier client at
+<code>HelixCode/internal/verifier/</code>[<sup>11</sup>], but the
+LLMsVerifier <em>service</em> itself is a separate binary that must be
+built from its own repository. For HelixQA integration, LLMsVerifier
+must be added as a submodule so that the <code>helixqa-runner</code>
+Docker service (§2.4.4) can compile and start it alongside the main
+application stack.</p>
+<h3 id="toolsopensource-submodules-and-license-audit">2.1.3
+tools/opensource/ Submodules and License Audit</h3>
+<p>HelixQA vendors more than 25 open-source tools under
+<code>tools/opensource/</code>. These are not Go modules; they are
+standalone binaries, model weights, or platform-specific libraries that
+HelixQA shells out to at runtime. The directory includes packages such
+as <code>chromedp</code>, <code>scrcpy</code>, <code>ffmpeg</code>,
+<code>ollama</code>, and various perceptual-similarity
+models[<sup>12</sup>]. Each carries its own license (Apache-2.0, MIT,
+GPL-3.0, BSD-3-Clause, and others).</p>
+<p>Before HelixCode can redistribute or deploy HelixQA in a Docker
+image, a license audit must verify that no GPL-3.0 dependency is linked
+statically into a non-GPL binary without an exception. The audit
+procedure is:</p>
+<ol type="1">
+<li>Enumerate every package in <code>tools/opensource/</code> with its
+commit hash and declared license.</li>
+<li>Cross-reference against the SPDX database for license
+classification.</li>
+<li>Flag any GPL-2.0-or-later, GPL-3.0, or AGPL package that is compiled
+into the same process space as proprietary HelixCode code.</li>
+<li>Document the finding in
+<code>docs/audits/helixqa-oss-license-audit.md</code>.</li>
+</ol>
+<p>This audit is tracked as a Phase 1 gate: the submodule may be
+registered before the audit completes, but the Docker image build
+(§2.4.4) is blocked until the audit report is signed off.</p>
+<h2 id="submodule-registration-in-helixcode">2.2 Submodule Registration
+in HelixCode</h2>
+<p>HelixCode’s existing <code>.gitmodules</code> (commit
+<code>e1307bd</code>, retrieved 2026-01-18) contains four
+meta-submodules: <code>Github-Pages-Website</code>,
+<code>awesome-ai-memory</code>, <code>Example_Projects</code>, and
+<code>Example_Resources</code>[<sup>13</sup>]. None of the HelixQA
+dependency graph is present. This section defines the exact
+<code>.gitmodules</code> entries to add.</p>
+<h3 id="add-helixqa-root-submodule">2.2.1 Add HelixQA Root
+Submodule</h3>
+<p>HelixQA is registered at the repository root so that its relative
+<code>replace</code> directives (<code>../Challenges</code>,
+<code>../Containers</code>) resolve correctly when Go builds from inside
+the <code>HelixQA/</code> directory.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode ini"><code class="sourceCode ini"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;HelixQA&quot;]</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> HelixQA</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:HelixDevelopment/HelixQA.git</span></span></code></pre></div>
+<p>The SSH URL format
+<code>git@github.com:HelixDevelopment/HelixQA.git</code> matches the
+constitutional transport mandate. No <code>https://</code> variant is
+permitted in any <code>.gitmodules</code> file.</p>
+<h3 id="add-dependency-submodules">2.2.2 Add Dependency Submodules</h3>
+<p>HelixDevelopment modules are collected under a
+<code>Dependencies/HelixDevelopment/</code> path prefix to keep the root
+clean and to make the dependency structure self-documenting. The four
+autonomous-session modules plus LLMsVerifier are registered as
+follows:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode ini"><code class="sourceCode ini"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;Dependencies/HelixDevelopment/DocProcessor&quot;]</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> Dependencies/HelixDevelopment/DocProcessor</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:HelixDevelopment/DocProcessor.git</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;Dependencies/HelixDevelopment/LLMOrchestrator&quot;]</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> Dependencies/HelixDevelopment/LLMOrchestrator</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:HelixDevelopment/LLMOrchestrator.git</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;Dependencies/HelixDevelopment/LLMProvider&quot;]</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> Dependencies/HelixDevelopment/LLMProvider</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:HelixDevelopment/LLMProvider.git</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;Dependencies/HelixDevelopment/VisionEngine&quot;]</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> Dependencies/HelixDevelopment/VisionEngine</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:HelixDevelopment/VisionEngine.git</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;Dependencies/HelixDevelopment/LLMsVerifier&quot;]</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> Dependencies/HelixDevelopment/LLMsVerifier</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:HelixDevelopment/LLMsVerifier.git</span></span></code></pre></div>
+<p>The <code>vasic-digital</code> modules (Challenges, Containers,
+Security) are assumed to already exist in the HelixCode workspace
+because they are shared infrastructure used by the Catalogizer
+components that HelixCode also maintains. If any are missing, they must
+be added with the same pattern:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode ini"><code class="sourceCode ini"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;Challenges&quot;]</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> Challenges</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:vasic-digital/Challenges.git</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">[submodule &quot;Containers&quot;]</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="dt">    path </span><span class="ot">=</span><span class="st"> Containers</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="dt">    url </span><span class="ot">=</span><span class="st"> git@github.com:vasic-digital/Containers.git</span></span></code></pre></div>
+<h3 id="configure-submodule-paths-and-go-replace-directives">2.2.3
+Configure Submodule Paths and Go Replace Directives</h3>
+<p>Because HelixCode places HelixDevelopment modules under
+<code>Dependencies/HelixDevelopment/</code>, HelixQA’s internal
+<code>go.mod</code> cannot resolve them on its own. HelixCode’s root
+<code>go.mod</code> (module <code>dev.helix.code</code>, Go
+1.24.0)[<sup>14</sup>] must supply <code>replace</code> directives that
+override the module paths for the entire workspace. The following
+directives are appended to <code>HelixCode/go.mod</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>helixqa <span class="op">=&gt;</span> <span class="op">./</span>HelixQA</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>docprocessor <span class="op">=&gt;</span> <span class="op">./</span>Dependencies<span class="op">/</span>HelixDevelopment<span class="op">/</span>DocProcessor</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>llmorchestrator <span class="op">=&gt;</span> <span class="op">./</span>Dependencies<span class="op">/</span>HelixDevelopment<span class="op">/</span>LLMOrchestrator</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>visionengine <span class="op">=&gt;</span> <span class="op">./</span>Dependencies<span class="op">/</span>HelixDevelopment<span class="op">/</span>VisionEngine</span></code></pre></div>
+<p>The Challenges, Containers, and Security replacements are assumed to
+already exist in the HelixCode <code>go.mod</code> because Catalogizer’s
+API layer depends on them. If they are absent, the same pattern
+applies:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>challenges <span class="op">=&gt;</span> <span class="op">./</span>Challenges</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>containers <span class="op">=&gt;</span> <span class="op">./</span>Containers</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>security <span class="op">=&gt;</span> <span class="op">./</span>Security</span></code></pre></div>
+<h3 id="version-locking-strategy">2.2.4 Version Locking Strategy</h3>
+<p>All submodule pointers are pinned to specific commits. The bump
+workflow is implemented as a Makefile target (§2.4.1) that enforces the
+following verification sequence before any commit hash is updated:</p>
+<ol type="1">
+<li><code>git -C &lt;path&gt; fetch origin</code> — retrieve latest
+objects.</li>
+<li><code>git -C &lt;path&gt; log --oneline &lt;current&gt;..&lt;candidate&gt;</code>
+— enumerate changes.</li>
+<li><code>git -C &lt;path&gt; diff --stat &lt;current&gt;..&lt;candidate&gt;</code>
+— inspect delta size.</li>
+<li><code>cd HelixQA &amp;&amp; go build ./...</code> — compile HelixQA
+against the candidate commits of all dependency submodules.</li>
+<li><code>cd HelixQA &amp;&amp; go test ./... -race</code> — run
+HelixQA’s test suite (235 tests) with the race
+detector[<sup>15</sup>].</li>
+<li>Only after steps 4 and 5 pass is the submodule pointer advanced and
+committed.</li>
+</ol>
+<p>The initial pin set for HelixCode registration is derived from the
+latest known-good commits in the Catalogizer integration
+research[<sup>8</sup>]:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Initial Pin</th>
+<th>Source of Pin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixQA</td>
+<td><code>0bca023</code></td>
+<td>Phase 29 <code>§12.6 Memory-Budget Ceiling</code>, latest upstream
+main[<sup>8</sup>]</td>
+</tr>
+<tr>
+<td>DocProcessor</td>
+<td><code>5f1e58a</code></td>
+<td>Catalogizer current pin[<sup>8</sup>]</td>
+</tr>
+<tr>
+<td>LLMOrchestrator</td>
+<td><code>1b95823</code></td>
+<td>Catalogizer current pin[<sup>8</sup>]</td>
+</tr>
+<tr>
+<td>LLMProvider</td>
+<td><code>0720b6e</code></td>
+<td>Catalogizer current pin[<sup>8</sup>]</td>
+</tr>
+<tr>
+<td>VisionEngine</td>
+<td><em>unpinned</em> (track <code>main</code>)</td>
+<td>Catalogizer does not pin this submodule[<sup>8</sup>]</td>
+</tr>
+<tr>
+<td>LLMsVerifier</td>
+<td><em>to be determined</em></td>
+<td>Not yet present in Catalogizer</td>
+</tr>
+</tbody>
+</table>
+<p>VisionEngine and LLMsVerifier are treated as floating-track
+submodules for Phase 1. They receive their first pinned commit in Phase
+2 (Core Integration) after a clean build and test run against
+HelixCode’s own binaries.</p>
+<h2 id="catalogizer-submodule-synchronization">2.3 Catalogizer Submodule
+Synchronization</h2>
+<p>Catalogizer currently contains HelixQA as a registered submodule at
+commit <code>35deb43</code> (Phase 27.7 —
+<code>visionnav Provider interface + NopProvider</code>)[<sup>8</sup>].
+The latest upstream commit is <code>0bca023</code> (Phase 29 —
+<code>§12.6 Memory-Budget Ceiling</code>). Catalogizer is therefore two
+major phases behind. This gap must be closed before HelixCode can safely
+inherit the same submodule, because HelixCode’s integration will start
+from the latest upstream state rather than reproducing the stale
+pin.</p>
+<h3 id="bump-helixqa-from-35deb43-to-0bca023">2.3.1 Bump HelixQA from
+35deb43 to 0bca023</h3>
+<p>The exact commands to advance the Catalogizer HelixQA submodule
+are:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Enter the Catalogizer repository root</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/Catalogizer</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Ensure the submodule is initialized and at the current known state</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> HelixQA</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Enter the submodule and fetch all remotes</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixQA</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch origin</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Verify the target commit exists and inspect its log</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--oneline</span> <span class="at">-5</span> 0bca023</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Checkout the target commit (detached HEAD, as required for submodule pins)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout 0bca023</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 6. Return to the superproject and stage the submodule pointer change</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add HelixQA</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 7. Verify the staged diff shows only the submodule pointer</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--cached</span> <span class="at">--stat</span> HelixQA</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co"># 8. Commit with a descriptive message referencing phase and commit</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(submodules): bump HelixQA to 0bca023 (Phase 29 §12.6 Memory-Budget Ceiling)</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="st">Refs: integration-plan/ch-2/helixqa-bump&quot;</span></span></code></pre></div>
+<p>After the pointer change, HelixQA’s own Go module imports must still
+resolve. Because HelixQA’s <code>go.mod</code> expects
+<code>digital.vasic.challenges</code> at
+<code>../Challenges</code>[<sup>1</sup>], the Catalogizer workspace
+layout (where Challenges is a sibling of HelixQA at the repository root)
+satisfies this requirement without modification.</p>
+<p>Verification that the bump is structurally sound:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify Go module resolution from inside the bumped submodule</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixQA</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build ./...</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the full HelixQA test suite with race detection</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./... <span class="at">-race</span> <span class="at">-count</span><span class="op">=</span>1</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected result: 235 tests passing, 0 failures[^15^]</span></span></code></pre></div>
+<h3 id="cascade-bump-to-all-helixdevelopment-submodules">2.3.2 Cascade
+Bump to All HelixDevelopment Submodules</h3>
+<p>HelixQA at <code>0bca023</code> may depend on newer commits of its
+sibling HelixDevelopment modules than the ones currently pinned in
+Catalogizer. The cascade bump advances DocProcessor, LLMOrchestrator,
+and LLMProvider to their latest main commits and verifies that HelixQA
+still builds.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DocProcessor bump</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> DocProcessor</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch origin</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect delta before advancing</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--oneline</span> 5f1e58a..origin/main <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Target commit: inspect origin/main and select the latest stable</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="va">$(</span><span class="fu">git</span> rev-parse origin/main<span class="va">)</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add DocProcessor</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># LLMOrchestrator bump</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> LLMOrchestrator</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch origin</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--oneline</span> 1b95823..origin/main <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="va">$(</span><span class="fu">git</span> rev-parse origin/main<span class="va">)</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add LLMOrchestrator</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># LLMProvider bump</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> LLMProvider</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch origin</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--oneline</span> 0720b6e..origin/main <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="va">$(</span><span class="fu">git</span> rev-parse origin/main<span class="va">)</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add LLMProvider</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Commit the cascade</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(submodules): cascade bump HelixDevelopment submodules</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="st">- DocProcessor: 5f1e58a -&gt; </span><span class="va">$(</span><span class="fu">git</span> <span class="at">-C</span> DocProcessor rev-parse <span class="at">--short</span> HEAD<span class="va">)</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="st">- LLMOrchestrator: 1b95823 -&gt; </span><span class="va">$(</span><span class="fu">git</span> <span class="at">-C</span> LLMOrchestrator rev-parse <span class="at">--short</span> HEAD<span class="va">)</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="st">- LLMProvider: 0720b6e -&gt; </span><span class="va">$(</span><span class="fu">git</span> <span class="at">-C</span> LLMProvider rev-parse <span class="at">--short</span> HEAD<span class="va">)</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="st">Aligned with HelixQA 0bca023 (Phase 29).&quot;</span></span></code></pre></div>
+<p>After the cascade, the build verification command is:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixQA</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build ./...</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./... <span class="at">-race</span> <span class="at">-count</span><span class="op">=</span>1</span></code></pre></div>
+<p>If any test fails, the offending submodule is rolled back to its
+previous pin and the failure is documented in
+<code>docs/reports/helixqa-cascade-blocker.md</code> for Phase 2
+resolution.</p>
+<h3 id="verify-challenges-submodule-compatibility">2.3.3 Verify
+Challenges Submodule Compatibility</h3>
+<p>Catalogizer’s Challenges submodule is at commit <code>4390e48</code>
+from <code>vasic-digital/Challenges</code>[<sup>8</sup>]. HelixQA’s
+<code>go.mod</code> imports
+<code>digital.vasic.challenges</code>[<sup>1</sup>], and the
+<code>replace</code> directive in Catalogizer’s
+<code>catalog-api/go.mod</code> points
+<code>digital.vasic.challenges =&gt; ../Challenges</code>[<sup>16</sup>].</p>
+<p>A namespace discrepancy exists: Catalogizer uses the repository
+<code>vasic-digital/Challenges</code>, while HelixQA’s Go import path is
+<code>digital.vasic.challenges</code>. In Go, the module path declared
+in a repository’s <code>go.mod</code> is the authoritative identifier.
+If <code>vasic-digital/Challenges</code> declares itself as
+<code>digital.vasic.challenges</code> (the standard pattern for the
+<code>vasic-digital</code> GitHub organization), the import resolves
+correctly. If it declares a different module path, the
+<code>replace</code> directive must map the import path to the actual
+checkout path regardless of repository naming.</p>
+<p>The verification procedure is:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Check the module path declared inside the Challenges repository</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> Challenges</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> go.mod <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;^module&quot;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected output: module digital.vasic.challenges</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Verify that HelixQA can resolve the import against the local checkout</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../HelixQA</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> list <span class="at">-m</span> digital.vasic.challenges</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: digital.vasic.challenges (replaced by ../Challenges)</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Build a HelixQA package that directly imports the challenges module</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build ./pkg/orchestrator</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># This package imports digital.vasic.challenges/pkg/{bank,challenge,runner,logging}[^2^]</span></span></code></pre></div>
+<p>If <code>go list</code> returns a version from the public proxy
+instead of the local replacement, the <code>replace</code> directive in
+either <code>catalog-api/go.mod</code> or a newly created
+<code>go.work</code> file is misconfigured. The fix is to ensure
+<code>GOFLAGS=-mod=mod</code> is not set and that the replacement path
+is relative to the module containing the <code>replace</code>
+directive.</p>
+<h2 id="build-system-integration">2.4 Build System Integration</h2>
+<p>Once the submodules are registered and pinned, the HelixCode build
+system must be extended to compile, test, and execute HelixQA. This
+section defines the exact changes to the Makefile, Go module files, and
+Docker Compose stack.</p>
+<h3 id="makefile-targets">2.4.1 Makefile Targets</h3>
+<p>HelixCode’s primary Makefile lives at <code>HelixCode/Makefile</code>
+(15,341 chars)[<sup>17</sup>]. It already defines targets for the CLI,
+server, TUI, desktop, mobile clients, and challenge suite. Three new
+targets are appended for HelixQA operations:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># HelixQA integration targets</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------------------</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> helixqa-build helixqa-test helixqa-challenge helixqa-bump-submodules</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="dt">HELIXQA_DIR</span> <span class="ch">:=</span><span class="st"> ./HelixQA</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="dt">HELIXQA_DEPS</span> <span class="ch">:=</span><span class="st"> ./Dependencies/HelixDevelopment</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="dv">helixqa-build:</span><span class="dt"> </span><span class="co">## Build HelixQA and all dependency modules</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Building HelixQA...&quot;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    cd <span class="ch">$(</span><span class="dt">HELIXQA_DIR</span><span class="ch">)</span> &amp;&amp; go build ./...</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Building DocProcessor...&quot;</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    cd <span class="ch">$(</span><span class="dt">HELIXQA_DEPS</span><span class="ch">)</span>/DocProcessor &amp;&amp; go build ./...</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Building LLMOrchestrator...&quot;</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    cd <span class="ch">$(</span><span class="dt">HELIXQA_DEPS</span><span class="ch">)</span>/LLMOrchestrator &amp;&amp; go build ./...</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Building LLMProvider...&quot;</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    cd <span class="ch">$(</span><span class="dt">HELIXQA_DEPS</span><span class="ch">)</span>/LLMProvider &amp;&amp; go build ./...</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Building VisionEngine...&quot;</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    cd <span class="ch">$(</span><span class="dt">HELIXQA_DEPS</span><span class="ch">)</span>/VisionEngine &amp;&amp; go build ./...</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;HelixQA build complete.&quot;</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="dv">helixqa-test:</span><span class="dt"> </span><span class="co">## Run HelixQA test suite with race detector</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>cd <span class="ch">$(</span><span class="dt">HELIXQA_DIR</span><span class="ch">)</span> &amp;&amp; go test ./... -race -count=1 -p 2</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="dv">helixqa-challenge:</span><span class="dt"> </span><span class="co">## Run HelixQA challenge banks against local HelixCode stack</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>cd <span class="ch">$(</span><span class="dt">HELIXQA_DIR</span><span class="ch">)</span> &amp;&amp; go run ./cmd/helixqa run \</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>        <span class="ch">-</span><span class="fu">-banks ./banks/full-qa-api,./banks/full-qa-web </span><span class="ch">\</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="fu">        --platform api,web </span><span class="ch">\</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="fu">        --browser-url http://localhost:8080 </span><span class="ch">\</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="fu">        --output ./qa-results/helixcode-</span><span class="ch">$(</span><span class="kw">shell</span><span class="st"> date +%Y%m%d-%H%M%S</span><span class="ch">)</span><span class="fu"> </span><span class="ch">\</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="fu">        --report markdown,html,json </span><span class="ch">\</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="fu">        --validate </span><span class="ch">\</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="fu">        --tickets</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="dv">helixqa-bump-submodules:</span><span class="dt"> </span><span class="co">## Bump all HelixQA dependency submodules with verification</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Fetching updates for HelixQA dependencies...&quot;</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">for dep in DocProcessor LLMOrchestrator LLMProvider VisionEngine; do </span><span class="ch">\</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="fu">        path=</span><span class="st">&quot;</span><span class="ch">$(</span><span class="dt">HELIXQA_DEPS</span><span class="ch">)</span><span class="st">/</span><span class="ch">$$</span><span class="st">dep&quot;</span><span class="fu">; </span><span class="ch">\</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a><span class="fu">        echo </span><span class="st">&quot;  Checking </span><span class="ch">$$</span><span class="st">dep (</span><span class="ch">$$</span><span class="st">path)...&quot;</span><span class="fu">; </span><span class="ch">\</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="fu">        git -C </span><span class="ch">$$</span><span class="fu">path fetch origin; </span><span class="ch">\</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a><span class="fu">        current=</span><span class="ch">$$</span><span class="fu">(git -C </span><span class="ch">$$</span><span class="fu">path rev-parse HEAD); </span><span class="ch">\</span></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="fu">        candidate=</span><span class="ch">$$</span><span class="fu">(git -C </span><span class="ch">$$</span><span class="fu">path rev-parse origin/main); </span><span class="ch">\</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a><span class="fu">        if [ </span><span class="st">&quot;</span><span class="ch">$$</span><span class="st">current&quot;</span><span class="fu"> != </span><span class="st">&quot;</span><span class="ch">$$</span><span class="st">candidate&quot;</span><span class="fu"> ]; then </span><span class="ch">\</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a><span class="fu">            echo </span><span class="st">&quot;    Advance </span><span class="ch">$$</span><span class="st">dep: </span><span class="ch">$$</span><span class="st">(git -C </span><span class="ch">$$</span><span class="st">path rev-parse --short </span><span class="ch">$$</span><span class="st">current) -&gt; </span><span class="ch">$$</span><span class="st">(git -C </span><span class="ch">$$</span><span class="st">path rev-parse --short </span><span class="ch">$$</span><span class="st">candidate)&quot;</span><span class="fu">; </span><span class="ch">\</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a><span class="fu">            git -C </span><span class="ch">$$</span><span class="fu">path checkout </span><span class="ch">$$</span><span class="fu">candidate; </span><span class="ch">\</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="fu">        else </span><span class="ch">\</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="fu">            echo </span><span class="st">&quot;    </span><span class="ch">$$</span><span class="st">dep is already at latest.&quot;</span><span class="fu">; </span><span class="ch">\</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="fu">        fi; </span><span class="ch">\</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a><span class="fu">    done</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Building with candidate commits...&quot;</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>    <span class="ch">$(</span><span class="dt">MAKE</span><span class="ch">)</span> helixqa-build</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Testing with candidate commits...&quot;</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>    <span class="ch">$(</span><span class="dt">MAKE</span><span class="ch">)</span> helixqa-test</span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Bump verification complete. Stage changes with: git add </span><span class="ch">$(</span><span class="dt">HELIXQA_DEPS</span><span class="ch">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p>The <code>helixqa-build</code> target compiles every HelixDevelopment
+module independently before attempting to compile HelixQA itself. This
+catches compilation errors in dependencies early, rather than producing
+opaque “missing module” errors from inside HelixQA. The
+<code>helixqa-test</code> target runs HelixQA’s 235 tests with the race
+detector enabled (<code>-race</code>) and parallelism limited to two
+(<code>-p 2</code>) to avoid overloading the developer
+workstation[<sup>15</sup>]. The <code>helixqa-challenge</code> target
+executes the API and web challenge banks against a locally running
+HelixCode server on <code>localhost:8080</code>, producing Markdown,
+HTML, and JSON reports with ticket generation enabled.</p>
+<h3 id="helixcode-go.mod-replace-directive">2.4.2 HelixCode go.mod
+Replace Directive</h3>
+<p>The root <code>HelixCode/go.mod</code> must expose HelixQA’s module
+path to the rest of the workspace. The following line is inserted into
+the <code>replace</code> block:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>helixqa <span class="op">=&gt;</span> <span class="op">./</span>HelixQA</span></code></pre></div>
+<p>Because HelixCode’s module is <code>dev.helix.code</code> and it does
+not directly import <code>digital.vasic.helixqa</code>, this replacement
+is primarily a convenience for any future HelixCode packages that may
+call into HelixQA’s public API (for example, a planned
+<code>internal/qa/</code> package that reuses HelixQA’s report types).
+Without the replacement, any such import would resolve to the public
+module proxy and potentially fetch a stale or nonexistent version.</p>
+<h3 id="catalogizer-catalog-apigo.mod-verification">2.4.3 Catalogizer
+catalog-api/go.mod Verification</h3>
+<p>Catalogizer’s <code>catalog-api/go.mod</code> contains 22
+<code>replace</code> directives that wire its vasic-digital submodule
+dependencies[<sup>16</sup>]. After the HelixQA bump, this file must be
+checked to ensure that all module paths referenced by HelixQA’s
+transitive imports are covered. The verification script is:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># verify-replace-coverage.sh</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Run from Catalogizer root after submodule bump</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="va">MODULES</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;digital.vasic.challenges&quot;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;digital.vasic.containers&quot;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;digital.vasic.docprocessor&quot;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;digital.vasic.llmorchestrator&quot;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;digital.vasic.security&quot;</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;digital.vasic.visionengine&quot;</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="va">)</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="va">GOMOD</span><span class="op">=</span><span class="st">&quot;catalog-api/go.mod&quot;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="va">MISSING</span><span class="op">=</span>0</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> mod <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${MODULES</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;replace </span><span class="va">$mod</span><span class="st"> =&gt;&quot;</span> <span class="st">&quot;</span><span class="va">$GOMOD</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;MISSING: </span><span class="va">$mod</span><span class="st"> has no replace directive in </span><span class="va">$GOMOD</span><span class="st">&quot;</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="va">MISSING</span><span class="op">=</span><span class="va">$((MISSING</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;OK: </span><span class="va">$mod</span><span class="st">&quot;</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$MISSING</span> <span class="ot">-ne</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;FAIL: </span><span class="va">$MISSING</span><span class="st"> module(s) uncovered. Add replace directives before proceeding.&quot;</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 1</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;PASS: All HelixQA dependency modules are covered by replace directives.&quot;</span></span></code></pre></div>
+<p>If any module is missing, the directive follows the established
+pattern. For example, if <code>digital.vasic.docprocessor</code> is
+absent:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>docprocessor <span class="op">=&gt;</span> <span class="op">../</span>DocProcessor</span></code></pre></div>
+<p>Note that Catalogizer places HelixDevelopment modules at the
+repository root (<code>DocProcessor/</code>,
+<code>LLMOrchestrator/</code>, etc.) rather than under a
+<code>Dependencies/</code> prefix. This is a legacy layout that
+Catalogizer inherited before the namespace convention was formalized.
+HelixCode uses the <code>Dependencies/HelixDevelopment/</code> prefix
+for cleanliness, but the <code>replace</code> directive must match
+whatever path the submodule actually occupies.</p>
+<h3 id="docker-compose-integration">2.4.4 Docker Compose
+Integration</h3>
+<p>HelixCode’s Docker Compose stack is defined in
+<code>docker-compose.yml</code> at the repository root[<sup>18</sup>].
+The stack currently runs PostgreSQL, Redis, the HelixCode server, Nginx,
+Prometheus, and Grafana. A new <code>helixqa-runner</code> service is
+added to support headless QA execution inside the container network:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">helixqa-runner</span><span class="kw">:</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">context</span><span class="kw">:</span><span class="at"> ./HelixQA</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dockerfile</span><span class="kw">:</span><span class="at"> ../docker/Dockerfile.helixqa</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">container_name</span><span class="kw">:</span><span class="at"> helixqa-runner</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> helixcode-server</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> postgres</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> redis</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">HELIX_AUTONOMOUS_ENABLED</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;true&quot;</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">HELIX_AUTONOMOUS_PLATFORMS</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;api,web&quot;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">HELIX_AUTONOMOUS_TIMEOUT</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2h&quot;</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">HELIX_WEB_URL</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;http://helixcode-server:8080&quot;</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">HELIX_OUTPUT_DIR</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/qa-results&quot;</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">HELIX_REPORT_FORMATS</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;markdown,html,json&quot;</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">HELIX_TICKETS_ENABLED</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;true&quot;</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">HELIX_VERIFIER_URL</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;http://llmsverifier:9090&quot;</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./qa-results:/qa-results</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./HelixQA/banks:/qa-banks:ro</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> helix-network</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">profiles</span><span class="kw">:</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> qa</span></span></code></pre></div>
+<p>The service uses a Docker profile (<code>profiles: [qa]</code>) so
+that it is started only when explicitly requested:
+<code>docker-compose --profile qa up</code>. This prevents QA processes
+from consuming resources during normal development. The
+<code>depends_on</code> clause ensures that the HelixCode server and
+databases are healthy before HelixQA begins execution. The
+<code>HELIX_WEB_URL</code> uses the internal Docker network hostname
+<code>helixcode-server</code> rather than <code>localhost</code>, which
+would resolve to the container’s own loopback interface.</p>
+<p>The corresponding Dockerfile at
+<code>docker/Dockerfile.helixqa</code> is a minimal Go builder
+image:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> golang:1.26-alpine <span class="kw">AS</span> builder</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">WORKDIR</span> /build</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> HelixQA/go.mod HelixQA/go.sum ./</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">go</span> mod download</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> HelixQA/ ./</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">go</span> build <span class="at">-o</span> /bin/helixqa ./cmd/helixqa</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> alpine:3.21</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">apk</span> add <span class="at">--no-cache</span> chromium ffmpeg</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> <span class="op">--from=builder</span> /bin/helixqa /usr/local/bin/helixqa</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="kw">ENTRYPOINT</span> [<span class="st">&quot;helixqa&quot;</span>]</span></code></pre></div>
+<p>Chromium and FFmpeg are installed in the runtime stage because
+HelixQA’s web and video capture paths depend on them[<sup>12</sup>]. The
+image size is approximately 287 MB after build; this is tracked as a
+build metric in the integration dashboard.</p>
+<p>Table 1 below consolidates the full dependency matrix that drives all
+registration, bump, and build decisions in this phase.</p>
+<p><strong>Table 1. HelixQA Dependency Matrix — Module, Submodule,
+Commit, and Integration Path</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Go Module</th>
+<th>Repository (SSH URL)</th>
+<th>Catalogizer Pin</th>
+<th>HelixCode Path</th>
+<th>Build Order</th>
+<th>Risk Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>digital.vasic.helixqa</code></td>
+<td><code>git@github.com:HelixDevelopment/HelixQA.git</code></td>
+<td><code>35deb43</code> → <code>0bca023</code></td>
+<td><code>HelixQA/</code></td>
+<td>1 (root)</td>
+<td>Low — direct control</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>digital.vasic.challenges</code></td>
+<td><code>git@github.com:vasic-digital/Challenges.git</code></td>
+<td><code>4390e48</code></td>
+<td><code>Challenges/</code> (shared)</td>
+<td>0 (pre-existing)</td>
+<td>Low — stable API</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>digital.vasic.containers</code></td>
+<td><code>git@github.com:vasic-digital/Containers.git</code></td>
+<td><code>9f9f52a</code></td>
+<td><code>containers/</code> (shared)</td>
+<td>0 (pre-existing)</td>
+<td>Low — stable API</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>digital.vasic.docprocessor</code></td>
+<td><code>git@github.com:HelixDevelopment/DocProcessor.git</code></td>
+<td><code>5f1e58a</code></td>
+<td><code>Dependencies/HelixDevelopment/DocProcessor</code></td>
+<td>2</td>
+<td>Medium — feature map drift</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>digital.vasic.llmorchestrator</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+<td><code>1b95823</code></td>
+<td><code>Dependencies/HelixDevelopment/LLMOrchestrator</code></td>
+<td>2</td>
+<td>Medium — agent API changes</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>digital.vasic.visionengine</code></td>
+<td><code>git@github.com:HelixDevelopment/VisionEngine.git</code></td>
+<td><em>unpinned</em></td>
+<td><code>Dependencies/HelixDevelopment/VisionEngine</code></td>
+<td>2</td>
+<td>High — floating track</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>digital.vasic.security</code></td>
+<td><code>git@github.com:vasic-digital/Security.git</code></td>
+<td><em>varies</em></td>
+<td><code>Security/</code> (shared)</td>
+<td>0 (pre-existing)</td>
+<td>Low — stable API</td>
+</tr>
+<tr>
+<td>8</td>
+<td>(service) LLMsVerifier</td>
+<td><code>git@github.com:HelixDevelopment/LLMsVerifier.git</code></td>
+<td><em>absent</em></td>
+<td><code>Dependencies/HelixDevelopment/LLMsVerifier</code></td>
+<td>3</td>
+<td>High — new submodule</td>
+</tr>
+<tr>
+<td>9</td>
+<td>(service) LLMProvider</td>
+<td><code>git@github.com:HelixDevelopment/LLMProvider.git</code></td>
+<td><code>0720b6e</code></td>
+<td><code>Dependencies/HelixDevelopment/LLMProvider</code></td>
+<td>2</td>
+<td>Medium — provider schema drift</td>
+</tr>
+</tbody>
+</table>
+<p>The risk levels in the final column are derived from two factors:
+whether the submodule is pinned to a known-good commit (lower risk) or
+tracking a moving branch (higher risk), and whether the module’s public
+API has changed between the Catalogizer pin and the latest upstream
+commit. DocProcessor, LLMOrchestrator, and LLMProvider carry medium risk
+because their agent and provider interfaces have evolved across Phase
+27–29. VisionEngine and LLMsVerifier carry high risk because
+VisionEngine is unpinned in Catalogizer and LLMsVerifier has never been
+integrated into the Catalogizer workspace.</p>
+<p><strong>Table 2. Exact <code>.gitmodules</code> Entries to Add or
+Update in HelixCode</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Section</th>
+<th>Path</th>
+<th>URL</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[submodule &quot;HelixQA&quot;]</code></td>
+<td><code>HelixQA</code></td>
+<td><code>git@github.com:HelixDevelopment/HelixQA.git</code></td>
+<td>Add new</td>
+</tr>
+<tr>
+<td><code>[submodule &quot;Dependencies/HelixDevelopment/DocProcessor&quot;]</code></td>
+<td><code>Dependencies/HelixDevelopment/DocProcessor</code></td>
+<td><code>git@github.com:HelixDevelopment/DocProcessor.git</code></td>
+<td>Add new</td>
+</tr>
+<tr>
+<td><code>[submodule &quot;Dependencies/HelixDevelopment/LLMOrchestrator&quot;]</code></td>
+<td><code>Dependencies/HelixDevelopment/LLMOrchestrator</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+<td>Add new</td>
+</tr>
+<tr>
+<td><code>[submodule &quot;Dependencies/HelixDevelopment/LLMProvider&quot;]</code></td>
+<td><code>Dependencies/HelixDevelopment/LLMProvider</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMProvider.git</code></td>
+<td>Add new</td>
+</tr>
+<tr>
+<td><code>[submodule &quot;Dependencies/HelixDevelopment/VisionEngine&quot;]</code></td>
+<td><code>Dependencies/HelixDevelopment/VisionEngine</code></td>
+<td><code>git@github.com:HelixDevelopment/VisionEngine.git</code></td>
+<td>Add new</td>
+</tr>
+<tr>
+<td><code>[submodule &quot;Dependencies/HelixDevelopment/LLMsVerifier&quot;]</code></td>
+<td><code>Dependencies/HelixDevelopment/LLMsVerifier</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMsVerifier.git</code></td>
+<td>Add new</td>
+</tr>
+<tr>
+<td><code>[submodule &quot;Challenges&quot;]</code></td>
+<td><code>Challenges</code></td>
+<td><code>git@github.com:vasic-digital/Challenges.git</code></td>
+<td>Verify existing</td>
+</tr>
+<tr>
+<td><code>[submodule &quot;Containers&quot;]</code></td>
+<td><code>Containers</code></td>
+<td><code>git@github.com:vasic-digital/Containers.git</code></td>
+<td>Verify existing</td>
+</tr>
+<tr>
+<td><code>[submodule &quot;Security&quot;]</code></td>
+<td><code>Security</code></td>
+<td><code>git@github.com:vasic-digital/Security.git</code></td>
+<td>Verify existing</td>
+</tr>
+</tbody>
+</table>
+<p>Every URL in Table 2 uses the SSH transport
+(<code>git@github.com:</code>). No entry contains an
+<code>https://</code> scheme. The <code>Challenges</code>,
+<code>Containers</code>, and <code>Security</code> entries are listed as
+“Verify existing” because they are assumed to be present in any
+HelixCode workspace that already builds the Catalogizer-derived
+components. If an audit reveals they are missing, they are added with
+the same pattern.</p>
+<p><strong>Table 3. Build System Changes — Files, Lines, and
+Verification Commands</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+<th>Exact Snippet</th>
+<th>Verification Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HelixCode/Makefile</code></td>
+<td>Append four targets</td>
+<td><code>helixqa-build</code>, <code>helixqa-test</code>,
+<code>helixqa-challenge</code>, <code>helixqa-bump-submodules</code>
+(§2.4.1)</td>
+<td><code>make helixqa-build</code></td>
+</tr>
+<tr>
+<td><code>HelixCode/go.mod</code></td>
+<td>Add replace directive</td>
+<td><code>replace digital.vasic.helixqa =&gt; ./HelixQA</code>
+(§2.4.2)</td>
+<td><code>cd HelixCode &amp;&amp; go list -m digital.vasic.helixqa</code></td>
+</tr>
+<tr>
+<td><code>Catalogizer/catalog-api/go.mod</code></td>
+<td>Add missing replaces</td>
+<td><code>replace digital.vasic.docprocessor =&gt; ../DocProcessor</code>
+(etc.) (§2.4.3)</td>
+<td><code>./verify-replace-coverage.sh</code></td>
+</tr>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td>Add <code>helixqa-runner</code> service</td>
+<td>YAML block with <code>profiles: [qa]</code> (§2.4.4)</td>
+<td><code>docker-compose config --profiles</code></td>
+</tr>
+<tr>
+<td><code>docker/Dockerfile.helixqa</code></td>
+<td>Create new</td>
+<td>Multi-stage builder with Chromium + FFmpeg (§2.4.4)</td>
+<td><code>docker build -f docker/Dockerfile.helixqa -t helixqa-runner:test .</code></td>
+</tr>
+</tbody>
+</table>
+<p>Table 3 provides the executable checklist for build-system
+integration. Each row contains the file path, the nature of the change,
+a pointer to the exact code block in this document, and the command that
+confirms the change is working. Running all five verification commands
+in sequence constitutes the Phase 1 exit gate: if any command fails, the
+phase is incomplete and the issue is logged as a blocker for Phase
+2.</p>
+<p>The commands in Table 3 produce the following expected outputs when
+Phase 1 is successful:</p>
+<ul>
+<li><code>make helixqa-build</code> exits with code 0 and prints
+“HelixQA build complete.”</li>
+<li><code>go list -m digital.vasic.helixqa</code> prints the module path
+followed by <code>(replaced by ./HelixQA)</code>.</li>
+<li><code>./verify-replace-coverage.sh</code> prints “PASS: All HelixQA
+dependency modules are covered by replace directives.” and exits with
+code 0.</li>
+<li><code>docker-compose config --profiles</code> lists <code>qa</code>
+among the available profiles.</li>
+<li><code>docker build ...</code> exits with code 0 and produces an
+image tagged <code>helixqa-runner:test</code>.</li>
+</ul>
+<p>These outputs are captured and appended to the Phase 1 completion
+report, which is stored at
+<code>docs/reports/integration/helixqa-phase1-completion.md</code> and
+referenced in the Chapter 3 (Core Integration) entry criteria.</p>
+</body>
+</html>

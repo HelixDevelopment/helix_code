@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>rename_safety_guardrails</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">rename_safety_guardrails</h1>
+</header>
+<h1 id="rename-safety-guardrails-const-052-task-252">Rename-Safety
+Guardrails (CONST-052 / Task #252)</h1>
+<p><strong>Operator safety mandate (2026-05-15):</strong></p>
+<blockquote>
+<p>“Double check that snake_case renaming is not applied to codebase
+which is by convention non-snake-case — directories of it or files! We
+MUST NOT break the System and working building process! Once done
+perform multiple checks for any signs of breaking the System, building
+process or introducing issues of any kind! Everything MUST BE safe,
+rock-solid and non-error-prone completed! Validate and verify this type
+of change with proper rebuild of the System and executing all tests and
+Challenges we have!”</p>
+</blockquote>
+<p>This document is the operative companion to
+<strong>CONST-052</strong> (lowercase + snake_case naming mandate /
+constitution submodule §11.4.29). CONST-052 already names “common-sense
+exceptions (technology-preserving)” for language-mandated case; this
+document <strong>enumerates every concrete exception</strong> so renames
+in Task #252 don’t silently break the build.</p>
+<h2 id="hard-rule">Hard rule</h2>
+<p><strong>Renaming is forbidden</strong> for any directory or file
+whose name is prescribed by:</p>
+<ol type="1">
+<li><p><strong>Build system / package manager</strong> —
+<code>Makefile</code>, <code>GNUmakefile</code>,
+<code>Cargo.toml</code>, <code>Cargo.lock</code>, <code>Gemfile</code>,
+<code>pom.xml</code>, <code>build.gradle</code>, <code>gradlew</code>,
+<code>gradle/</code>, <code>package.json</code>,
+<code>package-lock.json</code>, <code>pnpm-lock.yaml</code>,
+<code>tsconfig.json</code>, <code>pyproject.toml</code>,
+<code>setup.py</code>, <code>setup.cfg</code>,
+<code>requirements.txt</code>, <code>go.mod</code>, <code>go.sum</code>,
+<code>Dockerfile</code>, <code>Containerfile</code>,
+<code>CMakeLists.txt</code>, <code>*.xcodeproj</code>,
+<code>*.xcworkspace</code>.</p></li>
+<li><p><strong>Language / framework convention</strong> — Java package
+paths (mixed-case reverse-DNS notation inside
+<code>src/main/java/</code>), Kotlin package paths (same), Apple/Swift
+framework directories, C# project directories, Go module paths inside
+<code>vendor/</code>.</p></li>
+<li><p><strong>Android / AOSP build system</strong> — every name
+mandated by the AOSP build system is exempt:</p>
+<ul>
+<li>Top-level dirs: <code>art/</code>, <code>bionic/</code>,
+<code>bootable/</code>, <code>bootloader/</code>, <code>build/</code>,
+<code>cts/</code>, <code>dalvik/</code>, <code>developers/</code>,
+<code>development/</code>, <code>device/</code>, <code>docs/</code>,
+<code>external/</code>, <code>frameworks/</code>,
+<code>hardware/</code>, <code>kernel/</code>, <code>kernel-5.10/</code>,
+<code>libcore/</code>, <code>libnativehelper/</code>, <code>ndk/</code>,
+<code>out/</code>, <code>packages/</code>, <code>pdk/</code>,
+<code>platform_testing/</code>, <code>prebuilts/</code>,
+<code>sdk/</code>, <code>system/</code>, <code>test/</code>,
+<code>toolchain/</code>, <code>tools/</code>, <code>vendor/</code>.</li>
+<li>Mandated files: <code>AndroidManifest.xml</code>,
+<code>Android.bp</code>, <code>Android.mk</code>,
+<code>AndroidTest.xml</code>, <code>bootstrap.bash</code>,
+<code>BUILD</code>, <code>kokoro</code>, <code>lk_inc.mk</code>,
+<code>OWNERS</code>, <code>version_defaults.mk</code>.</li>
+</ul></li>
+<li><p><strong>Build / cache / generated artefacts</strong> —
+<code>node_modules/</code>, <code>__pycache__/</code>,
+<code>.gradle/</code>, <code>.idea/</code>, <code>.vscode/</code>,
+<code>target/</code>, <code>dist/</code>, <code>out/</code>,
+<code>build/</code>, <code>bin/</code> (kept by tooling
+convention).</p></li>
+<li><p><strong>VCS / governance state</strong> — <code>.git/</code>,
+<code>.github/</code>, <code>.gitlab/</code>, <code>.svn/</code>,
+<code>.hg/</code>.</p></li>
+<li><p><strong>Coordinated owned-project names</strong> — the names
+listed below ARE going to be renamed eventually per Task #252 BUT only
+via a <strong>phased migration</strong> that also renames the upstream
+GitHub + GitLab repositories AND every consuming project’s
+<code>.gitmodules</code> pointer AND every cross-reference. They CAN NOT
+be unilaterally renamed locally because the rename has to land
+atomically across all consumers:</p>
+<ul>
+<li><code>helix_code/</code>, <code>challenges/</code>,
+<code>containers/</code>, <code>dependencies/</code>,
+<code>github_pages_website/</code>, <code>helix_agent/</code>,
+<code>helix_qa/</code>, <code>security/</code>, <code>panoptic/</code>,
+<code>upstreams/</code>, <code>assets/</code>,
+<code>mcp_servers/</code>.</li>
+</ul></li>
+</ol>
+<h2 id="soft-target">Soft target</h2>
+<p>Renames are permitted (and encouraged) for:</p>
+<ul>
+<li>Operator-controlled internal directories whose names are
+<em>not</em> mandated by any of the above categories.</li>
+<li>Files that are <em>named</em> by humans for human readability rather
+than for tooling consumption.</li>
+</ul>
+<h2 id="mechanical-enforcement">Mechanical enforcement</h2>
+<p>The G6 gate in <code>scripts/verify-all-constitution-rules.sh</code>
+enumerates:</p>
+<ul>
+<li><strong>Protected count</strong> — dirs that violate snake_case but
+match the never-rename allow-list. These are surfaced for forensic
+visibility but never reported as failures.</li>
+<li><strong>Unprotected rename candidates</strong> — dirs that violate
+snake_case AND don’t match any exemption. These are the deliberate scope
+of any future rename batch.</li>
+</ul>
+<p>A batch that includes a protected name is a CONST-052 violation
+(operator mandate at top of this doc applies). The rename script (when
+Task #252’s phased program writes one) MUST reject any move whose source
+is in the never-rename allow-list.</p>
+<h2 id="validation-requirements-per-rename-batch">Validation
+requirements per rename batch</h2>
+<p>Per the operator mandate:</p>
+<ol type="1">
+<li><strong>Full rebuild</strong> of the system after the rename
+batch.</li>
+<li><strong>Execute all tests</strong> that touch the renamed paths
+(unit + integration + e2e + Challenges).</li>
+<li><strong>Execute <code>run_all_challenges.sh</code></strong>
+end-to-end with the renamed tree.</li>
+<li><strong>Run <code>verify-all-constitution-rules.sh</code></strong>
+(post-rename constitution sweep per CONST-055).</li>
+<li><strong>Run <code>verify-governance-cascade.sh</code></strong>
+(anchor cascade still intact across renamed paths).</li>
+<li><strong>Reference-resolution gate</strong> — every rename batch
+ships with a regression test verifying every reference to the renamed
+entity resolves to its new name (no stale references left).</li>
+</ol>
+<p>A rename batch that ships without all six is a §11.4.29 violation of
+equal severity to a §11.4 PASS-bluff at the reference-integrity
+layer.</p>
+<h2 id="audit-trail">Audit trail</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Date</th>
+<th>Author</th>
+<th>Round</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-05-15</td>
+<td>Claude Opus 4.7</td>
+<td>close-out²⁴</td>
+<td>Document created in response to operator’s 2026-05-15 safety
+mandate. Mechanically backed by G6 gate’s
+<code>NEVER_RENAME_PATTERNS</code> allow-list (~50 entries covering
+build systems, languages, AOSP top-level dirs, build artefacts, VCS
+state, and coordinated owned-project names).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sources-verified-2026-05-29-internal-governance-doc-no-third-party-service-operator-instructions-to-cross-reference.-this-document-enumerates-const-052-rename-safety-exemptions-its-references-are-to-buildpackage-manager-filenames-makefile-cargo.toml-package.json-go.mod-dockerfile-android.bp-etc.-and-aosp-top-level-directory-names-these-are-stable-naming-conventions-not-version-pinned-instructions-so-no-vendor-docs-check-applies-a-filename-like-package.json-does-not-go-stale.-no-external-service-or-version-pin-appears.-version-authority-per-claude.md-3.1-confirmed-in-tree-inner-module-go-1.26-root-go-1.25.2.-reviewed-against-the-live-tree-on-this-date-no-corrections-required.">Sources
+verified 2026-05-29: internal-governance doc — no third-party-service
+operator instructions to cross-reference. This document enumerates
+CONST-052 rename-safety exemptions; its references are to
+build/package-manager FILENAMES (<code>Makefile</code>,
+<code>Cargo.toml</code>, <code>package.json</code>, <code>go.mod</code>,
+<code>Dockerfile</code>, <code>Android.bp</code>, etc.) and AOSP
+top-level directory NAMES — these are stable naming conventions, not
+version-pinned instructions, so no vendor-docs check applies (a filename
+like <code>package.json</code> does not go stale). No external service
+or version pin appears. Version authority per CLAUDE.md §3.1 (confirmed
+in-tree): inner module <code>go 1.26</code>, root
+<code>go 1.25.2</code>. Reviewed against the live tree on this date; no
+corrections required.</h2>
+</body>
+</html>

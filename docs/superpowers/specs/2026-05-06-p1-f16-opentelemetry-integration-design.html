@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f16-opentelemetry-integration-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f16-opentelemetry-integration-design</h1>
+</header>
+<h1 id="phase-1-feature-16-opentelemetry-integration">Phase 1 / Feature
+16 — OpenTelemetry Integration</h1>
+<p><strong>Date:</strong> 2026-05-06 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship real, end-to-end <strong>OpenTelemetry tracing +
+metrics</strong> for the HelixCode CLI agent. F16 wires an OTel
+<code>TracerProvider</code> and <code>MeterProvider</code> into the CLI
+bootstrap, decorates the three central hot paths (LLM provider calls,
+tool registry execution, agent loop iterations) with span + counter +
+histogram instrumentation, and routes telemetry to one of three
+exporters selected at startup via standard OTel environment variables:
+<strong>OTLP/gRPC</strong> (production), <strong>OTLP/HTTP</strong>
+(proxy-friendly), or <strong>stdout</strong> (development). When no
+exporter env var is set the telemetry stack collapses to a no-op
+TracerProvider + MeterProvider with zero observable cost — telemetry off
+by default.</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong>Standard OTel env-var configuration</strong> (Q4=B):
+<code>OTEL_EXPORTER_OTLP_ENDPOINT</code>,
+<code>OTEL_EXPORTER_OTLP_PROTOCOL</code> (<code>grpc</code> |
+<code>http/protobuf</code> | <code>stdout</code>),
+<code>OTEL_SERVICE_NAME</code> (default <code>&quot;helixcode&quot;</code>),
+<code>OTEL_RESOURCE_ATTRIBUTES</code> (comma-separated
+<code>k=v,k=v</code> per OTel spec). <strong>No yaml/CLI flags in
+v1</strong> — config is exclusively env-var driven so the OTel
+ecosystem’s standard tooling (operators, sidecars, agents) configures
+HelixCode without HelixCode-specific knowledge.</li>
+<li><strong>Three exporter implementations</strong> (Q2=C):
+<ul>
+<li><strong>OTLP/gRPC</strong> — selected when
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=grpc</code> (or unset and endpoint
+looks gRPC-shaped). Production default.</li>
+<li><strong>OTLP/HTTP</strong> — selected when
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf</code>. Proxy-friendly;
+used when corporate proxies block raw gRPC.</li>
+<li><strong>stdout</strong> — selected when
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=stdout</code>. Writes spans + metrics
+as JSON-shaped lines to a configurable writer (default
+<code>os.Stderr</code>). Development-only.</li>
+</ul></li>
+<li><strong><code>/telemetry</code> slash command</strong> (Q5=B):
+<code>status</code> (alias of bare <code>/telemetry</code> — exporter
+kind, endpoint, service name, span/metric counts since startup),
+<code>show</code> (last N exported spans/metrics from an in-memory ring
+buffer for live debugging — only populated when stdout exporter is
+active), <code>flush</code> (calls <code>ForceFlush(timeout=5s)</code>
+on TracerProvider + MeterProvider). <strong>No cobra subcommand</strong>
+— inspection and force-flush both go through the slash.</li>
+</ol>
+<p>The instrumentation scope (Q3=B) is exactly three call sites:</p>
+<ul>
+<li><strong>LLM provider calls</strong> — <code>Provider.Generate</code>
+and <code>Provider.GenerateStream</code>. One span per call
+(<code>llm.generate</code> / <code>llm.generate_stream</code>); a
+<code>helixcode_llm_tokens_total</code> Int64Counter labelled by
+<code>model</code> + <code>direction</code>
+(<code>prompt</code>|<code>completion</code>); a
+<code>helixcode_llm_latency_seconds</code> Float64Histogram labelled by
+<code>model</code>. Decorated via a <code>TracedLLMProvider</code>
+wrapper at the <strong>calling site</strong> (registered into the agent
+and tool callers) — NOT by editing each of the four cloud providers
+(anthropic, bedrock, vertex, azure) plus ollama. Single integration
+point, zero per-provider churn.</li>
+<li><strong>Tool registry Execute</strong> —
+<code>ToolRegistry.Execute(ctx, name, params)</code>. One span per call
+(<code>tool.execute</code>); a <code>helixcode_tool_calls_total</code>
+Int64Counter labelled by <code>tool</code> + <code>status</code>
+(<code>success</code>|<code>error</code>); a
+<code>helixcode_tool_latency_seconds</code> Float64Histogram labelled by
+<code>tool</code>. Instrumented at the single chokepoint in
+<code>internal/tools/registry.go::Execute</code> — same place F13 wires
+LSP auto-trigger and F08 wires plan-mode gating.</li>
+<li><strong>Agent loop iterations</strong> — wherever the agent’s outer
+loop iterates (the spec calls it “iteration” not “turn” because v1
+BaseAgent runs a single LLM call per task; the “iteration” is the unit
+<code>executeTaskWithLLM</code> represents). One span per iteration
+(<code>agent.iteration</code>); a
+<code>helixcode_agent_iterations_total</code> Int64Counter; a
+<code>helixcode_agent_iteration_duration_seconds</code>
+Float64Histogram.</li>
+</ul>
+<p>The scope of F16 is <strong>TelemetryProvider + 3 exporters + 3
+instrumentation sites + /telemetry slash + env-var config</strong>.
+Logs-bridge from zap is <strong>explicitly deferred to F16.5</strong>
+(zap stays the logging layer; OTel stays the tracing+metrics layer; we
+do not bridge zap → OTel logs in v1 because the ecosystem’s logs API is
+still in Beta as of writing). Sandbox/subagent/LSP/session/MCP
+instrumentation is also deferred to F16.5. Sampling configuration beyond
+the OTel env-var defaults is deferred. A Prometheus exporter is deferred
+(the porting doc references it; we cut it because OTLP + the
+OpenTelemetry Collector covers Prometheus end-to-end without a second
+exporter chain).</p>
+<p>Anti-bluff: a “TelemetryProvider” that initialises an exporter but
+never produces a span, or that creates spans that the exporter never
+sees, or that wraps the LLM provider but never increments the counter,
+is a critical defect (§5.2). The single largest bluff vector for F16 is
+“telemetry on but pipeline broken” — looks correct from compilation
+alone, fails on any real export verification.</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>Five layers, all under <code>internal/telemetry/</code>:</p>
+<ul>
+<li><strong><code>TelemetryConfig</code></strong> — pure data: parsed
+env vars (<code>Endpoint</code>, <code>Protocol</code>,
+<code>ServiceName</code>, <code>ResourceAttributes</code>,
+<code>Insecure</code>, <code>Timeout</code>,
+<code>BlockedAttributeKeys</code>). Constructed by
+<code>LoadConfigFromEnv()</code>. When all OTEL_* env vars are unset,
+returns <code>TelemetryConfig{Enabled: false}</code> and the rest of the
+stack collapses to no-op providers.</li>
+<li><strong><code>ExporterKind</code></strong> — string enum:
+<code>ExporterOTLPGRPC</code>, <code>ExporterOTLPHTTP</code>,
+<code>ExporterStdout</code>, <code>ExporterNone</code>. Decided by
+<code>TelemetryConfig.SelectExporter()</code> from
+<code>OTEL_EXPORTER_OTLP_PROTOCOL</code> + endpoint shape.</li>
+<li><strong><code>TelemetryProvider</code></strong> — owns the pipeline.
+Holds a <code>*sdktrace.TracerProvider</code>, a
+<code>*sdkmetric.MeterProvider</code>, the chosen
+<code>ExporterKind</code>, a startup-time
+<code>*resource.Resource</code>, span/metric counters (for
+<code>/telemetry status</code>), and an in-memory ring buffer of last-N
+exported items (for <code>/telemetry show</code>, populated only by the
+stdout exporter wrapper — not by OTLP because stdout is already cheap
+and OTLP would double-buffer).</li>
+<li><strong>Instrumentation decorators</strong> — three small types:
+<ul>
+<li><strong><code>TracedLLMProvider</code></strong> wraps
+<code>llm.Provider</code> (struct embedding the inner Provider;
+overrides <code>Generate</code> + <code>GenerateStream</code> only;
+pass-through everything else).</li>
+<li><strong>Tool-registry instrumentation</strong> is
+<strong>not</strong> a wrapper — it’s a 6-line in-place block at the
+start of <code>ToolRegistry.Execute</code> (mirrors F13’s LSP
+auto-trigger placement). The registry holds an optional
+<code>*telemetry.TelemetryProvider</code>; when non-nil, Execute starts
+a span and records counter + histogram on return.</li>
+<li><strong>Agent-loop instrumentation</strong> is in-place inside
+<code>BaseAgent.executeTaskWithLLM</code> — wrap the existing
+<code>provider.Generate</code> call site with a span + iteration
+counter. Same <code>*telemetry.TelemetryProvider</code> injected via a
+new
+<code>BaseAgent.SetTelemetryProvider(*telemetry.TelemetryProvider)</code>
+setter (mirrors F01’s <code>SetAutoCompactor</code>).</li>
+</ul></li>
+<li><strong><code>/telemetry</code> slash command</strong> —
+<code>internal/commands/telemetry_command.go</code> mirrors F14
+<code>/sandbox</code> shape: defines a
+<code>TelemetryProviderInspector</code> interface in the commands
+package so the slash is testable with a fake while main.go passes the
+real <code>*telemetry.TelemetryProvider</code>.</li>
+</ul>
+<pre><code>                        ┌─ env vars ────────────────────────────┐
+                        │ OTEL_EXPORTER_OTLP_ENDPOINT           │
+                        │ OTEL_EXPORTER_OTLP_PROTOCOL=grpc|http/│
+                        │   protobuf|stdout                     │
+                        │ OTEL_SERVICE_NAME                     │
+                        │ OTEL_RESOURCE_ATTRIBUTES              │
+                        └──────────────┬────────────────────────┘
+                                       │
+                                       ▼
+                        ┌──── TelemetryConfig ────────┐
+                        │ LoadConfigFromEnv()         │
+                        │ SelectExporter() → Kind     │
+                        └──────────────┬──────────────┘
+                                       │
+                                       ▼
+                        ┌──── TelemetryProvider ──────┐
+                        │ TracerProvider              │
+                        │ MeterProvider               │
+                        │ Resource (svc name + attrs) │
+                        │ ring buffer (stdout only)   │
+                        └──────────────┬──────────────┘
+                          ┌────────────┼────────────┐
+                          ▼            ▼            ▼
+                 TracedLLMProvider  ToolRegistry   BaseAgent
+                  (wraps Generate)   .Execute      .executeTaskWithLLM
+                                     (in-place)    (in-place)
+                          │            │            │
+                          ▼            ▼            ▼
+                       span +      span +        span +
+                       latency     counter +     iteration
+                       hist +      latency       counter +
+                       tokens      hist          duration hist
+                                       │
+                                       ▼
+                              ┌─ Exporter ─────┐
+                              │ OTLP/gRPC      │
+                              │ OTLP/HTTP      │
+                              │ stdout         │
+                              │ no-op (default)│
+                              └────────────────┘</code></pre>
+<p>Shutdown: at process exit,
+<code>TelemetryProvider.Shutdown(ctx)</code> calls
+<code>tp.ForceFlush(ctx)</code> then <code>tp.Shutdown(ctx)</code> then
+the same on the MeterProvider; deadline 5 s; errors are logged at
+zap-WARN, never fatal — telemetry must never crash the agent.</p>
+<hr />
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/telemetry/types.go</code> —
+<code>TelemetryConfig</code>, <code>ExporterKind</code> enum,
+<code>TelemetryStats</code> (for /telemetry status), error sentinels.
+Exported <code>BlockedAttributeKeys</code> default list (CONST-042
+secret-attribute blocklist; see §5.2).</li>
+<li><code>helix_code/internal/telemetry/types_test.go</code>.</li>
+<li><code>helix_code/internal/telemetry/config.go</code> —
+<code>LoadConfigFromEnv() *TelemetryConfig</code> +
+<code>SelectExporter() ExporterKind</code>. Pure; no OTel deps.</li>
+<li><code>helix_code/internal/telemetry/config_test.go</code>.</li>
+<li><code>helix_code/internal/telemetry/provider.go</code> —
+<code>TelemetryProvider</code> constructor
+(<code>NewTelemetryProvider(ctx, cfg, logger) (*TelemetryProvider, error)</code>),
+<code>Tracer()</code>, <code>Meter()</code>, <code>Shutdown(ctx)</code>,
+<code>ForceFlush(ctx)</code>, <code>Stats()</code>,
+<code>RingBuffer()</code> for /telemetry show.</li>
+<li><code>helix_code/internal/telemetry/provider_test.go</code>.</li>
+<li><code>helix_code/internal/telemetry/llm_instrumentation.go</code> —
+<code>TracedLLMProvider</code> decorator + factory.</li>
+<li><code>helix_code/internal/telemetry/llm_instrumentation_test.go</code>.</li>
+<li><code>helix_code/internal/telemetry/tool_instrumentation.go</code> —
+small
+<code>instrumentToolCall(ctx, tp, name) (context.Context, func(err error))</code>
+helper used in-place inside <code>ToolRegistry.Execute</code>. Lives in
+the telemetry package so the tool registry imports it cleanly.</li>
+<li><code>helix_code/internal/telemetry/tool_instrumentation_test.go</code>.</li>
+<li><code>helix_code/internal/telemetry/agent_instrumentation.go</code>
+— analogous helper for the agent loop iteration:
+<code>instrumentAgentIteration(ctx, tp) (context.Context, func(err error))</code>.</li>
+<li><code>helix_code/internal/telemetry/agent_instrumentation_test.go</code>.</li>
+<li><code>helix_code/internal/telemetry/attribute_filter.go</code> —
+<code>FilterAttributes([]attribute.KeyValue, blocked []string) []attribute.KeyValue</code>.
+CONST-042 secret-shaped-attribute filter (§5.2).</li>
+<li><code>helix_code/internal/telemetry/attribute_filter_test.go</code>.</li>
+<li><code>helix_code/internal/commands/telemetry_command.go</code> —
+<code>/telemetry</code> slash
+(<code>status</code>/<code>show</code>/<code>flush</code>).</li>
+<li><code>helix_code/internal/commands/telemetry_command_test.go</code>.</li>
+<li><code>helix_code/tests/integration/telemetry_test.go</code> —
+<code>//go:build integration</code> (gating per §5.2).</li>
+<li><code>helix_code/tests/integration/cmd/p1f16_challenge/main.go</code>
+— runtime evidence harness with in-tree fake OTLP/HTTP receiver.</li>
+<li><code>challenges/p1-f16-opentelemetry-integration/CHALLENGE.md</code>
++ <code>run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/go.mod</code> — add OTel deps (§3.5).</li>
+<li><code>helix_code/internal/tools/registry.go</code> — add
+<code>telemetryProvider *telemetry.TelemetryProvider</code> field; add
+<code>SetTelemetryProvider(*telemetry.TelemetryProvider)</code> setter
+(mirrors <code>SetLSPManager</code> / <code>SetSandboxManager</code> /
+<code>SetSubagentManager</code>); wrap <code>Execute</code> body with
+<code>instrumentToolCall</code> (5 added lines).</li>
+<li><code>helix_code/internal/agent/base_agent.go</code> — add
+<code>telemetryProvider *telemetry.TelemetryProvider</code> field; add
+<code>SetTelemetryProvider</code> setter; wrap
+<code>executeTaskWithLLM</code> LLM-call site with
+<code>instrumentAgentIteration</code> (5 added lines).</li>
+<li><code>helix_code/cmd/cli/main.go</code> — three lines: load config
+from env, construct TelemetryProvider, register <code>/telemetry</code>
+slash + setters on registry/agent + <code>defer tp.Shutdown(ctx)</code>.
+The init goes alongside the existing logger construction (~line
+400).</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/telemetry/types.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ExporterKind <span class="dt">string</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ExporterNone     ExporterKind <span class="op">=</span> <span class="st">&quot;none&quot;</span>      <span class="co">// default: no env vars set → no-op providers</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    ExporterStdout   ExporterKind <span class="op">=</span> <span class="st">&quot;stdout&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ExporterOTLPGRPC ExporterKind <span class="op">=</span> <span class="st">&quot;otlp-grpc&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    ExporterOTLPHTTP ExporterKind <span class="op">=</span> <span class="st">&quot;otlp-http&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TelemetryConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    Enabled              <span class="dt">bool</span>              <span class="co">// false when no OTEL_* env var is set</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    Kind                 ExporterKind</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    Endpoint             <span class="dt">string</span>            <span class="co">// OTEL_EXPORTER_OTLP_ENDPOINT</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    Protocol             <span class="dt">string</span>            <span class="co">// OTEL_EXPORTER_OTLP_PROTOCOL raw</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    ServiceName          <span class="dt">string</span>            <span class="co">// OTEL_SERVICE_NAME (default &quot;helixcode&quot;)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    ResourceAttributes   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="co">// OTEL_RESOURCE_ATTRIBUTES parsed</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    Insecure             <span class="dt">bool</span>              <span class="co">// OTEL_EXPORTER_OTLP_INSECURE=true</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    Timeout              time<span class="op">.</span>Duration     <span class="co">// OTEL_EXPORTER_OTLP_TIMEOUT (default 10s)</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    BlockedAttributeKeys <span class="op">[]</span><span class="dt">string</span>          <span class="co">// CONST-042 blocklist; defaults applied when nil</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadConfigFromEnv<span class="op">()</span> <span class="op">*</span>TelemetryConfig</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>TelemetryConfig<span class="op">)</span> SelectExporter<span class="op">()</span> ExporterKind   <span class="co">// disambiguates from Protocol + Endpoint</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">// DefaultBlockedAttributeKeys is the seed list applied when</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">// TelemetryConfig.BlockedAttributeKeys is nil.  CONST-042-anchored.</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> DefaultBlockedAttributeKeys <span class="op">=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;api_key&quot;</span><span class="op">,</span> <span class="st">&quot;apikey&quot;</span><span class="op">,</span> <span class="st">&quot;api-key&quot;</span><span class="op">,</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;token&quot;</span><span class="op">,</span> <span class="st">&quot;auth&quot;</span><span class="op">,</span> <span class="st">&quot;authorization&quot;</span><span class="op">,</span> <span class="st">&quot;bearer&quot;</span><span class="op">,</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;password&quot;</span><span class="op">,</span> <span class="st">&quot;passwd&quot;</span><span class="op">,</span> <span class="st">&quot;secret&quot;</span><span class="op">,</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;anthropic_api_key&quot;</span><span class="op">,</span> <span class="st">&quot;openai_api_key&quot;</span><span class="op">,</span> <span class="st">&quot;google_api_key&quot;</span><span class="op">,</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;aws_access_key_id&quot;</span><span class="op">,</span> <span class="st">&quot;aws_secret_access_key&quot;</span><span class="op">,</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;prompt&quot;</span><span class="op">,</span>        <span class="co">// never emit full prompt text as a span attribute (CONST-042)</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;prompt_body&quot;</span><span class="op">,</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;request_body&quot;</span><span class="op">,</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;response_body&quot;</span><span class="op">,</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TelemetryStats <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    Kind          ExporterKind</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    Endpoint      <span class="dt">string</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    ServiceName   <span class="dt">string</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    SpansStarted  <span class="dt">uint64</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    SpansEnded    <span class="dt">uint64</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    MetricsRecord <span class="dt">uint64</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    StartTime     time<span class="op">.</span>Time</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    LastFlushAt   time<span class="op">.</span>Time</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    ErrTelemetryDisabled    <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;telemetry: disabled (no OTEL_* env vars set)&quot;</span><span class="op">)</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    ErrUnknownExporterKind  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;telemetry: unknown exporter kind&quot;</span><span class="op">)</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    ErrExporterUnreachable  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;telemetry: exporter endpoint unreachable&quot;</span><span class="op">)</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/telemetry/provider.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TelemetryProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    cfg          <span class="op">*</span>TelemetryConfig</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    tracerProv   <span class="op">*</span>sdktrace<span class="op">.</span>TracerProvider</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    meterProv    <span class="op">*</span>sdkmetric<span class="op">.</span>MeterProvider</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    tracer       trace<span class="op">.</span>Tracer            <span class="co">// cached: tracerProv.Tracer(&quot;helixcode&quot;)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    meter        metric<span class="op">.</span>Meter            <span class="co">// cached: meterProv.Meter(&quot;helixcode&quot;)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    resource     <span class="op">*</span>resource<span class="op">.</span>Resource</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    logger       <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// pre-built instruments (allocated once at construction)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    llmTokensCounter      metric<span class="op">.</span>Int64Counter</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    llmLatencyHist        metric<span class="op">.</span>Float64Histogram</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    toolCallsCounter      metric<span class="op">.</span>Int64Counter</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    toolLatencyHist       metric<span class="op">.</span>Float64Histogram</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    agentIterCounter      metric<span class="op">.</span>Int64Counter</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    agentIterDurationHist metric<span class="op">.</span>Float64Histogram</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    stats        TelemetryStats</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    statsMu      sync<span class="op">.</span>RWMutex</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    ringBuf      <span class="op">*</span>ringBuffer        <span class="co">// populated only when Kind == ExporterStdout</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTelemetryProvider<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cfg <span class="op">*</span>TelemetryConfig<span class="op">,</span> logger <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">(*</span>TelemetryProvider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">// Returns a non-nil *TelemetryProvider with no-op providers when cfg.Enabled == false (zero-cost path).</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> Tracer<span class="op">()</span> trace<span class="op">.</span>Tracer</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> Meter<span class="op">()</span> metric<span class="op">.</span>Meter</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> Stats<span class="op">()</span> TelemetryStats</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> RingBuffer<span class="op">()</span> <span class="op">[]</span>ExportedRecord       <span class="co">// empty unless stdout exporter</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> ForceFlush<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> Shutdown<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span>  <span class="co">// ForceFlush + Shutdown both providers; deadline 5s</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">// IsNoOp reports whether telemetry is disabled (TelemetryProvider was constructed</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">// with cfg.Enabled == false). Callers use this to skip work that only matters</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">// when a real exporter is wired.</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> IsNoOp<span class="op">()</span> <span class="dt">bool</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/telemetry/llm_instrumentation.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TracedLLMProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    inner llm<span class="op">.</span>Provider           <span class="co">// pass-through everything except Generate/GenerateStream</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    tp    <span class="op">*</span>TelemetryProvider     <span class="co">// nil → pass-through (no instrumentation)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTracedLLMProvider<span class="op">(</span>inner llm<span class="op">.</span>Provider<span class="op">,</span> tp <span class="op">*</span>TelemetryProvider<span class="op">)</span> <span class="op">*</span>TracedLLMProvider</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">// All non-Generate methods delegate to inner unchanged.</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TracedLLMProvider<span class="op">)</span> GetType<span class="op">()</span> llm<span class="op">.</span>ProviderType         <span class="op">{</span> <span class="cf">return</span> t<span class="op">.</span>inner<span class="op">.</span>GetType<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TracedLLMProvider<span class="op">)</span> GetName<span class="op">()</span> <span class="dt">string</span>                   <span class="op">{</span> <span class="cf">return</span> t<span class="op">.</span>inner<span class="op">.</span>GetName<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TracedLLMProvider<span class="op">)</span> GetModels<span class="op">()</span> <span class="op">[]</span>llm<span class="op">.</span>ModelInfo        <span class="op">{</span> <span class="cf">return</span> t<span class="op">.</span>inner<span class="op">.</span>GetModels<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">// ...</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TracedLLMProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>llm<span class="op">.</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>llm<span class="op">.</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TracedLLMProvider<span class="op">)</span> GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>llm<span class="op">.</span>LLMRequest<span class="op">,</span> ch <span class="kw">chan</span><span class="op">&lt;-</span> llm<span class="op">.</span>LLMResponse<span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/telemetry/tool_instrumentation.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">// instrumentToolCall starts a `tool.execute` span + records a counter increment and a</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">// latency histogram on the returned closer. Used in-place by ToolRegistry.Execute:</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">//     ctx, end := telemetry.InstrumentToolCall(ctx, r.telemetryProvider, name)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">//     defer func() { end(execErr) }()</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> InstrumentToolCall<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tp <span class="op">*</span>TelemetryProvider<span class="op">,</span> toolName <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>context<span class="op">.</span>Context<span class="op">,</span> <span class="kw">func</span><span class="op">(</span><span class="dt">error</span><span class="op">))</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> InstrumentAgentIteration<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tp <span class="op">*</span>TelemetryProvider<span class="op">)</span> <span class="op">(</span>context<span class="op">.</span>Context<span class="op">,</span> <span class="kw">func</span><span class="op">(</span><span class="dt">error</span><span class="op">))</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/commands/telemetry_command.go</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TelemetryProviderInspector <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    Stats<span class="op">()</span> telemetry<span class="op">.</span>TelemetryStats</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    RingBuffer<span class="op">()</span> <span class="op">[]</span>telemetry<span class="op">.</span>ExportedRecord</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    ForceFlush<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    IsNoOp<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TelemetryCommand <span class="kw">struct</span> <span class="op">{</span> tp TelemetryProviderInspector <span class="op">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTelemetryCommand<span class="op">(</span>tp TelemetryProviderInspector<span class="op">)</span> <span class="op">*</span>TelemetryCommand</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>TelemetryCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;telemetry&quot;</span> <span class="op">}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>TelemetryCommand<span class="op">)</span> Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span>    <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>TelemetryCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Inspect telemetry exporter status, last exported items, or force-flush the pipeline.&quot;</span> <span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>TelemetryCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span>        <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/telemetry [status|show|flush]&quot;</span> <span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>TelemetryCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h3 id="user-surfaces">3.4 User surfaces</h3>
+<p><strong>Environment-variable configuration</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Env var</th>
+<th>Required?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OTEL_EXPORTER_OTLP_ENDPOINT</code></td>
+<td>required to enable telemetry</td>
+<td>URL form: <code>host:4317</code> for gRPC,
+<code>http://host:4318</code> for HTTP, ignored for
+<code>stdout</code></td>
+</tr>
+<tr>
+<td><code>OTEL_EXPORTER_OTLP_PROTOCOL</code></td>
+<td>optional</td>
+<td><code>grpc</code> (default), <code>http/protobuf</code>,
+<code>stdout</code></td>
+</tr>
+<tr>
+<td><code>OTEL_SERVICE_NAME</code></td>
+<td>optional</td>
+<td>default <code>&quot;helixcode&quot;</code></td>
+</tr>
+<tr>
+<td><code>OTEL_RESOURCE_ATTRIBUTES</code></td>
+<td>optional</td>
+<td>comma-separated <code>k=v,k=v</code> per OTel spec</td>
+</tr>
+<tr>
+<td><code>OTEL_EXPORTER_OTLP_INSECURE</code></td>
+<td>optional</td>
+<td><code>true</code> to skip TLS (dev only)</td>
+</tr>
+<tr>
+<td><code>OTEL_EXPORTER_OTLP_TIMEOUT</code></td>
+<td>optional</td>
+<td>seconds, default 10</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exporter selection rule</strong>: 1. If
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=stdout</code> →
+<code>ExporterStdout</code>. 2. Else if
+<code>OTEL_EXPORTER_OTLP_ENDPOINT</code> is unset and
+<code>OTEL_EXPORTER_OTLP_PROTOCOL</code> is unset →
+<code>ExporterNone</code> (no-op providers, zero-cost path). 3. Else if
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf</code> →
+<code>ExporterOTLPHTTP</code>. 4. Else (default) →
+<code>ExporterOTLPGRPC</code>.</p>
+<p><strong>Slash command <code>/telemetry</code></strong>: -
+<code>/telemetry</code> (alias of <code>status</code>) — table:
+<code>KIND  ENDPOINT  SERVICE  SPANS  METRICS  UPTIME</code>. When
+<code>IsNoOp()</code>, prints
+<code>telemetry disabled (set OTEL_EXPORTER_OTLP_ENDPOINT or OTEL_EXPORTER_OTLP_PROTOCOL=stdout)</code>.
+- <code>/telemetry show</code> — last 10 exported items from the ring
+buffer (only populated when the stdout exporter is active; OTLP
+exporters do NOT mirror into the ring buffer because they round-trip to
+a real backend already). - <code>/telemetry flush</code> — calls
+<code>ForceFlush(ctx)</code> with a 5 s deadline; prints
+<code>flushed N spans, M metrics in &lt;dur&gt;</code>. On error, prints
+<code>flush failed: &lt;err&gt;</code> and the slash returns
+success=false.</p>
+<p><strong>No cobra subcommand</strong> (Q5=B). Inspection and
+force-flush both go through the slash command.</p>
+<h3 id="new-external-dependencies-exact-versions">3.5 New external
+dependencies (exact versions)</h3>
+<p>OTel Go SDK is on a synchronised release train. Pin all entries to a
+single major version (<code>v1.30.x</code> for trace/SDK +
+<code>v1.30.x</code>-aligned metric/exporter modules; the metric SDK +
+exporters in the v1.30 train carry the matching <code>v1.30.0</code> tag
+— no separate <code>v0.x</code> line for metric exporters as of the
+v1.30 release):</p>
+<pre><code>go.opentelemetry.io/otel                                              v1.30.0
+go.opentelemetry.io/otel/sdk                                          v1.30.0
+go.opentelemetry.io/otel/sdk/metric                                   v1.30.0
+go.opentelemetry.io/otel/metric                                       v1.30.0
+go.opentelemetry.io/otel/trace                                        v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlptrace                     v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc       v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp       v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlpmetric                    v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc     v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp     v1.30.0
+go.opentelemetry.io/otel/exporters/stdout/stdouttrace                 v1.30.0
+go.opentelemetry.io/otel/exporters/stdout/stdoutmetric                v1.30.0</code></pre>
+<p>Plus transitive: <code>google.golang.org/grpc</code>,
+<code>google.golang.org/protobuf</code>,
+<code>go.opentelemetry.io/proto/otlp</code>,
+<code>github.com/cenkalti/backoff/v4</code>,
+<code>github.com/grpc-ecosystem/grpc-gateway/v2</code> (already
+partially present for gRPC code paths). Estimated transitive footprint:
+~25 new modules in <code>go.sum</code>. No CGO.</p>
+<p>T02 runs <code>go mod tidy</code> and freezes <code>go.sum</code>;
+the resulting diff is reviewed for spurious major-version drifts before
+commit.</p>
+<h3 id="existing-code-constraints">3.6 Existing-code constraints</h3>
+<ul>
+<li><code>internal/llm/missing_types.go::Provider</code> interface has
+11 methods. <code>TracedLLMProvider</code> embeds the inner Provider via
+Go struct embedding so only the 2 methods F16 instruments
+(<code>Generate</code> + <code>GenerateStream</code>) need explicit
+definitions; the remaining 9 (<code>GetType</code>,
+<code>GetName</code>, <code>GetModels</code>,
+<code>GetCapabilities</code>, <code>IsAvailable</code>,
+<code>GetHealth</code>, <code>Close</code>,
+<code>GetContextWindow</code>, <code>CountTokens</code>) are promoted
+automatically. This keeps the wrapper compact and prevents drift if the
+Provider interface grows.</li>
+<li><code>internal/tools/registry.go::Execute</code> already has F07
+(background dispatch), F08 (plan-mode gate), F13 (LSP auto-trigger)
+hooks. F16 instrumentation slots in immediately after
+<code>tool, err := r.Get(name)</code> and wraps the entire
+<code>tool.Execute(ctx, params)</code> call site so the span captures
+hook overhead too. Ordering: F07 dispatch first (it short-circuits to a
+different code path), then plan-mode gate (it can short-circuit with an
+error), then <strong>telemetry span open</strong> (so the span captures
+the actual execution + LSP trigger), then tool.Execute, then
+hooks-after, then <strong>telemetry span close</strong>, then LSP
+trigger. This means the span timing represents wall-time the user
+perceives.</li>
+<li><code>internal/agent/base_agent.go::executeTaskWithLLM</code> is the
+v1 agent-iteration site. F16 wraps the existing
+<code>provider.Generate</code> call (line 389) inside
+<code>instrumentAgentIteration</code>. The agent loop in v1 is a single
+LLM call per task; multi-iteration loops are part of the broader planner
+work and v1 instrumentation captures one iteration per task — documented
+in the Stats output as <code>iterations</code> not
+<code>turns</code>.</li>
+<li><code>cmd/cli/main.go</code> already wires
+<code>subagent.IsSubagentInvocation</code> (F15) and
+<code>sandbox.IsHelperInvocation</code> (F14) at the top of
+<code>main()</code>. Telemetry init does NOT need helper-mode-style
+early dispatch because subagent helpers and sandbox helpers do NOT
+inherit telemetry — they run a single short-lived task and exit;
+instrumenting them is F16.5 work. The parent-process telemetry init
+slots in alongside the logger construction (~line 400), well after the
+helper checks.</li>
+</ul>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup-wiring-cmdclimain.go">4.1 Startup wiring
+(<code>cmd/cli/main.go</code>)</h3>
+<pre><code>main()
+  ├─ subagent.IsSubagentInvocation() check (F15, FIRST)
+  ├─ sandbox.IsHelperInvocation() check (F14, SECOND)
+  ├─ … existing CLI bootstrap (cobra, config load, logger) …
+  │
+  ├─ telCfg := telemetry.LoadConfigFromEnv()
+  ├─ tp, err := telemetry.NewTelemetryProvider(ctx, telCfg, logger)
+  ├─ if err != nil:
+  │     logger.Warn(&quot;telemetry init failed; continuing without telemetry&quot;, zap.Error(err))
+  │     tp = nil    // registry/agent setters tolerate nil
+  ├─ defer func() {
+  │     if tp != nil {
+  │         shCtx, sc := context.WithTimeout(context.Background(), 5*time.Second)
+  │         defer sc()
+  │         _ = tp.Shutdown(shCtx)
+  │     }
+  │  }()
+  │
+  ├─ … existing provider := factory(...) …
+  ├─ if tp != nil &amp;&amp; !tp.IsNoOp():
+  │     provider = telemetry.NewTracedLLMProvider(provider, tp)
+  │
+  ├─ … existing toolReg := tools.NewToolRegistry(...) …
+  ├─ if tp != nil: toolReg.SetTelemetryProvider(tp)
+  ├─ if tp != nil: baseAgent.SetTelemetryProvider(tp)
+  │
+  ├─ slashRegistry.Register(commands.NewTelemetryCommand(tp))   // tp may be nil → command reports unavailable
+  └─ … rest of bootstrap …</code></pre>
+<p>Failure modes that MUST NOT crash the agent: -
+<code>OTEL_EXPORTER_OTLP_ENDPOINT</code> is set but unreachable →
+<code>NewTelemetryProvider</code> succeeds (BatchSpanProcessor + OTLP
+exporter are async; transient connection failures get retried internally
+and surface only on <code>ForceFlush</code>/<code>Shutdown</code>). The
+agent runs normally; spans accumulate locally; on shutdown the
+deadline-bounded flush either ships them or logs a warning. -
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=bogus</code> →
+<code>LoadConfigFromEnv</code> returns
+<code>ErrUnknownExporterKind</code>; main.go logs WARN;
+<code>tp = nil</code>; agent runs without telemetry. -
+<code>NewTelemetryProvider</code> panics in the OTel SDK (defensive) →
+<code>recover</code>-wrapped at the boundary; logged at WARN;
+<code>tp = nil</code>.</p>
+<h3 id="llm-call-instrumentation-flow">4.2 LLM call instrumentation
+flow</h3>
+<pre><code>TracedLLMProvider.Generate(ctx, req)
+  ├─ if t.tp == nil || t.tp.IsNoOp(): return t.inner.Generate(ctx, req)   // zero-cost
+  ├─ start := time.Now()
+  ├─ ctx, span := t.tp.Tracer().Start(ctx, &quot;llm.generate&quot;,
+  │     trace.WithAttributes(
+  │         attribute.String(&quot;llm.model&quot;,       req.Model),
+  │         attribute.Int   (&quot;llm.max_tokens&quot;,  req.MaxTokens),
+  │         attribute.Int   (&quot;llm.message_count&quot;, len(req.Messages)),
+  │         // NB: DO NOT add attribute.String(&quot;llm.prompt&quot;, …) — CONST-042 (§5.2).
+  │     ))
+  ├─ resp, err := t.inner.Generate(ctx, req)
+  ├─ dur := time.Since(start).Seconds()
+  ├─ t.tp.observeLLMLatency(req.Model, dur)
+  ├─ if resp != nil:
+  │     t.tp.addLLMTokens(req.Model, &quot;prompt&quot;,     int64(resp.Usage.PromptTokens))
+  │     t.tp.addLLMTokens(req.Model, &quot;completion&quot;, int64(resp.Usage.CompletionTokens))
+  │     span.SetAttributes(
+  │         attribute.Int(&quot;llm.usage.prompt_tokens&quot;,     resp.Usage.PromptTokens),
+  │         attribute.Int(&quot;llm.usage.completion_tokens&quot;, resp.Usage.CompletionTokens),
+  │         attribute.Int(&quot;llm.usage.total_tokens&quot;,      resp.Usage.TotalTokens),
+  │         attribute.String(&quot;llm.finish_reason&quot;,        resp.FinishReason),
+  │     )
+  ├─ if err != nil:
+  │     span.RecordError(err)
+  │     span.SetStatus(codes.Error, err.Error())
+  ├─ span.End()
+  └─ return resp, err</code></pre>
+<p><code>GenerateStream</code> follows the same shape with the span
+ending after <code>ch</code> is closed.</p>
+<h3 id="tool-call-instrumentation-flow-in-place-inside-toolregistry.execute">4.3
+Tool call instrumentation flow (in-place inside
+<code>ToolRegistry.Execute</code>)</h3>
+<pre><code>ToolRegistry.Execute(ctx, name, params)
+  ├─ if run_in_background: dispatch &amp; return (existing F07 path; NOT instrumented here — F16.5)
+  ├─ checkPlanModeGate (existing F08; NOT inside the span — its rejection is not &quot;tool execution&quot;)
+  ├─ tool, err := r.Get(name); if err: return err   (NOT inside the span — failed lookup isn&#39;t an execution)
+  ├─ tool.Validate(...); if err: return err          (NOT inside the span)
+  ├─ // F16: open span + start clock
+  ├─ ctx, end := telemetry.InstrumentToolCall(ctx, r.telemetryProvider, name)
+  ├─ var execErr error
+  ├─ defer func() { end(execErr) }()
+  ├─ … existing fireBefore + tool.Execute + fireAfter + plan-action-mark + LSP-trigger …
+  └─ return result, execErr</code></pre>
+<p><code>InstrumentToolCall(ctx, tp, name)</code>: - Returns
+<code>ctx</code> unchanged + a no-op closer when
+<code>tp == nil || tp.IsNoOp()</code>. - Else: starts span
+<code>tool.execute</code> with attribute
+<code>tool.name=&lt;name&gt;</code>. The closer increments
+<code>helixcode_tool_calls_total{tool=&lt;name&gt;, status=success|error}</code>,
+records <code>helixcode_tool_latency_seconds{tool=&lt;name&gt;}</code>,
+calls <code>span.RecordError</code> +
+<code>span.SetStatus(codes.Error, …)</code> on error, ends the span.</p>
+<h3 id="agent-iteration-flow-in-place-inside-baseagent.executetaskwithllm">4.4
+Agent iteration flow (in-place inside
+<code>BaseAgent.executeTaskWithLLM</code>)</h3>
+<pre><code>executeTaskWithLLM(ctx, t)
+  ├─ … existing prompt build, model select, request construct, auto-compaction …
+  ├─ // F16: open iteration span + start clock
+  ├─ ctx, end := telemetry.InstrumentAgentIteration(ctx, a.telemetryProvider)
+  ├─ var llmErr error
+  ├─ defer func() { end(llmErr) }()
+  ├─ response, llmErr := a.llmProvider.Generate(ctx, request)
+  ├─ if llmErr != nil: dispatchOnError; return nil, llmErr
+  ├─ result, err := a.processLLMResponse(ctx, t, response)
+  └─ return result, err</code></pre>
+<p><code>InstrumentAgentIteration</code> mirrors
+<code>InstrumentToolCall</code>: span <code>agent.iteration</code> +
+counter + duration histogram. The span ends after
+<code>processLLMResponse</code> returns — so an iteration’s wall-time
+covers the LLM call AND the response processing (parse,
+code-application). This is intentional: it gives users the full
+per-iteration latency they care about.</p>
+<h3 id="shutdown-flow">4.5 Shutdown flow</h3>
+<pre><code>defer (in main.go)
+  ├─ if tp == nil: return
+  ├─ ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+  ├─ defer cancel()
+  ├─ if err := tp.Shutdown(ctx); err != nil:
+  │     logger.Warn(&quot;telemetry shutdown failed&quot;, zap.Error(err))
+  └─ // process exits
+
+TelemetryProvider.Shutdown(ctx)
+  ├─ tp.statsMu.Lock; tp.stats.LastFlushAt = time.Now(); tp.statsMu.Unlock
+  ├─ var errs []error
+  ├─ if t.tracerProv != nil:
+  │     errs = append(errs, t.tracerProv.ForceFlush(ctx))
+  │     errs = append(errs, t.tracerProv.Shutdown(ctx))
+  ├─ if t.meterProv != nil:
+  │     errs = append(errs, t.meterProv.ForceFlush(ctx))
+  │     errs = append(errs, t.meterProv.Shutdown(ctx))
+  └─ return errors.Join(errs...)</code></pre>
+<p><code>ForceFlush</code> is called from <code>/telemetry flush</code>
+with the same 5 s deadline.</p>
+<h2 id="error-handling-edge-cases-and-anti-bluff">5. Error handling,
+edge cases, and anti-bluff</h2>
+<h3 id="error-paths">5.1 Error paths</h3>
+<ul>
+<li><strong>No env vars set</strong> — <code>LoadConfigFromEnv</code>
+returns
+<code>&amp;TelemetryConfig{Enabled: false, Kind: ExporterNone}</code>.
+<code>NewTelemetryProvider</code> returns a non-nil
+<code>*TelemetryProvider</code> whose Tracer is
+<code>noop.NewTracerProvider().Tracer(&quot;helixcode&quot;)</code> and whose
+Meter is <code>metricnoop.NewMeterProvider().Meter(&quot;helixcode&quot;)</code>.
+All instrumentation helpers detect <code>IsNoOp()</code> and
+short-circuit to zero-allocation pass-through.
+<code>/telemetry status</code> reports <code>disabled</code>.</li>
+<li><strong>Unknown protocol</strong> — <code>LoadConfigFromEnv</code>
+errors with <code>ErrUnknownExporterKind</code>; main.go logs WARN; runs
+with <code>tp = nil</code>.</li>
+<li><strong>Exporter unreachable at startup</strong> — OTLP exporters
+construct asynchronously; <code>NewTelemetryProvider</code> succeeds.
+The first export attempt may fail; OTel SDK’s
+<code>BatchSpanProcessor</code> retries internally (configurable via
+<code>OTEL_EXPORTER_OTLP_TIMEOUT</code>). On
+<code>ForceFlush</code>/<code>Shutdown</code>, deadline-bounded errors
+are logged at WARN and the process exits cleanly.</li>
+<li><strong>Exporter unreachable mid-run</strong> — same: the BSP
+buffers; if the buffer fills (default 2048 spans), older spans are
+dropped silently. v1 does NOT add backpressure to the LLM call; the
+agent must remain usable when the collector is down.</li>
+<li><strong><code>Shutdown</code> deadline exceeded</strong> —
+<code>tp.Shutdown</code> returns the wrapped deadline error; main.go
+logs WARN; process exits 0 (telemetry must never gate exit code).</li>
+<li><strong><code>ForceFlush</code> from <code>/telemetry flush</code>
+deadline exceeded</strong> — slash command returns success=false with
+<code>flush timed out after 5s — collector may be unreachable</code>.</li>
+<li><strong>OTel SDK panic</strong> — every public method on
+<code>TelemetryProvider</code> defers a <code>recover()</code> that
+downgrades panic to a logged WARN. Telemetry must never crash the host
+process.</li>
+<li><strong>TracedLLMProvider with nil inner</strong> — constructor
+returns <code>nil, errors.New(&quot;inner provider must not be nil&quot;)</code>;
+main.go aborts wrapping but continues running with the unwrapped
+provider.</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9-loud">5.2 Anti-bluff (CONST-035 /
+§11.9) — LOUD</h3>
+<p><strong>The single largest bluff vector for F16 is “telemetry on but
+pipeline broken” — the SDK initialises, the exporter constructs,
+instrumentation appears to fire, but no spans actually reach a
+backend.</strong> This compiles, passes naive unit tests, and silently
+produces zero observability. Common bluff variants:</p>
+<ol type="1">
+<li><strong>(a) Tracer initialised but no spans actually
+created</strong> — code path <code>tp.Tracer().Start(...)</code> is
+never reached (e.g., a guard
+<code>if tp != nil &amp;&amp; tp.IsNoOp()</code> accidentally inverts
+the IsNoOp check; or the wrapper isn’t wired into main.go).</li>
+<li><strong>(b) Spans created but never exported</strong> —
+TracerProvider’s BatchSpanProcessor was constructed but
+<code>ForceFlush</code> is never called (e.g., the deferred shutdown is
+in the wrong scope; or shutdown uses a 0-deadline ctx).</li>
+<li><strong>(c) Metrics registered but values never recorded</strong> —
+the Counter is created in <code>NewTelemetryProvider</code> but the
+Add() call is in dead code (e.g., behind a feature flag that’s always
+false).</li>
+<li><strong>(d) Counters incremented but exporter never sees
+them</strong> — MeterProvider’s PeriodicReader was wired to the wrong
+exporter, or the exporter’s <code>Export</code> method is never invoked
+because no MeterProvider was actually <code>SetMeterProvider</code>’d
+into otel global (the global is irrelevant — we use the local Meter —
+but a careless integration test that asserts via the global will
+silently green).</li>
+</ol>
+<p><strong>Required real-execution criteria</strong> (these define what
+“telemetry works” means in F16):</p>
+<ol type="1">
+<li><strong>Unit tests</strong> — mocks OK at the exporter boundary.
+Tests verify that <strong>spans are actually created with the right
+attributes</strong> (use OTel’s <code>tracetest.SpanRecorder</code>) and
+<strong>metrics are actually recorded with the right labels</strong>
+(use OTel’s <code>metric/sdk/metricdata</code> reader pattern).
+Anti-bluff (a) + (c).</li>
+<li><strong>Integration tests</strong> (<code>-tags=integration</code>)
+— three scenarios, gating documented loudly:
+<ul>
+<li><strong>Stdout exporter test</strong> — ALWAYS runs. Sets
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=stdout</code>, runs an in-process LLM
+call via <code>subagent.FakeLLMProvider</code> (the F15 test provider —
+already in the integration-test build linkage), captures the stdout
+exporter’s writer, asserts the captured bytes contain the literal
+<code>&quot;Name&quot;:&quot;llm.generate&quot;</code> AND a
+<code>helixcode_llm_tokens_total</code> metric record. Anti-bluff (b) +
+(d).</li>
+<li><strong>OTLP/gRPC test</strong> — gated on
+<code>OTEL_EXPORTER_OTLP_ENDPOINT</code> being set to a real reachable
+collector AND <code>OTEL_EXPORTER_OTLP_PROTOCOL=grpc</code>. SKIP-OK
+with marker
+<code>SKIP-OK: P1-F16 OTEL_EXPORTER_OTLP_ENDPOINT unset (export OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 OTEL_EXPORTER_OTLP_PROTOCOL=grpc)</code>
+otherwise.</li>
+<li><strong>OTLP/HTTP test</strong> — gated on the same env vars with
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf</code>. SKIP-OK marker
+analogous.</li>
+</ul></li>
+<li><strong>Challenge harness</strong> — exercises the stdout exporter
+end-to-end (always-runs phase) PLUS an <strong>in-tree fake OTLP/HTTP
+receiver</strong> (a tiny <code>net/http.Server</code> that registers
+<code>POST /v1/traces</code> + <code>POST /v1/metrics</code>, decodes
+the protobuf body, records the count of received spans + metrics, and
+exits with non-zero if the count is 0). The harness sets
+<code>OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:&lt;port&gt;</code> +
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf</code>, runs a full
+agent call, force-flushes, asserts the receiver got ≥ 1 trace POST AND ≥
+1 metric POST. Real export, real HTTP, real protobuf.</li>
+<li><strong>Challenge MUST exit non-zero if no spans were
+observed</strong> in any phase that did run. Span-count-zero is treated
+as a hard failure, not a warning.</li>
+</ol>
+<p><strong>Concrete forbidden phrases</strong> (anti-bluff smoke):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  internal/telemetry internal/commands/telemetry_command.go <span class="dt">\</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>CONST-042 secret-attribute filter (mandatory)</strong>:</p>
+<p>Span attributes and metric labels MUST NOT carry secret-shaped
+values. The mechanism: - <code>attribute_filter.go</code> exports
+<code>FilterAttributes(attrs []attribute.KeyValue, blocked []string) []attribute.KeyValue</code>.
+The function drops any KV whose <strong>key</strong> matches any string
+in <code>blocked</code> (case-insensitive, exact match). - The default
+blocklist <code>DefaultBlockedAttributeKeys</code> covers
+credential-shaped keys (<code>api_key</code>, <code>token</code>,
+<code>bearer</code>, <code>password</code>, <code>secret</code>,
+<code>authorization</code>, provider-specific
+<code>anthropic_api_key</code>, <code>openai_api_key</code>, AWS
+credential pair) plus prompt-body keys (<code>prompt</code>,
+<code>prompt_body</code>, <code>request_body</code>,
+<code>response_body</code>). - Every instrumentation helper that takes
+user-provided attributes (currently: tool-params attributes; not used in
+v1 but the seam is reserved for F16.5) MUST funnel through
+<code>FilterAttributes</code> before calling
+<code>span.SetAttributes</code>. v1’s three instrumentation sites use
+only well-known model-metadata + token counts + finish reason, so the
+filter is preventative; the test still asserts the filter would drop a
+deliberately-injected <code>api_key=sk-abc</code> attribute. - Prompt
+body is NEVER added as a span attribute under any circumstance — the
+LLM-instrumentation flow above explicitly omits it. A unit test asserts:
+<code>TestTracedLLMProvider_DoesNotEmitPromptBodyAttribute</code>. -
+<code>BlockedAttributeKeys</code> is overridable via
+<code>TelemetryConfig.BlockedAttributeKeys</code> — additional
+org-specific keys can be appended at startup if a downstream user
+vendors HelixCode (not exposed via env var in v1; documented seam for
+F16.5).</p>
+<p><strong>Subprocess subagent inheritance</strong>: F15’s subprocess
+subagent helper-mode runs <code>RunAsSubagent</code> which constructs
+its own runtime independently of the parent. v1 does NOT pass telemetry
+through to subagent helpers (deferred to F16.5). The subagent’s LLM call
+is therefore not traced; this is documented loudly in §8 and the porting
+doc cross-reference.</p>
+<p><strong>Real-execution criteria summary</strong> (each tied to a unit
++ Challenge phase):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Unit</th>
+<th>Integration</th>
+<th>Challenge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1) spans created</td>
+<td><code>TestTracedLLMProvider_StartsSpan</code></td>
+<td>stdout: bytes contain <code>&quot;Name&quot;:&quot;llm.generate&quot;</code></td>
+<td>Phase A asserts captured span exists</td>
+</tr>
+<tr>
+<td>(2) spans exported</td>
+<td><code>TestProvider_ForceFlushDrainsBSP</code></td>
+<td>stdout: bytes are non-empty after flush</td>
+<td>Phase B fake OTLP receiver got ≥ 1 trace POST</td>
+</tr>
+<tr>
+<td>(3) metrics recorded</td>
+<td><code>TestTracedLLMProvider_AddsTokensCounter</code></td>
+<td>stdout: bytes contain <code>helixcode_llm_tokens_total</code></td>
+<td>Phase A asserts captured metric exists</td>
+</tr>
+<tr>
+<td>(4) metrics exported</td>
+<td><code>TestProvider_MetricsForceFlushDrainsReader</code></td>
+<td>OTLP gated: collector receives ≥ 1 metric record</td>
+<td>Phase B fake OTLP receiver got ≥ 1 metric POST</td>
+</tr>
+<tr>
+<td>(5) no secret-shaped attrs</td>
+<td><code>TestFilterAttributes_DropsBlockedKeys</code> +
+<code>TestTracedLLMProvider_DoesNotEmitPromptBodyAttribute</code></td>
+<td>n/a</td>
+<td>Phase C scans the captured stdout export for forbidden keys +
+asserts none present</td>
+</tr>
+</tbody>
+</table>
+<p>The Challenge harness’s fake-receiver exit-code logic uses positive
+evidence:
+<code>if observed_traces == 0 || observed_metrics == 0: exit 1</code>.
+Absence-of-error is NEVER acceptable — a Challenge that reports PASS
+without observed positive evidence is itself a bluff.</p>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-mocks-ok-at-the-exporter-boundary">6.1 Unit (mocks OK at
+the exporter boundary)</h3>
+<ul>
+<li><code>TestExporterKind_String</code> — enum sanity.</li>
+<li><code>TestLoadConfigFromEnv_NoEnv_DisablesTelemetry</code>.</li>
+<li><code>TestLoadConfigFromEnv_EndpointOnly_DefaultsToOTLPGRPC</code>.</li>
+<li><code>TestLoadConfigFromEnv_ProtocolStdout_SelectsStdout</code>.</li>
+<li><code>TestLoadConfigFromEnv_ProtocolHTTP_SelectsOTLPHTTP</code>.</li>
+<li><code>TestLoadConfigFromEnv_ServiceNameDefault_helixcode</code>.</li>
+<li><code>TestLoadConfigFromEnv_ResourceAttributes_ParsedAsCSV</code>.</li>
+<li><code>TestLoadConfigFromEnv_BadProtocol_ReturnsErrUnknownExporterKind</code>.</li>
+<li><code>TestSelectExporter_StdoutBeatsEndpointInference</code>.</li>
+<li><code>TestNewTelemetryProvider_NoEnv_ReturnsNoOpProvider</code> —
+<code>IsNoOp()</code> true; Tracer + Meter are functional but emit
+nothing.</li>
+<li><code>TestNewTelemetryProvider_StdoutKind_ReturnsRealProvider</code>
+— <code>IsNoOp()</code> false.</li>
+<li><code>TestProvider_ForceFlushDrainsBSP</code> — uses
+<code>tracetest.SpanRecorder</code> as the exporter; asserts spans
+flushed.</li>
+<li><code>TestProvider_MetricsForceFlushDrainsReader</code> — uses
+<code>metric/sdk/metricdata</code> to read out the registered
+counter.</li>
+<li><code>TestProvider_Shutdown_RespectsCtxDeadline</code> — passes a
+<code>context.WithTimeout(0)</code>; asserts return within 100ms.</li>
+<li><code>TestFilterAttributes_DropsBlockedKeys</code> — asserts
+api_key/token/secret/prompt entries are dropped.</li>
+<li><code>TestFilterAttributes_CaseInsensitive</code> —
+<code>API_KEY</code>, <code>Api-Key</code>, <code>apikey</code> all
+dropped.</li>
+<li><code>TestFilterAttributes_PassesThroughSafeKeys</code> —
+<code>model</code>, <code>tool.name</code>,
+<code>llm.usage.prompt_tokens</code> survive.</li>
+<li><code>TestTracedLLMProvider_StartsSpan</code> —
+<code>tracetest.SpanRecorder</code> sees a span named
+<code>llm.generate</code> after a Generate call.</li>
+<li><code>TestTracedLLMProvider_AddsTokensCounter</code> — manual
+<code>metric.Reader</code> exposes the counter increment.</li>
+<li><code>TestTracedLLMProvider_PassesThroughOtherMethods</code> —
+<code>GetType</code>, <code>GetModels</code>, etc. delegate correctly
+via embedding.</li>
+<li><code>TestTracedLLMProvider_DoesNotEmitPromptBodyAttribute</code> —
+assert the captured span has no attribute key in
+<code>{&quot;prompt&quot;, &quot;prompt_body&quot;, &quot;messages&quot;}</code>.</li>
+<li><code>TestTracedLLMProvider_RecordsErrorOnFailure</code> — inner
+provider returns err; span’s status code is
+<code>codes.Error</code>.</li>
+<li><code>TestTracedLLMProvider_NoOpFastPath</code> — when
+<code>tp.IsNoOp()</code>, no allocations from the wrapper (assert via
+<code>testing.AllocsPerRun &lt; 1</code>).</li>
+<li><code>TestInstrumentToolCall_NilProvider_NoOp</code> — tp == nil →
+returns same ctx and a no-op closer.</li>
+<li><code>TestInstrumentToolCall_ErrorPath_RecordsErrorAndStatus</code>.</li>
+<li><code>TestInstrumentToolCall_SuccessPath_RecordsSuccessLabel</code>.</li>
+<li><code>TestInstrumentAgentIteration_NilProvider_NoOp</code>.</li>
+<li><code>TestInstrumentAgentIteration_RecordsDuration</code>.</li>
+<li><code>TestTelemetryCommand_Status_RendersTable</code>.</li>
+<li><code>TestTelemetryCommand_Status_NoOpReportsDisabled</code>.</li>
+<li><code>TestTelemetryCommand_Show_NoOpReportsRingBufferOnlyForStdout</code>.</li>
+<li><code>TestTelemetryCommand_Flush_DelegatesToProviderForceFlush</code>.</li>
+<li><code>TestTelemetryCommand_Flush_DeadlineErrorReportedToUser</code>.</li>
+<li><code>TestTelemetryCommand_NilProvider_ReportsUnavailable</code> —
+symmetric with <code>/sandbox</code> and <code>/subagents</code>
+patterns.</li>
+</ul>
+<h3 id="integration-gobuild-integration">6.2 Integration
+(<code>//go:build integration</code>)</h3>
+<ul>
+<li><code>TestTelemetry_StdoutExporter_RealLLMCall_FakeProvider</code> —
+ALWAYS runs. Sets stdout protocol; runs a
+<code>subagent.FakeLLMProvider</code> Generate via TracedLLMProvider;
+force-flushes; asserts captured bytes contain
+<code>&quot;Name&quot;:&quot;llm.generate&quot;</code> AND
+<code>helixcode_llm_tokens_total</code>.</li>
+<li><code>TestTelemetry_OTLPGRPC_RealCollector</code> — gated on
+<code>OTEL_EXPORTER_OTLP_ENDPOINT</code> + <code>PROTOCOL=grpc</code>.
+SKIP-OK marker:
+<code>SKIP-OK: P1-F16 OTEL_EXPORTER_OTLP_ENDPOINT unset (export OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 OTEL_EXPORTER_OTLP_PROTOCOL=grpc)</code>.
+Connects, exports, force-flushes, no errors.</li>
+<li><code>TestTelemetry_OTLPHTTP_RealCollector</code> — analogous gating
++ assertion path.</li>
+<li><code>TestTelemetry_ToolRegistry_InstrumentedExecute</code> — runs
+the registry against a real bash tool with the stdout exporter, asserts
+captured span name <code>tool.execute</code> and label
+<code>tool=&quot;bash&quot;</code>.</li>
+<li><code>TestTelemetry_AgentIteration_RealLLMCall_StdoutExport</code> —
+runs <code>BaseAgent.executeTaskWithLLM</code> with
+<code>FakeLLMProvider</code> + stdout exporter; asserts span name
+<code>agent.iteration</code> appears and counter increments.</li>
+<li><code>TestTelemetry_NoOp_FastPath_RealRegistry</code> — telemetry
+disabled; runs 1000 tool calls; asserts execution time stays within 5%
+of the un-instrumented baseline (a regression-detector for accidental
+work in the no-op path).</li>
+</ul>
+<h3 id="challenge-challengesp1-f16-opentelemetry-integration">6.3
+Challenge
+(<code>challenges/p1-f16-opentelemetry-integration/</code>)</h3>
+<p>Five-phase output skeleton:</p>
+<pre><code>=== STDOUT EXPORTER (always runs) ===
+[PASS] stdout: TelemetryProvider initialised with kind=stdout
+[PASS] stdout: TracedLLMProvider.Generate produced a span (name=llm.generate observed in stdout bytes)
+[PASS] stdout: helixcode_llm_tokens_total metric appeared in stdout bytes
+[PASS] stdout: ToolRegistry.Execute produced span name=tool.execute
+[PASS] stdout: agent.iteration span observed
+[PASS] stdout: ForceFlush returned within 5s
+
+=== FAKE OTLP/HTTP RECEIVER (always runs) ===
+[PASS] otlp-http: in-tree receiver listening on http://127.0.0.1:&lt;port&gt;
+[PASS] otlp-http: agent round-trip completed without error
+[PASS] otlp-http: receiver observed &gt;=1 POST /v1/traces (count=&lt;n&gt;)
+[PASS] otlp-http: receiver observed &gt;=1 POST /v1/metrics (count=&lt;n&gt;)
+[PASS] otlp-http: decoded protobuf trace body had span name=llm.generate (anti-bluff: real export)
+
+=== SECRET-ATTRIBUTE FILTER (always runs) ===
+[PASS] filter: deliberately-injected attribute api_key=sk-abc-123 was dropped
+[PASS] filter: deliberately-injected attribute prompt=&lt;long body&gt; was dropped
+[PASS] filter: model=gpt-4 + tool.name=bash survived
+
+=== NO-OP FAST PATH (always runs) ===
+[PASS] noop: TelemetryProvider with no env vars reports IsNoOp=true
+[PASS] noop: 1000 tool calls completed within latency budget vs baseline
+
+=== REAL OTLP COLLECTOR (gated) ===
+[PASS|skipped: OTEL_EXPORTER_OTLP_ENDPOINT unset (export OTEL_EXPORTER_OTLP_ENDPOINT=...)]
+[PASS] real-collector: TracerProvider.Shutdown returned without error
+[PASS] real-collector: collector responded with success on at least 1 trace export
+
+SUMMARY: STDOUT=6/6 PASS; OTLP-HTTP=5/5 PASS; FILTER=3/3 PASS; NOOP=2/2 PASS; REAL-COLLECTOR=&lt;n&gt;/2 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any assertion failure within
+phases that did run. Anti-bluff smoke clean check appended to harness
+output.</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>OTel Go SDK is pure Go (no CGO) and supports
+<code>linux/amd64</code>, <code>linux/arm64</code>,
+<code>darwin/amd64</code>, <code>darwin/arm64</code>,
+<code>windows/amd64</code>. The OTLP/gRPC exporter pulls in
+<code>google.golang.org/grpc</code> which has a non-trivial dep
+footprint but compiles on all targets.
+<code>cross-compile linux/macos/windows</code> (the existing
+<code>make prod</code> target) is exercised to confirm. No
+<code>runtime.GOOS</code> switching needed in F16 code.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li><strong>Logs-bridge from zap to OTel logs</strong> — F16.5. The OTel
+Go logs API entered Beta in 2024; we wait for stable release to avoid a
+churn cost. zap remains the logging surface in v1.</li>
+<li><strong>Subagent telemetry inheritance</strong> (F15 subprocess
+subagent’s LLM calls instrumented under the parent’s trace ID) — F16.5.
+v1 subagents are not instrumented; their LLM calls produce no spans.
+Documented loudly in §5.2.</li>
+<li><strong>Sandbox / LSP / MCP / session / discovery
+instrumentation</strong> — F16.5. v1 covers the three highest-signal hot
+paths only.</li>
+<li><strong>Custom OTel processors</strong> (filtering/transformation
+pipelines beyond the simple BatchSpanProcessor + PeriodicReader) —
+F16.5.</li>
+<li><strong>Sampling configuration beyond OTel env-var defaults</strong>
+— F16.5; v1 uses the SDK default
+<code>parent-based(traces-and-error-codes)</code> sampler. Users who
+need head sampling set <code>OTEL_TRACES_SAMPLER</code> per the OTel
+spec — supported transitively by the SDK without F16-specific code.</li>
+<li><strong>Prometheus exporter</strong> — explicitly rejected in v1
+(porting doc references it). OTLP + the OpenTelemetry Collector covers
+the Prometheus-shaped consumer end-to-end without HelixCode owning a
+second exporter chain.</li>
+<li><strong>Jaeger native exporter</strong> — rejected (Jaeger now
+ingests OTLP natively; the Jaeger-format exporter is deprecated
+upstream).</li>
+<li><strong>W3C Trace Context propagation in/out of HTTP requests
+HelixCode makes to LLM providers</strong> — out of v1 because the
+existing provider clients don’t take a context-carrier seam. F16.5.</li>
+<li><strong><code>/telemetry config</code> subcommand to inspect parsed
+TelemetryConfig</strong> — covered today by <code>OTEL_*</code> env-var
+standard tooling; v1 surface area kept minimal.</li>
+<li><strong><code>TelemetryConfig.BlockedAttributeKeys</code> env-var
+override</strong> — v1 hardcodes the default list; runtime override is
+F16.5.</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>§11.9 / CONST-035</strong> — Challenge has FIVE phases.
+STDOUT, FAKE-OTLP-HTTP, FILTER, and NOOP always run; REAL-COLLECTOR is
+gated and never claims PASS without runtime evidence. The five
+real-execution criteria in §5.2 each map to a unit + Challenge
+assertion. Span-count-zero is a hard Challenge failure.</li>
+<li><strong>CONST-039</strong> — Challenge at
+<code>challenges/p1-f16-opentelemetry-integration/</code> + evidence
+harness at
+<code>tests/integration/cmd/p1f16_challenge/main.go</code>.</li>
+<li><strong>CONST-042 (No-Secret-Leak)</strong> —
+<code>attribute_filter.go</code> enforces the blocklist for any
+user-provided attributes. <code>DefaultBlockedAttributeKeys</code>
+covers credential-shaped keys + prompt-body keys. Prompt body is NEVER
+added as a span attribute.
+<code>TestTracedLLMProvider_DoesNotEmitPromptBodyAttribute</code>
+asserts this. The Challenge’s FILTER phase deliberately injects
+<code>api_key=sk-abc-123</code> and <code>prompt=&lt;body&gt;</code> and
+asserts they are dropped from captured exports.</li>
+<li><strong>CONST-043 (No-Force-Push)</strong> — close-out task pushes
+to all four remotes non-force; explicit user authorization is requested
+at T12 before pushing.</li>
+<li><strong>No-Mocks-In-Production (Universal Rule 2)</strong> —
+<code>TelemetryProvider</code>, all three exporters, the three
+instrumentation sites, and the <code>/telemetry</code> slash are real.
+<code>tracetest.SpanRecorder</code> and the OTel
+<code>metric/sdk/metricdata</code> reader are TEST-ONLY scoped under
+<code>_test.go</code> files; the in-tree fake OTLP/HTTP receiver is the
+Challenge harness ONLY (under
+<code>tests/integration/cmd/p1f16_challenge/</code>) and is not linked
+from production paths.</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: scope</td>
+<td>(B) tracing + metrics, no logs-bridge</td>
+<td>OTel <code>Tracer</code> + <code>Meter</code> only; logs-bridge from
+zap deferred to F16.5</td>
+</tr>
+<tr>
+<td>Q2: exporters</td>
+<td>(C) three implementations</td>
+<td>OTLP/gRPC (production), OTLP/HTTP (proxy-friendly), stdout
+(development); selected from <code>OTEL_EXPORTER_OTLP_PROTOCOL</code>;
+default no-op when no env var set</td>
+</tr>
+<tr>
+<td>Q3: instrumentation surface</td>
+<td>(B) LLM + tools + agent loop</td>
+<td>LLM provider Generate/GenerateStream (counter for tokens, histogram
+for latency, span per call); ToolRegistry.Execute (span + counter +
+histogram per tool); agent loop iterations (span + counter + duration
+histogram); sandbox/subagent/LSP not instrumented in v1 (F16.5)</td>
+</tr>
+<tr>
+<td>Q4: configuration</td>
+<td>(B) standard OTel env vars</td>
+<td><code>OTEL_EXPORTER_OTLP_ENDPOINT</code>,
+<code>OTEL_EXPORTER_OTLP_PROTOCOL</code>, <code>OTEL_SERVICE_NAME</code>
+(default “helixcode”), <code>OTEL_RESOURCE_ATTRIBUTES</code>, plus
+standard <code>OTEL_EXPORTER_OTLP_INSECURE</code> /
+<code>OTEL_EXPORTER_OTLP_TIMEOUT</code>; no yaml/CLI flags in v1</td>
+</tr>
+<tr>
+<td>Q5: user surface</td>
+<td>(B) slash only</td>
+<td><code>/telemetry</code> slash with <code>status</code> /
+<code>show</code> / <code>flush</code>; no cobra subcommand</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="non-obvious-decisions-recorded-for-plan-time-review">11.
+Non-obvious decisions (recorded for plan-time review)</h2>
+<ol type="1">
+<li><strong>Decorator vs per-call instrumentation for the LLM hot
+path</strong> — the spec picks the <code>TracedLLMProvider</code>
+decorator over editing each provider implementation. Reason: the four
+cloud providers (anthropic, bedrock, vertex, azure) plus ollama all
+implement the same <code>Provider</code> interface; a decorator at the
+construction site (main.go) is one wrapping line, vs five identical
+span+counter blocks across five files. The decorator uses Go struct
+embedding so adding a new method to the Provider interface does not
+require an F16 update.</li>
+<li><strong>In-place vs decorator for the tool registry and agent
+loop</strong> — the spec picks <strong>in-place</strong> for these two
+sites because the registry’s <code>Execute</code> is already a
+chokepoint with five existing pre/post hooks (F07/F08/F13 +
+hooks-before/after); wrapping it with a separate decorator would force
+every test that exercises the registry to thread the decorator through.
+The agent loop has the same shape — <code>executeTaskWithLLM</code> is
+already the single LLM-call site; wrapping <code>BaseAgent</code> would
+require duplicating its public surface. Five lines in-place &gt; a
+parallel decorator hierarchy.</li>
+<li><strong>No-op vs error when no OTel env vars are set</strong> —
+chose no-op. Reason: the OTel ecosystem’s standard pattern is “telemetry
+off = no-op providers”. Erroring out would force every CI pipeline that
+doesn’t run a collector to set a sentinel env var, which is intrusive
+and unstable.</li>
+<li><strong>Span-attribute naming convention</strong> — chose OTel
+semantic-convention keys where they exist (<code>llm.model</code>,
+<code>llm.usage.prompt_tokens</code>,
+<code>llm.usage.completion_tokens</code>, <code>tool.name</code>) and
+<code>helixcode.*</code> prefix where they don’t
+(<code>helixcode.tool.name</code> is wrong — collides with
+<code>tool.name</code>; the spec uses bare <code>tool.name</code> per
+OTel semconv). Metric names use snake_case prefix
+<code>helixcode_*</code> (per Prometheus convention which the
+OTel-to-Prom translator preserves).</li>
+<li><strong>Sampling default</strong> — left at OTel SDK default
+<code>parent-based(traces-and-error-codes)</code>. Users who want head
+sampling set <code>OTEL_TRACES_SAMPLER</code> /
+<code>OTEL_TRACES_SAMPLER_ARG</code> per the OTel spec; the SDK reads
+those automatically. F16 does not pin a sampler.</li>
+<li><strong>Why no env-var override of
+<code>BlockedAttributeKeys</code></strong> — v1 hardcodes the default
+list to keep the CONST-042 floor non-bypassable in a production deploy.
+An OTEL_HELIXCODE_BLOCKED_ATTRIBUTES env var would let an operator
+weaken the blocklist by accident; F16.5 may add a strict
+“additional-keys-only” override. The seam
+(<code>TelemetryConfig.BlockedAttributeKeys</code> field) exists today
+for in-process customisation.</li>
+<li><strong>Why ring buffer is stdout-only</strong> — when an OTLP
+collector is wired, the user already has full backend visibility;
+mirroring exports into a process-local ring buffer would be wasted
+memory. Stdout is purely a developer mode and the ring buffer makes
+<code>/telemetry show</code> useful in that mode.</li>
+<li><strong>Why no telemetry for subagent helpers in v1</strong> — F15’s
+<code>RunAsSubagent</code> constructs a minimal runtime that doesn’t
+share parent state. Threading the parent’s TracerProvider through the
+env-var payload would require encoding the parent’s resource + endpoint
+in the helper’s stdin handshake, which is a non-trivial protocol change.
+F16.5 will add it; v1 documents the gap loudly.</li>
+</ol>
+</body>
+</html>

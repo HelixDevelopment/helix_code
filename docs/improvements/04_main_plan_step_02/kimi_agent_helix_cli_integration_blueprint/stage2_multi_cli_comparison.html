@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage2_multi_cli_comparison</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage2_multi_cli_comparison</h1>
+</header>
+<h1 id="comprehensive-comparative-analysis-of-top-10-cli-ai-coding-agents">Comprehensive
+Comparative Analysis of TOP 10 CLI AI Coding Agents</h1>
+<h2 id="for-helixcode-integration---stage-2-research-report">For
+HelixCode Integration - Stage 2 Research Report</h2>
+<p><strong>Date:</strong> May 2026<br />
+<strong>Scope:</strong> 10 Leading CLI AI Coding Agents (excluding
+Claude Code)<br />
+<strong>Methodology:</strong> GitHub API analysis, README/code review,
+architecture documentation, web research</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-executive-summary">Executive Summary</a></li>
+<li><a href="#2-agent-by-agent-deep-dive">Agent-by-Agent Deep
+Dive</a></li>
+<li><a href="#3-feature-comparison-matrix">Feature Comparison
+Matrix</a></li>
+<li><a href="#4-architecture-pattern-analysis">Architecture Pattern
+Analysis</a></li>
+<li><a href="#5-game-changing-features">Game-Changing Features</a></li>
+<li><a href="#6-recommendations-for-helixcode">Recommendations for
+HelixCode</a></li>
+</ol>
+<hr />
+<h2 id="executive-summary">1. Executive Summary</h2>
+<p>This report analyzes the top 10 open-source CLI AI coding agents to
+identify the best features, architectural patterns, and innovations that
+should be ported to HelixCode. Each agent was evaluated across 11
+dimensions: Repository Structure, Core Features, Unique Innovations,
+Architecture Patterns, Tool Use, Context Management, Edit Format, UI
+Components, Performance Features, Integration APIs, and Game
+Changers.</p>
+<h3 id="key-findings-at-a-glance">Key Findings at a Glance</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 11%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Stars</th>
+<th>Lang</th>
+<th>License</th>
+<th>Best At</th>
+<th>Killer Feature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Gemini CLI</strong></td>
+<td>103K</td>
+<td>TypeScript</td>
+<td>Apache-2.0</td>
+<td>Large context, research</td>
+<td>1M token context + Plan Mode</td>
+</tr>
+<tr>
+<td><strong>OpenAI Codex</strong></td>
+<td>80K</td>
+<td>Rust</td>
+<td>Apache-2.0</td>
+<td>Production agent loop</td>
+<td>Sandboxed execution + ZDR</td>
+</tr>
+<tr>
+<td><strong>Cline</strong></td>
+<td>61K</td>
+<td>TypeScript</td>
+<td>Apache-2.0</td>
+<td>IDE integration, control</td>
+<td>Plan/Act + Checkpoints</td>
+</tr>
+<tr>
+<td><strong>GPT Engineer</strong></td>
+<td>55K</td>
+<td>Python</td>
+<td>MIT</td>
+<td>Full project generation</td>
+<td>Prompt-based scaffolding</td>
+</tr>
+<tr>
+<td><strong>Aider</strong></td>
+<td>44K</td>
+<td>Python</td>
+<td>Apache-2.0</td>
+<td>Git-native pair programming</td>
+<td>Architect/Editor dual-model</td>
+</tr>
+<tr>
+<td><strong>Kilo Code</strong></td>
+<td>19K</td>
+<td>TypeScript</td>
+<td>MIT</td>
+<td>Multi-mode orchestration</td>
+<td>5 agent modes + subagents</td>
+</tr>
+<tr>
+<td><strong>Plandex</strong></td>
+<td>15K</td>
+<td>Go</td>
+<td>MIT</td>
+<td>Large-scale refactoring</td>
+<td>2M token sandboxed diffs</td>
+</tr>
+<tr>
+<td><strong>OpenCode</strong></td>
+<td>12K</td>
+<td>Go</td>
+<td>MIT</td>
+<td>BYOK freedom, plugins</td>
+<td>LSP + 75+ providers</td>
+</tr>
+<tr>
+<td><strong>Forge</strong></td>
+<td>7K</td>
+<td>Rust</td>
+<td>Apache-2.0</td>
+<td>Multi-agent orchestration</td>
+<td>6 orchestration patterns</td>
+</tr>
+<tr>
+<td><strong>Amazon Q</strong></td>
+<td>2K</td>
+<td>Rust</td>
+<td>Apache-2.0</td>
+<td>AWS ecosystem</td>
+<td>Fig integration + diagrams</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="agent-by-agent-deep-dive">2. Agent-by-Agent Deep Dive</h2>
+<hr />
+<h3 id="aider-aider-aiaider---44304-stars">2.1 Aider (Aider-AI/aider) -
+44,304 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: Python (100%) -
+Size: 140MB - Monolithic Python package with <code>aider/</code> as main
+module - website/docs in <code>aider/website/</code> - CLI entry via
+<code>aider/main.py</code></p>
+<p><strong>Core Features:</strong> - Git-native pair programming: every
+change auto-committed - Support for 100+ programming languages -
+Voice-to-code input (<code>/voice</code> command) - Image input for UI
+development - IDE watch mode (file changes trigger AI) - Architect mode
++ Editor model dual-model workflow - 4 edit formats: diff, udiff, whole,
+diff-fenced - Repo map via Tree-sitter for codebase understanding - Auto
+test/lint-fix loop - Benchmark-leading accuracy (81-88% on polyglot
+benchmarks)</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>Architect/Editor
+Mode</strong>: Separates reasoning (architect model like o1/o3) from
+editing (editor model like GPT-4o/Claude). Architect proposes solution,
+editor converts to actual file edits. Benchmarks show 85% pass rate with
+o1-preview + o1-mini. 2. <strong>Unified Diff Format</strong>: Created
+specifically to combat GPT-4 Turbo “lazy coding” (eliding code with “# …
+original code here …”). Makes GPT-4 Turbo 3X less lazy. 3.
+<strong>Flexible Search/Replace Matching</strong>: 4-layer matching
+strategy (exact, whitespace-insensitive, indentation-preserving, fuzzy
+via difflib) for robust edit application. 4. <strong>Repo Map</strong>:
+Tree-sitter-based AST parsing to build a compressed representation of
+codebase structure (classes, functions, imports) within token budget
+(default 1k map tokens).</p>
+<p><strong>Architecture Patterns:</strong> - Single-agent ReAct loop
+with tight git integration - Prompt caching optimization through careful
+prefix ordering - Hierarchical context: repo map → added files →
+conversation history - Git as session store: every action committed,
+full history inspectable</p>
+<p><strong>Tool Use:</strong> - No MCP (Model Context Protocol) - custom
+tool set - Built-in tools: read_file, write_file, search/replace, shell
+command, git operations - LSP integration for language-specific context
+- Browser automation via Playwright (optional)</p>
+<p><strong>Context Management:</strong> - Manual <code>/add</code> and
+<code>/drop</code> for file context control - <code>/tokens</code>
+command shows approximate token count and cost per file - Repo map
+auto-generated for all tracked files - <code>/reset</code> drops all
+context - Context window managed by user with granular control</p>
+<p><strong>Edit Format:</strong> - <strong>diff</strong> (search/replace
+blocks): Primary format, most models - <strong>udiff</strong> (unified
+diff): For GPT-4 Turbo, prevents laziness - <strong>whole</strong> (full
+file rewrite): Fallback for weak models - <strong>diff-fenced</strong>
+(path-in-fence): For Gemini models -
+<strong>editor-diff/editor-whole</strong>: Streamlined versions for
+architect mode</p>
+<p><strong>UI Components:</strong> - CLI terminal interface (rich text
+via Python Rich library) - VS Code extension (companion) - Voice input
+mode - Streaming output with syntax highlighting</p>
+<p><strong>Performance Features:</strong> - Prompt caching via prefix
+preservation - Lazy loading of repo map - Only sends changed files in
+context - Model-optimized edit format selection</p>
+<p><strong>Integration APIs:</strong> - Command-line interface with
+extensive flags - <code>.aider.conf.yml</code> for project configuration
+- <code>.aiderignore</code> for exclusion patterns - Environment
+variables for model selection</p>
+<p><strong>Game Changers:</strong> 1. <strong>Architect/Editor
+dual-model</strong> - separates reasoning from editing, dramatically
+improving quality 2. <strong>4-layer fuzzy matching</strong> for
+search/replace - makes edits robust even with imperfect AI output 3.
+<strong>Git-native workflow</strong> - every change auto-committed with
+meaningful messages, making AI work auditable and reversible</p>
+<p><strong>Best Feature to Port:</strong> The <strong>Architect/Editor
+dual-model architecture</strong> - this is a proven pattern that boosts
+accuracy by separating problem-solving from file manipulation. Any model
+that can reason but struggles with precise edits benefits
+enormously.</p>
+<hr />
+<h3 id="cline-clinecline---61341-stars">2.2 Cline (cline/cline) - 61,341
+stars</h3>
+<p><strong>Repository Structure:</strong> - Language: TypeScript (100%)
+- Size: 390MB - VS Code extension architecture with sidebar panel - Core
+in <code>src/core/</code>, webview UI in <code>src/core/webview/</code>
+- CLI 2.0 as separate terminal-native build</p>
+<p><strong>Core Features:</strong> - Human-in-the-loop: every file
+change and terminal command requires explicit approval - Browser
+automation via Puppeteer (Computer Use) - Workspace checkpoints (shadow
+Git repository) - Plan/Act dual-mode system - Deep Planning
+(<code>/deep-planning</code>) for complex tasks - Focus Chain (automatic
+todo list tracking) - Memory Bank (structured documentation for
+cross-session context) - 30+ LLM providers supported - Cost tracking
+(token count and API spend per task) - <code>.clinerules/</code> for
+project-specific governance - MCP Marketplace for tool discovery</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>Plan/Act Mode
+Split</strong>: Plan mode is read-only (can explore codebase but not
+modify). Act mode executes changes. Context carries over between modes.
+Can use DIFFERENT models for each mode (e.g., Claude Opus for Plan, Grok
+Fast for Act). 2. <strong>Checkpoints (Shadow Git)</strong>: Independent
+Git repository that snapshots workspace state after each AI operation.
+Granular rollback without polluting main Git history. Preserves terminal
+states and browser sessions. 3. <strong>Computer Use (Browser)</strong>:
+Launches real Chrome, navigates, screenshots, interacts with UI. Can
+verify UI changes rendered correctly, debug runtime errors visually. 4.
+<strong>Focus Chain</strong>: Automatic todo list that tracks
+implementation progress against plan with visible checklist. 5.
+<strong>Memory Bank</strong>: Structured project documentation that
+persists across sessions (<code>projectBrief.md</code>,
+<code>techContext.md</code>, <code>activeContext.md</code>,
+<code>progress.md</code>).</p>
+<p><strong>Architecture Patterns:</strong> - VS Code extension as
+primary surface, CLI 2.0 as terminal-native alternative - Agent Client
+Protocol (ACP) for editor-agnostic communication - State machine: Plan ↔︎
+Act with context preservation - Shadow Git for checkpointing</p>
+<p><strong>Tool Use:</strong> - Full MCP (Model Context Protocol)
+support - stdio and SSE transport - Custom tools: execute_command,
+read_file, write_file, replace_in_file, search_files, list_files,
+list_code_definition_names, browser_visit, ask_followup_question,
+attempt_completion - MCP Marketplace for one-click tool installation</p>
+<p><strong>Context Management:</strong> - Full file reading in Plan mode
+for comprehensive understanding - Memory Bank files for cross-session
+persistence - Timeline feature for file change tracking - Context
+carried between Plan and Act modes</p>
+<p><strong>Edit Format:</strong> - <code>replace_in_file</code> with
+SEARCH/REPLACE blocks (XML-like tags) - Diff view in editor for human
+review - Can edit or revert changes directly in diff view</p>
+<p><strong>UI Components:</strong> - VS Code sidebar panel (primary) -
+JetBrains, Cursor, Windsurf, Zed, Neovim (via ACP) - CLI 2.0 terminal
+TUI (tab between Plan/Act) - Markdown rendering inline in terminal -
+Slash commands (<code>/history</code>, <code>/settings</code>,
+<code>/deep-planning</code>)</p>
+<p><strong>Performance Features:</strong> - Model switching mid-session
+(Plan vs Act optimization) - Checkpoints enable safe experimentation -
+“Proceed While Running” for long-running processes - Lazy Teammate Mode
+and YOLO mode for autonomy tuning</p>
+<p><strong>Integration APIs:</strong> - VS Code extension API - CLI 2.0
+with <code>-y</code> headless mode, <code>--json</code> structured
+output - ACP (Agent Client Protocol) compliance - Custom workflows via
+Markdown files in <code>~/.cline/workflows/</code></p>
+<p><strong>Game Changers:</strong> 1. <strong>Plan/Act with different
+models</strong> - Using cheap/fast models for execution and
+expensive/reasoning models for planning optimizes cost and quality 2.
+<strong>Shadow Git Checkpoints</strong> - Granular rollback system that
+preserves full environment state independently of user’s Git 3.
+<strong>Computer Use / Browser automation</strong> - Real browser
+verification bridges static code analysis and runtime behavior gap</p>
+<p><strong>Best Feature to Port:</strong> The <strong>Plan/Act dual-mode
+with model switching</strong> - this is a workflow innovation that
+dramatically improves control and cost-efficiency. Every serious agent
+should have a read-only planning phase.</p>
+<hr />
+<h3 id="openai-codex-openaicodex---79852-stars">2.3 OpenAI Codex
+(openai/codex) - 79,852 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: Rust (95.6%), with
+TypeScript bindings - Size: 423MB - Monorepo: <code>codex-cli/</code>
+(main CLI), <code>codex-rs/</code> (Rust rewrite) - 640+ tagged releases
+since April 2025 - 4,000+ commits, 400 contributors</p>
+<p><strong>Core Features:</strong> - Terminal-native agent with TUI -
+ChatGPT plan integration (Plus/Pro/Team/Edu/Enterprise) - API key
+authentication alternative - OS-level sandboxed execution - Enterprise
+proxy support (custom CA certificates) - Hooks system (user prompt hook,
+pre/post hooks) - Python SDK and app-server for programmatic access -
+CI-friendly sandbox - Remote test workflows - Cross-platform binaries
+(macOS ARM/x86, Linux x86/ARM, Windows native)</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>Production-Grade
+Agent Loop</strong>: Stateless request architecture for Zero Data
+Retention (ZDR) compliance. Deliberately avoids
+<code>previous_response_id</code> to maintain statelessness. 2.
+<strong>Prompt Caching Optimization</strong>: Careful prefix
+preservation to achieve linear rather than quadratic performance. Static
+content (instructions, tools) at beginning, variable content at end. 3.
+<strong>Automatic Context Compaction</strong>:
+<code>/responses/compact</code> endpoint with specialized compaction
+items containing opaque encrypted content preserving model’s latent
+understanding. 4. <strong>Tiered Sandbox</strong>: Suggest (read-only
+auto) → Auto-Edit (auto-apply patches) → Full Auto (complete autonomy
+within sandbox). OS-level enforcement: macOS Seatbelt, Linux
+Docker+iptables, Windows native sandbox. 5. <strong>Hierarchical
+Instruction System</strong>: AGENTS.md/AGENTS.override.md cascading from
+$CODEX_HOME to CWD with 32 KiB limit. Skills instructions layered on
+top.</p>
+<p><strong>Architecture Patterns:</strong> - Rust-based harness (95.6%
+of codebase) for performance - Agent loop: inference → tool call →
+execution → observation → repeat - Stateless requests for ZDR compliance
+- SSE streaming with internal event republishing - Multi-surface: CLI,
+VS Code extension, Cursor, Windsurf</p>
+<p><strong>Tool Use:</strong> - Uses Responses API (not Chat
+Completions) - Codex-provided tools (sandboxed) + API-provided tools +
+MCP servers - Shell-centric design: one primary tool (shell executor)
+for reading, searching, editing via <code>apply_patch</code> -
+<code>apply_patch</code> for unified diffs (not whole-file rewrites)</p>
+<p><strong>Context Management:</strong> - Hierarchical prompt
+construction: system → tools → instructions → input - Automatic
+compaction when <code>auto_compact_limit</code> exceeded -
+Developer-role messages for sandbox config changes (preserves cache
+prefix) - AGENTS.md for project-specific instructions</p>
+<p><strong>Edit Format:</strong> - <strong>apply_patch</strong> (unified
+diff) - primary format - Minimal surgical diffs rather than whole-file
+rewrites - Colorized diffs for user review - Explicit approval/deny/edit
+options</p>
+<p><strong>UI Components:</strong> - Terminal TUI (interactive) -
+<code>--output-format json</code> for structured output -
+<code>--output-format stream-json</code> for real-time event streaming -
+Non-interactive mode for scripts (<code>-p</code> for simple text)</p>
+<p><strong>Performance Features:</strong> - Prompt caching through
+prefix preservation (linear vs quadratic) - Careful tool ordering to
+avoid cache misses - Context window management via automatic compaction
+- Rust implementation for speed</p>
+<p><strong>Integration APIs:</strong> - Python SDK for programmatic
+embedding - Hooks system for custom integrations - <code>--oss</code>
+flag for local models via Ollama/LM Studio - Enterprise proxy via
+SSL_CERT_FILE environment variables</p>
+<p><strong>Game Changers:</strong> 1. <strong>Stateless ZDR-compliant
+architecture</strong> - Proves you can build production agents without
+storing conversation history server-side 2. <strong>Automatic context
+compaction with encrypted latent understanding</strong> - Revolutionary
+approach to context window management that preserves model comprehension
+3. <strong>OS-native sandboxing</strong> (Seatbelt/Docker/Windows) -
+Sets the security standard for CLI agents; every agent should sandbox at
+OS level</p>
+<p><strong>Best Feature to Port:</strong> The <strong>OS-native
+sandboxed execution</strong> - this is the gold standard for agent
+security. Sandboxing at the OS level (not just application-level
+permissions) is essential for trustworthy autonomous agents.</p>
+<hr />
+<h3 id="plandex-plandex-aiplandex---15326-stars">2.4 Plandex
+(plandex-ai/plandex) - 15,326 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: Go (100%) - Size:
+57MB - Client-server architecture - CLI client in <code>app/cli/</code>,
+server in <code>app/server/</code> - Single binary for CLI, requires
+server component</p>
+<p><strong>Core Features:</strong> - 2M token effective context window
+per session - 20M+ token directory indexing via Tree-sitter - Cumulative
+diff review sandbox (changes accumulate, apply atomically) - Full auto
+mode for autonomous execution - REPL mode with fuzzy auto-complete -
+Client-server architecture (can self-host server) - Model packs with
+version-controlled settings - Git integration with auto commit messages
+- Multi-model via OpenRouter API</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>Cumulative Diff
+Review Sandbox</strong>: ALL AI-generated changes accumulate in a
+sandbox separate from project files. Review and test ALL changes before
+applying ANY. This is critical for multi-session work spanning many
+files. 2. <strong>2M Token Context Window</strong>: Direct support for
+2M tokens (~100k per file), with tree-sitter project maps for 20M+ token
+directories. One of the largest context windows in CLI agents. 3.
+<strong>Model Packs with Version Control</strong>: Model settings and
+entire model packs are version-controlled within Plandex. Can experiment
+with configurations and revert to stable settings. 4.
+<strong>Client-Server Architecture</strong>: Server handles model
+inference, client handles local file operations. Enables self-hosting
+and cloud usage.</p>
+<p><strong>Architecture Patterns:</strong> - Client-server: CLI client ↔︎
+HTTP server - Tree-sitter indexing pipeline: parse → extract → store →
+serve - Sandbox pattern: all edits staged before application - REPL with
+command history and fuzzy matching</p>
+<p><strong>Tool Use:</strong> - Custom tool system (not MCP) - Tools:
+file read/write, shell execution, git operations, codebase search -
+Tree-sitter-based code understanding</p>
+<p><strong>Context Management:</strong> - 2M token direct context
+(massive) - Tree-sitter project maps for 20M+ token directories - Manual
+file loading per task - Context persists across server sessions</p>
+<p><strong>Edit Format:</strong> - Cumulative diffs (sandboxed) - Batch
+application (apply all or none) - Review interface before
+application</p>
+<p><strong>UI Components:</strong> - Terminal REPL interface - Fuzzy
+auto-complete for commands - Diff review interface - No IDE integration
+(terminal-only by design)</p>
+<p><strong>Performance Features:</strong> - Tree-sitter incremental
+indexing - Server-side context management - Efficient binary protocol
+between client/server</p>
+<p><strong>Integration APIs:</strong> - HTTP API for server - OpenRouter
+integration for model access - Self-hosting via Docker</p>
+<p><strong>Game Changers:</strong> 1. <strong>Cumulative diff
+sandbox</strong> - The ability to accumulate, review, and apply ALL
+changes atomically is unique and solves the “AI rewrote half my project”
+problem 2. <strong>2M token context + 20M token indexing</strong> -
+Massive context handling for truly large-scale refactoring 3.
+<strong>Version-controlled model packs</strong> - Treating model
+configuration as versioned artifacts enables safe experimentation</p>
+<p><strong>Best Feature to Port:</strong> The <strong>Cumulative Diff
+Review Sandbox</strong> - this safety mechanism should be standard in
+every agent. The ability to batch-review AI changes before application
+prevents catastrophic mistakes.</p>
+<hr />
+<h3 id="forge-antinomyhqforge---7177-stars">2.5 Forge (antinomyhq/forge)
+- 7,177 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: Rust (100%) -
+Size: 18MB - Modular Rust crates structure - CLI in
+<code>crates/forge_main/</code>, engine in
+<code>crates/forge_engine/</code> - YAML-based configuration
+(<code>forge.yaml</code>)</p>
+<p><strong>Core Features:</strong> - Multi-agent AI coding orchestrator
+- 6 orchestration patterns (sequential, parallel, leader-worker, dynamic
+routing, etc.) - Multi-model coordination (Claude, Gemini, Copilot,
+Antigravity) - Agent hierarchy: Mayor (coordinator), Polecat (worker),
+Refinery (reviewer), Triage (resolver) - Quality scoring (100pt scale:
+structure/code/tests/docs) - A/B testing for prompts and agent combos -
+HTML dashboard with Chart.js - Resume/save-restore pipeline state -
+Benchmark runner with standard objectives</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>6 Orchestration
+Patterns</strong>: Sequential Pipeline, Parallel Fan-Out, Leader-Worker,
+Dynamic Routing, Explorer-Critic, Iterative Kanban. This is the most
+sophisticated multi-agent orchestration in CLI tools. 2. <strong>Agent
+Hierarchy with Specialized Roles</strong>: Mayor (persistent
+coordinator), Polecat (clones repos, writes code, commits, pushes),
+Refinery (reviews branches, runs quality gates), Triage (resolves
+ambiguities). 3. <strong>Quality Scoring System</strong>: 100-point
+scale evaluating structure, code quality, tests, and documentation.
+Enables automated quality gates. 4. <strong>A/B Testing
+Framework</strong>: Built-in framework for comparing prompts and agent
+combinations with statistical significance.</p>
+<p><strong>Architecture Patterns:</strong> - Multi-crate Rust workspace
+- Async engine with parallel dispatch - Pipeline phases: PLAN → CODE →
+VERIFY → REVIEW → FIX - Reconciler loop (every 5 seconds) driving state
+transitions - Pydantic-based configuration validation</p>
+<p><strong>Tool Use:</strong> - MCP support for external tools -
+Built-in tools: bash, file operations, git, search - Plugin registry
+with hook-based extension</p>
+<p><strong>Context Management:</strong> - Smart file chunking and
+context windowing - Session + persistent cross-run memory -
+Workspace-aware context gathering - Context compacting for long
+sessions</p>
+<p><strong>Edit Format:</strong> - Patch-based edits - Diff application
+- Whole file writes for scaffolding</p>
+<p><strong>UI Components:</strong> - Terminal UI with Rich library
+panels - HTML dashboard for monitoring - TUI for interactive
+sessions</p>
+<p><strong>Performance Features:</strong> - Parallel agent execution -
+Async/await throughout - Smart context windowing - Resume/save-restore
+for long tasks</p>
+<p><strong>Integration APIs:</strong> - YAML configuration
+(<code>forge.yaml</code>) - CLI with multiple subcommands - Plugin
+system with hooks</p>
+<p><strong>Game Changers:</strong> 1. <strong>6 orchestration
+patterns</strong> - The most complete multi-agent orchestration toolkit
+available; enables complex workflows impossible with single agents 2.
+<strong>Quality scoring with automated gates</strong> - 100pt scale with
+automated pass/fail enables CI/CD integration 3. <strong>A/B testing for
+agent configurations</strong> - Data-driven approach to finding optimal
+prompt+model combinations</p>
+<p><strong>Best Feature to Port:</strong> The <strong>6 orchestration
+patterns</strong> - Sequential, Parallel, Leader-Worker, Dynamic
+Routing, Explorer-Critic, and Kanban. This is the future of agentic
+development and HelixCode should support multiple coordination patterns
+natively.</p>
+<hr />
+<h3 id="kilo-code-kilo-orgkilocode---18881-stars">2.6 Kilo Code
+(Kilo-Org/kilocode) - 18,881 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: TypeScript
+(primary) - Size: 407MB - Central CLI engine
+(<code>packages/opencode/</code>) - VS Code extension
+(<code>packages/kilo-vscode/</code>) - Kilo Gateway
+(<code>packages/kilo-gateway/</code>) - KiloClaw cloud platform</p>
+<p><strong>Core Features:</strong> - 5 specialized agent modes: Ask,
+Architect, Code, Debug, Orchestrator - Subagent delegation (agents can
+spawn child agents) - 500+ models via provider router - Memory Bank for
+cross-session context - KiloClaw cloud agents (24/7 autonomous) -
+GitHub/GitLab bot integration - Auto Triage (issue classification,
+duplicate detection) - Code Review service (automated PR reviews) - App
+Builder (full app generation from prompts) - Gas Town multi-agent
+orchestration platform - JetBrains support (all plans, not just
+Enterprise)</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>5 Specialized
+Modes</strong>: Each mode has its own prompt, tools, and context policy.
+Architect plans, Code implements, Debug fixes, Ask answers, Orchestrator
+coordinates. This is like having 5 different agents in one tool. 2.
+<strong>Subagent Delegation</strong>: Any agent with full tool access
+(Code, Plan, Debug) can launch subagents automatically via
+<code>task</code> tool. Subagents run in isolated context, return
+summaries to parent. Enables parallel exploration. 3. <strong>KiloClaw /
+Gas Town</strong>: Multi-agent orchestration on Cloudflare. Town
+(workspace) → Rig (repo) → Bead (task) → Convoy (batch). Agents: Mayor
+(coordinator), Polecat (worker), Refinery (reviewer), Triage (resolver).
+Reconciler loop every 5 seconds. 4. <strong>Auto Triage</strong>:
+Classifies GitHub issues (bug/feature/question), detects duplicates via
+vector similarity, optionally creates fix PRs. 5. <strong>Agent
+Observability</strong>: Built-in monitoring and telemetry for agentic
+systems.</p>
+<p><strong>Architecture Patterns:</strong> - Central CLI engine powers
+all surfaces (TUI, VS Code, Cloud) - HTTP + SSE communication between
+clients and CLI - Provider Router connects to 500+ models -
+Cloudflare-based cloud infrastructure - Durable Objects for state
+management</p>
+<p><strong>Tool Use:</strong> - Full MCP support - Built-in tools: file
+edit, shell execution, search, browser - LSP Client integration for code
+intelligence - Custom subagent tool</p>
+<p><strong>Context Management:</strong> - Memory Bank for cross-session
+persistence - Mode-specific context policies - Subagent isolation
+(separate conversation history) - Organization Modes Library for shared
+team modes</p>
+<p><strong>Edit Format:</strong> - Search/Replace blocks (XML-like) -
+Diff view in IDE - File timeline for tracking changes</p>
+<p><strong>UI Components:</strong> - VS Code extension (sidebar chat +
+agent manager) - JetBrains extension - Terminal TUI - Web dashboard (for
+cloud agents) - CLI (<code>kilo</code>, <code>kilo run</code>,
+<code>kilo serve</code>)</p>
+<p><strong>Performance Features:</strong> - Multi-session orchestration
+with git worktree isolation - Parallel subagent execution - Provider
+routing with automatic failover - Auto model tiers (Frontier/Free/Open
+routing)</p>
+<p><strong>Integration APIs:</strong> - <code>kilo serve</code> HTTP
+server mode - REST API + SSE streaming - <code>@kilocode/sdk</code> for
+custom clients - GitHub/GitLab webhooks - Telegram/Discord/Slack
+bots</p>
+<p><strong>Game Changers:</strong> 1. <strong>5 specialized modes with
+subagent delegation</strong> - Mode-specific agents that can spawn
+subagents create a recursive agent hierarchy 2. <strong>Gas Town
+multi-agent platform</strong> - Cloudflare-native multi-agent
+orchestration with formal state machine (Town→Rig→Bead→Convoy) 3.
+<strong>Auto Triage + Code Review + App Builder</strong> - Full DevOps
+automation pipeline built into the agent platform</p>
+<p><strong>Best Feature to Port:</strong> The <strong>Subagent
+delegation system</strong> - The ability for any agent to spawn isolated
+child agents for parallel work is a massive force multiplier. This
+should be a core HelixCode capability.</p>
+<hr />
+<h3 id="opencode-opencode-aiopencode---12329-stars">2.7 OpenCode
+(opencode-ai/opencode) - 12,329 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: Go (100%) - Size:
+1.4MB (very lightweight) - Single binary, zero dependencies - Modular
+architecture: cmd, internal/app, internal/config, internal/db,
+internal/llm, internal/tui, internal/lsp - Cobra CLI framework, Bubble
+Tea TUI</p>
+<p><strong>Core Features:</strong> - 75+ model providers (most
+comprehensive) - Native TUI via Bubble Tea (Go) - LSP integration for
+code intelligence - MCP server support - Plugin system with
+TypeScript/JavaScript (25+ lifecycle hooks) - Multi-session support
+(parallel conversations) - SQLite database for persistent storage -
+Vim-like integrated editor - File change tracking - Named arguments for
+custom commands - <code>opencode -m</code> headless single-prompt
+execution - <code>opencode serve</code> server mode - AGENTS.md custom
+instructions - Variants support for different use cases</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>75+ Providers with
+Zero Lock-in</strong>: Claude, OpenAI, Google, Groq, Fireworks,
+Together, OpenRouter, Azure, AWS Bedrock, Ollama, and 60+ more. Can
+switch mid-session. 2. <strong>Plugin System with 25+ Hooks</strong>:
+TypeScript/JavaScript plugins with hooks for session lifecycle, tool
+execution, context modification. Plugin ecosystem via npm. Comparable to
+“oh-my-zsh for AI agents” (OMO super-plugin demonstrates this). 3.
+<strong>LSP + AST-grep Tools</strong>: Real Language Server Protocol
+integration gives AI actual code understanding, not just text search.
+Diagnostics feedback loop for self-correction. 4. <strong>Client/Server
+Architecture</strong>: Run server headlessly, connect from multiple
+clients. Enables team sharing of sessions and context. 5.
+<strong>Lightweight Go Binary</strong>: Single binary, fast startup,
+minimal resource usage compared to TypeScript/Python alternatives.</p>
+<p><strong>Architecture Patterns:</strong> - Go modules with clean
+separation - Cobra for CLI, Bubble Tea for TUI - SQLite for local
+persistence - HTTP server for remote connections - Event-driven plugin
+system</p>
+<p><strong>Tool Use:</strong> - Built-in tools: glob, grep, ls, view,
+write, edit, patch, diagnostics, bash, fetch, sourcegraph, agent - MCP
+server integration (stdio transport) - Plugin custom tools via
+TypeScript</p>
+<p><strong>Context Management:</strong> - Session-based with SQLite
+persistence - Multi-session with independent context - AGENTS.md for
+project-specific instructions - External editor support for composing
+messages</p>
+<p><strong>Edit Format:</strong> - Search/Replace blocks - Patch
+application - Whole file writes - Multi-edit support</p>
+<p><strong>UI Components:</strong> - Bubble Tea TUI (native terminal,
+not web wrapper) - CLI mode for scripting - Server mode for IDE
+integrations - External editor integration - File browser in TUI</p>
+<p><strong>Performance Features:</strong> - Go binary (fast, low memory)
+- SQLite local storage - Streaming responses - Background task
+support</p>
+<p><strong>Integration APIs:</strong> - <code>opencode serve</code> HTTP
++ SSE API - Plugin API with 25+ hooks - MCP server compatibility -
+Custom commands with named arguments - AGENTS.md configuration</p>
+<p><strong>Game Changers:</strong> 1. <strong>75+ provider support with
+mid-session switching</strong> - Unmatched model flexibility eliminates
+vendor lock-in entirely 2. <strong>LSP integration with diagnostics
+feedback loop</strong> - Gives AI actual semantic understanding of code,
+not just text patterns 3. <strong>Plugin system with 25+ lifecycle
+hooks</strong> - Creates an extensible ecosystem similar to VS Code
+extensions but for CLI agents</p>
+<p><strong>Best Feature to Port:</strong> The <strong>LSP integration
+with diagnostics feedback loop</strong> - Having the agent use actual
+language servers for code intelligence (not just text search) is a huge
+leap in accuracy. The AI can get real-time type information, errors, and
+suggestions.</p>
+<hr />
+<h3 id="gemini-cli-google-geminigemini-cli---103087-stars">2.8 Gemini
+CLI (google-gemini/gemini-cli) - 103,087 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: TypeScript - Size:
+93MB - Monorepo with <code>packages/cli/</code> and
+<code>packages/core/</code> - npm workspaces - React/Ink for TUI
+rendering</p>
+<p><strong>Core Features:</strong> - 1M token context window (Gemini 2.5
+Pro) - ReAct (Reason and Act) loop architecture - Plan Mode (read-only
+exploration) - Multimodal input (images, PDFs, sketches) - Google Search
+grounding (real-time information) - Built-in developer tools: shell,
+file ops, web search, web fetch - GitHub integration (PR reviews, issue
+triage) - GitHub Actions integration - MCP support - Custom commands
+(slash commands) - Extensions ecosystem - <code>gemini.md</code> context
+files - OAuth and API key auth - Free tier: 60 req/min, 1,000
+req/day</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>1M Token Context
+Window</strong>: With Gemini 2.5 Pro, can understand entire codebases in
+a single context window. No need for complex indexing or retrieval
+systems for most projects. 2. <strong>Plan Mode with
+<code>ask_user</code> tool</strong>: Read-only mode where agent explores
+codebase, maps dependencies, proposes solutions WITHOUT modifying files.
+<code>ask_user</code> tool pauses research to ask targeted clarifying
+questions. Bidirectional communication ensures plans align with vision.
+3. <strong>Multimodal to Code</strong>: Generate applications from
+hand-drawn sketches, analyze architecture diagrams, extract
+implementation from PDF specs. Bridges visual thinking and code. 4.
+<strong>Google Search Grounding</strong>: Real-time web search with
+citations for up-to-date information. Not training-cutoff limited. 5.
+<strong>React/Ink TUI</strong>: Modern terminal UI built with React
+component model. Component-based architecture enables rich interactive
+experiences in terminal.</p>
+<p><strong>Architecture Patterns:</strong> - Monorepo: CLI (UI) + Core
+(AI orchestration) - ReAct loop: Reason → Act → Observe → Repeat -
+React/Ink for terminal UI - Tool scheduler with confirmation gates -
+Modular tool registry</p>
+<p><strong>Tool Use:</strong> - Built-in: write-file, read-file, edit,
+read-many-files, grep, glob, ls, web-fetch, web-search, shell,
+memoryTool - MCP client for external tools - Extension tools via custom
+commands</p>
+<p><strong>Context Management:</strong> - 1M token window reduces need
+for complex retrieval - <code>gemini.md</code> files for project context
+- Conversation memory tool - Read-only MCP tools in Plan mode</p>
+<p><strong>Edit Format:</strong> - Built-in edit tool (search/replace) -
+write-file for new files - Batch file operations</p>
+<p><strong>UI Components:</strong> - React/Ink interactive terminal UI -
+Auto-completion, command history - File path references
+(<code>@path/to/file</code>) - Slash commands - Non-interactive mode
+(<code>-p</code> for scripts, <code>--output-format json</code>) -
+Stream-json for real-time monitoring</p>
+<p><strong>Performance Features:</strong> - Streaming responses -
+Background command execution - Efficient tool scheduling - Confirmation
+caching (“Always Allow”)</p>
+<p><strong>Integration APIs:</strong> -
+<code>--output-format json</code> / <code>stream-json</code> - Custom
+commands via extensions - GitHub Actions for CI/CD - MCP server
+connectivity</p>
+<p><strong>Game Changers:</strong> 1. <strong>1M token context</strong>
+- Makes complex indexing systems unnecessary for most codebases; agent
+can see everything at once 2. <strong>Plan Mode with bidirectional
+<code>ask_user</code></strong> - The safest planning mode in any CLI
+agent; actively asks clarifying questions instead of making assumptions
+3. <strong>Multimodal input (sketches→code)</strong> - Unique capability
+that no other CLI agent has; enables prototyping from visual inputs</p>
+<p><strong>Best Feature to Port:</strong> The <strong>Plan Mode with
+<code>ask_user</code> tool</strong> - The bidirectional planning
+approach where the agent actively asks clarifying questions instead of
+guessing is a massive UX improvement. This prevents the “AI did the
+wrong thing” problem at the source.</p>
+<hr />
+<h3 id="amazon-q-developer-cli-awsamazon-q-developer-cli---1947-stars">2.9
+Amazon Q Developer CLI (aws/amazon-q-developer-cli) - 1,947 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: Rust - Size: 39MB
+- AWS-first architecture - Fig integration (acquired by AWS) -
+Rust-based CLI with async runtime</p>
+<p><strong>Core Features:</strong> - AWS ecosystem integration (CDK,
+Lambda, DynamoDB, etc.) - Fig integration for command-line autocomplete
+- Architecture diagram generation (via aws-diagram-mcp-server) - CDK
+construct abstraction suggestions - Local mode with on-device processing
+- IDE extensions (VS Code, JetBrains) - ChatGPT plan integration (via
+AWS Bedrock)</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>Fig
+Integration</strong>: Command-line autocomplete and intellisense for the
+terminal. Knows your CLI tools, flags, and options. This makes the
+terminal itself smarter before AI even gets involved. 2.
+<strong>Architecture Diagram Generation</strong>: Uses
+aws-diagram-mcp-server to generate AWS architecture visuals (sequence,
+class, flow diagrams) in Python Diagram’s format. Can “talk to your
+diagrams” - update CDK constructs and sync code with diagrams. 3.
+<strong>CDK Construct Abstraction</strong>: Proposes higher-level CDK
+constructs from low-level resource definitions, improving architecture
+modularity and testability. 4. <strong>AWS-Native Context</strong>: Deep
+understanding of AWS services, IAM policies, CloudFormation, CDK
+patterns. Not generic coding but cloud-native development.</p>
+<p><strong>Architecture Patterns:</strong> - Rust-based for performance
+- MCP server architecture for tool extensibility - AWS service
+integration via SDK - Fig plugin system for CLI enhancement</p>
+<p><strong>Tool Use:</strong> - MCP servers for extensibility -
+AWS-specific tools (CDK, CloudFormation, etc.) - Standard file/shell
+tools</p>
+<p><strong>Context Management:</strong> - AWS service context -
+Project-specific AWS configuration - CDK stack context</p>
+<p><strong>Edit Format:</strong> - Standard diff-based edits -
+CDK-specific transformations</p>
+<p><strong>UI Components:</strong> - Terminal CLI - IDE extensions -
+Fig-enhanced terminal</p>
+<p><strong>Performance Features:</strong> - Rust implementation - Local
+processing options - AWS-optimized inference routing</p>
+<p><strong>Integration APIs:</strong> - AWS SDK integration - MCP server
+protocol - Fig plugin API</p>
+<p><strong>Game Changers:</strong> 1. <strong>Fig terminal
+intellisense</strong> - Makes the terminal itself intelligent before
+AI介入; every CLI agent should have this 2. <strong>Architecture diagram
+↔︎ code sync</strong> - Bidirectional relationship between diagrams and
+code is unique 3. <strong>CDK construct abstraction</strong> - AI that
+understands cloud architecture patterns and can improve modularity</p>
+<p><strong>Best Feature to Port:</strong> The <strong>Fig-style terminal
+intellisense</strong> - Enhancing the terminal with command autocomplete
+and context-aware suggestions BEFORE invoking AI is a fundamental UX
+improvement that every CLI agent should have.</p>
+<hr />
+<h3 id="gpt-engineer-antonosikagpt-engineer---55226-stars">2.10 GPT
+Engineer (AntonOsika/gpt-engineer) - 55,226 stars</h3>
+<p><strong>Repository Structure:</strong> - Language: Python - Size:
+20MB - Simple, focused architecture - <code>gpt_engineer/</code> package
+with CLI entry point - Prompt-based workflow</p>
+<p><strong>Core Features:</strong> - Full project generation from
+natural language prompts - Memory/prompt system for maintaining project
+context - Vision capabilities (image-to-code) - Multiple AI model
+support - Self-healing code generation - Interactive clarification loop
+- File-based prompt management</p>
+<p><strong>Unique Innovations:</strong> 1. <strong>Prompt-Based Project
+Scaffolding</strong>: Unlike other agents that modify existing code, GPT
+Engineer specializes in generating ENTIRE projects from scratch. The
+entire workflow is prompt-driven. 2. <strong>Memory System</strong>:
+File-based memory that persists project requirements, decisions, and
+context across sessions. Uses <code>.gpteng/</code> directory for memory
+storage. 3. <strong>Interactive Clarification</strong>: Before
+generating, asks clarifying questions to refine requirements. Reduces
+misunderstanding and rework. 4. <strong>Self-Healing</strong>: Attempts
+to fix errors automatically by re-prompting with error context.</p>
+<p><strong>Architecture Patterns:</strong> - Simple Python script
+architecture - File-based memory system - Prompt-driven workflow -
+Clarification → Generation → Refinement loop</p>
+<p><strong>Tool Use:</strong> - Standard file operations - Shell
+execution - No MCP (custom tools)</p>
+<p><strong>Context Management:</strong> - <code>.gpteng/memory/</code>
+for persistent context - File-based prompt storage - Project
+requirements documentation</p>
+<p><strong>Edit Format:</strong> - Whole file generation (primary use
+case) - Diff-based for modifications</p>
+<p><strong>UI Components:</strong> - Simple CLI interface - Interactive
+Q&amp;A for clarification - Streaming output</p>
+<p><strong>Performance Features:</strong> - Lightweight Python
+implementation - Minimal dependencies - Fast startup</p>
+<p><strong>Integration APIs:</strong> - CLI interface - Python API for
+embedding - Custom prompt templates</p>
+<p><strong>Game Changers:</strong> 1. <strong>Prompt-driven full project
+generation</strong> - Specializes in greenfield development, not just
+editing existing code 2. <strong>Interactive requirement
+clarification</strong> - Asks questions before building, dramatically
+improving output quality 3. <strong>File-based memory system</strong> -
+Simple but effective persistent context without complex databases</p>
+<p><strong>Best Feature to Port:</strong> The <strong>Interactive
+Clarification Loop</strong> - Asking clarifying questions BEFORE
+generating code is a simple but extremely effective pattern that
+dramatically reduces rework. Every agent should do this.</p>
+<hr />
+<h2 id="feature-comparison-matrix">3. Feature Comparison Matrix</h2>
+<h3 id="repository-language">3.1 Repository &amp; Language</h3>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 17%" />
+<col style="width: 15%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Stars</th>
+<th>Language</th>
+<th>License</th>
+<th>Size</th>
+<th>Age</th>
+<th>Contributors</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Gemini CLI</strong></td>
+<td>103,087</td>
+<td>TypeScript</td>
+<td>Apache-2.0</td>
+<td>93MB</td>
+<td>~1 year</td>
+<td>Google team</td>
+</tr>
+<tr>
+<td><strong>OpenAI Codex</strong></td>
+<td>79,852</td>
+<td>Rust (95.6%)</td>
+<td>Apache-2.0</td>
+<td>423MB</td>
+<td>1 year</td>
+<td>400+</td>
+</tr>
+<tr>
+<td><strong>Cline</strong></td>
+<td>61,341</td>
+<td>TypeScript</td>
+<td>Apache-2.0</td>
+<td>390MB</td>
+<td>2 years</td>
+<td>Large community</td>
+</tr>
+<tr>
+<td><strong>GPT Engineer</strong></td>
+<td>55,226</td>
+<td>Python</td>
+<td>MIT</td>
+<td>20MB</td>
+<td>2+ years</td>
+<td>Community</td>
+</tr>
+<tr>
+<td><strong>Aider</strong></td>
+<td>44,304</td>
+<td>Python</td>
+<td>Apache-2.0</td>
+<td>140MB</td>
+<td>2+ years</td>
+<td>Active</td>
+</tr>
+<tr>
+<td><strong>Kilo Code</strong></td>
+<td>18,881</td>
+<td>TypeScript</td>
+<td>MIT</td>
+<td>407MB</td>
+<td>1 year</td>
+<td>GitLab founder</td>
+</tr>
+<tr>
+<td><strong>Plandex</strong></td>
+<td>15,326</td>
+<td>Go</td>
+<td>MIT</td>
+<td>57MB</td>
+<td>2 years</td>
+<td>Solo founder</td>
+</tr>
+<tr>
+<td><strong>OpenCode</strong></td>
+<td>12,329</td>
+<td>Go</td>
+<td>MIT</td>
+<td>1.4MB</td>
+<td>1 year</td>
+<td>SST team</td>
+</tr>
+<tr>
+<td><strong>Forge</strong></td>
+<td>7,177</td>
+<td>Rust</td>
+<td>Apache-2.0</td>
+<td>18MB</td>
+<td>1 year</td>
+<td>Community</td>
+</tr>
+<tr>
+<td><strong>Amazon Q</strong></td>
+<td>1,947</td>
+<td>Rust</td>
+<td>Apache-2.0</td>
+<td>39MB</td>
+<td>2 years</td>
+<td>AWS team</td>
+</tr>
+</tbody>
+</table>
+<h3 id="core-capabilities">3.2 Core Capabilities</h3>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+<th style="text-align: center;">GPT Engineer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>File Read</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>File Write</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Shell Execute</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Git Integration</strong></td>
+<td style="text-align: center;">✅(native)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Browser Use</strong></td>
+<td style="text-align: center;">✅(Play)</td>
+<td style="text-align: center;">✅(Puppet)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Code Search</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>LSP Integration</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>MCP Support</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Plan Mode</strong></td>
+<td style="text-align: center;">✅(Arch)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅(Q&amp;A)</td>
+</tr>
+<tr>
+<td><strong>Voice Input</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Vision/Multimodal</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="model-support">3.3 Model Support</h3>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+<th style="text-align: center;">GPT Engineer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OpenAI/GPT</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(native)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Anthropic/Claude</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Google/Gemini</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(native)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Local/Ollama</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(—oss)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>DeepSeek</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>OpenRouter</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>AWS Bedrock</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>BYOK Support</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong># Providers</strong></td>
+<td style="text-align: center;">20+</td>
+<td style="text-align: center;">30+</td>
+<td style="text-align: center;">1+(—oss)</td>
+<td style="text-align: center;">5+</td>
+<td style="text-align: center;">5+</td>
+<td style="text-align: center;">500+</td>
+<td style="text-align: center;">75+</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">5+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="context-management">3.4 Context Management</h3>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Aider</th>
+<th>Cline</th>
+<th>Codex</th>
+<th>Plandex</th>
+<th>Forge</th>
+<th>Kilo</th>
+<th>OpenCode</th>
+<th>Gemini</th>
+<th>Amazon Q</th>
+<th>GPT Engineer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Context Window</strong></td>
+<td>200K</td>
+<td>200K</td>
+<td>200K</td>
+<td><strong>2M</strong></td>
+<td>200K</td>
+<td>200K</td>
+<td>200K</td>
+<td><strong>1M</strong></td>
+<td>200K</td>
+<td>200K</td>
+</tr>
+<tr>
+<td><strong>Repo Map</strong></td>
+<td>✅(TS)</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅(TS)</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Embeddings/Vector</strong></td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Tree-sitter Parsing</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Auto-compaction</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Cross-session Memory</strong></td>
+<td>❌(git)</td>
+<td>✅(MB)</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅(MB)</td>
+<td>✅(DB)</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅(files)</td>
+</tr>
+<tr>
+<td><strong>Incremental Indexing</strong></td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="edit-format">3.5 Edit Format</h3>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr>
+<th>Format</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+<th style="text-align: center;">GPT Engineer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Search/Replace</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Unified Diff</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Whole File</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅(primary)</td>
+</tr>
+<tr>
+<td><strong>Patch Apply</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Fuzzy Matching</strong></td>
+<td style="text-align: center;">✅(4-layer)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Sandboxed Review</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅(CP)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<p><em>CP = Checkpoints (Shadow Git)</em></p>
+<h3 id="ui-interaction">3.6 UI &amp; Interaction</h3>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+<th style="text-align: center;">GPT Engineer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Terminal TUI</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(CLI2)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(BT)</td>
+<td style="text-align: center;">✅(Ink)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>IDE Extension</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(VS)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Web Interface</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅(dash)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Plan Mode UI</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Streaming Output</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Headless/CI Mode</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(—y)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Multi-session</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<p><em>BT = Bubble Tea, Ink = React/Ink, VS = VS Code, dash =
+dashboard</em></p>
+<h3 id="security-sandboxing">3.7 Security &amp; Sandboxing</h3>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+<th style="text-align: center;">GPT Engineer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OS-level Sandbox</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅(Seatbelt/Docker)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Approval Gates</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(per-step)</td>
+<td style="text-align: center;">✅(tiered)</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Command Filtering</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Network Restrictions</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅(iptables)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Shadow Git</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Cumulative Diff</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>ZDR Compliance</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="multi-agent-orchestration">3.8 Multi-Agent &amp;
+Orchestration</h3>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+<th style="text-align: center;">GPT Engineer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Subagents</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(OMO)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Multi-agent Patterns</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅(6)</td>
+<td style="text-align: center;">✅(Gas)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Agent Hierarchy</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Quality Scoring</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>A/B Testing</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Auto Triage</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Auto Code Review</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-optimizations">3.9 Performance &amp;
+Optimizations</h3>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+<th style="text-align: center;">GPT Engineer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Prompt Caching</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Rust Implementation</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Go Implementation</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Streaming</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td><strong>Background Tasks</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Model Switching</strong></td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅(P/A)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td><strong>Auto-compaction</strong></td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="architecture-pattern-analysis">4. Architecture Pattern
+Analysis</h2>
+<h3 id="the-agent-loop-pattern">4.1 The Agent Loop Pattern</h3>
+<p>All 10 agents share a common execution structure (the “Agent
+Loop”):</p>
+<pre><code>User Input → Construct Prompt → LLM Inference → 
+  ├─ Tool Call → Execute Tool → Observe Result → [Loop]
+  └─ Assistant Message → Present to User → [End Turn]</code></pre>
+<p><strong>Variations:</strong> - <strong>Aider</strong>: Tight git
+integration loop; every edit committed - <strong>Cline</strong>:
+Plan/Act state machine within loop; checkpoints between iterations -
+<strong>Codex</strong>: Stateless requests with careful prefix
+preservation; ZDR compliance - <strong>Forge</strong>: Multi-agent
+orchestrator loop with 6 patterns - <strong>Kilo</strong>: Mode-specific
+loops with subagent delegation</p>
+<h3 id="context-management-architectures">4.2 Context Management
+Architectures</h3>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 26%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Agents</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Manual Control</strong></td>
+<td>Aider</td>
+<td>User explicitly adds/drops files via <code>/add</code>,
+<code>/drop</code></td>
+</tr>
+<tr>
+<td><strong>Full-Text Indexing</strong></td>
+<td>Plandex, OpenCode</td>
+<td>Tree-sitter parsing + indexing for large codebases</td>
+</tr>
+<tr>
+<td><strong>Vector Search</strong></td>
+<td>Cline, Forge, Kilo</td>
+<td>Embeddings + semantic search for relevant context</td>
+</tr>
+<tr>
+<td><strong>Massive Context</strong></td>
+<td>Gemini, Plandex</td>
+<td>1M-2M token windows reduce need for retrieval</td>
+</tr>
+<tr>
+<td><strong>Memory Bank</strong></td>
+<td>Cline, Kilo</td>
+<td>Structured files for cross-session persistence</td>
+</tr>
+<tr>
+<td><strong>Git-as-Memory</strong></td>
+<td>Aider</td>
+<td>Commit history as persistent context</td>
+</tr>
+<tr>
+<td><strong>Auto-compaction</strong></td>
+<td>Codex</td>
+<td>Automatic summarization with encrypted latent understanding</td>
+</tr>
+</tbody>
+</table>
+<h3 id="edit-format-evolution">4.3 Edit Format Evolution</h3>
+<p>The industry has converged on several edit formats, each with
+tradeoffs:</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 23%" />
+<col style="width: 31%" />
+<col style="width: 17%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Format</th>
+<th style="text-align: center;">Token Efficiency</th>
+<th style="text-align: center;">Model Compatibility</th>
+<th style="text-align: center;">Robustness</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Search/Replace</strong></td>
+<td style="text-align: center;">High</td>
+<td style="text-align: center;">Most models</td>
+<td style="text-align: center;">Medium</td>
+<td>General purpose</td>
+</tr>
+<tr>
+<td><strong>Unified Diff</strong></td>
+<td style="text-align: center;">High</td>
+<td style="text-align: center;">GPT-4 Turbo, Codex</td>
+<td style="text-align: center;">High</td>
+<td>Complex changes</td>
+</tr>
+<tr>
+<td><strong>Whole File</strong></td>
+<td style="text-align: center;">Low</td>
+<td style="text-align: center;">All models</td>
+<td style="text-align: center;">High</td>
+<td>Small files, weak models</td>
+</tr>
+<tr>
+<td><strong>Patch</strong></td>
+<td style="text-align: center;">High</td>
+<td style="text-align: center;">Codex</td>
+<td style="text-align: center;">Medium</td>
+<td>Batch changes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Aider’s Innovation</strong>: 4-layer fuzzy matching (exact →
+whitespace → indentation → difflib) makes search/replace robust even
+with imperfect AI output.</p>
+<h3 id="security-model-spectrum">4.4 Security Model Spectrum</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 50%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Level</th>
+<th>Implementation</th>
+<th>Agents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>None</strong></td>
+<td>Trust the user</td>
+<td>GPT Engineer, early agents</td>
+</tr>
+<tr>
+<td><strong>Approval Gates</strong></td>
+<td>Ask before execute</td>
+<td>Cline, Aider, OpenCode, Gemini</td>
+</tr>
+<tr>
+<td><strong>Tiered Approval</strong></td>
+<td>Auto-approve reads, ask for writes</td>
+<td>Codex (Suggest/Auto-Edit/Full Auto)</td>
+</tr>
+<tr>
+<td><strong>Shadow Git</strong></td>
+<td>Independent rollback checkpoint</td>
+<td>Cline</td>
+</tr>
+<tr>
+<td><strong>Cumulative Diff</strong></td>
+<td>Sandbox all changes before apply</td>
+<td>Plandex</td>
+</tr>
+<tr>
+<td><strong>OS Sandbox</strong></td>
+<td>Seatbelt/Docker/iptables</td>
+<td>Codex</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="game-changing-features">5. Game-Changing Features</h2>
+<h3 id="top-3-game-changers-per-agent">5.1 Top 3 Game-Changers Per
+Agent</h3>
+<h4 id="aider"><strong>Aider</strong></h4>
+<ol type="1">
+<li><strong>Architect/Editor Dual-Model</strong> - Separating reasoning
+from editing (85% pass rate with o1-preview + o1-mini)</li>
+<li><strong>4-Layer Fuzzy Matching</strong> - Exact → Whitespace →
+Indentation → difflib for robust edits</li>
+<li><strong>Git-Native Workflow</strong> - Every change auto-committed,
+full audit trail</li>
+</ol>
+<h4 id="cline"><strong>Cline</strong></h4>
+<ol type="1">
+<li><strong>Plan/Act with Different Models</strong> - Use cheap models
+for execution, expensive for planning</li>
+<li><strong>Shadow Git Checkpoints</strong> - Granular rollback
+preserving full environment state</li>
+<li><strong>Computer Use / Browser Automation</strong> - Real browser
+verification of UI changes</li>
+</ol>
+<h4 id="openai-codex"><strong>OpenAI Codex</strong></h4>
+<ol type="1">
+<li><strong>OS-Native Sandboxed Execution</strong> - Seatbelt (macOS) /
+Docker+iptables (Linux) / Native (Windows)</li>
+<li><strong>Automatic Context Compaction</strong> -
+<code>/responses/compact</code> with encrypted latent understanding
+preservation</li>
+<li><strong>Stateless ZDR Architecture</strong> - Zero Data Retention
+compliance without losing functionality</li>
+</ol>
+<h4 id="plandex"><strong>Plandex</strong></h4>
+<ol type="1">
+<li><strong>Cumulative Diff Review Sandbox</strong> - Accumulate ALL
+changes, review BEFORE applying ANY</li>
+<li><strong>2M Token Context + 20M Token Indexing</strong> - Massive
+context handling for large projects</li>
+<li><strong>Version-Controlled Model Packs</strong> - Model config as
+versioned artifacts</li>
+</ol>
+<h4 id="forge"><strong>Forge</strong></h4>
+<ol type="1">
+<li><strong>6 Orchestration Patterns</strong> - Sequential, Parallel,
+Leader-Worker, Dynamic Routing, Explorer-Critic, Kanban</li>
+<li><strong>Quality Scoring with Automated Gates</strong> - 100pt scale
+for CI/CD integration</li>
+<li><strong>A/B Testing for Agent Configs</strong> - Data-driven
+optimization of prompts and models</li>
+</ol>
+<h4 id="kilo-code"><strong>Kilo Code</strong></h4>
+<ol type="1">
+<li><strong>5 Specialized Modes + Subagent Delegation</strong> -
+Recursive agent hierarchy with isolated subagents</li>
+<li><strong>Gas Town Multi-Agent Platform</strong> - Cloudflare-native
+with formal state machine (Town→Rig→Bead→Convoy)</li>
+<li><strong>Auto Triage + Auto Review + App Builder</strong> - Full
+DevOps automation pipeline</li>
+</ol>
+<h4 id="opencode"><strong>OpenCode</strong></h4>
+<ol type="1">
+<li><strong>75+ Provider Support with Mid-Session Switching</strong> -
+Unmatched model flexibility</li>
+<li><strong>LSP Integration with Diagnostics Feedback</strong> -
+Semantic code understanding, not text search</li>
+<li><strong>Plugin System with 25+ Lifecycle Hooks</strong> - Extensible
+ecosystem via TypeScript/npm</li>
+</ol>
+<h4 id="gemini-cli"><strong>Gemini CLI</strong></h4>
+<ol type="1">
+<li><strong>1M Token Context Window</strong> - Eliminates need for
+complex indexing for most projects</li>
+<li><strong>Plan Mode with <code>ask_user</code> Tool</strong> -
+Bidirectional planning with active clarification</li>
+<li><strong>Multimodal Input (Sketches→Code)</strong> - Visual
+prototyping to functional code</li>
+</ol>
+<h4 id="amazon-q"><strong>Amazon Q</strong></h4>
+<ol type="1">
+<li><strong>Fig-Style Terminal Intellisense</strong> - Context-aware
+autocomplete before AI介入</li>
+<li><strong>Architecture Diagram ↔︎ Code Sync</strong> - Bidirectional
+diagrams and code relationship</li>
+<li><strong>CDK Construct Abstraction</strong> - AI that understands
+cloud architecture patterns</li>
+</ol>
+<h4 id="gpt-engineer"><strong>GPT Engineer</strong></h4>
+<ol type="1">
+<li><strong>Interactive Clarification Loop</strong> - Asks questions
+before building</li>
+<li><strong>Prompt-Driven Full Project Generation</strong> - Greenfield
+development from natural language</li>
+<li><strong>File-Based Memory System</strong> - Simple persistent
+context without databases</li>
+</ol>
+<hr />
+<h2 id="recommendations-for-helixcode">6. Recommendations for
+HelixCode</h2>
+<h3 id="absolute-best-features-to-port-priority-order">6.1 ABSOLUTE BEST
+Features to Port (Priority Order)</h3>
+<h4 id="tier-1-must-have"><strong>Tier 1: Must Have</strong></h4>
+<ol type="1">
+<li><strong>Plan/Act Dual-Mode with Model Switching</strong> (from
+Cline)
+<ul>
+<li>Read-only Plan mode for exploration and architecture</li>
+<li>Act mode for implementation</li>
+<li>Different models for each mode (cost/quality optimization)</li>
+<li>Context carries over between modes</li>
+<li><strong>Impact</strong>: Dramatically improves control, safety, and
+cost-efficiency</li>
+</ul></li>
+<li><strong>OS-Native Sandboxed Execution</strong> (from Codex)
+<ul>
+<li>macOS Seatbelt profiles</li>
+<li>Linux Docker containers with iptables</li>
+<li>Windows native sandbox</li>
+<li>File scope limiting + network restrictions</li>
+<li><strong>Impact</strong>: Essential for trustworthy autonomous
+agents; prevents catastrophic mistakes</li>
+</ul></li>
+<li><strong>Architect/Editor Dual-Model Architecture</strong> (from
+Aider)
+<ul>
+<li>Architect model reasons about solution</li>
+<li>Editor model converts to precise file edits</li>
+<li>85% pass rate demonstrated</li>
+<li><strong>Impact</strong>: Separates reasoning from precision; any
+model can be paired with a strong editor</li>
+</ul></li>
+</ol>
+<h4 id="tier-2-strongly-recommended"><strong>Tier 2: Strongly
+Recommended</strong></h4>
+<ol start="4" type="1">
+<li><strong>Cumulative Diff Review Sandbox</strong> (from Plandex)
+<ul>
+<li>All AI changes accumulate in sandbox</li>
+<li>Review ALL before applying ANY</li>
+<li>Atomic apply or reject</li>
+<li><strong>Impact</strong>: Prevents “AI rewrote half my project”
+disasters</li>
+</ul></li>
+<li><strong>LSP Integration with Diagnostics Feedback Loop</strong>
+(from OpenCode)
+<ul>
+<li>Real language server protocol integration</li>
+<li>Type information, real-time errors</li>
+<li>AI self-correction via diagnostics</li>
+<li><strong>Impact</strong>: Massive improvement in code accuracy vs
+text search</li>
+</ul></li>
+<li><strong>Subagent Delegation System</strong> (from Kilo Code)
+<ul>
+<li>Any agent can spawn isolated child agents</li>
+<li>Parallel execution of subtasks</li>
+<li>Automatic task decomposition</li>
+<li><strong>Impact</strong>: Force multiplier; enables complex workflows
+impossible for single agents</li>
+</ul></li>
+<li><strong>Interactive Clarification Loop</strong> (from Gemini CLI +
+GPT Engineer)
+<ul>
+<li>Agent asks clarifying questions before acting</li>
+<li>Bidirectional communication during planning</li>
+<li>Reduces misunderstanding and rework</li>
+<li><strong>Impact</strong>: Dramatically reduces “AI did the wrong
+thing” problems</li>
+</ul></li>
+</ol>
+<h4 id="tier-3-highly-valuable"><strong>Tier 3: Highly
+Valuable</strong></h4>
+<ol start="8" type="1">
+<li><strong>6 Orchestration Patterns</strong> (from Forge)
+<ul>
+<li>Sequential, Parallel, Leader-Worker, Dynamic Routing,
+Explorer-Critic, Kanban</li>
+<li>Enables complex multi-agent workflows</li>
+<li><strong>Impact</strong>: Future-proofs HelixCode for advanced agent
+coordination</li>
+</ul></li>
+<li><strong>Shadow Git Checkpoints</strong> (from Cline)
+<ul>
+<li>Independent Git repository for AI state</li>
+<li>Granular rollback without polluting main history</li>
+<li>Preserves terminal and browser state</li>
+<li><strong>Impact</strong>: Safety net for experimentation</li>
+</ul></li>
+<li><strong>75+ Provider Router</strong> (from OpenCode)
+<ul>
+<li>BYOK with any provider</li>
+<li>Mid-session model switching</li>
+<li>Automatic failover</li>
+<li><strong>Impact</strong>: Eliminates vendor lock-in</li>
+</ul></li>
+<li><strong>Tree-Sitter + Vector Indexing</strong> (from Plandex/Aider)
+<ul>
+<li>AST-based code understanding</li>
+<li>Semantic search via embeddings</li>
+<li>Incremental updates</li>
+<li><strong>Impact</strong>: Accurate codebase comprehension at
+scale</li>
+</ul></li>
+<li><strong>Fig-Style Terminal Intellisense</strong> (from Amazon Q)
+<ul>
+<li>Command autocomplete before AI介入</li>
+<li>Context-aware suggestions</li>
+<li><strong>Impact</strong>: Improves baseline terminal UX</li>
+</ul></li>
+</ol>
+<h3 id="recommended-helixcode-architecture">6.2 Recommended HelixCode
+Architecture</h3>
+<p>Based on this analysis, the optimal HelixCode architecture should
+combine:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                         HELIXCODE ARCHITECTURE                       │
+├─────────────────────────────────────────────────────────────────────┤
+│  UI Layer: Terminal TUI (Bubble Tea) + IDE Extension + Web Dashboard │
+├─────────────────────────────────────────────────────────────────────┤
+│  Mode Layer: Plan Mode (read-only) ↔ Act Mode (execute)              │
+│              + Architect/Editor dual-model option                   │
+├─────────────────────────────────────────────────────────────────────┤
+│  Agent Layer: Primary Agent + Subagent Delegation                   │
+│              + Multi-agent orchestration patterns                   │
+├─────────────────────────────────────────────────────────────────────┤
+│  Tool Layer: Built-in tools + MCP servers + LSP integration         │
+│              + Custom plugins (25+ hooks)                            │
+├─────────────────────────────────────────────────────────────────────┤
+│  Context Layer: Tree-sitter indexing + Vector search               │
+│              + 2M token window + Auto-compaction                 │
+│              + Memory Bank (cross-session) + Git-as-memory         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Edit Layer: Search/Replace + Unified Diff + Patch                │
+│              + 4-layer fuzzy matching + Cumulative sandbox         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Security Layer: OS sandbox (Seatbelt/Docker)                       │
+│              + Tiered approval + Shadow Git checkpoints            │
+│              + Command filtering + Network restrictions            │
+├─────────────────────────────────────────────────────────────────────┤
+│  Provider Layer: 75+ provider router with BYOK                     │
+│              + Mid-session model switching + Auto failover         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Platform: Go (performance) or Rust (safety) core                  │
+│              + SQLite persistence + HTTP/SSE server API              │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="implementation-priority">6.3 Implementation Priority</h3>
+<p><strong>Phase 1 (Core):</strong> 1. Plan/Act dual-mode 2. OS-native
+sandboxing 3. Architect/Editor dual-model 4. LSP integration 5.
+Tree-sitter indexing</p>
+<p><strong>Phase 2 (Advanced):</strong> 6. Subagent delegation 7.
+Cumulative diff sandbox 8. Interactive clarification 9. Shadow Git
+checkpoints 10. 75+ provider router</p>
+<p><strong>Phase 3 (Ecosystem):</strong> 11. 6 orchestration patterns
+12. Plugin system (25+ hooks) 13. Multi-agent platform (Gas Town-style)
+14. Auto Triage / Review / Builder 15. Fig-style terminal
+intellisense</p>
+<hr />
+<h2 id="summary-statistics">7. Summary Statistics</h2>
+<h3 id="most-common-patterns-across-all-agents">Most Common Patterns
+Across All Agents</h3>
+<ul>
+<li><strong>Git integration</strong>: 10/10 agents</li>
+<li><strong>Shell execution</strong>: 10/10 agents</li>
+<li><strong>Streaming output</strong>: 10/10 agents</li>
+<li><strong>Approval gates</strong>: 10/10 agents</li>
+<li><strong>MCP support</strong>: 5/10 agents (growing)</li>
+<li><strong>Plan mode</strong>: 5/10 agents</li>
+<li><strong>Multi-session</strong>: 3/10 agents</li>
+<li><strong>OS sandbox</strong>: 1/10 agents (Codex only - huge
+opportunity)</li>
+<li><strong>Subagent delegation</strong>: 2/10 agents</li>
+<li><strong>LSP integration</strong>: 2/10 agents</li>
+</ul>
+<h3 id="technology-stack-distribution">Technology Stack
+Distribution</h3>
+<ul>
+<li><strong>Python</strong>: Aider, GPT Engineer (2)</li>
+<li><strong>TypeScript</strong>: Cline, Gemini CLI, Kilo Code (3)</li>
+<li><strong>Rust</strong>: Codex, Forge, Amazon Q (3)</li>
+<li><strong>Go</strong>: Plandex, OpenCode (2)</li>
+</ul>
+<h3 id="license-distribution">License Distribution</h3>
+<ul>
+<li><strong>Apache-2.0</strong>: Aider, Cline, Codex, Forge, Gemini,
+Amazon Q (6)</li>
+<li><strong>MIT</strong>: Plandex, Kilo Code, OpenCode, GPT Engineer
+(4)</li>
+</ul>
+<hr />
+<p><em>Report generated from analysis of 10 CLI AI coding agent
+repositories, documentation, and architecture sources.</em> <em>All star
+counts, features, and capabilities accurate as of May 2026.</em></p>
+</body>
+</html>

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec08</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec08</h1>
+</header>
+<h1 id="phase-7-ai-driven-qa-session-orchestration">8. Phase 7:
+AI-Driven QA Session Orchestration</h1>
+<blockquote>
+<p><strong>Prerequisite</strong>: Phase 6 (anti-bluff framework) must be
+active so that every autonomous step carries positive evidence. Phase 5
+(agent decision pipeline) must expose
+<code>DecisionEngine.Evaluate()</code> so that
+<code>PlatformWorker</code> can route curiosity-driven actions through
+the same grounding layer used by structured test banks.</p>
+</blockquote>
+<p>The HelixQA autonomous session layer extends the test bank model into
+a self-directing QA process. A <code>SessionCoordinator</code> manages
+the full lifecycle, delegating per-platform execution to parallel
+<code>PlatformWorker</code> instances that each hold an LLM agent, a
+vision analyzer, a navigation engine, and an issue detector. The
+integration objective is to make the system self-testing: after every
+deployment, an autonomous session exercises the application across all
+supported platforms, verifies documented features against live behavior,
+explores beyond the documentation to find undiscovered issues, and
+produces a ticketed, video-annotated report without human
+intervention.</p>
+<h2 id="autonomous-session-architecture">8.1 Autonomous Session
+Architecture</h2>
+<h3 id="sessioncoordinator-orchestrates-the-4-phase-lifecycle">8.1.1
+SessionCoordinator Orchestrates the 4-Phase Lifecycle</h3>
+<p>The <code>SessionCoordinator</code> type in
+<code>pkg/autonomous/coordinator.go</code> (467 lines) is the root
+orchestrator. It accepts a <code>SessionConfig</code>, acquires an agent
+pool and vision engine from external modules, and drives the session
+through four sequential phases while running platform workers in
+parallel within each phase [<sup>66</sup>].</p>
+<p>The coordinator state machine is defined by the
+<code>PhaseManager</code> in <code>pkg/autonomous/phase.go</code> (244
+lines). <code>NewPhaseManager()</code> initializes four phases in
+<code>PhasePending</code> status [<sup>66</sup>]:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/autonomous/phase.go lines 85-95</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewPhaseManager<span class="op">()</span> <span class="op">*</span>PhaseManager <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>PhaseManager<span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        phases<span class="op">:</span> <span class="op">[]</span>Phase<span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;setup&quot;</span><span class="op">,</span>       Status<span class="op">:</span> PhasePending<span class="op">},</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;doc-driven&quot;</span><span class="op">,</span>  Status<span class="op">:</span> PhasePending<span class="op">},</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;curiosity&quot;</span><span class="op">,</span>   Status<span class="op">:</span> PhasePending<span class="op">},</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;report&quot;</span><span class="op">,</span>      Status<span class="op">:</span> PhasePending<span class="op">},</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        current<span class="op">:</span> <span class="op">-</span><span class="dv">1</span><span class="op">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Each <code>Phase</code> tracks <code>Name</code>, <code>Status</code>
+(<code>pending|running|completed|failed|skipped</code>),
+<code>StartAt</code>, <code>EndAt</code>, <code>Progress</code>
+(0.0–1.0), and an <code>Error</code> field. The
+<code>PhaseManager</code> guarantees ordered transitions:
+<code>Start</code> requires <code>pending</code>; <code>Complete</code>
+and <code>Fail</code> require <code>running</code>; <code>Skip</code>
+requires <code>pending</code> [<sup>77</sup>].</p>
+<p>The <code>SessionCoordinator.Run()</code> method enforces the
+lifecycle. It first checks that the coordinator is
+<code>StatusIdle</code>; if so, it transitions to
+<code>StatusRunning</code>, wraps the caller
+<code>context.Context</code> with a timeout derived from
+<code>SessionConfig.Timeout</code>, and then executes the four phases in
+sequence [<sup>76</sup>]:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/autonomous/coordinator.go — Run() method (excerpt)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sc <span class="op">*</span>SessionCoordinator<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>SessionResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    sc<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> sc<span class="op">.</span>status <span class="op">!=</span> StatusIdle <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        sc<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;session is %s, expected idle&quot;</span><span class="op">,</span> sc<span class="op">.</span>status<span class="op">)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    sc<span class="op">.</span>status <span class="op">=</span> StatusRunning</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    sc<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    result <span class="op">:=</span> <span class="op">&amp;</span>SessionResult<span class="op">{</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        SessionID<span class="op">:</span>       sc<span class="op">.</span>config<span class="op">.</span>SessionID<span class="op">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        Status<span class="op">:</span>          StatusRunning<span class="op">,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        StartTime<span class="op">:</span>       time<span class="op">.</span>Now<span class="op">(),</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        PlatformResults<span class="op">:</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>PlatformResult<span class="op">),</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>ctx<span class="op">,</span> sc<span class="op">.</span>config<span class="op">.</span>Timeout<span class="op">)</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cancel<span class="op">()</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 1: Setup.</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> sc<span class="op">.</span>runSetup<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        result<span class="op">.</span>Status <span class="op">=</span> StatusFailed</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        result<span class="op">.</span>Error <span class="op">=</span> err<span class="op">.</span>Error<span class="op">()</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        sc<span class="op">.</span>finalize<span class="op">(</span>result<span class="op">)</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> result<span class="op">,</span> err</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 2: Doc-Driven Verification.</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> sc<span class="op">.</span>runDocDriven<span class="op">(</span>ctx<span class="op">,</span> result<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        result<span class="op">.</span>Error <span class="op">=</span> err<span class="op">.</span>Error<span class="op">()</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 3: Curiosity-Driven Exploration.</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> sc<span class="op">.</span>config<span class="op">.</span>CuriosityEnabled <span class="op">{</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> sc<span class="op">.</span>runCuriosityDriven<span class="op">(</span>ctx<span class="op">,</span> result<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>            result<span class="op">.</span>Error <span class="op">=</span> err<span class="op">.</span>Error<span class="op">()</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        _ <span class="op">=</span> sc<span class="op">.</span>phaseManager<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;curiosity&quot;</span><span class="op">)</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 4: Report &amp; Cleanup.</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    sc<span class="op">.</span>runReport<span class="op">(</span>ctx<span class="op">,</span> result<span class="op">)</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    sc<span class="op">.</span>finalize<span class="op">(</span>result<span class="op">)</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>Run()</code> method is deliberately resilient: a failure in
+<code>runDocDriven</code> does not abort the session. The error is
+recorded in <code>result.Error</code>, execution proceeds to
+<code>runCuriosityDriven</code>, and the report phase still runs. This
+ensures that partial results — including evidence already captured — are
+never lost to an early exit [<sup>76</sup>].</p>
+<p>The <code>NewSessionCoordinator</code> constructor assembles the
+coordinator from its dependencies. It accepts the
+<code>SessionConfig</code>, an <code>AgentPool</code>, a vision
+<code>Analyzer</code>, a <code>FeatureMap</code>, a
+<code>CoverageTracker</code>, and functional <code>SessionOption</code>
+values for dependency injection:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/autonomous/coordinator.go — NewSessionCoordinator (excerpt)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSessionCoordinator<span class="op">(</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">*</span>SessionConfig<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    pool agent<span class="op">.</span>AgentPool<span class="op">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    viz analyzer<span class="op">.</span>Analyzer<span class="op">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    fm <span class="op">*</span>feature<span class="op">.</span>FeatureMap<span class="op">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    cov coverage<span class="op">.</span>CoverageTracker<span class="op">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    opts <span class="op">...</span>SessionOption<span class="op">,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">*</span>SessionCoordinator <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    sc <span class="op">:=</span> <span class="op">&amp;</span>SessionCoordinator<span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        config<span class="op">:</span>          cfg<span class="op">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        orchestrator<span class="op">:</span>    pool<span class="op">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        visionEngine<span class="op">:</span>    viz<span class="op">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        featureMap<span class="op">:</span>      fm<span class="op">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        executorFactory<span class="op">:</span> <span class="op">&amp;</span>NoopExecutorFactory<span class="op">{},</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        workers<span class="op">:</span>         <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>PlatformWorker<span class="op">),</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        phaseManager<span class="op">:</span>    NewPhaseManager<span class="op">(),</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        session<span class="op">:</span> session<span class="op">.</span>NewSessionRecorder<span class="op">(</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            cfg<span class="op">.</span>SessionID<span class="op">,</span> cfg<span class="op">.</span>OutputDir<span class="op">,</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">),</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        coverage<span class="op">:</span> cov<span class="op">,</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        status<span class="op">:</span>   StatusIdle<span class="op">,</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> opt <span class="op">:=</span> <span class="kw">range</span> opts <span class="op">{</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        opt<span class="op">(</span>sc<span class="op">)</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sc</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The constructor defaults to a <code>NoopExecutorFactory</code> so
+that unit tests can instantiate a coordinator without real platform
+executors. Production code injects a real factory via
+<code>WithExecutorFactory(f ExecutorFactory)</code> [<sup>76</sup>].</p>
+<h3 id="platformworker-per-platform">8.1.2 PlatformWorker Per
+Platform</h3>
+<p>Within each phase, <code>SessionCoordinator</code> delegates to a
+fleet of <code>PlatformWorker</code> instances, one per target platform.
+The worker is defined in <code>pkg/autonomous/worker.go</code> (~300
+lines) and holds the full per-platform tool chain [<sup>66</sup>]:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/autonomous/worker.go — PlatformWorker (excerpt)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlatformWorker <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    platform      <span class="dt">string</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    agent         agent<span class="op">.</span>Agent</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    analyzer      analyzer<span class="op">.</span>Analyzer</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    navigator     <span class="op">*</span>navigator<span class="op">.</span>NavigationEngine</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    issueDetector <span class="op">*</span>issuedetector<span class="op">.</span>IssueDetector</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    coverage      coverage<span class="op">.</span>CoverageTracker</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    navGraph      graph<span class="op">.</span>NavigationGraph</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    session       <span class="op">*</span>session<span class="op">.</span>SessionRecorder</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    executor      navigator<span class="op">.</span>ActionExecutor</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    mu            sync<span class="op">.</span>Mutex</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The worker exposes two entry points:
+<code>RunDocDriven(ctx, features)</code> and
+<code>RunCuriosityDriven(ctx, budget)</code>. In doc-driven mode, the
+worker receives a slice of <code>feature.Feature</code> structs from the
+<code>FeatureMap</code> and systematically navigates to each feature’s
+entry screen, executes its documented steps, and validates outcomes. In
+curiosity mode, the worker receives a <code>time.Duration</code> budget
+and uses <code>NavigationEngine.Explore()</code> to traverse UI paths
+not covered by documentation, detecting issues via
+<code>IssueDetector.AnalyzeScreen()</code> after each action
+[<sup>66</sup>].</p>
+<p>The coordinator initializes workers during <code>runSetup</code>. For
+each configured platform, it acquires an <code>agent.Agent</code> from
+the <code>AgentPool</code> with <code>NeedsVision: true</code>, creates
+a platform-specific <code>ActionExecutor</code> via the
+<code>ExecutorFactory</code>, and assembles the worker
+[<sup>76</sup>]:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/autonomous/coordinator.go — runSetup (excerpt)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sc <span class="op">*</span>SessionCoordinator<span class="op">)</span> runSetup<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> sc<span class="op">.</span>phaseManager<span class="op">.</span>Start<span class="op">(</span><span class="st">&quot;setup&quot;</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> platform <span class="op">:=</span> <span class="kw">range</span> sc<span class="op">.</span>config<span class="op">.</span>Platforms <span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        ag<span class="op">,</span> err <span class="op">:=</span> sc<span class="op">.</span>orchestrator<span class="op">.</span>Acquire<span class="op">(</span>ctx<span class="op">,</span> agent<span class="op">.</span>AgentRequirements<span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            NeedsVision<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        exec<span class="op">,</span> _ <span class="op">:=</span> sc<span class="op">.</span>executorFactory<span class="op">.</span>Create<span class="op">(</span>platform<span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        worker <span class="op">:=</span> NewPlatformWorker<span class="op">(</span>PlatformWorkerConfig<span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            Platform<span class="op">:</span> platform<span class="op">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            Agent<span class="op">:</span>    ag<span class="op">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            Analyzer<span class="op">:</span> sc<span class="op">.</span>visionEngine<span class="op">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            Executor<span class="op">:</span> exec<span class="op">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            Coverage<span class="op">:</span> sc<span class="op">.</span>coverage<span class="op">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            Session<span class="op">:</span>  sc<span class="op">.</span>session<span class="op">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        sc<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        sc<span class="op">.</span>workers<span class="op">[</span>platform<span class="op">]</span> <span class="op">=</span> worker</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        sc<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        _ <span class="op">=</span> sc<span class="op">.</span>session<span class="op">.</span>StartRecording<span class="op">(</span>platform<span class="op">)</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sc<span class="op">.</span>phaseManager<span class="op">.</span>Complete<span class="op">(</span><span class="st">&quot;setup&quot;</span><span class="op">)</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Table 1. Session phase specification</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 31%" />
+<col style="width: 14%" />
+<col style="width: 16%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Typical Duration</th>
+<th>Inputs</th>
+<th>Outputs</th>
+<th>Failure Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Setup</strong></td>
+<td>30–120 s</td>
+<td><code>SessionConfig</code>, <code>AgentPool</code>,
+<code>FeatureMap</code>, <code>ExecutorFactory</code></td>
+<td><code>PlatformWorker</code> map initialized, per-platform video
+started, agents acquired</td>
+<td>Hard fail: missing <code>AgentPool</code> or
+<code>ExecutorFactory</code> error. No subsequent phases run
+[<sup>76</sup>]</td>
+</tr>
+<tr>
+<td><strong>2. Doc-Driven</strong></td>
+<td>15–60 min per platform</td>
+<td><code>[]feature.Feature</code> per platform from
+<code>FeatureMap</code></td>
+<td><code>[]StepResult</code> per platform, <code>PlatformResult</code>
+with <code>FeaturesVerified</code>, <code>FeaturesFailed</code>,
+<code>IssuesFound</code></td>
+<td>Soft fail: error recorded in <code>result.Error</code>; session
+continues. Partial verification still reported [<sup>76</sup>]</td>
+</tr>
+<tr>
+<td><strong>3. Curiosity</strong></td>
+<td>5–30 min per platform (<code>CuriosityTimeout</code> budget)</td>
+<td>Navigation graph state from doc-driven phase</td>
+<td><code>[]StepResult</code> from exploration, new
+<code>NavigationGraph</code> nodes, additional issues</td>
+<td>Soft fail: phase skipped if <code>CuriosityEnabled == false</code>
+or no LLM provider available [<sup>66</sup>]</td>
+</tr>
+<tr>
+<td><strong>4. Report</strong></td>
+<td>10–60 s</td>
+<td>All <code>StepResult</code>, <code>Issue</code>, timeline events,
+coverage report</td>
+<td><code>SessionResult</code> with <code>ReportPaths</code>,
+<code>VideoPaths</code>, <code>Tickets</code>,
+<code>CoverageOverall</code></td>
+<td>Soft fail: raw JSON timeline always exported even if formatting
+errors occur [<sup>76</sup>]</td>
+</tr>
+</tbody>
+</table>
+<p>The phase specification reveals deliberate asymmetry in failure
+handling. Setup failures are hard stops because without agents or
+executors there is nothing to test. Doc-driven and curiosity failures
+are soft because partial evidence is still valuable — a session that
+verifies 70% of features and then crashes is more useful than a session
+that reports nothing. The report phase is append-only: even if HTML
+rendering fails, the raw <code>SessionResult</code> struct is serialized
+to JSON before <code>Run()</code> returns [<sup>76</sup>].</p>
+<h3 id="llm-selection-llmsverifier-scores-providers">8.1.3 LLM
+Selection: LLMsVerifier Scores Providers</h3>
+<p>Each <code>PlatformWorker</code> requires an LLM agent for vision
+analysis (screenshot interpretation, UI element detection) and chat
+reasoning (navigation planning, issue classification). The
+<code>LLMsVerifier</code> module — imported from
+<code>digital.vasic.llmorchestrator</code> — scores available providers
+at session start and selects the strongest vision model across all
+configured hosts [<sup>66</sup>].</p>
+<p>The verifier operates as a strategy pattern. Its configuration lives
+in <code>llmsverifier.yaml</code> (path controlled by
+<code>LLMSVERIFIER_CONFIG</code>, default
+<code>./llmsverifier.yaml</code>). Key tunables include
+<code>LLMSVERIFIER_MIN_SCORE</code> (default 0.6),
+<code>LLMSVERIFIER_MAX_MODELS</code> (default 5), and
+<code>LLMSVERIFIER_CACHE_RESULTS</code> (default <code>true</code> with
+24-hour TTL) [<sup>66</sup>]. The scoring pipeline probes each provider
+with a reference vision task, measures response latency, correctness
+against a ground-truth label set, and cost per token, then ranks
+providers by a composite score.</p>
+<p>The <code>SessionCoordinator</code> passes
+<code>NeedsVision: true</code> to <code>AgentPool.Acquire()</code>, and
+the pool internally queries <code>LLMsVerifier</code> for the
+highest-scoring vision-capable agent. If distributed vision hosts are
+configured (<code>HELIX_VISION_HOSTS</code>), the verifier probes each
+host via SSH and may activate <code>llama.cpp</code> RPC mode if the
+combined memory across hosts can load a larger vision model than any
+single host supports [<sup>66</sup>].</p>
+<h3 id="feature-map-building-docprocessor-reads-project-docs">8.1.4
+Feature Map Building: DocProcessor Reads Project Docs</h3>
+<p>Before the doc-driven phase can execute, the
+<code>SessionCoordinator</code> needs a <code>FeatureMap</code> — a
+machine-readable index of every feature described in the project’s
+documentation. The <code>DocProcessor</code> module (sibling repository
+<code>digital.vasic.docprocessor</code>) scans the documentation root
+(<code>HELIX_DOCS_ROOT</code>, default <code>./docs</code>), discovers
+files by extension (<code>HELIX_DOCS_FORMATS</code>, default
+<code>md,yaml,html,adoc,rst</code>), and parses each document into
+structured <code>feature.Feature</code> records [<sup>66</sup>].</p>
+<p>A <code>Feature</code> record contains the feature name, description,
+platform applicability, prerequisite conditions, expected outcomes, and
+references to the source documentation sections. The
+<code>FeatureMap</code> aggregates all features and exposes
+<code>FeaturesForPlatform(platform string) []Feature</code>, which the
+coordinator calls during <code>runSetup</code> to partition the feature
+set per worker [<sup>66</sup>].</p>
+<p>The <code>CoverageTracker</code> interface — also from
+<code>DocProcessor</code> — tracks which features have been verified
+during the session. After <code>runDocDriven</code>, the coordinator
+queries <code>coverage.Coverage()</code> to compute
+<code>CoverageOverall</code>. The coverage target
+(<code>HELIX_AUTONOMOUS_COVERAGE_TARGET</code>, default 0.90) is a
+session-level success criterion: if
+<code>CoverageOverall &lt; CoverageTarget</code>, the session status is
+<code>StatusComplete</code> but the result carries a warning that
+coverage is below target [<sup>66</sup>].</p>
+<h2 id="heavy-qa-session-design">8.2 Heavy QA Session Design</h2>
+<h3 id="session-trigger-manual-scheduled-and-event-driven">8.2.1 Session
+Trigger: Manual, Scheduled, and Event-Driven</h3>
+<p>Autonomous sessions can be triggered through three paths.</p>
+<p><strong>Manual trigger</strong>: the <code>autonomous</code>
+subcommand of the HelixQA CLI. Running <code>make qa-session</code> (or
+<code>helixqa autonomous --project . --platforms android,desktop,web --timeout 2h</code>)
+starts a single-shot session. The CLI accepts <code>--env</code> for
+environment file override and <code>--timeout</code> for per-session cap
+[<sup>66</sup>].</p>
+<p><strong>Scheduled trigger</strong>: cron-like invocation via the
+system orchestrator. The <code>.env.example</code> file defines
+<code>HELIX_AUTONOMOUS_ENABLED</code> (default <code>true</code>) and
+<code>HELIX_AUTONOMOUS_TIMEOUT</code> (default <code>2h</code>). A
+system-level cron job or systemd timer invokes
+<code>helixqa autonomous</code> at a configured cadence — nightly for
+active development branches, weekly for stable release branches. The
+session ID is auto-generated from
+<code>fmt.Sprintf(&quot;helix-%d&quot;, time.Now().Unix())</code> unless
+overridden in <code>SessionConfig.SessionID</code> [<sup>66</sup>].</p>
+<p><strong>Event-driven trigger</strong>: post-deploy hook. The
+<code>pkg/nexus/adapter.go</code> package provides a
+<code>NexusAdapter</code> that listens for deployment completion events
+from the CI/CD pipeline. When a deployment event is received, the
+adapter constructs a <code>SessionConfig</code> with
+<code>Platforms</code> derived from the deployment manifest and invokes
+<code>NewSessionCoordinator(...).Run(ctx)</code>. This path is the
+integration default for production environments: every deployment
+automatically triggers a full-platform autonomous session before the
+deployment is marked healthy [<sup>66</sup>].</p>
+<p>A complete session configuration file for the event-driven trigger
+path is shown below. This YAML is consumed by <code>SessionConfig</code>
+via the config loader in <code>pkg/config/config.go</code>
+[<sup>66</sup>]:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># helix-session.yaml — Autonomous QA Session Configuration</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">session</span><span class="kw">:</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">session_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;auto-deploy-2026-05-01-001&quot;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">output_dir</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./qa-results&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;android&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;desktop&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;web&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;cli&quot;</span><span class="kw">]</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2h&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">coverage_target</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.90</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">curiosity_enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">curiosity_timeout</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;30m&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">report_formats</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;markdown&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;html&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;json&quot;</span><span class="kw">]</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">resources</span><span class="kw">:</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">gomaxprocs</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">nice_level</span><span class="kw">:</span><span class="at"> </span><span class="dv">19</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">agent_pool_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">platform_overrides</span><span class="kw">:</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">android</span><span class="kw">:</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">device</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;emulator-5554&quot;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">package</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;com.example.app&quot;</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2h&quot;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">web</span><span class="kw">:</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;http://localhost:8080&quot;</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">browser</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;chromium&quot;</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">desktop</span><span class="kw">:</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">display</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;:0&quot;</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">process</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;myapp-desktop&quot;</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cli</span><span class="kw">:</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;30m&quot;</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">verifier_config</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./llmsverifier.yaml&quot;</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">min_score</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.6</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_models</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vision_hosts</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;thinker.local&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;amber.local&quot;</span><span class="kw">]</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="fu">recording</span><span class="kw">:</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">video</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">screenshots</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">video_quality</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;medium&quot;</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">screenshot_format</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;png&quot;</span></span></code></pre></div>
+<p>The <code>resources</code> stanza encodes the constitutional resource
+limits directly: <code>gomaxprocs: 2</code> limits the Go runtime to two
+OS threads, and <code>nice_level: 19</code> ensures the session process
+yields to interactive workloads. The <code>platform_overrides</code>
+stanza allows per-platform timeout and device customization, while the
+top-level <code>session</code> stanza defines the 4-phase lifecycle
+parameters.</p>
+<h3 id="platform-parallelism">8.2.2 Platform Parallelism</h3>
+<p>The coordinator runs all platform workers concurrently within each
+phase. In <code>runDocDriven</code>, it iterates over the
+<code>workers</code> map, launches a goroutine per worker, and waits on
+a <code>sync.WaitGroup</code> [<sup>76</sup>]:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/autonomous/coordinator.go — runDocDriven (excerpt)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> wg sync<span class="op">.</span>WaitGroup</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> mu sync<span class="op">.</span>Mutex</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> firstErr <span class="dt">error</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> platform<span class="op">,</span> worker <span class="op">:=</span> <span class="kw">range</span> sc<span class="op">.</span>workers <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    features <span class="op">:=</span> sc<span class="op">.</span>featureMap<span class="op">.</span>FeaturesForPlatform<span class="op">(</span>platform<span class="op">)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>features<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    wg<span class="op">.</span>Add<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> <span class="kw">func</span><span class="op">(</span>p <span class="dt">string</span><span class="op">,</span> w <span class="op">*</span>PlatformWorker<span class="op">,</span> feats <span class="op">[]</span>feature<span class="op">.</span>Feature<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">defer</span> wg<span class="op">.</span>Done<span class="op">()</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        stepResults<span class="op">,</span> err <span class="op">:=</span> w<span class="op">.</span>RunDocDriven<span class="op">(</span>ctx<span class="op">,</span> feats<span class="op">)</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">defer</span> mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> firstErr <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> firstErr <span class="op">=</span> err <span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}(</span>platform<span class="op">,</span> worker<span class="op">,</span> features<span class="op">)</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>wg<span class="op">.</span>Wait<span class="op">()</span></span></code></pre></div>
+<p>The same pattern repeats in <code>runCuriosityDriven</code>. Each
+worker writes to its own isolated evidence directory under the session
+output root. The <code>SessionRecorder</code> manages per-platform
+<code>VideoManager</code> instances keyed by platform name, so video
+files for Android (<code>video-android-{timestamp}.mp4</code>) and Web
+(<code>video-web-{timestamp}.mp4</code>) never collide
+[<sup>66</sup>].</p>
+<p><strong>Table 2. PlatformWorker configuration per
+platform</strong></p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 33%" />
+<col style="width: 24%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Executor</th>
+<th>Device / Process Requirements</th>
+<th>Evidence Subdirectory</th>
+<th>Default Timeout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Android</strong></td>
+<td><code>ADBExecutor</code> —
+<code>adb shell input tap/text/swipe</code>, <code>screencap</code></td>
+<td>ADB device ID (<code>HELIX_ANDROID_DEVICE</code>, default
+<code>emulator-5554</code>); package name
+(<code>HELIX_ANDROID_PACKAGE</code>)</td>
+<td><code>evidence/android/</code></td>
+<td>2 h</td>
+</tr>
+<tr>
+<td><strong>Android TV</strong></td>
+<td><code>ADBExecutor</code> + DPAD navigation;
+<code>CompetingAppPackages</code> guard</td>
+<td>ADB device ID; force-stop competing apps before test</td>
+<td><code>evidence/androidtv/</code></td>
+<td>2 h</td>
+</tr>
+<tr>
+<td><strong>Web</strong></td>
+<td><code>PlaywrightExecutor</code> — Playwright CDP over
+<code>HELIX_WEB_URL</code></td>
+<td>Browser process (<code>HELIX_WEB_BROWSER</code>, default
+<code>chromium</code>); reachable URL</td>
+<td><code>evidence/web/</code></td>
+<td>2 h</td>
+</tr>
+<tr>
+<td><strong>Desktop (Linux)</strong></td>
+<td><code>X11Executor</code> — <code>xdotool</code> / <code>xte</code>
+for input, <code>import</code> for screenshots</td>
+<td>X11 display (<code>HELIX_DESKTOP_DISPLAY</code>, default
+<code>:0</code>); target process name
+(<code>HELIX_DESKTOP_PROCESS</code>)</td>
+<td><code>evidence/desktop/</code></td>
+<td>2 h</td>
+</tr>
+<tr>
+<td><strong>Desktop (macOS)</strong></td>
+<td><code>AXTreeExecutor</code> — macOS accessibility tree +
+<code>screencapture</code></td>
+<td>Target process name; accessibility permissions</td>
+<td><code>evidence/desktop/</code></td>
+<td>2 h</td>
+</tr>
+<tr>
+<td><strong>Desktop (Windows)</strong></td>
+<td><code>UIAExecutor</code> — Windows UI Automation +
+<code>PrintWindow</code></td>
+<td>Target process name; UIA runtime</td>
+<td><code>evidence/desktop/</code></td>
+<td>2 h</td>
+</tr>
+<tr>
+<td><strong>CLI</strong></td>
+<td><code>CLIExecutor</code> — shell command execution, stdout/stderr
+capture</td>
+<td>Shell environment; working directory</td>
+<td><code>evidence/cli/</code></td>
+<td>30 min</td>
+</tr>
+<tr>
+<td><strong>API</strong></td>
+<td><code>APIExecutor</code> — HTTP client with CSRF preflight, token
+cache</td>
+<td>Base URL (<code>HTTPBaseURL</code>); valid credentials</td>
+<td><code>evidence/api/</code></td>
+<td>30 min</td>
+</tr>
+</tbody>
+</table>
+<p>Every platform-specific executor implements the common
+<code>ActionExecutor</code> interface (<code>Click</code>,
+<code>Type</code>, <code>Scroll</code>, <code>Swipe</code>,
+<code>KeyPress</code>, <code>Back</code>, <code>Home</code>,
+<code>Screenshot</code>), so the <code>NavigationEngine</code> and
+<code>IssueDetector</code> are platform-agnostic above the executor
+boundary [<sup>66</sup>]. The CLI and API executors have shorter default
+timeouts (30 min) because they do not require video recording or
+screenshot analysis; their evidence is textual.</p>
+<h3 id="timeout-and-resource-limits">8.2.3 Timeout and Resource
+Limits</h3>
+<p>Heavy QA sessions are resource-intensive: each platform worker may
+run an LLM inference, capture video via FFmpeg, and hold a browser or
+ADB connection. The constitutional mandate limits a single session to
+<strong>30–40% of host resources</strong> [<sup>5</sup>].</p>
+<p>The resource envelope is enforced at three layers:</p>
+<ol type="1">
+<li><p><strong>CPU affinity and priority</strong>: Each
+<code>PlatformWorker</code> goroutine is launched with
+<code>runtime.GOMAXPROCS(2)</code> scoped to the worker’s execution
+context, and the session process is started with <code>nice -n 19</code>
+so that autonomous QA never starves interactive or production workloads.
+The <code>GOMAXPROCS=2</code> limit is hard-coded in
+<code>pkg/autonomous/pipeline.go</code> as a session-wide cap; the Go
+runtime scheduler distributes the two OS threads across all worker
+goroutines [<sup>66</sup>].</p></li>
+<li><p><strong>Session timeout</strong>:
+<code>SessionConfig.Timeout</code> defaults to
+<code>2 * time.Hour</code> and is enforced via
+<code>context.WithTimeout(ctx, sc.config.Timeout)</code> at the top of
+<code>Run()</code>. When the timeout fires, all in-flight calls receive
+<code>context.DeadlineExceeded</code>, workers stop gracefully, and the
+session proceeds to the report phase with whatever evidence has been
+collected [<sup>76</sup>].</p></li>
+<li><p><strong>Phase-level budgets</strong>: The curiosity phase has its
+own budget, <code>CuriosityTimeout</code> (default
+<code>30 * time.Minute</code>). Doc-driven phase uses a per-feature
+timeout derived from <code>feature.EstimatedDuration</code> with a 2×
+multiplier. The HTTP executor enforces <code>StepTimeout</code> per API
+call [<sup>66</sup>].</p></li>
+</ol>
+<p>Memory limits are implicit: the <code>AgentPool</code> size
+(<code>HELIX_AGENT_POOL_SIZE</code>, default 3) caps the number of
+concurrent LLM contexts. Video recording quality
+(<code>HELIX_RECORDING_VIDEO_QUALITY</code>, default
+<code>medium</code>) maps to FFmpeg presets controlling bitrate and
+buffer size.</p>
+<h3 id="graceful-degradation">8.2.4 Graceful Degradation</h3>
+<p>The autonomous session degrades rather than aborts when dependencies
+are missing.</p>
+<p><strong>LLM provider unavailability</strong>: If
+<code>LLMsVerifier</code> cannot score any provider above
+<code>LLMSVERIFIER_MIN_SCORE</code> (0.6), or if all vision hosts are
+unreachable, <code>AgentPool.Acquire()</code> returns an error. During
+setup this is a hard failure. If a mid-session provider outage occurs,
+<code>PlatformWorker.RunCuriosityDriven</code> detects the failure, logs
+the error, and returns. The coordinator records the error but does not
+roll back doc-driven results. The session does not fabricate fake
+curiosity results; the phase simply terminates early and the report
+notes partial curiosity coverage [<sup>66</sup>].</p>
+<p><strong>Device unavailability</strong>: If an Android device is
+disconnected or a desktop process is not running when
+<code>executorFactory.Create(platform)</code> is called, the factory
+returns an error. The coordinator treats this as a per-platform skip:
+the worker is not added to the map, the platform is omitted from
+<code>PlatformResults</code>, and the report contains a
+<code>SkippedPlatforms</code> entry. Other platforms continue normally
+[<sup>66</sup>].</p>
+<p>The following Mermaid diagram illustrates the 4-phase lifecycle with
+parallel <code>PlatformWorker</code> execution:</p>
+<pre class="mermaid"><code>flowchart TB
+    subgraph Coordinator[&quot;SessionCoordinator&quot;]
+        direction TB
+        P1[&quot;Phase 1: Setup&quot;] --&gt; P2[&quot;Phase 2: Doc-Driven&quot;]
+        P2 --&gt; P3[&quot;Phase 3: Curiosity&quot;]
+        P3 --&gt; P4[&quot;Phase 4: Report&quot;]
+    end
+
+    subgraph Workers[&quot;Parallel PlatformWorkers&quot;]
+        direction LR
+        W1[&quot;Android Worker&lt;br/&gt;ADBExecutor + IssueDetector&quot;]
+        W2[&quot;Web Worker&lt;br/&gt;PlaywrightExecutor + IssueDetector&quot;]
+        W3[&quot;Desktop Worker&lt;br/&gt;X11Executor + IssueDetector&quot;]
+        W4[&quot;CLI Worker&lt;br/&gt;CLIExecutor + IssueDetector&quot;]
+    end
+
+    P1 --&gt;|&quot;acquire agent, create executor, start video&quot;| Workers
+    P2 --&gt;|&quot;RunDocDriven(ctx, features)&quot;| Workers
+    P3 --&gt;|&quot;RunCuriosityDriven(ctx, budget)&quot;| Workers
+    Workers --&gt;|&quot;StepResult[], Issue[], coverage&quot;| P4
+    P4 --&gt;|&quot;StopRecording, ExportTimeline, GenerateReport&quot;| Out[&quot;SessionResult&lt;br/&gt;+ report.md/html/json&lt;br/&gt;+ tickets/&lt;br/&gt;+ evidence/&quot;]
+
+    style Coordinator fill:#f5f5f5,stroke:#7B6D8D,stroke-width:2px
+    style Workers fill:#f5f5f5,stroke:#6C5B7B,stroke-width:2px
+    style Out fill:#f0f0f0,stroke:#584A6E,stroke-width:2px</code></pre>
+<h2 id="report-generation-and-distribution">8.3 Report Generation and
+Distribution</h2>
+<h3 id="qa-report-markdown-html-json">8.3.1 QA Report: Markdown + HTML +
+JSON</h3>
+<p>The report phase (<code>runReport</code>) aggregates all evidence
+into three output formats. The <code>pkg/reporter</code> package defines
+<code>QAReport</code> as the root data structure [<sup>66</sup>]:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/reporter/reporter.go — QAReport</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> QAReport <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    Title            <span class="dt">string</span>            <span class="st">`json:&quot;title&quot;`</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    GeneratedAt      time<span class="op">.</span>Time         <span class="st">`json:&quot;generated_at&quot;`</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    PlatformResults  <span class="op">[]*</span>PlatformResult <span class="st">`json:&quot;platform_results&quot;`</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    TotalChallenges  <span class="dt">int</span>               <span class="st">`json:&quot;total_challenges&quot;`</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    PassedChallenges <span class="dt">int</span>               <span class="st">`json:&quot;passed_challenges&quot;`</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    FailedChallenges <span class="dt">int</span>               <span class="st">`json:&quot;failed_challenges&quot;`</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    TotalCrashes     <span class="dt">int</span>               <span class="st">`json:&quot;total_crashes&quot;`</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    TotalANRs        <span class="dt">int</span>               <span class="st">`json:&quot;total_anrs&quot;`</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    TotalDuration    time<span class="op">.</span>Duration     <span class="st">`json:&quot;total_duration&quot;`</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    OutputDir        <span class="dt">string</span>            <span class="st">`json:&quot;output_dir&quot;`</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>For autonomous sessions, <code>runReport</code> populates a
+<code>SessionResult</code> struct that subsumes <code>QAReport</code>
+fields and adds autonomous-specific data: <code>Issues</code>,
+<code>Timeline</code>, <code>CoverageOverall</code>,
+<code>Phases</code>, <code>VideoPaths</code>, and <code>NavGraphs</code>
+[<sup>76</sup>]. The result is then written in three formats by calling
+<code>WriteMarkdown</code>, <code>WriteHTML</code>, and
+<code>WriteJSON</code> on a <code>Reporter</code> instance.</p>
+<p>A typical session output directory is structured as follows
+[<sup>66</sup>]:</p>
+<pre><code>qa-results/
+├── report.md
+├── report.html
+├── report.json
+├── evidence/
+│   ├── screenshot-step1-1714500000000.png
+│   ├── video-android-1714500000000.mp4
+│   ├── video-web-1714500000000.mp4
+│   ├── logcat-1714500000000.txt
+│   └── stacktrace-1714500000000.txt
+└── tickets/
+    ├── TICKET-001.md
+    └── TICKET-002.md</code></pre>
+<h3 id="video-evidence-with-timeline-event-overlays">8.3.2 Video
+Evidence with Timeline Event Overlays</h3>
+<p>Per-platform video is recorded continuously during the session. The
+<code>SessionRecorder</code> in <code>pkg/session/recorder.go</code>
+(246 lines) maintains a <code>map[string]*VideoManager</code> keyed by
+platform [<sup>66</sup>]. Video recording starts in
+<code>runSetup</code> via <code>session.StartRecording(platform)</code>
+and stops in <code>runReport</code> via
+<code>session.StopRecording(platform)</code>. The video file path
+follows the convention
+<code>video-{platform}-{sessionStartUnix}.mp4</code>
+[<sup>66</sup>].</p>
+<p>Timeline events are correlated with video offsets. Every
+<code>TimelineEvent</code> carries a <code>VideoOffset</code> field
+(<code>time.Duration</code>) that records the elapsed time in the
+platform’s video at the moment the event occurred. This allows
+post-session tooling to overlay event markers on the video timeline: a
+click at 00:03:24, an issue detection at 00:05:17, a crash at 00:07:02.
+The <code>Timeline</code> type in <code>pkg/session/timeline.go</code>
+supports filtering by platform, event type, and time range, making it
+straightforward to generate per-ticket video clips [<sup>66</sup>].</p>
+<h3 id="ticket-generation">8.3.3 Ticket Generation</h3>
+<p>The <code>pkg/ticket</code> package (key file
+<code>pkg/ticket/ticket.go</code>, ~13.7 KB) generates Markdown tickets
+from <code>StepResult</code> and <code>DetectionResult</code> records
+[<sup>66</sup>]. The <code>Ticket</code> struct contains severity,
+platform, reproduction steps, stack traces, screenshot paths, video
+references, and an <code>LLMSuggestedFix</code> field populated by the
+<code>IssueDetector</code> when the vision LLM returns a remediation
+suggestion:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/ticket/ticket.go — Ticket (excerpt)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Ticket <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    ID               <span class="dt">string</span>            <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    Title            <span class="dt">string</span>            <span class="st">`json:&quot;title&quot;`</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    Severity         Severity          <span class="st">`json:&quot;severity&quot;`</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    Platform         config<span class="op">.</span>Platform   <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    Category         <span class="dt">string</span>            <span class="st">`json:&quot;category&quot;`</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    Description      <span class="dt">string</span>            <span class="st">`json:&quot;description&quot;`</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    ReproSteps       <span class="op">[]</span><span class="dt">string</span>          <span class="st">`json:&quot;repro_steps&quot;`</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    ExpectedBehavior <span class="dt">string</span>            <span class="st">`json:&quot;expected_behavior&quot;`</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    ActualBehavior   <span class="dt">string</span>            <span class="st">`json:&quot;actual_behavior&quot;`</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    StackTrace       <span class="dt">string</span>            <span class="st">`json:&quot;stack_trace,omitempty&quot;`</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    Logs             <span class="op">[]</span><span class="dt">string</span>          <span class="st">`json:&quot;logs,omitempty&quot;`</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    Screenshots      <span class="op">[]</span><span class="dt">string</span>          <span class="st">`json:&quot;screenshots,omitempty&quot;`</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    VideoRef         <span class="op">*</span>VideoReference   <span class="st">`json:&quot;video_ref,omitempty&quot;`</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    LLMSuggestedFix  <span class="op">*</span>LLMSuggestedFix  <span class="st">`json:&quot;llm_suggested_fix,omitempty&quot;`</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    DocumentationRefs <span class="op">[]</span>validator<span class="op">.</span>DocRef <span class="st">`json:&quot;documentation_refs,omitempty&quot;`</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    Timestamp        time<span class="op">.</span>Time         <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Tickets are filtered by minimum severity
+(<code>HELIX_TICKETS_MIN_SEVERITY</code>, default <code>low</code>). In
+autonomous mode, <code>pkg/autonomous/findings_bridge.go</code> (~150
+lines) bridges <code>IssueDetector</code> findings to the ticket
+generator, preserving the LLM analysis text as the
+<code>Description</code> field and extracting reproduction steps from
+the <code>NavigationEngine</code> state history [<sup>66</sup>].</p>
+<h3 id="dashboard-integration">8.3.4 Dashboard Integration</h3>
+<p>The <code>challenges-dashboard</code> static HTML generator produces
+a browsable dashboard over the <code>qa-results/</code> directory. It
+reads <code>report.json</code>, <code>timeline.json</code>, and the
+per-platform video files, and renders a pass/fail trend chart, a
+platform coverage matrix, and a clickable issue list. The dashboard is a
+zero-dependency static site: all data is embedded as JSON script tags,
+and all interactivity is vanilla JavaScript. This allows the dashboard
+to be served from any static file host — S3, GitHub Pages, or the local
+<code>python -m http.server</code> that the orchestrator spins up after
+a session completes [<sup>66</sup>].</p>
+<p>The dashboard reads the <code>OutputDir</code> from
+<code>report.json</code> and constructs relative paths to evidence
+files, so moving the entire <code>qa-results/</code> directory preserves
+all links. Coverage percentage is visualized as a donut chart with the
+constitutional 90% target drawn as a threshold line. Platforms below
+target are highlighted in amber; platforms above target are green.</p>
+<h2 id="presentational-screenshots-on-demand">8.4 Presentational
+Screenshots on Demand</h2>
+<h3 id="during-autonomous-session-sessionrecorder-captures-screenshots-at-every-step">8.4.1
+During Autonomous Session: SessionRecorder Captures Screenshots at Every
+Step</h3>
+<p>The <code>SessionRecorder</code> captures screenshots at three
+moments during each step: before the action (pre-screenshot), after the
+action (post-screenshot), and at the moment an issue is detected
+(issue-screenshot). Screenshots are indexed by platform, timestamp, and
+step name, and stored in the <code>evidence/</code> subdirectory
+[<sup>66</sup>].</p>
+<p>The screenshot index structure from
+<code>pkg/session/recorder.go</code> is [<sup>66</sup>]:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Screenshot <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    Path        <span class="dt">string</span>        <span class="st">`json:&quot;path&quot;`</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    Platform    <span class="dt">string</span>        <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span>        <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    Index       <span class="dt">int</span>           <span class="st">`json:&quot;index&quot;`</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    Timestamp   time<span class="op">.</span>Time     <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    VideoOffset time<span class="op">.</span>Duration <span class="st">`json:&quot;video_offset&quot;`</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>Index</code> field is a monotonic counter per session,
+ensuring that screenshots can be sorted chronologically regardless of
+platform. The <code>VideoOffset</code> field correlates the screenshot
+with the platform video timeline, enabling precise frame-level
+alignment.</p>
+<p>For LLM consumption, screenshots are resized to a maximum width of
+480 pixels via nearest-neighbor interpolation before being
+base64-encoded and sent to the vision model. This resizing is
+implemented in <code>pkg/autonomous/screenshot.go</code> (153 lines) and
+reduces inference latency by a factor of 4–8 compared to full-resolution
+frames [<sup>66</sup>]. The original-resolution screenshot is still
+saved to disk for human review.</p>
+<h3 id="on-demand-api">8.4.2 On-Demand API</h3>
+<p>The on-demand screenshot API is exposed as an HTTP endpoint served by
+the internal dashboard server. The route is
+<code>GET /api/v1/qa/screenshot?session=X&amp;platform=Y&amp;step=Z</code>,
+where <code>session</code> is the <code>SessionID</code>,
+<code>platform</code> is the platform name, and <code>step</code> is the
+step name or screenshot index [<sup>66</sup>].</p>
+<p>The handler resolves the query parameters, locates the screenshot in
+the <code>evidence/</code> directory via the
+<code>SessionRecorder</code> index, and returns the image with
+<code>Content-Type: image/png</code>. If the step parameter is omitted,
+the handler returns the most recent screenshot for that platform and
+session. If the session is still running, the handler reads from the
+live index maintained in memory by the <code>SessionRecorder</code>,
+enabling real-time remote observation of an in-progress session
+[<sup>66</sup>].</p>
+<h3 id="presentational-export">8.4.3 Presentational Export</h3>
+<p>The presentational export mode compiles selected screenshots into an
+annotated gallery HTML file. Each gallery entry includes the screenshot
+image, a caption derived from the step name and feature ID, the
+timestamp, the pass/fail status, and a link to the corresponding ticket
+if an issue was detected. The gallery is generated by a standalone tool
+in <code>cmd/helixqa-capture-demo/</code> that reads
+<code>report.json</code> and <code>timeline.json</code> and writes a
+self-contained HTML file with embedded base64 images
+[<sup>66</sup>].</p>
+<p>The gallery is intended for stakeholder review: it presents the
+session outcome as a visual narrative, showing what the application
+looked like at each verification step, rather than as a table of
+pass/fail booleans. The anti-bluff principle from Phase 6 is directly
+supported here — every “pass” in the gallery is accompanied by the
+actual screenshot that proves the feature was visible and functional
+[<sup>5</sup>].</p>
+<h3 id="slide-deck-generation">8.4.4 Slide Deck Generation</h3>
+<p>For executive reporting, the session evidence can be compiled into an
+automated slide deck. The <code>pkg/reporter</code> package supports
+PowerPoint export via a template-driven generator that maps
+<code>PlatformResult</code> and <code>Issue</code> records to slide
+layouts: title slide, platform summary slide, coverage chart slide,
+issue detail slides (one per critical or high issue), and an evidence
+slide with embedded screenshots.</p>
+<p>The slide generator is triggered by
+<code>--report-formats pptx</code> in the CLI or by setting
+<code>ReportFormats: []string{&quot;markdown&quot;,&quot;html&quot;,&quot;json&quot;,&quot;pptx&quot;}</code> in
+<code>SessionConfig</code>. It requires <code>python-pptx</code> or
+<code>LibreOffice</code> as an external dependency; if neither is
+available, the PPTX format is silently omitted from output and a warning
+is logged. The generated deck includes speaker notes derived from
+<code>Ticket.Description</code> and <code>LLMSuggestedFix</code>, giving
+presenters the full technical context without requiring them to read the
+raw Markdown tickets [<sup>66</sup>].</p>
+</body>
+</html>

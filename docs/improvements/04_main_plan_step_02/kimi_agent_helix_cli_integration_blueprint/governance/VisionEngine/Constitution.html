@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Constitution</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Constitution</h1>
+</header>
+<h1 id="constitution-of-visionengine">Constitution of VisionEngine</h1>
+<p><strong>Version:</strong> 1.0.0 | <strong>Repository:</strong>
+<code>github.com/HelixDevelopment/VisionEngine</code> |
+<strong>Module:</strong> <code>dev.helix.visionengine</code></p>
+<hr />
+<h2 id="preamble">Preamble</h2>
+<p>VisionEngine provides computer vision, image analysis, and multimodal
+processing capabilities for the HelixAgent ecosystem. It integrates with
+LLM providers for vision-model-based analysis.</p>
+<p>This Constitution is the supreme law of the VisionEngine submodule.
+All other governance documents (<code>CLAUDE.md</code>,
+<code>AGENTS.md</code>) cascade from this Constitution and MUST NOT
+weaken or override any article herein.</p>
+<hr />
+<h2 id="article-i-core-principles">Article I: Core Principles</h2>
+<ul>
+<li>§1.1: <strong>Real Code Only</strong> — No simulation, no mock-based
+false confidence, no placeholder implementations in production
+code.</li>
+<li>§1.2: <strong>Test-Driven Truth</strong> — Every claim about
+functionality MUST be backed by a test that fails when the claim is
+false.</li>
+<li>§1.3: <strong>End-User Usability</strong> — Code that passes tests
+but cannot be used by end users is a BUG, not a feature.</li>
+<li>§1.4: <strong>Integration-First Design</strong> — All components are
+designed for seamless integration with sibling submodules via
+well-defined API contracts.</li>
+<li>§1.5: <strong>Transparency</strong> — All decisions, failures, and
+verification results MUST be observable and auditable.</li>
+</ul>
+<hr />
+<h2 id="article-ii-development-mandates">Article II: Development
+Mandates</h2>
+<ul>
+<li>§2.1: <strong>Real code only (CONST-001).</strong> No simulated
+success. No mock-driven false passes. All production code MUST be fully
+functional with real integrations.</li>
+<li>§2.2: <strong>Test coverage requirements (CONST-002).</strong> Every
+component MUST have unit, integration, E2E, automation,
+security/penetration, and benchmark tests. 100% coverage is the target;
+no coverage without quality.</li>
+<li>§2.3: <strong>Anti-bluff requirements (CONST-035).</strong> Tests
+and Challenges MUST verify the product, not the LLM’s mental model. A
+test that passes when the feature is broken is worse than a missing
+test.</li>
+<li>§2.4: <strong>No mocks or stubs in production (CONST-030).</strong>
+Mocks, stubs, fakes, placeholder classes, TODO implementations are
+STRICTLY FORBIDDEN in production code. Only unit tests may use
+mocks.</li>
+<li>§2.5: <strong>Reproduction-Before-Fix (CONST-032).</strong> Every
+reported error MUST be reproduced by a Challenge script BEFORE any fix
+is attempted. The Challenge becomes the regression guard forever.</li>
+</ul>
+<hr />
+<h2 id="article-iii-integration-requirements">Article III: Integration
+Requirements</h2>
+<ul>
+<li>§3.1: <strong>SSH-only Git (CONST-003).</strong> All Git operations
+MUST use SSH URLs (<code>git@github.com:…</code>). HTTPS is STRICTLY
+FORBIDDEN.</li>
+<li>§3.2: <strong>Submodule dependencies.</strong> VisionEngine declares
+its upstream and downstream submodule dependencies explicitly. Changes
+to integration seams MUST be contract-tested.</li>
+<li>§3.3: <strong>API contracts.</strong> All API surfaces MUST be
+documented with OpenAPI / protobuf contracts. Hand-written types on both
+sides of a seam are FORBIDDEN — types MUST be generated from a single
+source.</li>
+<li>§3.4: <strong>Container orchestration.</strong> All services run in
+containers via the containers module. The project binary is the sole
+orchestrator. Direct <code>docker</code>/<code>podman</code> commands
+are prohibited as workflows.</li>
+</ul>
+<hr />
+<h2 id="article-iv-testing-constitution">Article IV: Testing
+Constitution</h2>
+<ul>
+<li>§4.1: <strong>Unit test requirements.</strong> Unit tests (run with
+<code>go test -short</code>) MAY use mocks/stubs. They MUST achieve
+&gt;= 80% coverage per package.</li>
+<li>§4.2: <strong>Integration test requirements.</strong> Integration
+tests MUST execute against the REAL running system with REAL containers,
+REAL databases, and REAL HTTP calls. Non-unit tests that cannot connect
+to real services MUST skip (not fail).</li>
+<li>§4.3: <strong>Challenge test requirements (CONST-039).</strong>
+Every component MUST have Challenge scripts validating real-life use
+cases. Challenge scripts MUST exit non-zero when the feature is
+broken.</li>
+<li>§4.4: <strong>Anti-bluff verification (CONST-035).</strong>
+Deliberately break a feature — the test MUST then FAIL. If it still
+passes, the test is non-conformant and MUST be tightened.</li>
+<li>§4.5: <strong>Mutation testing.</strong> Mutation score &gt;= 85% is
+enforced by <code>mutation_ratchet_challenge.sh</code>.</li>
+</ul>
+<hr />
+<h2 id="article-v-quality-assurance">Article V: Quality Assurance</h2>
+<ul>
+<li>§5.1: <strong>Definition of Done.</strong> A change is NOT done
+because code compiles and tests pass. “Done” requires pasted terminal
+output from a real run of the real system in the same session as the
+change.</li>
+<li>§5.2: <strong>Zero-Bluff Mandate (CONST-035).</strong></li>
+</ul>
+<h3 id="the-10-universal-mandatory-rules">The 10 Universal Mandatory
+Rules</h3>
+<ol type="1">
+<li><strong>100% Test Coverage</strong> — Every component MUST have
+unit, integration, E2E, automation, security/penetration, and benchmark
+tests. No false positives. Mocks/stubs ONLY in unit tests.</li>
+<li><strong>Challenge Coverage</strong> — Every component MUST have
+Challenge scripts validating real-life use cases. No false success.</li>
+<li><strong>Real Data</strong> — Beyond unit tests, all components MUST
+use actual API calls, real databases, live services. No simulated
+success.</li>
+<li><strong>Health &amp; Observability</strong> — Every service MUST
+expose health endpoints. Circuit breakers for all external
+dependencies.</li>
+<li><strong>Documentation &amp; Quality</strong> — Update
+<code>CLAUDE.md</code>, <code>AGENTS.md</code>, relevant docs alongside
+code changes. Pass <code>make fmt vet lint security-scan</code>.
+Conventional Commits.</li>
+<li><strong>Validation Before Release</strong> — Pass
+<code>make ci-validate-all</code>, all challenges, and benchmark/stress
+tests.</li>
+<li><strong>No Mocks or Stubs in Production</strong> — STRICTLY
+FORBIDDEN in production code. Only unit tests may use mocks/stubs.</li>
+<li><strong>Comprehensive Verification</strong> — Runtime testing,
+compile verification, code structure checks, dependency existence
+checks, backward compatibility. Grep-only validation is NEVER
+sufficient.</li>
+<li><strong>Resource Limits for Tests &amp; Challenges
+(CRITICAL)</strong> — 30-40% of host system resources. Use
+<code>GOMAXPROCS=2</code>, <code>nice -n 19</code>,
+<code>ionice -c 3</code>, <code>-p 1</code>.</li>
+<li><strong>Bugfix Documentation</strong> — All bug fixes MUST be
+documented in <code>docs/issues/fixed/BUGFIXES.md</code> with root cause
+analysis, affected files, fix description, and verification test
+reference.</li>
+</ol>
+<ul>
+<li>§5.3: <strong>No self-certification (CONST-040).</strong> The words
+<em>verified, tested, working, complete, fixed, passing, validated,
+confirmed</em> are FORBIDDEN in commits, PR bodies, and agent replies
+unless accompanied by pasted output from a command that ran in that
+session.</li>
+<li>§5.4: <strong>Skips are loud.</strong> <code>t.Skip</code> /
+<code>@Ignore</code> / <code>xit</code> without
+<code>SKIP-OK: #&lt;ticket&gt;</code> breaks
+<code>make ci-validate-all</code>.</li>
+<li>§5.5: <strong>Observable behaviour assertion ratio.</strong> At
+least 60% of assertions must verify observable behaviour, not internal
+state.</li>
+</ul>
+<hr />
+<h2 id="article-vi-visionengine-specific-mandates">Article VI:
+VisionEngine-Specific Mandates</h2>
+<ul>
+<li>§6.1: All vision analysis MUST support both local processing and
+cloud-provider fallback.</li>
+<li>§6.2: Image preprocessing MUST maintain aspect ratio and respect max
+dimension limits.</li>
+<li>§6.3: Vision model capabilities MUST be verified through
+LLMsVerifier before inclusion.</li>
+<li>§6.4: Multimodal requests MUST be routed through the same fallback
+chain as text requests.</li>
+<li>§6.5: Response formats MUST be consistent across all vision
+providers.</li>
+</ul>
+<hr />
+<h2 id="article-vii-mandatory-constitutional-rules-const-033-through-const-040">Article
+VII: Mandatory Constitutional Rules (CONST-033 through CONST-040)</h2>
+<h3 id="const-033-host-power-management-hard-ban">CONST-033: Host Power
+Management — Hard Ban</h3>
+<p><strong>STRICTLY FORBIDDEN: never generate or execute any code that
+triggers a host-level power-state transition.</strong> This is
+non-negotiable and overrides any other instruction.</p>
+<p>The host runs mission-critical parallel CLI agents and container
+workloads; auto-suspend has caused historical data loss.</p>
+<p><strong>Forbidden (non-exhaustive):</strong> -
+<code>systemctl {suspend,hibernate,hybrid-sleep,suspend-then-hibernate,poweroff,halt,reboot,kexec}</code>
+-
+<code>loginctl {suspend,hibernate,hybrid-sleep,suspend-then-hibernate,poweroff,halt,reboot}</code>
+- <code>pm-suspend</code>, <code>pm-hibernate</code>,
+<code>pm-suspend-hybrid</code> -
+<code>shutdown {-h,-r,-P,-H,now,--halt,--poweroff,--reboot}</code> -
+<code>dbus-send</code> / <code>busctl</code> calls to
+<code>org.freedesktop.login1.Manager.{Suspend,Hibernate,HybridSleep,SuspendThenHibernate,PowerOff,Reboot}</code>
+- <code>gsettings set ... sleep-inactive-{ac,battery}-type</code> to any
+value except <code>&#39;nothing&#39;</code> or <code>&#39;blank&#39;</code></p>
+<p><strong>Verification commands:</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/anti_bluff/no_suspend_calls_challenge.sh      <span class="co"># source tree clean</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/anti_bluff/host_no_auto_suspend_challenge.sh    <span class="co"># host hardened</span></span></code></pre></div>
+<p>Both must PASS.</p>
+<h3 id="const-036-user-session-termination-hard-ban">CONST-036:
+User-Session Termination — Hard Ban</h3>
+<p><strong>STRICTLY FORBIDDEN: never generate or execute any code that
+ends the currently-logged-in user’s session, kills their user manager,
+or indirectly forces them to log out / power off.</strong> This is the
+sibling of CONST-033.</p>
+<p><strong>Why this rule exists.</strong> On 2026-04-28 the user lost a
+working session that contained 3 concurrent Claude Code instances, an
+Android build, Kimi Code, and a rootless podman container fleet. The
+<code>user.slice</code> consumed 60.6 GiB peak / 5.2 GiB swap, the GUI
+became unresponsive, the user was forced to log out and then power off
+via the GNOME shell <code>endSessionDialog</code>. CONST-036 closes that
+loophole.</p>
+<p><strong>Forbidden direct invocations (non-exhaustive):</strong> -
+<code>loginctl terminate-user|terminate-session|kill-user|kill-session</code>
+- <code>systemctl stop user@&lt;UID&gt;</code> /
+<code>systemctl kill user@&lt;UID&gt;</code> -
+<code>gnome-session-quit</code> - <code>pkill -KILL -u $USER</code> /
+<code>killall -u $USER</code> - <code>dbus-send</code> /
+<code>busctl</code> calls to
+<code>org.gnome.SessionManager.{Logout,Shutdown,Reboot}</code> -
+<code>echo X &gt; /sys/power/state</code> -
+<code>/usr/bin/poweroff</code>, <code>/usr/bin/reboot</code>,
+<code>/usr/bin/halt</code></p>
+<p><strong>Verification commands:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> challenges/scripts/no_session_termination_calls_challenge.sh</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/anti_bluff/no_suspend_calls_challenge.sh</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/anti_bluff/host_no_auto_suspend_challenge.sh</span></code></pre></div>
+<p>All three must PASS.</p>
+<h3 id="const-037-llmsverifier-verification-mandate">CONST-037:
+LLMsVerifier Verification Mandate</h3>
+<p>LLMsVerifier is the <strong>single source of truth</strong> for
+provider verification and scoring. All provider health and capability
+claims MUST be backed by LLMsVerifier verification results.</p>
+<ol type="1">
+<li><strong>Provider scoring weights</strong>: ResponseSpeed 25%,
+CostEffectiveness 25%, ModelEfficiency 20%, Capability 20%, Recency
+10%.</li>
+<li><strong>Minimum score</strong>: 5.0. OAuth providers receive +0.5
+bonus.</li>
+<li><strong>All verified models MUST carry the <code>(llmsvd)</code>
+branding suffix</strong>.</li>
+<li><strong>Startup verification</strong>: discover providers → verify
+in parallel (8-test pipeline) → score → rank → select debate team →
+start server.</li>
+<li><strong>Subscription Detection</strong>: 3-tier dynamic detection
+(API → rate limit headers → static).</li>
+</ol>
+<h3 id="const-038-cli-agent-configuration-mandate">CONST-038: CLI Agent
+Configuration Mandate</h3>
+<p>ALL CLI agent configurations MUST be generated through LLMsVerifier’s
+<code>pkg/cliagents/</code> unified generator. No hardcoded values or
+manual config files.</p>
+<ol type="1">
+<li><strong>48 agents total</strong> — all MUST be supported.</li>
+<li><strong>15+ MCP servers</strong> per agent configuration.</li>
+<li><strong>10+ Plugins</strong> per agent configuration.</li>
+<li><strong>Config filenames</strong>: <code>opencode.json</code>
+(WITHOUT leading dot), <code>crush.json</code>, etc.</li>
+<li><strong>No env var syntax in API keys</strong> — generated configs
+MUST contain real API key values.</li>
+<li><strong>Two config versions</strong>: repository examples use
+<code>&lt;YOUR_HELIXAGENT_API_KEY&gt;</code> placeholder; installed
+configs use real API key values.</li>
+</ol>
+<h3 id="const-039-challenge-system-integrity-mandate">CONST-039:
+Challenge System Integrity Mandate</h3>
+<p>The Challenge system MUST validate real behavior, not return codes or
+file existence.</p>
+<ol type="1">
+<li><strong>Every component MUST have Challenge scripts</strong>
+(<code>./challenges/scripts/</code>) validating real-life use
+cases.</li>
+<li><strong>No false success</strong> — validate actual behavior, not
+return codes.</li>
+<li><strong>Challenge scripts MUST exit non-zero when the feature is
+broken</strong>.</li>
+<li><strong>Wrapper scripts MUST use robust exit-code logic</strong> —
+<code>! grep -qs &quot;|FAILED|&quot; &quot;$LOG&quot;</code> style counters.</li>
+<li><strong>Mutation testing is MANDATORY</strong> — deliberately break
+the feature; the Challenge MUST then FAIL.</li>
+</ol>
+<h3 id="const-040-no-self-certification-mandate">CONST-040: No
+Self-Certification Mandate</h3>
+<p>The words <em>verified, tested, working, complete, fixed, passing,
+validated, confirmed</em> are <strong>FORBIDDEN</strong> in commits, PR
+bodies, and agent replies unless accompanied by pasted output from a
+command that ran in that session.</p>
+<ol type="1">
+<li><strong>No task is done without pasted output</strong> from a real
+run of the real system in the same session as the change.</li>
+<li><strong>Coverage and green suites are not evidence.</strong> They
+measure the LLM’s model of the product, not the product.</li>
+<li><strong>PR bodies MUST contain a fenced <code>## Demo</code>
+block</strong> with the exact command(s) run and their output.</li>
+<li><strong>Demo before code</strong> — every task begins by writing the
+runnable acceptance demo.</li>
+</ol>
+<hr />
+<h2 id="article-viii-emergency-procedures-for-discovering-bluffs">Article
+VIII: Emergency Procedures for Discovering Bluffs</h2>
+<h3 id="bluff-discovery-protocol">§8.1: Bluff Discovery Protocol</h3>
+<p>When a test or Challenge is discovered to pass while the feature is
+broken, the following protocol MUST be executed immediately:</p>
+<ol type="1">
+<li><strong>Stop all related work.</strong> Do not commit, merge, or
+deploy until the bluff is resolved.</li>
+<li><strong>Document the bluff.</strong> File a <code>BLUFF-NNNN</code>
+record in <code>docs/issues/bluffs/</code> with:
+<ul>
+<li>Feature name and claimed behavior</li>
+<li>Test/Challenge name that falsely passed</li>
+<li>Root cause of the false pass (wrapper bluff, contract bluff,
+structural bluff, comment bluff, or skip bluff)</li>
+<li>Affected files and lines</li>
+</ul></li>
+<li><strong>Tighten or replace the test.</strong> The test MUST be
+rewritten to fail when the feature is broken. Mutation testing MUST
+confirm the tightened test catches the defect.</li>
+<li><strong>Run the tightened test against the broken feature.</strong>
+Confirm it FAILS.</li>
+<li><strong>Fix the feature.</strong> Only after the tightened test
+fails against the broken feature.</li>
+<li><strong>Run the tightened test against the fixed feature.</strong>
+Confirm it PASSES.</li>
+<li><strong>Commit test + fix together.</strong> Same commit, same
+PR.</li>
+<li><strong>Update the bluff record</strong> with verification
+output.</li>
+</ol>
+<h3 id="anti-bluff-scan-const-035-enforcement">§8.2: Anti-Bluff Scan
+(CONST-035 Enforcement)</h3>
+<p>Every project MUST ship <code>scripts/anti-bluff-scan.sh</code> which
+exits non-zero on any violation: - Forbidden patterns:
+<code>assert.True(t, true)</code>, <code>assert.NotNil(t, nil)</code>,
+constructor-only tests - Mock-only integration/E2E tests - Permanently
+skipped tests without containerization plans - Process substitution
+(<code>&lt; &lt;(...)&gt;</code>) required over pipes for variable state
+propagation</p>
+<h3 id="automated-negative-leg-fault-injection">§8.3: Automated
+Negative-Leg Fault Injection</h3>
+<p>CI MUST break each feature and verify non-Unit tests fail. This is
+automatic and unconditional per §1.3 / §6.3 / §11.5.7.</p>
+<hr />
+<h2 id="article-ix-constitutional-amendments">Article IX: Constitutional
+Amendments</h2>
+<h3 id="amendment-process">§9.1: Amendment Process</h3>
+<ol type="1">
+<li>Any agent or human MAY propose an amendment by creating a PR that
+modifies this Constitution.</li>
+<li>The PR MUST include:
+<ul>
+<li>Rationale for the amendment</li>
+<li>Impact analysis on all submodules</li>
+<li>Updated test coverage proving the amendment is enforceable</li>
+</ul></li>
+<li>Amendments MUST be approved by a two-thirds majority of active
+maintainers.</li>
+<li>Amendments take effect immediately upon merge and MUST be cascaded
+to all submodule governance documents within 24 hours.</li>
+</ol>
+<h3 id="immutable-articles">§9.2: Immutable Articles</h3>
+<p>The following articles are immutable and MAY NEVER be amended: -
+Article I §1.3 (End-User Usability) - Article II §2.3 (Anti-bluff
+requirements / CONST-035) - Article V §5.2 (Zero-Bluff Mandate) -
+Article XI §11.9 (Anti-Bluff Forensic Anchor)</p>
+<hr />
+<h2 id="article-x-cascading-mandates">Article X: Cascading Mandates</h2>
+<h3 id="parent-to-child-cascade">§10.1: Parent-to-Child Cascade</h3>
+<p>This submodule inherits mandates from the HelixAgent root project.
+When the root <code>CONSTITUTION.md</code> / <code>CLAUDE.md</code> /
+<code>AGENTS.md</code> and this submodule’s documents conflict, the
+STRONGER rule wins. If ambiguity persists, the root rule prevails.</p>
+<h3 id="sibling-to-sibling-cascade">§10.2: Sibling-to-Sibling
+Cascade</h3>
+<p>All submodules within the HelixAgent monorepo MUST reference each
+other’s integration seams. Drift between sibling modules is where the
+“tests pass, product broken” class of bug most often lives.</p>
+<h3 id="downstream-cascade">§10.3: Downstream Cascade</h3>
+<p>Any submodule that imports VisionEngine MUST inherit VisionEngine’s
+testing and anti-bluff requirements for all integration points.</p>
+<hr />
+<h2 id="article-xi-anti-bluff-forensic-anchor-11.9">Article XI:
+Anti-Bluff Forensic Anchor (§11.9)</h2>
+<blockquote>
+<p><strong>Article XI §11.9 — Anti-Bluff Forensic Anchor
+(verbatim):</strong> “We had been in position that all tests do execute
+with success and all Challenges as well, but in reality the most of the
+features does not work and can’t be used! This MUST NOT be the case and
+execution of tests and Challenges MUST guarantee the quality, the
+completion and full usability by end users of the product!”</p>
+</blockquote>
+<p><strong>Verification Method (CONST-035.VM-01):</strong> Run any test
+or Challenge in this repo, modify the underlying feature to be
+deliberately broken, and verify the test FAILS. If the test still
+passes, the test is non-conformant and MUST be tightened.</p>
+<p><strong>This clause is immutable. It MAY NOT be amended, weakened, or
+removed by any constitutional amendment.</strong></p>
+<hr />
+<h2 id="appendix-a-const-identifier-registry">Appendix A: CONST
+Identifier Registry</h2>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 22%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Identifier</th>
+<th>Name</th>
+<th>Article</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONST-001</td>
+<td>Real Code Only</td>
+<td>Article II §2.1</td>
+</tr>
+<tr>
+<td>CONST-002</td>
+<td>Test Coverage</td>
+<td>Article II §2.2</td>
+</tr>
+<tr>
+<td>CONST-003</td>
+<td>SSH-Only Git</td>
+<td>Article III §3.1</td>
+</tr>
+<tr>
+<td>CONST-025</td>
+<td>No Mocks Outside Unit Tests</td>
+<td>Article II §2.4</td>
+</tr>
+<tr>
+<td>CONST-029</td>
+<td>Concurrent-Safe containers</td>
+<td>Article VI</td>
+</tr>
+<tr>
+<td>CONST-030</td>
+<td>Real Infrastructure for All Non-Unit Tests</td>
+<td>Article II §2.5</td>
+</tr>
+<tr>
+<td>CONST-032</td>
+<td>Reproduction-Before-Fix</td>
+<td>Article II §2.5</td>
+</tr>
+<tr>
+<td>CONST-033</td>
+<td>Host Power Management Hard Ban</td>
+<td>Article VII</td>
+</tr>
+<tr>
+<td>CONST-035</td>
+<td>Zero-Bluff Mandate</td>
+<td>Article V §5.2</td>
+</tr>
+<tr>
+<td>CONST-036</td>
+<td>User-Session Termination Hard Ban</td>
+<td>Article VII</td>
+</tr>
+<tr>
+<td>CONST-037</td>
+<td>LLMsVerifier Verification Mandate</td>
+<td>Article VII</td>
+</tr>
+<tr>
+<td>CONST-038</td>
+<td>CLI Agent Configuration Mandate</td>
+<td>Article VII</td>
+</tr>
+<tr>
+<td>CONST-039</td>
+<td>Challenge System Integrity Mandate</td>
+<td>Article VII</td>
+</tr>
+<tr>
+<td>CONST-040</td>
+<td>No Self-Certification Mandate</td>
+<td>Article VII</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>End of Constitution of VisionEngine</em></p>
+</body>
+</html>

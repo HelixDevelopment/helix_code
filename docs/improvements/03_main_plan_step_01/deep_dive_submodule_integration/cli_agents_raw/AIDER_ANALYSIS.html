@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>AIDER_ANALYSIS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">AIDER_ANALYSIS</h1>
+</header>
+<h1 id="aider-cli-agent-analysis">Aider CLI Agent Analysis</h1>
+<blockquote>
+<p><strong>Tier 1 Agent</strong> - Git-native AI pair programming tool
+<strong>Source</strong>: https://github.com/Aider-AI/aider
+<strong>Language</strong>: Python (~20,270 LOC)
+<strong>License</strong>: Apache 2.0</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>Aider is the most popular open-source AI pair programming tool. It
+allows developers to collaborate with LLMs directly in their terminal,
+with deep Git integration and support for multiple LLM providers.</p>
+<p><strong>Key Stats:</strong> - 5.7M+ PyPI installs - 15B+ tokens
+processed weekly - 88% “Singularity” (self-written code) - Top 20 on
+OpenRouter</p>
+<h2 id="core-features">Core Features</h2>
+<h3 id="repository-mapping-repomap.py---867-lines">1. Repository Mapping
+(<code>repomap.py</code> - 867 lines)</h3>
+<ul>
+<li>Maps entire codebase for context</li>
+<li>Tree-sitter based language parsing</li>
+<li>Supports 100+ programming languages</li>
+<li>Intelligent file context selection</li>
+</ul>
+<h3 id="multiple-coder-modes-coders---3000-lines">2. Multiple Coder
+Modes (<code>coders/</code> - ~3000 lines)</h3>
+<ul>
+<li><strong>EditBlock Coder</strong>: Surgical code edits</li>
+<li><strong>Architect Coder</strong>: High-level design</li>
+<li><strong>Ask Coder</strong>: Q&amp;A mode</li>
+<li><strong>Context Coder</strong>: Context-aware coding</li>
+<li><strong>Patch Coder</strong>: Diff-based editing</li>
+<li><strong>Search/Replace</strong>: Direct text replacement</li>
+</ul>
+<h3 id="git-integration-repo.py---622-lines">3. Git Integration
+(<code>repo.py</code> - 622 lines)</h3>
+<ul>
+<li>Automatic commits with sensible messages</li>
+<li>Branch management</li>
+<li>Diff viewing</li>
+<li>Conflict resolution</li>
+<li>Git history awareness</li>
+</ul>
+<h3 id="multi-provider-support-models.py---1323-lines">4. Multi-Provider
+Support (<code>models.py</code> - 1323 lines)</h3>
+<ul>
+<li>Claude (Anthropic)</li>
+<li>GPT-4o, o1, o3-mini (OpenAI)</li>
+<li>DeepSeek R1 &amp; Chat</li>
+<li>Local models via Ollama</li>
+<li>100+ models via OpenRouter</li>
+</ul>
+<h3 id="slash-commands-commands.py---1712-lines">5. Slash Commands
+(<code>commands.py</code> - 1712 lines)</h3>
+<ul>
+<li><code>/add</code> - Add files to context</li>
+<li><code>/drop</code> - Remove files from context</li>
+<li><code>/commit</code> - Commit changes</li>
+<li><code>/diff</code> - Show diffs</li>
+<li><code>/undo</code> - Undo last change</li>
+<li><code>/lint</code> - Run linters</li>
+<li><code>/test</code> - Run tests</li>
+<li><code>/help</code> - Show help</li>
+<li><code>/voice</code> - Voice input</li>
+<li><code>/model</code> - Switch models</li>
+<li><code>/settings</code> - Configure settings</li>
+</ul>
+<h3 id="voice-to-code-voice.py---187-lines">6. Voice-to-Code
+(<code>voice.py</code> - 187 lines)</h3>
+<ul>
+<li>Speech recognition</li>
+<li>Voice commands</li>
+<li>Hands-free coding</li>
+</ul>
+<h3 id="linting-testing-linter.py---304-lines">7. Linting &amp; Testing
+(<code>linter.py</code> - 304 lines)</h3>
+<ul>
+<li>Automatic linting</li>
+<li>Test execution</li>
+<li>Error fixing loops</li>
+</ul>
+<h3 id="ide-integration-watch.py---318-lines">8. IDE Integration
+(<code>watch.py</code> - 318 lines)</h3>
+<ul>
+<li>File watching</li>
+<li>IDE/editor integration</li>
+<li>Comment-driven development</li>
+</ul>
+<h3 id="web-scraping-scrape.py---284-lines">9. Web Scraping
+(<code>scrape.py</code> - 284 lines)</h3>
+<ul>
+<li>URL content extraction</li>
+<li>Documentation scraping</li>
+<li>Image/web page context</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<pre><code>aider/
+├── main.py           # Entry point (1274 lines)
+├── models.py         # LLM abstraction (1323 lines)
+├── repo.py           # Git integration (622 lines)
+├── repomap.py        # Codebase mapping (867 lines)
+├── commands.py       # Slash commands (1712 lines)
+├── io.py             # I/O handling (1191 lines)
+├── coders/           # Coder implementations
+│   ├── base_coder.py
+│   ├── editblock_coder.py
+│   ├── architect_coder.py
+│   └── ...
+└── ...</code></pre>
+<h2 id="key-capabilities-to-port-to-helixagent">Key Capabilities to Port
+to HelixAgent</h2>
+<h3 id="repository-mapping">1. Repository Mapping</h3>
+<ul>
+<li>Tree-sitter integration for code parsing</li>
+<li>Repository structure analysis</li>
+<li>Intelligent context selection</li>
+</ul>
+<h3 id="edit-block-format">2. Edit Block Format</h3>
+<ul>
+<li>Surgical code modifications</li>
+<li>Search/replace blocks</li>
+<li>Minimal diff generation</li>
+</ul>
+<h3 id="git-native-workflow">3. Git-Native Workflow</h3>
+<ul>
+<li>Automatic commit messages</li>
+<li>Branch-aware operations</li>
+<li>Diff-based reviews</li>
+</ul>
+<h3 id="multi-modal-support">4. Multi-Modal Support</h3>
+<ul>
+<li>Voice commands</li>
+<li>Image context</li>
+<li>URL/web content</li>
+</ul>
+<h3 id="linttest-integration">5. Lint/Test Integration</h3>
+<ul>
+<li>Automatic linting</li>
+<li>Test execution</li>
+<li>Fix iteration loops</li>
+</ul>
+<h2 id="integration-points">Integration Points</h2>
+<table>
+<thead>
+<tr>
+<th>Aider Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repository Map</td>
+<td>Extend ToolSchema with TreeView, Symbols</td>
+</tr>
+<tr>
+<td>Edit Blocks</td>
+<td>ToolEdit with search/replace</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>ToolGit with auto-commit</td>
+</tr>
+<tr>
+<td>Voice Commands</td>
+<td>KAIROS voice mode extension</td>
+</tr>
+<tr>
+<td>Lint/Test</td>
+<td>ToolLint, ToolTest integration</td>
+</tr>
+<tr>
+<td>Slash Commands</td>
+<td>CLI command system</td>
+</tr>
+</tbody>
+</table>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li>Website: https://aider.chat/</li>
+<li>Docs: https://aider.chat/docs/</li>
+<li>LLM Setup: https://aider.chat/docs/llms.html</li>
+<li>Repomap: https://aider.chat/docs/repomap.html</li>
+</ul>
+<h2 id="porting-priority-high">Porting Priority: HIGH</h2>
+<p>Aider’s git-native workflow, repository mapping, and edit block
+format are essential features to port to HelixAgent.</p>
+</body>
+</html>

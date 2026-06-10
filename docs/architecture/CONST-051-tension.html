@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CONST-051-tension</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CONST-051-tension</h1>
+</header>
+<h1 id="const-051b-const-051c-standalone-build-tension">CONST-051(B) ↔︎
+CONST-051(C) Standalone-Build Tension</h1>
+<h2 id="status">Status</h2>
+<p><strong>RESOLVED via Option E (fork consolidation)</strong> —
+close-out⁴⁶, 2026-05-16.</p>
+<p>Operator chose <strong>Option E</strong>. HelixAgent’s 4
+colliding-module replace directives migrated from
+<code>vasic-digital/*</code> → <code>HelixDevelopment/*</code> (the
+more-active canonical fork). Verification: HelixAgent compile is green
+across <code>./internal/...</code>, <code>./cmd/helixagent/...</code>,
+and <code>./tests/integration/...</code> against the
+HelixDevelopment-side variants of DocProcessor, LLMOrchestrator,
+LLMProvider, VisionEngine. The vasic-digital submodules remain on disk
+for the moment (deprecation sweep is a follow-up); HelixAgent no longer
+consumes them.</p>
+<p>Task #274 (DebateOrchestrator) — the long-blocked sibling of this
+tension — was resolved in the same close-out by reconstruction from
+import surface; the new repo at
+<code>github.com/HelixDevelopment/DebateOrchestrator</code> is added as
+a submodule at <code>submodules/debate_orchestrator</code>.</p>
+<p><strong>Historical analysis preserved below for posterity.</strong>
+Original “operator decision required” section retained verbatim so the
+option-tradeoff reasoning remains discoverable.</p>
+<hr />
+<h2 id="historical-surface-after-tasks-254273">(Historical) Surface
+after Tasks #254/#273</h2>
+<h2 id="the-tension">The tension</h2>
+<p>CONST-051(C) (nested-own-org chains forbidden) and CONST-051(B)
+(submodules-as-standalone, project-not-aware, reusable) pull in opposite
+directions for Go-module consumers like HelixAgent and HelixLLM.</p>
+<h3 id="before-tasks-254-273-const-051c-violation">Before Tasks #254 /
+#273 (CONST-051(C) violation)</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// helix_agent/go.mod</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>eventbus <span class="op">=&gt;</span> <span class="op">./</span>EventBus</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// helix_agent/.gitmodules</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">[</span>submodule <span class="st">&quot;EventBus&quot;</span><span class="op">]</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    path <span class="op">=</span> EventBus</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> git@github<span class="op">.</span>com<span class="op">:</span>vasic<span class="op">-</span>digital<span class="op">/</span>EventBus<span class="op">.</span>git</span></code></pre></div>
+<p>Standalone-buildable (G5-style ✓), but violates G4 (nested own-org
+chain).</p>
+<h3 id="after-tasks-254-273-const-051b-violation">After Tasks #254 /
+#273 (CONST-051(B) violation)</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// helix_agent/go.mod</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>eventbus <span class="op">=&gt;</span> <span class="op">../</span>submodules<span class="op">/</span>event_bus</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// helix_agent/.gitmodules</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">(</span>no EventBus entry — moved to parent root<span class="op">)</span></span></code></pre></div>
+<p>Satisfies G4 ✓, but standalone clones break:</p>
+<pre><code>$ git clone git@github.com:HelixDevelopment/HelixAgent.git
+$ cd HelixAgent
+$ go build ./...
+go: module digital.vasic.eventbus@v0.0.0 not found</code></pre>
+<h2 id="attempted-fix-go.work-workspace-at-helixcode-root">Attempted
+fix: go.work workspace at HelixCode root</h2>
+<p>A <code>go.work</code> file with
+<code>use ./HelixAgent + ./dependencies/vasic-digital/...</code> was
+attempted (this round). It surfaced a SECOND conflict:</p>
+<pre><code>go: conflicting replacements for digital.vasic.docprocessor:
+    .../submodules/doc_processor
+    .../submodules/doc_processor</code></pre>
+<p>Both repos declare <code>module digital.vasic.docprocessor</code>
+even though they are DIFFERENT codebases under different upstream orgs.
+The workspace can’t register both. Same conflict for: LLMOrchestrator,
+LLMProvider, VisionEngine (HelixDevelopment vs vasic-digital variants
+with shared module identifier).</p>
+<p><code>go.work</code> removed to restore HelixCode inner module’s
+working compile state.</p>
+<h2 id="additional-evidence-close-out⁴⁵-phase-1-deep">Additional
+evidence (close-out⁴⁵ Phase 1 deep)</h2>
+<p>Three findings reframe the option set:</p>
+<p><strong>Finding 1 — The 4 colliding modules are forks of a common
+ancestor, not independent codebases that happen to share a
+name.</strong> All four
+<code>dependencies/{HelixDevelopment,vasic-digital}/{DocProcessor, LLMOrchestrator, LLMProvider, VisionEngine}</code>
+pairs share their first-commit SHA (DocProcessor root:
+<code>27888613...</code>; LLMOrchestrator root:
+<code>91209efb...</code>; LLMProvider root: <code>94fcea1f...</code>;
+VisionEngine root: <code>b2fcdcfb...</code>). HelixDevelopment fork has
+more activity (DocProcessor: 63 vs 35 commits) — it is the
+more-maintained side.</p>
+<p><strong>Finding 2 — HelixCode does NOT depend on HelixAgent.</strong>
+<code>grep helixagent helix_code/go.mod</code> returns nothing. No
+source imports of HelixAgent module path. They are independent Go
+modules whose parent-build coexistence is incidental.</p>
+<p><strong>Finding 3 — The two consumers split on which fork they
+consume.</strong> - <code>helix_code/go.mod</code> →
+<code>replace digital.vasic.docprocessor =&gt;   ../submodules/doc_processor</code>
+- <code>helix_agent/go.mod</code> →
+<code>replace digital.vasic.docprocessor =&gt;   ../submodules/doc_processor</code></p>
+<p>The previous <code>go.work</code> attempt failed because it tried to
+register <strong>both</strong> sides under one workspace. But neither
+consumer needs both; each picks one fork.</p>
+<h2 id="real-fix-options-operator-decision">Real-fix options (operator
+decision)</h2>
+<h3 id="option-a-module-path-renaming">Option A: Module-path
+renaming</h3>
+<p>Distinguish the colliding modules by org-prefix in their module
+path:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// submodules/doc_processor/go.mod</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>module dev<span class="op">.</span>helix<span class="op">.</span>docprocessor   <span class="co">// distinguish from digital.vasic.docprocessor</span></span></code></pre></div>
+<p>Requires upstream repo edits AND every consumer’s go.mod update.
+Substantial coordinated work spanning two GitHub orgs.</p>
+<h3 id="option-b-proper-go-module-versioning">Option B: Proper Go-module
+versioning</h3>
+<p>Publish each dependencies/vasic-digital/* module as a real Go module
+with semantic version tags. Consumers reference by version:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>require digital<span class="op">.</span>vasic<span class="op">.</span>eventbus v1<span class="fl">.0</span><span class="er">.0</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">// no `replace` needed</span></span></code></pre></div>
+<p><strong>Caveat (close-out⁴⁵):</strong> B alone is INSUFFICIENT to
+resolve the collision. Two different VCS roots publishing the SAME
+module path (<code>digital.vasic.docprocessor</code> from both
+<code>github.com/HelixDevelopment/...</code> and
+<code>github.com/vasic-digital/...</code>) is still an unresolvable
+conflict for the Go module proxy — semver only disambiguates versions of
+one module path, not two repos sharing the same path. <strong>B must be
+paired with A</strong> to be correct.</p>
+<h3 id="option-c-keep-current-state-accept-const-051b-gap">Option C:
+Keep current state, accept CONST-051(B) gap</h3>
+<p>Document that HelixAgent + HelixLLM are NOT standalone-buildable
+post-#254/#273 by design — they’re only consumable from HelixCode
+parent. This trades B↔︎C tension by sacrificing B for C. CONST-051(B)
+would need a note documenting “Go-module consumers operating under
+HelixCode parent are exempt from standalone-build expectation.”</p>
+<h3 id="option-d-hybrid-ship-a-bootstrap-script">Option D: Hybrid — ship
+a bootstrap script</h3>
+<p>Add a <code>scripts/bootstrap-standalone-build.sh</code> to
+HelixAgent + HelixLLM that, on clone, clones the parent’s dependencies/*
+tree adjacent and generates a temporary go.work pointing at them.
+Consumers can build standalone after running bootstrap once. CONST-054’s
+<code>helix-deps.yaml</code> manifest is the natural metadata source for
+this script (avoids project-aware coupling per CONST-051(B)).</p>
+<h3 id="option-e-fork-consolidation-new-close-out⁴⁵">Option E: Fork
+consolidation (NEW — close-out⁴⁵)</h3>
+<p>Since the four collision pairs share ancestry (Finding 1), pick the
+more-maintained HelixDevelopment fork as canonical, deprecate the
+vasic-digital variants. HelixAgent migrates its 4 replace lines from
+<code>vasic-digital/*</code> to <code>HelixDevelopment/*</code>.
+Eliminates the collision permanently — there is only ONE module per
+identifier.</p>
+<p><strong>When E is the right answer:</strong> if the org-bifurcation
+has no business reason to persist (e.g. the duplicate forks were created
+for historical org-migration reasons that no longer apply).</p>
+<p><strong>When E is NOT the right answer:</strong> if the two forks
+have diverged in API or are owned/maintained by different teams that
+need autonomy. In that case A+B is the right answer.</p>
+<h3 id="not-an-option-f-per-consumer-go.work-scope-rejected-close-out⁴⁵">NOT-an-option
+F: Per-consumer <code>go.work</code> scope (REJECTED — close-out⁴⁵)</h3>
+<p>A previous draft of this doc considered scoping <code>go.work</code>
+per consumer (HelixCode root has its own; HelixAgent root has its own).
+This does NOT solve the standalone-build gap that CONST-051(B) demands —
+HelixAgent’s <code>go.work</code> would still reference
+<code>../dependencies/...</code> paths that don’t exist after a fresh
+standalone clone. Per-consumer workspace only papers over the
+parent-build path that already works.</p>
+<h2 id="recommendation-revised">Recommendation (revised)</h2>
+<p>The option ranking depends on org policy:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>If…</th>
+<th>Pick</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Both forks must persist with autonomy</td>
+<td><strong>A+B</strong> (rename + semver)</td>
+</tr>
+<tr>
+<td>Forks can be consolidated</td>
+<td><strong>E</strong> (fork consolidation) — cheapest by far</td>
+</tr>
+<tr>
+<td>Quick unblock without org coordination</td>
+<td><strong>D</strong> (bootstrap + helix-deps.yaml)</td>
+</tr>
+<tr>
+<td>Defer until org policy is set</td>
+<td><strong>C</strong> (accept gap, document carve-out)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Default suggestion if no other input:</strong> <strong>E
+(fork consolidation)</strong>. The shared-ancestry finding strongly
+suggests the bifurcation was incidental rather than intentional, and
+consolidation is the only option that requires no permanent ongoing
+maintenance burden (renames are a one-time event; semver tags need
+ongoing release discipline; bootstrap script needs ongoing maintenance;
+accept-the-gap means every new consumer hits the same surprise).</p>
+<h2 id="audit-trail">Audit trail</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Date</th>
+<th>Author</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-05-15</td>
+<td>Claude Opus 4.7</td>
+<td>Tension surfaced during honest assessment after close-out⁴¹.
+Attempted go.work fix during close-out⁴³, removed after
+<code>digital.vasic.docprocessor</code> cross-org module-name collision
+broke HelixCode inner compile. Documented as architectural decision
+point.</td>
+</tr>
+<tr>
+<td>2026-05-15</td>
+<td>Claude Opus 4.7 (close-out⁴⁵)</td>
+<td>Phase 1 deep investigation: established forks-share-ancestry,
+HelixCode-doesn’t-depend-on-HelixAgent, original Option B is incomplete
+without A. Surfaced Option E (fork consolidation) and rejected Option F
+(per-consumer workspace). Revised recommendation to A+B / E / D / C
+ladder; default suggestion now E pending org-policy input.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sources-verified-2026-05-29-httpsgo.devrefmod-cross-referenced-this-docs-go-module-claims-against-the-latest-official-go-modules-reference.-confirmed-accurate-as-of-this-date-a-the-replace-directive-accepts-a-local-relative-path-.-or-..-to-a-replacement-module-root-containing-a-go.mod-with-the-version-omitted-the-replace-digital.vasic.eventbus-..dependencies...-pattern-in-after-tasks-254273-b-two-different-vcs-repositories-declaring-the-same-module-path-cannot-both-be-resolved-by-the-go-module-system-if-two-or-more-modules-in-the-build-list-provide-a-package-the-go-command-reports-an-error-the-digital.vasic.docprocessor-cross-org-collision-in-attempted-fix-and-option-b-caveat-c-go.work-workspace-files-and-the-use-directive-relative-path-to-a-modules-go.mod-behave-as-described-in-attempted-fix-and-option-f-and-the-reference-notes-go.work-is-typically-not-committed-to-vcs.-negative-finding-none-every-module-system-mechanism-this-doc-relies-on-is-current-and-accurate.-go-version-authority-per-claude.md-3.1-inner-module-go-1.26-root-go-1.25.2-confirmed-in-tree-no-builddocker-version-pins-appear-in-this-doc-so-none-required-correction.">Sources
+verified 2026-05-29: https://go.dev/ref/mod — Cross-referenced this
+doc’s Go-module claims against the latest official Go Modules Reference.
+Confirmed accurate as of this date: (a) the <code>replace</code>
+directive accepts a local relative path (<code>./</code> or
+<code>../</code>) to a replacement module root containing a
+<code>go.mod</code>, with the version omitted (the
+<code>replace digital.vasic.eventbus =&gt; ../dependencies/...</code>
+pattern in §“After Tasks #254/#273”); (b) two different VCS repositories
+declaring the SAME module path cannot both be resolved by the Go module
+system — if two or more modules in the build list provide a package the
+<code>go</code> command reports an error (the
+<code>digital.vasic.docprocessor</code> cross-org collision in
+§“Attempted fix” and Option B caveat); (c) <code>go.work</code>
+workspace files and the <code>use</code> directive (relative path to a
+module’s <code>go.mod</code>) behave as described in §“Attempted fix”
+and Option F, and the reference notes <code>go.work</code> is typically
+not committed to VCS. Negative finding: none — every module-system
+mechanism this doc relies on is current and accurate. Go version
+authority per CLAUDE.md §3.1: inner module <code>go 1.26</code>, root
+<code>go 1.25.2</code> (confirmed in-tree); no build/Docker version pins
+appear in this doc so none required correction.</h2>
+</body>
+</html>

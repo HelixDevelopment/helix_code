@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f15-subagent-team-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f15-subagent-team-design</h1>
+</header>
+<h1 id="phase-1-feature-15-subagent-team">Phase 1 / Feature 15 —
+Subagent Team</h1>
+<p><strong>Date:</strong> 2026-05-06 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, end-to-end <strong>subagent dispatch</strong> system.
+F15 lets the parent agent fan out independent units of work to one or
+more subagents, each running its own (inner) agent loop with its own LLM
+call(s) and its own tool registry, then collect their results back as
+they stream in.</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong>Agent tool</strong> — <code>task</code> (the literal tool
+name claude-code uses, picked here for cross-agent prompt portability
+per Q4=B). Registered via
+<code>internal/tools/registry.go::ToolRegistry.registerAllTools()</code>
+lazily once the SubagentManager is wired in (mirrors F13’s
+<code>SetLSPManager</code> and F14’s <code>SetSandboxManager</code>).
+Arguments: <code>description</code> (string, required),
+<code>prompt</code> (string, required), <code>isolation</code> (string
+enum: <code>&quot;none&quot;</code> (default) or <code>&quot;worktree&quot;</code>; per
+Q2=B), <code>subagent_type</code> (optional string; selects a configured
+profile if any).</li>
+<li><strong>Slash command <code>/subagents</code></strong> —
+<code>list</code> (alias of bare <code>/subagents</code>),
+<code>status [id]</code>, <code>kill &lt;id&gt;</code>. <strong>No cobra
+subcommand</strong> (Q5=B). The slash surface is read-only inspection +
+targeted termination.</li>
+<li><strong>Hybrid execution model</strong> (Q1=C) — by default
+subagents run as in-process goroutines with their own agent loop. When
+the agent passes <code>isolation: &quot;worktree&quot;</code>, the subagent is
+spawned as a <strong>subprocess</strong> (re-exec of the host binary
+with a sentinel env var, mirroring F14’s helper-mode dispatch) running
+inside an F04-managed worktree directory.</li>
+</ol>
+<p>Streaming aggregation (Q3=B) — the manager returns a
+<code>&lt;-chan SubagentResult</code> immediately on dispatch; results
+land on the channel as each subagent completes; the channel is closed
+when the last subagent finishes. A small
+<code>WaitAll(&lt;-chan SubagentResult) []SubagentResult</code> helper
+drains synchronously for the call sites that prefer the blocking style.
+Both modes are first-class.</p>
+<p>The scope of F15 is <strong>dispatch + execution + streaming
+aggregation + worktree isolation + slash inspection</strong>. Auto-merge
+of worktree changes back to the parent branch, persistent subagent state
+across CLI sessions, subagent-to-subagent direct messaging, and
+per-subagent CPU/memory quotas are explicitly deferred to F15.5
+(§8).</p>
+<p>The subagent’s inner agent loop is built from the same primitives the
+parent uses: <code>internal/llm.Provider</code> +
+<code>internal/tools.ToolRegistry</code> + a private session.
+Anti-bluff: a “subagent” that does not invoke the LLM, or that returns a
+hardcoded “I would do X” string, is a critical defect (§5.2).</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>Five layers, all under <code>internal/agent/subagent/</code>:</p>
+<ul>
+<li><strong><code>SubagentManager</code></strong> — owns the lifecycle
+of running subagents. Its
+<code>Dispatch(ctx, *SubagentTask) (id string, results &lt;-chan SubagentResult, err error)</code>
+is the only public dispatch path. Enforces (a) max-concurrency (default
+5), (b) timeout (default 5min), (c) worktree creation via F04 when
+<code>isolation: &quot;worktree&quot;</code>, (d) kill-by-id from the slash
+command, (e) result streaming + channel close on terminal state.</li>
+<li><strong><code>SubagentSpawner</code> interface</strong> — two
+implementations:
+<ul>
+<li><code>InProcessSpawner</code> — runs the subagent’s inner agent loop
+in a goroutine. Each subagent gets its own (shallow-copied)
+<code>llm.Provider</code> reference and a fresh
+<code>ToolRegistry</code> view.</li>
+<li><code>SubprocessSpawner</code> — uses <code>os.Executable()</code> +
+a sentinel env var (<code>HELIX_SUBAGENT_INVOCATION=1</code>) to
+fork-exec the host binary. The child detects the env var at the very top
+of <code>main()</code> (F14 helper-mode pattern) and runs
+<code>RunAsSubagent()</code> instead of normal CLI dispatch. Stdout
+carries a JSON-encoded <code>SubagentResult</code>; the parent reads it
+and forwards to the caller’s channel.</li>
+</ul></li>
+<li><strong><code>Subagent</code></strong> — runtime record (ID, task,
+state, started/finished timestamps, isolation kind, worktree path if
+any, last error). State is
+<code>pending | running | succeeded | failed | killed | timed_out</code>.</li>
+<li><strong><code>TaskTool</code></strong> — implements the
+<code>tools.Tool</code> interface
+(<code>Name</code>/<code>Description</code>/<code>Schema</code>/<code>Category</code>/<code>Validate</code>/<code>Execute</code>).
+Tool name: literal <code>task</code>. Category
+<code>CategorySubagent</code> (new constant; mirrors F13’s
+<code>CategoryLSP</code> and F14’s <code>CategorySandbox</code>).
+Execute calls <code>manager.Dispatch</code>, then either drains the
+channel (default, blocking) or returns the channel handle in the result
+map (when <code>streaming: true</code>). Default v1 behaviour is
+blocking-drain (one subagent per <code>task</code> call); the
+channel-handle return is the seam for a future <code>task_async</code>
+variant and is documented but kept behind a flag in v1.</li>
+<li><strong><code>SubagentsCommand</code></strong> —
+<code>/subagents</code> slash command
+(<code>list</code>/<code>status</code>/<code>kill</code>). Mirrors F14’s
+<code>/sandbox</code> command shape: defines a small
+<code>SubagentManager</code> interface in the commands package so the
+slash is testable with a fake while main.go passes the real
+<code>*subagent.SubagentManager</code>.</li>
+</ul>
+<p>Worktree integration (per Q2=B):
+<code>SubagentManager.Dispatch</code> calls
+<code>worktree.Manager.EnterWorktree(ctx, name, baseBranch)</code> when
+<code>isolation == &quot;worktree&quot;</code>. The returned absolute path is set
+as the subprocess child’s <code>cmd.Dir</code>. v1 does
+<strong>not</strong> auto-merge — subagent worktrees are returned to the
+user via the result map’s <code>worktree_path</code> field for manual
+review using F04’s existing <code>worktree</code> cobra command.</p>
+<pre><code>┌──────────────────┐  task tool
+│  agent.go (LLM)  │ ──────► ToolRegistry.Execute(&quot;task&quot;, {…})
+└──────────────────┘                │
+                                     ├─ TaskTool.Execute
+                                     │     ├─ SubagentManager.Dispatch
+                                     │     │     ├─ enforce max-concurrency
+                                     │     │     ├─ if isolation=worktree: WorktreeManager.EnterWorktree
+                                     │     │     ├─ pick spawner (InProcess vs Subprocess)
+                                     │     │     ├─ goroutine OR fork-exec with HELIX_SUBAGENT_INVOCATION=1
+                                     │     │     ├─ stream SubagentResult on chan
+                                     │     │     └─ close chan when done
+                                     │     └─ drain chan (or return handle)
+                                     └─ result back to parent agent</code></pre>
+<p>Subprocess child path (mirrors F14 helper-mode, see
+<code>internal/tools/sandbox/native_backend.go::IsHelperInvocation</code>):</p>
+<pre><code>main()
+  ├─ if subagent.IsSubagentInvocation(): os.Exit(subagent.RunAsSubagent())   ← FIRST stmt
+  ├─ if sandbox.IsHelperInvocation():    os.Exit(sandbox.RunAsHelper())
+  ├─ … normal CLI bootstrap</code></pre>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/agent/subagent/types.go</code> —
+<code>SubagentTask</code>, <code>SubagentResult</code>,
+<code>Isolation</code> enum, <code>SubagentState</code> enum,
+<code>SubagentSpawner</code> interface, error sentinels,
+<code>FakeLLMProvider</code> (TEST PROVIDER, see §5.2).</li>
+<li><code>helix_code/internal/agent/subagent/types_test.go</code>.</li>
+<li><code>helix_code/internal/agent/subagent/inprocess_spawner.go</code>
+— goroutine-based spawner; runs an inner agent loop with the parent’s
+<code>llm.Provider</code> (or a freshly-constructed one when configured)
+and a fresh <code>tools.ToolRegistry</code> view.</li>
+<li><code>helix_code/internal/agent/subagent/inprocess_spawner_test.go</code>
+— uses <code>FakeLLMProvider</code>.</li>
+<li><code>helix_code/internal/agent/subagent/subprocess_spawner.go</code>
+— fork-exec via <code>os.Executable()</code> +
+<code>HELIX_SUBAGENT_INVOCATION=1</code>; reads JSON-encoded
+<code>SubagentResult</code> from child stdout.</li>
+<li><code>helix_code/internal/agent/subagent/subprocess_spawner_test.go</code>
+— uses an injectable <code>Executor</code> seam to assert argv +
+env.</li>
+<li><code>helix_code/internal/agent/subagent/manager.go</code> —
+<code>SubagentManager</code> with dispatch + streaming aggregation +
+max-concurrency + kill-by-id.</li>
+<li><code>helix_code/internal/agent/subagent/manager_test.go</code>.</li>
+<li><code>helix_code/internal/agent/subagent/worktree_integration.go</code>
+— wraps F04’s <code>worktree.Manager.EnterWorktree</code>; on dispatch
+failure, no worktree is created.</li>
+<li><code>helix_code/internal/agent/subagent/worktree_integration_test.go</code>
+— runs against a real <code>git init</code>-ed tempdir.</li>
+<li><code>helix_code/internal/agent/subagent/helper_mode.go</code> —
+<code>IsSubagentInvocation()</code> + <code>RunAsSubagent() int</code>.
+Helper-mode does NOT depend on the rest of the CLI bootstrap; it
+constructs a minimal subagent runtime from env-var-encoded payload, runs
+the inner agent loop, prints JSON to stdout, exits.</li>
+<li><code>helix_code/internal/agent/subagent/helper_mode_test.go</code>.</li>
+<li><code>helix_code/internal/tools/task_tool.go</code> —
+<code>TaskTool</code> implementing <code>tools.Tool</code> interface;
+tool name <code>task</code>.</li>
+<li><code>helix_code/internal/tools/task_tool_test.go</code>.</li>
+<li><code>helix_code/internal/commands/subagents_command.go</code> —
+<code>/subagents</code> slash (list/status/kill).</li>
+<li><code>helix_code/internal/commands/subagents_command_test.go</code>.</li>
+<li><code>helix_code/tests/integration/subagent_test.go</code> —
+<code>//go:build integration</code>, gated per §5.2.</li>
+<li><code>helix_code/tests/integration/cmd/p1f15_challenge/main.go</code>
+— runtime evidence harness.</li>
+<li><code>challenges/p1-f15-subagent-team/CHALLENGE.md</code> +
+<code>run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/internal/tools/registry.go</code> — add
+<code>CategorySubagent ToolCategory = &quot;subagent&quot;</code>. Add
+<code>SetSubagentManager(m *subagent.SubagentManager)</code> (mirrors
+F13’s <code>SetLSPManager</code> and F14’s
+<code>SetSandboxManager</code>); the method lazily registers
+<code>TaskTool</code> so unit tests of the registry that don’t supply a
+manager don’t see the <code>task</code> tool.</li>
+<li><code>helix_code/cmd/cli/main.go</code> — three lines:
+<ol type="1">
+<li><strong>First statement of <code>main()</code></strong>:
+<code>if subagent.IsSubagentInvocation() { os.Exit(subagent.RunAsSubagent()) }</code>.
+MUST precede the existing <code>sandbox.IsHelperInvocation()</code>
+check.</li>
+<li>After the existing tool-registry construction: build a
+<code>SubagentManager</code>, call
+<code>registry.SetSubagentManager(mgr)</code>.</li>
+<li>Slash-command registration:
+<code>slashRegistry.Register(commands.NewSubagentsCommand(mgr))</code>.</li>
+</ol></li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/agent/subagent/types.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Isolation <span class="dt">string</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    IsolationNone     Isolation <span class="op">=</span> <span class="st">&quot;none&quot;</span>      <span class="co">// default; in-process goroutine</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    IsolationWorktree Isolation <span class="op">=</span> <span class="st">&quot;worktree&quot;</span>  <span class="co">// F04 worktree + subprocess</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentState <span class="dt">string</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    StatePending    SubagentState <span class="op">=</span> <span class="st">&quot;pending&quot;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    StateRunning    SubagentState <span class="op">=</span> <span class="st">&quot;running&quot;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    StateSucceeded  SubagentState <span class="op">=</span> <span class="st">&quot;succeeded&quot;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    StateFailed     SubagentState <span class="op">=</span> <span class="st">&quot;failed&quot;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    StateKilled     SubagentState <span class="op">=</span> <span class="st">&quot;killed&quot;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    StateTimedOut   SubagentState <span class="op">=</span> <span class="st">&quot;timed_out&quot;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">// SubagentTask is what the parent agent&#39;s `task` tool call builds.</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentTask <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    Description   <span class="dt">string</span>        <span class="st">`json:&quot;description&quot;`</span>     <span class="co">// human-readable; logged at INFO</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    Prompt        <span class="dt">string</span>        <span class="st">`json:&quot;prompt&quot;`</span>          <span class="co">// the LLM prompt body; NEVER logged at INFO (CONST-042)</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    Isolation     Isolation     <span class="st">`json:&quot;isolation&quot;`</span>       <span class="co">// default IsolationNone</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    SubagentType  <span class="dt">string</span>        <span class="st">`json:&quot;subagent_type,omitempty&quot;`</span> <span class="co">// optional profile selector</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    Timeout       time<span class="op">.</span>Duration <span class="st">`json:&quot;timeout&quot;`</span>         <span class="co">// default 5min, hard ceiling 30min</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    BaseBranch    <span class="dt">string</span>        <span class="st">`json:&quot;base_branch,omitempty&quot;`</span> <span class="co">// worktree base; empty → current HEAD</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">// SubagentResult is what each subagent emits on the streaming channel.</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    ID            <span class="dt">string</span>         <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    State         SubagentState  <span class="st">`json:&quot;state&quot;`</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    Output        <span class="dt">string</span>         <span class="st">`json:&quot;output&quot;`</span>           <span class="co">// LLM text response or aggregated tool output</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    Error         <span class="dt">string</span>         <span class="st">`json:&quot;error,omitempty&quot;`</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    ExitCode      <span class="dt">int</span>            <span class="st">`json:&quot;exit_code&quot;`</span>        <span class="co">// 0 success; only meaningful for subprocess</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    StartedAt     time<span class="op">.</span>Time      <span class="st">`json:&quot;started_at&quot;`</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    FinishedAt    time<span class="op">.</span>Time      <span class="st">`json:&quot;finished_at&quot;`</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    Duration      time<span class="op">.</span>Duration  <span class="st">`json:&quot;duration&quot;`</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    Isolation     Isolation      <span class="st">`json:&quot;isolation&quot;`</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    WorktreePath  <span class="dt">string</span>         <span class="st">`json:&quot;worktree_path,omitempty&quot;`</span>  <span class="co">// non-empty for worktree isolation</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    ToolCalls     <span class="dt">int</span>            <span class="st">`json:&quot;tool_calls&quot;`</span>       <span class="co">// number of tool invocations the subagent made</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentSpawner <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    Spawn<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sub <span class="op">*</span>Subagent<span class="op">,</span> sink <span class="kw">chan</span><span class="op">&lt;-</span> SubagentResult<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    Kind<span class="op">()</span> <span class="dt">string</span>  <span class="co">// &quot;in-process&quot; or &quot;subprocess&quot;</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    ErrMaxConcurrency       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;subagent: max concurrency reached&quot;</span><span class="op">)</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    ErrSubagentNotFound     <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;subagent: id not found&quot;</span><span class="op">)</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    ErrWorktreeUnavailable  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;subagent: worktree manager not configured&quot;</span><span class="op">)</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    ErrInvalidIsolation     <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;subagent: isolation must be &#39;none&#39; or &#39;worktree&#39;&quot;</span><span class="op">)</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    ErrSubagentTimeout      <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;subagent: timed out&quot;</span><span class="op">)</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    ErrSubagentKilled       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;subagent: killed via /subagents kill&quot;</span><span class="op">)</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/agent/subagent/manager.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentManagerOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    LLMProvider     llm<span class="op">.</span>Provider              <span class="co">// required; the parent&#39;s provider</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    ToolRegistry    <span class="op">*</span>tools<span class="op">.</span>ToolRegistry       <span class="co">// required; subagent tools are a fresh view of this registry</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    WorktreeManager <span class="op">*</span>worktree<span class="op">.</span>Manager         <span class="co">// optional; required only when IsolationWorktree is requested</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    InProcess       SubagentSpawner           <span class="co">// injectable for tests; default NewInProcessSpawner(...)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    Subprocess      SubagentSpawner           <span class="co">// injectable for tests; default NewSubprocessSpawner(...)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    MaxConcurrency  <span class="dt">int</span>                       <span class="co">// default 5</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    DefaultTimeout  time<span class="op">.</span>Duration             <span class="co">// default 5min, hard ceiling 30min</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    Logger          <span class="op">*</span>zap<span class="op">.</span>Logger               <span class="co">// optional; nil → zap.NewNop()</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Now             <span class="kw">func</span><span class="op">()</span> time<span class="op">.</span>Time          <span class="co">// injectable; default time.Now</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    opts    SubagentManagerOptions</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    mu      sync<span class="op">.</span>RWMutex</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    running <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Subagent     <span class="co">// id → record</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    sem     <span class="kw">chan</span> <span class="kw">struct</span><span class="op">{}</span>             <span class="co">// bounded by MaxConcurrency</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSubagentManager<span class="op">(</span>opts SubagentManagerOptions<span class="op">)</span> <span class="op">(*</span>SubagentManager<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SubagentManager<span class="op">)</span> Dispatch<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> t <span class="op">*</span>SubagentTask<span class="op">)</span> <span class="op">(</span>id <span class="dt">string</span><span class="op">,</span> results <span class="op">&lt;-</span><span class="kw">chan</span> SubagentResult<span class="op">,</span> err <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SubagentManager<span class="op">)</span> WaitAll<span class="op">(</span>results <span class="op">&lt;-</span><span class="kw">chan</span> SubagentResult<span class="op">)</span> <span class="op">[]</span>SubagentResult     <span class="co">// synchronous helper</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SubagentManager<span class="op">)</span> List<span class="op">()</span> <span class="op">[]</span>SubagentInfo                                       <span class="co">// for /subagents list</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SubagentManager<span class="op">)</span> Status<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>SubagentInfo<span class="op">,</span> <span class="dt">error</span><span class="op">)</span>                     <span class="co">// for /subagents status</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SubagentManager<span class="op">)</span> Kill<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span>                                       <span class="co">// for /subagents kill</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SubagentManager<span class="op">)</span> Close<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span>                            <span class="co">// drains running, returns when all stopped or ctx done</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Subagent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    ID            <span class="dt">string</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    Task          <span class="op">*</span>SubagentTask</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    State         SubagentState</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    StartedAt     time<span class="op">.</span>Time</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    FinishedAt    time<span class="op">.</span>Time</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    WorktreePath  <span class="dt">string</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    cancel        context<span class="op">.</span>CancelFunc</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    spawner       SubagentSpawner</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    mu            sync<span class="op">.</span>RWMutex</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentInfo <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    ID            <span class="dt">string</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    Description   <span class="dt">string</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    State         SubagentState</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    Isolation     Isolation</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    WorktreePath  <span class="dt">string</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    StartedAt     time<span class="op">.</span>Time</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    Duration      time<span class="op">.</span>Duration  <span class="co">// 0 if still running</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/task_tool.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskTool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    manager <span class="op">*</span>subagent<span class="op">.</span>SubagentManager</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTaskTool<span class="op">(</span>m <span class="op">*</span>subagent<span class="op">.</span>SubagentManager<span class="op">)</span> <span class="op">*</span>TaskTool</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;task&quot;</span> <span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="co">// documents description/prompt/isolation/subagent_type</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Schema<span class="op">()</span> ToolSchema   <span class="co">// see below</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Category<span class="op">()</span> ToolCategory <span class="co">// CategorySubagent</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p>Tool result is a <code>map[string]interface{}</code> with keys
+<code>id</code>, <code>state</code>, <code>output</code>,
+<code>error</code>, <code>duration_ms</code>, <code>tool_calls</code>,
+<code>worktree_path</code> (only present for worktree isolation),
+<code>isolation</code>. Default v1 behaviour is to drain a single-result
+channel and return the consolidated map.</p>
+<h3 id="user-surfaces">3.4 User surfaces</h3>
+<p><strong>Agent tool call</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool name</th>
+<th>Schema</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task</code></td>
+<td><code>{description: string, prompt: string, isolation?: &quot;none&quot;|&quot;worktree&quot; (default &quot;none&quot;), subagent_type?: string, timeout_seconds?: int (default 300; max 1800)}</code></td>
+<td><code>{id, state, output, error?, duration_ms, tool_calls, isolation, worktree_path?}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Slash command <code>/subagents</code></strong>: -
+<code>/subagents</code> (alias of <code>list</code>) — table:
+<code>ID  STATE  ISOLATION  DURATION  DESCRIPTION</code>.
+Killed/finished rows are kept for a short retention window
+(<code>opts.RetentionAfterFinish</code>, default 10min) so the user can
+inspect post-mortem. - <code>/subagents status &lt;id&gt;</code> — full
+record (state, isolation, worktree path if any, started_at, finished_at,
+error message if any). Output is <strong>never</strong> the prompt body
+(CONST-042) — the description field is shown instead. -
+<code>/subagents kill &lt;id&gt;</code> — calls
+<code>manager.Kill(id)</code>. For in-process subagents this cancels the
+context; for subprocess subagents it sends SIGTERM (then SIGKILL after
+5s if the child is still alive).</p>
+<p><strong>No cobra subcommand</strong> (Q5=B). Inspection and
+termination both go through the slash command.</p>
+<h3 id="existing-code-constraints">3.5 Existing-code constraints</h3>
+<p><code>internal/agent/</code> already has its own <code>Agent</code>
+interface, <code>BaseAgent</code> type, <code>AgentRegistry</code>, etc.
+F15 deliberately does <strong>not</strong> modify those types. The
+subagent’s inner loop reuses <code>BaseAgent.SetLLMProvider</code> +
+<code>BaseAgent.SetToolRegistry</code> (already public per
+<code>base_agent.go</code>) to construct a fresh agent without touching
+the parent’s registry of agents. The <code>SubagentManager</code> and
+the existing <code>AgentRegistry</code> are intentionally separate —
+<code>AgentRegistry</code> is the long-lived “what agent types exist”
+registry, while <code>SubagentManager</code> is the per-task “what is
+currently running” registry. This separation keeps F15 additive.</p>
+<p><code>internal/tools/registry.go</code> already defines a
+<code>Tool</code> interface — <code>TaskTool</code> lives in package
+<code>tools</code> (NOT in <code>subagent</code>) to avoid a circular
+import, and imports the subagent package directly. This mirrors F13’s
+tool placement (LSPTool lives in <code>tools</code>, not in a
+subpackage), keeping the registry self-contained.</p>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup-wiring-cmdclimain.go">4.1 Startup wiring
+(<code>cmd/cli/main.go</code>)</h3>
+<pre><code>main()
+  ├─ if subagent.IsSubagentInvocation(): os.Exit(subagent.RunAsSubagent())   // FIRST
+  ├─ if sandbox.IsHelperInvocation():    os.Exit(sandbox.RunAsHelper())      // SECOND
+  ├─ … existing CLI bootstrap (cobra, config load, providers, …)
+  ├─ wtMgr := worktree.NewManager(repoRoot)
+  ├─ saMgr, err := subagent.NewSubagentManager(subagent.SubagentManagerOptions{
+  │      LLMProvider: provider, ToolRegistry: toolReg,
+  │      WorktreeManager: wtMgr, MaxConcurrency: 5, DefaultTimeout: 5*time.Minute,
+  │  })
+  ├─ if err != nil: log WARN; saMgr = nil  → registry will not register `task`
+  ├─ if saMgr != nil: toolReg.SetSubagentManager(saMgr)
+  ├─ slashRegistry.Register(commands.NewSubagentsCommand(saMgr))
+  └─ defer saMgr.Close(ctx)</code></pre>
+<p>If <code>saMgr == nil</code> (e.g. WorktreeManager construction
+failed AND IsolationWorktree was passed) — the registry skips
+registering <code>task</code>, so the agent gets a clear “tool not
+found” error rather than a silent no-op. The <code>/subagents</code>
+slash still registers and prints
+<code>subagent manager unavailable</code>.</p>
+<h3 id="in-process-dispatch-flow">4.2 In-process dispatch flow</h3>
+<pre><code>TaskTool.Execute(ctx, params)
+  ├─ task := buildTask(params)         // parse description/prompt/isolation/timeout
+  ├─ id, results, err := mgr.Dispatch(ctx, task)
+  ├─ if err != nil: return error
+  ├─ collected := mgr.WaitAll(results) // drain until channel close
+  └─ return resultMap(collected[0])
+
+SubagentManager.Dispatch(ctx, task)
+  ├─ acquire sem (block up to ctx.Deadline) OR return ErrMaxConcurrency
+  ├─ id := uuid.NewString()
+  ├─ subCtx, cancel := context.WithTimeout(ctx, task.Timeout)
+  ├─ sub := &amp;Subagent{ID: id, Task: task, State: StatePending, cancel: cancel, …}
+  ├─ if task.Isolation == IsolationWorktree:
+  │     path, err := wtMgr.EnterWorktree(subCtx, id, task.BaseBranch)
+  │     if err: release sem; cancel; return err
+  │     sub.WorktreePath = path
+  │     sub.spawner = m.opts.Subprocess
+  ├─ else:
+  │     sub.spawner = m.opts.InProcess
+  ├─ register sub in m.running
+  ├─ ch := make(chan SubagentResult, 1)
+  ├─ go func() {
+  │     defer close(ch); defer m.release(id)
+  │     err := sub.spawner.Spawn(subCtx, sub, ch)
+  │     if err &amp;&amp; no result was emitted: ch &lt;- failedResult(sub, err)
+  │  }()
+  └─ return id, ch, nil
+
+InProcessSpawner.Spawn(ctx, sub, sink)
+  ├─ provider := sub.spawner.opts.LLMProvider
+  ├─ inner := buildInnerAgent(provider, sub.spawner.opts.ToolRegistry)  // fresh BaseAgent
+  ├─ start := now()
+  ├─ resp, err := inner.Run(ctx, sub.Task.Prompt)        // ACTUALLY invokes the LLM
+  ├─ result := SubagentResult{ID: sub.ID, Output: resp.Text, State: stateFromErr(err), Duration: now().Sub(start), ToolCalls: inner.ToolCallCount(), Isolation: IsolationNone}
+  └─ sink &lt;- result</code></pre>
+<h3 id="subprocess-worktree-isolated-dispatch-flow">4.3 Subprocess
+(worktree-isolated) dispatch flow</h3>
+<pre><code>SubprocessSpawner.Spawn(ctx, sub, sink)
+  ├─ exe, _ := os.Executable()
+  ├─ payload := encodeSubagentPayload(sub.Task, sub.WorktreePath, sub.ID)  // JSON, base64
+  ├─ cmd := exec.CommandContext(ctx, exe)
+  ├─ cmd.Dir = sub.WorktreePath                               // child runs INSIDE the worktree
+  ├─ cmd.Env = append(os.Environ(),
+  │      &quot;HELIX_SUBAGENT_INVOCATION=1&quot;,
+  │      &quot;HELIX_SUBAGENT_PAYLOAD=&quot;+payload,
+  │  )
+  ├─ var stdout bytes.Buffer
+  ├─ cmd.Stdout = &amp;stdout
+  ├─ cmd.Stderr = (a logger-prefixing writer)
+  ├─ err := cmd.Run()
+  ├─ result := decodeSubagentResult(stdout.Bytes())
+  ├─ if decode fails: result = failedResult(sub, fmt.Errorf(&quot;subagent stdout malformed: %w; raw: %s&quot;, err, …))
+  ├─ result.WorktreePath = sub.WorktreePath
+  ├─ result.Isolation = IsolationWorktree
+  └─ sink &lt;- result
+
+// In the child process:
+RunAsSubagent() int
+  ├─ payload := decodeSubagentPayload(os.Getenv(&quot;HELIX_SUBAGENT_PAYLOAD&quot;))
+  ├─ provider := buildProviderFromEnv()                       // F12: same env wiring as parent
+  ├─ toolReg := buildMinimalToolRegistry(provider)            // shell, read, edit, grep — no `task` recursion
+  ├─ inner := buildInnerAgent(provider, toolReg)
+  ├─ result, err := inner.Run(ctx, payload.Prompt)
+  ├─ json.NewEncoder(os.Stdout).Encode(SubagentResult{...})
+  └─ return 0 on success, 1 on err</code></pre>
+<p>The child does NOT register the <code>task</code> tool itself
+(preventing infinite subagent recursion in v1). v1 cap: subagent depth =
+1. Documented in §8.</p>
+<h3 id="streaming-waitall">4.4 Streaming + WaitAll</h3>
+<pre><code>results := &lt;-chan SubagentResult                 // returned by Dispatch
+go func() { ... eventually close(results) }()    // closed by manager goroutine
+
+// Sync drain:
+all := mgr.WaitAll(results)                      // blocks until close
+
+// Async fanout (e.g., when the parent dispatches N subagents and merges):
+for r := range results { handle(r) }</code></pre>
+<p><code>WaitAll</code> is implemented as
+<code>for r := range ch { out = append(out, r) }</code> — trivial but
+documented as part of the public API so call sites don’t need to
+remember the channel-iteration idiom.</p>
+<h3 id="worktree-integration-per-q2b">4.5 Worktree integration (per
+Q2=B)</h3>
+<p>When <code>task.Isolation == IsolationWorktree</code>: - The manager
+calls <code>wtMgr.EnterWorktree(ctx, sub.ID, task.BaseBranch)</code>. -
+The worktree directory is
+<code>&lt;repoRoot&gt;/.helix-worktrees/&lt;sub.ID&gt;/</code>. F04
+already creates the parent dir. - <strong>Parent’s uncommitted
+changes</strong>: the F04 <code>EnterWorktree</code> path uses
+<code>git worktree add &lt;path&gt; &lt;branch&gt;</code> which is
+invariant in the parent’s working-tree state — uncommitted changes in
+the parent stay in the parent and are NOT copied into the new worktree.
+The subagent’s worktree starts from the clean tip of the named branch
+(or HEAD if <code>BaseBranch == &quot;&quot;</code>). v1 documents this loudly: a
+subagent does NOT see the parent’s WIP. Users who want WIP visibility
+must commit (or stash + apply manually) BEFORE dispatching the subagent.
+Auto-stash-on-dispatch is deferred to F15.5. - The subprocess child runs
+with <code>cmd.Dir = worktreePath</code>, so all relative paths the
+subagent uses are inside its own worktree. - On completion, the worktree
+is <strong>left in place</strong> (Q2=B: optional merge-back, not auto).
+Result map carries <code>worktree_path</code> so the user can inspect /
+merge / discard with the existing F04 <code>worktree</code> cobra
+commands.</p>
+<h2 id="error-handling-edge-cases-and-anti-bluff">5. Error handling,
+edge cases, and anti-bluff</h2>
+<h3 id="error-paths">5.1 Error paths</h3>
+<ul>
+<li><strong>Max concurrency reached</strong> — <code>Dispatch</code>
+returns <code>ErrMaxConcurrency</code> immediately (no goroutine, no
+worktree). Default cap: 5 (<code>opts.MaxConcurrency</code>). Slash
+<code>/subagents list</code> shows the running set so the user can
+<code>/subagents kill &lt;id&gt;</code> to free a slot.</li>
+<li><strong>Worktree creation failure</strong> (e.g., dirty existing
+worktree, branch conflict) — <code>Dispatch</code> returns the wrapped
+<code>worktree.Manager.EnterWorktree</code> error.
+<strong>Fail-closed</strong>: do NOT silently degrade to in-process when
+the agent asked for worktree isolation. The agent receives the error and
+can retry.</li>
+<li><strong>WorktreeManager not configured but isolation=worktree
+requested</strong> — <code>ErrWorktreeUnavailable</code>.</li>
+<li><strong>LLM provider failure</strong> — propagated as
+<code>SubagentResult{State: StateFailed, Error: err.Error()}</code>. The
+channel is still closed normally. Tool result has
+<code>state: &quot;failed&quot;</code> and a non-empty <code>error</code>
+field.</li>
+<li><strong>Subprocess crash</strong> (exit code != 0, stdout malformed)
+— manager constructs a <code>failedResult</code> with the captured
+stderr (truncated to 4 KiB) attached as <code>error</code>, and the exit
+code in <code>exit_code</code>. The result is still emitted on the
+channel.</li>
+<li><strong>Timeout</strong> — context deadline propagates to the
+spawner. In-process: the inner agent loop sees
+<code>ctx.Err() == context.DeadlineExceeded</code> on its next LLM/tool
+call and returns. Subprocess: <code>exec.CommandContext</code> SIGKILLs
+the child. Manager emits
+<code>SubagentResult{State: StateTimedOut}</code>.</li>
+<li><strong>Kill via <code>/subagents kill &lt;id&gt;</code></strong> —
+manager calls <code>sub.cancel()</code>. In-process: ctx-cancel
+propagates. Subprocess: process group SIGTERM (then SIGKILL after 5s).
+Manager emits <code>SubagentResult{State: StateKilled}</code>.</li>
+<li><strong>Manager Close while subagents running</strong> —
+<code>Close(ctx)</code> cancels every active subagent’s ctx and waits
+for the goroutines to drain (or <code>ctx.Done()</code>). In-flight
+worktrees are NOT removed (the user keeps them).</li>
+<li><strong>Channel never closed bug</strong> — manager’s dispatch
+goroutine ALWAYS closes the channel in a deferred call. Unit test
+asserts this with <code>_, ok := &lt;-ch</code> after a known-failing
+dispatch.</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9-loud">5.2 Anti-bluff (CONST-035 /
+§11.9) — LOUD</h3>
+<p><strong>The single largest bluff vector for F15 is “subagent ran”
+with no actual LLM call, no actual subprocess, no actual worktree — just
+a struct that “represents” a subagent but never executes.</strong> The
+criteria below are non-negotiable.</p>
+<p><strong>Required real-execution criteria</strong> (these define what
+“subagent ran” means in F15):</p>
+<ol type="1">
+<li><strong>In-process subagent</strong> MUST actually invoke
+<code>llm.Provider.Generate(ctx, *LLMRequest)</code>. The test asserts:
+<code>FakeLLMProvider.GenerateCallCount() &gt;= 1</code> after
+<code>WaitAll</code> returns. The subagent’s <code>Output</code> field
+MUST be the provider’s response, not the prompt echoed back. A
+“subagent” that returns <code>result.Output = task.Prompt</code> is a
+bluff and the test must fail.</li>
+<li><strong>Subprocess subagent</strong> MUST actually fork-exec the
+host binary. The test asserts: child PID was distinct from parent
+(<code>cmd.ProcessState.Pid() != os.Getpid()</code>); child’s
+<code>cmd.ProcessState.Success()</code> reflects the actual exit code;
+stdout JSON parses to a real <code>SubagentResult</code> with non-zero
+<code>Duration</code>.</li>
+<li><strong>Worktree-isolated subagent</strong> MUST actually create a
+worktree. The test asserts: <code>os.Stat(result.WorktreePath)</code>
+reports a directory; the path is NOT equal to the parent’s cwd; running
+<code>git rev-parse --show-toplevel</code> inside that path returns the
+path itself (not the parent repo). A subagent that creates a
+<code>result.WorktreePath</code> field but no actual directory is a
+bluff.</li>
+<li><strong>Streaming aggregation</strong> MUST actually stream — the
+channel MUST be unbuffered or buffer-1, and the test asserts that for
+two subagents A (fast) and B (slow), A’s result lands on the channel
+before B’s. A “streaming” implementation that collects all results in a
+slice and then sends them at once is a bluff.</li>
+</ol>
+<p><strong>The Challenge harness</strong> uses an in-tree
+<code>FakeLLMProvider</code> (a struct that implements
+<code>llm.Provider</code> and returns deterministic canned responses
+based on the prompt). The provider is explicitly documented as a
+<strong>TEST PROVIDER, not a production mock</strong> — the type
+docstring must read
+<code>// FakeLLMProvider is a TEST-ONLY llm.Provider used by F15&#39;s challenge harness and unit tests. It MUST NOT be referenced from production code paths (cmd/, applications/, internal/&lt;pkg&gt;/&lt;file&gt;.go that doesn&#39;t end in _test.go). Verified by the bluff scanner.</code>.
+The FakeLLMProvider lives at
+<code>internal/agent/subagent/types.go</code> (NOT in a
+<code>_test.go</code> file) so the integration-test binary and the
+Challenge harness can both link it; the bluff scanner gets a
+special-case rule that <code>FakeLLMProvider</code> is the ONE allowed
+test-provider type and that it MUST carry the documented anti-misuse
+comment. Any other “fake provider” in production paths is a bluff.</p>
+<p><strong>FakeLLMProvider exact contract:</strong> -
+<code>Generate(ctx, req)</code> returns
+<code>&amp;LLMResponse{Text: canned[req.Prompt]}</code> where
+<code>canned</code> is a <code>map[string]string</code> populated by the
+test/Challenge before dispatch. If <code>canned[req.Prompt]</code> is
+missing, returns
+<code>&amp;LLMResponse{Text: &quot;FAKE-LLM-ECHO: &quot; + req.Prompt}</code> so
+test assertions can detect “provider was actually called with this
+prompt”. - <code>GenerateCallCount() int</code> returns the number of
+times <code>Generate</code> was invoked. -
+<code>LastPrompt() string</code> returns the most recent prompt body
+(assertion target). - <code>GetType()</code> returns
+<code>ProviderType(&quot;fake-test-only&quot;)</code> (a sentinel that production
+code never produces).</p>
+<p><strong>Optional real-LLM gated phase</strong> (mirrors F12): if
+<code>ANTHROPIC_API_KEY</code> is set in the env and not empty, the
+Challenge runs Phase D (a single in-process subagent against the real
+Anthropic provider, prompt
+<code>&quot;Reply with the literal string p1f15-real-llm-ok&quot;</code>). If the
+key is unset, Phase D is skipped with
+<code>SKIP-OK: P1-F15 ANTHROPIC_API_KEY unset (export ANTHROPIC_API_KEY=...)</code>.
+Phases A-C use only the FakeLLMProvider.</p>
+<p><strong>Concrete forbidden phrases</strong> (anti-bluff smoke):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  internal/agent/subagent internal/tools/task_tool.go internal/commands/subagents_command.go <span class="dt">\</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Helper-mode dispatch is the one early-exit</strong> the
+subprocess subagent path depends on; the in-process path does NOT depend
+on it. The Challenge MUST exercise BOTH paths to prove the architecture
+isn’t a single point of bluff.</p>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-mocks-ok">6.1 Unit (mocks OK)</h3>
+<ul>
+<li><code>TestIsolation_DefaultIsNone</code>.</li>
+<li><code>TestSubagentTask_TimeoutDefaultsTo5Min</code>.</li>
+<li><code>TestSubagentTask_TimeoutClampedTo30Min</code>.</li>
+<li><code>TestFakeLLMProvider_RecordsCallCount</code> +
+<code>TestFakeLLMProvider_RecordsLastPrompt</code>.</li>
+<li><code>TestFakeLLMProvider_HasAntiMisuseComment</code> — grep
+self-test against <code>types.go</code>.</li>
+<li><code>TestInProcessSpawner_InvokesLLMProvider</code> — assert
+<code>FakeLLMProvider.GenerateCallCount() == 1</code> after Spawn.</li>
+<li><code>TestInProcessSpawner_OutputIsLLMResponse_NotPromptEcho</code>
+— anti-bluff (b).</li>
+<li><code>TestInProcessSpawner_PropagatesContextCancel</code>.</li>
+<li><code>TestSubprocessSpawner_BuildsExecCommandWithSentinelEnv</code>
+— assert <code>cmd.Env</code> contains
+<code>HELIX_SUBAGENT_INVOCATION=1</code>.</li>
+<li><code>TestSubprocessSpawner_SetsCwdToWorktreePath</code>.</li>
+<li><code>TestSubprocessSpawner_DecodesStdoutJSON</code>.</li>
+<li><code>TestManager_Dispatch_ReturnsIDAndChannel</code>.</li>
+<li><code>TestManager_Dispatch_RespectsMaxConcurrency</code> — 6th
+dispatch with cap=5 returns <code>ErrMaxConcurrency</code>.</li>
+<li><code>TestManager_Dispatch_ChannelClosesEvenOnSpawnError</code> —
+channel must close even if spawner errors before emitting.</li>
+<li><code>TestManager_Dispatch_StreamsResultsAsTheyComplete</code> — A
+finishes 50ms before B; A’s result lands first. (Anti-bluff (4).)</li>
+<li><code>TestManager_Kill_CancelsRunningSubagent</code>.</li>
+<li><code>TestManager_Kill_UnknownID_ReturnsErrSubagentNotFound</code>.</li>
+<li><code>TestManager_List_IncludesPendingAndRunning</code>.</li>
+<li><code>TestManager_Close_DrainsRunningSubagents</code>.</li>
+<li><code>TestManager_WaitAll_DrainsChannelToClose</code>.</li>
+<li><code>TestTaskTool_Name_IsTask</code>.</li>
+<li><code>TestTaskTool_IsolationDefaultsNone</code>.</li>
+<li><code>TestTaskTool_RejectsInvalidIsolation</code>.</li>
+<li><code>TestTaskTool_ResultMapShape</code> — keys: id, state, output,
+duration_ms, tool_calls, isolation, worktree_path (only when
+isolation=worktree).</li>
+<li><code>TestSubagentsCommand_List_RendersTable</code>.</li>
+<li><code>TestSubagentsCommand_Status_ShowsDescriptionNotPromptBody</code>
+— CONST-042 anti-leak.</li>
+<li><code>TestSubagentsCommand_Kill_DelegatesToManager</code>.</li>
+<li><code>TestHelperMode_IsSubagentInvocation_ReadsEnvVar</code>.</li>
+<li><code>TestHelperMode_RunAsSubagent_DecodesPayloadFromEnv</code>.</li>
+<li><code>TestHelperMode_RunAsSubagent_PrintsJSONResult</code>.</li>
+</ul>
+<h3 id="integration--tagsintegration">6.2 Integration
+(<code>-tags=integration</code>)</h3>
+<ul>
+<li><code>TestSubagent_InProcess_RealLLM_RealToolRegistry</code> — uses
+<code>FakeLLMProvider</code>; runs against a
+<code>t.TempDir</code>-built <code>tools.ToolRegistry</code>. Asserts
+<code>GenerateCallCount == 1</code> and <code>result.Output</code>
+matches the canned response.</li>
+<li><code>TestSubagent_Subprocess_RealForkExec_FakeLLM</code> — gated on
+<code>os.Executable()</code> being a real Go binary (always true in
+<code>go test</code>); runs the host binary with
+<code>HELIX_SUBAGENT_INVOCATION=1</code> and a payload that uses
+FakeLLMProvider. Asserts the child PID is distinct from
+<code>os.Getpid()</code> and the JSON stdout parses.</li>
+<li><code>TestSubagent_Worktree_RealGitWorktree</code> — gated on
+<code>git</code> being on PATH
+(<code>SKIP-OK: P1-F15 git not on PATH (install: apt install git OR dnf install git)</code>).
+Initialises a tempdir repo with a single commit, dispatches a
+worktree-isolated subagent, asserts: (a)
+<code>result.WorktreePath</code> exists and is a directory, (b)
+<code>git rev-parse --show-toplevel</code> inside that path returns the
+path itself, (c) <code>os.Stat(result.WorktreePath)</code>
+succeeds.</li>
+<li><code>TestSubagent_StreamingOrder</code> — dispatches two subagents
+with different fake LLM latencies (FakeLLMProvider grows a per-prompt
+sleep field); asserts the fast one’s result lands on the channel
+first.</li>
+<li><code>TestSubagent_Kill_Subprocess</code> — gated on git; dispatches
+a worktree-isolated subagent that runs a shell loop forever in its inner
+tool, calls <code>Kill(id)</code>, asserts result state is
+<code>StateKilled</code> within 6s.</li>
+</ul>
+<h3 id="challenge">6.3 Challenge</h3>
+<ul>
+<li><strong>Phase A — In-process + FakeLLM (always runs)</strong> — 5
+[PASS] lines: dispatch returns id+chan; channel closes after WaitAll;
+FakeLLM was called; result.Output equals canned response (NOT prompt
+echo); duration &gt; 0.</li>
+<li><strong>Phase B — Subprocess + FakeLLM (always runs)</strong> — 4
+[PASS] lines: child PID distinct from parent; stdout JSON decodes;
+result.State=succeeded; helper-mode env-var dispatch fired (proven by a
+sentinel printed to stderr).</li>
+<li><strong>Phase C — Worktree isolation + Subprocess + FakeLLM (gated
+on <code>git</code>)</strong> — 4 [PASS] lines or
+<code>[skipped: git not on PATH (install: apt install git OR dnf install git)]</code>:
+worktree directory exists; worktree path != parent cwd;
+<code>git rev-parse --show-toplevel</code> inside path returns the path;
+result.WorktreePath populated.</li>
+<li><strong>Phase D — Real LLM (gated on
+<code>ANTHROPIC_API_KEY</code>)</strong> — 2 [PASS] lines or
+<code>[skipped: ANTHROPIC_API_KEY unset (export ANTHROPIC_API_KEY=...)]</code>:
+real provider returns non-empty text; text contains the literal
+<code>p1f15-real-llm-ok</code>.</li>
+<li>Final summary:
+<code>IN-PROCESS=5/5 PASS; SUBPROCESS=4/4 PASS; WORKTREE=&lt;n&gt;/4 PASS; REAL-LLM=&lt;n&gt;/2 PASS</code>.</li>
+<li>Challenge MUST exit non-zero on any assertion failure within phases
+that did run.</li>
+</ul>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>Pure Go + stdlib (<code>os/exec</code>, <code>syscall</code>,
+<code>os.Executable</code>). No platform-specific code: - Subprocess
+re-exec works on Linux, macOS, Windows. - F04 worktree manager uses
+<code>git worktree</code> which is cross-platform. - The kill path uses
+<code>cmd.Process.Signal(syscall.SIGTERM)</code> on Unix and
+<code>cmd.Process.Kill()</code> on Windows (auto-selected by Go stdlib).
+- No build tags needed. The whole package builds on every GOOS.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li><strong>Auto-merge of subagent worktree changes back to the parent
+branch</strong> — F15.5. v1: result map carries
+<code>worktree_path</code>; user uses F04’s <code>worktree</code> cobra
+command for manual merge/discard.</li>
+<li><strong>Subagent-to-subagent direct messaging</strong>
+(<code>SendMessage</code> tool from porting doc) — F15.5.</li>
+<li><strong>Per-subagent CPU/memory quotas</strong> (cgroups v2
+integration similar to F14’s resource caps) — F15.5.</li>
+<li><strong>Persistent subagent state across CLI sessions</strong>
+(resume a subagent after parent exit) — F15.5; would require a new
+persistence backend.</li>
+<li><strong>Subagent recursion / nested subagents</strong> (a subagent
+itself calling <code>task</code>) — explicitly disabled in v1; the
+subprocess child does NOT register the <code>task</code> tool. F15.5 may
+lift this with a depth-limit guard.</li>
+<li><strong><code>subagent_type</code> profile registry</strong> (so
+prompts like <code>subagent_type: &quot;code-reviewer&quot;</code> resolve to a
+curated system prompt + tool subset) — v1 accepts the field but treats
+it as informational metadata only. F15.5 wires the actual profile
+resolver.</li>
+<li><strong>Auto-stash-on-dispatch</strong> (copy parent’s WIP into the
+worktree) — F15.5. v1 documents loudly that subagents start from the
+clean branch tip; users must commit/stash WIP first.</li>
+<li><strong>Streaming partial LLM output</strong> (token-by-token from a
+subagent) — v1 streams only at the subagent-completion granularity.
+Token-level streaming is F15.5.</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>§11.9 / CONST-035</strong> — Challenge has FOUR phases
+(in-process, subprocess, worktree, real-LLM); the first two always run;
+the latter two are explicitly gated and never claim PASS without runtime
+evidence. Anti-bluff criteria 1-4 in §5.2 each have a dedicated
+unit/Challenge assertion. The FakeLLMProvider’s anti-misuse comment is
+itself self-tested.</li>
+<li><strong>CONST-039</strong> — Challenge at
+<code>challenges/p1-f15-subagent-team/</code> + evidence harness at
+<code>tests/integration/cmd/p1f15_challenge/main.go</code>.</li>
+<li><strong>CONST-042 (No-Secret-Leak)</strong> —
+<code>SubagentTask.Prompt</code> is logged at DEBUG level only;
+INFO-level logs use <code>task.Description</code> (which is
+human-supplied and safe). <code>/subagents status</code> prints
+description, never prompt body. Subprocess payload (env-var-encoded) is
+NEVER printed by the manager — only the description is logged when the
+subagent starts.</li>
+<li><strong>CONST-043 (No-Force-Push)</strong> — close-out task pushes
+to all four remotes non-force.</li>
+<li><strong>No-Mocks-In-Production (Universal Rule 2)</strong> —
+<code>SubagentManager</code>, both spawners, the <code>task</code> tool,
+the <code>/subagents</code> slash are real. The FakeLLMProvider is a
+TEST-ONLY type with a self-tested anti-misuse comment, and it is the
+SOLE exception (documented and bluff-scanner-allowlisted). Production
+code (cmd/, applications/) MUST NOT import it; the bluff scanner
+enforces this.</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: execution model</td>
+<td>(C) hybrid</td>
+<td>in-process goroutines by default; subprocess-per-subagent when
+<code>isolation: worktree</code>; subprocess re-execs host binary with
+sentinel env var (mirrors F14 helper-mode)</td>
+</tr>
+<tr>
+<td>Q2: worktree integration</td>
+<td>(B) optional per task</td>
+<td><code>task</code> tool’s <code>isolation</code> arg is
+<code>&quot;none&quot;</code> (default) or <code>&quot;worktree&quot;</code>; v1 does NOT
+auto-merge — <code>worktree_path</code> returned in result for manual
+review via F04</td>
+</tr>
+<tr>
+<td>Q3: results</td>
+<td>(B) streaming</td>
+<td><code>Dispatch</code> returns <code>&lt;-chan SubagentResult</code>;
+results land as each subagent completes; channel closes on terminal
+state; <code>WaitAll</code> helper drains synchronously</td>
+</tr>
+<tr>
+<td>Q4: tool name</td>
+<td>(B) <code>task</code></td>
+<td>matches claude-code precedent for cross-agent prompt portability;
+args: <code>description</code>, <code>prompt</code>,
+<code>isolation</code> (default “none”), <code>subagent_type</code>
+(optional)</td>
+</tr>
+<tr>
+<td>Q5: user surface</td>
+<td>(B) slash only</td>
+<td><code>/subagents</code> slash with
+<code>list</code>/<code>status</code>/<code>kill</code>; <strong>no
+cobra subcommand</strong></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CODEX_ANALYSIS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CODEX_ANALYSIS</h1>
+</header>
+<h1 id="openai-codex-cli-agent-analysis">OpenAI Codex CLI Agent
+Analysis</h1>
+<blockquote>
+<p><strong>Tier 1 Agent</strong> - OpenAI’s official coding agent
+<strong>Source</strong>: https://github.com/openai/codex
+<strong>Language</strong>: TypeScript (CLI) + Rust (Core)
+<strong>License</strong>: Apache 2.0</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>Codex is OpenAI’s official coding agent that runs locally on your
+machine. It integrates with ChatGPT plans and provides both CLI and
+desktop app experiences.</p>
+<h2 id="architecture">Architecture</h2>
+<pre><code>codex/
+├── codex-cli/          # TypeScript CLI frontend
+├── codex-rs/           # Rust core implementation
+│   ├── core/           # Core logic
+│   ├── tui/            # Terminal UI (ratatui)
+│   ├── app-server-protocol/  # Protocol definitions
+│   └── ...
+└── sdk/                # SDK for integrations</code></pre>
+<h2 id="core-features">Core Features</h2>
+<h3 id="sandboxed-execution">1. Sandboxed Execution</h3>
+<ul>
+<li>Uses macOS Seatbelt (<code>/usr/bin/sandbox-exec</code>) for
+sandboxing</li>
+<li>Network-disabled by default in sandbox</li>
+<li>Secure command execution environment</li>
+</ul>
+<h3 id="multi-modal-input">2. Multi-Modal Input</h3>
+<ul>
+<li>Natural language commands</li>
+<li>File attachments</li>
+<li>Image context support</li>
+</ul>
+<h3 id="approval-system">3. Approval System</h3>
+<ul>
+<li>Configurable approval policies</li>
+<li>Command execution approval</li>
+<li>Patch application approval</li>
+</ul>
+<h3 id="git-integration">4. Git Integration</h3>
+<ul>
+<li>Automatic git commits</li>
+<li>Branch management</li>
+<li>Diff viewing</li>
+</ul>
+<h3 id="collaboration-modes">5. Collaboration Modes</h3>
+<ul>
+<li>Full autonomy mode</li>
+<li>Interactive mode</li>
+<li>Approval-required mode</li>
+</ul>
+<h3 id="tui-terminal-ui">6. TUI (Terminal UI)</h3>
+<ul>
+<li>Built with ratatui (Rust)</li>
+<li>Rich interactive interface</li>
+<li>Chat-style interaction</li>
+<li>File browser integration</li>
+</ul>
+<h3 id="protocol-based-communication">7. Protocol-Based
+Communication</h3>
+<ul>
+<li>JSON-RPC Lite protocol</li>
+<li>Structured request/response</li>
+<li>Thread history management</li>
+<li>Conversation summaries</li>
+</ul>
+<h2 id="key-files">Key Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AGENTS.md</td>
+<td>16,538</td>
+<td>Development guidelines</td>
+</tr>
+<tr>
+<td>codex-rs/core</td>
+<td>~5000</td>
+<td>Core Rust implementation</td>
+</tr>
+<tr>
+<td>codex-rs/tui</td>
+<td>~3000</td>
+<td>Terminal UI</td>
+</tr>
+<tr>
+<td>codex-cli</td>
+<td>~2000</td>
+<td>TypeScript CLI</td>
+</tr>
+</tbody>
+</table>
+<h2 id="security-features">Security Features</h2>
+<ol type="1">
+<li><strong>Sandboxing</strong>: All commands run in sandbox</li>
+<li><strong>Network Control</strong>: Can disable network access</li>
+<li><strong>Approval Gates</strong>: Multi-level approval system</li>
+<li><strong>Audit Logging</strong>: Complete operation logs</li>
+</ol>
+<h2 id="helixagent-integration-points">HelixAgent Integration
+Points</h2>
+<table>
+<thead>
+<tr>
+<th>Codex Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sandboxed Execution</td>
+<td>ToolExecutor with permission modes</td>
+</tr>
+<tr>
+<td>Approval System</td>
+<td>PermissionMode + rules</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td>Web UI + Terminal UI</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>ToolGit with auto-commit</td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td>API endpoints</td>
+</tr>
+<tr>
+<td>Sandboxing</td>
+<td>Container-based isolation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li>Docs: https://developers.openai.com/codex</li>
+<li>IDE Integration: https://developers.openai.com/codex/ide</li>
+<li>Auth: https://developers.openai.com/codex/auth</li>
+</ul>
+<h2 id="porting-priority-high">Porting Priority: HIGH</h2>
+<p>Codex’s sandboxed execution model, approval system, and protocol
+architecture are valuable additions to HelixAgent.</p>
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HELIXCODE_AGENTS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HELIXCODE_AGENTS</h1>
+</header>
+<h1 id="agents.md---helixcode-authoritative-agent-guide">AGENTS.md -
+HelixCode Authoritative Agent Guide</h1>
+<h2 id="helixcode-agent-guidelines">HelixCode Agent Guidelines</h2>
+<p><strong>Version</strong>: 2.0.0 (Updated with CONST-035 Anti-Bluff
+Mandate) <strong>Date</strong>: 2026-04-30 <strong>Scope</strong>: All
+AI agents, human contributors, and automated processes working on
+HelixCode <strong>Authority</strong>: Derived from HelixAgent AGENTS.md
+with HelixCode-specific enhancements</p>
+<hr />
+<h2 id="project-overview">Project Overview</h2>
+<p>HelixCode is an enterprise-grade distributed AI development platform
+built in Go that enables intelligent task division, work preservation,
+and cross-platform development workflows.</p>
+<p><strong>Current Status</strong>: Foundation is solid (auth system
+verified real), but CRITICAL bluff areas exist in core user-facing
+features. All agents MUST prioritize zero-bluff implementation.</p>
+<p><strong>Key Features (Target State)</strong>: - <strong>Distributed
+Computing</strong>: SSH-based worker pools with auto-installation and
+health monitoring - <strong>Multi-Provider LLM Integration</strong>:
+Support for 15+ providers - <strong>Development Workflows</strong>:
+Automated planning, building, testing, refactoring - <strong>Task
+Management</strong>: Intelligent task division with checkpointing -
+<strong>MCP Protocol</strong>: Full Model Context Protocol
+implementation - <strong>Multi-Client Architecture</strong>: REST API,
+CLI, Terminal UI, WebSocket, Desktop, Mobile - <strong>Memory
+Systems</strong>: Integration with external memory providers -
+<strong>Advanced Editor</strong>: Multi-format code editing -
+<strong>Tools Ecosystem</strong>: 40+ comprehensive tools -
+<strong>Notifications</strong>: Multi-channel support</p>
+<hr />
+<h2 id="verified-real-implementations">Verified Real
+Implementations</h2>
+<h3 id="auth-001-authentication-system-verified-real">AUTH-001:
+Authentication System (VERIFIED REAL)</h3>
+<p><strong>File</strong>: <code>internal/auth/auth.go</code>
+<strong>Lines</strong>: 470 <strong>Assessment</strong>:
+Production-ready</p>
+<p>Verified capabilities: - User registration with validation - Password
+hashing with bcrypt + argon2 - JWT token generation and verification -
+Session management with crypto-random tokens - Password verification
+with fallback chain - Constant-time comparison for timing attack
+prevention</p>
+<p><strong>Agent Note</strong>: This is the gold standard. All other
+packages should match this quality.</p>
+<hr />
+<h2 id="verified-bluff-areas-must-fix">Verified Bluff Areas (MUST
+FIX)</h2>
+<h3 id="bluff-001-llm-generation-is-simulated-critical">BLUFF-001: LLM
+Generation is Simulated (CRITICAL)</h3>
+<p><strong>File</strong>: <code>cmd/cli/main.go</code> lines 190-214
+<strong>Evidence</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// For now, simulate generation</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// In production, this would use the actual LLM provider</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>response <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;Generated response for: %s</span><span class="ch">\n\n</span><span class="st">This is a simulated response...&quot;</span><span class="op">,</span> prompt<span class="op">)</span></span></code></pre></div>
+<p><strong>Impact</strong>: Users following README’s documented CLI
+usage receive fake responses.</p>
+<p><strong>Fix Priority</strong>: P0 - Immediate</p>
+<h3 id="bluff-002-model-listing-is-hardcoded-critical">BLUFF-002: Model
+Listing is Hardcoded (CRITICAL)</h3>
+<p><strong>File</strong>: <code>cmd/cli/main.go</code> lines 101-128
+<strong>Evidence</strong>: Only 3 hardcoded models. No dynamic
+discovery.</p>
+<p><strong>Fix Priority</strong>: P0 - Immediate</p>
+<h3 id="bluff-003-command-execution-is-simulated-high">BLUFF-003:
+Command Execution is Simulated (HIGH)</h3>
+<p><strong>File</strong>: <code>cmd/cli/main.go</code> lines 237-250
+<strong>Evidence</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// For now, simulate command execution</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Executing: %s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> command<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">1</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Command completed successfully</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Fix Priority</strong>: P0 - Immediate</p>
+<hr />
+<h2 id="technology-stack">Technology Stack</h2>
+<p><strong>Core Technologies</strong>: - <strong>Language</strong>: Go
+1.24.0 with toolchain go1.24.9 - <strong>Module</strong>:
+<code>dev.helix.code</code> - <strong>HTTP Framework</strong>: Gin
+v1.11.0 - <strong>Authentication</strong>: JWT v4.5.2 -
+<strong>Database</strong>: PostgreSQL 15+ (optional) -
+<strong>Cache</strong>: Redis 7+ (optional) -
+<strong>Configuration</strong>: Viper v1.21.0 - <strong>CLI
+Framework</strong>: Cobra v1.8.0 - <strong>Testing</strong>: Testify
+v1.11.1</p>
+<p><strong>UI Technologies</strong>: - <strong>Desktop</strong>: Fyne
+v2.7.0 - <strong>Terminal UI</strong>: tview v0.42.0 -
+<strong>Mobile</strong>: gomobile bindings</p>
+<p><strong>External Integrations</strong>: - <strong>Browser
+Automation</strong>: chromedp v0.14.2 - <strong>Web Scraping</strong>:
+goquery v1.10.3 - <strong>Tree-sitter</strong>: go-tree-sitter</p>
+<hr />
+<h2 id="essential-build-commands">Essential Build Commands</h2>
+<p><strong>CRITICAL</strong>: All commands must be run from the
+<code>helix_code/</code> subdirectory.</p>
+<h3 id="core-commands">Core Commands</h3>
+<ul>
+<li><strong>Build</strong>: <code>make build</code> (generates logo
+assets and builds to bin/helixcode)</li>
+<li><strong>Test all</strong>: <code>make test</code> or
+<code>go test -v ./...</code></li>
+<li><strong>Test single</strong>:
+<code>go test -v -run TestName ./path/to/package</code></li>
+<li><strong>Lint</strong>: <code>make lint</code> or
+<code>golangci-lint run ./...</code></li>
+<li><strong>Format</strong>: <code>make fmt</code> or
+<code>go fmt ./...</code></li>
+<li><strong>Clean</strong>: <code>make clean</code></li>
+</ul>
+<h3 id="development-workflow">Development Workflow</h3>
+<ul>
+<li><strong>Dev server</strong>: <code>make dev</code></li>
+<li><strong>Logo assets</strong>: <code>make logo-assets</code>
+(required before first build)</li>
+<li><strong>Setup deps</strong>: <code>make setup-deps</code> or
+<code>go mod tidy</code></li>
+</ul>
+<h3 id="specialized-builds">Specialized Builds</h3>
+<ul>
+<li><strong>Production</strong>: <code>make prod</code>
+(cross-platform)</li>
+<li><strong>Mobile</strong>: <code>make mobile</code> (iOS +
+Android)</li>
+<li><strong>Aurora OS</strong>: <code>make aurora-os</code></li>
+<li><strong>Harmony OS</strong>: <code>make harmony-os</code></li>
+</ul>
+<h3 id="testing-variations">Testing Variations</h3>
+<ul>
+<li><strong>Unit</strong>: <code>./run_tests.sh --unit</code></li>
+<li><strong>Integration</strong>:
+<code>./run_tests.sh --integration</code></li>
+<li><strong>E2E</strong>: <code>./run_tests.sh --e2e</code></li>
+<li><strong>Coverage</strong>:
+<code>./run_tests.sh --coverage</code></li>
+<li><strong>Security</strong>:
+<code>./run_tests.sh --security</code></li>
+<li><strong>Challenges</strong>:
+<code>cd tests/e2e/challenges &amp;&amp; ./run_all_challenges.sh</code></li>
+</ul>
+<hr />
+<h2 id="architecture-code-organization">Architecture &amp; Code
+Organization</h2>
+<h3 id="core-structure">Core Structure</h3>
+<pre><code>helix_code/
+├── cmd/                    # Application entry points
+│   ├── server/            # Main HTTP server
+│   ├── cli/               # CLI client
+│   └── security-test/     # Security testing tools
+├── internal/              # Internal packages
+│   ├── auth/              # JWT authentication (VERIFIED REAL)
+│   ├── llm/               # LLM providers (BLUFF AREA)
+│   ├── worker/            # SSH-based worker pool
+│   ├── task/              # Task management
+│   ├── server/            # HTTP server &amp; API
+│   ├── database/          # PostgreSQL layer
+│   ├── tools/             # Tool ecosystem
+│   ├── editor/            # Code editing
+│   ├── memory/            # Memory integration
+│   ├── notification/      # Notifications
+│   ├── mcp/               # MCP protocol
+│   ├── workflow/          # Workflow engine
+│   └── ...
+├── applications/          # Platform-specific apps
+├── tests/                 # Test suites
+└── config/               # Configuration files</code></pre>
+<hr />
+<h2 id="configuration-management">Configuration Management</h2>
+<h3 id="primary-configuration">Primary Configuration</h3>
+<p>Main config at <code>config/config.yaml</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">server</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">address</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0.0.0.0&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">8080</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span><span class="co">  # Empty to disable for testing</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">5432</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">user</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helix&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">dbname</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helixcode_prod&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">sslmode</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;disable&quot;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">redis</span><span class="kw">:</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;redis&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">6379</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">auth</span><span class="kw">:</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">jwt_secret</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;change-in-production&quot;</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">token_expiry</span><span class="kw">:</span><span class="at"> </span><span class="dv">86400</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">session_expiry</span><span class="kw">:</span><span class="at"> </span><span class="dv">604800</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="fu">workers</span><span class="kw">:</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">health_check_interval</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_concurrent_tasks</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="fu">tasks</span><span class="kw">:</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">checkpoint_interval</span><span class="kw">:</span><span class="at"> </span><span class="dv">300</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="at">  </span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">default_provider</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;local&quot;</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_tokens</span><span class="kw">:</span><span class="at"> </span><span class="dv">4096</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">temperature</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.7</span></span></code></pre></div>
+<h3 id="environment-variables">Environment Variables</h3>
+<p><strong>Required for Production</strong>: -
+<code>HELIX_DATABASE_PASSWORD</code> -
+<code>HELIX_AUTH_JWT_SECRET</code> -
+<code>HELIX_REDIS_PASSWORD</code></p>
+<p><strong>LLM Provider Keys</strong>: - <code>OPENAI_API_KEY</code>,
+<code>ANTHROPIC_API_KEY</code>, <code>GEMINI_API_KEY</code>, etc.</p>
+<hr />
+<h2 id="testing-approach">Testing Approach</h2>
+<h3 id="test-categories">Test Categories</h3>
+<ol type="1">
+<li><strong>Unit tests</strong>: Mocks allowed, <code>*_test.go</code>,
+<code>-short</code> flag</li>
+<li><strong>Contract tests</strong>: Real API schemas, no mocks</li>
+<li><strong>Component tests</strong>: Real subsystems wired
+together</li>
+<li><strong>Integration tests</strong>: Full app with real
+dependencies</li>
+<li><strong>E2E challenges</strong>: Complete user workflows</li>
+<li><strong>Security tests</strong>: OWASP compliance</li>
+<li><strong>Performance tests</strong>: Benchmarks</li>
+</ol>
+<h3 id="anti-bluff-testing-rules">Anti-Bluff Testing Rules</h3>
+<ul>
+<li>Unit tests: Mocks OK</li>
+<li>ALL other tests: Real infrastructure ONLY</li>
+<li>Every PASS guarantees Quality + Completion + Usability</li>
+<li>Challenges fail on simulated/stubbed behavior</li>
+<li>No bare <code>t.Skip()</code> without
+<code>SKIP-OK: #&lt;ticket&gt;</code></li>
+</ul>
+<hr />
+<h2 id="key-subsystems">Key Subsystems</h2>
+<h3 id="llm-package-internalllm">LLM Package
+(<code>internal/llm/</code>)</h3>
+<p><strong>Status</strong>: CRITICAL BLUFF AREA</p>
+<p>Target state: - 15+ providers with real implementations - Provider
+manager with fallback chain - Circuit breakers per provider - Health
+checks - Model discovery</p>
+<h3 id="tools-package-internaltools">Tools Package
+(<code>internal/tools/</code>)</h3>
+<p><strong>Status</strong>: To be verified</p>
+<p>Target tools: - Filesystem: fs_read, fs_write, fs_edit, glob, grep -
+Shell: shell, shell_background with sandbox - Web: web_fetch, web_search
+- Browser: browser_launch, browser_navigate, browser_screenshot - Git:
+git automation - MultiEdit: Transactional multi-file editing</p>
+<h3 id="editor-package-internaleditor">Editor Package
+(<code>internal/editor/</code>)</h3>
+<p><strong>Status</strong>: To be verified</p>
+<p>Target formats: - Diff Format (unified diff) - Whole File replacement
+- Search/Replace with regex - Line-Based edits</p>
+<hr />
+<h2 id="free-ai-providers">Free AI Providers</h2>
+<ul>
+<li><strong>XAI (Grok)</strong>: grok-3-fast-beta,
+grok-3-mini-fast-beta</li>
+<li><strong>OpenRouter</strong>: Free models from various providers</li>
+<li><strong>GitHub Copilot</strong>: gpt-4o, claude-3.5-sonnet (with
+subscription)</li>
+<li><strong>Qwen</strong>: 2,000 requests/day free tier</li>
+</ul>
+<hr />
+<h2 id="docker-deployment">Docker Deployment</h2>
+<h3 id="quick-start">Quick Start</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit .env with secure passwords</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> up <span class="at">-d</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> ps</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost/health</span></code></pre></div>
+<h3 id="services">Services</h3>
+<ul>
+<li>helixcode-server (ports 8080, 2222)</li>
+<li>postgres (port 5432)</li>
+<li>redis (port 6379)</li>
+<li>nginx (ports 80, 443)</li>
+</ul>
+<hr />
+<h2 id="important-gotchas">Important Gotchas</h2>
+<h3 id="critical-requirements">Critical Requirements</h3>
+<ul>
+<li><strong>Always work from helix_code/ subdirectory</strong></li>
+<li><strong>Generate logo assets before first build</strong>:
+<code>make logo-assets</code></li>
+<li><strong>Database/Redis optional</strong>: Disable by setting
+<code>database.host: &quot;&quot;</code></li>
+<li><strong>Environment variables override config file</strong></li>
+</ul>
+<h3 id="anti-bluff-mandate-const-035">Anti-Bluff Mandate
+(CONST-035)</h3>
+<p>Every agent working on HelixCode MUST: 1. Verify code actually works
+before marking complete 2. Write tests that validate REAL behavior 3.
+Write challenges that exercise complete workflows 4. Never commit
+simulated/placeholder code to production paths 5. Include pasted
+terminal output as evidence of working code</p>
+<h3 id="common-issues">Common Issues</h3>
+<ol type="1">
+<li><strong>Build fails</strong>: Run <code>make logo-assets</code> then
+<code>make build</code></li>
+<li><strong>Database errors</strong>: Check
+<code>HELIX_DATABASE_PASSWORD</code></li>
+<li><strong>Worker SSH failures</strong>: Verify SSH key
+authentication</li>
+<li><strong>LLM timeouts</strong>: Check provider status and config</li>
+</ol>
+<hr />
+<h2 id="universal-mandatory-constraints">Universal Mandatory
+Constraints</h2>
+<h3 id="hard-stops-permanent-non-negotiable">Hard Stops (permanent,
+non-negotiable)</h3>
+<ol type="1">
+<li><strong>NO CI/CD pipelines</strong></li>
+<li><strong>NO HTTPS for Git</strong> (SSH only)</li>
+<li><strong>NO manual container commands</strong>
+(orchestrator-owned)</li>
+</ol>
+<h3 id="mandatory-development-standards">Mandatory Development
+Standards</h3>
+<ol type="1">
+<li><strong>100% Test Coverage</strong> (unit, integration, E2E,
+automation, security, benchmark)</li>
+<li><strong>Challenge Coverage</strong> (every component)</li>
+<li><strong>Real Data</strong> (actual API calls, real DB, live
+services)</li>
+<li><strong>Health &amp; Observability</strong> (health endpoints,
+circuit breakers)</li>
+<li><strong>Documentation &amp; Quality</strong> (update docs with code
+changes)</li>
+<li><strong>Validation Before Release</strong> (full suite + all
+challenges)</li>
+<li><strong>No Mocks in Production</strong></li>
+<li><strong>Comprehensive Verification</strong> (runtime, compile,
+structure, dependencies, compatibility)</li>
+<li><strong>Resource Limits</strong> (30-40% of host resources max)</li>
+<li><strong>Bugfix Documentation</strong> (root cause, affected files,
+fix, verification link)</li>
+<li><strong>Real Infrastructure for All Non-Unit Tests</strong></li>
+<li><strong>Reproduction-Before-Fix</strong> (Challenge first, then
+fix)</li>
+<li><strong>Concurrent-Safe Collections</strong></li>
+</ol>
+<h3 id="definition-of-done">Definition of Done</h3>
+<p>A change is NOT done because code compiles. “Done” requires: - Pasted
+terminal output from a real run - No self-certification words without
+evidence - Demo commands that run against real artifacts - Loud skips
+with <code>SKIP-OK: #&lt;ticket&gt;</code> markers</p>
+<hr />
+<h2 id="const-035-end-user-usability-mandate">CONST-035 — End-User
+Usability Mandate</h2>
+<p>A test or Challenge that PASSES is a CLAIM that the tested behavior
+<strong>works for the end user of the product</strong>.</p>
+<p>The HelixAgent project has repeatedly hit the failure mode where
+every test ran green AND every Challenge reported PASS, yet most product
+features did not actually work — buggy challenge wrappers masked failed
+assertions, scripts checked file existence without executing the file,
+“reachability” tests tolerated timeouts, contracts were honest in
+advertising but broken in dispatch. <strong>This MUST NOT recur in
+HelixCode.</strong></p>
+<p>Every PASS result MUST guarantee: a. <strong>Quality</strong> -
+correct behavior under real inputs, edge cases, concurrency b.
+<strong>Completion</strong> - wired end-to-end with no stub/placeholder
+gaps c. <strong>Full usability</strong> - a user following documentation
+succeeds</p>
+<p>A passing test that doesn’t certify all three is a
+<strong>bluff</strong> and MUST be tightened.</p>
+<h3 id="bluff-taxonomy-each-pattern-observed-and-now-forbidden">Bluff
+Taxonomy (each pattern observed and now forbidden)</h3>
+<ul>
+<li><strong>Wrapper bluff</strong> - assertions PASS but wrapper’s
+exit-code logic is buggy</li>
+<li><strong>Contract bluff</strong> - system advertises capability but
+rejects it in dispatch</li>
+<li><strong>Structural bluff</strong> - file exists but doesn’t contain
+working code</li>
+<li><strong>Comment bluff</strong> - comment promises behavior code
+doesn’t have</li>
+<li><strong>Skip bluff</strong> - <code>t.Skip(&quot;not running yet&quot;)</code>
+without <code>SKIP-OK: #&lt;ticket&gt;</code> marker</li>
+</ul>
+<p>The taxonomy is illustrative, not exhaustive. Every Challenge or test
+added going forward MUST pass an honest self-review against this
+taxonomy before being committed.</p>
+<hr />
+<h2 id="contact-resources">Contact &amp; Resources</h2>
+<ul>
+<li><strong>Constitution</strong>: <code>CONSTITUTION.md</code></li>
+<li><strong>CLAUDE.md</strong>: <code>CLAUDE.md</code></li>
+<li><strong>Gap Analysis</strong>:
+<code>HELIXCODE_GAP_ANALYSIS.md</code></li>
+<li><strong>Zero-Bluff Plan</strong>:
+<code>HELIXCODE_ZERO_BLUFF_PLAN.md</code></li>
+<li><strong>Testing Strategy</strong>:
+<code>ANTI_BLUFF_TESTING_STRATEGY.md</code></li>
+</ul>
+<hr />
+<p><em>Built with zero-bluff commitment. Every feature actually
+works.</em></p>
+</body>
+</html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-execution-models</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-execution-models</h1>
+</header>
+<h1 id="execution-model-families-deep-web-research-sp6-feeder">Execution-Model
+Families — Deep Web Research (SP6 feeder)</h1>
+<p><strong>Date:</strong> 2026-06-10 <strong>Author:</strong>
+DEEP-WEB-RESEARCH subagent (§11.4.99 / §11.4.8 / §11.4.74)
+<strong>Scope:</strong> Research feeder for SP6 (“other execution models
+/ dynamic flows”). Read-only over the repo; sources verified against
+current official/authoritative docs + OSS repos (see footer). Where a
+claim could not be verified online it is marked HONEST-GAP.
+<strong>Mandate quoted (operator):</strong> <em>“We MUST support all
+ways of execution and development: dynamic flows and all other that
+exist. Perform deep web research and obtain details and technical
+knowledge and source code access for all of them then incorporate each
+fully into the System.”</em></p>
+<blockquote>
+<p>Anti-bluff note (§11.4.6): every external claim below carries a
+source URL in the footer. License/language/status facts were fetched
+from the canonical repo pages, not memory. Items I could not confirm are
+flagged HONEST-GAP rather than asserted.</p>
+</blockquote>
+<hr />
+<h2 id="what-helixcodehelixagent-already-has-reuse-baseline-11.4.74">0.
+What HelixCode/HelixAgent already has (reuse baseline, §11.4.74)</h2>
+<p>Surveyed read-only on 2026-06-10. These are the in-house abstractions
+every recommendation below is measured against:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Own-org submodule / pkg</th>
+<th>Module id</th>
+<th>Current capability (from README / source)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submodules/agentic</code></td>
+<td><code>digital.vasic.agentic</code></td>
+<td><strong>Graph-based agentic workflow.</strong>
+<code>Workflow{Graph *WorkflowGraph, State *WorkflowState, Config}</code>,
+<code>Node{ID,Type,Handler,Condition,Config,RetryPolicy}</code>, node
+types
+<code>Agent / Tool / Condition / Parallel / Human / Subgraph</code>;
+statuses <code>Pending/Running/Paused/Completed/Failed</code>;
+retries+backoff, periodic checkpointing, workflow+node timeouts,
+max-iteration guard, shared
+<code>WorkflowState{Messages,Variables,History,Checkpoints}</code>.
+<strong>Graph is built up-front (builder pattern) — no runtime
+AddNode/AddEdge/mutate API was found in
+<code>agentic/workflow.go</code>.</strong></td>
+</tr>
+<tr>
+<td><code>submodules/planning</code></td>
+<td><code>digital.vasic.planning</code></td>
+<td><strong>HiPlan</strong> (hierarchical goal→milestone→step,
+dependency topo-sort, parallel milestones, adaptive),
+<strong>MCTS</strong> (UCB1 + UCT-DP, parallel sims, discounted
+backprop), <strong>ToT</strong> (BFS/DFS/beam over thought tree,
+pruning, backtrack). Pluggable Generator/Evaluator/Executor strategy
+interfaces.</td>
+</tr>
+<tr>
+<td><code>submodules/concurrency</code></td>
+<td><code>digital.vasic.concurrency</code></td>
+<td>Worker pool (<code>pkg/pool</code>, incl. <code>Map</code>
+parallel-map), priority queue (<code>pkg/queue</code>,
+Critical/High/…/Low), token-bucket rate limiter, circuit breaker,
+semaphore, resource monitor. This is the <strong>scheduling/execution
+substrate</strong> every new runtime should sit on.</td>
+</tr>
+<tr>
+<td><code>submodules/debate_orchestrator</code></td>
+<td><code>digital.vasic.debate</code></td>
+<td>Multi-LLM consensus/dissent orchestration:
+<code>Orchestrator.ConductDebate</code>, <code>AgentPool</code>,
+<code>APIAdapter</code>, <code>ProviderInvoker</code>,
+<code>LessonBank</code>, topology/gates enums. Several aux pkgs are
+honest stubs.</td>
+</tr>
+<tr>
+<td><code>submodules/llm_orchestrator</code></td>
+<td><code>digital.vasic.llmorchestrator</code></td>
+<td>Headless CLI-agent pool (OpenCode/Claude/Gemini/Junie/Qwen),
+pipe+file protocol, capability matching, per-agent circuit breaker,
+response parser. This is the <strong>multi-agent transport/pool</strong>
+layer.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/workflow</code></td>
+<td>(inner app)</td>
+<td>Linear <strong><code>Workflow{Steps []Step}</code></strong> with a
+goroutine <code>Executor</code>, status accessors under
+<code>sync.RWMutex</code>, autonomy + planmode + snapshots subpkgs,
+chaos/stress tests. NOT a general DAG — a sequential step runner.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/task</code></td>
+<td>(inner app)</td>
+<td><code>DependencyManager</code> (<code>ValidateDependencies</code>,
+<code>CheckDependenciesCompleted</code> over <code>[]uuid.UUID</code>),
+task <code>Manager</code> + DB persistence, checkpoint, priority
+<code>queue.go</code>. This is the <strong>task-dependency /
+DAG-data</strong> layer (validation + completion gating), not a
+scheduler.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Net:</strong> HelixCode already has (a) a <em>static</em>
+agentic graph engine, (b) planning/search algorithms, (c) concurrency
+primitives, (d) task-dependency data + a linear executor, (e)
+multi-agent pools. The genuine gaps SP6 must fill are:
+<strong>runtime-mutable graphs, durable/compensating orchestration,
+reactive/dataflow streaming, behavior-tree control, and a true DAG
+scheduler</strong> over the existing concurrency substrate.</p>
+<hr />
+<h2 id="dynamic-flows-runtime-mutable-workflow-graphs">1. Dynamic flows
+/ runtime-mutable workflow graphs</h2>
+<p><strong>Definition.</strong> Execution models where the graph
+topology is decided/extended <em>at runtime</em> from state —
+conditional routing, dynamic fan-out (map-reduce), node-generated
+successors, and (in durable engines) replay-based resumption. Distinct
+from a graph fixed before <code>Run()</code>.</p>
+<p><strong>Canonical OSS implementations.</strong> -
+<strong>LangGraph</strong> (<code>langchain-ai/langgraph</code>, Python
++ JS; MIT). Core: <code>StateGraph(State)</code>, <code>add_node</code>,
+<code>add_edge</code>, <code>add_conditional_edges</code>;
+<strong><code>Command</code></strong> (a node returns <em>state update +
+next-node</em> in one value, collapsing routing into the node);
+<strong><code>Send</code></strong> (inside a conditional edge,
+dynamically invoke a node N times with custom per-branch state → native
+map-reduce). Runtime context injected via <code>Runtime[Context]</code>.
+This is the closest match to “dynamic flows.” -
+<strong>Temporal</strong> (<code>temporalio/sdk-go</code>,
+<strong>Go</strong>, MIT, v1.44.1 / 2026-05-28). Durable execution:
+deterministic Workflow functions + Activities; topology emerges from
+ordinary Go control flow and is made durable by <strong>event-sourced
+replay</strong> (no static graph at all). First-class Saga support (see
+§3). - <strong>Prefect / Dagster / Flyte / Airflow</strong> (Python;
+Apache-2.0 except Prefect Apache-2.0). Prefect builds the dependency
+graph <em>as code executes</em> (dynamic mapping, subflows). Dagster is
+asset-graph/lineage-centric. Airflow 3.2 (2026-04) added dynamic task
+mapping + asset partitioning; still primarily static DAG-as-code. Flyte
+= K8s-native typed DAG.</p>
+<p><strong>Core abstractions to lift.</strong> <code>State</code>
+(reducer-merged), node-returns-routing (<code>Command</code>), dynamic
+fan-out (<code>Send</code>), durable replay (Temporal), runtime
+dependency accretion (Prefect).</p>
+<p><strong>Map onto Go + HelixCode.</strong> Extend <code>agentic</code>
+with: (1) a runtime <code>Graph.AddNode/AddEdge/RemoveNode</code> + a
+<code>NodeResult{StatePatch, GoTo []NodeID}</code> so a
+<code>NodeHandler</code> can both patch state and name successors
+(LangGraph <code>Command</code>); (2) a
+<code>Fan(targetNode, []State)</code> primitive over
+<code>concurrency.Map</code> for dynamic map-reduce (LangGraph
+<code>Send</code>); (3) a reducer-typed <code>WorkflowState</code>
+merge. Durable replay is a <em>separate</em> concern → see §3
+(<code>flow_engine</code> should wrap Temporal-style replay or integrate
+Temporal Go SDK directly rather than reimplement event-sourcing).</p>
+<p><strong>Distinct vs what we have / recommendation.</strong> Distinct
+= runtime topology mutation + <code>Command</code>/<code>Send</code>
+semantics + durable replay; we only have a static graph + linear
+executor. <strong>→ EXTEND <code>agentic</code></strong> for
+runtime-mutable graph + <code>Command</code>/<code>Send</code>;
+<strong>CREATE-NEW <code>flow_engine</code></strong> as the high-level
+dynamic-flow façade that composes agentic + planning + (optionally)
+wraps Temporal Go SDK for durability. Do <strong>not</strong>
+reimplement Temporal’s replay (§11.4.74) — wrap/depend on
+<code>temporalio/sdk-go</code> (Go, MIT) where durability is
+required.</p>
+<hr />
+<h2 id="dataflow-reactive-reactivex-fbp-apache-beam">2. Dataflow /
+reactive (ReactiveX, FBP, Apache Beam)</h2>
+<p><strong>Definition.</strong> Computation as data moving through a
+network of operators. Two sub-families: <strong>reactive
+streams</strong> (push, observable/operator pipelines) and
+<strong>flow-based programming/FBP</strong> (named components with typed
+in/out ports connected by bounded channels). Beam adds a windowed
+batch+stream dataflow model.</p>
+<p><strong>Canonical OSS implementations.</strong> -
+<strong>RxGo</strong> (<code>ReactiveX/RxGo</code>, <strong>Go</strong>,
+MIT). Observables + operators implemented as channel-connected pipeline
+stages of goroutines (Map/Filter/FlatMap/Reduce/backpressure
+strategies). - <strong>GoFlow</strong> (<code>trustmaster/goflow</code>,
+<strong>Go</strong>, MIT). FBP: <code>Component</code> with input/output
+<strong>ports</strong> + state; the network is wired declaratively and
+runs asynchronously; data are <code>Packet</code>s/IPs over channels. -
+<strong>Apache Beam Go SDK</strong>
+(<code>apache/beam/sdks/v2/go/pkg/beam</code>, <strong>Go</strong>,
+Apache-2.0). <code>PCollection</code> (bounded/unbounded),
+<code>ParDo</code> (per-element parallel fn), windowing; pluggable
+runners (Direct local, Dataflow, Flink…).</p>
+<p><strong>Core abstractions to lift.</strong> Observable + operator
+chain (Rx), typed-port Component + channel wiring (FBP),
+<code>PCollection</code>/<code>ParDo</code>/windowing (Beam).</p>
+<p><strong>Map onto Go + HelixCode.</strong> Go channels +
+<code>concurrency.pool</code>/<code>Map</code> are a natural substrate.
+A <code>pipeline_runtime</code> package should expose:
+<code>Stream[T]</code> (observable), composable operators
+(<code>Map/Filter/FlatMap/Window/Buffer/Reduce</code>), and a
+<strong>Component/Port</strong> FBP layer for declaratively wired agent
+pipelines. Backpressure → reuse <code>concurrency</code>
+rate-limiter/semaphore. Beam’s runner abstraction is over-scoped for our
+needs (HONEST-GAP: full Beam parity = large; recommend Rx+FBP subset
+first).</p>
+<p><strong>Distinct vs what we have / recommendation.</strong> Distinct
+= push-based streaming operators + typed-port FBP wiring + windowing; we
+have none of this (our <code>streaming</code> submodule is LLM token
+streaming, not a dataflow operator graph — verify scope before reuse).
+<strong>→ CREATE-NEW <code>pipeline_runtime</code></strong> (Rx-style
+streams + FBP components) built on <code>concurrency</code>; optionally
+vendor RxGo/GoFlow patterns rather than full Beam.</p>
+<hr />
+<h2 id="saga-compensation-orchestration">3. Saga / compensation
+orchestration</h2>
+<p><strong>Definition.</strong> Long-running distributed transaction as
+a sequence of local steps each with a registered <strong>compensating
+action</strong>; on failure, run compensations in reverse for completed
+steps (no global lock/2PC).</p>
+<p><strong>Canonical OSS implementations.</strong> - <strong>Temporal Go
+SDK</strong> (<code>temporalio/sdk-go</code>, Go, MIT). First-class
+saga: register compensations and run them on abort; the common Go idiom
+uses <code>defer</code> + a compensation stack. Samples:
+<code>temporalio/samples-go/saga/workflow.go</code>. -
+<strong>Community</strong>:
+<code>kevinmichaelchen/temporal-saga-grpc</code> (Go) demonstrates
+cross-microservice saga rollback.</p>
+<p><strong>Core abstractions to lift.</strong>
+<code>Saga.AddCompensation(fn)</code>, <code>Saga.Compensate()</code>
+(reverse order), step-level idempotency, durable progress so
+compensations survive a crash.</p>
+<p><strong>Map onto Go + HelixCode.</strong> A <code>saga</code> package
+(could live in <code>flow_engine</code> or
+<code>dag_orchestrator</code>):
+<code>Saga{steps []Step{Do, Undo}}</code>, run forward collecting Undo
+closures, on error run Undo in LIFO. For <em>durable</em> sagas (survive
+process death) → depend on Temporal Go SDK rather than build our own
+event store. <code>agentic</code>’s checkpointing gives at-most weak
+durability — adequate for in-process compensation, not
+crash-durable.</p>
+<p><strong>Distinct vs what we have / recommendation.</strong> Distinct
+= explicit compensation/rollback semantics (we have retry+checkpoint but
+no compensation model). <strong>→ CREATE-NEW lightweight
+<code>saga</code> primitive</strong> inside <code>flow_engine</code>;
+<strong>REUSE <code>temporalio/sdk-go</code></strong> (Go, MIT) for
+crash-durable sagas instead of reimplementing durable execution
+(§11.4.74).</p>
+<hr />
+<h2 id="behavior-trees-agent-control">4. Behavior trees (agent
+control)</h2>
+<p><strong>Definition.</strong> A directed rooted tree ticked each
+frame; <strong>composite</strong> nodes (Sequence = AND,
+Selector/Fallback = OR), <strong>decorator</strong> nodes (Inverter,
+Retry, Timeout, Repeat), <strong>leaf</strong> nodes (Action/Condition).
+Each tick returns Success/Failure/Running. Strong for reactive,
+interruptible agent control with explicit fallbacks.</p>
+<p><strong>Canonical OSS implementations.</strong> -
+<strong><code>joeycumines/go-behaviortree</code></strong>
+(<strong>Go</strong>; license HONEST-GAP — pkg.go.dev shows
+“redistributable” but the exact SPDX wasn’t confirmed online; verify the
+repo LICENSE before vendoring). Stateless <code>Tick</code> funcs,
+<code>Selector</code>, <code>Sequence</code>, context-cancellation
+support. - <strong><code>askft/go-behave</code></strong>
+(<strong>Go</strong>, MIT). Build tree from nodes,
+<code>NewBehaviorTree(Config)</code>; extensible
+composite/decorator/leaf. - Reference (non-Go):
+<code>BehaviorTree.CPP</code> (the de-facto standard; C++).</p>
+<p><strong>Core abstractions to lift.</strong>
+<code>Node.Tick(ctx) Status{Success,Failure,Running}</code>, composites
+(Sequence/Selector/Parallel), decorators
+(Inverter/Retry/Timeout/Repeat), blackboard (shared state).</p>
+<p><strong>Map onto Go + HelixCode.</strong> A
+<code>behavior_tree</code> package:
+<code>Tick func(ctx) (Status,error)</code>,
+<code>Sequence/Selector/Parallel(children...)</code>, decorators, a
+<code>Blackboard</code> aliasing
+<code>agentic.WorkflowState.Variables</code>. BT leaves can wrap
+<code>agentic</code> Tool/Agent nodes → BT becomes a <em>control
+layer</em> over existing handlers. Distinct value: reactive
+re-evaluation + explicit fallback that the current condition-edge model
+expresses awkwardly.</p>
+<p><strong>Distinct vs what we have / recommendation.</strong> Distinct
+= tick-based reactive control with Running state + Selector fallbacks;
+<code>agentic</code> is run-to-completion graph traversal, no per-tick
+re-eval. <strong>→ CREATE-NEW <code>behavior_tree</code></strong>
+submodule (small, vendor patterns from <code>askft/go-behave</code>
+MIT); leaves delegate to
+<code>agentic</code>/<code>llm_orchestrator</code> handlers.</p>
+<hr />
+<h2 id="pipeline-runtimes-unix-pipe-streaming-map-reduce">5. Pipeline
+runtimes (Unix-pipe / streaming / map-reduce)</h2>
+<p><strong>Definition.</strong> Linear/branching stages connected by
+buffered channels; each stage transforms a stream; includes map-reduce
+(partition→map→shuffle→reduce) and Unix-pipe composition
+(stdout→stdin).</p>
+<p><strong>Canonical OSS implementations / patterns.</strong> Go’s own
+<strong>pipeline pattern</strong> (Go blog “Pipelines and cancellation”:
+stage = goroutine group over channels — this is exactly how RxGo §2 is
+built). Map-reduce = <code>concurrency.Map</code> + a reduce stage. Beam
+(§2) is the heavyweight version.</p>
+<p><strong>Core abstractions to lift.</strong>
+<code>Stage func(in &lt;-chan T) &lt;-chan U</code>, fan-out/fan-in,
+cancellation via <code>context</code>, bounded buffers for
+backpressure.</p>
+<p><strong>Map onto Go + HelixCode.</strong> This is the
+<strong>lowest-friction</strong> family — Go channels +
+<code>concurrency.pool.Map</code> already cover ~80%. A thin
+<code>pipeline</code> API (<code>Pipe(stages...)</code>,
+<code>FanOut(n)</code>, <code>FanIn()</code>,
+<code>MapReduce(mapper, reducer)</code>) belongs in the same
+<code>pipeline_runtime</code> package as §2 (Rx/FBP and Unix-pipe are
+the same substrate at different abstraction levels).</p>
+<p><strong>Distinct vs what we have / recommendation.</strong> Mostly
+already expressible via <code>concurrency</code>; distinct = the
+ergonomic stage/fan-out/fan-in API + map-reduce helper. <strong>→ EXTEND
+<code>concurrency</code></strong> with a <code>pipeline</code> subpkg OR
+fold into <code>pipeline_runtime</code> (§2). Reuse-heavy, minimal new
+code.</p>
+<hr />
+<h2 id="dag-orchestration-patterns-scheduling">6. DAG orchestration
+patterns + scheduling</h2>
+<p><strong>Definition.</strong> Schedule a directed-acyclic graph of
+tasks honoring dependencies: topological order, ready-set dispatch,
+max-parallelism, retries/backoff, failure-propagation policies
+(fail-fast vs continue), and (dynamic DAGs) runtime task mapping.</p>
+<p><strong>Canonical OSS implementations.</strong> Airflow (Apache-2.0;
+static DAG-as-code + dynamic task mapping since 2.3, asset partitioning
+3.2/2026-04), Prefect (Apache-2.0; runtime-built graph), Dagster
+(Apache-2.0; asset graph + lineage), Flyte (Apache-2.0; typed K8s DAG),
+Temporal (durable, §3). Go-native general DAG schedulers are
+comparatively rare (HONEST-GAP: no single dominant Go DAG-scheduler
+library surfaced — most Go usage embeds Temporal or hand-rolls topo-sort
+over a worker pool).</p>
+<p><strong>Core abstractions to lift.</strong>
+<code>DAG{nodes, edges}</code> + topo-sort, ready-queue scheduler,
+per-node retry/timeout, failure policy, dynamic-mapping (expand one node
+into N at runtime — bridges to §1 <code>Send</code>), result/lineage
+tracking (Dagster).</p>
+<p><strong>Map onto Go + HelixCode.</strong> We already have the
+<em>data</em> (<code>task.DependencyManager</code> validates deps +
+completion). The missing piece is a <strong>scheduler</strong>: a
+<code>dag_orchestrator</code> that consumes a <code>DAG</code> (built
+from <code>task</code> dependencies or an <code>agentic</code> graph),
+computes the ready-set, dispatches via <code>concurrency.pool</code>
+honoring a parallelism cap + <code>concurrency.queue</code> priority,
+applies retry/backoff + failure policy, and records lineage. Dynamic
+DAGs = let a completed node emit new nodes (composes with §1).</p>
+<p><strong>Distinct vs what we have / recommendation.</strong> Distinct
+= the <em>scheduler</em> (ready-set dispatch + parallelism + failure
+policy + lineage); we have dependency-validation but no scheduler.
+<strong>→ CREATE-NEW <code>dag_orchestrator</code></strong> over
+<code>concurrency</code> (pool+queue) + <code>task</code> (dependency
+data); <strong>REUSE Temporal</strong> only where
+crash-durability/distribution is required.</p>
+<hr />
+<h2 id="agent-mesh-swarm-coordination">7. Agent-mesh / swarm
+coordination</h2>
+<p><strong>Definition.</strong> Multiple autonomous agents collaborate
+via handoffs, shared message bus / group chat, role specialization, or
+topology (star/mesh/hierarchy). Routing decisions are themselves
+agentic.</p>
+<p><strong>Canonical OSS implementations.</strong> - <strong>OpenAI
+Swarm</strong> (<code>openai/swarm</code>, Python, MIT) —
+<strong>DEPRECATED</strong>, superseded by <strong>OpenAI Agents
+SDK</strong> (<code>openai/openai-agents-python</code>, Python, MIT,
+prod, 2025-03). Primitives: <strong>Agent</strong> (instructions+tools)
++ <strong>handoff</strong> (an agent returns another Agent to transfer
+control). Lightweight, stateless-between-calls. -
+<strong>CrewAI</strong> (Python, MIT) — role/goal/backstory agents in a
+“crew” with sequential/hierarchical process. - <strong>AutoGen</strong>
+(Microsoft, Python, MIT/CC) — conversational multi-agent, group chat,
+<code>Swarm</code> team via handoff messages. - <strong>LangGraph
+multi-agent</strong> (§1) — supervisor/network topologies as a
+graph.</p>
+<p><strong>Core abstractions to lift.</strong>
+<code>Agent{instructions, tools}</code>,
+<code>Handoff(targetAgent)</code> (transfer control + context), shared
+message history, supervisor/router agent, topology (star/mesh/hierarchy
+— already an enum in <code>debate_orchestrator/topology</code>).</p>
+<p><strong>Map onto Go + HelixCode.</strong>
+<code>debate_orchestrator</code> (consensus/dissent, AgentPool, topology
+enum) + <code>llm_orchestrator</code> (CLI-agent pool, capability
+matching, circuit breaker) already cover most of the <em>substrate</em>.
+The genuinely missing primitive is <strong>handoff</strong> (agent A
+transfers control+context to agent B, OpenAI-Swarm style) and a
+<strong>supervisor/router</strong> loop. Map handoff onto
+<code>agentic.Command</code>-style routing where a node returns the next
+<em>agent</em> rather than next <em>node</em>.</p>
+<p><strong>Distinct vs what we have / recommendation.</strong> Distinct
+= Swarm-style handoff + supervisor routing; we have debate (consensus) +
+agent pools but not handoff-as-control-transfer. <strong>→ EXTEND
+<code>debate_orchestrator</code> (or
+<code>llm_orchestrator</code>)</strong> with a <code>handoff</code> +
+<code>supervisor</code> primitive rather than create a new swarm
+submodule (avoid duplicating the existing AgentPool/topology —
+§11.4.74). Mirror OpenAI <strong>Agents SDK</strong> patterns (the
+maintained successor), not the deprecated Swarm repo.</p>
+<hr />
+<h2 id="cross-cutting-integration-interfaces-to-define-for-sp6">8.
+Cross-cutting integration interfaces to define (for SP6)</h2>
+<p>Define these Go interfaces so all families compose on one substrate
+(<code>concurrency</code>) and one state model
+(<code>agentic.WorkflowState</code>):</p>
+<ol type="1">
+<li><strong><code>Executor</code></strong> —
+<code>Run(ctx, *WorkflowState) (*Result, error)</code> — the universal
+entry every model implements (agentic graph, BT, pipeline, DAG, saga,
+swarm).</li>
+<li><strong><code>Node</code>/<code>Step</code> result with
+routing</strong> —
+<code>NodeResult{StatePatch, GoTo []NodeID, Spawn []Node}</code> —
+unifies LangGraph <code>Command</code>/<code>Send</code>, dynamic DAG
+mapping, and swarm handoff.</li>
+<li><strong><code>Scheduler</code></strong> —
+<code>Dispatch(ready []Node)</code> over
+<code>concurrency.pool</code>+<code>queue</code> with a parallelism cap
++ failure policy — shared by <code>dag_orchestrator</code> and dynamic
+flows.</li>
+<li><strong><code>Compensable</code></strong> —
+<code>Do(ctx)/Undo(ctx)</code> — the saga step contract.</li>
+<li><strong><code>Stream[T]</code> + <code>Operator[T,U]</code></strong>
+— the dataflow/pipeline contract.</li>
+<li><strong><code>Tick</code></strong> —
+<code>Tick(ctx) (Status, error)</code> — the behavior-tree contract; BT
+leaves wrap <code>Executor</code>.</li>
+<li><strong><code>Agent</code> + <code>Handoff</code></strong> —
+<code>Handle(ctx,*State) (*State, *Agent, error)</code> — swarm
+control-transfer.</li>
+<li><strong><code>Durability</code> (optional)</strong> — adapter to
+<code>temporalio/sdk-go</code> so any flow can opt into crash-durable
+replay without the rest of the system depending on Temporal.</li>
+</ol>
+<hr />
+<h2 id="twelve-line-summary">9. Twelve-line summary</h2>
+<ol type="1">
+<li>Five-to-seven model families researched: dynamic-flows,
+dataflow/reactive, saga/compensation, behavior-trees,
+pipeline/map-reduce, DAG-scheduling, agent-mesh/swarm.</li>
+<li>HelixCode ALREADY has: static agentic graph, planning
+(HiPlan/MCTS/ToT), concurrency primitives, task-dependency data + linear
+executor, multi-agent pools (debate + llm_orchestrator).</li>
+<li>Dynamic flows → <strong>EXTEND <code>agentic</code></strong>
+(runtime AddNode/AddEdge + <code>Command</code>/<code>Send</code>) +
+<strong>CREATE-NEW <code>flow_engine</code></strong> façade; wrap
+Temporal Go SDK (MIT) for durability — don’t reimplement replay.</li>
+<li>Dataflow/reactive + pipeline/map-reduce → <strong>CREATE-NEW
+<code>pipeline_runtime</code></strong> (Rx-style streams + FBP
+components) on <code>concurrency</code>; vendor RxGo/GoFlow patterns
+(both Go, MIT), not full Beam.</li>
+<li>Saga/compensation → <strong>CREATE-NEW lightweight <code>saga</code>
+primitive</strong> in <code>flow_engine</code>; REUSE
+<code>temporalio/sdk-go</code> for crash-durable sagas.</li>
+<li>Behavior trees → <strong>CREATE-NEW
+<code>behavior_tree</code></strong> submodule (vendor
+<code>askft/go-behave</code> MIT patterns); leaves delegate to
+agentic/llm_orchestrator handlers.</li>
+<li>DAG scheduling → <strong>CREATE-NEW
+<code>dag_orchestrator</code></strong> scheduler over
+<code>concurrency.pool</code>+<code>queue</code> + <code>task</code>
+dependency data (no dominant Go DAG-scheduler lib exists —
+HONEST-GAP).</li>
+<li>Agent-mesh/swarm → <strong>EXTEND
+<code>debate_orchestrator</code>/<code>llm_orchestrator</code></strong>
+with handoff+supervisor (mirror OpenAI <strong>Agents SDK</strong>, not
+deprecated Swarm); reuse existing AgentPool/topology.</li>
+<li>New submodules to create: <code>flow_engine</code>,
+<code>dag_orchestrator</code>, <code>pipeline_runtime</code>,
+<code>behavior_tree</code>; extend: <code>agentic</code>,
+<code>debate_orchestrator</code>/<code>llm_orchestrator</code>,
+<code>concurrency</code>.</li>
+<li>Top integration interfaces to define: <code>Executor</code>,
+<code>NodeResult{StatePatch,GoTo,Spawn}</code>, <code>Scheduler</code>,
+<code>Compensable{Do,Undo}</code>, <code>Stream/Operator</code>,
+<code>Tick</code>, <code>Agent/Handoff</code>, optional
+<code>Durability</code> (Temporal adapter).</li>
+<li>Reuse-not-reimplement wins (§11.4.74): Temporal Go SDK for durable
+execution/sagas; RxGo/GoFlow patterns for streams; OpenAI Agents-SDK
+handoff pattern; existing <code>concurrency</code> as the single
+scheduling substrate.</li>
+<li>HONEST-GAPs to resolve in SP6: confirm
+<code>joeycumines/go-behaviortree</code> SPDX license; decide
+Beam-parity scope (recommend Rx+FBP subset first); confirm
+<code>helix_code/internal/streaming</code> is token-streaming (not
+dataflow) before reusing its name.</li>
+</ol>
+<hr />
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<ul>
+<li>LangGraph Graph API / StateGraph / Command / Send / conditional
+edges — https://docs.langchain.com/oss/python/langgraph/graph-api ,
+https://reference.langchain.com/python/langgraph/graph/state/StateGraph
+,
+https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph.Send.html
+(accessed 2026-06-10)</li>
+<li>Temporal Go SDK (license MIT, v1.44.1 / 2026-05-28, durable
+execution, saga) — https://github.com/temporalio/sdk-go ,
+https://github.com/temporalio/samples-go/blob/main/saga/workflow.go ,
+https://temporal.io/blog/compensating-actions-part-of-a-complete-breakfast-with-sagas
+(accessed 2026-06-10)</li>
+<li>RxGo (Go, MIT, pipeline-of-goroutines model) —
+https://github.com/ReactiveX/RxGo ,
+https://pkg.go.dev/github.com/reactivex/rxgo (accessed 2026-06-10)</li>
+<li>GoFlow / FBP (Go, MIT, Component+ports) —
+https://github.com/trustmaster/goflow ,
+https://github.com/trustmaster/goflow/wiki/Components (accessed
+2026-06-10)</li>
+<li>Apache Beam Go SDK (Apache-2.0,
+PCollection/ParDo/bounded-unbounded/runners) —
+https://beam.apache.org/documentation/programming-guide/ ,
+https://pkg.go.dev/github.com/apache/beam/sdks/v2/go/pkg/beam ,
+https://github.com/apache/beam/blob/master/sdks/go/pkg/beam/pardo.go
+(accessed 2026-06-10)</li>
+<li>Behavior trees Go — https://github.com/joeycumines/go-behaviortree ,
+https://github.com/askft/go-behave (MIT) ,
+https://www.behaviortree.dev/groot/ (accessed 2026-06-10)</li>
+<li>OpenAI Swarm (Python, MIT, DEPRECATED → Agents SDK) —
+https://github.com/openai/swarm ,
+https://github.com/openai/openai-agents-python (accessed
+2026-06-10)</li>
+<li>AutoGen Swarm / CrewAI multi-agent —
+https://microsoft.github.io/autogen/stable//user-guide/agentchat-user-guide/swarm.html
+(accessed 2026-06-10)</li>
+<li>DAG orchestrators comparison (Airflow 3.2 / Prefect / Dagster /
+Flyte, dynamic task mapping) —
+https://www.zenml.io/blog/orchestration-showdown-dagster-vs-prefect-vs-airflow
+, https://beam.apache.org/get-started/quickstart/go/ (accessed
+2026-06-10)</li>
+<li>Go pipeline pattern (stage=goroutine-group over channels) —
+https://go.dev/blog/pipelines (canonical reference; accessed via
+RxGo/Go-pipeline corroboration 2026-06-10)</li>
+</ul>
+<p><strong>Negative / honest findings (§11.4.99(B)):</strong> (a) no
+single dominant Go-native general-purpose DAG-scheduler library surfaced
+— Go projects predominantly embed Temporal or hand-roll topo-sort+pool
+(justifies a new <code>dag_orchestrator</code>). (b)
+<code>joeycumines/go-behaviortree</code> exact SPDX license not
+confirmable from search snippets — verify the repo LICENSE file before
+vendoring. (c) OpenAI Swarm is unmaintained since 2025-03; use the
+<strong>Agents SDK</strong> patterns as the authoritative handoff
+reference. (d) Full Apache Beam parity is large; Rx+FBP subset
+recommended for first increment.</p>
+</body>
+</html>

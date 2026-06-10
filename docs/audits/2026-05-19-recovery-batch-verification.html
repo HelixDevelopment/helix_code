@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-19-recovery-batch-verification</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-19-recovery-batch-verification</h1>
+</header>
+<h1 id="round-193-11.4-recovery-batch-verification-report">Round-193
+§11.4 — Recovery-Batch Verification Report</h1>
+<p><strong>Date</strong>: 2026-05-19 <strong>Round</strong>: 193
+(verification audit, no production code changes) <strong>Scope</strong>:
+Re-verification of 10 packages whose CONST-046 i18n recovery content was
+landed via Phase-4 recovery batches (<code>b7f8672</code>,
+<code>5c94696</code>) without per-round centralized test execution.
+<strong>Cascade authority</strong>: CONST-035 / CONST-049 / Article XI
+§11.9</p>
+<hr />
+<h2 id="verbatim-operator-mandate-per-const-049-11.4.17">Verbatim
+Operator Mandate (per CONST-049 §11.4.17)</h2>
+<blockquote>
+<p>Verbatim 2026-05-19 operator mandate: “all existing tests and
+Challenges do work in anti-bluff manner - they MUST confirm that all
+tested codebase really works as expected! We had been in position that
+all tests do execute with success and all Challenges as well, but in
+reality the most of the features does not work and can’t be used! This
+MUST NOT be the case and execution of tests and Challenges MUST
+guarantee the quality, the completition and full usability by end users
+of the product!”</p>
+</blockquote>
+<hr />
+<h2 id="methodology">Methodology</h2>
+<p>For each of 10 packages landed via recovery batches in rounds 157,
+161, 163, 165, 166-RE, 167, 168, 173, 175, 178:</p>
+<ol type="1">
+<li><code>go build ./internal/&lt;pkg&gt;/...</code> (from
+<code>helix_code/</code>)</li>
+<li><code>go test -count=1 ./internal/&lt;pkg&gt;/...</code> (from
+<code>helix_code/</code>)</li>
+<li><code>go run scripts/audit_const046/main.go --roots helix_code/internal/&lt;pkg&gt; --json</code>
+(from repo root)</li>
+</ol>
+<p>PASS = clean build AND all tests green. FAIL = build error OR test
+failure (CONST-046 audit violations recorded separately as advisory;
+pre-existing migration debt, not blocker for this audit).</p>
+<p>Toolchain: <code>go test -count=1</code> defeats test cache so every
+PASS is a fresh runtime observation per Article XI §11.9.</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 17%" />
+<col style="width: 16%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 26%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Package</th>
+<th>Round</th>
+<th>Build</th>
+<th>Tests</th>
+<th>CONST-046 audit</th>
+<th>Overall</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>focus</td>
+<td>157</td>
+<td>PASS</td>
+<td>PASS</td>
+<td>1 violation</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>2</td>
+<td>llm</td>
+<td>161</td>
+<td>PASS</td>
+<td>FAIL</td>
+<td>many violations</td>
+<td>FAIL</td>
+</tr>
+<tr>
+<td>3</td>
+<td>logo</td>
+<td>163</td>
+<td>PASS</td>
+<td>FAIL</td>
+<td>1 violation</td>
+<td>FAIL</td>
+</tr>
+<tr>
+<td>4</td>
+<td>memory</td>
+<td>165</td>
+<td>PASS</td>
+<td>PASS</td>
+<td>many violations</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>5</td>
+<td>notification</td>
+<td>167</td>
+<td>PASS</td>
+<td>FAIL</td>
+<td>many violations</td>
+<td>FAIL</td>
+</tr>
+<tr>
+<td>6</td>
+<td>performance</td>
+<td>168</td>
+<td>FAIL</td>
+<td>FAIL</td>
+<td>many violations</td>
+<td>FAIL</td>
+</tr>
+<tr>
+<td>7</td>
+<td>monitoring</td>
+<td>166-RE</td>
+<td>PASS</td>
+<td>PASS</td>
+<td>0 violations</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>8</td>
+<td>redis</td>
+<td>173</td>
+<td>PASS</td>
+<td>PASS</td>
+<td>0 violations</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>9</td>
+<td>rules</td>
+<td>175</td>
+<td>PASS</td>
+<td>PASS</td>
+<td>0 violations</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>10</td>
+<td>session</td>
+<td>178</td>
+<td>PASS</td>
+<td>PASS</td>
+<td>1 violation</td>
+<td>PASS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tally</strong>: 6 PASS / 4 FAIL (40 % recovery-batch failure
+rate — confirms hypothesis that uncentralized recovery batches
+under-verify).</p>
+<hr />
+<h2 id="failure-details-proposed-remediation">Failure Details + Proposed
+Remediation</h2>
+<h3 id="fail-1-internalllm-wizard-test-asserts-substring-message-id-is-bare-token">FAIL-1:
+<code>internal/llm</code> — wizard test asserts substring, message ID is
+bare token</h3>
+<p><strong>Symptom</strong>:</p>
+<pre><code>--- FAIL: TestValidateWizardForm_AnthropicRequiresAPIKey (0.00s)
+    wizard_test.go:55: error &quot;internal_llm_wizard_anthropic_apikey_required&quot; must mention api_key</code></pre>
+<p><strong>Root cause</strong>: Round-161 i18n migration replaced the
+human-readable error string with a CONST-046 message ID
+(<code>internal_llm_wizard_anthropic_apikey_required</code>). The test
+was written against the old literal substring (<code>api_key</code>) and
+was not updated in the same commit. Under <code>NoopTranslator{}</code>
+the message ID echoes literally, so the substring check fails.</p>
+<p><strong>Proposed remediation</strong> (separate scope, NOT executed
+in this round): - Option A (preferred): tighten the test to assert the
+message-ID literal
+(<code>require.Contains(t, err.Error(), &quot;internal_llm_wizard_anthropic_apikey_required&quot;)</code>).
+Preserves anti-bluff guarantee that the wizard surfaces the correct
+error key. - Option B: install a test-local Translator that returns a
+human-readable translation containing <code>api_key</code>, then keep
+the substring assertion. Demonstrates full i18n round-trip but requires
+test-local YAML fixture.</p>
+<h3 id="fail-2-internallogo-image-decode-error-wrapping-wraps-i18n-key-not-english-phrase">FAIL-2:
+<code>internal/logo</code> — image-decode error wrapping wraps i18n key,
+not English phrase</h3>
+<p><strong>Symptom</strong>:</p>
+<pre><code>--- FAIL: TestGenerateASCIIArt/generate_ASCII_from_invalid_image
+    processor_test.go:219: &quot;internal_logo_decode_source_failed&quot; does not contain &quot;failed to decode&quot;
+--- FAIL: TestGenerateASCIIArt/generate_ASCII_from_missing_file</code></pre>
+<p><strong>Root cause</strong>: Same class as FAIL-1. Round-163
+migration replaced the error literal
+<code>&quot;failed to decode source&quot;</code> with message ID
+<code>internal_logo_decode_source_failed</code>. Test still expects the
+English substring.</p>
+<p><strong>Proposed remediation</strong>: Same as FAIL-1 — update test
+to assert the message ID OR wire a test Translator with English
+bundle.</p>
+<h3 id="fail-3-internalnotification-8-event-handler-tests-assert-english-title-literals">FAIL-3:
+<code>internal/notification</code> — 8 event-handler tests assert
+English title literals</h3>
+<p><strong>Symptom</strong>: 8 sibling failures including
+<code>TestEventNotificationHandler_HandleEvent_TaskCompleted</code>:</p>
+<pre><code>expected: &quot;Task Completed&quot;
+actual  : &quot;internal_notification_title_task_completed&quot;</code></pre>
+<p><strong>Root cause</strong>: Round-167 migration replaced all 8
+notification title literals with CONST-046 message IDs. Tests still
+assert English titles. Under <code>NoopTranslator{}</code> the IDs echo
+literally.</p>
+<p><strong>Proposed remediation</strong>: Update 8 tests to assert
+message-ID literals (same pattern as FAIL-1/FAIL-2). Alternatively,
+install a test bundle that decodes the IDs to English. Affected tests:
+<code>_TaskCompleted</code>, <code>_TaskFailed</code>,
+<code>_WorkflowCompleted</code>, <code>_WorkflowFailed</code>,
+<code>_WorkerDisconnected</code>, <code>_SystemError</code>,
+<code>_SystemStartup</code>, <code>_EndToEnd</code>.</p>
+<h3 id="fail-4-internalperformance-build-broken-undefined-stdctx-unused-context">FAIL-4:
+<code>internal/performance</code> — build broken: undefined
+<code>stdctx</code>, unused <code>context</code></h3>
+<p><strong>Symptom</strong> (compile failure, blocks both build and
+test):</p>
+<pre><code>internal/performance/translator.go:14:2: &quot;context&quot; imported and not used
+internal/performance/translator.go:49:13: undefined: stdctx</code></pre>
+<p><strong>Root cause</strong>: Round-168 migration introduced
+<code>translator.go</code> referencing <code>stdctx.Context</code> (per
+the pattern used by sibling packages that aliased <code>&quot;context&quot;</code>
+as <code>stdctx</code> because they also imported a domain-local
+<code>context</code> package). <code>internal/performance</code> does
+NOT have a domain-local <code>context</code> collision, so the import is
+written as <code>import &quot;context&quot;</code> not
+<code>import stdctx &quot;context&quot;</code>. The <code>tr(...)</code> helper
+still uses <code>stdctx.Context</code>. Net: import unused, identifier
+undefined.</p>
+<p><strong>Proposed remediation</strong>: Edit
+<code>helix_code/internal/performance/translator.go</code> line 49:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Change:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> tr<span class="op">(</span>ctx stdctx<span class="op">.</span>Context<span class="op">,</span> msgID <span class="dt">string</span><span class="op">,</span> data <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">// To:</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> tr<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> msgID <span class="dt">string</span><span class="op">,</span> data <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span></code></pre></div>
+<p>Removes the unused-import error and the undefined-identifier error in
+one keystroke. Then re-run build + tests. Pre-existing CONST-046
+violations (many) remain as separate migration debt — out of scope for
+this audit.</p>
+<hr />
+<h2 id="const-046-audit-gate-observations-advisory">CONST-046 audit gate
+observations (advisory)</h2>
+<p>Packages with zero CONST-046 violations (clean migrations):
+<code>monitoring</code>, <code>redis</code>, <code>rules</code>.
+Packages with single residual violation: <code>focus</code> (1),
+<code>logo</code> (1), <code>session</code> (1). Packages with batched
+residuals carried forward: <code>llm</code>, <code>memory</code>,
+<code>notification</code>, <code>performance</code> (each with multiple
+hardcoded-string hits — pre-existing migration debt tracked separately
+by Phase-4 sweep).</p>
+<p>The audit gate result is advisory for this round; gating closure of
+these violations is the Phase-4 round-by-round migration’s
+responsibility, not this verification audit’s.</p>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>40 % of the 10 recovery-batch packages failed verification (4 of 10).
+Three failures (<code>llm</code>, <code>logo</code>,
+<code>notification</code>) are test-assertion drift from the i18n
+migration — tests not updated in the same commit as the production code
+change. One failure (<code>performance</code>) is a compile-blocking
+build error from copy-paste of the sibling-package translator template
+without adapting the import alias.</p>
+<p>All four failures are §11.4 PASS-bluffs at the recovery-batch layer:
+the recovery batches reported successful content capture but the
+resulting trees do not build/test green. This confirms the operator’s
+2026-05-19 mandate: tests-pass-as-summary-line without runtime evidence
+is no longer acceptable as a closure signal — even for stalled-agent
+recovery flows.</p>
+<p>Remediation per failure is scoped above. Fixes will be executed in a
+follow-up round (separate scope per the round-193 charter — this round
+documents, does not fix).</p>
+<hr />
+<h2 id="provenance-correction">Provenance correction</h2>
+<p>The initial filesystem-write of this file at round-193 was captured
+by a parallel session’s commit <code>c41bc2f</code> (round-190 HXA-003
+venice fix) due to a race in pre-commit staging. The audit content is
+unchanged; this commit re-anchors the round-193 audit to its proper
+subject line per the round-193 charter.</p>
+</body>
+</html>

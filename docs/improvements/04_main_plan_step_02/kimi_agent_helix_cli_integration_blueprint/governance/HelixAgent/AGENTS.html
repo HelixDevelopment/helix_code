@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>AGENTS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">AGENTS</h1>
+</header>
+<h1 id="agents.md-helixagent">AGENTS.md — HelixAgent</h1>
+<blockquote>
+<p><strong>NON-NEGOTIABLE PRIME DIRECTIVE:</strong> <strong>“We had been
+in position that all tests do execute with success and all Challenges as
+well, but in reality the most of the features does not work and can’t be
+used! This MUST NOT be the case and execution of tests and Challenges
+MUST guarantee the quality, the completion and full usability by end
+users of the product!”</strong> This statement is the foundational
+requirement of this project. Any agent dispatch, any code review that
+allows green tests on broken features is a violation and MUST be
+rejected.</p>
+</blockquote>
+<p>This file defines agent constraints, capabilities, and collaboration
+rules for automated agents working on the HelixAgent codebase.</p>
+<hr />
+<h2 id="project-overview">Project Overview</h2>
+<p><strong>Submodule:</strong> HelixAgent<br />
+<strong>Repository:</strong>
+<code>github.com/HelixDevelopment/HelixAgent</code><br />
+<strong>Mission:</strong> HelixAgent is the ensemble LLM service that
+fronts 50+ LLM providers with dynamic selection driven by LLMsVerifier
+verification scores. It exposes OpenAI-compatible APIs and serves as the
+root orchestrator for all submodules.</p>
+<p>This file assumes the reader knows nothing about the project. Deeper
+<code>AGENTS.md</code> or <code>CLAUDE.md</code> files in subdirectories
+take precedence over this root file for files within those subtrees.</p>
+<hr />
+<h2 id="universal-mandatory-constraints-inherited-from-constitution">Universal
+Mandatory Constraints (Inherited from Constitution)</h2>
+<p>These rules are non-negotiable across every project, submodule, and
+sibling repository. Each project MUST surface them in its own
+<code>CLAUDE.md</code>, <code>AGENTS.md</code>, and
+<code>CONSTITUTION.md</code>. Project-specific addenda cannot weaken or
+override these.</p>
+<h3 id="hard-stops-permanent-non-negotiable">Hard Stops (permanent,
+non-negotiable)</h3>
+<ol type="1">
+<li><strong>NO CI/CD pipelines.</strong> No
+<code>.github/workflows/</code>, <code>.gitlab-ci.yml</code>,
+<code>Jenkinsfile</code>, <code>.travis.yml</code>,
+<code>.circleci/</code>, or any automated pipeline. No Git hooks
+either.</li>
+<li><strong>NO HTTPS for Git.</strong> SSH URLs only
+(<code>git@github.com:…</code>, <code>git@gitlab.com:…</code>) for
+clones, fetches, pushes, and submodule updates.</li>
+<li><strong>NO manual container commands.</strong> Container
+orchestration is owned by the project’s binary/orchestrator. Direct
+<code>docker</code>/<code>podman start|stop|rm</code> and
+<code>docker-compose up|down</code> are prohibited as workflows.</li>
+</ol>
+<h3 id="mandatory-development-standards">Mandatory Development
+Standards</h3>
+<ol type="1">
+<li><p><strong>100% Test Coverage.</strong> Every component MUST have
+unit, integration, E2E, automation, security/penetration, and benchmark
+tests.</p></li>
+<li><p><strong>Challenge Coverage.</strong> Every component MUST have
+Challenge scripts validating real-life use cases.</p></li>
+<li><p><strong>Real Data.</strong> Beyond unit tests, all components
+MUST use actual API calls, real databases, live services.</p></li>
+<li><p><strong>Health &amp; Observability.</strong> Every service MUST
+expose health endpoints. Circuit breakers for all external
+dependencies.</p></li>
+<li><p><strong>Documentation &amp; Quality.</strong> Update
+<code>CLAUDE.md</code>, <code>AGENTS.md</code> alongside code changes.
+Conventional Commits.</p></li>
+<li><p><strong>Validation Before Release.</strong> Pass the project’s
+full validation suite plus all challenges.</p></li>
+<li><p><strong>No Mocks or Stubs in Production.</strong> STRICTLY
+FORBIDDEN in production code. Only unit tests may use
+mocks/stubs.</p></li>
+<li><p><strong>Comprehensive Verification.</strong> Runtime testing,
+compile verification, code structure checks. Grep-only validation is
+NEVER sufficient.</p></li>
+<li><p><strong>Resource Limits for Tests &amp; Challenges
+(CRITICAL).</strong> 30-40% of host resources. Use
+<code>GOMAXPROCS=2</code>, <code>nice -n 19</code>,
+<code>ionice -c 3</code>, <code>-p 1</code>.</p></li>
+<li><p><strong>Bugfix Documentation.</strong> All bug fixes MUST be
+documented in <code>docs/issues/fixed/BUGFIXES.md</code>.</p></li>
+<li><p><strong>Real Infrastructure for All Non-Unit Tests.</strong>
+Mocks/fakes MAY be used ONLY in unit tests. ALL other test types MUST
+execute against the REAL running system.</p></li>
+<li><p><strong>Reproduction-Before-Fix (CONST-032 — MANDATORY).</strong>
+Every reported error MUST be reproduced by a Challenge script BEFORE any
+fix is attempted.</p></li>
+<li><p><strong>Concurrent-Safe Containers (CONST-029).</strong> Mutable
+shared collections MUST use <code>safe.Store[K,V]</code> /
+<code>safe.Slice[T]</code>. Bare <code>sync.Mutex + map/slice</code> is
+prohibited for new code.</p></li>
+</ol>
+<h3 id="definition-of-done-universal">Definition of Done
+(universal)</h3>
+<p>A change is NOT done because code compiles and tests pass. “Done”
+requires pasted terminal output from a real run, produced in the same
+session as the change.</p>
+<ul>
+<li><strong>No self-certification.</strong> Words like <em>verified,
+tested, working, complete, fixed, passing</em> are forbidden unless
+accompanied by pasted output.</li>
+<li><strong>Demo before code.</strong> Every task begins by writing the
+runnable acceptance demo.</li>
+<li><strong>Real system, every time.</strong> Demos run against real
+artifacts.</li>
+<li><strong>Skips are loud.</strong> <code>t.Skip</code> /
+<code>@Ignore</code> / <code>xit</code> without
+<code>SKIP-OK: #&lt;ticket&gt;</code> breaks validation.</li>
+<li><strong>Evidence in the PR.</strong> PR bodies must contain a fenced
+<code>## Demo</code> block.</li>
+</ul>
+<hr />
+<h2 id="agent-definitions">Agent Definitions</h2>
+<p>ProviderAgent, EnsembleAgent, DebateAgent, MCPAgent, BootAgent,
+ConstitutionAgent</p>
+<hr />
+<h2 id="capability-specifications">Capability Specifications</h2>
+<p>Provider registry (51+), ensemble voting, debate orchestration
+(8-phase), MCP management (45+ adapters), container boot, constitution
+sync</p>
+<hr />
+<h2 id="integration-patterns">Integration Patterns</h2>
+<p>HelixLLM (fallback chain), HelixMemory (MemoryAdapter sync),
+HelixSpecifier (SpecKit auto-activation), LLMsVerifier (startup
+verification), Containers (dynamic remote distribution), Challenges
+(challenge script execution)</p>
+<hr />
+<h2 id="testing-requirements-per-agent">Testing Requirements Per
+Agent</h2>
+<p>All agents require Unit, Integration, E2E, Challenge, and Anti-Bluff
+tests with live infrastructure</p>
+<hr />
+<h2 id="safe-parallel-changes-no-coordination-required">Safe Parallel
+Changes (No Coordination Required)</h2>
+<ul>
+<li>Adding new test files (<code>*_test.go</code>)</li>
+<li>Adding new challenge scripts
+(<code>challenges/scripts/*_challenge.sh</code>)</li>
+<li>Adding new documentation files (<code>docs/**/*.md</code>)</li>
+<li>Adding new benchmark functions</li>
+<li>Modifying code within a single package (if no interface
+changes)</li>
+</ul>
+<h2 id="coordination-required">Coordination Required</h2>
+<ul>
+<li><strong>Interface changes</strong> — modifying any shared
+interface</li>
+<li><strong>Config changes</strong> — adding new environment
+variables</li>
+<li><strong>go.mod changes</strong> — adding or removing
+dependencies</li>
+<li><strong>Makefile changes</strong> — adding or modifying build/test
+targets</li>
+<li><strong>Submodule updates</strong> — changing submodule
+references</li>
+<li><strong>API surface changes</strong> — modifying HTTP route
+registrations</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-mandate-const-035">Anti-Bluff Mandate
+(CONST-035)</h2>
+<p>Every agent working on this codebase MUST:</p>
+<ol type="1">
+<li>Verify that tests fail when features are deliberately broken</li>
+<li>Never accept “tests pass” as sufficient evidence of done</li>
+<li>Require pasted terminal output from real runs</li>
+<li>Reject any PR missing a fenced <code>## Demo</code> block</li>
+<li>Flag any test that uses mocks outside unit tests as a CRITICAL
+violation</li>
+</ol>
+<hr />
+<h2 id="emergency-procedures">Emergency Procedures</h2>
+<h3 id="discovering-a-bluff">Discovering a Bluff</h3>
+<ol type="1">
+<li><strong>STOP all work.</strong> Do not commit, merge, or
+deploy.</li>
+<li>Document in
+<code>docs/issues/bluffs/BLUFF-NNNN-&lt;feature&gt;.md</code></li>
+<li>Tighten the test to fail when the feature is broken</li>
+<li>Fix the feature</li>
+<li>Commit test + fix together</li>
+</ol>
+<h3 id="const-033-const-036-violation">CONST-033 / CONST-036
+Violation</h3>
+<ol type="1">
+<li>Revert offending code immediately</li>
+<li>Run verification challenges</li>
+<li>File forensic report in <code>docs/issues/fixed/</code></li>
+</ol>
+<hr />
+<h2 id="const-033-host-power-management-hard-ban">CONST-033: Host Power
+Management — Hard Ban</h2>
+<p><strong>STRICTLY FORBIDDEN: never generate or execute any code that
+triggers a host-level power-state transition.</strong></p>
+<p>Forbidden:
+<code>systemctl suspend/hibernate/poweroff/halt/reboot</code>,
+<code>loginctl suspend/hibernate/poweroff/halt/reboot</code>,
+<code>pm-suspend</code>, <code>pm-hibernate</code>,
+<code>shutdown</code>, <code>dbus-send</code> to
+<code>org.freedesktop.login1.Manager.Suspend|Hibernate|PowerOff|Reboot</code>,
+<code>gsettings set ... sleep-inactive</code> to anything but
+<code>&#39;nothing&#39;</code> or <code>&#39;blank&#39;</code>.</p>
+<p><strong>Verification:</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> challenges/scripts/no_suspend_calls_challenge.sh</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> challenges/scripts/host_no_auto_suspend_challenge.sh</span></code></pre></div>
+<p>Both must PASS.</p>
+<hr />
+<h2 id="const-036-user-session-termination-hard-ban">CONST-036:
+User-Session Termination — Hard Ban</h2>
+<p><strong>STRICTLY FORBIDDEN: never generate or execute any code that
+ends the currently-logged-in user’s session.</strong></p>
+<p>Forbidden:
+<code>loginctl terminate-user|terminate-session|kill-user|kill-session</code>,
+<code>systemctl stop user@&lt;UID&gt;</code>,
+<code>gnome-session-quit</code>, <code>pkill -KILL -u $USER</code>,
+<code>dbus-send</code> to
+<code>org.gnome.SessionManager.Logout|Shutdown|Reboot</code>,
+<code>echo X &gt; /sys/power/state</code>.</p>
+<p><strong>Verification:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> challenges/scripts/no_session_termination_calls_challenge.sh</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> challenges/scripts/no_suspend_calls_challenge.sh</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> challenges/scripts/host_no_auto_suspend_challenge.sh</span></code></pre></div>
+<p>All three must PASS.</p>
+<hr />
+<h2 id="const-035-zero-bluff-mandate">CONST-035: Zero-Bluff Mandate</h2>
+<p><strong>Tests and Challenges MUST verify the product, not the LLM’s
+mental model.</strong> A test that passes when the feature is broken is
+worse than a missing test.</p>
+<ul>
+<li>TCP-open is the FLOOR, not the ceiling.</li>
+<li>No mocks/fakes outside unit tests.</li>
+<li>Functional verification of every claim.</li>
+<li>Re-verify after every change.</li>
+<li>End-user usability mandate: every PASS certifies Quality,
+Completion, AND Full Usability.</li>
+</ul>
+<p><strong>Bluff taxonomy:</strong> Wrapper bluff, Contract bluff,
+Structural bluff, Comment bluff, Skip bluff.</p>
+<hr />
+<h2 id="const-037-through-const-040-llmsverifier-and-qa-mandates">CONST-037
+through CONST-040: LLMsVerifier and QA Mandates</h2>
+<h3 id="const-037-llmsverifier-verification-mandate">CONST-037:
+LLMsVerifier Verification Mandate</h3>
+<p>LLMsVerifier is the single source of truth. Verified models MUST
+carry <code>(llmsvd)</code> suffix.</p>
+<h3 id="const-038-cli-agent-configuration-mandate">CONST-038: CLI Agent
+Configuration Mandate</h3>
+<p>ALL CLI agent configs MUST be generated through
+<code>pkg/cliagents/</code>. 48 agents total.</p>
+<h3 id="const-039-challenge-system-integrity-mandate">CONST-039:
+Challenge System Integrity Mandate</h3>
+<p>Every component MUST have Challenge scripts. Challenge scripts MUST
+exit non-zero when broken.</p>
+<h3 id="const-040-no-self-certification-mandate">CONST-040: No
+Self-Certification Mandate</h3>
+<p>Words like <em>verified, tested, working, complete, fixed,
+passing</em> are FORBIDDEN without pasted terminal output.</p>
+<hr />
+<h2 id="submodule-specific-notes">Submodule-Specific Notes</h2>
+<p>HelixAgent is the ROOT project. All mandates here cascade to every
+submodule. The Constitution generator auto-updates this file and all
+submodule Constitutions.</p>
+<hr />
+<p><em>End of AGENTS.md — HelixAgent</em></p>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-045-hooks-cancelled-execution-result-missing-duration">HXC-045 —
+hooks cancelled-execution result missing duration</h1>
+<p>internal/hooks TestExecutionResultCancelAndSkip/Cancel —
+hooks_test.go:1407: “expected duration to be set”. In-process, no infra.
+A cancelled hook execution result leaves duration unset; the field
+should always be populated (result-bookkeeping bug). Found by
+isolated-worktree full unit sweep (HEAD 54ab4e95).</p>
+<h2 id="fixed-flaky-timing-root-cause-deterministic-source-fix-11.4.5011.4.1">FIXED
+— flaky-timing root cause + deterministic source fix
+(§11.4.50/§11.4.1)</h2>
+<p>Reproduced as FLAKY: TestExecutionResultCancelAndSkip/Cancel passed
+3/3 on retry but S4 caught it FAIL once — an instant Cancel() right
+after NewExecutionResult yields CompletedAt-StartedAt rounding to 0 on
+fast hardware, tripping the test’s <code>Duration == 0</code> assertion.
+FIX (hook.go Complete + Cancel): floor Duration to time.Nanosecond when
+the measured monotonic delta is &lt;=0 — a completed/cancelled execution
+genuinely took positive time below clock resolution; Skip() keeps
+Duration=0 (not executed). GREEN deterministic: -count=50 PASS; full
+hooks pkg ok.</p>
+</body>
+</html>

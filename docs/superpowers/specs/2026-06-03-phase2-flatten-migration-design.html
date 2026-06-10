@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-03-phase2-flatten-migration-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-03-phase2-flatten-migration-design</h1>
+</header>
+<h1 id="phase-2-flatten-own-org-submodules-to-submodulesleaf-rewrite-refs-design-migration-map">Phase
+2 — Flatten own-org submodules to <code>submodules/&lt;leaf&gt;</code> +
+rewrite refs (Design / Migration Map)</h1>
+<p><strong>Date:</strong> 2026-06-03 <strong>Status:</strong> Approved
+(operator decisions 2026-06-03) — execution authorized, subagent-driven,
+incremental with build verification. <strong>Risk:</strong> VERY HIGH /
+hard-to-reverse. Restore anchor:
+<code>docs/migration/phase0-restore-manifest-2026-06-03.txt</code>.</p>
+<h2 id="operator-decisions-2026-06-03">Operator decisions
+(2026-06-03)</h2>
+<ol type="1">
+<li><strong>Drop</strong> the 4 unused vasic-digital forks
+(<code>doc_processor</code>, <code>llm_orchestrator</code>,
+<code>llm_provider</code>, <code>vision_engine</code>) — build consumes
+the HelixDevelopment forks. Also drop the duplicate <strong>HD
+<code>models</code></strong> mount (true dup of vd/models). Upstream
+repos remain intact; only the submodule mounts are removed.</li>
+<li><strong>Keep <code>constitution</code> at
+<code>./constitution/</code></strong> — exempt from flattening
+(governance root reached by path-relative <code>@import</code> +
+name-hardcoded resolver). No constitution reference rewrite needed.</li>
+</ol>
+<h2 id="target-layout">Target layout</h2>
+<p>Every own-org submodule EXCEPT <code>constitution</code> (and except
+third-party, which stay nested) lives at
+<code>submodules/&lt;snake_case_leaf&gt;</code>. Inner Go app
+<code>helix_code/</code> stays put (it is a tracked subdir, NOT a
+submodule).</p>
+<h3 id="drop-5-mounts-git-submodule-deinit--f-git-rm-delete-.gitmodulespath-remove-.gitmodules-stanza">DROP
+(5 mounts — <code>git submodule deinit -f</code> + <code>git rm</code> +
+delete <code>.git/modules/&lt;path&gt;</code> + remove
+<code>.gitmodules</code> stanza)</h3>
+<ul>
+<li><code>submodules/models</code> (dup of vd/models)</li>
+<li><code>submodules/doc_processor</code></li>
+<li><code>submodules/llm_orchestrator</code></li>
+<li><code>submodules/llm_provider</code></li>
+<li><code>submodules/vision_engine</code></li>
+</ul>
+<h3 id="move-submodulesleaf-65-total">MOVE →
+<code>submodules/&lt;leaf&gt;</code> (65 total)</h3>
+<ul>
+<li><strong>Top-level (8):</strong> challenges, containers, security,
+panoptic, github_pages_website, helix_agent, helix_qa, mcp_servers</li>
+<li><strong>HelixDevelopment kept (9):</strong> doc_processor,
+llm_orchestrator, llm_provider, vision_engine, llms_verifier,
+helix_memory, helix_specifier, helix_llm, debate_orchestrator</li>
+<li><strong>vasic-digital kept (48):</strong> models + the 47 others
+(agentic, auth, auto_temp, background_tasks, benchmark, cache, claritas,
+concurrency, config, conversation, database, document, embeddings,
+event_bus, filesystem, formatters, gandalf_solutions, hyper_tune, i18n,
+i_llm, lazy, leak_hub, llm_ops, mcp_module, memory, messaging,
+middleware, normalize, observability, optimization, ouroborous,
+planning, plinius_common, plugins, rag, rate_limiter, recovery,
+red_team, self_improve, skill_registry, storage, streaming, tool_schema,
+toon, vector_db, veritas, watcher)</li>
+</ul>
+<p>Canonical winners for the 5 collision leaves:
+<code>submodules/models</code> ← vd;
+<code>submodules/{doc_processor,llm_orchestrator,llm_provider,vision_engine}</code>
+← HD.</p>
+<h2 id="go.mod-replace-rewrites-62-lines-build-critical-rule-by-consumer-location">go.mod
+replace rewrites (62 lines / build-critical) — rule by consumer
+location</h2>
+<p>Relative <code>replace</code> targets recompute by where the
+CONSUMING go.mod sits after the move: -
+<strong><code>helix_code/go.mod</code></strong> (stays at
+<code>helix_code/</code>, depth-1): <code>../dependencies/{org}/X</code>
+→ <code>../submodules/X</code>. (6 lines: docprocessor, llmorchestrator,
+visionengine, debate→debate_orchestrator, helixspecifier, lazy.) -
+<strong><code>helix_agent/go.mod</code></strong> (moves to
+<code>submodules/helix_agent/</code>): siblings under
+<code>submodules/</code> → <code>../dependencies/{org}/X</code> →
+<code>../X</code>; <code>../submodules/llms_verifier/llm-verifier</code>
+→ <code>../llms_verifier/llm-verifier</code>. (37 lines.) -
+<strong><code>helix_qa/go.mod</code></strong> (moves to
+<code>submodules/helix_qa/</code>): its existing sibling-form
+<code>../X</code> block already resolves correctly once both it and X
+are siblings under <code>submodules/</code>. Normalize the dual
+capital/lowercase blocks to ONE lowercase block; fix the
+<code>LLMsVerifier</code>→<code>llms_verifier</code> casing mismatch
+(line 130). Net: <code>../Challenges</code>→<code>../challenges</code>,
+<code>../DocProcessor</code>→<code>../doc_processor</code>, etc.;
+<code>../submodules/llms_verifier/llm-verifier</code>→<code>../llms_verifier/llm-verifier</code>.
+- <strong><code>submodules/llms_verifier/go.mod</code></strong> (moves
+to <code>submodules/llms_verifier/</code>): <code>../challenges</code> →
+<code>../challenges</code> (still sibling — OK; verify). -
+<strong>Archived copies under
+<code>docs/improvements/**/helixcode_sources/go.mod</code></strong> —
+not part of active build; leave (or update for tidiness, L-risk).</p>
+<h2 id="other-reference-rewrites">Other reference rewrites</h2>
+<ul>
+<li><strong><code>.gitmodules</code></strong>: 70 own-org
+<code>path=</code>/<code>url</code> stanzas → <code>git mv</code>
+updates them; the 5 drops removed; constitution stanza UNCHANGED.</li>
+<li><strong><code>.codegraph/config.json</code></strong>: own-org paths
+now under <code>submodules/</code> must stay in-index per §11.4.79
+(they’re in-scope by absence of exclusion; verify globs still cover
+<code>submodules/</code>). Re-index after.</li>
+<li><strong>Shell scripts (541 files / 1217 lines)</strong> +
+<strong>configs (122/313)</strong> referencing
+<code>dependencies/{org}/X</code> or top-level own-org dirs → rewrite to
+<code>submodules/X</code>. Highest-volume but mechanical; do via
+scripted sed with an explicit old→new map, then grep-verify zero stale
+refs.</li>
+<li><strong>Markdown (1144/12296)</strong> → rewrite for reference
+integrity (CONST-052 treats post-rename drift as a violation);
+regenerate <code>.html</code>/<code>.pdf</code> siblings if exporter
+present.</li>
+</ul>
+<h2 id="execution-order-incremental-build-verified-before-commit">Execution
+order (incremental, build-verified BEFORE commit)</h2>
+<ol type="1">
+<li><code>mkdir submodules/</code>. Relocate the 65 via
+<code>git mv &lt;old&gt; submodules/&lt;leaf&gt;</code> (git updates
+<code>.gitmodules</code> + <code>.git/config</code>). Drop the 5
+mounts.</li>
+<li>Rewrite the 62 go.mod replaces per rules above; fix helix_qa
+casing/dup-block.</li>
+<li>Rewrite scripts/configs/.codegraph via scripted old→new map;
+grep-verify no stale
+<code>dependencies/vasic-digital|dependencies/HelixDevelopment</code>
+own-org refs remain (excluding third-party + archived).</li>
+<li>Rewrite markdown refs; regenerate exports.</li>
+<li><strong>VERIFY (gate before any commit):</strong>
+<code>cd helix_code &amp;&amp; go build ./... &amp;&amp; go vet ./...</code>;
+same for helix_agent, helix_qa where buildable. Reference-integrity grep
+= 0 stale. Only on green → commit.</li>
+<li>Commit meta-repo (path moves + .gitmodules + .codegraph +
+scripts/docs) + each changed submodule (helix_agent/helix_qa go.mod) →
+push all to all upstreams.</li>
+<li>CONTINUATION close-out; update
+<code>docs/improvements/submodule_owned.txt</code> paths; HXC-001
+(CONST-052 rename) closure.</li>
+</ol>
+<h2 id="rollback">Rollback</h2>
+<p>Restore manifest pins every pre-move SHA + remote. A broken build at
+step 5 → <code>git restore</code>/<code>git checkout -- .</code> +
+<code>git submodule update</code> before any commit; nothing is pushed
+until build is green.</p>
+</body>
+</html>

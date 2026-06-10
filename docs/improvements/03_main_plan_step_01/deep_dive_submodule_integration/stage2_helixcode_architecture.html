@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage2_helixcode_architecture</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage2_helixcode_architecture</h1>
+</header>
+<h1 id="helixcode-internal-architecture---comprehensive-technical-analysis">HelixCode
+Internal Architecture - Comprehensive Technical Analysis</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>HelixCode is a <strong>Go-based enterprise AI development
+platform</strong> built around a sophisticated multi-agent system with
+29+ LLM provider integrations, distributed computing capabilities, and a
+zero-tolerance security posture. The architecture follows a
+<strong>layered, modular design</strong> with clear separation between
+CLI entry points, core internal packages, application frontends, and API
+services.</p>
+<p><strong>Key Architectural Characteristics:</strong> -
+<strong>Language</strong>: Go 1.26 with ~60+ internal packages -
+<strong>Module</strong>: <code>dev.helix.code</code> - <strong>CLI
+Framework</strong>: Cobra + Viper for configuration - <strong>HTTP
+Framework</strong>: Gin with JWT auth, CORS, security middleware -
+<strong>Database</strong>: PostgreSQL (pgx) with Redis caching -
+<strong>External Dependencies</strong>: Fyne (desktop), tview
+(terminal), chromedp (browser), tree-sitter (parsing)</p>
+<hr />
+<h2 id="cmd-directory---cli-entry-points-commands">1. CMD/ Directory -
+CLI Entry Points &amp; Commands</h2>
+<h3 id="architecture-pattern">1.1 Architecture Pattern</h3>
+<p><strong>Pattern</strong>: Cobra Command Pattern with subcommand
+hierarchy</p>
+<h3 id="key-files-structure">1.2 Key Files &amp; Structure</h3>
+<pre><code>cmd/
+├── cli/main.go          - CLI client entry point
+├── root.go              - Root cobra command definition
+├── server/main.go       - HTTP server entry point
+├── server/main_test.go  - Server tests
+├── security-fix/        - Standalone security fix utility
+├── security-fix-standalone/
+├── security-test/       - Security testing utility</code></pre>
+<h3 id="key-types-interfaces">1.3 Key Types &amp; Interfaces</h3>
+<p><strong>Root Command</strong> (<code>cmd/root.go</code>):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> rootCmd <span class="op">=</span> <span class="op">&amp;</span>cobra<span class="op">.</span>Command<span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    Use<span class="op">:</span>   <span class="st">&quot;helix&quot;</span><span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Short<span class="op">:</span> <span class="st">&quot;HelixCode - Enterprise AI Development Platform&quot;</span><span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Long<span class="op">:</span>  <span class="st">&quot;HelixCode is the world&#39;s most advanced enterprise AI development platform...&quot;</span><span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Version<span class="op">:</span> <span class="st">&quot;1.0.0&quot;</span><span class="op">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><strong>Global Flags</strong>: <code>--config</code>,
+<code>--debug</code>, <code>--log-level</code></li>
+<li><strong>Config Integration</strong>: Viper with automatic env
+binding (<code>HELIX_*</code> prefix)</li>
+<li><strong>Config Search Paths</strong>:
+<code>$HOME/.helix.yaml</code>, <code>./config/</code>,
+<code>/etc/helixcode/</code></li>
+</ul>
+<h3 id="cli-agent-features-implemented">1.4 CLI Agent Features
+Implemented</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root command with version</td>
+<td>✅</td>
+<td>Cobra rootCmd</td>
+</tr>
+<tr>
+<td>Global config flag</td>
+<td>✅</td>
+<td><code>--config</code> with viper</td>
+</tr>
+<tr>
+<td>Debug/logging flags</td>
+<td>✅</td>
+<td><code>--debug</code>, <code>--log-level</code></td>
+</tr>
+<tr>
+<td>Server mode</td>
+<td>✅</td>
+<td><code>cmd/server/main.go</code></td>
+</tr>
+<tr>
+<td>Security utilities</td>
+<td>✅</td>
+<td><code>cmd/security_fix/</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="whats-missing-vs-state-of-the-art">1.5 What’s Missing vs
+State-of-the-Art</h3>
+<ul>
+<li><strong>Missing</strong>: Interactive chat REPL loop (only basic
+command structure)</li>
+<li><strong>Missing</strong>: Auto-completion for file paths in CLI</li>
+<li><strong>Missing</strong>: Rich TUI dashboard in CLI mode (only
+separate terminal-ui app)</li>
+<li><strong>Missing</strong>: Inline editing commands
+(<code>/edit</code>, <code>/add</code>, <code>/drop</code>)</li>
+</ul>
+<hr />
+<h2 id="internal-directory---core-packages">2. INTERNAL/ Directory -
+Core Packages</h2>
+<h3 id="agent---multi-agent-orchestration-system">2.1 AGENT/ -
+Multi-Agent Orchestration System</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Actor Model + Registry
+Pattern + Circuit Breaker</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Core Agent Interface</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Agent <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">()</span> <span class="dt">string</span><span class="op">;</span> Type<span class="op">()</span> AgentType<span class="op">;</span> Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Capabilities<span class="op">()</span> <span class="op">[]</span>Capability</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    CanHandle<span class="op">(</span>task <span class="op">*</span>task<span class="op">.</span>Task<span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task <span class="op">*</span>task<span class="op">.</span>Task<span class="op">)</span> <span class="op">(*</span>task<span class="op">.</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    Collaborate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> agents <span class="op">[]</span>Agent<span class="op">,</span> task <span class="op">*</span>task<span class="op">.</span>Task<span class="op">)</span> <span class="op">(*</span>CollaborationResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    Initialize<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> config <span class="op">*</span>AgentConfig<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    Shutdown<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    Status<span class="op">()</span> AgentStatus<span class="op">;</span> Health<span class="op">()</span> <span class="op">*</span>HealthCheck</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Agent Types</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>AgentTypePlanning <span class="op">|</span> AgentTypeCoding <span class="op">|</span> AgentTypeTesting <span class="op">|</span> AgentTypeDebugging</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>AgentTypeReview <span class="op">|</span> AgentTypeRefactoring <span class="op">|</span> AgentTypeDocumentation <span class="op">|</span> AgentTypeCoordinator</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">// Collaboration System</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>CollaborationResult <span class="op">{</span> Success<span class="op">,</span> Results<span class="op">,</span> Consensus<span class="op">,</span> Conflicts<span class="op">,</span> Messages <span class="op">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>CollaborationMessage <span class="op">{</span> ID<span class="op">,</span> From<span class="op">,</span> To<span class="op">,</span> Type<span class="op">,</span> Content<span class="op">,</span> Timestamp <span class="op">}</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>Conflict <span class="op">{</span> ID<span class="op">,</span> Agents<span class="op">,</span> Issue<span class="op">,</span> Proposals<span class="op">,</span> Resolution <span class="op">}</span></span></code></pre></div>
+<p><strong>BaseAgent Implementation</strong>
+(<code>internal/agent/base_agent.go</code>): - <strong>Task
+Queue</strong>: Buffered channel (100 tasks) - <strong>Result
+Channel</strong>: Buffered channel (100 results) -
+<strong>Concurrency</strong>: Configurable maxConcurrency (default: 1) -
+<strong>Timeout</strong>: Configurable (default: 30s) -
+<strong>Retry</strong>: Configurable retryCount (default: 3) -
+<strong>Statistics</strong>: tasksProcessed, tasksSucceeded,
+tasksFailed, totalDuration - <strong>LLM Integration</strong>: Optional
+llm.Provider + tools.ToolRegistry - <strong>Collaboration
+Logic</strong>: Built-in inter-agent collaboration with type-based
+routing: - CodingAgent → ReviewAgent (code review) - CodingAgent →
+TestingAgent (test generation) - DebuggingAgent → TestingAgent
+(verification) - ReviewAgent → RefactoringAgent (issue addressing) -
+PlanningAgent → PlanningAgent (consensus)</p>
+<p><strong>Coordinator</strong>
+(<code>internal/agent/coordinator.go</code>): -
+<strong>Registry</strong>: AgentRegistry with mutex-protected map -
+<strong>Task Assignment</strong>: findSuitableAgent() - first idle agent
+with matching capabilities - <strong>Resilience</strong>:
+CircuitBreakerManager + RetryPolicy - <strong>Workflow
+Execution</strong>: WorkflowExecutor integration - <strong>Health
+Monitoring</strong>: Per-agent circuit breaker state tracking</p>
+<p><strong>Task System</strong> (<code>internal/agent/task/</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Task <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Title<span class="op">,</span> Description <span class="dt">string</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Type TaskType <span class="co">// planning, code_generation, code_edit, testing, debugging, review, refactoring, documentation, analysis</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Priority Priority <span class="co">// 1-4</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Input <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    RequiredCapabilities <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Dependencies <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Agent Types Directory</strong>
+(<code>internal/agent/types/</code>): - <code>coding_agent.go</code> -
+Code generation and editing - <code>debugging_agent.go</code> - Error
+analysis and fixing - <code>planning_agent.go</code> - Technical
+planning and architecture - <code>review_agent.go</code> - Code review
+and quality assessment - <code>testing_agent.go</code> - Test generation
+and execution</p>
+<h3 id="llm---llm-provider-integration-29-providers">2.2 LLM/ - LLM
+Provider Integration (29+ Providers)</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Factory Pattern +
+Strategy Pattern + Registry Pattern</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Provider Interface</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Provider <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    GetType<span class="op">()</span> ProviderType</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    GetName<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">[]</span>ModelInfo</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    GetHealth<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>ProviderHealth<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">// LLMRequest/Response</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>LLMRequest <span class="op">{</span> Model<span class="op">,</span> Messages<span class="op">,</span> MaxTokens<span class="op">,</span> Temperature<span class="op">,</span> Tools <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>LLMResponse <span class="op">{</span> Content<span class="op">,</span> Usage<span class="op">,</span> Model<span class="op">,</span> FinishReason <span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">// Model Selection Criteria</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>ModelSelectionCriteria <span class="op">{</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    TaskType<span class="op">,</span> RequiredCapabilities<span class="op">,</span> MaxTokens<span class="op">,</span> Budget<span class="op">,</span> LatencyRequirement<span class="op">,</span> QualityPreference</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Supported Providers</strong> (from
+<code>internal/llm/factory.go</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Cloud Providers</th>
+<th>Local Providers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td>Ollama</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>LlamaCpp</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td>VLLM</td>
+</tr>
+<tr>
+<td>Azure</td>
+<td>LocalAI</td>
+</tr>
+<tr>
+<td>AWS Bedrock</td>
+<td>FastChat</td>
+</tr>
+<tr>
+<td>Vertex AI</td>
+<td>TextGen</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td>LMStudio</td>
+</tr>
+<tr>
+<td>XAI (Grok)</td>
+<td>Jan</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td>GPT4All</td>
+</tr>
+<tr>
+<td>Copilot</td>
+<td>TabbyAPI</td>
+</tr>
+<tr>
+<td>Qwen</td>
+<td>MLX</td>
+</tr>
+<tr>
+<td></td>
+<td>MistralRS</td>
+</tr>
+<tr>
+<td></td>
+<td>KoboldAI</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Model Manager</strong>
+(<code>internal/llm/model_manager.go</code>): - <strong>Scoring
+Algorithm</strong>: Multi-criteria model scoring (capability match,
+token fit, budget, latency, quality) - <strong>Hardware
+Integration</strong>: Hardware detector for local model selection -
+<strong>Verifier Integration</strong>: Score-augmented selection via
+verifier.Adapter - <strong>Health Checks</strong>: Per-provider health
+monitoring</p>
+<p><strong>AutoLLM Manager</strong>
+(<code>internal/llm/auto_llm_manager.go</code>): - <strong>Zero-Touch
+Configuration</strong>: Auto-discover, auto-install, auto-configure,
+auto-start, auto-monitor, auto-update - <strong>Health
+Monitoring</strong>: Auto-recovery with configurable retries -
+<strong>Performance Optimization</strong>: Auto-optimize, load balance,
+cache responses, predict scaling - <strong>Security</strong>:
+Auto-sandbox, min privileges, network isolation, resource limits</p>
+<p><strong>Load Balancer</strong>
+(<code>internal/llm/load_balancer.go</code>): -
+<strong>Strategies</strong>: round_robin, least_connections,
+response_time, weighted, performance_based - <strong>Statistics
+Collection</strong>: Per-provider request counts, response times, error
+rates - <strong>Optimal Provider Detection</strong>: Continuous
+performance-based selection</p>
+<p><strong>Compression System</strong>
+(<code>internal/llm/compression/</code>): - Context compression with
+configurable strategies - Retention policies for important context -
+Token budget management</p>
+<p><strong>Vision Support</strong> (<code>internal/llm/vision/</code>):
+- Vision model detection and switching - Config-based vision provider
+management - Verifier synchronization</p>
+<p><strong>Cross-Provider Registry</strong>
+(<code>internal/llm/cross_provider_registry.go</code>): - Unified model
+naming across providers - Provider-agnostic model resolution - Fallback
+model chains</p>
+<h3 id="tools---tool-framework">2.3 TOOLS/ - Tool Framework</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Plugin Registry +
+Unified Tool Interface</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Tool <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    Schema<span class="op">()</span> ToolSchema</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    Category<span class="op">()</span> ToolCategory</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ToolRegistry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    tools   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>Tool</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    aliases <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Component instances</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    filesystem   <span class="op">*</span>filesystem<span class="op">.</span>FileSystemTools</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    shell        <span class="op">*</span>shell<span class="op">.</span>ShellExecutor</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    web          <span class="op">*</span>web<span class="op">.</span>WebTools</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    browser      <span class="op">*</span>browser<span class="op">.</span>BrowserTools</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    mapper       mapping<span class="op">.</span>Mapper</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    multiEdit    <span class="op">*</span>multiedit<span class="op">.</span>MultiFileEditor</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    confirmation <span class="op">*</span>confirmation<span class="op">.</span>ConfirmationCoordinator</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Tool Categories</strong>: | Category | Tools | Description |
+|———-|——-|————-| | Filesystem | FSRead, FSWrite, FSEdit, Glob, Grep |
+File operations | | Shell | Shell, ShellBackground, ShellOutput,
+ShellKill | Command execution | | Web | WebFetch, WebSearch | Web
+scraping and search | | Browser | BrowserLaunch, BrowserNavigate,
+BrowserScreenshot, BrowserClose | ChromeDP-based | | Mapping |
+CodebaseMap, FileDefinitions | Code analysis via tree-sitter | |
+MultiEdit | MultiEditBegin, MultiEditAdd, MultiEditPreview,
+MultiEditCommit | Atomic multi-file edits | | Interactive | AskUser,
+TaskTracker | User interaction | | Notebook | NotebookRead, NotebookEdit
+| Jupyter-like notebooks |</p>
+<p><strong>Key Innovations</strong>: - <strong>MultiEdit</strong>:
+Atomic multi-file editing with transaction support -
+<strong>Confirmation System</strong>: Danger-level policies with audit
+trails (<code>internal/tools/confirmation/</code>) - <strong>Browser
+Automation</strong>: ChromeDP-based with screenshot capture -
+<strong>Code Mapping</strong>: Tree-sitter based code analysis for
+accurate edits</p>
+<h3 id="commands---slash-command-system">2.4 COMMANDS/ - Slash Command
+System</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Command Pattern +
+Registry</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> Command <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    Usage<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cmdCtx <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CommandContext <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    UserID<span class="op">,</span> SessionID<span class="op">,</span> ProjectID <span class="dt">string</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    Args <span class="op">[]</span><span class="dt">string</span><span class="op">;</span> Flags <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    RawInput <span class="dt">string</span><span class="op">;</span> ChatHistory <span class="op">[]</span>ChatMessage</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    WorkingDir <span class="dt">string</span><span class="op">;</span> Metadata <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CommandResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    Success <span class="dt">bool</span><span class="op">;</span> Message <span class="dt">string</span><span class="op">;</span> Data <span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    Actions <span class="op">[]</span>Action<span class="op">;</span> ShouldReply <span class="dt">bool</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Built-in Commands</strong>
+(<code>internal/commands/builtin/</code>): - <code>condense.go</code> -
+Context condensation - <code>deepplanning.go</code> - Deep planning mode
+- <code>newrule.go</code> - Rule creation - <code>newtask.go</code> -
+Task creation - <code>reportbug.go</code> - Bug reporting -
+<code>workflows.go</code> - Workflow management</p>
+<h3 id="context---context-management">2.5 CONTEXT/ - Context
+Management</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Hierarchical Context
+Store + TTL Expiration</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ContextManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    items    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>ContextItem</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    sessions <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>SessionContext</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    projects <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>ProjectContext</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    global   <span class="op">*</span>GlobalContext</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ContextItem <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Type<span class="op">,</span> Key <span class="dt">string</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    Value <span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    Metadata <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    Timestamp time<span class="op">.</span>Time</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    TTL <span class="op">*</span>time<span class="op">.</span>Duration</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    Source <span class="dt">string</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    Priority <span class="dt">int</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - <strong>Hierarchical Scopes</strong>:
+File → Session → Project → Global - <strong>TTL Expiration</strong>:
+Automatic cleanup of expired items (5-minute ticker) -
+<strong>Search</strong>: Key pattern matching within context types -
+<strong>Version Control</strong>: Context item versioning for conflict
+resolution</p>
+<p><strong>Context Builder</strong>
+(<code>internal/context/builder.go</code>): - Template-based context
+assembly - Source aggregation (files, git, URLs, terminal output) -
+Mention system for file/folder/git/problem/URL/terminal references</p>
+<h3 id="memory---memory-conversation-system">2.6 MEMORY/ - Memory &amp;
+Conversation System</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Conversation Manager +
+Callback Events</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    conversations    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Conversation</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    activeConv       <span class="op">*</span>Conversation</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    maxMessages      <span class="dt">int</span>    <span class="co">// 1000 default</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    maxTokens        <span class="dt">int</span>    <span class="co">// 100000 default (~25K words)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    maxConversations <span class="dt">int</span>    <span class="co">// 100 default</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    onCreate  <span class="op">[]</span>ConversationCallback</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    onMessage <span class="op">[]</span>MessageCallback</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    onClear   <span class="op">[]</span>ConversationCallback</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    onDelete  <span class="op">[]</span>ConversationCallback</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - <strong>Conversation Lifecycle</strong>:
+Create, get, set active, delete, clear, import, export - <strong>Message
+Management</strong>: Add with automatic limit enforcement -
+<strong>Token Management</strong>: Automatic truncation at 75% of
+maxTokens - <strong>Search</strong>: Full-text search across
+conversations and messages - <strong>Version Control</strong>:
+Optimistic concurrency with conflict resolution (overwrite/merge
+strategies) - <strong>Statistics</strong>: Per-conversation and
+aggregate metrics - <strong>Snapshot Support</strong>: Export/import
+conversation snapshots</p>
+<p><strong>Memory Providers</strong>
+(<code>internal/memory/providers/</code>): | Provider | Type | |———-|——|
+| Mem0 | Memory layer | | Zep | Long-term memory | | Memonto | Memory
+management | | BaseAI | AI-native memory | | ChromaDB | Vector store | |
+FAISS | Vector search | | Pinecone | Cloud vector DB | | Qdrant | Vector
+DB | | Weaviate | Vector search engine | | Anima | Character memory | |
+CharacterAI | Personality memory |</p>
+<h3 id="database---data-persistence">2.7 DATABASE/ - Data
+Persistence</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Interface + PostgreSQL
+Implementation + Mock Layer</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> DatabaseInterface <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Connection management</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    Connect<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    Close<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    HealthCheck<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// CRUD operations</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    Query<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sql <span class="dt">string</span><span class="op">,</span> args <span class="op">...</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span>Rows<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sql <span class="dt">string</span><span class="op">,</span> args <span class="op">...</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Transactions</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    BeginTx<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span>Transaction<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Mock System</strong>: - <code>mock_database.go</code> - Full
+database mock - <code>mock_row.go</code>, <code>mock_rows.go</code> -
+Row mocking - <code>mock_helpers.go</code> - Test utilities</p>
+<h3 id="auth---authentication">2.8 AUTH/ - Authentication</h3>
+<p><strong>Architecture Pattern</strong>: <strong>JWT-based Auth Service
++ Database-backed</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuthService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    config AuthConfig</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    db     <span class="op">*</span>AuthDB</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuthConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    JWTSecret     <span class="dt">string</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    TokenExpiry   time<span class="op">.</span>Duration</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    SessionExpiry time<span class="op">.</span>Duration</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    BcryptCost    <span class="dt">int</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - JWT token generation and verification -
+Session management with expiry - Bcrypt password hashing -
+Database-backed user storage</p>
+<h3 id="server---http-api-server">2.9 SERVER/ - HTTP API Server</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Gin Router +
+Dependency Injection + Middleware Chain</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Server <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    config         <span class="op">*</span>config<span class="op">.</span>Config</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    db             <span class="op">*</span>database<span class="op">.</span>Database</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    redis          <span class="op">*</span>redis<span class="op">.</span>Client</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    auth           <span class="op">*</span>auth<span class="op">.</span>AuthService</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    mcp            <span class="op">*</span>mcp<span class="op">.</span>MCPServer</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    notification   <span class="op">*</span>notification<span class="op">.</span>NotificationEngine</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    taskManager    <span class="op">*</span>task<span class="op">.</span>DatabaseManager</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    workerManager  <span class="op">*</span>worker<span class="op">.</span>DatabaseManager</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    projectManager <span class="op">*</span>project<span class="op">.</span>DatabaseManager</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    sessionManager <span class="op">*</span>session<span class="op">.</span>Manager</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    verifierResult <span class="op">*</span>verifier<span class="op">.</span>BootstrapResult</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    qaEngine       <span class="op">*</span>helixqa<span class="op">.</span>Engine</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    router         <span class="op">*</span>gin<span class="op">.</span>Engine</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Route Structure</strong>:</p>
+<pre><code>/health                          - Health check (public)
+/api/v1/
+  /auth/register, /login, /logout, /refresh
+  /users/me
+  /workers/ (CRUD + heartbeat + metrics)
+  /tasks/ (CRUD + assign + start + complete + fail + checkpoint + retry)
+  /projects/ (CRUD + sessions + workflows)
+  /sessions/ (CRUD)
+  /llm/providers, /llm/models
+  /memory/systems, /memory/stats
+  /qa/session (QA testing)
+  /screenshot/:platform
+  /system/stats, /system/status
+  /server/info, /metrics
+/ws                              - WebSocket for MCP
+/static                          - Static web frontend</code></pre>
+<p><strong>Middleware Stack</strong>: 1. Gin Logger 2. Gin Recovery 3.
+CORS Middleware 4. Security Middleware (X-Content-Type-Options,
+X-Frame-Options, HSTS) 5. JWT Auth Middleware (Bearer token
+verification)</p>
+<h3 id="worker---distributed-computing">2.10 WORKER/ - Distributed
+Computing</h3>
+<p><strong>Architecture Pattern</strong>: <strong>SSH-based Worker Pool
++ Consensus</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    workers      <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Worker</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    sshPool      <span class="op">*</span>SSHPool</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    consensus    <span class="op">*</span>ConsensusEngine</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    isolation    <span class="op">*</span>IsolationManager</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    memoryRepo   <span class="op">*</span>MemoryRepository</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Worker <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Hostname <span class="dt">string</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    Status WorkerStatus <span class="co">// active, inactive, maintenance, failed, offline</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    HealthStatus HealthStatus</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    Resources WorkerResources</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    SSHConfig SSHConfig</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    Capabilities <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    MaxConcurrentTasks <span class="dt">int</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - <strong>SSH Pool</strong>: Connection
+pooling to remote workers - <strong>Health Monitoring</strong>:
+Heartbeat-based with metrics - <strong>Consensus</strong>: Distributed
+consensus engine - <strong>Isolation</strong>: Task isolation between
+workers - <strong>Database Manager</strong>: Persistent worker state in
+PostgreSQL</p>
+<h3 id="workflow---development-workflows">2.11 WORKFLOW/ - Development
+Workflows</h3>
+<p><strong>Architecture Pattern</strong>: <strong>State Machine + Step
+Executor</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Workflow <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Name<span class="op">,</span> Description<span class="op">,</span> Mode <span class="dt">string</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    Steps <span class="op">[]</span>Step</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    Status WorkflowStatus</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Step <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Name<span class="op">,</span> Description <span class="dt">string</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    Type StepType   <span class="co">// analysis, generation, execution, validation</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    Action StepAction <span class="co">// analyze_code, generate_code, execute_command, run_tests, lint_code, build_project</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    Dependencies <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    Status StepStatus</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Workflow Modes</strong>: - <code>autonomy/</code> -
+Autonomous execution with guardrails, escalation, permission system -
+<code>planmode/</code> - Planning mode with executor, planner, mode
+controller - <code>snapshots/</code> - Workflow snapshots with
+comparison, metadata, restore</p>
+<h3 id="editor---editor-integration">2.12 EDITOR/ - Editor
+Integration</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Format Registry + Diff
+Engine</strong></p>
+<p><strong>Supported Edit Formats</strong>
+(<code>internal/editor/formats/</code>): | Format | File | |——–|——| |
+Unified Diff | <code>udiff_format.go</code> | | Search/Replace |
+<code>search_replace_format.go</code> | | Whole File |
+<code>whole_format.go</code> | | Line Numbers |
+<code>line_number_format.go</code> | | Architect |
+<code>architect_format.go</code> | | Ask | <code>ask_format.go</code> |
+| Diff | <code>diff_format.go</code> |</p>
+<p><strong>Editor Implementations</strong>: -
+<code>diff_editor.go</code> - Diff-based editing -
+<code>line_editor.go</code> - Line-number based editing -
+<code>search_replace_editor.go</code> - Search/replace editing -
+<code>whole_editor.go</code> - Whole file replacement</p>
+<h3 id="event---event-system">2.13 EVENT/ - Event System</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Pub/Sub Bus + Instance
+Management</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EventBus <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    subscribers <span class="kw">map</span><span class="op">[</span>EventType<span class="op">][]</span>EventHandler</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - Benchmark-tested event dispatch -
+Instance-based event routing - Typed event handlers</p>
+<h3 id="fix---auto-fix-capabilities">2.14 FIX/ - Auto-Fix
+Capabilities</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Rule-based Fix
+Engine</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FixEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Auto-fix capabilities for common issues</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - Automated error detection and correction
+- Test-driven fix validation</p>
+<h3 id="focus---focus-chain-management">2.15 FOCUS/ - Focus Chain
+Management</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Chain of Focus
+Contexts</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Chain <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Focus chain for maintaining context across operations</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - Focus preservation across operations -
+Context switching management</p>
+<h3 id="hardware---hardware-abstraction">2.16 HARDWARE/ - Hardware
+Abstraction</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Detector
+Pattern</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Detector <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Hardware capability detection</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - GPU detection (count, model, memory) -
+CPU detection (count, capabilities) - Memory detection - Used for local
+LLM model selection</p>
+<h3 id="hooks---hook-system">2.17 HOOKS/ - Hook System</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Hook Registry +
+Executor</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Hook <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">,</span> Description <span class="dt">string</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    Event <span class="dt">string</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    Command <span class="dt">string</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    hooks <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Hook</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    executor <span class="op">*</span>Executor</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - Pre/post event hooks - Configurable hook
+execution - Hook registry management</p>
+<h3 id="repomap---repository-mapping">2.18 REPOMAP/ - Repository
+Mapping</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Tree-sitter Based Code
+Analysis</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RepoMap <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    cache <span class="op">*</span>Cache</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    fileRanker <span class="op">*</span>FileRanker</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    tagExtractor <span class="op">*</span>TagExtractor</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    treeSitter <span class="op">*</span>TreeSitter</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - File ranking based on importance - Tag
+extraction for symbols - Tree-sitter parsing for language support -
+Caching for performance</p>
+<h3 id="session---session-management">2.19 SESSION/ - Session
+Management</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Manager + Session
+Store</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    sessions <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Session</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Session <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> ProjectID<span class="op">,</span> Name<span class="op">,</span> Mode<span class="op">,</span> Status <span class="dt">string</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    FocusChainID <span class="dt">string</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    Context <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="task---task-management">2.20 TASK/ - Task Management</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Manager + Queue +
+Checkpoints + Dependencies</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    tasks <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Task</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    queue <span class="op">*</span>Queue</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    checkpoints <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">][]*</span>Checkpoint</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    dependencies <span class="op">*</span>DependencyGraph</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Task <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">,</span> Name<span class="op">,</span> Description<span class="op">,</span> Type<span class="op">,</span> Status <span class="dt">string</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    Priority <span class="dt">int</span><span class="op">;</span> Criticality <span class="dt">string</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    AssignedWorker <span class="dt">string</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    Dependencies <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    RetryCount<span class="op">,</span> MaxRetries <span class="dt">int</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - Task queue with priority - Checkpoint
+system for resumable tasks - Dependency graph for task ordering -
+Database-backed persistence</p>
+<h3 id="notification---notification-system">2.21 NOTIFICATION/ -
+Notification System</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Engine + Integrations
++ Queue + Rate Limiting</strong></p>
+<p><strong>Integrations</strong>: - Discord - Slack - Telegram - Email -
+Webhooks</p>
+<p><strong>Features</strong>: - Event-based notification triggers - Rate
+limiting - Retry logic with backoff - Queue-based delivery - Metrics
+collection</p>
+<h3 id="verifier---llm-verifier-subsystem">2.22 VERIFIER/ - LLM Verifier
+Subsystem</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Adapter + Bootstrap +
+Poller</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Adapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Score-augmented model selection</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BootstrapResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Verifier initialization result</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - Model score verification - Health
+monitoring - Cache management - Embedded server mode - Fallback model
+chains</p>
+<h3 id="mcp---model-context-protocol">2.23 MCP/ - Model Context
+Protocol</h3>
+<p><strong>Architecture Pattern</strong>: <strong>Server + WebSocket
+Handler</strong></p>
+<p><strong>Key Types</strong>:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MCPServer <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Model Context Protocol server</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - WebSocket-based MCP communication - Mock
+connection support for testing</p>
+<hr />
+<h2 id="applications---multi-platform-ui">3. APPLICATIONS/ -
+Multi-Platform UI</h2>
+<h3 id="architecture-pattern-1">3.1 Architecture Pattern</h3>
+<p><strong>Pattern</strong>: Shared core
+(<code>shared/mobile-core/</code>) with platform-specific frontends</p>
+<h3 id="supported-platforms">3.2 Supported Platforms</h3>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 32%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Framework</th>
+<th>Entry Point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Terminal UI</td>
+<td>tview (Go TUI)</td>
+<td><code>applications/terminal_ui/main.go</code></td>
+</tr>
+<tr>
+<td>Desktop</td>
+<td>Fyne (Go GUI)</td>
+<td><code>applications/desktop/main.go</code></td>
+</tr>
+<tr>
+<td>Android</td>
+<td>Kotlin</td>
+<td><code>applications/android/app/src/main/java/.../MainActivity.kt</code></td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>Swift</td>
+<td><code>applications/ios/helix_code/ViewController.swift</code></td>
+</tr>
+<tr>
+<td>Aurora OS</td>
+<td>Go</td>
+<td><code>applications/aurora_os/main.go</code></td>
+</tr>
+<tr>
+<td>Harmony OS</td>
+<td>Go</td>
+<td><code>applications/harmony_os/main.go</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="terminal-ui">3.3 Terminal UI</h3>
+<ul>
+<li>Uses <code>github.com/rivo/tview</code> for terminal UI
+components</li>
+<li>Theme support with configurable colors</li>
+<li>Component-based layout</li>
+</ul>
+<h3 id="desktop">3.4 Desktop</h3>
+<ul>
+<li>Uses <code>fyne.io/fyne/v2</code> for cross-platform GUI</li>
+<li>Theme system with light/dark modes</li>
+<li>No-GUI build option (<code>main_nogui.go</code>)</li>
+</ul>
+<h3 id="mobile">3.5 Mobile</h3>
+<ul>
+<li><strong>Android</strong>: Kotlin with <code>MobileCore.kt</code>
+shared logic</li>
+<li><strong>iOS</strong>: Swift with <code>MobileCore.swift</code>
+shared logic</li>
+<li>Shared Go core in <code>shared/mobile-core/mobile.go</code></li>
+</ul>
+<hr />
+<h2 id="apiopenapi.yaml---api-specification">4. API/OPENAPI.YAML - API
+Specification</h2>
+<h3 id="architecture-pattern-2">4.1 Architecture Pattern</h3>
+<p><strong>OpenAPI 3.0.3</strong> with comprehensive REST API design</p>
+<h3 id="api-endpoints-summary">4.2 API Endpoints Summary</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 40%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Endpoints</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Health</td>
+<td>GET /health</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>POST /auth/{register,login,logout,refresh}</td>
+<td>Mixed</td>
+</tr>
+<tr>
+<td>Users</td>
+<td>GET/PUT/DELETE /users/me</td>
+<td>JWT</td>
+</tr>
+<tr>
+<td>Projects</td>
+<td>CRUD /projects</td>
+<td>Mixed</td>
+</tr>
+<tr>
+<td>Workflows</td>
+<td>POST
+/projects/{id}/workflows/{planning,building,testing,refactoring}</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Tasks</td>
+<td>CRUD + assign/start/complete/fail/checkpoint/retry</td>
+<td>JWT</td>
+</tr>
+<tr>
+<td>Workers</td>
+<td>CRUD + heartbeat + metrics</td>
+<td>JWT</td>
+</tr>
+<tr>
+<td>Sessions</td>
+<td>CRUD /sessions</td>
+<td>JWT</td>
+</tr>
+<tr>
+<td>LLM</td>
+<td>GET /llm/providers, /llm/models</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>GET /memory/systems, /memory/stats</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>QA</td>
+<td>POST/GET/DELETE /qa/session*</td>
+<td>JWT</td>
+</tr>
+<tr>
+<td>Screenshot</td>
+<td>GET /screenshot/:platform</td>
+<td>JWT</td>
+</tr>
+<tr>
+<td>System</td>
+<td>GET /system/stats, /system/status</td>
+<td>JWT</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>GET /server/info, /metrics</td>
+<td>Public</td>
+</tr>
+<tr>
+<td>WebSocket</td>
+<td>GET /ws</td>
+<td>Public</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-schemas">4.3 Key Schemas</h3>
+<ul>
+<li>Comprehensive schema definitions for all entities</li>
+<li>Task lifecycle with 7 status states</li>
+<li>Worker resources (CPU, memory, disk, GPU)</li>
+<li>Session modes (planning, building, testing, refactoring, debugging,
+deployment)</li>
+</ul>
+<hr />
+<h2 id="config---configuration-system">5. CONFIG/ - Configuration
+System</h2>
+<h3 id="architecture-pattern-3">5.1 Architecture Pattern</h3>
+<p><strong>Viper-based + Environment Variables + Validation +
+Migration</strong></p>
+<h3 id="key-features">5.2 Key Features</h3>
+<ul>
+<li><strong>Sources</strong>: File (YAML), Environment
+(<code>HELIX_*</code>), Defaults</li>
+<li><strong>Hot Reload</strong>: Via fsnotify (implied by
+dependency)</li>
+<li><strong>Validation</strong>: Strict validation with custom
+rules</li>
+<li><strong>Migration</strong>: Version-based config migration (1.0.0 →
+1.1.0 → 1.2.0)</li>
+<li><strong>Templates</strong>: Environment-specific templates (dev,
+prod, test)</li>
+<li><strong>Secure Fields</strong>: JWT secret, DB password via env vars
+only</li>
+</ul>
+<h3 id="config-structure">5.3 Config Structure</h3>
+<div class="sourceCode" id="cb26"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0.0&quot;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">application</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> name</span><span class="kw">,</span><span class="at"> version</span><span class="kw">,</span><span class="at"> environment</span><span class="kw">,</span><span class="at"> workspace</span><span class="kw">,</span><span class="at"> session </span><span class="kw">}</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">server</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> address</span><span class="kw">,</span><span class="at"> port</span><span class="kw">,</span><span class="at"> timeouts </span><span class="kw">}</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> host</span><span class="kw">,</span><span class="at"> port</span><span class="kw">,</span><span class="at"> user</span><span class="kw">,</span><span class="at"> password</span><span class="kw">,</span><span class="at"> dbname </span><span class="kw">}</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="fu">redis</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> enabled</span><span class="kw">,</span><span class="at"> host</span><span class="kw">,</span><span class="at"> port </span><span class="kw">}</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="fu">auth</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> jwt_secret</span><span class="kw">,</span><span class="at"> token_expiry</span><span class="kw">,</span><span class="at"> session_expiry</span><span class="kw">,</span><span class="at"> bcrypt_cost </span><span class="kw">}</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">workers</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> health_check_interval</span><span class="kw">,</span><span class="at"> max_concurrent_tasks </span><span class="kw">}</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="fu">tasks</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> max_retries</span><span class="kw">,</span><span class="at"> checkpoint_interval </span><span class="kw">}</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> default_provider</span><span class="kw">,</span><span class="at"> default_model</span><span class="kw">,</span><span class="at"> max_tokens</span><span class="kw">,</span><span class="at"> temperature </span><span class="kw">}</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="fu">logging</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> level</span><span class="kw">,</span><span class="at"> format</span><span class="kw">,</span><span class="at"> output </span><span class="kw">}</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="fu">verifier</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> enabled</span><span class="kw">,</span><span class="at"> mode</span><span class="kw">,</span><span class="at"> endpoint</span><span class="kw">,</span><span class="at"> scoring_weights </span><span class="kw">}</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="fu">qa</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> enabled</span><span class="kw">,</span><span class="at"> banks_dir</span><span class="kw">,</span><span class="at"> platforms</span><span class="kw">,</span><span class="at"> coverage_target </span><span class="kw">}</span></span></code></pre></div>
+<hr />
+<h2 id="test---testing-infrastructure">6. TEST/ - Testing
+Infrastructure</h2>
+<h3 id="architecture-pattern-4">6.1 Architecture Pattern</h3>
+<p><strong>Multi-layer Testing with Automation</strong></p>
+<h3 id="test-categories">6.2 Test Categories</h3>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 30%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Location</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit Tests</td>
+<td><code>*_test.go</code> (per package)</td>
+<td>Package-level unit tests</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td><code>test/integration/</code></td>
+<td>Discord, Slack, Telegram integration</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td><code>test/e2e/</code></td>
+<td>Comprehensive end-to-end</td>
+</tr>
+<tr>
+<td>Load</td>
+<td><code>test/load/</code></td>
+<td>Notification load testing</td>
+</tr>
+<tr>
+<td>Automation</td>
+<td><code>test/automation/</code></td>
+<td>Provider automation (Anthropic, Gemini, OpenRouter, Qwen, XAI)</td>
+</tr>
+<tr>
+<td>Workers</td>
+<td><code>test/workers/</code></td>
+<td>SSH key management for worker tests</td>
+</tr>
+</tbody>
+</table>
+<h3 id="standalone-tests">6.3 Standalone Tests</h3>
+<ul>
+<li><code>standalone_tests/cli_test.go</code> - CLI standalone
+tests</li>
+<li><code>standalone_tests/test_suite.go</code> - Test suite runner</li>
+</ul>
+<hr />
+<h2 id="benchmarks---performance-benchmarking">7. BENCHMARKS/ -
+Performance Benchmarking</h2>
+<h3 id="architecture-pattern-5">7.1 Architecture Pattern</h3>
+<p><strong>Go Benchmark Suite</strong></p>
+<h3 id="key-files">7.2 Key Files</h3>
+<ul>
+<li><code>benchmarks/performance_bench_test.go</code> - Performance
+benchmarks</li>
+<li><code>benchmark-reports/</code> - Generated benchmark reports with
+timestamps</li>
+</ul>
+<hr />
+<h2 id="module-dependencies-relationships">8. Module Dependencies &amp;
+Relationships</h2>
+<h3 id="dependency-graph-key-flows">8.1 Dependency Graph (Key
+Flows)</h3>
+<pre><code>main.go
+  └── cmd/root.go (Cobra)
+        ├── cmd/cli/main.go → internal/* (CLI mode)
+        └── cmd/server/main.go → internal/server (Server mode)
+
+internal/server/server.go
+  ├── internal/auth (JWT)
+  ├── internal/database (PostgreSQL)
+  ├── internal/redis (Caching)
+  ├── internal/llm (LLM providers)
+  ├── internal/mcp (MCP protocol)
+  ├── internal/notification (Notifications)
+  ├── internal/task (Task management)
+  ├── internal/worker (Distributed workers)
+  ├── internal/project (Project management)
+  ├── internal/session (Session tracking)
+  ├── internal/helixqa (QA engine)
+  └── internal/verifier (Model verification)
+
+internal/agent/coordinator.go
+  ├── internal/agent/base_agent.go
+  ├── internal/agent/task (Task definitions)
+  ├── internal/llm (LLM provider)
+  └── internal/tools (Tool registry)
+
+internal/tools/registry.go
+  ├── internal/tools/filesystem
+  ├── internal/tools/shell
+  ├── internal/tools/web
+  ├── internal/tools/browser (ChromeDP)
+  ├── internal/tools/mapping (Tree-sitter)
+  ├── internal/tools/multiedit
+  └── internal/tools/confirmation
+
+internal/llm/factory.go
+  ├── 29+ provider implementations
+  ├── internal/llm/model_manager.go
+  ├── internal/llm/auto_llm_manager.go
+  ├── internal/llm/load_balancer.go
+  └── internal/hardware (Hardware detection)</code></pre>
+<h3 id="external-module-replacements-go.mod">8.2 External Module
+Replacements (go.mod)</h3>
+<pre><code>digital.vasic.containers =&gt; ../Containers
+digital.vasic.helixqa =&gt; ../HelixQA
+digital.vasic.docprocessor =&gt; ../submodules/doc_processor
+digital.vasic.llmorchestrator =&gt; ../submodules/llm_orchestrator
+digital.vasic.visionengine =&gt; ../submodules/vision_engine
+digital.vasic.challenges =&gt; ../Challenges
+digital.vasic.security =&gt; ../Security</code></pre>
+<hr />
+<h2 id="power-features-analysis">9. Power Features Analysis</h2>
+<h3 id="implemented-power-features">9.1 Implemented Power Features</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 46%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Implementation</th>
+<th>Rating</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>29+ LLM Providers</strong></td>
+<td>Factory pattern with 18 cloud + 11 local</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Auto LLM Management</strong></td>
+<td>Zero-touch discovery/install/configure/monitor</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Load Balancing</strong></td>
+<td>5 strategies (performance-based default)</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Multi-Agent System</strong></td>
+<td>8 agent types with collaboration</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Circuit Breaker</strong></td>
+<td>Per-agent resilience with retries</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Tool Framework</strong></td>
+<td>20+ tools across 8 categories</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Multi-Edit</strong></td>
+<td>Atomic multi-file transactions</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Context Builder</strong></td>
+<td>Mentions, templates, sources</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Memory System</strong></td>
+<td>11+ providers, conversation management</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Distributed Workers</strong></td>
+<td>SSH-based worker pools</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Workflow Engine</strong></td>
+<td>Planning/building/testing/refactoring</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>QA Integration</strong></td>
+<td>Screenshot-based testing</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Edit Formats</strong></td>
+<td>7 editor formats</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Code Mapping</strong></td>
+<td>Tree-sitter based analysis</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Browser Automation</strong></td>
+<td>ChromeDP screenshot/console</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Notification System</strong></td>
+<td>Discord/Slack/Telegram/Email/Webhook</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Verifier Subsystem</strong></td>
+<td>Score-augmented model selection</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Cross-Platform UI</strong></td>
+<td>Terminal/Desktop/Android/iOS/Specialized OS</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>API Server</strong></td>
+<td>Full REST API with OpenAPI spec</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Config System</strong></td>
+<td>Viper + env + validation + migration</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>JWT, Bcrypt, confirmation policies, sandbox</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="unique-innovations">9.2 Unique Innovations</h3>
+<ol type="1">
+<li><strong>AutoLLMManager</strong>: Fully automated local LLM lifecycle
+- discovers, installs, configures, starts, monitors, and updates local
+LLM providers without manual intervention</li>
+<li><strong>Cross-Provider Registry</strong>: Unified model naming
+across 29+ providers with fallback chains</li>
+<li><strong>Verifier Bridge</strong>: Score-augmented model selection
+that verifies model capabilities before selection</li>
+<li><strong>Multi-Agent Collaboration</strong>: Built-in collaboration
+patterns (coding→review, coding→testing, debugging→verification)</li>
+<li><strong>Confirmation Audit System</strong>: Danger-level policies
+with JSONL audit trails</li>
+<li><strong>HelixQA Engine</strong>: Integrated quality assurance with
+screenshot capture across platforms</li>
+<li><strong>Specialized OS Support</strong>: Aurora OS and Harmony OS
+native applications</li>
+</ol>
+<hr />
+<h2 id="missing-features-vs-state-of-the-art-cli-agents">10. Missing
+Features vs State-of-the-Art CLI Agents</h2>
+<h3 id="compared-to-aider-claude-code-cline-continue">10.1 Compared to
+Aider, Claude Code, Cline, Continue</h3>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 42%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>HelixCode Status</th>
+<th>Gap Analysis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Interactive Chat REPL</strong></td>
+<td>⚠️ Basic</td>
+<td>Missing rich inline chat with syntax highlighting</td>
+</tr>
+<tr>
+<td><strong>Git Integration</strong></td>
+<td>⚠️ Partial</td>
+<td>Has git tools but missing deep git-aware context</td>
+</tr>
+<tr>
+<td><strong>Repository Map (Aider-style)</strong></td>
+<td>✅ Strong</td>
+<td>Tree-sitter based with file ranking</td>
+</tr>
+<tr>
+<td><strong>Voice Input</strong></td>
+<td>⚠️ Partial</td>
+<td>Voice tools exist but not integrated in CLI</td>
+</tr>
+<tr>
+<td><strong>Cost Tracking</strong></td>
+<td>⚠️ Basic</td>
+<td>Budget in model selection but no per-session cost</td>
+</tr>
+<tr>
+<td><strong>Lint/Test Integration</strong></td>
+<td>⚠️ Partial</td>
+<td>Workflow exists but not auto-triggered</td>
+</tr>
+<tr>
+<td><strong>Undo/Redo Stack</strong></td>
+<td>❌ Missing</td>
+<td>No explicit undo/redo for edits</td>
+</tr>
+<tr>
+<td><strong>File Watching</strong></td>
+<td>⚠️ Partial</td>
+<td>fsnotify in deps but not integrated for auto-reload</td>
+</tr>
+<tr>
+<td><strong>Multi-line Input</strong></td>
+<td>❌ Missing</td>
+<td>No multi-line prompt support in CLI</td>
+</tr>
+<tr>
+<td><strong>Inline Diff Preview</strong></td>
+<td>⚠️ Partial</td>
+<td>Editor formats exist but no TUI diff preview</td>
+</tr>
+<tr>
+<td><strong>Auto-commit Messages</strong></td>
+<td>✅ Present</td>
+<td><code>internal/tools/git/message_generator.go</code></td>
+</tr>
+<tr>
+<td><strong>Shell Command Suggestions</strong></td>
+<td>⚠️ Partial</td>
+<td>Shell tool exists but no smart suggestions</td>
+</tr>
+<tr>
+<td><strong>Model Aliases</strong></td>
+<td>✅ Present</td>
+<td><code>internal/llm/aliases.go</code></td>
+</tr>
+<tr>
+<td><strong>Token Counting</strong></td>
+<td>✅ Present</td>
+<td>Conversation token management</td>
+</tr>
+<tr>
+<td><strong>Context Compression</strong></td>
+<td>✅ Present</td>
+<td><code>internal/llm/compression/</code></td>
+</tr>
+<tr>
+<td><strong>Reasoning Models</strong></td>
+<td>✅ Present</td>
+<td><code>internal/llm/reasoning.go</code></td>
+</tr>
+<tr>
+<td><strong>Vision Support</strong></td>
+<td>✅ Present</td>
+<td><code>internal/llm/vision/</code></td>
+</tr>
+<tr>
+<td><strong>Caching</strong></td>
+<td>✅ Present</td>
+<td>Response caching in AutoLLMManager</td>
+</tr>
+<tr>
+<td><strong>Streaming Responses</strong></td>
+<td>⚠️ Partial</td>
+<td>Streaming supported in providers but not fully integrated</td>
+</tr>
+<tr>
+<td><strong>MCP Protocol</strong></td>
+<td>✅ Present</td>
+<td>Full MCP server with WebSocket</td>
+</tr>
+<tr>
+<td><strong>Checkpoint/Restore</strong></td>
+<td>✅ Present</td>
+<td>Task checkpoint system</td>
+</tr>
+<tr>
+<td><strong>Dependency Management</strong></td>
+<td>✅ Present</td>
+<td>Task dependency graph</td>
+</tr>
+</tbody>
+</table>
+<h3 id="critical-gaps">10.2 Critical Gaps</h3>
+<ol type="1">
+<li><strong>No Streaming TUI</strong>: The terminal-ui app exists but
+doesn’t show real-time streaming LLM responses</li>
+<li><strong>Limited Inline Editing</strong>: Edit formats exist but no
+interactive inline editing experience</li>
+<li><strong>No File Watch Auto-Reload</strong>: fsnotify is a dependency
+but not used for automatic context refresh</li>
+<li><strong>No Smart Completion</strong>: No shell-like tab completion
+for file paths or commands</li>
+<li><strong>No Session Persistence in CLI</strong>: Sessions exist in
+server mode but not in CLI mode</li>
+<li><strong>Missing Rich Error Recovery</strong>: Limited automatic
+error recovery beyond circuit breakers</li>
+<li><strong>No Plugin System</strong>: No external plugin/extension
+mechanism beyond built-in tools</li>
+</ol>
+<hr />
+<h2 id="performance-characteristics">11. Performance
+Characteristics</h2>
+<h3 id="scalability-design">11.1 Scalability Design</h3>
+<ul>
+<li><strong>Worker Pool</strong>: SSH-based horizontal scaling</li>
+<li><strong>Load Balancing</strong>: Performance-based provider
+selection</li>
+<li><strong>Caching</strong>: Redis + in-memory provider response
+caching</li>
+<li><strong>Circuit Breakers</strong>: Automatic failure isolation</li>
+<li><strong>Context Compression</strong>: Token budget management</li>
+</ul>
+<h3 id="concurrency-patterns">11.2 Concurrency Patterns</h3>
+<ul>
+<li><strong>Agent Task Queue</strong>: Buffered channels with
+configurable concurrency</li>
+<li><strong>Context Manager</strong>: RWMutex for read-heavy
+operations</li>
+<li><strong>Tool Registry</strong>: RWMutex for safe concurrent
+access</li>
+<li><strong>Memory Manager</strong>: RWMutex for conversation
+operations</li>
+<li><strong>Server</strong>: Gin’s goroutine-per-request model</li>
+</ul>
+<h3 id="memory-management">11.3 Memory Management</h3>
+<ul>
+<li><strong>Conversation Limits</strong>: Configurable max messages
+(1000) and tokens (100000)</li>
+<li><strong>Auto-Truncation</strong>: Keeps last 50% of messages when
+limit exceeded</li>
+<li><strong>Context TTL</strong>: Automatic expiration with cleanup
+routine</li>
+<li><strong>Redis Offloading</strong>: Optional Redis for distributed
+caching</li>
+</ul>
+<hr />
+<h2 id="security-architecture">12. Security Architecture</h2>
+<h3 id="security-layers">12.1 Security Layers</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auth</td>
+<td>JWT with bcrypt, configurable expiry</td>
+</tr>
+<tr>
+<td>Transport</td>
+<td>HSTS, CORS, security headers</td>
+</tr>
+<tr>
+<td>Confirmation</td>
+<td>Danger-level policies with audit trails</td>
+</tr>
+<tr>
+<td>Sandbox</td>
+<td>Auto-sandbox for LLM providers</td>
+</tr>
+<tr>
+<td>Privileges</td>
+<td>Minimum privilege mode</td>
+</tr>
+<tr>
+<td>Network Isolation</td>
+<td>Optional network isolation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="security-tools">12.2 Security Tools</h3>
+<ul>
+<li><code>cmd/security_fix/</code> - Automated security fix utility</li>
+<li><code>cmd/security_test/</code> - Security testing utility</li>
+<li><code>internal/security/</code> - Core security package</li>
+<li><code>internal/tools/confirmation/</code> - Confirmation with audit
+logging</li>
+</ul>
+<hr />
+<h2 id="deployment-operations">13. Deployment &amp; Operations</h2>
+<h3 id="deployment-targets">13.1 Deployment Targets</h3>
+<ul>
+<li><strong>Docker</strong>: <code>docker-compose.yml</code>,
+<code>docker-compose.full-test.yml</code></li>
+<li><strong>Specialized Platforms</strong>: Aurora OS, Harmony OS</li>
+<li><strong>Cloud</strong>: Azure provider integration</li>
+<li><strong>Local</strong>: Ollama, LMStudio, and 9 other local
+providers</li>
+</ul>
+<h3 id="monitoring">13.2 Monitoring</h3>
+<ul>
+<li><strong>Health Checks</strong>: <code>/health</code> endpoint with
+DB and Redis checks</li>
+<li><strong>Metrics</strong>: <code>/metrics</code> endpoint</li>
+<li><strong>Worker Metrics</strong>: CPU, memory, disk, network,
+temperature</li>
+<li><strong>LLM Health</strong>: Per-provider health monitoring</li>
+<li><strong>Notification</strong>: Multi-channel alerting</li>
+</ul>
+<hr />
+<h2 id="summary-of-architectural-strengths">14. Summary of Architectural
+Strengths</h2>
+<ol type="1">
+<li><strong>Modularity</strong>: 60+ well-separated internal packages
+with clear interfaces</li>
+<li><strong>Extensibility</strong>: Factory pattern for LLM providers,
+tool registry for tools, command registry for commands</li>
+<li><strong>Resilience</strong>: Circuit breakers, retry policies,
+health monitoring, graceful degradation</li>
+<li><strong>Scale</strong>: Distributed worker pools, load balancing,
+Redis caching</li>
+<li><strong>Cross-Platform</strong>: 6 platform targets with shared
+core</li>
+<li><strong>Security</strong>: Multi-layer security with audit
+trails</li>
+<li><strong>Testing</strong>: Comprehensive test suite with automation,
+E2E, load testing</li>
+<li><strong>Configuration</strong>: Mature config system with
+validation, migration, templates</li>
+</ol>
+<h2 id="summary-of-architectural-weaknesses">15. Summary of
+Architectural Weaknesses</h2>
+<ol type="1">
+<li><strong>Complexity</strong>: Very large codebase with many
+interdependencies</li>
+<li><strong>Documentation Gap</strong>: Many packages have minimal
+documentation beyond doc.go</li>
+<li><strong>Mock Dependency</strong>: Heavy reliance on mocks for
+testing (may mask integration issues)</li>
+<li><strong>CLI Experience</strong>: Basic CLI compared to rich TUI
+applications</li>
+<li><strong>External Modules</strong>: Hardcoded relative paths for
+external modules (<code>../Containers</code>,
+<code>../HelixQA</code>)</li>
+<li><strong>Version Mismatch</strong>: Claims Go 1.26 but uses features
+that may not be stable</li>
+</ol>
+<hr />
+<p><em>Report generated from analysis of HelixCode repository at
+https://github.com/HelixDevelopment/HelixCode</em> <em>Focus Path:
+<code>helix_code/</code> directory</em></p>
+</body>
+</html>

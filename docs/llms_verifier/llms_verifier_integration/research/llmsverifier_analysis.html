@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>llmsverifier_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">llmsverifier_analysis</h1>
+</header>
+<h1 id="llmsverifier-repository-deep-analysis-report">LLMsVerifier
+Repository — Deep Analysis Report</h1>
+<p><strong>Repository</strong>:
+https://github.com/vasic-digital/LLMsVerifier<br />
+<strong>Branch</strong>: <code>main</code><br />
+<strong>Primary Language</strong>: Go (75.3%)<br />
+<strong>Analysis Date</strong>: 2026<br />
+<strong>Total Commits</strong>: ~519<br />
+<strong>Contributors</strong>: milos85vasic, claude</p>
+<hr />
+<h2 id="repository-structure">1. Repository Structure</h2>
+<h3 id="root-level-directories">Root-Level Directories</h3>
+<table>
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>llm-verifier/</code></td>
+<td><strong>Main Go application</strong> — core engine, CLI, API server,
+providers, scoring, verification</td>
+</tr>
+<tr>
+<td><code>internal/</code></td>
+<td>Internal packages: <code>benchmark/</code>, <code>llmops/</code>,
+<code>messaging/</code>, <code>rag/</code>,
+<code>selfimprove/</code></td>
+</tr>
+<tr>
+<td><code>configs/</code></td>
+<td>Configuration files and schemas</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td>Documentation (governance, architecture, design docs)</td>
+</tr>
+<tr>
+<td><code>examples/</code></td>
+<td>Usage examples (e.g., <code>examples/scoring/</code>)</td>
+</tr>
+<tr>
+<td><code>tests/</code></td>
+<td>Test suites (unit, integration, e2e, performance, security)</td>
+</tr>
+<tr>
+<td><code>challenges/</code></td>
+<td>Challenge system scripts and specifications</td>
+</tr>
+<tr>
+<td><code>sdk/</code></td>
+<td>SDK for client integrations</td>
+</tr>
+<tr>
+<td><code>helm/</code></td>
+<td>Helm charts for Kubernetes deployment</td>
+</tr>
+<tr>
+<td><code>k8s/</code></td>
+<td>Kubernetes manifests</td>
+</tr>
+<tr>
+<td><code>monitoring/</code></td>
+<td>Monitoring and observability configs</td>
+</tr>
+<tr>
+<td><code>website/</code></td>
+<td>Website source</td>
+</tr>
+<tr>
+<td><code>mobile/flutter/</code></td>
+<td>Mobile application (Flutter)</td>
+</tr>
+<tr>
+<td><code>assets/</code></td>
+<td>Logo and visual assets</td>
+</tr>
+<tr>
+<td><code>upstreams/</code></td>
+<td>Upstream repository management</td>
+</tr>
+<tr>
+<td><code>reports/</code></td>
+<td>Generated reports storage</td>
+</tr>
+<tr>
+<td><code>scripts/</code></td>
+<td>Utility scripts</td>
+</tr>
+<tr>
+<td><code>specs/</code></td>
+<td>Specifications (e.g., <code>001-extend-llm-providers</code>)</td>
+</tr>
+<tr>
+<td><code>test_results/</code></td>
+<td>Test result outputs</td>
+</tr>
+<tr>
+<td><code>video-course/</code></td>
+<td>Video course assets</td>
+</tr>
+<tr>
+<td><code>backup/</code></td>
+<td>Backup data</td>
+</tr>
+</tbody>
+</table>
+<h3 id="llm-verifier-subdirectory-structure"><code>llm-verifier/</code>
+Subdirectory Structure</h3>
+<pre><code>llm-verifier/
+  cmd/main.go                 # CLI entry point (~1633 lines)
+  ai/                         # AI-related modules
+  analytics/                  # Analytics and metrics
+  api/                        # REST API server (gin-based)
+  api_keys/                   # API key tracking and management
+  auth/                       # OAuth, JWT, LDAP authentication
+  bigdata/                    # Big Data integration
+  capabilities/               # Capability detection
+  challenges/                 # Challenge system
+  client/                     # HTTP client for API communication
+  config/                     # Configuration structs and loading
+  database/                   # SQLite persistence layer
+  desktop/                    # Desktop application code
+  docs/                       # Package-level docs
+  enhanced/                   # Enhanced features
+  events/                     # Event system
+  failover/                   # Failover logic
+  k8s/                        # K8s-specific code
+  llmverifier/                # Core verification engine
+    recipes/                  # Verification recipes
+    analytics.go
+    config_loader.go
+    config_export.go
+    issue_detector.go
+    llm_client.go           # LLM HTTP client
+    models.go               # Data models
+    reporter.go             # Report generation
+    strategy.go             # Scoring strategy interface
+    strategy_builder.go
+    strategy_default.go
+  logging/                    # Logging infrastructure
+  messaging/                  # Kafka/RabbitMQ integration
+  mobile/                     # Mobile app helpers
+  monitoring/                 # Monitoring hooks
+  multimodal/                 # Multimodal capabilities
+  notifications/              # Slack, Email, Telegram, Matrix, WhatsApp
+  partners/                   # Partner integrations
+  performance/                # Performance testing
+  pkg/                        # Shared packages
+  providers/                   # Provider adapters
+    base.go                   # BaseAdapter struct
+    anthropic.go              # Anthropic (Claude) adapter
+    cerebras.go
+    cloudflare.go
+    cohere.go
+    deepseek.go
+    groq.go
+    hyperbolic.go
+    kilo.go
+    kimi.go
+    kimicode.go
+    mistral.go
+    modal.go
+    model_provider_service.go
+    errors.go
+    fallback_models.go
+    http_client.go
+    config.go
+    config_validator.go
+  scheduler/                   # Verification scheduling
+  scoring/                     # Scoring system
+    scoring_engine.go         # Core scoring logic
+    types.go                  # Score data structures
+    metrics_collector.go
+    alert_manager.go
+    api_handlers.go
+    database_integration.go
+    model_display.go
+    model_naming.go
+    monitoring.go
+  scripts/                     # Build and deploy scripts
+  sdk/                         # SDK packages
+  security/                    # Security modules
+  suffix/                      # Suffix handling
+  test_exports/                  # Test exports
+  testing/                     # Testing utilities
+  testsuite/                     # Test suite runner
+  tui/                         # Terminal UI (bubbletea)
+  verification/                  # Verification logic
+    verification.go           # Main verifier (stub/placeholder)
+    code_verification.go
+    code_verification_integration.go
+    coding_capability_verification.go
+    models_dev_enhanced.go
+    provider_client.go
+    provider_service_interface.go
+    verification_real.go
+  web/                           # Web UI components</code></pre>
+<hr />
+<h2 id="readme-documentation">2. README &amp; Documentation</h2>
+<p><strong>File</strong>: <code>llm-verifier/README.md</code> (400
+lines) [<sup>18</sup>]</p>
+<h3 id="purpose">Purpose</h3>
+<blockquote>
+<p>“LLM Verifier is a comprehensive tool to verify, test, and benchmark
+LLMs based on their coding capabilities and other features.”</p>
+</blockquote>
+<h3 id="supported-providers-12-implemented-adapters">Supported Providers
+(12 Implemented Adapters)</h3>
+<ol type="1">
+<li><strong>OpenAI</strong> — GPT models with full API
+compatibility</li>
+<li><strong>Anthropic</strong> — Claude models via official API</li>
+<li><strong>DeepSeek</strong> — DeepSeek models with streaming
+support</li>
+<li><strong>Groq</strong> — Fast inference with Llama models</li>
+<li><strong>Together AI</strong> — Wide range of open-source models</li>
+<li><strong>Mistral</strong> — European provider with advanced
+models</li>
+<li><strong>xAI</strong> — Grok models from xAI</li>
+<li><strong>Replicate</strong> — Model hosting and deployment
+platform</li>
+<li><strong>Cohere</strong> — Command models with enterprise
+features</li>
+<li><strong>Cerebras</strong> — High-performance inference</li>
+<li><strong>Cloudflare Workers AI</strong> — Edge AI inference</li>
+<li><strong>SiliconFlow</strong> — Chinese AI models and services</li>
+</ol>
+<h3 id="features">Features</h3>
+<ul>
+<li>Model Discovery (auto-discover from API endpoints)</li>
+<li>Comprehensive Testing (existence, responsiveness, overload,
+capabilities)</li>
+<li>Feature Detection (tool calling, embeddings, code generation,
+etc.)</li>
+<li>Coding Assessment (multiple programming languages)</li>
+<li>Performance Scoring (code capability, responsiveness, reliability,
+feature richness)</li>
+<li>Reporting (markdown + JSON)</li>
+<li>Rankings (by strength, speed, reliability, etc.)</li>
+</ul>
+<h3 id="cli-commands">CLI Commands</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models list [--filter NAME] [--limit N] [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models get MODEL_ID</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models create PROVIDER_ID MODEL_ID NAME</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models verify MODEL_ID</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> providers list [--filter NAME] [--limit N] [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> results list [--filter MODEL_NAME] [--limit N] [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> pricing list [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> limits list [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> issues list [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> events list [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> schedules list [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> exports list [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> logs list [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> config show</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> config export FORMAT</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> users create USERNAME PASSWORD EMAIL <span class="pp">[</span><span class="ss">FULL_NAME</span><span class="pp">]</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> tui                          <span class="co"># Terminal UI</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> server [--port PORT]         <span class="co"># REST API server</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> ai-config export <span class="pp">[</span><span class="ss">format</span><span class="pp">]</span> <span class="pp">[</span><span class="ss">output_file</span><span class="pp">]</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> ai-config bulk <span class="pp">[</span><span class="ss">output_directory</span><span class="pp">]</span></span></code></pre></div>
+<h3 id="scoring-system-weights-from-readme">Scoring System Weights (from
+README)</h3>
+<ul>
+<li><strong>Code Capability (40%)</strong></li>
+<li><strong>Responsiveness (20%)</strong></li>
+<li><strong>Reliability (20%)</strong></li>
+<li><strong>Feature Richness (15%)</strong></li>
+<li><strong>Value Proposition (5%)</strong></li>
+</ul>
+<hr />
+<h2 id="core-verification-engine">3. Core Verification Engine</h2>
+<h3 id="entry-point">Entry Point</h3>
+<p><strong>File</strong>: <code>llm-verifier/cmd/main.go</code> (line
+84-106) [<sup>19</sup>]</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> runVerification<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> llmverifier<span class="op">.</span>LoadConfig<span class="op">(</span>configFile<span class="op">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    verifier <span class="op">:=</span> llmverifier<span class="op">.</span>New<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    results<span class="op">,</span> err <span class="op">:=</span> verifier<span class="op">.</span>Verify<span class="op">()</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    verifier<span class="op">.</span>GenerateMarkdownReport<span class="op">(</span>results<span class="op">,</span> outputDir<span class="op">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    verifier<span class="op">.</span>GenerateJSONReport<span class="op">(</span>results<span class="op">,</span> outputDir<span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="main-verifier">Main Verifier</h3>
+<p><strong>File</strong>:
+<code>llm-verifier/verification/verification.go</code> (130 lines)
+[<sup>28</sup>]</p>
+<p><strong>CRITICAL FINDING</strong>: The core
+<code>verification.go</code> is currently a <strong>stub/placeholder
+implementation</strong> that returns hardcoded scores:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Verifier<span class="op">)</span> Verify<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>Request<span class="op">)</span> <span class="op">(*</span>database<span class="op">.</span>VerificationResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... validation ...</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    result <span class="op">:=</span> <span class="op">&amp;</span>database<span class="op">.</span>VerificationResult<span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        ID<span class="op">:</span> time<span class="op">.</span>Now<span class="op">().</span>UnixNano<span class="op">(),</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        ModelID<span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="co">// Placeholder</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        Status<span class="op">:</span> <span class="st">&quot;completed&quot;</span><span class="op">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        ModelExists<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">true</span><span class="op">),</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        Responsive<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">true</span><span class="op">),</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        Overloaded<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">false</span><span class="op">),</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        SupportsToolUse<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        SupportsCodeGeneration<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ... ALL fields hardcoded to true or 8.5 ...</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        OverallScore<span class="op">:</span> <span class="fl">8.5</span><span class="op">,</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        CodeCapabilityScore<span class="op">:</span> <span class="fl">8.5</span><span class="op">,</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        ResponsivenessScore<span class="op">:</span> <span class="fl">8.5</span><span class="op">,</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        ReliabilityScore<span class="op">:</span> <span class="fl">8.5</span><span class="op">,</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        FeatureRichnessScore<span class="op">:</span> <span class="fl">8.5</span><span class="op">,</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        ValuePropositionScore<span class="op">:</span> <span class="fl">8.5</span><span class="op">,</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>NOTE</strong>: The actual verification logic for coding
+capabilities appears to be in
+<code>verification/coding_capability_verification.go</code> which
+performs real LLM API calls with keyword matching.</p>
+<h3 id="coding-capability-verification">Coding Capability
+Verification</h3>
+<p><strong>File</strong>:
+<code>llm-verifier/verification/coding_capability_verification.go</code>
+(~450 lines) [<sup>28</sup>]</p>
+<ul>
+<li>Tests 4 dimensions: <strong>Codebase Detection</strong>,
+<strong>Language Detection</strong>, <strong>Code Generation</strong>,
+<strong>Code Analysis</strong></li>
+<li>Uses keyword matching against expected terms</li>
+<li>Threshold: <code>&gt;= 0.6</code> readiness score for
+“ReadyForCoding”</li>
+<li>Status mapping: <code>&gt;= 0.7</code> → “verified”,
+<code>&gt;= 0.4</code> → “partial”, else “failed”</li>
+<li>Makes real LLM API calls via
+<code>ProviderClientInterface</code></li>
+</ul>
+<hr />
+<h2 id="provider-support">4. Provider Support</h2>
+<h3 id="base-adapter">Base Adapter</h3>
+<p><strong>File</strong>: <code>llm-verifier/providers/base.go</code>
+(62 lines) [<sup>27</sup>]</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BaseAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    client   <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    endpoint <span class="dt">string</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    apiKey   <span class="dt">string</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    headers  <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="provider-files-in-providers">Provider Files in
+<code>providers/</code></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Provider</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>anthropic.go</code></td>
+<td>Anthropic (Claude)</td>
+<td>API Key + OAuth</td>
+</tr>
+<tr>
+<td><code>deepseek.go</code></td>
+<td>DeepSeek</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>groq.go</code></td>
+<td>Groq</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>cerebras.go</code></td>
+<td>Cerebras</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>cloudflare.go</code></td>
+<td>Cloudflare Workers AI</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>cohere.go</code></td>
+<td>Cohere</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>hyperbolic.go</code></td>
+<td>Hyperbolic</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>kilo.go</code></td>
+<td>Kilo</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>kimi.go</code></td>
+<td>Kimi</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>kimicode.go</code></td>
+<td>Kimi Code</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>mistral.go</code></td>
+<td>Mistral</td>
+<td>API Key</td>
+</tr>
+<tr>
+<td><code>modal.go</code></td>
+<td>Modal</td>
+<td>API Key</td>
+</tr>
+</tbody>
+</table>
+<p><strong>File</strong>: <code>providers/anthropic.go</code> (excerpt,
+lines 26-78) [<sup>27</sup>]</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AnthropicAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    BaseAdapter</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    authType        AuthType</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    oauthCredReader <span class="op">*</span>auth<span class="op">.</span>OAuthCredentialReader</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Supports both API Key (x-api-key) and OAuth (Bearer token)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Header: &quot;anthropic-version&quot;: &quot;2023-06-01&quot;</span></span></code></pre></div>
+<h3 id="provider-configuration">Provider Configuration</h3>
+<p><strong>File</strong>: <code>providers/config.go</code> — defines
+provider metadata, endpoints, rate limits <strong>File</strong>:
+<code>providers/fallback_models.go</code> — fallback model lists when
+APIs fail <strong>File</strong>: <code>providers/errors.go</code> —
+provider-specific error types (<code>ProviderInitError</code>, etc.)</p>
+<h3 id="how-new-providers-are-added">How New Providers Are Added</h3>
+<ol type="1">
+<li>Create a new file in <code>providers/</code> (e.g.,
+<code>newprovider.go</code>)</li>
+<li>Embed <code>BaseAdapter</code></li>
+<li>Implement provider-specific request/response conversion</li>
+<li>Add to provider registry/service</li>
+<li>Add fallback models to <code>fallback_models.go</code></li>
+</ol>
+<hr />
+<h2 id="model-management">5. Model Management</h2>
+<h3 id="model-data-structure">Model Data Structure</h3>
+<p><strong>File</strong>:
+<code>llm-verifier/llmverifier/models.go</code> (excerpt, lines 6-55)
+[<sup>40</sup>]</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerificationResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    ModelInfo              ModelInfo                  <span class="st">`json:&quot;model_info&quot;`</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    Availability           AvailabilityResult         <span class="st">`json:&quot;availability&quot;`</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    ResponseTime           ResponseTimeResult         <span class="st">`json:&quot;response_time&quot;`</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    FeatureDetection       FeatureDetectionResult     <span class="st">`json:&quot;feature_detection&quot;`</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    CodeCapabilities       CodeCapabilityResult       <span class="st">`json:&quot;code_capabilities&quot;`</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    GenerativeCapabilities GenerativeCapabilityResult <span class="st">`json:&quot;generative_capabilities,omitempty&quot;`</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    PerformanceScores      PerformanceScore           <span class="st">`json:&quot;performance_scores&quot;`</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    Timestamp              time<span class="op">.</span>Time                  <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    Error                  <span class="dt">string</span>                     <span class="st">`json:&quot;error,omitempty&quot;`</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    ScoreDetails           ScoreDetails               <span class="st">`json:&quot;score_details&quot;`</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelInfo <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    ID                <span class="dt">string</span>         <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    Object            <span class="dt">string</span>         <span class="st">`json:&quot;object&quot;`</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    Created           <span class="dt">int64</span>          <span class="st">`json:&quot;created&quot;`</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    OwnedBy           <span class="dt">string</span>         <span class="st">`json:&quot;owned_by&quot;`</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    Root              <span class="dt">string</span>         <span class="st">`json:&quot;root,omitempty&quot;`</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    Parent            <span class="dt">string</span>         <span class="st">`json:&quot;parent,omitempty&quot;`</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    Permissions       <span class="op">[]</span>Permission   <span class="st">`json:&quot;permissions,omitempty&quot;`</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    ScalingPolicy     <span class="op">*</span>ScalingPolicy <span class="st">`json:&quot;scaling_policy,omitempty&quot;`</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    Capabilities      Capabilities   <span class="st">`json:&quot;capabilities,omitempty&quot;`</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    ContextWindow     ContextWindow  <span class="st">`json:&quot;context_window,omitempty&quot;`</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    MaxOutputTokens   <span class="dt">int</span>            <span class="st">`json:&quot;max_output_tokens,omitempty&quot;`</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    InputPrices       InputPrices    <span class="st">`json:&quot;input_prices,omitempty&quot;`</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    OutputPrices      OutputPrices   <span class="st">`json:&quot;output_prices,omitempty&quot;`</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    HasTrainingData   <span class="dt">bool</span>           <span class="st">`json:&quot;has_training_data,omitempty&quot;`</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    Description       <span class="dt">string</span>         <span class="st">`json:&quot;description,omitempty&quot;`</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    Architecture      Architecture   <span class="st">`json:&quot;architecture,omitempty&quot;`</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    Tokenizer         <span class="dt">string</span>         <span class="st">`json:&quot;tokenizer,omitempty&quot;`</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    Organization      <span class="dt">string</span>         <span class="st">`json:&quot;organization,omitempty&quot;`</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    ReleaseDate       <span class="dt">string</span>         <span class="st">`json:&quot;release_date,omitempty&quot;`</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    LanguageSupport   <span class="op">[]</span><span class="dt">string</span>       <span class="st">`json:&quot;language_support,omitempty&quot;`</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    UseCase           <span class="dt">string</span>         <span class="st">`json:&quot;use_case,omitempty&quot;`</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    Version           <span class="dt">string</span>         <span class="st">`json:&quot;version,omitempty&quot;`</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    MaxInputTokens    <span class="dt">int</span>            <span class="st">`json:&quot;max_input_tokens,omitempty&quot;`</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    SupportsVision    <span class="dt">bool</span>           <span class="st">`json:&quot;supports_vision,omitempty&quot;`</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    SupportsAudio     <span class="dt">bool</span>           <span class="st">`json:&quot;supports_audio,omitempty&quot;`</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    SupportsVideo     <span class="dt">bool</span>           <span class="st">`json:&quot;supports_video,omitempty&quot;`</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    SupportsReasoning <span class="dt">bool</span>           <span class="st">`json:&quot;supports_reasoning,omitempty&quot;`</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    SupportsHTTP3     <span class="dt">bool</span>           <span class="st">`json:&quot;supports_http3,omitempty&quot;`</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    SupportsToon      <span class="dt">bool</span>           <span class="st">`json:&quot;supports_toon,omitempty&quot;`</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    SupportsBrotli    <span class="dt">bool</span>           <span class="st">`json:&quot;supports_brotli,omitempty&quot;`</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    OpenSource        <span class="dt">bool</span>           <span class="st">`json:&quot;open_source,omitempty&quot;`</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    Deprecated        <span class="dt">bool</span>           <span class="st">`json:&quot;deprecated,omitempty&quot;`</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    Tags              <span class="op">[]</span><span class="dt">string</span>       <span class="st">`json:&quot;tags,omitempty&quot;`</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    Endpoint          <span class="dt">string</span>         <span class="st">`json:&quot;endpoint&quot;`</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="database-model-schema">Database Model Schema</h3>
+<p><strong>File</strong>: <code>llm-verifier/database/database.go</code>
+(lines 444-479) [<sup>28</sup>]</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> models (</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span> AUTOINCREMENT,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    provider_id <span class="dt">INTEGER</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    model_id TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    name TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    description TEXT,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    version TEXT,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    architecture TEXT,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    parameter_count <span class="dt">INTEGER</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    context_window_tokens <span class="dt">INTEGER</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    max_output_tokens <span class="dt">INTEGER</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    training_data_cutoff <span class="dt">DATE</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    release_date <span class="dt">DATE</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    is_multimodal <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    supports_vision <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    supports_audio <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    supports_video <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    supports_reasoning <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    open_source <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    deprecated <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    tags TEXT,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    language_support TEXT,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    use_case TEXT,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    last_verified <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    verification_status TEXT <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    overall_score <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    code_capability_score <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    responsiveness_score <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    reliability_score <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    feature_richness_score <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    value_proposition_score <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (provider_id) <span class="kw">REFERENCES</span> providers(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h3 id="model-discovery">Model Discovery</h3>
+<ul>
+<li><code>llmverifier/llm_client.go</code> — <code>ListModels()</code>
+calls <code>/models</code> endpoint on provider</li>
+<li>Returns <code>[]ModelInfo</code> with full metadata</li>
+</ul>
+<hr />
+<h2 id="rate-limiting-cooldown">6. Rate Limiting &amp; Cooldown</h2>
+<h3 id="configuration">Configuration</h3>
+<p><strong>File</strong>: <code>llm-verifier/config/config.go</code>
+(lines 139-158) [<sup>28</sup>]</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> APIConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    Port              <span class="dt">string</span> <span class="st">`mapstructure:&quot;port&quot;`</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    JWTSecret         <span class="dt">string</span> <span class="st">`mapstructure:&quot;jwt_secret&quot;`</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    RateLimit         <span class="dt">int</span>    <span class="st">`mapstructure:&quot;rate_limit&quot;`</span>            <span class="co">// requests per minute</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    BurstLimit        <span class="dt">int</span>    <span class="st">`mapstructure:&quot;burst_limit&quot;`</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    RateLimitWindow   <span class="dt">int</span>    <span class="st">`mapstructure:&quot;rate_limit_window&quot;`</span>     <span class="co">// seconds</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    EnableCORS        <span class="dt">bool</span>   <span class="st">`mapstructure:&quot;enable_cors&quot;`</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    RateLimitByAPIKey <span class="dt">bool</span>   <span class="st">`mapstructure:&quot;rate_limit_by_api_key&quot;`</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... TLS, timeouts ...</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="database-limits-table">Database Limits Table</h3>
+<p><strong>File</strong>: <code>llm-verifier/database/database.go</code>
+(lines 499-512)</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> limits (</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span> AUTOINCREMENT,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    model_id <span class="dt">INTEGER</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    limit_type TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    limit_value <span class="dt">INTEGER</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    current_usage <span class="dt">INTEGER</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    reset_period TEXT,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    reset_time <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    is_hard_limit <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="dv">1</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (model_id) <span class="kw">REFERENCES</span> models(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h3 id="provider-level-rate-limiting">Provider-Level Rate Limiting</h3>
+<p><strong>File</strong>: <code>llm-verifier/providers/config.go</code>
+— contains <code>ProviderConfig</code> with <code>RateLimit</code>,
+<code>RateLimitWindow</code>, <code>RetryPolicy</code></p>
+<h3 id="global-request-delay">Global Request Delay</h3>
+<p><strong>File</strong>: <code>llm-verifier/config.yaml</code> (line
+14): <code>request_delay: 1s</code></p>
+<hr />
+<h2 id="token-tracking-pricing">7. Token Tracking &amp; Pricing</h2>
+<h3 id="pricing-table">Pricing Table</h3>
+<p><strong>File</strong>: <code>llm-verifier/database/database.go</code>
+(lines 481-497)</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> pricing (</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> <span class="dt">INTEGER</span> <span class="kw">PRIMARY</span> <span class="kw">KEY</span> AUTOINCREMENT,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    model_id <span class="dt">INTEGER</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    input_token_cost <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    output_token_cost <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    cached_input_token_cost <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    storage_cost <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    request_cost <span class="dt">REAL</span> <span class="kw">DEFAULT</span> <span class="fl">0.0</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    currency TEXT <span class="kw">DEFAULT</span> <span class="st">&#39;USD&#39;</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    pricing_model TEXT <span class="kw">DEFAULT</span> <span class="st">&#39;per_token&#39;</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    effective_from <span class="dt">DATE</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    effective_to <span class="dt">DATE</span>,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FOREIGN</span> <span class="kw">KEY</span> (model_id) <span class="kw">REFERENCES</span> models(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h3 id="token-usage-tracking">Token Usage Tracking</h3>
+<p><strong>File</strong>:
+<code>llm-verifier/llmverifier/llm_client.go</code> (lines 114-119)</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Usage <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    PromptTokens     <span class="dt">int</span> <span class="st">`json:&quot;prompt_tokens&quot;`</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    CompletionTokens <span class="dt">int</span> <span class="st">`json:&quot;completion_tokens&quot;`</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    TotalTokens      <span class="dt">int</span> <span class="st">`json:&quot;total_tokens&quot;`</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="cost-effectiveness-scoring">Cost Effectiveness Scoring</h3>
+<p><strong>File</strong>:
+<code>llm-verifier/scoring/scoring_engine.go</code> (lines 223-264)
+[<sup>41</sup>]</p>
+<ul>
+<li>Input token cost <code>&lt; 1.0</code> → +2.0 score</li>
+<li>Input token cost <code>&lt; 5.0</code> → +1.0 score</li>
+<li>Input token cost <code>&gt; 15.0</code> → -2.0 score</li>
+<li>Open source models → +2.0 score</li>
+</ul>
+<hr />
+<h2 id="real-time-updates">8. Real-time Updates</h2>
+<p><strong>Finding</strong>: The repository does <strong>not</strong>
+appear to have a webhook or push-based update system. Updates appear to
+be:</p>
+<ol type="1">
+<li><strong>Polling-based</strong>: The TUI auto-refreshes every 30-60
+seconds</li>
+<li><strong>CLI-triggered</strong>:
+<code>llm-verifier models verify MODEL_ID</code> initiates verification
+on-demand</li>
+<li><strong>Scheduled</strong>: <code>llm-verifier schedules list</code>
+suggests scheduled verifications exist</li>
+<li><strong>Manual refresh</strong>: TUI supports <code>r</code> /
+<code>R</code> key for manual refresh</li>
+</ol>
+<p><strong>File</strong>: <code>llm-verifier/cmd/main.go</code> (line
+63-66): <code>schedulesCmd()</code> for schedule management</p>
+<hr />
+<h2 id="api-interface">9. API / Interface</h2>
+<h3 id="rest-api-server">REST API Server</h3>
+<p><strong>File</strong>: <code>llm-verifier/api/server.go</code> (70
+lines, currently minimal) [<sup>28</sup>]</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Server <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    config   <span class="op">*</span>config<span class="op">.</span>Config</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    database <span class="op">*</span>database<span class="op">.</span>Database</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    server   <span class="op">*</span>http<span class="op">.</span>Server</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Endpoints registered:</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">//   /api/health         -&gt; HealthHandler</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">//   /api/models        -&gt; ListModelsHandler</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">//   /api/models/{id}   -&gt; GetModelHandler</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   /api/models/{id}/verify -&gt; VerifyModelHandler</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   /api/providers     -&gt; ProvidersHandler</span></span></code></pre></div>
+<p><strong>CRITICAL GAP</strong>: The <code>api/server.go</code> is
+<strong>extremely minimal</strong> — only 5 endpoints. The full API
+surface is much larger (models CRUD, providers, results, pricing,
+limits, issues, events, schedules, exports, logs, config, users, batch,
+tui). These likely exist in other files under <code>api/</code> (e.g.,
+<code>api/handlers.go</code>, <code>api/routes.go</code>) but the
+current <code>server.go</code> only wires a basic mux.</p>
+<h3 id="cli-client">CLI Client</h3>
+<p><strong>File</strong>: <code>llm-verifier/client/client.go</code> —
+HTTP client that communicates with the REST API server</p>
+<h3 id="data-export-formats">Data Export Formats</h3>
+<ul>
+<li><strong>Markdown</strong>:
+<code>llm_verification_report.md</code></li>
+<li><strong>JSON</strong>:
+<code>llm_verification_report.json</code></li>
+<li><strong>AI CLI formats</strong>: opencode, crush, claude-code
+configurations</li>
+</ul>
+<hr />
+<h2 id="configuration-system">10. Configuration System</h2>
+<h3 id="configuration-file">Configuration File</h3>
+<p><strong>File</strong>: <code>llm-verifier/config.yaml</code> (18
+lines) [<sup>17</sup>]</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">api</span><span class="kw">:</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enable_cors</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">jwt_secret</span><span class="kw">:</span><span class="at"> your-secret-key-change-in-production</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;8080&#39;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">rate_limit</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">concurrency</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">encryption_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;&#39;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> ./llm-verifier.db</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">global</span><span class="kw">:</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> ${OPENAI_API_KEY}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">base_url</span><span class="kw">:</span><span class="at"> https://api.openai.com/v1</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">request_delay</span><span class="kw">:</span><span class="at"> 1s</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">llms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[]</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 60s</span></span></code></pre></div>
+<h3 id="config-struct">Config Struct</h3>
+<p><strong>File</strong>: <code>llm-verifier/config/config.go</code>
+(lines 97-110) [<sup>28</sup>]</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    Profile       <span class="dt">string</span>              <span class="st">`mapstructure:&quot;profile&quot;`</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    LLMs          <span class="op">[]</span>LLMConfig         <span class="st">`mapstructure:&quot;llms&quot;`</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    Global        GlobalConfig        <span class="st">`mapstructure:&quot;global&quot;`</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    Database      DatabaseConfig      <span class="st">`mapstructure:&quot;database&quot;`</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    API           APIConfig           <span class="st">`mapstructure:&quot;api&quot;`</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    Concurrency   <span class="dt">int</span>                 <span class="st">`mapstructure:&quot;concurrency&quot;`</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    Timeout       time<span class="op">.</span>Duration       <span class="st">`mapstructure:&quot;timeout&quot;`</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    Logging       LoggingConfig       <span class="st">`mapstructure:&quot;logging&quot;`</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    Monitoring    MonitoringConfig    <span class="st">`mapstructure:&quot;monitoring&quot;`</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    Security      SecurityConfig      <span class="st">`mapstructure:&quot;security&quot;`</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    Notifications NotificationsConfig <span class="st">`mapstructure:&quot;notifications&quot;`</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="loading">Loading</h3>
+<ul>
+<li><code>config.LoadFromFile(path)</code> — supports YAML, JSON, TOML
+via Viper</li>
+<li>Environment variable substitution:
+<code>${OPENAI_API_KEY}</code></li>
+</ul>
+<h3 id="full-configuration-example">Full Configuration Example</h3>
+<p><strong>File</strong>: <code>llm-verifier/config_full.yaml</code> —
+comprehensive example with all providers, features, and options</p>
+<hr />
+<h2 id="data-storage">11. Data Storage</h2>
+<h3 id="sqlite-with-optional-encryption">SQLite with Optional
+Encryption</h3>
+<p><strong>File</strong>: <code>llm-verifier/database/database.go</code>
+(1661 lines) [<sup>28</sup>]</p>
+<ul>
+<li><strong>Driver</strong>:
+<code>github.com/mattn/go-sqlite3</code></li>
+<li><strong>Encryption</strong>: SQL Cipher (optional, via
+<code>_pragma_key</code>)</li>
+<li><strong>WAL mode</strong>: Enabled for concurrency</li>
+<li><strong>Connection pooling</strong>: Max 25 open, 5 idle, 5min
+lifetime</li>
+<li><strong>Migrations</strong>: Built-in migration manager with version
+tracking</li>
+</ul>
+<h3 id="key-tables">Key Tables</h3>
+<ol type="1">
+<li><code>users</code> — Authentication</li>
+<li><code>api_keys</code> — Programmatic access keys</li>
+<li><code>providers</code> — Provider metadata and status</li>
+<li><code>models</code> — Model definitions and scores</li>
+<li><code>pricing</code> — Token pricing per model</li>
+<li><code>limits</code> — Rate limits per model</li>
+<li><code>verification_results</code> — Full verification outputs</li>
+<li><code>issues</code> — Detected issues and workarounds</li>
+<li><code>events</code> — System events</li>
+<li><code>schedules</code> — Verification schedules</li>
+<li><code>exports</code> — Configuration exports</li>
+<li><code>logs</code> — System logs</li>
+<li><code>scoring_events</code> — Scoring history</li>
+</ol>
+<hr />
+<h2 id="validation-results-structure">12. Validation Results
+Structure</h2>
+<h3 id="verificationresult-database">VerificationResult (Database)</h3>
+<p><strong>File</strong>: <code>llm-verifier/database/database.go</code>
+(lines 514-581)</p>
+<p>Key fields: - <code>id</code>, <code>model_id</code>,
+<code>verification_type</code> - <code>started_at</code>,
+<code>completed_at</code>, <code>status</code> -
+<code>model_exists</code>, <code>responsive</code>,
+<code>overloaded</code>, <code>latency_ms</code> - Feature flags:
+<code>supports_tool_use</code>, <code>supports_code_generation</code>,
+<code>supports_embeddings</code>, <code>supports_streaming</code>,
+<code>supports_json_mode</code>, <code>supports_reasoning</code>,
+<code>supports_parallel_tool_use</code>,
+<code>supports_batch_processing</code>, <code>supports_brotli</code> -
+Code capabilities: <code>code_debugging</code>,
+<code>code_optimization</code>, <code>test_generation</code>,
+<code>documentation_generation</code>, <code>refactoring</code>,
+<code>error_resolution</code>, <code>architecture_design</code>,
+<code>security_assessment</code>, <code>pattern_recognition</code> -
+Scores: <code>debugging_accuracy</code>,
+<code>code_quality_score</code>, <code>logic_correctness_score</code>,
+<code>runtime_efficiency_score</code>, <code>overall_score</code>,
+<code>code_capability_score</code>, <code>responsiveness_score</code>,
+<code>reliability_score</code>, <code>feature_richness_score</code>,
+<code>value_proposition_score</code> - Performance:
+<code>avg_latency_ms</code>, <code>p95_latency_ms</code>,
+<code>min_latency_ms</code>, <code>max_latency_ms</code>,
+<code>throughput_rps</code></p>
+<hr />
+<h2 id="dependencies">13. Dependencies</h2>
+<p><strong>File</strong>: <code>llm-verifier/go.mod</code> (172 lines)
+[<sup>16</sup>]</p>
+<h3 id="module-digital.vasic.llmsverifier">Module:
+<code>digital.vasic.llmsverifier</code></h3>
+<h3 id="go-version-1.25.3">Go Version: <code>1.25.3</code></h3>
+<h3 id="direct-dependencies">Direct Dependencies</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>github.com/gin-gonic/gin</code></td>
+<td>v1.11.0</td>
+<td>HTTP web framework</td>
+</tr>
+<tr>
+<td><code>github.com/spf13/cobra</code></td>
+<td>v1.10.2</td>
+<td>CLI framework</td>
+</tr>
+<tr>
+<td><code>github.com/spf13/viper</code></td>
+<td>v1.21.0</td>
+<td>Configuration management</td>
+</tr>
+<tr>
+<td><code>github.com/charmbracelet/bubbletea</code></td>
+<td>v1.1.0</td>
+<td>TUI framework</td>
+</tr>
+<tr>
+<td><code>github.com/charmbracelet/lipgloss</code></td>
+<td>v0.13.0</td>
+<td>TUI styling</td>
+</tr>
+<tr>
+<td><code>github.com/mattn/go-sqlite3</code></td>
+<td>v1.14.32</td>
+<td>SQLite driver</td>
+</tr>
+<tr>
+<td><code>github.com/golang-jwt/jwt/v5</code></td>
+<td>v5.3.0</td>
+<td>JWT authentication</td>
+</tr>
+<tr>
+<td><code>github.com/go-playground/validator/v10</code></td>
+<td>v10.27.0</td>
+<td>Input validation</td>
+</tr>
+<tr>
+<td><code>github.com/google/uuid</code></td>
+<td>v1.6.0</td>
+<td>UUID generation</td>
+</tr>
+<tr>
+<td><code>github.com/gorilla/websocket</code></td>
+<td>v1.5.3</td>
+<td>WebSocket support</td>
+</tr>
+<tr>
+<td><code>github.com/stretchr/testify</code></td>
+<td>v1.11.1</td>
+<td>Testing framework</td>
+</tr>
+<tr>
+<td><code>github.com/swaggo/swag</code></td>
+<td>v1.16.6</td>
+<td>Swagger docs</td>
+</tr>
+<tr>
+<td><code>golang.org/x/crypto</code></td>
+<td>v0.46.0</td>
+<td>Cryptography</td>
+</tr>
+<tr>
+<td><code>golang.org/x/time</code></td>
+<td>v0.14.0</td>
+<td>Rate limiting</td>
+</tr>
+<tr>
+<td><code>cloud.google.com/go/storage</code></td>
+<td>v1.58.0</td>
+<td>GCS integration</td>
+</tr>
+<tr>
+<td><code>github.com/Azure/azure-sdk-for-go/sdk/storage/azblob</code></td>
+<td>v1.6.3</td>
+<td>Azure Blob</td>
+</tr>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2</code></td>
+<td>v1.41.0</td>
+<td>AWS SDK</td>
+</tr>
+<tr>
+<td><code>github.com/minio/minio-go/v7</code></td>
+<td>v7.0.98</td>
+<td>S3-compatible</td>
+</tr>
+<tr>
+<td><code>github.com/andybalholm/brotli</code></td>
+<td>v1.2.0</td>
+<td>Brotli compression</td>
+</tr>
+<tr>
+<td><code>github.com/go-ldap/ldap/v3</code></td>
+<td>v3.4.12</td>
+<td>LDAP auth</td>
+</tr>
+<tr>
+<td><code>github.com/quic-go/quic-go</code></td>
+<td>v0.54.0</td>
+<td>QUIC/HTTP3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="external-module-dependency">External Module Dependency</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>replace digital<span class="op">.</span>vasic<span class="op">.</span>llmprovider <span class="op">=&gt;</span> <span class="op">../../</span>LLMProvider</span></code></pre></div>
+<p><strong>CRITICAL</strong>: The project depends on a local module
+<code>digital.vasic.llmprovider</code> at
+<code>../../LLMProvider</code>. This is a sibling repository that must
+be present for the project to build.</p>
+<hr />
+<h2 id="test-framework">14. Test Framework</h2>
+<h3 id="test-directory-structure">Test Directory Structure</h3>
+<p><strong>Directory</strong>: <code>llm-verifier/tests/</code>
+[<sup>44</sup>]</p>
+<table>
+<colgroup>
+<col style="width: 61%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>Files</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit tests</td>
+<td><code>tests/unit/</code>, <code>database_unit_test.go</code>,
+<code>core_components_test.go</code></td>
+</tr>
+<tr>
+<td>Integration tests</td>
+<td><code>tests/integration/</code>, <code>integration_test.go</code>,
+<code>integration_comprehensive_test.go</code>,
+<code>integration_simple_test.go</code></td>
+</tr>
+<tr>
+<td>E2E tests</td>
+<td><code>e2e_test.go</code>, <code>acp_e2e_test.go</code></td>
+</tr>
+<tr>
+<td>Performance tests</td>
+<td><code>performance_test.go</code>,
+<code>acp_performance_test.go</code></td>
+</tr>
+<tr>
+<td>Security tests</td>
+<td><code>security_test.go</code>,
+<code>acp_security_test.go</code></td>
+</tr>
+<tr>
+<td>Automation tests</td>
+<td><code>automation_test.go</code>,
+<code>acp_automation_test.go</code></td>
+</tr>
+<tr>
+<td>ACP tests</td>
+<td><code>acp_test.go</code>, <code>acp_integration_test.go</code>,
+etc.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="test-patterns">Test Patterns</h3>
+<ul>
+<li>Tests use <code>t.Skip()</code> with <code>SKIP-OK</code> markers
+(per CONST-035)</li>
+<li>Mock API server: <code>tests/mock_api_server.go</code></li>
+<li>Test helpers: <code>tests/test_helpers.go</code></li>
+<li>Constants: <code>tests/test_constants.go</code></li>
+</ul>
+<h3 id="provider-tests">Provider Tests</h3>
+<ul>
+<li><code>providers/adapters_test.go</code></li>
+<li><code>providers/base_extended_test.go</code></li>
+<li><code>providers/deepseek_extended_test.go</code></li>
+<li><code>providers/errors_advanced_test.go</code></li>
+<li><code>providers/fallback_models_test.go</code></li>
+<li><code>providers/groq_test.go</code></li>
+<li><code>providers/integration_test.go</code></li>
+<li><code>providers/model_provider_service_test.go</code></li>
+</ul>
+<h3 id="scoring-tests">Scoring Tests</h3>
+<ul>
+<li><code>scoring/scoring_engine_test.go</code></li>
+<li><code>scoring/types_test.go</code></li>
+<li><code>scoring/metrics_collector_test.go</code></li>
+<li><code>scoring/alert_manager_test.go</code></li>
+<li><code>scoring/api_handlers_test.go</code></li>
+<li><code>scoring/database_extensions_test.go</code></li>
+<li><code>scoring/database_integration_test.go</code></li>
+<li><code>scoring/integration_simplified_test.go</code></li>
+<li><code>scoring/integration_test.go</code></li>
+<li><code>scoring/model_display_test.go</code></li>
+<li><code>scoring/model_naming_test.go</code></li>
+</ul>
+<hr />
+<h2 id="integration-examples">15. Integration Examples</h2>
+<h3 id="ai-cli-configuration-export">AI CLI Configuration Export</h3>
+<p><strong>File</strong>: <code>llm-verifier/cmd/main.go</code> (lines
+556-599)</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> ai-config export opencode config.json</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> ai-config bulk ./exports/</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> ai-config validate config.json</span></code></pre></div>
+<h3 id="client-library">Client Library</h3>
+<p><strong>File</strong>: <code>llm-verifier/client/client.go</code> —
+HTTP client with authentication</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>c <span class="op">:=</span> client<span class="op">.</span>New<span class="op">(</span>serverURL<span class="op">)</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span>Login<span class="op">(</span>username<span class="op">,</span> password<span class="op">)</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>models<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>GetModels<span class="op">()</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>result<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>VerifyModel<span class="op">(</span>modelID<span class="op">)</span></span></code></pre></div>
+<h3 id="docker-support">Docker Support</h3>
+<p><strong>File</strong>: <code>llm-verifier/docker-compose.yml</code> -
+SQLite database persistence - Memory caps to prevent host crashes</p>
+<h3 id="kubernetes">Kubernetes</h3>
+<ul>
+<li><code>helm/llm-verifier/</code> — Helm chart</li>
+<li><code>k8s/</code> — Raw Kubernetes manifests</li>
+<li><code>llm-verifier/k8s/</code> — K8s-specific Go code</li>
+</ul>
+<hr />
+<h2 id="critical-findings-gaps-for-helixcode-integration">16. Critical
+Findings &amp; Gaps for HelixCode Integration</h2>
+<h3 id="gaps-what-needs-extension">GAPS — What Needs Extension</h3>
+<ol type="1">
+<li><p><strong>Core Verification is a Stub</strong><br />
+<code>verification/verification.go</code> returns hardcoded scores (all
+8.5). The real verification happens in
+<code>coding_capability_verification.go</code> but only covers 4 coding
+tests. For HelixCode to use LLMsVerifier as a “single source of truth,”
+the verification engine needs to be completed with actual provider API
+calls for all dimensions.</p></li>
+<li><p><strong>API Server is Minimal</strong><br />
+<code>api/server.go</code> only has 5 basic endpoints. Full CRUD, batch
+operations, and real-time streaming are likely in other files but not
+wired in the main server file.</p></li>
+<li><p><strong>External Module Dependency</strong><br />
+<code>digital.vasic.llmprovider</code> at <code>../../LLMProvider</code>
+is required but not in this repo. HelixCode needs access to the
+<code>LLMProvider</code> sibling repository.</p></li>
+<li><p><strong>No Real-time Push Notifications</strong><br />
+Only polling and scheduled updates exist. For real-time integration,
+webhooks or SSE/WebSocket-based push would need to be added.</p></li>
+<li><p><strong>Authentication OAuth is Stub-heavy</strong><br />
+The <code>auth/oauth_stub.go</code> files exist to satisfy builds but
+may not implement full OAuth flows.</p></li>
+<li><p><strong>Rate Limiting is Config-only</strong><br />
+The <code>limits</code> table exists but actual enforcement middleware
+may not be fully implemented in the minimal
+<code>api/server.go</code>.</p></li>
+<li><p><strong>Token Pricing Integration</strong><br />
+Pricing data is stored but there’s no evidence of automatic price
+fetching from provider APIs. Prices appear to be manually configured or
+sourced from <code>models.dev</code>.</p></li>
+<li><p><strong>Scoring Strategy is Extensible</strong><br />
+<code>llmverifier/strategy.go</code>, <code>strategy_builder.go</code>,
+<code>strategy_default.go</code> define a Strategy pattern. This is good
+for HelixCode — custom scoring strategies can be injected.</p></li>
+</ol>
+<h3 id="strengths-ready-for-integration">STRENGTHS — Ready for
+Integration</h3>
+<ol type="1">
+<li><strong>Comprehensive Data Model</strong> — The <code>models</code>
+table and <code>VerificationResult</code> struct have ~40+ fields
+covering all dimensions needed for model evaluation.</li>
+<li><strong>Provider Adapter Pattern</strong> — Clean
+<code>BaseAdapter</code> + per-provider adapters make adding new LLM
+providers straightforward.</li>
+<li><strong>SQLite + Encryption</strong> — Portable, single-file
+database with optional SQL Cipher encryption.</li>
+<li><strong>TUI + CLI + REST API</strong> — Three interfaces available;
+HelixCode can use the REST API or embed as a Go library.</li>
+<li><strong>Scoring Engine is Modular</strong> —
+<code>ScoringEngine</code> with configurable weights, batch scoring, and
+history tracking.</li>
+<li><strong>Report Generation</strong> — Markdown and JSON reports with
+rankings.</li>
+<li><strong>Configuration Export</strong> — Native support for opencode,
+crush, claude-code formats.</li>
+</ol>
+<hr />
+<h2 id="key-file-paths-summary">17. Key File Paths Summary</h2>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 73%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Primary File(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI Entry</td>
+<td><code>llm-verifier/cmd/main.go</code></td>
+</tr>
+<tr>
+<td>Config Structs</td>
+<td><code>llm-verifier/config/config.go</code></td>
+</tr>
+<tr>
+<td>Config Loader</td>
+<td><code>llm-verifier/llmverifier/config_loader.go</code></td>
+</tr>
+<tr>
+<td>Core Verifier (stub)</td>
+<td><code>llm-verifier/verification/verification.go</code></td>
+</tr>
+<tr>
+<td>Coding Verification</td>
+<td><code>llm-verifier/verification/coding_capability_verification.go</code></td>
+</tr>
+<tr>
+<td>Provider Base</td>
+<td><code>llm-verifier/providers/base.go</code></td>
+</tr>
+<tr>
+<td>Provider Anthropic</td>
+<td><code>llm-verifier/providers/anthropic.go</code></td>
+</tr>
+<tr>
+<td>Provider Config</td>
+<td><code>llm-verifier/providers/config.go</code></td>
+</tr>
+<tr>
+<td>Provider Errors</td>
+<td><code>llm-verifier/providers/errors.go</code></td>
+</tr>
+<tr>
+<td>LLM Client</td>
+<td><code>llm-verifier/llmverifier/llm_client.go</code></td>
+</tr>
+<tr>
+<td>Data Models</td>
+<td><code>llm-verifier/llmverifier/models.go</code></td>
+</tr>
+<tr>
+<td>Reporter</td>
+<td><code>llm-verifier/llmverifier/reporter.go</code></td>
+</tr>
+<tr>
+<td>Scoring Engine</td>
+<td><code>llm-verifier/scoring/scoring_engine.go</code></td>
+</tr>
+<tr>
+<td>Score Types</td>
+<td><code>llm-verifier/scoring/types.go</code></td>
+</tr>
+<tr>
+<td>Database</td>
+<td><code>llm-verifier/database/database.go</code></td>
+</tr>
+<tr>
+<td>API Server</td>
+<td><code>llm-verifier/api/server.go</code></td>
+</tr>
+<tr>
+<td>Client Lib</td>
+<td><code>llm-verifier/client/client.go</code></td>
+</tr>
+<tr>
+<td>TUI</td>
+<td><code>llm-verifier/tui/</code></td>
+</tr>
+<tr>
+<td>Tests</td>
+<td><code>llm-verifier/tests/</code></td>
+</tr>
+<tr>
+<td>README</td>
+<td><code>llm-verifier/README.md</code></td>
+</tr>
+<tr>
+<td>go.mod</td>
+<td><code>llm-verifier/go.mod</code></td>
+</tr>
+<tr>
+<td>config.yaml</td>
+<td><code>llm-verifier/config.yaml</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Analysis generated from exhaustive repository exploration of
+https://github.com/vasic-digital/LLMsVerifier</em></p>
+</body>
+</html>

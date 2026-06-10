@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec04</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec04</h1>
+</header>
+<h1 id="phase-3-on-demand-screenshot-pipeline">4. Phase 3: On-Demand
+Screenshot Pipeline</h1>
+<blockquote>
+<p><strong>Prerequisite</strong>: Phase 1 integration
+(<code>pkg/evidence</code>, <code>pkg/session</code>) and Phase 2
+executor implementations (<code>pkg/navigator</code>) must be in place.
+The new <code>pkg/screenshot/</code> package consumes those layers and
+exposes a unified, platform-agnostic on-demand capture API.</p>
+</blockquote>
+<h2 id="screenshot-architecture-design">4.1 Screenshot Architecture
+Design</h2>
+<h3 id="new-package-pkgscreenshot">4.1.1 New Package:
+<code>pkg/screenshot/</code></h3>
+<p>The existing HelixQA codebase scatters screenshot capability across
+three disconnected layers. <code>pkg/evidence/collector.go</code> shells
+out to platform tools but is evidence-oriented: it writes to disk and
+returns <code>Item</code> metadata without bytes [<sup>66</sup>].
+<code>pkg/navigator/executor.go</code> defines
+<code>ActionExecutor.Screenshot(ctx) ([]byte, error)</code>, implemented
+by <code>ADBExecutor</code>, <code>PlaywrightExecutor</code>, and
+<code>X11Executor</code>, yet these executors are navigation-bound—they
+exist only inside a <code>PlatformWorker</code> [<sup>68</sup>].
+<code>pkg/session/recorder.go</code> tracks screenshot indices and paths
+but does not capture bytes; the caller must write image data to the
+returned path [<sup>65</sup>]. There is no single entry point for an
+operator or reporting service to request, “capture platform X right now
+and return the image.”</p>
+<p>The new <code>pkg/screenshot/</code> package introduces
+<code>Engine</code>, <code>Storage</code>, and <code>Manager</code>.
+<code>Engine</code> is the per-platform capture abstraction.
+<code>Storage</code> persists and retrieves bytes. <code>Manager</code>
+binds engines to storage, attaches session metadata, and exposes
+programmatic and HTTP APIs.</p>
+<h3 id="engine-interface">4.1.2 Engine Interface</h3>
+<p>Every platform engine implements the same contract.
+<code>Capture</code> returns <code>*Result</code> (not bare
+<code>[]byte</code>) so that width, height, capture duration, and
+thumbnail data travel with the payload.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/engine.go</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> screenshot</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;context&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Engine is the platform-specific capture implementation.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Engine <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Capture returns raw screenshot bytes and metadata.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Supported returns true if the engine is wired and tools are on PATH.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    Supported<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Name returns a human-readable identifier, e.g. &quot;web-playwright&quot;.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>CaptureOptions</code> parameterises a single request. Fields
+are populated by the HTTP API, the CLI, or the autonomous pipeline.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/options.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CaptureOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Format                <span class="dt">string</span>        <span class="co">// png, jpeg, webp (default: png)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Quality               <span class="dt">int</span>           <span class="co">// 1–100 for lossy formats (default: 90)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Width                 <span class="dt">int</span>           <span class="co">// 0 = native resolution</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    Height                <span class="dt">int</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    FullPage              <span class="dt">bool</span>          <span class="co">// Web: capture full scrollable document</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    ResponsiveBreakpoints <span class="op">[]</span>Breakpoint  <span class="co">// Web: capture at multiple viewports</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    DisplayID             <span class="dt">string</span>        <span class="co">// Desktop: target specific display</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    WindowID              <span class="dt">string</span>        <span class="co">// Desktop: target specific window</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    WaitForRender         time<span class="op">.</span>Duration <span class="co">// Delay before capture</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    ValidateContent       <span class="dt">bool</span>          <span class="co">// Reject blank/uniform screenshots</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    MaxRetries            <span class="dt">int</span>           <span class="co">// Default: 3</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    DarkMode              <span class="dt">bool</span>          <span class="co">// Web: prefers-color-scheme: dark</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Breakpoint <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    Name   <span class="dt">string</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    Width  <span class="dt">int</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    Height <span class="dt">int</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Result</code> carries the image and all metadata required for
+retrieval, presentation, and timeline correlation.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/result.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Data        <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    Format      <span class="dt">string</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Width       <span class="dt">int</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    Height      <span class="dt">int</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    Platform    config<span class="op">.</span>Platform</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    Timestamp   time<span class="op">.</span>Time</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    Duration    time<span class="op">.</span>Duration <span class="co">// wall-clock capture time</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    SessionID   <span class="dt">string</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    StepName    <span class="dt">string</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    StepIndex   <span class="dt">int</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    Path        <span class="dt">string</span>        <span class="co">// set if persisted to Storage</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    VideoOffset time<span class="op">.</span>Duration <span class="co">// links to session video</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    Thumbnail   <span class="op">[]</span><span class="dt">byte</span>        <span class="co">// 480 px wide preview</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    Breakpoint  <span class="dt">string</span>        <span class="co">// e.g. &quot;mobile&quot;, &quot;tablet&quot;, &quot;desktop&quot;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="storage-interface">4.1.3 Storage Interface</h3>
+<p><code>Storage</code> decouples persistence from capture. The default
+<code>fsStorage</code> writes to
+<code>&lt;outputDir&gt;/screenshots/&lt;platform&gt;/&lt;idx&gt;-&lt;name&gt;.png</code>
+and keeps an index <code>screenshots.json</code> mapping
+<code>id → filepath + metadata</code>. This preserves compatibility with
+the existing <code>SessionRecorder</code> layout while adding
+queryability.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/storage.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Storage <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Save<span class="op">(</span>name <span class="dt">string</span><span class="op">,</span> data <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> meta Result<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Load<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    List<span class="op">(</span>sessionID <span class="dt">string</span><span class="op">)</span> <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Thumbnail<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="manager">4.1.4 Manager</h3>
+<p><code>Manager</code> is the public face of the package. It holds a
+registry of engines, a storage backend, and optionally a
+<code>*session.SessionRecorder</code> for timeline integration.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/manager.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    engines <span class="kw">map</span><span class="op">[</span>config<span class="op">.</span>Platform<span class="op">]</span>Engine</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    store   Storage</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    session <span class="op">*</span>session<span class="op">.</span>SessionRecorder</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    vision  <span class="op">*</span>visionserver<span class="op">.</span>Handler</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    mu      sync<span class="op">.</span>RWMutex</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewManager<span class="op">(</span>store Storage<span class="op">,</span> opts <span class="op">...</span>ManagerOption<span class="op">)</span> <span class="op">*</span>Manager</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> RegisterEngine<span class="op">(</span>platform config<span class="op">.</span>Platform<span class="op">,</span> e Engine<span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> platform config<span class="op">.</span>Platform<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CaptureAll<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CaptureResponsive<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> breakpoints <span class="op">[]</span>Breakpoint<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Get<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Query<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> q Query<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h3 id="architecture-diagram">4.1.5 Architecture Diagram</h3>
+<pre class="mermaid"><code>flowchart TB
+    subgraph Entry[&quot;Entry Points&quot;]
+        HTTP[&quot;HTTP API&lt;br/&gt;/api/v1/qa/screenshot&quot;]
+        CLI[&quot;CLI Command&lt;br/&gt;helixcode qa screenshot&quot;]
+        WS[&quot;WebSocket&lt;br/&gt;/ws/qa/screenshot&quot;]
+        AUTO[&quot;Autonomous Pipeline&lt;br/&gt;PlatformWorker&quot;]
+    end
+
+    subgraph Core[&quot;pkg/screenshot&quot;]
+        MGR[&quot;Manager&lt;br/&gt;engine registry + storage + session&quot;]
+        ENG[&quot;Engine Interface&lt;br/&gt;Capture(ctx, opts) (*Result, error)&quot;]
+        STO[&quot;Storage Interface&lt;br/&gt;Save / Load / List / Thumbnail&quot;]
+    end
+
+    subgraph Engines[&quot;Per-Platform Engines&quot;]
+        WEB[&quot;WebEngine&lt;br/&gt;Playwright / chromedp&quot;]
+        LIN[&quot;LinuxEngine&lt;br/&gt;xwd / grim / xrandr&quot;]
+        MAC[&quot;MacOSEngine&lt;br/&gt;screencapture -x / ScreenCaptureKit&quot;]
+        WIN[&quot;WindowsEngine&lt;br/&gt;DXGI / BitBlt&quot;]
+        AND[&quot;AndroidEngine&lt;br/&gt;adb exec-out / scrcpy&quot;]
+        IOS[&quot;iOSEngine&lt;br/&gt;simctl io / go-ios&quot;]
+        CLIENG[&quot;CLIEngine&lt;br/&gt;asciinema + ANSI-to-PNG&quot;]
+        TUIENG[&quot;TUIEngine&lt;br/&gt;tmux capture-pane / xterm.js&quot;]
+    end
+
+    subgraph Downstream[&quot;Downstream&quot;]
+        VISION[&quot;VisionServer&lt;br/&gt;/analyze&quot;]
+        TIMELINE[&quot;Session Timeline&lt;br/&gt;pkg/session&quot;]
+        DISK[&quot;Filesystem&lt;br/&gt;qa-results/&lt;session&gt;/screenshots/&quot;]
+    end
+
+    HTTP --&gt; MGR
+    CLI --&gt; MGR
+    WS --&gt; MGR
+    AUTO --&gt; MGR
+    MGR --&gt; ENG
+    MGR --&gt; STO
+    ENG --&gt; WEB &amp; LIN &amp; MAC &amp; WIN &amp; AND &amp; IOS &amp; CLIENG &amp; TUIENG
+    WEB --&gt; VISION
+    LIN &amp; MAC &amp; WIN &amp; AND &amp; IOS &amp; CLIENG &amp; TUIENG --&gt; DISK
+    STO --&gt; TIMELINE &amp; DISK</code></pre>
+<p>All four entry points converge on <code>Manager.Capture()</code>. The
+Manager selects the correct <code>Engine</code>, invokes
+<code>Capture(ctx, opts)</code>, and forwards <code>*Result</code> to
+<code>Storage</code> and optionally to
+<code>visionserver.Handler</code>. Engine failures are isolated; a
+<code>WindowsEngine</code> error does not block
+<code>AndroidEngine</code>.</p>
+<h2 id="per-platform-screenshot-implementation">4.2 Per-Platform
+Screenshot Implementation</h2>
+<h3 id="web-playwright-responsive-breakpoints">4.2.1 Web: Playwright +
+Responsive Breakpoints</h3>
+<p><code>PlaywrightExecutor.Screenshot()</code> sends
+<code>{&quot;action&quot;:&quot;screenshot&quot;}</code> to a Node.js bridge and returns raw
+PNG bytes [<sup>70</sup>]. The nexus capture layer uses
+<code>chromedp.CaptureScreenshot</code> for continuous frame streaming.
+Neither path supports multiple breakpoints, full-page capture, or
+dark-mode emulation.</p>
+<p><code>WebEngine</code> wraps the existing bridge and adds breakpoint
+enumeration, full-page capture, and dark-mode toggling. The bridge
+script is extended with <code>screenshot_fullpage</code>,
+<code>set_viewport</code>, and <code>set_dark_mode</code> actions.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/web_engine.go</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>WebEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> opts<span class="op">.</span>DarkMode <span class="op">{</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        _<span class="op">,</span> _ <span class="op">=</span> e<span class="op">.</span>runBridgeCmd<span class="op">(</span>ctx<span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;action&quot;</span><span class="op">:</span> <span class="st">&quot;set_dark_mode&quot;</span><span class="op">,</span> <span class="st">&quot;enabled&quot;</span><span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>opts<span class="op">.</span>ResponsiveBreakpoints<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> results <span class="op">[]*</span>Result</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> bp <span class="op">:=</span> <span class="kw">range</span> opts<span class="op">.</span>ResponsiveBreakpoints <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            _<span class="op">,</span> _ <span class="op">=</span> e<span class="op">.</span>runBridgeCmd<span class="op">(</span>ctx<span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;action&quot;</span><span class="op">:</span> <span class="st">&quot;set_viewport&quot;</span><span class="op">,</span> <span class="st">&quot;width&quot;</span><span class="op">:</span> bp<span class="op">.</span>Width<span class="op">,</span> <span class="st">&quot;height&quot;</span><span class="op">:</span> bp<span class="op">.</span>Height<span class="op">,</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">})</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> opts<span class="op">.</span>WaitForRender <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span> time<span class="op">.</span>Sleep<span class="op">(</span>opts<span class="op">.</span>WaitForRender<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>            data<span class="op">,</span> err <span class="op">:=</span> e<span class="op">.</span>captureSingle<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;web %s: %w&quot;</span><span class="op">,</span> bp<span class="op">.</span>Name<span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>results<span class="op">,</span> <span class="op">&amp;</span>Result<span class="op">{</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>                Data<span class="op">:</span> data<span class="op">,</span> Format<span class="op">:</span> opts<span class="op">.</span>Format<span class="op">,</span> Width<span class="op">:</span> bp<span class="op">.</span>Width<span class="op">,</span> Height<span class="op">:</span> bp<span class="op">.</span>Height<span class="op">,</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>                Platform<span class="op">:</span> config<span class="op">.</span>PlatformWeb<span class="op">,</span> Timestamp<span class="op">:</span> time<span class="op">.</span>Now<span class="op">(),</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>                Duration<span class="op">:</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">),</span> Breakpoint<span class="op">:</span> bp<span class="op">.</span>Name<span class="op">,</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>            <span class="op">})</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> results<span class="op">[</span><span class="dv">0</span><span class="op">],</span> <span class="ot">nil</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> e<span class="op">.</span>captureSingle<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... decode dimensions, return Result</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Default breakpoints: mobile 375×667 (iPhone SE), tablet 768×1024
+(iPad mini), desktop 1440×900. Configurable per-project via
+<code>helixqa.yaml</code>.</p>
+<h3 id="desktop-linux-x11-and-wayland">4.2.2 Desktop Linux: X11 and
+Wayland</h3>
+<p><code>X11Executor.Screenshot()</code> uses
+<code>import -window root png:-</code> [<sup>69</sup>]. The nexus
+capture layer probes <code>xwd</code> → <code>gnome-screenshot</code> →
+<code>grim</code>. No per-display selection exists in the navigator
+layer.</p>
+<p><code>LinuxEngine</code> probes the runtime at construction: if
+<code>DISPLAY</code> is set and <code>xwd</code> is on PATH, it uses
+<code>xwd</code> (faster than <code>import</code>, avoiding ImageMagick
+overhead). If <code>WAYLAND_DISPLAY</code> is set and <code>grim</code>
+is on PATH, it uses <code>grim</code>. Multi-monitor enumeration uses
+<code>xrandr</code> on X11 and <code>wlr-randr</code> on wlroots
+compositors.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/linux_engine.go</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>LinuxEngine<span class="op">)</span> Supported<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;DISPLAY&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;xwd&quot;</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> e<span class="op">.</span>backend <span class="op">=</span> <span class="st">&quot;xwd&quot;</span><span class="op">;</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;import&quot;</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> e<span class="op">.</span>backend <span class="op">=</span> <span class="st">&quot;import&quot;</span><span class="op">;</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;WAYLAND_DISPLAY&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;grim&quot;</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> e<span class="op">.</span>backend <span class="op">=</span> <span class="st">&quot;grim&quot;</span><span class="op">;</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">false</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>LinuxEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> e<span class="op">.</span>backend <span class="op">{</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;xwd&quot;</span><span class="op">:</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureX11<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;grim&quot;</span><span class="op">:</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureWayland<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;linux: no backend available&quot;</span><span class="op">)</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="desktop-macos-screencapture-screencapturekit">4.2.3 Desktop
+macOS: <code>screencapture</code> + ScreenCaptureKit</h3>
+<p><code>pkg/capture/macos_capture.go</code> (build-tagged
+<code>//go:build darwin</code>) implements video capture via GStreamer
+<code>avfvideosrc</code> [<sup>73</sup>]. No static screenshot utility
+exists in the main navigator tree.</p>
+<p><code>MacOSEngine</code> uses
+<code>screencapture -x -D &lt;display&gt;</code> (silent, no shutter
+sound). Per-display selection uses <code>-D</code> (1-indexed). Window
+capture uses <code>-l &lt;windowID&gt;</code>. For Phase 5.5, a
+CGO-backed <code>ScreenCaptureKit</code> path will be registered as an
+alternate engine.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/macos_engine.go</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>MacOSEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    tmpFile <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>os<span class="op">.</span>TempDir<span class="op">(),</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;helixqa-%d.png&quot;</span><span class="op">,</span> time<span class="op">.</span>Now<span class="op">().</span>UnixNano<span class="op">()))</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> os<span class="op">.</span>Remove<span class="op">(</span>tmpFile<span class="op">)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;-x&quot;</span><span class="op">,</span> tmpFile<span class="op">}</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> opts<span class="op">.</span>DisplayID <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> args <span class="op">=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;-x&quot;</span><span class="op">,</span> <span class="st">&quot;-D&quot;</span><span class="op">,</span> opts<span class="op">.</span>DisplayID<span class="op">,</span> tmpFile<span class="op">}</span> <span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> opts<span class="op">.</span>WindowID <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> args <span class="op">=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;-x&quot;</span><span class="op">,</span> <span class="st">&quot;-l&quot;</span><span class="op">,</span> opts<span class="op">.</span>WindowID<span class="op">,</span> tmpFile<span class="op">}</span> <span class="op">}</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;screencapture&quot;</span><span class="op">,</span> args<span class="op">...).</span>Run<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;screencapture: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>tmpFile<span class="op">)</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> data<span class="op">,</span> Format<span class="op">:</span> <span class="st">&quot;png&quot;</span><span class="op">,</span> Platform<span class="op">:</span> config<span class="op">.</span>PlatformDesktop<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="desktop-windows-dxgi-desktop-duplication">4.2.4 Desktop Windows:
+DXGI Desktop Duplication</h3>
+<p>No Windows-specific screenshot code exists in the repository.</p>
+<p><code>WindowsEngine</code> uses a small C# bridge executable that
+wraps the DXGI Desktop Duplication API (Windows 8+, WDDM 1.2+) and
+outputs PNG to stdout. A <code>BitBlt</code> fallback is compiled into
+the same bridge for headless sessions where D3D is unavailable. The
+bridge (<code>cmd/helixqa-capture-windows/</code>) is published as a
+single-file artifact alongside releases.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/windows_engine.go</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>WindowsEngine<span class="op">)</span> Supported<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;helixqa-capture-windows.exe&quot;</span><span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> err <span class="op">==</span> <span class="ot">nil</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>WindowsEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;-mode&quot;</span><span class="op">,</span> <span class="st">&quot;dxgi&quot;</span><span class="op">,</span> <span class="st">&quot;-format&quot;</span><span class="op">,</span> <span class="st">&quot;png&quot;</span><span class="op">,</span> <span class="st">&quot;-stdout&quot;</span><span class="op">}</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> opts<span class="op">.</span>DisplayID <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> args <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>args<span class="op">,</span> <span class="st">&quot;-display&quot;</span><span class="op">,</span> opts<span class="op">.</span>DisplayID<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;helixqa-capture-windows.exe&quot;</span><span class="op">,</span> args<span class="op">...)</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Output<span class="op">()</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        args<span class="op">[</span><span class="dv">1</span><span class="op">]</span> <span class="op">=</span> <span class="st">&quot;bitblt&quot;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        cmd <span class="op">=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;helixqa-capture-windows.exe&quot;</span><span class="op">,</span> args<span class="op">...)</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        data<span class="op">,</span> err <span class="op">=</span> cmd<span class="op">.</span>Output<span class="op">()</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;windows capture: %w&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> data<span class="op">,</span> Format<span class="op">:</span> <span class="st">&quot;png&quot;</span><span class="op">,</span> Platform<span class="op">:</span> config<span class="op">.</span>PlatformDesktop<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="android-adb-exec-out-screencap-scrcpy">4.2.5 Android:
+<code>adb exec-out screencap</code> + scrcpy</h3>
+<p><code>ADBExecutor.Screenshot()</code> uses
+<code>adb exec-out screencap -p</code> with a 5-attempt retry loop, size
+validation (&lt; 5000 bytes = blank), and uniform-image sampling
+[<sup>68</sup>]. <code>pkg/evidence/collector.go</code> uses the slower
+shell+pull path [<sup>66</sup>].</p>
+<p><code>AndroidEngine</code> unifies both paths. The fast
+<code>exec-out</code> path is default. <code>scrcpy</code> is used as a
+high-speed alternative when available and the device is on USB. Rotation
+is detected by parsing
+<code>adb shell dumpsys display | grep &#39;orientation=&#39;</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/android_engine.go</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>AndroidEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> lastErr <span class="dt">error</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> attempt <span class="op">:=</span> <span class="dv">1</span><span class="op">;</span> attempt <span class="op">&lt;=</span> max<span class="op">(</span>opts<span class="op">.</span>MaxRetries<span class="op">,</span> <span class="dv">3</span><span class="op">);</span> attempt<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        data<span class="op">,</span> err <span class="op">:=</span> e<span class="op">.</span>cmdRunner<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;adb&quot;</span><span class="op">,</span> <span class="st">&quot;-s&quot;</span><span class="op">,</span> e<span class="op">.</span>device<span class="op">,</span> <span class="st">&quot;exec-out&quot;</span><span class="op">,</span> <span class="st">&quot;screencap&quot;</span><span class="op">,</span> <span class="st">&quot;-p&quot;</span><span class="op">)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> lastErr <span class="op">=</span> err<span class="op">;</span> time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">500</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">);</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>data<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">5000</span> <span class="op">{</span> lastErr <span class="op">=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;too small (%d bytes)&quot;</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>data<span class="op">));</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> autonomous<span class="op">.</span>IsBlankScreenshot<span class="op">(</span>data<span class="op">)</span> <span class="op">{</span> lastErr <span class="op">=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;blank&quot;</span><span class="op">);</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> data<span class="op">,</span> Format<span class="op">:</span> <span class="st">&quot;png&quot;</span><span class="op">,</span> Platform<span class="op">:</span> config<span class="op">.</span>PlatformAndroid<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;android capture failed: %w&quot;</span><span class="op">,</span> lastErr<span class="op">)</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="ios-xcrun-simctl-io-go-ios">4.2.6 iOS:
+<code>xcrun simctl io</code> + go-ios</h3>
+<p>No iOS support exists in the codebase. Confirmed gap
+[<sup>61</sup>].</p>
+<p><code>iOSEngine</code> has two sub-implementations.
+<code>iOSSimulatorEngine</code> uses
+<code>xcrun simctl io &lt;udid&gt; screenshot &lt;path&gt;</code>.
+<code>iOSDeviceEngine</code> uses <code>go-ios screenshot</code>
+(pure-Go usbmuxd client, no Xcode required).</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/ios_engine.go</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> iOSSimulatorEngine <span class="kw">struct</span> <span class="op">{</span> udid <span class="dt">string</span> <span class="op">}</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>iOSSimulatorEngine<span class="op">)</span> Supported<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;xcrun&quot;</span><span class="op">)</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> err <span class="op">==</span> <span class="ot">nil</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>iOSSimulatorEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    tmpFile <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>os<span class="op">.</span>TempDir<span class="op">(),</span> <span class="st">&quot;ios-screenshot.png&quot;</span><span class="op">)</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> os<span class="op">.</span>Remove<span class="op">(</span>tmpFile<span class="op">)</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;xcrun&quot;</span><span class="op">,</span> <span class="st">&quot;simctl&quot;</span><span class="op">,</span> <span class="st">&quot;io&quot;</span><span class="op">,</span> e<span class="op">.</span>udid<span class="op">,</span> <span class="st">&quot;screenshot&quot;</span><span class="op">,</span> tmpFile<span class="op">).</span>Run<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;simctl: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>tmpFile<span class="op">)</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> data<span class="op">,</span> Format<span class="op">:</span> <span class="st">&quot;png&quot;</span><span class="op">,</span> Platform<span class="op">:</span> config<span class="op">.</span>PlatformIOS<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="cli-asciinema-ansi-to-png-renderer">4.2.7 CLI: asciinema +
+ANSI-to-PNG Renderer</h3>
+<p><code>CLIExecutor.Screenshot()</code> returns stdout text as raw
+bytes [<sup>74</sup>]. No visual rendering exists.</p>
+<p><code>CLIEngine</code> supports <code>CLIModeText</code>
+(backward-compatible) and <code>CLIModeRendered</code> (new). Rendered
+mode records via <code>asciinema rec</code>, then converts the
+<code>.cast</code> file to PNG via a headless Chromium process loading
+<code>xterm.js</code> and screenshotting the canvas.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/cli_engine.go</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CLICaptureMode <span class="dt">string</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    CLIModeText     CLICaptureMode <span class="op">=</span> <span class="st">&quot;text&quot;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    CLIModeRendered CLICaptureMode <span class="op">=</span> <span class="st">&quot;rendered&quot;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CLIEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    command <span class="dt">string</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    args    <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    runner  detector<span class="op">.</span>CommandRunner</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    mode    CLICaptureMode</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>CLIEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> e<span class="op">.</span>mode <span class="op">==</span> CLIModeRendered <span class="op">{</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureRendered<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> e<span class="op">.</span>runner<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">,</span> e<span class="op">.</span>command<span class="op">,</span> e<span class="op">.</span>args<span class="op">...)</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;cli text: %w&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> data<span class="op">,</span> Format<span class="op">:</span> <span class="st">&quot;text/plain&quot;</span><span class="op">,</span> Platform<span class="op">:</span> config<span class="op">.</span>PlatformCLI<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="tui-terminal-buffer-state-capture">4.2.8 TUI: Terminal Buffer
+State Capture</h3>
+<p>TUI applications share <code>CLIExecutor</code>; the “screenshot” is
+stdout text with raw ANSI sequences [<sup>74</sup>]. No terminal grid
+reconstruction exists.</p>
+<p><code>TUIEngine</code> captures terminal buffer state. The
+<code>tmux</code> backend uses <code>tmux capture-pane -p -e</code>
+(preserves ANSI colors). The <code>xtermjs</code> backend launches a
+headless terminal emulator, runs the TUI command, waits for
+<code>opts.WaitForRender</code>, and screenshots the rendered grid.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/tui_engine.go</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TUIEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    backend <span class="dt">string</span> <span class="co">// &quot;tmux&quot;, &quot;xtermjs&quot;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    paneID  <span class="dt">string</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>TUIEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> e<span class="op">.</span>backend <span class="op">{</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;tmux&quot;</span><span class="op">:</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        cmd <span class="op">:=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;tmux&quot;</span><span class="op">,</span> <span class="st">&quot;capture-pane&quot;</span><span class="op">,</span> <span class="st">&quot;-p&quot;</span><span class="op">,</span> <span class="st">&quot;-e&quot;</span><span class="op">,</span> <span class="st">&quot;-t&quot;</span><span class="op">,</span> e<span class="op">.</span>paneID<span class="op">)</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        data<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Output<span class="op">()</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;tmux: %w&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        png<span class="op">,</span> err <span class="op">:=</span> renderANSIToPNG<span class="op">(</span>data<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> png<span class="op">,</span> Format<span class="op">:</span> <span class="st">&quot;png&quot;</span><span class="op">,</span> Platform<span class="op">:</span> config<span class="op">.</span>PlatformCLI<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;xtermjs&quot;</span><span class="op">:</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureXtermJS<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;tui: unknown backend %s&quot;</span><span class="op">,</span> e<span class="op">.</span>backend<span class="op">)</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="platform-coverage-matrix">4.2.9 Platform Coverage Matrix</h3>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 25%" />
+<col style="width: 17%" />
+<col style="width: 10%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Capture Mechanism</th>
+<th>Engine File</th>
+<th>Status</th>
+<th>Anti-Bluff Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web (mobile 375px)</td>
+<td>Playwright <code>set_viewport</code> + <code>screenshot</code></td>
+<td><code>pkg/screenshot/web_engine.go</code></td>
+<td>New extension</td>
+<td>Vision LLM: “Is login button visible at mobile width?”</td>
+</tr>
+<tr>
+<td>Web (tablet 768px)</td>
+<td>Playwright <code>set_viewport</code> + <code>screenshot</code></td>
+<td><code>pkg/screenshot/web_engine.go</code></td>
+<td>New extension</td>
+<td>Template match against tablet reference</td>
+</tr>
+<tr>
+<td>Web (desktop 1440px)</td>
+<td>Playwright <code>set_viewport</code> +
+<code>screenshot_fullpage</code></td>
+<td><code>pkg/screenshot/web_engine.go</code></td>
+<td>New extension</td>
+<td>OCR: verify expected page title</td>
+</tr>
+<tr>
+<td>Desktop Linux (X11)</td>
+<td><code>xwd -root</code> + <code>convert png:-</code></td>
+<td><code>pkg/screenshot/linux_engine.go</code></td>
+<td>New refactor</td>
+<td>SSIM against known-good reference</td>
+</tr>
+<tr>
+<td>Desktop Linux (Wayland)</td>
+<td><code>grim -o &lt;output&gt;</code></td>
+<td><code>pkg/screenshot/linux_engine.go</code></td>
+<td>New</td>
+<td>SSIM + <code>IsBlankScreenshot</code></td>
+</tr>
+<tr>
+<td>Desktop macOS</td>
+<td><code>screencapture -x -D &lt;display&gt;</code></td>
+<td><code>pkg/screenshot/macos_engine.go</code></td>
+<td>New</td>
+<td>Vision LLM: expected window visible</td>
+</tr>
+<tr>
+<td>Desktop Windows</td>
+<td>DXGI Desktop Duplication / BitBlt</td>
+<td><code>pkg/screenshot/windows_engine.go</code></td>
+<td><strong>New</strong></td>
+<td>Template match; deliberate-break test</td>
+</tr>
+<tr>
+<td>Android</td>
+<td><code>adb exec-out screencap -p</code> / scrcpy</td>
+<td><code>pkg/screenshot/android_engine.go</code></td>
+<td>Refactor</td>
+<td><code>IsBlankScreenshot</code> grid + size check</td>
+</tr>
+<tr>
+<td>iOS Simulator</td>
+<td><code>xcrun simctl io &lt;udid&gt; screenshot</code></td>
+<td><code>pkg/screenshot/ios_engine.go</code></td>
+<td><strong>New</strong></td>
+<td>OCR: verify iOS UI text</td>
+</tr>
+<tr>
+<td>iOS Device</td>
+<td><code>go-ios screenshot --udid &lt;udid&gt;</code></td>
+<td><code>pkg/screenshot/ios_engine.go</code></td>
+<td><strong>New</strong></td>
+<td>Vision LLM: iPhone screen visible</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>asciinema rec</code> + ANSI-to-PNG</td>
+<td><code>pkg/screenshot/cli_engine.go</code></td>
+<td><strong>New</strong></td>
+<td>OCR on rendered terminal image</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td><code>tmux capture-pane -p -e</code> / <code>xterm.js</code></td>
+<td><code>pkg/screenshot/tui_engine.go</code></td>
+<td><strong>New</strong></td>
+<td>Vision LLM: TUI interface visible</td>
+</tr>
+</tbody>
+</table>
+<p>Of 12 rows, 6 are entirely new implementations (Windows, iOS
+simulator, iOS device, CLI rendered, TUI), 4 are refactors or extensions
+of existing code (Web responsive, Linux dual backend, Android
+unification, macOS wrapper), and 2 reuse existing verification logic
+(Android blank detection). New implementations require additional
+dependencies: a C# bridge for Windows, <code>go-ios</code> for physical
+iOS devices, <code>asciinema</code> and a headless Chromium renderer for
+CLI/TUI. Refactors can be implemented against existing
+<code>pkg/navigator</code> executor tests.</p>
+<h2 id="on-demand-screenshot-api">4.3 On-Demand Screenshot API</h2>
+<h3 id="http-endpoint">4.3.1 HTTP Endpoint</h3>
+<p>The screenshot API is mounted under
+<code>/api/v1/qa/screenshot</code>. It supports synchronous capture
+returned as base64 inline, file download, or persistent URL.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/http_handler.go</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> RegisterRoutes<span class="op">(</span>mux <span class="op">*</span>http<span class="op">.</span>ServeMux<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    mux<span class="op">.</span>HandleFunc<span class="op">(</span><span class="st">&quot;/api/v1/qa/screenshot&quot;</span><span class="op">,</span> m<span class="op">.</span>handleScreenshot<span class="op">)</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    mux<span class="op">.</span>HandleFunc<span class="op">(</span><span class="st">&quot;/api/v1/qa/screenshot/&quot;</span><span class="op">,</span> m<span class="op">.</span>handleScreenshotByID<span class="op">)</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    mux<span class="op">.</span>HandleFunc<span class="op">(</span><span class="st">&quot;/ws/qa/screenshot&quot;</span><span class="op">,</span> m<span class="op">.</span>handleScreenshotStream<span class="op">)</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> handleScreenshot<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    platform <span class="op">:=</span> config<span class="op">.</span>Platform<span class="op">(</span>r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;platform&quot;</span><span class="op">))</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    sessionID <span class="op">:=</span> r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;session&quot;</span><span class="op">)</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    format <span class="op">:=</span> r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;format&quot;</span><span class="op">)</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> format <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> format <span class="op">=</span> <span class="st">&quot;base64&quot;</span> <span class="op">}</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    opts <span class="op">:=</span> CaptureOptions<span class="op">{</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        Format<span class="op">:</span> r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;image_format&quot;</span><span class="op">),</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        FullPage<span class="op">:</span> r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;full_page&quot;</span><span class="op">)</span> <span class="op">==</span> <span class="st">&quot;true&quot;</span><span class="op">,</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        DarkMode<span class="op">:</span> r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;dark_mode&quot;</span><span class="op">)</span> <span class="op">==</span> <span class="st">&quot;true&quot;</span><span class="op">,</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        ValidateContent<span class="op">:</span> r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;validate&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;false&quot;</span><span class="op">,</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> wStr <span class="op">:=</span> r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;width&quot;</span><span class="op">);</span> wStr <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> opts<span class="op">.</span>Width<span class="op">,</span> _ <span class="op">=</span> strconv<span class="op">.</span>Atoi<span class="op">(</span>wStr<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;responsive&quot;</span><span class="op">)</span> <span class="op">==</span> <span class="st">&quot;true&quot;</span> <span class="op">{</span> opts<span class="op">.</span>ResponsiveBreakpoints <span class="op">=</span> defaultBreakpoints <span class="op">}</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Capture<span class="op">(</span>r<span class="op">.</span>Context<span class="op">(),</span> platform<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>        http<span class="op">.</span>Error<span class="op">(</span>w<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> http<span class="op">.</span>StatusInternalServerError<span class="op">)</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> sessionID <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>        result<span class="op">.</span>SessionID <span class="op">=</span> sessionID</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>        id<span class="op">,</span> _ <span class="op">:=</span> m<span class="op">.</span>store<span class="op">.</span>Save<span class="op">(</span>fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%s-%s&quot;</span><span class="op">,</span> sessionID<span class="op">,</span> platform<span class="op">),</span> result<span class="op">.</span>Data<span class="op">,</span> <span class="op">*</span>result<span class="op">)</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>        result<span class="op">.</span>Path <span class="op">=</span> id</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> format <span class="op">{</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;base64&quot;</span><span class="op">:</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>        w<span class="op">.</span>Header<span class="op">().</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;application/json&quot;</span><span class="op">)</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>        json<span class="op">.</span>NewEncoder<span class="op">(</span>w<span class="op">).</span>Encode<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;id&quot;</span><span class="op">:</span> result<span class="op">.</span>Path<span class="op">,</span> <span class="st">&quot;platform&quot;</span><span class="op">:</span> platform<span class="op">,</span></span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;data&quot;</span><span class="op">:</span> base64<span class="op">.</span>StdEncoding<span class="op">.</span>EncodeToString<span class="op">(</span>result<span class="op">.</span>Data<span class="op">),</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;file&quot;</span><span class="op">:</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>        w<span class="op">.</span>Header<span class="op">().</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> mimeType<span class="op">(</span>result<span class="op">.</span>Format<span class="op">))</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>        w<span class="op">.</span>Write<span class="op">(</span>result<span class="op">.</span>Data<span class="op">)</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;url&quot;</span><span class="op">:</span></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>        w<span class="op">.</span>Header<span class="op">().</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;application/json&quot;</span><span class="op">)</span></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>        json<span class="op">.</span>NewEncoder<span class="op">(</span>w<span class="op">).</span>Encode<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;url&quot;</span><span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;/api/v1/qa/screenshot/%s/download&quot;</span><span class="op">,</span> result<span class="op">.</span>Path<span class="op">),</span></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="cli-command">4.3.2 CLI Command</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">// cmd/helixcode/qa_screenshot.go</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> qaScreenshotCmd <span class="op">=</span> <span class="op">&amp;</span>cobra<span class="op">.</span>Command<span class="op">{</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    Use<span class="op">:</span>   <span class="st">&quot;screenshot&quot;</span><span class="op">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    Short<span class="op">:</span> <span class="st">&quot;Capture an on-demand screenshot&quot;</span><span class="op">,</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    RunE<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>cmd <span class="op">*</span>cobra<span class="op">.</span>Command<span class="op">,</span> args <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        platform<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Flags<span class="op">().</span>GetString<span class="op">(</span><span class="st">&quot;platform&quot;</span><span class="op">)</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        session<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Flags<span class="op">().</span>GetString<span class="op">(</span><span class="st">&quot;session&quot;</span><span class="op">)</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        responsive<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Flags<span class="op">().</span>GetBool<span class="op">(</span><span class="st">&quot;responsive&quot;</span><span class="op">)</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        darkMode<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Flags<span class="op">().</span>GetBool<span class="op">(</span><span class="st">&quot;dark-mode&quot;</span><span class="op">)</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        fullPage<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Flags<span class="op">().</span>GetBool<span class="op">(</span><span class="st">&quot;full-page&quot;</span><span class="op">)</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        output<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Flags<span class="op">().</span>GetString<span class="op">(</span><span class="st">&quot;output&quot;</span><span class="op">)</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        mgr <span class="op">:=</span> screenshot<span class="op">.</span>NewManager<span class="op">(</span>screenshot<span class="op">.</span>NewFSStorage<span class="op">(</span>sessionOutputDir<span class="op">))</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        mgr<span class="op">.</span>RegisterEnginesFromEnvironment<span class="op">()</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>        opts <span class="op">:=</span> screenshot<span class="op">.</span>CaptureOptions<span class="op">{</span>Format<span class="op">:</span> <span class="st">&quot;png&quot;</span><span class="op">,</span> FullPage<span class="op">:</span> fullPage<span class="op">,</span> DarkMode<span class="op">:</span> darkMode<span class="op">,</span> ValidateContent<span class="op">:</span> <span class="ot">true</span><span class="op">}</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> responsive <span class="op">{</span> opts<span class="op">.</span>ResponsiveBreakpoints <span class="op">=</span> screenshot<span class="op">.</span>DefaultBreakpoints <span class="op">}</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        result<span class="op">,</span> err <span class="op">:=</span> mgr<span class="op">.</span>Capture<span class="op">(</span>cmd<span class="op">.</span>Context<span class="op">(),</span> config<span class="op">.</span>Platform<span class="op">(</span>platform<span class="op">),</span> opts<span class="op">)</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> output <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> output <span class="op">=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%s-%s.png&quot;</span><span class="op">,</span> session<span class="op">,</span> platform<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> os<span class="op">.</span>WriteFile<span class="op">(</span>output<span class="op">,</span> result<span class="op">.</span>Data<span class="op">,</span> <span class="bn">0644</span><span class="op">)</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> init<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    qaScreenshotCmd<span class="op">.</span>Flags<span class="op">().</span>String<span class="op">(</span><span class="st">&quot;platform&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Target platform (web|android|desktop|ios|cli|tui)&quot;</span><span class="op">)</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    qaScreenshotCmd<span class="op">.</span>Flags<span class="op">().</span>String<span class="op">(</span><span class="st">&quot;session&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Session ID&quot;</span><span class="op">)</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>    qaScreenshotCmd<span class="op">.</span>Flags<span class="op">().</span>Bool<span class="op">(</span><span class="st">&quot;responsive&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;Capture at responsive breakpoints&quot;</span><span class="op">)</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    qaScreenshotCmd<span class="op">.</span>Flags<span class="op">().</span>Bool<span class="op">(</span><span class="st">&quot;dark-mode&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;Use dark color scheme&quot;</span><span class="op">)</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    qaScreenshotCmd<span class="op">.</span>Flags<span class="op">().</span>Bool<span class="op">(</span><span class="st">&quot;full-page&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;Capture full scrollable page&quot;</span><span class="op">)</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    qaScreenshotCmd<span class="op">.</span>Flags<span class="op">().</span>String<span class="op">(</span><span class="st">&quot;output&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Output file path&quot;</span><span class="op">)</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    qaScreenshotCmd<span class="op">.</span>MarkFlagRequired<span class="op">(</span><span class="st">&quot;platform&quot;</span><span class="op">)</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="real-time-streaming-websocket">4.3.3 Real-Time Streaming:
+WebSocket</h3>
+<p>For live session capture during autonomous QA, the WebSocket endpoint
+<code>/ws/qa/screenshot</code> streams thumbnails at 1 FPS. This is
+distinct from the nexus capture layer’s 10 FPS continuous pipeline; the
+WebSocket produces 480 px previews to conserve bandwidth.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> handleScreenshotStream<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    upgrader <span class="op">:=</span> websocket<span class="op">.</span>Upgrader<span class="op">{</span>CheckOrigin<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">}}</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    conn<span class="op">,</span> _ <span class="op">:=</span> upgrader<span class="op">.</span>Upgrade<span class="op">(</span>w<span class="op">,</span> r<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> conn<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    platform <span class="op">:=</span> config<span class="op">.</span>Platform<span class="op">(</span>r<span class="op">.</span>URL<span class="op">.</span>Query<span class="op">().</span>Get<span class="op">(</span><span class="st">&quot;platform&quot;</span><span class="op">))</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    ticker <span class="op">:=</span> time<span class="op">.</span>NewTicker<span class="op">(</span><span class="dv">1</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> ticker<span class="op">.</span>Stop<span class="op">()</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">select</span> <span class="op">{</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">&lt;-</span>ticker<span class="op">.</span>C<span class="op">:</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>            result<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Capture<span class="op">(</span>r<span class="op">.</span>Context<span class="op">(),</span> platform<span class="op">,</span> CaptureOptions<span class="op">{</span>Width<span class="op">:</span> <span class="dv">480</span><span class="op">,</span> ValidateContent<span class="op">:</span> <span class="ot">true</span><span class="op">})</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> conn<span class="op">.</span>WriteJSON<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()});</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>            conn<span class="op">.</span>WriteMessage<span class="op">(</span>websocket<span class="op">.</span>BinaryMessage<span class="op">,</span> result<span class="op">.</span>Data<span class="op">)</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">&lt;-</span>r<span class="op">.</span>Context<span class="op">().</span>Done<span class="op">():</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="presentational-export">4.3.4 Presentational Export</h3>
+<p>Screenshot packs are directory structures ready for PowerPoint or
+Keynote import. Each pack contains: (1) full-resolution PNGs, (2) 480 px
+thumbnails, (3) <code>manifest.json</code> with timestamps, step names,
+and video offsets, and (4) <code>annotations.json</code> with UI element
+bounding boxes from <code>pkg/vision/detector.go</code>. Generated by
+<code>Manager.ExportPack(sessionID, opts)</code>.</p>
+<h3 id="screenshot-api-specification">4.3.5 Screenshot API
+Specification</h3>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 12%" />
+<col style="width: 17%" />
+<col style="width: 28%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Parameters</th>
+<th>Response Formats</th>
+<th>Authentication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/qa/screenshot</code></td>
+<td>GET, POST</td>
+<td><code>platform</code> (required), <code>session</code>,
+<code>format</code> (base64|file|url), <code>image_format</code>,
+<code>width</code>, <code>height</code>, <code>full_page</code>,
+<code>responsive</code>, <code>dark_mode</code>, <code>validate</code>,
+<code>wait_ms</code></td>
+<td>JSON with base64, raw image, or JSON with URLs</td>
+<td>Bearer token from <code>HELIX_API_TOKEN</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/qa/screenshot/{id}/download</code></td>
+<td>GET</td>
+<td>—</td>
+<td><code>image/png</code> or <code>image/jpeg</code></td>
+<td>Bearer token</td>
+</tr>
+<tr>
+<td><code>/api/v1/qa/screenshot/{id}/thumbnail</code></td>
+<td>GET</td>
+<td>—</td>
+<td><code>image/png</code>, 480 px wide</td>
+<td>Bearer token</td>
+</tr>
+<tr>
+<td><code>/api/v1/qa/screenshot/{id}/analyze</code></td>
+<td>POST</td>
+<td><code>prompt</code> (default: “Describe what you see”)</td>
+<td>JSON <code>VisionResult</code></td>
+<td>Bearer token</td>
+</tr>
+<tr>
+<td><code>/api/v1/qa/screenshot/query</code></td>
+<td>GET</td>
+<td><code>session</code>, <code>platform</code>, <code>step</code>,
+<code>after</code>, <code>before</code></td>
+<td>JSON array of <code>Result</code> metadata</td>
+<td>Bearer token</td>
+</tr>
+<tr>
+<td><code>/ws/qa/screenshot</code></td>
+<td>WebSocket</td>
+<td><code>platform</code> (required), <code>fps</code> (default: 1),
+<code>quality</code> (default: 80)</td>
+<td>Binary PNG frames</td>
+<td>Bearer token in <code>Sec-WebSocket-Protocol</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>format</code> parameter determines whether the caller
+receives inline base64 (for JSON consumers and test assertions), a
+direct file download (for report generation), or a persistent URL (for
+lazy-loading dashboards). The <code>analyze</code> endpoint reuses
+<code>visionserver.Handler.HandleAnalyze</code> [<sup>66</sup>].</p>
+<h2 id="anti-bluff-visual-verification">4.4 Anti-Bluff Visual
+Verification</h2>
+<p>The screenshot pipeline is a correctness mechanism, not merely a
+convenience. Every test that claims to verify a UI feature must prove
+the UI rendered the expected state. Four verification methods are
+applied.</p>
+<h3 id="template-matching">4.4.1 Template Matching</h3>
+<p><code>pkg/vision/detector.go</code> already defines UI element
+detection with bounding boxes and confidence scores [<sup>67</sup>]. The
+template matching layer adds OpenCV <code>matchTemplate</code>
+(normalised cross-correlation) and SSIM comparison against golden
+references stored in
+<code>qa-results/references/&lt;platform&gt;/&lt;testname&gt;.png</code>.
+SSIM is used when pixel layout may vary (dynamic content, different font
+rendering) but structural composition must match. The default threshold
+is 0.95 for pixel-perfect references and 0.85 for structural
+references.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/verify_template.go</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TemplateMatch<span class="op">(</span>screenshot<span class="op">,</span> reference <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> threshold <span class="dt">float64</span><span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">float64</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    img1<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> image<span class="op">.</span>Decode<span class="op">(</span>bytes<span class="op">.</span>NewReader<span class="op">(</span>screenshot<span class="op">))</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    img2<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> image<span class="op">.</span>Decode<span class="op">(</span>bytes<span class="op">.</span>NewReader<span class="op">(</span>reference<span class="op">))</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    mat1<span class="op">,</span> mat2 <span class="op">:=</span> gocvImageFromGo<span class="op">(</span>img1<span class="op">),</span> gocvImageFromGo<span class="op">(</span>img2<span class="op">)</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> mat1<span class="op">.</span>Close<span class="op">();</span> <span class="cf">defer</span> mat2<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    result <span class="op">:=</span> gocv<span class="op">.</span>NewMat<span class="op">();</span> <span class="cf">defer</span> result<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    gocv<span class="op">.</span>MatchTemplate<span class="op">(</span>mat1<span class="op">,</span> mat2<span class="op">,</span> <span class="op">&amp;</span>result<span class="op">,</span> gocv<span class="op">.</span>TmCcorrNormed<span class="op">,</span> gocv<span class="op">.</span>NewMat<span class="op">())</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> maxVal<span class="op">,</span> _<span class="op">,</span> _ <span class="op">:=</span> gocv<span class="op">.</span>MinMaxLoc<span class="op">(</span>result<span class="op">)</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> maxVal <span class="op">&gt;=</span> threshold<span class="op">,</span> maxVal<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="ocr-validation">4.4.2 OCR Validation</h3>
+<p><code>pkg/vision/ocr_tesseract.go</code> wraps Tesseract. The
+verification extracts text from the screenshot and asserts expected
+strings are present.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/verify_ocr.go</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> OCRContains<span class="op">(</span>screenshot <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> expected <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    text<span class="op">,</span> err <span class="op">:=</span> vision<span class="op">.</span>ExtractText<span class="op">(</span>screenshot<span class="op">)</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    found <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span><span class="op">)</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> expected <span class="op">{</span> found<span class="op">[</span>e<span class="op">]</span> <span class="op">=</span> strings<span class="op">.</span>Contains<span class="op">(</span>text<span class="op">,</span> e<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> found<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>OCR is most effective for iOS and Android where expected UI text
+(“Sign In”, “Welcome back”) is deterministic. It is less effective for
+icon-heavy interfaces where vision LLM analysis is preferred.</p>
+<h3 id="vision-llm-validation">4.4.3 Vision LLM Validation</h3>
+<p>The <code>internal/visionserver</code> server exposes
+<code>/analyze</code>, accepting a base64 PNG and a prompt, returning a
+<code>VisionResult</code> [<sup>66</sup>]. The screenshot pipeline sends
+every captured image to the vision server with a structured prompt.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/verify_vision.go</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> VisionValidate<span class="op">(</span>screenshot <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> prompt <span class="dt">string</span><span class="op">,</span> vision <span class="op">*</span>visionserver<span class="op">.</span>Handler<span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> vision<span class="op">.</span>Analyze<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> screenshot<span class="op">,</span> prompt<span class="op">)</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    yes <span class="op">:=</span> strings<span class="op">.</span>Contains<span class="op">(</span>strings<span class="op">.</span>ToLower<span class="op">(</span>result<span class="op">.</span>Text<span class="op">),</span> <span class="st">&quot;yes&quot;</span><span class="op">)</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> yes<span class="op">,</span> result<span class="op">.</span>Text<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Default prompts are defined in <code>pkg/screenshot/prompts.go</code>
+and cover login screen presence, error dialog visibility, loading
+spinner detection, empty state confirmation, and navigation bar
+identification.</p>
+<h3 id="deliberate-break-test">4.4.4 Deliberate-Break Test</h3>
+<p>The deliberate-break test (CONST-035) is the strongest anti-bluff
+method. For every screenshot-based test, a companion test intentionally
+breaks the feature and asserts that verification fails.</p>
+<p><strong>Procedure:</strong> (1) run test normally → must PASS; (2)
+introduce a deliberate defect (hide login button with
+<code>display: none</code>, return HTTP 500 from auth); (3) capture
+broken state; (4) run same verification → must FAIL. If step 4 passes,
+the verification is bluffing.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/verify_test.go</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoginScreenshot_AntiBluff<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    ctx <span class="op">:=</span> context<span class="op">.</span>Background<span class="op">()</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> testManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    normal<span class="op">,</span> _ <span class="op">:=</span> mgr<span class="op">.</span>Capture<span class="op">(</span>ctx<span class="op">,</span> config<span class="op">.</span>PlatformWeb<span class="op">,</span> CaptureOptions<span class="op">{</span>Width<span class="op">:</span> <span class="dv">1440</span><span class="op">,</span> Height<span class="op">:</span> <span class="dv">900</span><span class="op">})</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    yes<span class="op">,</span> _<span class="op">,</span> _ <span class="op">:=</span> screenshot<span class="op">.</span>VisionValidate<span class="op">(</span>normal<span class="op">.</span>Data<span class="op">,</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Is there a visible &#39;Sign In&#39; button?&quot;</span><span class="op">,</span> testVision<span class="op">)</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> yes<span class="op">,</span> <span class="st">&quot;normal state must show Sign In button&quot;</span><span class="op">)</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    testBreakCSS<span class="op">(</span>t<span class="op">,</span> <span class="st">`.login-btn { display: none !important; }`</span><span class="op">)</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    broken<span class="op">,</span> _ <span class="op">:=</span> mgr<span class="op">.</span>Capture<span class="op">(</span>ctx<span class="op">,</span> config<span class="op">.</span>PlatformWeb<span class="op">,</span> CaptureOptions<span class="op">{</span>Width<span class="op">:</span> <span class="dv">1440</span><span class="op">,</span> Height<span class="op">:</span> <span class="dv">900</span><span class="op">})</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    yes<span class="op">,</span> _<span class="op">,</span> _ <span class="op">=</span> screenshot<span class="op">.</span>VisionValidate<span class="op">(</span>broken<span class="op">.</span>Data<span class="op">,</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Is there a visible &#39;Sign In&#39; button?&quot;</span><span class="op">,</span> testVision<span class="op">)</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> yes<span class="op">,</span> <span class="st">&quot;broken state must NOT show Sign In button&quot;</span><span class="op">)</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This pattern is applied to every platform and verification method. A
+deliberate-break test that passes when it should fail indicates the
+verification is relying on cached data, stale screenshots, or overly
+permissive thresholds.</p>
+<h3 id="engine-implementation-checklist">4.4.5 Engine Implementation
+Checklist</h3>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 16%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 16%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Engine</th>
+<th>File Path</th>
+<th>Key Functions</th>
+<th>Lines (est.)</th>
+<th>Test File</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Engine</code> interface</td>
+<td><code>pkg/screenshot/engine.go</code></td>
+<td><code>Capture()</code>, <code>Supported()</code>,
+<code>Name()</code></td>
+<td>30</td>
+<td>—</td>
+<td><strong>Design complete</strong></td>
+</tr>
+<tr>
+<td><code>Storage</code> interface</td>
+<td><code>pkg/screenshot/storage.go</code></td>
+<td><code>Save()</code>, <code>Load()</code>, <code>List()</code>,
+<code>Thumbnail()</code></td>
+<td>35</td>
+<td>—</td>
+<td><strong>Design complete</strong></td>
+</tr>
+<tr>
+<td><code>Manager</code></td>
+<td><code>pkg/screenshot/manager.go</code></td>
+<td><code>Capture()</code>, <code>CaptureAll()</code>,
+<code>CaptureResponsive()</code>, <code>Get()</code>,
+<code>Query()</code></td>
+<td>250</td>
+<td><code>manager_test.go</code></td>
+<td><strong>Design complete</strong></td>
+</tr>
+<tr>
+<td><code>WebEngine</code></td>
+<td><code>pkg/screenshot/web_engine.go</code></td>
+<td><code>captureSingle()</code>, <code>runBridgeCmd()</code>,
+<code>setViewport()</code></td>
+<td>200</td>
+<td><code>web_engine_test.go</code></td>
+<td><strong>Design complete</strong></td>
+</tr>
+<tr>
+<td><code>LinuxEngine</code></td>
+<td><code>pkg/screenshot/linux_engine.go</code></td>
+<td><code>captureX11()</code>, <code>captureWayland()</code>,
+<code>enumerateDisplays()</code></td>
+<td>180</td>
+<td><code>linux_engine_test.go</code></td>
+<td><strong>Design complete</strong></td>
+</tr>
+<tr>
+<td><code>MacOSEngine</code></td>
+<td><code>pkg/screenshot/macos_engine.go</code></td>
+<td><code>Capture()</code>, <code>checkPermission()</code></td>
+<td>120</td>
+<td><code>macos_engine_test.go</code></td>
+<td><strong>Design complete</strong></td>
+</tr>
+<tr>
+<td><code>WindowsEngine</code></td>
+<td><code>pkg/screenshot/windows_engine.go</code></td>
+<td><code>Capture()</code>, <code>dxgiCapture()</code>,
+<code>bitbltCapture()</code></td>
+<td>150</td>
+<td><code>windows_engine_test.go</code></td>
+<td><strong>New — requires C# bridge</strong></td>
+</tr>
+<tr>
+<td><code>AndroidEngine</code></td>
+<td><code>pkg/screenshot/android_engine.go</code></td>
+<td><code>Capture()</code>, <code>scrcpyCapture()</code>,
+<code>detectRotation()</code></td>
+<td>200</td>
+<td><code>android_engine_test.go</code></td>
+<td><strong>Refactor of ADBExecutor</strong></td>
+</tr>
+<tr>
+<td><code>iOSSimulatorEngine</code></td>
+<td><code>pkg/screenshot/ios_engine.go</code></td>
+<td><code>Capture()</code>, <code>listSimulators()</code></td>
+<td>100</td>
+<td><code>ios_engine_test.go</code></td>
+<td><strong>New</strong></td>
+</tr>
+<tr>
+<td><code>iOSDeviceEngine</code></td>
+<td><code>pkg/screenshot/ios_engine.go</code></td>
+<td><code>Capture()</code>, <code>deviceConnected()</code></td>
+<td>100</td>
+<td><code>ios_engine_test.go</code></td>
+<td><strong>New</strong></td>
+</tr>
+<tr>
+<td><code>CLIEngine</code></td>
+<td><code>pkg/screenshot/cli_engine.go</code></td>
+<td><code>captureText()</code>, <code>captureRendered()</code>,
+<code>renderCastToPNG()</code></td>
+<td>180</td>
+<td><code>cli_engine_test.go</code></td>
+<td><strong>New</strong></td>
+</tr>
+<tr>
+<td><code>TUIEngine</code></td>
+<td><code>pkg/screenshot/tui_engine.go</code></td>
+<td><code>captureTmux()</code>, <code>captureXtermJS()</code>,
+<code>renderANSIToPNG()</code></td>
+<td>180</td>
+<td><code>tui_engine_test.go</code></td>
+<td><strong>New</strong></td>
+</tr>
+<tr>
+<td>HTTP handler</td>
+<td><code>pkg/screenshot/http_handler.go</code></td>
+<td><code>handleScreenshot()</code>,
+<code>handleScreenshotByID()</code>,
+<code>handleScreenshotStream()</code></td>
+<td>250</td>
+<td><code>http_handler_test.go</code></td>
+<td><strong>Design complete</strong></td>
+</tr>
+<tr>
+<td>CLI command</td>
+<td><code>cmd/helixcode/qa_screenshot.go</code></td>
+<td>Cobra command, flag binding</td>
+<td>80</td>
+<td>—</td>
+<td><strong>Design complete</strong></td>
+</tr>
+<tr>
+<td>Template verify</td>
+<td><code>pkg/screenshot/verify_template.go</code></td>
+<td><code>TemplateMatch()</code>, <code>SSIMCompare()</code></td>
+<td>120</td>
+<td><code>verify_template_test.go</code></td>
+<td><strong>New</strong></td>
+</tr>
+<tr>
+<td>OCR verify</td>
+<td><code>pkg/screenshot/verify_ocr.go</code></td>
+<td><code>OCRContains()</code>, <code>OCRExtractAll()</code></td>
+<td>80</td>
+<td><code>verify_ocr_test.go</code></td>
+<td><strong>New</strong></td>
+</tr>
+<tr>
+<td>Vision verify</td>
+<td><code>pkg/screenshot/verify_vision.go</code></td>
+<td><code>VisionValidate()</code>, <code>PromptForScenario()</code></td>
+<td>60</td>
+<td><code>verify_vision_test.go</code></td>
+<td><strong>New</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The checklist contains 17 implementation units with an estimated
+2,345 lines of Go and 13 test files. The critical
+path—<code>Manager</code>, <code>WebEngine</code>,
+<code>LinuxEngine</code>, <code>AndroidEngine</code>—derives from
+existing executor code and can be implemented first. New implementations
+(Windows, iOS, CLI rendered, TUI) require additional dependencies and
+should be scheduled after the core four engines pass deliberate-break
+tests.</p>
+</body>
+</html>

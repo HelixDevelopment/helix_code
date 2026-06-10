@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-04-cli-agent-fusion-synthesis-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-04-cli-agent-fusion-synthesis-design</h1>
+</header>
+<h1 id="helixcode-cli-agent-fusion-synthesis-design-spec">HelixCode
+CLI-Agent Fusion — Synthesis Design Spec</h1>
+<p><strong>Date:</strong> 2026-05-04 <strong>Author:</strong> Claude
+Opus 4.7 (1M context) + user (milos85vasic.2nd@gmail.com)
+<strong>Status:</strong> APPROVED in brainstorming, awaiting user review
+of written spec <strong>Successor:</strong> to be handed to
+<code>superpowers:writing-plans</code> for executable plan
+<strong>Supersedes (partially):</strong> the aspirational diagrams in
+<code>docs/improvements/01_*</code> and <code>02_*</code> (those used a
+fictional module set — HelixML/HelixSDK/HelixDB/etc. — that does not
+exist as real repositories under <code>HelixDevelopment</code> or
+<code>vasic-digital</code>)</p>
+<p>This spec is the single planning artefact for an integration
+programme that fuses every power-feature, optimisation, and design
+innovation from every CLI agent in <code>helix_agent/cli_agents/</code>
+into HelixCode, with anti-bluff guarantees applied at every layer.</p>
+<hr />
+<h2 id="goals-non-goals-success-criteria">1. Goals, non-goals, success
+criteria</h2>
+<h3 id="what-were-building">1.1 What we’re building</h3>
+<p>A staged programme — <em>not</em> a single feature — that produces,
+in order:</p>
+<ol type="1">
+<li>A <strong>clean foundation</strong> (governance, secrets, submodule
+topology) that no later phase can be silently built on top of broken
+state.</li>
+<li>A <strong>ported feature set</strong> from claude-code-source first,
+then every other CLI agent, each landed with runtime-evidence Challenges
+proving end-user usability.</li>
+<li>A <strong>verified test infrastructure</strong> spanning unit / e2e
+/ integration / full-automation / performance / concurrency /
+benchmarking / security / scanning (SonarQube + Snyk + others) / DDoS /
+Challenge banks / helix_qa banks — every test type configured to fail
+loudly when bluffing rather than green-PASS on absence-of-error.</li>
+<li><strong>Cascaded documentation</strong> — Constitution / CLAUDE.md /
+AGENTS.md across the meta-repo and every owned submodule, plus user
+manuals, website, video curriculum, ADRs, and refreshed architectural
+diagrams.</li>
+</ol>
+<h3 id="goals-priority-order">1.2 Goals (priority order)</h3>
+<ul>
+<li><strong>G1 — No bluffs.</strong> Every PASS in the system carries
+positive runtime evidence (Constitution Article XI §11.9, CONST-035).
+Tests/Challenges that go green on a broken feature are themselves the
+defect.</li>
+<li><strong>G2 — Single source of truth.</strong> HelixAgent is the
+integration substrate; cli_agents come from
+<code>helix_agent/cli_agents/&lt;name&gt;</code> only — never from
+<code>Example_Projects/</code>.</li>
+<li><strong>G3 — Secrets safe.</strong> API keys live in
+<code>.env</code> files mode 0600, never in git, never in logs, never in
+docs.</li>
+<li><strong>G4 — No force pushes without explicit user
+approval.</strong> New constitutional mandate cascaded everywhere.</li>
+<li><strong>G5 — Real production readiness for every ported
+feature.</strong> “Done” means a Challenge demonstrates end-user
+usability, not “tests pass.”</li>
+</ul>
+<h3 id="non-goals-explicit-out-of-scope">1.3 Non-goals (explicit
+out-of-scope)</h3>
+<ul>
+<li><strong>N1.</strong> Closed-source agents (<code>claude-code</code>
+core, <code>codex</code> core, <code>warp</code>, <code>amazon-q</code>,
+<code>copilot-cli</code>, <code>kiro-cli</code>, <code>shai</code>) — we
+port what’s documented/observable, not what’s reverse-engineered from
+binaries.</li>
+<li><strong>N2.</strong> Replacing or rewriting <code>HelixAgent</code>
+itself. We consume it as a submodule; if HelixAgent needs changes,
+that’s a separate spec routed through HelixAgent’s own governance.</li>
+<li><strong>N3.</strong> Mobile/Aurora/Harmony UI work beyond what
+HelixCode already has, unless a CLI-agent feature port directly requires
+it.</li>
+<li><strong>N4.</strong> Migration to a new test framework. We extend
+the existing testify-based stack.</li>
+<li><strong>N5.</strong> CI/CD pipelines — Constitution Rule 1 forbids
+them; we run gates manually or via Makefile.</li>
+</ul>
+<h3 id="success-criteria-the-bar-for-declaring-this-programme-complete">1.4
+Success criteria (the bar for declaring this programme complete)</h3>
+<ul>
+<li><strong>S1.</strong>
+<code>git submodule foreach --recursive &#39;echo OK&#39;</code> succeeds across
+the entire HelixCode tree.</li>
+<li><strong>S2.</strong> <code>make ci-validate-all</code> (root) and
+<code>make test-full</code> (inner) both pass with <strong>zero
+<code>t.Skip()</code></strong> that lacks a
+<code>SKIP-OK: #&lt;ticket&gt;</code> marker.</li>
+<li><strong>S3.</strong> Every CLI-agent feature listed in
+<code>docs/improvements/04/.../porting_*.md</code> has: (a) source code
+merged at the documented HelixCode path, (b) a Challenge script that
+exercises the feature end-to-end against real infrastructure, (c) the
+Challenge’s PASS evidence pasted in its commit message.</li>
+<li><strong>S4.</strong> Every governance triplet (Constitution.md /
+CLAUDE.md / AGENTS.md) at every owned-by-us repo carries the three
+constitutional anchors: anti-bluff (Article XI §11.9), no-force-push
+(CONST-043), no-secret-leak (CONST-042).</li>
+<li><strong>S5.</strong> SonarQube and Snyk both run locally via
+<code>make scan-sonarqube</code> / <code>make scan-snyk</code>, produce
+real reports, and have at least one finding triaged or waived with a
+documented exception.</li>
+<li><strong>S6.</strong> Refreshed PNG diagrams in
+<code>docs/improvements/06_diagrams_real/</code> reflect the real
+submodule topology (not the aspirational HelixML/HelixSDK fiction).</li>
+</ul>
+<hr />
+<h2 id="topology-repo-wiring">2. Topology + repo wiring</h2>
+<h3 id="final-repo-layout-post-phase-0">2.1 Final repo layout
+(post-Phase-0)</h3>
+<pre><code>helix_code/                              # meta-repo (this repo)
+├── helix_code/                          # tracked subdirectory (Go app, NOT a submodule)
+│   ├── CLAUDE.md / AGENTS.md / CONSTITUTION.md   # NEW — governance triplet (currently missing)
+│   ├── cmd/  internal/  applications/  tests/  ...
+│   └── go.mod                          # module dev.helix.code, go 1.26
+│
+├── helix_agent/                         # NEW SUBMODULE — git@github.com:HelixDevelopment/HelixAgent.git
+│   ├── HelixLLM/                       # nested submodule (canonical)
+│   ├── HelixMemory/                    # nested submodule (canonical)
+│   ├── HelixSpecifier/                 # nested submodule (canonical)
+│   ├── LLMsVerifier/                   # nested submodule (overlaps submodules/llms_verifier)
+│   └── cli_agents/                     # 39 CLI-agent submodules — canonical source
+│       ├── claude-code/  aider/  cline/  codex/  continue/  ...
+│
+├── helix_qa/                            # existing submodule
+├── challenges/                         # existing submodule (now with containers + panoptic init&#39;d)
+├── containers/                         # existing submodule
+├── security/                           # existing submodule
+│
+├── dependencies/HelixDevelopment/      # keep as-is for direct Go imports
+│   ├── LLMsVerifier/                   # canonical pin (helix_agent/LLMsVerifier defers to this)
+│   ├── DocProcessor/  LLMOrchestrator/  LLMProvider/  VisionEngine/
+│
+├── Example_Projects/                   # DEPRECATE — replaced by helix_agent/cli_agents/ as canonical
+│                                       # (preserved through Phase 4; Phase 5 cleanup once import paths migrated)
+│
+├── assets/  github_pages_website/  dependencies/{HuggingFace_Hub,LLama_CPP,Ollama}/
+└── docs/  scripts/  Makefile  setup.sh  helix  CLAUDE.md ...</code></pre>
+<h3 id="submodule-rules">2.2 Submodule rules</h3>
+<ul>
+<li><strong>Protocol: SSH only.</strong> <code>git@github.com:…</code>
+or <code>git@gitlab.com:…</code>. Constitution Rule 3 already prohibits
+HTTPS — re-affirmed.</li>
+<li><strong>Recursion: deep.</strong>
+<code>git submodule update --init --recursive --jobs 8</code>.
+<code>setup.sh</code> wraps this; we add a verifier that fails if any
+submodule is uninitialised.</li>
+<li><strong><code>helix_code/helix_code/</code> stays a tracked
+subdirectory.</strong> Promoting it to a submodule would create a
+circular reference (this repo <em>is</em>
+<code>HelixDevelopment/HelixCode</code>). Documented explicitly in
+<code>helix_code/helix_code/CLAUDE.md</code>.</li>
+<li><strong>LLMsVerifier dual-pinning.</strong>
+<code>submodules/llms_verifier</code> is the canonical pin used by Go
+imports; <code>helix_agent/LLMsVerifier</code> is HelixAgent’s
+transitive view. <code>scripts/verify-llmsverifier-pin-parity.sh</code>
+fails if pointers diverge.</li>
+<li><strong>Agent-Deck nested-worktree fix.</strong>
+<code>Example_Projects/Agent-Deck/.claude/worktrees/agent-*</code> paths
+are git worktrees, not submodules. Add to <code>.git/info/exclude</code>
+(local) and document.</li>
+</ul>
+<h3 id="secret-handling">2.3 Secret handling</h3>
+<p><strong>CONST-042 (NEW):</strong> &gt; No API key, token, password,
+certificate, or other credential may be committed to any repository
+owned by HelixDevelopment or vasic-digital, transitively or otherwise.
+All secrets live in <code>.env</code> files (mode 0600) listed in
+<code>.gitignore</code>. Any leak — to git, logs, build artefacts,
+screenshots, or external services — is a release blocker until rotated
+and post-mortemed.</p>
+<p><strong>Implementation:</strong> -
+<code>helix_code/helix_code/.env</code> — copied (not symlinked) from
+<code>../helix_agent/.env</code> during Phase 0; mode 0600; owner-only.
+- <code>helix_code/helix_code/.env.example</code> — every key from real
+<code>.env</code> with <code>&lt;REDACTED&gt;</code> placeholders; under
+git. - <code>.gitignore</code> (root +
+<code>helix_code/helix_code/</code>) — explicit <code>.env</code>,
+<code>.env.local</code>, <code>.env.*</code> (with
+<code>!.env.example</code> exception), <code>*.pem</code>,
+<code>*.key</code>, <code>*.crt</code>, <code>id_rsa*</code>, plus
+<code>helix.security.json</code> if it ever holds secrets. -
+<strong>Secret-scan gate</strong> — <code>scripts/scan-secrets.sh</code>
+runs gitleaks (or fallback grep over working tree); wired into
+<code>make ci-validate-all</code>. Failing it blocks any phase work. -
+<strong>Migration steps (Phase 0 P0-04):</strong>
+<code>cp -p ../helix_agent/.env helix_code/helix_code/.env   chmod 600 helix_code/helix_code/.env   ls -la helix_code/helix_code/.env             # must show -rw-------   git check-ignore helix_code/helix_code/.env   # must exit 0</code></p>
+<h3 id="push-protections">2.4 Push protections</h3>
+<p><strong>CONST-043 (NEW):</strong> &gt; No force push,
+force-with-lease push, history rewrite, branch deletion of
+<code>main</code>/<code>master</code>, or upstream-overwriting operation
+may be performed without explicit, in-conversation user approval given
+for that specific operation. Authorization for one push does not extend
+to subsequent pushes. Bypassing hooks (<code>--no-verify</code>),
+signature verification (<code>--no-gpg-sign</code>), or protected-branch
+rules also requires explicit approval. This applies to every repository
+in the HelixDevelopment / vasic-digital stack.</p>
+<p><strong>Implementation:</strong> - Pre-push hook at
+<code>scripts/git_hooks/pre-push</code> rejects <code>--force</code> /
+<code>--force-with-lease</code> unless
+<code>HELIX_FORCE_PUSH_APPROVED=1</code> is set. Idempotent installer at
+<code>scripts/install-git-hooks.sh</code> invoked from
+<code>setup.sh</code>. - Hook is local courtesy gate; the constitutional
+clause is the actual contract.</p>
+<h3 id="authorisation-scope-for-non-force-pushes-during-this-programme">2.5
+Authorisation scope for non-force pushes during this programme</h3>
+<p>The user has authorised, in this conversation, <strong>non-force
+pushes of new commits to existing branches on the four configured
+remotes</strong> for the duration of this programme — without per-push
+approval. Force pushes, new branches, new remotes, hook bypasses: still
+per-operation approval.</p>
+<hr />
+<h2 id="phase-0-foundation-cleanup">3. Phase 0 — Foundation Cleanup</h2>
+<p>Phase 0 is <strong>the gate</strong>. Nothing in Phases 1-5 begins
+until P0 is verified done. Every task has an acceptance check; the phase
+closes only when every check passes and a single rolled-up evidence log
+is committed at
+<code>docs/improvements/05_phase_0_evidence.md</code>.</p>
+<h3 id="phase-0-task-list">3.1 Phase 0 task list</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Acceptance check</th>
+<th>Blocks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P0-01</strong></td>
+<td>Resolve <code>Example_Projects/Agent-Deck/.claude/worktrees/</code>
+recursion error: add path to <code>.git/info/exclude</code> (local);
+document fix in <code>helix_agent/cli_agents/agent-deck/CLAUDE.md</code>
+(after P0-02)</td>
+<td><code>git submodule foreach --recursive &#39;echo OK&#39; \| grep -c OK</code>
+returns ≥87 with no <code>fatal:</code></td>
+<td>P0-02</td>
+</tr>
+<tr>
+<td><strong>P0-02</strong></td>
+<td>Add HelixAgent submodule:
+<code>git submodule add git@github.com:HelixDevelopment/HelixAgent.git HelixAgent &amp;&amp; git submodule update --init --recursive HelixAgent</code></td>
+<td><code>ls helix_agent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier,cli_agents/claude-code}</code>
+all exist</td>
+<td>P0-03, P1+</td>
+</tr>
+<tr>
+<td><strong>P0-03</strong></td>
+<td><code>scripts/verify-llmsverifier-pin-parity.sh</code> — fails if
+<code>submodules/llms_verifier</code> SHA differs from
+<code>helix_agent/LLMsVerifier</code> SHA</td>
+<td>Script exits 0 when pins match, 1 with diff output otherwise;
+included in <code>make ci-validate-all</code></td>
+<td>P0-04</td>
+</tr>
+<tr>
+<td><strong>P0-04</strong></td>
+<td>Migrate API keys:
+<code>cp -p ../helix_agent/.env helix_code/helix_code/.env &amp;&amp; chmod 600 helix_code/helix_code/.env</code></td>
+<td><code>ls -la</code> shows <code>-rw-------</code>;
+<code>git check-ignore</code> exits 0</td>
+<td>P0-05</td>
+</tr>
+<tr>
+<td><strong>P0-05</strong></td>
+<td>Update <code>.gitignore</code> (root +
+<code>helix_code/helix_code/</code>): <code>.env</code>,
+<code>.env.local</code>, <code>.env.*</code> with
+<code>!.env.example</code>, plus
+<code>*.pem *.key *.crt id_rsa*</code></td>
+<td><code>git status --ignored \| grep -F .env</code> lists
+<code>.env</code>;
+<code>git ls-files \| grep -E &#39;\.env$\|\.pem$\|\.key$&#39;</code> empty</td>
+<td>P0-06</td>
+</tr>
+<tr>
+<td><strong>P0-06</strong></td>
+<td>Refresh <code>helix_code/helix_code/.env.example</code>: every key
+from <code>../helix_agent/.env</code> with placeholder values; no real
+values</td>
+<td><code>diff &lt;(grep -oE &#39;^[A-Z_]+=&#39; ../helix_agent/.env\|sort) &lt;(grep -oE &#39;^[A-Z_]+=&#39; helix_code/helix_code/.env.example\|sort)</code>
+empty</td>
+<td>P0-07</td>
+</tr>
+<tr>
+<td><strong>P0-07</strong></td>
+<td><code>scripts/scan-secrets.sh</code> — gitleaks or fallback grep for
+<code>sk-</code>, <code>gho_</code>, <code>glpat-</code>,
+<code>xoxb-</code>, <code>AKIA</code>, <code>eyJ</code>; wired into
+<code>make ci-validate-all</code></td>
+<td>Exits 0 on clean tree; intentionally fails on planted test
+secret</td>
+<td>P0-08</td>
+</tr>
+<tr>
+<td><strong>P0-08</strong></td>
+<td><code>scripts/git_hooks/pre-push</code> rejecting
+<code>--force</code> unless <code>HELIX_FORCE_PUSH_APPROVED=1</code>;
+idempotent installer at <code>scripts/install-git-hooks.sh</code>
+invoked from <code>setup.sh</code></td>
+<td>Hook blocks <code>git push --force github main</code> (verify by
+reading hook output text only — do not actually run a force push)</td>
+<td>P0-09</td>
+</tr>
+<tr>
+<td><strong>P0-09</strong></td>
+<td>Create governance triplet for <code>helix_code/helix_code/</code>:
+<code>CONSTITUTION.md</code>, <code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, each derived from root + Go-module-specific
+addenda</td>
+<td>All three files exist; each contains all three anchors (§11.9,
+CONST-042, CONST-043)</td>
+<td>P0-13</td>
+</tr>
+<tr>
+<td><strong>P0-10</strong></td>
+<td>Add CONST-042 + CONST-043 to root <code>CONSTITUTION.md</code>
+Article XII (NEW)</td>
+<td><code>grep -E &quot;CONST-042\|CONST-043&quot; CONSTITUTION.md</code> returns
+both</td>
+<td>P0-11</td>
+</tr>
+<tr>
+<td><strong>P0-11</strong></td>
+<td>Cascade CONST-042 + CONST-043 to root <code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, <code>CRUSH.md</code>, <code>QWEN.md</code>.
+Backfill anti-bluff anchor to <code>CRUSH.md</code> and
+<code>QWEN.md</code> (currently missing)</td>
+<td><code>for f in CLAUDE.md AGENTS.md CRUSH.md QWEN.md; do grep -lE &quot;11.9\|CONST-042\|CONST-043&quot; $f; done</code>
+returns all four</td>
+<td>P0-12</td>
+</tr>
+<tr>
+<td><strong>P0-12</strong></td>
+<td>Cascade all three anchors to every owned submodule: HelixQA,
+Challenges, Containers, Security,
+dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine},
+plus new HelixAgent and its nested HelixLLM/HelixMemory/HelixSpecifier.
+Backfill missing anti-bluff anchor in LLMsVerifier (all 3) and
+CONSTITUTION.md anchor in the four Dependencies repos</td>
+<td><code>scripts/verify-governance-cascade.sh</code> (extended) exits
+0</td>
+<td>P0-13</td>
+</tr>
+<tr>
+<td><strong>P0-13</strong></td>
+<td>Fix root <code>CLAUDE.md</code> §3.2 bluff: change
+<code>helix_code/ ← SUBMODULE</code> to
+<code>helix_code/ ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo&#39;s primary inner directory; circular reference if promoted)</code></td>
+<td><code>grep -A1 &#39;^├── helix_code/&#39; CLAUDE.md</code> shows corrected
+label</td>
+<td>P0-14</td>
+</tr>
+<tr>
+<td><strong>P0-14</strong></td>
+<td>Wire P0 gates into Makefile: <code>make verify-foundation</code>
+runs P0-01, 03, 05, 07, 12 checks plus <code>no-silent-skips</code> and
+<code>verify-governance-cascade.sh</code></td>
+<td>Exits 0 with no warnings; output committed to evidence log</td>
+<td>P0-15</td>
+</tr>
+<tr>
+<td><strong>P0-15</strong></td>
+<td>Refresh PNG diagrams: regenerate
+<code>overall_architecture.png</code>,
+<code>dependency_graph.png</code>, <code>feature_gap_matrix.png</code>,
+<code>integration_phases.png</code> against real module set. Output to
+<code>docs/improvements/06_diagrams_real/</code>; deprecate 01/02 with
+<code>DEPRECATED.md</code> pointers</td>
+<td>New diagrams exist; <code>01/DEPRECATED.md</code> and
+<code>02/DEPRECATED.md</code> reference new location</td>
+<td>P0-16</td>
+</tr>
+<tr>
+<td><strong>P0-16</strong></td>
+<td>Write <code>docs/improvements/05_phase_0_evidence.md</code> — pasted
+output of every P0 acceptance check with timestamps. Single atomic
+commit listing all 16 tasks. Push to all four remotes (no force)</td>
+<td><code>git ls-remote --heads &lt;r&gt; main</code> for
+<code>github</code>/<code>gitlab</code>/<code>origin</code>/<code>upstream</code>
+shows matching SHAs</td>
+<td>P0 done → P1 unblocked</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-0-estimated-effort">3.2 Phase 0 estimated effort</h3>
+<p>~1-2 working sessions. Mostly mechanical (governance cascade is
+templated). Tricky parts: P0-04 (secret migration), P0-08 (hook
+semantics), P0-15 (diagram regen).</p>
+<hr />
+<h2 id="phases-1-5-charters">4. Phases 1-5 charters</h2>
+<p>Each phase is its own future spec → plan → implementation cycle. The
+synthesis spec only commits to <strong>scope, dependencies, acceptance
+criteria</strong> — per-feature implementation detail goes into that
+phase’s own writing-plans cycle.</p>
+<h3 id="phase-1-claude-code-source-porting-priority-1">4.1 Phase 1 —
+claude-code-source porting (priority #1)</h3>
+<p><strong>Scope (frozen):</strong> All 20 features in
+<code>docs/improvements/04/.../porting_claude_code.md</code>: 1.
+Auto-Compaction System 2. Permission Rule System 3. Tool Result
+Persistence 4. Git Worktree Agent Isolation 5. Hook-Based Extensibility
+6. MCP Full Lifecycle 7. Background Task System 8. Plan Mode 9. Slash
+Command System 10. Skill System 11. Session Transcript Resume 12.
+Multi-Provider Backend 13. LSP Integration 14. Sandboxed Shell Execution
+15. Subagent Team 16. OpenTelemetry Integration 17. Smart File Editing
+18. No-Flicker Rendering 19. AskUserQuestion with Previews 20. Theme
+System</p>
+<p><strong>Source of truth:</strong>
+<code>helix_agent/cli_agents/claude-code/</code> (canonical) —
+<em>not</em> <code>helix_code/Example_Projects/Claude_Code/</code>.
+claude-code core is closed-source; porting derives features from public
+SDK + observable CLI behaviour. No reverse-engineering of binaries.</p>
+<p><strong>Per-feature deliverables (all six required):</strong> - (a)
+Source landed at the documented HelixCode path under
+<code>helix_code/internal/&lt;package&gt;/</code>. - (b) Unit tests
+using existing testify pattern; mocks allowed only here. - (c)
+Integration test under <code>helix_code/tests/integration/</code> with
+<code>-tags=integration</code>, <strong>no mocks</strong>, real
+PostgreSQL/Redis. - (d) Challenge script under
+<code>helix_code/tests/e2e/challenges/&lt;feature&gt;/</code> against
+the docker-compose-full-test stack with positive runtime evidence. - (e)
+Updated reference docs in <code>docs/COMPLETE_API_REFERENCE.md</code> /
+<code>docs/COMPLETE_CLI_REFERENCE.md</code> if applicable. - (f)
+Anti-bluff smoke check —
+<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; &lt;new_files&gt;</code>
+empty.</p>
+<p><strong>Acceptance criteria for Phase 1:</strong> - All 20 features
+land with full (a)-(f). - <code>make test-full</code> (with
+<code>make test-infra-up</code>) passes with zero new
+<code>t.Skip()</code> without <code>SKIP-OK</code> markers. - Each
+feature’s Challenge has runtime evidence pasted in its commit message
+body. - Features are wired into <code>applications/desktop/</code>,
+<code>applications/terminal_ui/</code>, <code>cmd/cli/</code> where
+applicable.</p>
+<p><strong>Estimated cycle:</strong> 6-10 working weeks.</p>
+<h3 id="phase-2-remaining-cli-agents-porting">4.2 Phase 2 — Remaining
+CLI agents porting</h3>
+<p><strong>Priority order:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Order</th>
+<th>Agent</th>
+<th>Source</th>
+<th>Highlight features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Aider</td>
+<td><code>helix_agent/cli_agents/aider/</code></td>
+<td>Architect/Editor dual-model, 4-layer fuzzy matching, repo-map
+(tree-sitter), unified diff, voice-to-code, IDE watch mode, prompt
+caching</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Cline</td>
+<td><code>helix_agent/cli_agents/cline/</code></td>
+<td>Plan/Act modes, browser automation, file-watching, MCP marketplace,
+autonomous task chains</td>
+</tr>
+<tr>
+<td>3</td>
+<td>OpenHands</td>
+<td><code>helix_agent/cli_agents/openhands/</code></td>
+<td>Sandbox runtimes (Docker/E2B/Local), agent micro-framework,
+evaluation harness, multi-agent delegation</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Codex</td>
+<td><code>helix_agent/cli_agents/codex/</code></td>
+<td>Approval workflows, sandboxed exec, multi-turn refinement</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Continue</td>
+<td><code>helix_agent/cli_agents/continue/</code></td>
+<td>IDE-native context, slash commands, custom providers</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Forge</td>
+<td><code>helix_agent/cli_agents/forge/</code></td>
+<td>Multi-tier model routing, retrieval optimisation</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Plandex</td>
+<td><code>helix_agent/cli_agents/plandex/</code></td>
+<td>Long-running plans with branching, cost ceiling, partial-apply</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Kilo Code</td>
+<td><code>helix_agent/cli_agents/kilo-code/</code></td>
+<td>Mode profiles, custom modes, MCP integration</td>
+</tr>
+<tr>
+<td>9</td>
+<td>GPT-Engineer</td>
+<td><code>helix_agent/cli_agents/gpt-engineer/</code></td>
+<td>Project bootstrapping from prompt, file-by-file generation</td>
+</tr>
+<tr>
+<td>10</td>
+<td>OpenCode (sst)</td>
+<td><code>helix_agent/cli_agents/opencode/</code></td>
+<td>TUI patterns, session management, model switching</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Gemini-CLI</td>
+<td><code>helix_agent/cli_agents/gemini-cli/</code></td>
+<td>Long-context strategies, Gemini-specific tool calling</td>
+</tr>
+<tr>
+<td>12</td>
+<td>DeepSeek-CLI</td>
+<td><code>helix_agent/cli_agents/deepseek-cli/</code></td>
+<td>Reasoning-mode wrapper, prompt patterns</td>
+</tr>
+<tr>
+<td>13</td>
+<td>GPTme</td>
+<td><code>helix_agent/cli_agents/gptme/</code></td>
+<td>Local-first agent, terminal-native UX, plugin ecosystem</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Qwen-Code</td>
+<td><code>helix_agent/cli_agents/qwen-code/</code></td>
+<td>Qwen-tuned reasoning prompts, model-specific tool calling</td>
+</tr>
+<tr>
+<td>15</td>
+<td>TaskWeaver</td>
+<td><code>helix_agent/cli_agents/taskweaver/</code></td>
+<td>Code-as-action orchestration, role-playing planner-executor</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Codex (open-source CLI variant)</td>
+<td><code>helix_agent/cli_agents/codex/</code></td>
+<td>Approval workflows, sandboxed exec, multi-turn refinement (clarify
+in P2 spec whether this points at OpenAI’s open-source CLI or the legacy
+closed Codex; if the latter, move to N1)</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Bundled remainder</td>
+<td><code>helix_agent/cli_agents/{octogen,multiagent-coding,nanocoder,ollama-code,get-shit-done,vtcode,conduit,bridle,noi,roo-code,spec-kit,swe-agent,junie,agent-deck,codename-goose,fauxpilot,gpt-engineer-sub-variants,…}</code></td>
+<td>Single sub-spec (<code>porting_remaining_agents.md</code>);
+per-agent feature audit done at sub-spec time; agents lacking unique
+features → noted as “no porting needed, archived as reference”</td>
+</tr>
+<tr>
+<td>18</td>
+<td>MCP/skill supplements</td>
+<td><code>helix_agent/cli_agents/{git-mcp,postgres-mcp,claude-plugins,codex-skills,ui-ux-pro-max}/</code></td>
+<td>Not agents — MCP servers and skill packs that supplement Phase 1
+features (MCP Lifecycle, Skill System); fold in during the corresponding
+Phase 1 feature work</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Phase 2 scope is exhaustive:</strong> every subdirectory
+under <code>helix_agent/cli_agents/</code> is in scope unless it appears
+in the N1 closed-source list. Agents not enumerated above by name are
+covered by row 17 (Bundled remainder). At Phase 2 sub-spec time, do
+<code>ls helix_agent/cli_agents/</code> and reconcile every entry
+against this table; any new agent that has appeared upstream since spec
+authoring gets added to row 17 and processed.</p>
+<p><strong>Out of scope per N1 (closed-source / no portable
+code):</strong> <code>claude-squad</code>, <code>amazon-q</code>,
+<code>copilot-cli</code>, <code>warp</code>, <code>kiro-cli</code>,
+<code>shai</code>. Treat as observable behaviour studies if UX patterns
+inspire features. <code>superset</code>, <code>snow-cli</code> — note
+that despite being in <code>cli_agents/</code>, these are non-agent
+products (Apache Superset analytics, Snowflake CLI) and contribute no
+porting features; document and skip.</p>
+<p><strong>Per-agent deliverable shape:</strong> identical to Phase 1
+(a)-(f).</p>
+<p><strong>Acceptance criteria for Phase 2:</strong> - Every
+priority-listed agent has its sub-spec executed; features land under
+<code>helix_code/internal/&lt;package&gt;/</code> or
+<code>helix_code/applications/...</code>. - No silent feature skips —
+intentional omissions get <code>SKIP-OK: &lt;reason&gt;</code> in the
+porting doc. - Fusion goal verified: a single end-user can invoke
+claude-code’s Plan Mode on a task using Aider’s repo-map + Cline’s
+browser automation + OpenHands’ sandbox — and it works end-to-end.</p>
+<p><strong>Estimated cycle:</strong> 8-12 working weeks.</p>
+<h3 id="phase-3-test-infrastructure-expansion-parallelisable-with-phase-2">4.3
+Phase 3 — Test infrastructure expansion (parallelisable with Phase
+2)</h3>
+<p><strong>Test-type matrix:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Type</th>
+<th>Mocks?</th>
+<th>Folder</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>✓ allowed</td>
+<td><code>tests/unit/</code> + per-package <code>*_test.go</code></td>
+<td>100% line coverage on every <code>internal/&lt;pkg&gt;/</code>
+(necessary not sufficient)</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>✗</td>
+<td><code>tests/integration/</code></td>
+<td><code>-tags=integration</code>, real PostgreSQL/Redis/Ollama; every
+public API path</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>✗</td>
+<td><code>tests/e2e/challenges/&lt;feature&gt;/</code></td>
+<td>Per-feature Challenge with runtime evidence</td>
+</tr>
+<tr>
+<td>Full-automation</td>
+<td>✗</td>
+<td><code>tests/automation/</code></td>
+<td>Headless multi-step workflows</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>✗</td>
+<td><code>tests/performance/</code></td>
+<td>Latency P50/P95/P99 budgets per public endpoint</td>
+</tr>
+<tr>
+<td>Concurrency</td>
+<td>✗</td>
+<td><code>tests/concurrency/</code> (NEW)</td>
+<td><code>-race</code> enforced; property tests for critical mutex
+paths</td>
+</tr>
+<tr>
+<td>Benchmarking</td>
+<td>✗</td>
+<td><code>tests/performance/benchmarks/</code></td>
+<td><code>go test -bench=.</code> baseline per release; regression
+report</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>✗</td>
+<td><code>tests/security/</code></td>
+<td>SQL-injection, auth bypass, tenant isolation, JWT edge cases</td>
+</tr>
+<tr>
+<td>Scanning</td>
+<td>n/a</td>
+<td><code>scripts/scan-{sonarqube,snyk,gitleaks,trivy,grype,osv}.sh</code></td>
+<td>All scanners run; SonarQube + Snyk mandatory</td>
+</tr>
+<tr>
+<td>DDoS</td>
+<td>✗</td>
+<td><code>tests/security/ddos/</code> (NEW)</td>
+<td>Rate-limit verification with vegeta or wrk; HTTP 429 verified</td>
+</tr>
+<tr>
+<td>Challenge banks</td>
+<td>✗</td>
+<td><code>challenges/banks/&lt;bank-name&gt;/</code></td>
+<td>Each bank carries runtime evidence</td>
+</tr>
+<tr>
+<td>helix_qa banks</td>
+<td>✗</td>
+<td><code>helix_qa/banks/&lt;bank-name&gt;/</code></td>
+<td>Heavy QA sessions with multi-platform verification</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Acceptance criteria for Phase 3:</strong> -
+<code>make test-full</code> runs all test types; zero
+<code>t.Skip()</code> without justified markers. -
+<code>scripts/scan-*</code> all run via <code>make scan-all</code>;
+reports archived under <code>docs/scan-reports/&lt;date&gt;/</code>. -
+Concurrency suite passes with <code>-race</code>. - DDoS suite confirms
+rate limiting; thresholds documented.</p>
+<p><strong>Dependencies:</strong> Phase 0 done. Parallelisable with
+Phases 1-2 once scaffolding is up.</p>
+<h3 id="phase-4-anti-bluff-verification-pass">4.4 Phase 4 — Anti-bluff
+verification pass</h3>
+<p><strong>Activities:</strong> - Run <code>bluff-detector.sh</code>
+over the entire tree → <code>BLUFF_AUDIT_FINDINGS.md</code> listing each
+finding (file, line, class, severity). - Triage each:
+<strong>fix</strong> (tighten test/Challenge), <strong>waive</strong>
+(with <code>SKIP-OK: #&lt;ticket&gt;</code> and written justification),
+or <strong>delete</strong> (test was meaningless from inception). -
+Re-run; commit tightened tests + waiver list. - Sample 10% randomly;
+user (or fresh terminal session on clean machine) re-executes; evidence
+must match. - Output: <code>BLUFF_AUDIT_REPORT.md</code> under
+<code>docs/improvements/</code>.</p>
+<p><strong>Acceptance criteria for Phase 4:</strong> - Bluff-detector
+exits clean. - Every previously-skipped test removed (with rationale) or
+carries <code>SKIP-OK: #&lt;ticket&gt;</code> tied to real defect. - 10%
+random re-run sample produces matching evidence.</p>
+<p><strong>Dependencies:</strong> Phases 1+2 done; Phase 3
+infrastructure ready.</p>
+<h3 id="phase-5-end-user-materials-uplift">4.5 Phase 5 — End-user
+materials uplift</h3>
+<p><strong>Deliverables:</strong> -
+<code>helix_code/helix_code/docs/USER_MANUAL.md</code> — full rewrite
+covering every Phase-1+2 feature; rendered to HTML at
+<code>github_pages_website/manual/</code>. -
+<code>github_pages_website/</code> — feature pages,
+comparison-with-{claude-code,aider,cline} matrix, screenshots/asciinema
+demos. - <code>docs/VIDEO_COURSE_CURRICULUM.md</code> — per-feature
+episode outlines with sample scripts (full filming out of scope). -
+<code>docs/adr/NNN-&lt;topic&gt;.md</code> — one ADR per non-trivial
+port. - <code>docs/improvements/06_diagrams_real/</code> — refreshed
+showing all ported features. - Per-owned-submodule README — call out
+role in HelixCode integration.</p>
+<p><strong>Acceptance criteria for Phase 5:</strong> - A new user can
+follow <code>USER_MANUAL.md</code> from install to running a multi-agent
+task without external help. - <code>github_pages_website/</code> builds
+and renders. - Every Phase-1/2 feature has at least one mention in
+user-facing docs.</p>
+<p><strong>Dependencies:</strong> Phases 1+2+4 done.</p>
+<h3 id="cross-phase-rules">4.6 Cross-phase rules</h3>
+<ul>
+<li><strong>No phase declares done</strong> without a single rolled-up
+evidence file (<code>docs/improvements/0N_phase_N_evidence.md</code>)
+committed and pushed (no force) to all four remotes.</li>
+<li><strong>Every phase respects CONST-035, CONST-042,
+CONST-043.</strong></li>
+<li><strong>Submodule pointer updates</strong> require running through
+secret-scan + verify-pin-parity gate.</li>
+<li><strong>Force-push prohibition is absolute.</strong></li>
+</ul>
+<hr />
+<h2 id="anti-bluff-verification-framework">5. Anti-bluff verification
+framework</h2>
+<h3 id="bluff-taxonomy">5.1 Bluff taxonomy</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Class</th>
+<th>Symptom</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>B1</strong></td>
+<td>Metadata-only PASS</td>
+<td>Test asserts a struct field exists, never checks the field’s value
+matches expected behaviour</td>
+<td><code>require.NotNil(t, user.Token)</code> without verifying token
+is JWT-shaped or accepted by an auth server</td>
+</tr>
+<tr>
+<td><strong>B2</strong></td>
+<td>Configuration-only PASS</td>
+<td>Test verifies config loads, never verifies the configured component
+does anything</td>
+<td><code>cfg, err := config.Load(...); require.NoError(t, err)</code>
+and stops</td>
+</tr>
+<tr>
+<td><strong>B3</strong></td>
+<td>Absence-of-error PASS</td>
+<td>Test calls a function expecting <code>nil</code> error, never
+inspects what was produced</td>
+<td><code>_, err := provider.Generate(ctx, req); require.NoError(t, err)</code>
+with no follow-up assertion</td>
+</tr>
+<tr>
+<td><strong>B4</strong></td>
+<td>Grep-based PASS</td>
+<td>Challenge greps source for a string, calls that “verification”</td>
+<td><code>grep -q &quot;os.Exec&quot; cmd.go &amp;&amp; echo PASS</code></td>
+</tr>
+<tr>
+<td><strong>B5</strong></td>
+<td>Mock-only integration</td>
+<td>Test labelled “integration” but uses
+<code>mockDB.On(...).Return(...)</code></td>
+<td>Forbidden by Constitution Rule 5 + Rule 2; appears in some
+<code>tests/integration/</code> subtrees</td>
+</tr>
+<tr>
+<td><strong>B6</strong></td>
+<td>Print-and-sleep simulation</td>
+<td>Code “executes” by printing the command then <code>time.Sleep</code>
+instead of <code>os/exec</code></td>
+<td>The original BLUFF-003</td>
+</tr>
+<tr>
+<td><strong>B7</strong></td>
+<td>Skipped-feature PASS</td>
+<td>Test starts with <code>if testing.Short() { t.Skip() }</code> and is
+<strong>always</strong> run with <code>-short</code></td>
+<td>Common in CI-shy codebases</td>
+</tr>
+</tbody>
+</table>
+<h3 id="detection-scriptsbluff-detector.sh">5.2 Detection —
+<code>scripts/bluff-detector.sh</code></h3>
+<p>A composite scanner; wired into <code>make ci-validate-all</code>.
+Components:</p>
+<ul>
+<li><strong>Check 1 — <code>t.Skip()</code> audit (B7):</strong> every
+<code>t.Skip()</code>, <code>testing.Short()</code>, build-tag exclusion
+must have <code>SKIP-OK: #&lt;ticket&gt;</code> within 3 lines OR be
+flagged. Existing <code>scripts/no-silent-skips.sh</code> reused +
+extended.</li>
+<li><strong>Check 2 — assertion-density audit (B1, B2, B3):</strong> for
+every <code>*_test.go</code>, count NoError/assert.NoError ratio
+vs. behavioural assertions (assert.Equal, assert.Contains,
+assert.JSONEq, custom matchers). NoError-density &gt; 60% AND
+behavioural-assertion count &lt; 2 → flagged for human review (smell,
+doesn’t gate).</li>
+<li><strong>Check 3 — challenge runtime-evidence audit (B4):</strong>
+every <code>tests/e2e/challenges/&lt;feature&gt;/run.sh</code> must (1)
+make a real network call (curl/nc/psql/redis-cli/docker exec) OR (2)
+spawn a real subprocess via <code>go run</code> /
+<code>./bin/helixcode</code> AND (3) print at least one line containing
+the feature’s expected output pattern. Greps without (1) or (2) →
+fail.</li>
+<li><strong>Check 4 — integration-test purity (B5):</strong> files
+matching <code>tests/integration/**/*.go</code> with
+<code>-tags=integration</code> build constraint must NOT import
+<code>internal/mocks/</code>.
+<code>grep -rn &quot;internal/mocks&quot; helix_code/tests/integration/</code>
+empty.</li>
+<li><strong>Check 5 — simulation-string scan (B6):</strong>
+<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder\|This is a simulated\|simulate generation\|For now,&quot; helix_code/internal helix_code/cmd helix_code/applications</code>
+empty.</li>
+<li><strong>Check 6 — print-and-sleep pattern:</strong> AST scan flags
+any function with <code>fmt.Print*</code> followed by
+<code>time.Sleep</code> followed by <code>return nil</code> with no
+<code>exec.*Command</code> between them.</li>
+</ul>
+<h3 id="runtime-evidence-what-counts">5.3 Runtime evidence — what
+counts</h3>
+<p>Every Challenge has a sibling <code>expected.json</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;must_appear_in_stdout&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;regex1&quot;</span><span class="ot">,</span> <span class="st">&quot;regex2&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;must_not_appear&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;simulated&quot;</span><span class="ot">,</span> <span class="st">&quot;placeholder&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;min_duration_ms&quot;</span><span class="fu">:</span> <span class="dv">100</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;max_duration_ms&quot;</span><span class="fu">:</span> <span class="dv">30000</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;asserts_external_state&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;postgres&quot;</span><span class="fu">,</span> <span class="dt">&quot;table&quot;</span><span class="fu">:</span> <span class="st">&quot;users&quot;</span><span class="fu">,</span> <span class="dt">&quot;rowcount_min&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;redis&quot;</span><span class="fu">,</span> <span class="dt">&quot;key_pattern&quot;</span><span class="fu">:</span> <span class="st">&quot;session:*&quot;</span><span class="fu">,</span> <span class="dt">&quot;min_keys&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;http&quot;</span><span class="fu">,</span> <span class="dt">&quot;url&quot;</span><span class="fu">:</span> <span class="st">&quot;http://localhost:8080/api/v1/health&quot;</span><span class="fu">,</span> <span class="dt">&quot;expect_status&quot;</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">}</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The Challenge runner
+(<code>tests/e2e/challenges/cmd/runner/main.go</code>) parses and
+asserts. <strong>A Challenge cannot self-certify</strong> — it does not
+write its own PASS verdict; the runner does, after evaluating
+evidence.</p>
+<h3 id="retroactive-bluff-audit-phase-4">5.4 Retroactive bluff audit
+(Phase 4)</h3>
+<ol type="1">
+<li>Run <code>bluff-detector.sh</code> over the whole tree →
+<code>BLUFF_AUDIT_FINDINGS.md</code>.</li>
+<li>Triage each finding: fix / waive / delete.</li>
+<li>Re-run; commit tightened tests + waiver list.</li>
+<li>Sample 10% randomly; user (or fresh session on clean machine)
+re-executes; evidence must match.</li>
+<li>Output <code>BLUFF_AUDIT_REPORT.md</code> under
+<code>docs/improvements/</code>.</li>
+</ol>
+<h3 id="const-035-enforcement-loop-per-ported-feature">5.5 CONST-035
+enforcement loop (per ported feature)</h3>
+<p>For every feature port: 1. Write production code. 2. Write unit test
+(mocks allowed). 3. Write integration test (no mocks). 4. Write
+Challenge with <code>expected.json</code>. 5. Run Challenge against
+<code>make test-infra-up</code>. 6. Paste runner output (with
+timestamps) into commit message body. 7. Run
+<code>bluff-detector.sh</code> on diff; must exit clean. 8. Only then is
+the feature “done.”</p>
+<hr />
+<h2 id="documentation-cascade">6. Documentation cascade</h2>
+<h3 id="constitution-structure">6.1 Constitution structure</h3>
+<p>Every owned-by-us repo’s governance triplet
+(<code>CONSTITUTION.md</code>, <code>CLAUDE.md</code>,
+<code>AGENTS.md</code>) carries the <strong>same three constitutional
+anchors</strong>, with the <strong>same wording</strong>, in the
+<strong>same article numbering</strong>. Wording lives in canonical
+templates at the meta-repo root;
+<code>scripts/propagate-governance.sh</code> rewrites the corresponding
+section in each submodule on every run.</p>
+<p><strong>Article XI §11.9 — Anti-Bluff (existing, expanding
+cascade):</strong> &gt; Verbatim user mandate: <em>“We had been in
+position that all tests do execute with success and all Challenges as
+well, but in reality the most of the features does not work and can’t be
+used! This MUST NOT be the case and execution of tests and Challenges
+MUST guarantee the quality, the completion and full usability by end
+users of the product!”</em> &gt; Operative rule: every PASS carries
+positive runtime evidence captured during execution. Metadata-only /
+configuration-only / absence-of-error / grep-based PASS without runtime
+evidence are critical defects.</p>
+<p><strong>Article XII (NEW) — Repository Safety:</strong> -
+<strong>§12.1 (CONST-042) — No-Secret-Leak.</strong> No API key, token,
+password, certificate, or other credential may be committed to any
+repository owned by HelixDevelopment or vasic-digital. All secrets in
+<code>.env</code> (mode 0600) listed in <code>.gitignore</code>. Any
+leak is a release blocker until rotated and post-mortemed. -
+<strong>§12.2 (CONST-043) — No-Force-Push.</strong> No force push,
+force-with-lease push, history rewrite, branch deletion of
+<code>main</code>/<code>master</code>, or upstream-overwriting operation
+without explicit per-operation user approval. Authorization for one push
+does not extend further.</p>
+<h3 id="claude.md-agents.md-structure">6.2 CLAUDE.md / AGENTS.md
+structure</h3>
+<p>Both files contain: - <strong>§ Peer Governance</strong> — pointer to
+sister files, links to parent <code>helix_code/</code>. - <strong>§
+Mandatory Rules</strong> — full enumeration of every applicable
+CONST-xxx with one-line summary. - <strong>§ Anti-Bluff</strong> —
+Article XI §11.9 verbatim quote + operative rule + cascade requirement.
+- <strong>§ Repo-Specific Addenda</strong> — only here may submodules
+diverge. Tech stack, build commands, single-test invocation. Delimited
+by <code>&lt;!-- BEGIN: REPO-SPECIFIC ADDENDA --&gt;</code> /
+<code>&lt;!-- END: REPO-SPECIFIC ADDENDA --&gt;</code> markers. -
+<strong>§ Reference Commands</strong> — concrete invocations: build,
+test, scan, verify-foundation.</p>
+<p><code>scripts/propagate-governance.sh</code> enforces the first three
+sections by replacement; addenda preserved.</p>
+<h3 id="cascade-automation">6.3 Cascade automation</h3>
+<pre><code>canonical/CONSTITUTION_ANCHORS.md      # canonical wording for the three articles
+canonical/CLAUDE_TEMPLATE.md           # template with addenda placeholder
+canonical/AGENTS_TEMPLATE.md
+owned-repos.txt                        # HelixCode (root), helix_code/HelixCode (subdir),
+                                       # HelixAgent, helix_agent/HelixLLM, helix_agent/HelixMemory,
+                                       # helix_agent/HelixSpecifier, HelixQA, Challenges,
+                                       # Containers, Security, dependencies/HelixDevelopment/*
+                                       # NOT included: cli_agents/* (third-party), Example_Projects/*,
+                                       #                dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}</code></pre>
+<p>Run via <code>make propagate-governance</code>. Verifier
+<code>scripts/verify-governance-cascade.sh</code> (extended) checks all
+three anchors in every owned-by-us governance file; failing it blocks
+<code>make ci-validate-all</code>.</p>
+<h3 id="end-user-materials">6.4 End-user materials</h3>
+<p><strong>Inside <code>helix_code/helix_code/</code>:</strong> -
+<code>docs/USER_MANUAL.md</code> — end-to-end user guide (Phase 5); HTML
+via <code>make manual-html</code>. -
+<code>docs/COMPLETE_API_REFERENCE.md</code>,
+<code>docs/COMPLETE_CLI_REFERENCE.md</code>,
+<code>docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md</code>,
+<code>docs/COMPLETE_DEPLOYMENT_GUIDE.md</code>,
+<code>docs/COMPLETE_TROUBLESHOOTING_GUIDE.md</code> — refreshed per
+port. - <code>docs/adr/</code> — ADRs added per non-trivial port. -
+<code>docs/HOST_POWER_MANAGEMENT.md</code> — already documents
+CONST-033; cross-link to CONST-042/042.</p>
+<p><strong>Inside meta-repo root:</strong> -
+<code>github_pages_website/</code> — feature pages, comparison matrix,
+install guide, asciinema demos. - <code>Documentation/</code> — mirrored
+canonical docs. - <code>website/</code> — marketing site. -
+<code>docs/improvements/06_diagrams_real/</code> — refreshed PNGs
+(P0-15). - <code>docs/improvements/05_phase_0_evidence.md</code> — P0
+rolled-up evidence. -
+<code>docs/improvements/0N_phase_N_evidence.md</code> — one per phase. -
+<code>docs/improvements/01_*/DEPRECATED.md</code>,
+<code>02_*/DEPRECATED.md</code> — pointers to
+<code>06_diagrams_real/</code>.</p>
+<p><strong>Per owned submodule:</strong> <code>README.md</code> updated
+with “Role in HelixCode” section.</p>
+<h3 id="video-curriculum-phase-5-scope-limited">6.5 Video curriculum
+(Phase 5, scope-limited)</h3>
+<p><code>docs/VIDEO_COURSE_CURRICULUM.md</code>: - Curriculum outline
+(modules + episodes). - Per episode: title, learning objectives, ~3-5
+minute outline, sample script intro+outro, screen-recording cue list. -
+<strong>Out of scope:</strong> filming/editing.</p>
+<h3 id="diagram-regeneration">6.6 Diagram regeneration</h3>
+<p><code>scripts/regenerate-diagrams.py</code> (NEW; replaces 01/02
+generators) reads <code>docs/improvements/canonical/topology.yaml</code>
+(real module set) and emits to
+<code>docs/improvements/06_diagrams_real/</code>: -
+<code>overall_architecture.png</code> — hub-and-spoke with HelixCode
+core, HelixAgent substrate, real Helix-* libraries. -
+<code>dependency_graph.png</code> — topological layers from actual
+<code>go.mod</code> + <code>.gitmodules</code>. -
+<code>feature_gap_matrix.png</code> — matrix against real modules; cells
+based on actual feature presence. - <code>integration_phases.png</code>
+— refreshed timeline.</p>
+<p>Old 01/02 PNGs preserved as historical artefacts; each gets
+<code>DEPRECATED.md</code> pointer.</p>
+<h3 id="cascade-enforcement-gate">6.7 Cascade enforcement gate</h3>
+<p><code>make verify-foundation</code> (P0 deliverable, extended through
+later phases) runs: 1. <code>scripts/verify-governance-cascade.sh</code>
+— all anchors present in every owned-by-us repo. 2.
+<code>scripts/scan-secrets.sh</code> — no leaked credentials. 3.
+<code>scripts/verify-llmsverifier-pin-parity.sh</code> — LLMsVerifier
+dual-pin parity. 4. <code>scripts/no-silent-skips.sh</code> — every
+<code>t.Skip()</code> justified. 5.
+<code>scripts/bluff-detector.sh</code> — no detected bluff patterns.</p>
+<p>Runs before any phase declares itself done.</p>
+<hr />
+<h2 id="operational-continuity">7. Operational continuity</h2>
+<h3 id="single-source-of-truth-docsimprovementsprogress.md">7.1 Single
+source of truth: <code>docs/improvements/PROGRESS.md</code></h3>
+<p>A markdown file at a stable path that any future session — including
+a fresh agent with no conversation history — can read to understand
+exactly where the programme stands.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># HelixCode CLI-Agent Fusion — Live Progress Tracker</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; **STOP/RESUME PROTOCOL**: read this file first. The &quot;current focus&quot; pointer</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; below identifies the active task. The &quot;evidence trail&quot; links every claim of</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; &quot;done&quot; to its commit + Challenge output.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## Current focus</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Active phase:** P<span class="dt">&lt;</span><span class="kw">n</span><span class="dt">&gt;</span> — <span class="dt">&lt;</span><span class="kw">phase</span><span class="ot"> name</span><span class="dt">&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Active task:** P<span class="dt">&lt;</span><span class="kw">n</span><span class="dt">&gt;</span>-<span class="dt">&lt;</span><span class="kw">id</span><span class="dt">&gt;</span> — <span class="dt">&lt;</span><span class="kw">task</span><span class="ot"> subject</span><span class="dt">&gt;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Owner:** <span class="dt">&lt;</span><span class="kw">user-or-agent</span><span class="dt">&gt;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Started:** <span class="dt">&lt;</span><span class="kw">ISO</span><span class="ot"> timestamp</span><span class="dt">&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Last touched:** <span class="dt">&lt;</span><span class="kw">ISO</span><span class="ot"> timestamp</span><span class="dt">&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Blocked-on:** <span class="dt">&lt;</span><span class="kw">none</span><span class="ot"> </span><span class="er">|</span><span class="ot"> ticket </span><span class="er">|</span><span class="ot"> upstream issue</span><span class="dt">&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Phase status</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Phase <span class="pp">|</span> State <span class="pp">|</span> Started <span class="pp">|</span> Completed <span class="pp">|</span> Evidence <span class="pp">|</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|---|</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> P0 — Foundation <span class="pp">|</span> &lt;pending/active/done&gt; <span class="pp">|</span> — <span class="pp">|</span> — <span class="pp">|</span> docs/improvements/05_phase_0_evidence.md <span class="pp">|</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> P1 — claude-code <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> P2 — Other CLI agents <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> P3 — Test infra <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> P4 — Anti-bluff audit <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> P5 — End-user materials <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span> … <span class="pp">|</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## Active phase task list</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[x]</span> P<span class="dt">&lt;</span><span class="kw">n</span><span class="dt">&gt;</span>-01 — <span class="dt">&lt;</span><span class="kw">subject</span><span class="dt">&gt;</span>  ← commit <span class="dt">&lt;</span><span class="kw">sha</span><span class="dt">&gt;</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">-</span><span class="co">]</span> P<span class="dt">&lt;</span><span class="kw">n</span><span class="dt">&gt;</span>-02 — <span class="dt">&lt;</span><span class="kw">subject</span><span class="dt">&gt;</span>  ← in progress</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P<span class="dt">&lt;</span><span class="kw">n</span><span class="dt">&gt;</span>-03 — <span class="dt">&lt;</span><span class="kw">subject</span><span class="dt">&gt;</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="fu">## Decision log</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="dt">&lt;</span><span class="kw">date</span><span class="dt">&gt;</span> — <span class="dt">&lt;</span><span class="kw">decision</span><span class="dt">&gt;</span> — rationale — link to commit/discussion</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Open risks / parking lot</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="dt">&lt;</span><span class="kw">item</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>Updated atomically with every commit that advances the programme.</p>
+<h3 id="commit-cadence">7.2 Commit cadence</h3>
+<p>Every meaningful unit of progress = one commit. A “meaningful unit”
+is at minimum: - One Phase task moved from <code>in_progress</code> →
+<code>completed</code>, OR - One Phase task’s intermediate sub-step that
+lands code or docs.</p>
+<p>No squashing during the programme. Each commit message body
+includes:</p>
+<pre><code>&lt;type&gt;(&lt;phase-task&gt;): &lt;subject&gt;
+
+&lt;short description&gt;
+
+Phase: P&lt;n&gt;
+Task:  P&lt;n&gt;-&lt;id&gt;
+Evidence: &lt;pasted runtime output OR pointer to file containing it&gt;
+
+Co-Authored-By: Claude Opus 4.7 (1M context) &lt;noreply@anthropic.com&gt;</code></pre>
+<h3 id="push-cadence">7.3 Push cadence</h3>
+<p><strong>Default cadence:</strong> push at the end of every working
+session, and at every phase boundary. Working session = continuous block
+of agent-driven work (typically 1-3 hours of clock time).</p>
+<p><strong>Push protocol (cascade order — submodule first, then
+parent):</strong> 1. For every submodule with new commits in the
+session: 1.
+<code>cd &lt;submodule&gt; &amp;&amp; make verify-foundation</code>
+(when the submodule has it; otherwise compile check) 2.
+<code>cd &lt;submodule&gt; &amp;&amp; scripts/scan-secrets.sh</code> (if
+available; else fallback grep) 3.
+<code>cd &lt;submodule&gt; &amp;&amp; git push &lt;each-remote&gt; &lt;branch&gt;</code>
+— every configured remote, sequentially 2. For the meta-repo (after all
+submodules pushed): 1. <code>make verify-foundation</code> 2.
+<code>scripts/scan-secrets.sh</code> 3. <code>git add</code> updated
+submodule pointers + <code>PROGRESS.md</code> + meta-repo files 4.
+Single commit listing every submodule SHA bumped 5.
+<code>git push &lt;each-remote&gt; main</code> for <code>github</code>,
+<code>gitlab</code>, <code>origin</code>, <code>upstream</code> 3.
+Verify:
+<code>for r in github gitlab origin upstream; do git ls-remote --heads $r main; done</code>
+— all four return same SHA.</p>
+<p><strong>Authorisation rule (CONST-043 reaffirmed):</strong> -
+<strong>Regular <code>git push</code> (no force) for advancing
+<code>main</code> on existing remotes during this programme</strong> —
+pre-authorised in conversation; no per-push approval needed. -
+<strong>Force pushes / history rewrites / hook bypasses / new branches /
+new remotes</strong> — still per-operation approval.</p>
+<p><strong>Pre-push gate (mechanical):</strong></p>
+<pre><code>make verify-foundation &amp;&amp; scripts/scan-secrets.sh &amp;&amp; \
+  for r in github gitlab origin upstream; do git push $r &lt;branch&gt;; done</code></pre>
+<p>If <code>verify-foundation</code> or secret scan fails → push aborts;
+evidence captured in <code>PROGRESS.md</code> “blocked-on” field.</p>
+<h3 id="recovery-semantics">7.4 Recovery semantics</h3>
+<p>Any agent / human starting a fresh session executes, in order: 1.
+<code>git -C &lt;repo&gt; submodule update --init --recursive --jobs 8</code>
+2. <code>cat docs/improvements/PROGRESS.md</code> — get current focus.
+3. <code>git log --oneline -10 docs/improvements/PROGRESS.md</code> —
+verify file is current. 4. <code>make verify-foundation</code> — confirm
+foundation intact. 5. Resume the active task per the file.</p>
+<p>If <code>PROGRESS.md</code> is stale or contradicts git state, fix it
+first; never start work on top of inconsistent state.</p>
+<h3 id="stop-semantics">7.5 Stop semantics</h3>
+<p>User says “stop”, session times out, or work pauses for any reason:
+1. Finish the in-flight tool call cleanly. 2. Update
+<code>PROGRESS.md</code>: move active task to <code>completed</code> (if
+cleanly done) or back to <code>pending</code> with
+<code>stopped at: &lt;description&gt;</code> note. 3. Commit + push per
+cadence above. 4. Report stop status to user.</p>
+<p>At no point is the system left with in-flight work that isn’t either
+completed-and-committed or rolled-back-to-clean-restartable state.</p>
+<hr />
+<h2 id="spec-self-review-log">8. Spec self-review log</h2>
+<p>Pass executed 2026-05-04 by the authoring agent immediately before
+handing the spec to user review.</p>
+<p><strong>Findings &amp; resolutions:</strong> 1. <strong>Placeholder
+scan</strong> — flagged hits at the bluff-detector grep patterns
+(<code>TODO implement</code>, <code>placeholder</code> strings) and
+inside the <code>PROGRESS.md</code> template (<code>&lt;n&gt;</code>,
+<code>&lt;id&gt;</code>, <code>&lt;subject&gt;</code>). All confirmed as
+legitimate content (literal strings used by detector, runtime template
+tokens). <strong>No fix needed.</strong> 2. <strong>Internal
+consistency</strong> — Phase boundaries, anchor names (CONST-035 / -041
+/ -042), and acceptance-criteria references match across §1, §3, §4, §5,
+§6. CONST numbering matches the existing root
+<code>CONSTITUTION.md</code> style. <strong>No fix needed.</strong> 3.
+<strong>Scope check</strong> — single spec covers a multi-phase
+programme but each phase has its own writing-plans cycle; this spec only
+commits to scope, dependencies, acceptance criteria, and operational
+continuity. The decomposition is appropriate for the brainstorming →
+writing-plans handoff. <strong>No fix needed.</strong> 4.
+<strong>Ambiguity check</strong> — push authorisation rule clarified:
+regular non-force pushes pre-authorised for the duration of the
+programme; force pushes / hook bypasses / new branches / new remotes
+still require per-operation approval. <strong>§7.3 was already explicit;
+reaffirmed during review.</strong> 5. <strong>Coverage of “ALL CLI
+agents” mandate</strong> — original Phase-2 priority table only
+enumerated 13 explicit agents + a “bundled remainder” without specifying
+the bundled set. The user’s mandate is “all CLI agents” with no
+exceptions. <strong>FIXED inline:</strong> Phase 2 table extended to row
+18; explicit clause added that scope is every
+<code>helix_agent/cli_agents/</code> subdirectory minus N1 closed-source
+set, with a Phase-2-time reconciliation step. 6. <strong>Codex
+ambiguity</strong> — spec was unclear whether “Codex” refers to OpenAI’s
+legacy closed-source CLI or the modern open-source successor.
+<strong>FIXED inline:</strong> row 16 explicitly defers the
+disambiguation to the Phase 2 sub-spec; if it’s the closed variant it
+moves to N1. 7. <strong>Decision-log column in PROGRESS.md</strong> —
+present and used for in-band-but-out-of-spec calls (e.g., the Codex
+disambiguation, any submodule pointer rollback). Adequate.</p>
+<p><strong>Open spec-level uncertainty (deferred to
+writing-plans):</strong> - Exact Go module import path under
+<code>dev.helix.code/helix_agent/HelixLLM/...</code> — needs reading
+<code>helix_agent/HelixLLM/go.mod</code> after P0-02 lands. Recorded as
+an open item; does not block the spec. - Whether
+<code>Example_Projects/</code> is deleted in Phase 5 or kept as
+read-only mirror — decided after Phase 4 verification per §2.1. -
+Submodule depth (<code>--depth=1</code> shallow vs. full clone) —
+measured during P0-02; default to full clone unless a submodule exceeds
+500 MB.</p>
+<hr />
+<h2 id="references">9. References</h2>
+<ul>
+<li><strong>Constitution:</strong> <code>CONSTITUTION.md</code> (Article
+XI §11.9 = anti-bluff anchor; Article XII §12.1 = CONST-042; §12.2 =
+CONST-043 — both NEW in P0-10)</li>
+<li><strong>Existing planning material:</strong>
+<code>docs/improvements/03_main_plan_step_01/deep_dive_submodule_integration/</code>
+and
+<code>docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/</code></li>
+<li><strong>Per-CLI-agent porting docs:</strong>
+<code>docs/improvements/04/.../porting_*.md</code> (16 documents)</li>
+<li><strong>Anti-bluff framework reference:</strong>
+<code>docs/improvements/04/.../anti_bluff_test_framework.md</code></li>
+<li><strong>Real module map (gh org):</strong>
+<code>HelixDevelopment/{HelixAgent,HelixCode,HelixLLM,HelixMemory,HelixSpecifier,HelixQA,HelixBuilder,HelixGitpx,HelixPlay,HelixTranslate}</code>
+and
+<code>vasic-digital/{LLMsVerifier,Challenges,Containers,...}</code></li>
+</ul>
+<hr />
+<p><em>End of synthesis design spec. Hand-off to
+<code>superpowers:writing-plans</code> follows user review.</em></p>
+</body>
+</html>

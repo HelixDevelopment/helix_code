@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f08-plan-mode-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f08-plan-mode-design</h1>
+</header>
+<h1 id="phase-1-feature-8-plan-mode">Phase 1 / Feature 8 — Plan
+Mode</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Status:</strong> Approved
+(brainstorming, auto-approved per programme cadence)
+<strong>Programme:</strong> CLI-Agent Fusion — Phase 1 port from
+claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Add claude-code-style Plan Mode to HelixCode: a read-only operational
+mode where destructive tools are blocked unless the agent’s plan has
+been approved by the user. Both agent (<code>EnterPlanMode</code> tool)
+and user (<code>/plan</code> slash command) can switch into plan mode;
+<code>ExitPlanMode</code> agent tool and <code>/plan reject</code> (or
+<code>/plan approve</code>+execute) return to normal execution. Hooks
+fire on plan approval/reject so users can wire policy enforcement (per
+F05). Allow-list of always-safe tools (<code>Read</code>,
+<code>Glob</code>, <code>Grep</code>, <code>View</code>,
+<code>LSPGetDiagnostics</code>, <code>TaskOutput</code>,
+<code>TaskStop</code>, <code>WebFetch</code>, <code>WebSearch</code>);
+everything else blocked unless explicitly approved as a plan action.</p>
+<p>This ports claude-code’s Plan Mode pattern, building on the existing
+heavyweight <code>internal/workflow/planmode/</code> package
+(Mode/ModeController/Plan/Planner already exist) by adding the missing
+tool-gating layer.</p>
+<h2 id="architecture">2. Architecture</h2>
+<p>Extend <code>internal/workflow/planmode/</code> with a new
+<code>gating.go</code> file holding <code>ToolGate</code> (knows the
+allow-list + per-tool key-arg map, queries <code>ModeController</code> +
+<code>Planner</code>, returns blocked/allowed for any tool call). Add
+<code>EnterPlanModeTool</code> + <code>ExitPlanModeTool</code> agent
+tools that wrap <code>ModeController.TransitionTo(...)</code>. Add
+<code>/plan</code> slash command exposing
+<code>show</code>/<code>approve [&lt;id&gt;]</code>/<code>reject</code>/<code>status</code>
+to interactive users. Wire <code>ToolRegistry.Execute</code> with
+<code>SetPlanModeGate(*ToolGate)</code> setter (mirrors F07’s
+<code>SetBackgroundManager</code>); the registry consults the gate
+before any tool execution and returns <code>ErrPlanModeGated</code> if
+blocked. Hook integration via the existing F05 hook system (new
+<code>OnPlanApproval</code>, <code>OnPlanReject</code> hook types).</p>
+<p><strong>Boundary discipline:</strong> - <code>ToolGate</code> is the
+only place that knows the allow-list, key-arg map, and the gating
+decision. ToolRegistry asks one question; gate answers. -
+<code>Planner</code>/<code>Plan</code> machinery from existing
+<code>planmode/</code> is reused as-is — no refactor of the heavyweight
+option-presenter code. -
+<code>EnterPlanMode</code>/<code>ExitPlanMode</code> agent tools are
+pure mode-transition wrappers — they don’t know about the gate or
+planner internals. - <code>/plan</code> slash + agent tools are sibling
+consumers of <code>Planner</code> + <code>ModeController</code>. Neither
+calls the other.</p>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/internal/workflow/planmode/gating.go</code></td>
+<td><code>ToolGate</code> struct + allow-list + key-arg map +
+<code>IsBlocked()</code>, <code>MatchApprovedAction()</code></td>
+</tr>
+<tr>
+<td><code>helix_code/internal/workflow/planmode/gating_test.go</code></td>
+<td>Unit tests for gate logic</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/tools/plan_tools.go</code></td>
+<td><code>EnterPlanModeTool</code>, <code>ExitPlanModeTool</code> (both
+implement <code>Tool</code>)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/tools/plan_tools_test.go</code></td>
+<td>Unit tests for the agent tools</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/tools/types_planmode.go</code></td>
+<td><code>ErrPlanModeGated</code> sentinel</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/commands/plan_command.go</code></td>
+<td><code>/plan</code> slash command</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/commands/plan_command_test.go</code></td>
+<td>Unit tests for the slash command</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/commands/builtin/plan_register_test.go</code></td>
+<td>Test for <code>RegisterBuiltinCommandsWithPlanMode</code></td>
+</tr>
+<tr>
+<td><code>helix_code/tests/integration/planmode_gating_test.go</code></td>
+<td><code>//go:build integration</code> end-to-end test</td>
+</tr>
+<tr>
+<td><code>challenges/p1-f08-plan-mode/CHALLENGE.md</code> +
+<code>run.sh</code></td>
+<td>Runtime-evidence Challenge</td>
+</tr>
+</tbody>
+</table>
+<h3 id="modified-files">3.2 Modified files</h3>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/internal/tools/registry.go</code></td>
+<td><code>SetPlanModeGate(*planmode.ToolGate)</code> method;
+<code>Execute</code> consults gate; returns
+<code>ErrPlanModeGated</code> on block. Foreground + background paths
+both gated.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/commands/builtin/register.go</code></td>
+<td>New
+<code>RegisterBuiltinCommandsWithPlanMode(registry, planner, mc)</code>
+mirroring the Hooks/MCP/Tasks pattern. Add <code>&quot;plan&quot;</code> to
+<code>GetBuiltinCommandNames</code>.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/hooks/hook.go</code></td>
+<td>Add <code>OnPlanApproval</code>, <code>OnPlanReject</code> hook type
+constants.</td>
+</tr>
+<tr>
+<td><code>helix_code/cmd/cli/main.go</code></td>
+<td>Construct <code>ToolGate</code>, wire to registry + slash
+registration.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="toolgate-internalworkflowplanmodegating.go">3.3
+<code>ToolGate</code>
+(<code>internal/workflow/planmode/gating.go</code>)</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> planmode</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// AllowList is the default set of always-safe tool names — read-only/inspection tools.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> DefaultAllowList <span class="op">=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Read&quot;</span><span class="op">,</span> <span class="st">&quot;Glob&quot;</span><span class="op">,</span> <span class="st">&quot;Grep&quot;</span><span class="op">,</span> <span class="st">&quot;View&quot;</span><span class="op">,</span> <span class="st">&quot;LSPGetDiagnostics&quot;</span><span class="op">,</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;TaskOutput&quot;</span><span class="op">,</span> <span class="st">&quot;TaskStop&quot;</span><span class="op">,</span> <span class="st">&quot;WebFetch&quot;</span><span class="op">,</span> <span class="st">&quot;WebSearch&quot;</span><span class="op">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">// DefaultKeyArgMap maps each destructive tool name to the param key that</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">// identifies its target. An approved plan action matches an Execute call only</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">// when the values for that key are equal (where defined).</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> DefaultKeyArgMap <span class="op">=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Edit&quot;</span><span class="op">:</span>        <span class="st">&quot;file_path&quot;</span><span class="op">,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Write&quot;</span><span class="op">:</span>       <span class="st">&quot;file_path&quot;</span><span class="op">,</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;MultiEdit&quot;</span><span class="op">:</span>   <span class="st">&quot;file_path&quot;</span><span class="op">,</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;NotebookEdit&quot;</span><span class="op">:</span> <span class="st">&quot;notebook_path&quot;</span><span class="op">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Bash&quot;</span><span class="op">:</span>        <span class="st">&quot;command&quot;</span><span class="op">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;shell&quot;</span><span class="op">:</span>       <span class="st">&quot;command&quot;</span><span class="op">,</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ToolGate <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    mc        ModeController</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    planner   Planner</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    allowList <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    keyArgs   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span>  <span class="co">// toolName → param key for matching</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewToolGate<span class="op">(</span>mc ModeController<span class="op">,</span> planner Planner<span class="op">)</span> <span class="op">*</span>ToolGate</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>g <span class="op">*</span>ToolGate<span class="op">)</span> IsBlocked<span class="op">(</span>toolName <span class="dt">string</span><span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(</span>blocked <span class="dt">bool</span><span class="op">,</span> reason <span class="dt">string</span><span class="op">)</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>g <span class="op">*</span>ToolGate<span class="op">)</span> MatchApprovedAction<span class="op">(</span>toolName <span class="dt">string</span><span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(*</span>PlanAction<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>g <span class="op">*</span>ToolGate<span class="op">)</span> WithAllowList<span class="op">(</span>extra <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="op">*</span>ToolGate    <span class="co">// for YAML override (deferred)</span></span></code></pre></div>
+<p>Decision logic for <code>IsBlocked</code>: 1. If
+<code>mc.GetMode() != ModePlan</code>, return <code>(false, &quot;&quot;)</code>.
+2. If <code>toolName ∈ allowList</code>, return
+<code>(false, &quot;&quot;)</code>. 3. Get the active plan from
+<code>planner.ActivePlan()</code> (or equivalent). If nil, return
+<code>(true, &quot;no active plan&quot;)</code>. 4. Walk plan actions: find one
+with <code>ToolName == toolName</code>, <code>Approved == true</code>,
+<code>Executed == false</code>. If key-arg defined for this tool, also
+require matching arg value. 5. If found, return <code>(false, &quot;&quot;)</code>
+— the action will be marked Executed by the caller (registry) after a
+successful Execute. 6. Otherwise return
+<code>(true, &quot;no approved plan action authorises this tool&quot;)</code>.</p>
+<h3 id="planner-extensions">3.4 <code>Planner</code> extensions</h3>
+<p>The existing <code>planmode.Planner</code> interface already covers
+plan creation. F08 needs three method signatures (add to the interface,
+implement in the existing <code>DefaultPlanner</code>): -
+<code>ApprovePlan(planID string) error</code> — sets
+<code>Status = PlanApproved</code>, marks all actions approved, fires
+<code>OnPlanApproval</code>. -
+<code>ApproveAction(planID, actionID string) error</code> — marks one
+action approved. - <code>RejectPlan(planID string) error</code> — sets
+<code>Status = PlanRejected</code>, fires <code>OnPlanReject</code>,
+transitions mode back to Normal.</p>
+<p>If <code>ActivePlan() *Plan</code> doesn’t exist, add it (returns the
+plan whose status is Pending/Approved).</p>
+<h3 id="agent-tools">3.5 Agent tools</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// EnterPlanModeTool — agent calls this to switch into plan mode.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Side-effect only: ModeController.TransitionTo(ModePlan).</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EnterPlanModeTool <span class="kw">struct</span><span class="op">{</span> mc planmode<span class="op">.</span>ModeController <span class="op">}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">// ExitPlanModeTool — agent calls this to leave plan mode.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Optional param: allowed_prompts []string (claude-code parity, used by F05 hook policies).</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ExitPlanModeTool <span class="kw">struct</span><span class="op">{</span> mc planmode<span class="op">.</span>ModeController <span class="op">}</span></span></code></pre></div>
+<p>Both implement the 6-method <code>Tool</code> interface
+(Name/Description/Schema/Category/Validate/Execute) per the convention
+established in F07.</p>
+<h3 id="plan-slash-command">3.6 <code>/plan</code> slash command</h3>
+<pre><code>/plan                  # alias for /plan show
+/plan show             # render active plan: title, description, actions table (id/tool/approved/executed), status
+/plan approve          # approve all actions in the active plan
+/plan approve &lt;id&gt;     # approve one action by ID
+/plan reject           # reject the active plan, exit plan mode
+/plan status           # current mode + active plan summary</code></pre>
+<p>Mirrors the F02–F07 slash-command-with-subcommands pattern. Uses the
+<code>*CommandContext</code> / <code>*CommandResult</code> interface
+adopted in F06–F07.</p>
+<h3 id="registry-wiring">3.7 Registry wiring</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ToolRegistry<span class="op">)</span> SetPlanModeGate<span class="op">(</span>g <span class="op">*</span>planmode<span class="op">.</span>ToolGate<span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<p>In <code>Execute</code> (after the F07 <code>run_in_background</code>
+shortcut, before fireBefore):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> r<span class="op">.</span>planModeGate <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    blocked<span class="op">,</span> reason <span class="op">:=</span> r<span class="op">.</span>planModeGate<span class="op">.</span>IsBlocked<span class="op">(</span>name<span class="op">,</span> params<span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> blocked <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;%w: %s (%s)&quot;</span><span class="op">,</span> ErrPlanModeGated<span class="op">,</span> name<span class="op">,</span> reason<span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The same gate consultation happens inside
+<code>executeInBackground</code> so background dispatch is also
+gated.</p>
+<h3 id="hook-types">3.8 Hook types</h3>
+<p>In <code>internal/hooks/hook.go</code>, add to the existing
+<code>HookType</code> const block:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>OnPlanApproval HookType <span class="op">=</span> <span class="st">&quot;OnPlanApproval&quot;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>OnPlanReject   HookType <span class="op">=</span> <span class="st">&quot;OnPlanReject&quot;</span></span></code></pre></div>
+<p>The <code>Planner.ApprovePlan</code> and <code>RejectPlan</code>
+implementations fire these via the existing <code>hooks.Manager</code>
+(passed in via constructor).</p>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="agent-enters-plan-mode">4.1 Agent enters plan mode</h3>
+<pre><code>agent calls EnterPlanMode {}
+  └─ EnterPlanModeTool.Execute
+       └─ mc.TransitionTo(ModePlan)
+            └─ ModeController callbacks fire (announce mode change)
+       └─ return {mode: &quot;plan&quot;, message: &quot;Plan mode active. Propose a plan.&quot;}</code></pre>
+<h3 id="agent-proposes-plan">4.2 Agent proposes plan</h3>
+<p>The agent calls existing <code>Planner</code> APIs (already in
+<code>planmode/planner.go</code>) — F08 doesn’t add a new agent surface
+for plan creation. The agent constructs a <code>Plan</code> with
+<code>[]PlanAction</code> and calls
+<code>Planner.SubmitPlan(plan)</code> (existing API or equivalent).</p>
+<h3 id="user-approves">4.3 User approves</h3>
+<pre><code>user types &quot;/plan approve&quot;
+  └─ PlanCommand.Execute({Args: [&quot;approve&quot;]})
+       ├─ planID := planner.ActivePlan().ID
+       ├─ planner.ApprovePlan(planID)
+       │     ├─ Status = PlanApproved; all actions approved
+       │     └─ hooks.Manager.Trigger(OnPlanApproval, plan)
+       └─ return &quot;Plan approved (N actions).&quot;</code></pre>
+<p>User can also <code>/plan approve &lt;action-id&gt;</code> to approve
+a single action. The plan’s overall status stays <code>Pending</code>
+until all actions are approved or <code>/plan approve</code> (no arg) is
+run.</p>
+<h3 id="agent-executes-destructive-tool-against-approved-plan">4.4 Agent
+executes destructive tool against approved plan</h3>
+<pre><code>agent calls &quot;Edit&quot; {file_path: &quot;foo.go&quot;, ...}
+  └─ ToolRegistry.Execute(ctx, &quot;Edit&quot;, params)
+       ├─ planModeGate.IsBlocked(&quot;Edit&quot;, params)
+       │     ├─ mode == ModePlan
+       │     ├─ &quot;Edit&quot; ∉ allowList
+       │     ├─ active plan; walk actions → find one with ToolName==&quot;Edit&quot;, Approved=true, Executed=false, params[&quot;file_path&quot;]==&quot;foo.go&quot;
+       │     └─ return (false, &quot;&quot;)  // matched approved action
+       ├─ existing fireBefore + Execute path runs
+       ├─ on success: planModeGate.MarkExecuted(actionID) — the matched action is now Executed=true
+       └─ return result</code></pre>
+<h3 id="agent-tries-unapproved-destructive-tool">4.5 Agent tries
+unapproved destructive tool</h3>
+<pre><code>agent calls &quot;Bash&quot; {command: &quot;rm -rf /tmp/x&quot;} (no matching plan action)
+  └─ ToolRegistry.Execute
+       ├─ planModeGate.IsBlocked → (true, &quot;no approved plan action authorises this tool&quot;)
+       └─ return ErrPlanModeGated wrapped with name + reason</code></pre>
+<p>The agent sees the error, can either: 1. Propose a new plan action
+and ask user to approve it. 2. Call <code>ExitPlanMode</code> to return
+to normal mode (if user has authorised).</p>
+<h3 id="user-rejects">4.6 User rejects</h3>
+<pre><code>user types &quot;/plan reject&quot;
+  └─ PlanCommand.Execute({Args: [&quot;reject&quot;]})
+       ├─ planner.RejectPlan(activePlanID)
+       │     ├─ Status = PlanRejected
+       │     └─ hooks.Manager.Trigger(OnPlanReject, plan)
+       ├─ mc.TransitionTo(ModeNormal)
+       └─ return &quot;Plan rejected. Returning to normal mode.&quot;</code></pre>
+<h3 id="agent-exits-plan-mode">4.7 Agent exits plan mode</h3>
+<pre><code>agent calls ExitPlanMode {allowed_prompts: [&quot;...&quot;]}
+  └─ ExitPlanModeTool.Execute
+       ├─ if claude-code semantics: store allowed_prompts on planner state
+       └─ mc.TransitionTo(ModeNormal)  // plan stays in archive; new plans start fresh</code></pre>
+<h2 id="error-handling-edge-cases-anti-bluff">5. Error handling, edge
+cases, anti-bluff</h2>
+<h3 id="error-sentinel">5.1 Error sentinel</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> ErrPlanModeGated <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;tools: blocked by plan mode&quot;</span><span class="op">)</span></span></code></pre></div>
+<p>Wrapped with the tool name and reason for diagnostic clarity:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;%w: %s (%s)&quot;</span><span class="op">,</span> ErrPlanModeGated<span class="op">,</span> name<span class="op">,</span> reason<span class="op">)</span></span></code></pre></div>
+<h3 id="concurrency-invariants">5.2 Concurrency invariants</h3>
+<ul>
+<li><code>ModeController</code> already has <code>sync.RWMutex</code>
+(existing).</li>
+<li><code>ToolGate</code> doesn’t store mutable state of its own — it
+queries <code>mc</code> and <code>planner</code> per call. No new lock
+needed.</li>
+<li><code>Planner.ApprovePlan/RejectPlan</code> mutations under the
+planner’s existing <code>sync.RWMutex</code>.</li>
+<li>Hook firing happens after the lock release to avoid holding locks
+across user-supplied hook code.</li>
+</ul>
+<h3 id="edge-cases">5.3 Edge cases</h3>
+<ul>
+<li><strong>Empty plan approved</strong> (zero actions):
+<code>ApprovePlan</code> succeeds, status becomes Approved, no actions
+to authorise. Any destructive tool call hits
+<code>IsBlocked → (true, ...)</code>. The user must add actions or
+reject.</li>
+<li><strong>All actions executed</strong>: subsequent destructive tool
+calls are blocked (no unexecuted approved action remains). The agent
+should propose a new plan or <code>ExitPlanMode</code>.</li>
+<li><strong>Mode change mid-execution</strong>: rare (gate checks happen
+synchronously in Execute). If <code>mc</code> state changes between
+check and execute, the result is inconsistent but bounded — at most one
+extra tool runs in the wrong mode.</li>
+<li><strong>Background tasks in plan mode</strong>:
+<code>executeInBackground</code> consults the same gate. If the
+destructive tool would be blocked in foreground, it’s also blocked when
+invoked with <code>run_in_background:true</code>.</li>
+<li><strong>Allow-list tool with side effects</strong>:
+<code>Read</code> is allow-listed but reads can leak path information.
+Not a concern at the gating layer — the allow-list is what claude-code
+defines; users can shrink it via the WithAllowList override.</li>
+</ul>
+<h3 id="resource-limits">5.4 Resource limits</h3>
+<p>No new resources. Gate is stateless beyond the
+<code>mc</code>/<code>planner</code> references. Allow-list and key-arg
+map are O(K) lookup where K is small.</p>
+<h3 id="anti-bluff-const-035-article-xi-11.9">5.5 Anti-bluff (CONST-035,
+Article XI §11.9)</h3>
+<ul>
+<li>Challenge in T13: spawn a real <code>Bash</code> background task in
+plan mode WITHOUT an approved plan, assert blocked. Then approve a
+<code>Bash</code> action with matching <code>command</code>, assert
+allowed, assert tool actually runs.</li>
+<li>Tool name + key-arg matching enforced by tests with multiple actions
+and verification of which matched.</li>
+<li>No metadata-only PASS: every test asserts on <code>IsBlocked</code>
+returning the expected <code>(blocked, reason)</code> pair AND on a real
+subsequent Execute call producing the expected outcome.</li>
+<li>Anti-bluff smoke
+<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/workflow/planmode/gating.go internal/tools/plan_tools.go internal/tools/types_planmode.go internal/commands/plan_command.go</code>
+must return empty.</li>
+</ul>
+<h3 id="logging">5.6 Logging</h3>
+<ul>
+<li>Mode transitions log via existing <code>internal/logging</code>
+(already done by <code>ModeController</code>).</li>
+<li>Gate decisions log at DEBUG (with tool name + reason).</li>
+<li>Hook firing on Approve/Reject logs at INFO (handled by
+<code>hooks.Manager</code>).</li>
+</ul>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-tests-mocks-allowed">6.1 Unit tests (mocks allowed)</h3>
+<p><code>gating_test.go</code>: - TestToolGate_NormalModeNeverBlocks -
+TestToolGate_AllowListPasses - TestToolGate_NoActivePlanBlocks -
+TestToolGate_ApprovedActionAllows - TestToolGate_KeyArgMismatchBlocks -
+TestToolGate_ExecutedActionDoesNotReauthorise -
+TestToolGate_RejectedPlanBlocksAll -
+TestToolGate_WithAllowListExtends</p>
+<p><code>plan_tools_test.go</code>: -
+TestEnterPlanModeTool_TransitionsToPlanMode -
+TestExitPlanModeTool_TransitionsToNormal -
+TestEnterPlanModeTool_FromInvalidStateErrors</p>
+<p><code>plan_command_test.go</code>: - TestSlashPlan_ShowEmptyPlan -
+TestSlashPlan_ShowActivePlan - TestSlashPlan_ApproveAll -
+TestSlashPlan_ApproveSingleAction - TestSlashPlan_RejectExitsPlanMode -
+TestSlashPlan_StatusReportsMode -
+TestSlashPlan_UnknownSubcommandErrors</p>
+<p>Registry tests (extend existing test file): -
+TestRegistry_PlanModeGateBlocksDestructive -
+TestRegistry_PlanModeGateAllowsAllowList -
+TestRegistry_PlanModeGateAllowsApprovedAction -
+TestRegistry_PlanModeGateBlocksOnBackgroundDispatch (T07 path)</p>
+<p><code>plan_register_test.go</code>: -
+TestRegisterBuiltinCommandsWithPlanMode</p>
+<h3 id="integration-test--tagsintegration">6.2 Integration test
+(<code>-tags=integration</code>)</h3>
+<p><code>tests/integration/planmode_gating_test.go</code>: -
+<code>TestPlanMode_BlocksUnapprovedBash</code> — real registry, real
+ModeController; transition to plan mode; assert <code>Bash</code>
+blocked. Approve a plan action with matching command. Assert subsequent
+<code>Bash</code> allowed and runs (asserts on actual subprocess
+output). - <code>TestPlanMode_AllowListPasses</code> — transition to
+plan mode; call <code>Glob</code>; assert it runs without approval. -
+<code>TestPlanMode_ExitReturnsToNormal</code> — agent calls
+<code>ExitPlanMode</code>; subsequent <code>Bash</code> runs without
+approval.</p>
+<h3 id="challenge">6.3 Challenge</h3>
+<p><code>challenges/p1-f08-plan-mode/</code>: 1. Build the harness. 2.
+Run a small program that: a. Constructs registry + ModeController +
+Planner + ToolGate. b. Transitions to ModePlan. c. Tries to execute
+<code>Bash echo hi</code> → expects <code>ErrPlanModeGated</code>.
+d. Submits a plan with action <code>Bash command=echo hi</code>,
+approves it. e. Tries to execute <code>Bash echo hi</code> → expects
+success, captures “hi” output. f. Tries to execute
+<code>Bash echo bye</code> (different command) → expects
+<code>ErrPlanModeGated</code> (key-arg mismatch). g. Calls
+<code>ExitPlanMode</code>, then <code>Bash echo bye</code> → expects
+success. 3. Anti-bluff smoke clean. 4. Cross-compile linux clean.</p>
+<p>Pasted runtime evidence to
+<code>docs/improvements/06_phase_1_evidence.md</code>.</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>No new platform-specific code.
+<code>ModeController</code>/<code>Planner</code>/<code>ToolGate</code>
+are pure Go. Cross-compile check: linux native + windows compile (the
+existing pre-existing CGO failures in <code>internal/tools/git</code>,
+etc., remain documented out-of-scope).</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li>YAML override of allow-list / key-arg map. The
+<code>WithAllowList(extra)</code> builder hook is in place but no YAML
+loader yet — defer to F08.5 if needed.</li>
+<li>Plan persistence across sessions (the existing
+<code>StateManager</code> is in-memory; durable plans need DB
+integration).</li>
+<li><code>EnterPlanMode</code> <code>allowed_prompts</code> parameter —
+accepted by the tool but currently ignored. Future feature: F05 hook can
+consult the stored allowed_prompts to gate user-prompt-driven
+exits.</li>
+<li>A standalone <code>helixcode plan</code> cobra subcommand — the
+<code>/plan</code> slash is the user surface; a top-level cobra command
+would only operate on a session and adds no value over
+<code>/plan</code> (same constraint discovered in F07-T08).</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>CONST-033</strong> (no power management): N/A — F08 doesn’t
+spawn subprocesses.</li>
+<li><strong>CONST-035 / Article XI §11.9</strong> (anti-bluff): every
+PASS in the gate’s tests carries runtime evidence; the Challenge spawns
+a real subprocess gated correctly.</li>
+<li><strong>CONST-036–040</strong> (LLMsVerifier, providers,
+capabilities): orthogonal.</li>
+<li><strong>CONST-042</strong> (no-secret-leak): tool params are not
+logged at INFO; gate decisions logged at DEBUG only with tool name (no
+params).</li>
+<li><strong>CONST-043</strong> (no-force-push): non-force pushes to all
+four remotes per programme convention.</li>
+</ul>
+<h2 id="open-questions-resolved-during-brainstorming">10. Open questions
+resolved during brainstorming</h2>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: where does gating live</td>
+<td>(A) <code>internal/workflow/planmode/gating.go</code></td>
+</tr>
+<tr>
+<td>Q2: feature scope</td>
+<td>(C) Full parity: gating + Enter/ExitPlanMode tools + /plan slash +
+hooks</td>
+</tr>
+<tr>
+<td>Q3: allow-list vs deny-list</td>
+<td>(A) Allow-list (default-deny, claude-code’s design)</td>
+</tr>
+<tr>
+<td>Q4: who can enter plan mode</td>
+<td>(B) Both <code>EnterPlanMode</code> agent tool + <code>/plan</code>
+slash command</td>
+</tr>
+<tr>
+<td>Q5: action matching strictness</td>
+<td>(B) Tool name + per-tool key-arg match, fall back to name-only when
+no key-arg defined</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

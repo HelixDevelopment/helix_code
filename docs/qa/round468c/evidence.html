@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="retroactive-qa-evidence-commit-c63c8963-run-id-round468c">Retroactive
+QA evidence — commit <code>c63c8963</code> (run-id
+<code>round468c</code>)</h1>
+<blockquote>
+<p><strong>RECONSTRUCTED, AFTER-THE-FACT DOCUMENTATION (HXC-039,
+§11.4.83).</strong> This file is NOT a captured-at-the-time end-user
+transcript. It is honest retroactive documentation created during the
+HXC-039 §11.4.83 back-fill, operator-authorised, to give a pre-existing
+feature commit its required <code>docs/qa/&lt;run-id&gt;/</code>
+evidence directory WITHOUT rewriting git history. No runtime output
+below is fabricated (§11.4.6 / §11.4.123).</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Commit SHA</td>
+<td><code>c63c896321f6f4081a1d36450b9baa366ede869e</code></td>
+</tr>
+<tr>
+<td>Short SHA</td>
+<td><code>c63c8963</code></td>
+</tr>
+<tr>
+<td>Authored</td>
+<td>2026-06-04T12:33:56+05:00</td>
+</tr>
+<tr>
+<td>Subject</td>
+<td><code>feat(meta): Wave4b — FAISS honest relabel, consensus multi-peer transport, +2 pointer bumps (round468c)</code></td>
+</tr>
+<tr>
+<td>run-id basename</td>
+<td><code>round468c</code> (a verbatim substring of the commit
+subject)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-the-commit-changed-from-git-show---stat">What the commit
+changed (from <code>git show --stat</code>)</h2>
+<pre><code>docs/CONTINUATION.md                               |   9 +
+helix_code/internal/memory/providers/faiss_provider.go  |  36 +-
+helix_code/internal/memory/providers/faiss_provider_test.go | 56 ++-
+helix_code/internal/worker/consensus.go            | 516 +++++++++++++++++----
+helix_code/internal/worker/consensus_election_test.go | 182 ++++++++
+helix_code/internal/worker/consensus_test.go       |  39 +-
+submodules/helix_qa                                |   2 +-
+submodules/llm_provider                            |   2 +-
+8 files changed, 724 insertions(+), 118 deletions(-)</code></pre>
+<p>“Wave4b”: an honest relabel of the FAISS memory provider
+(<code>faiss_provider.go</code>) and a multi-peer transport for worker
+consensus (<code>consensus.go</code>), plus 2 pointer bumps.</p>
+<h2 id="verification-that-exists-for-this-commit">Verification that
+exists for this commit</h2>
+<ul>
+<li><strong>Two paired test files updated/added in the SAME
+commit:</strong> <code>memory/providers/faiss_provider_test.go</code>
+(FAISS relabel) and <code>worker/consensus_election_test.go</code> +
+<code>consensus_test.go</code> (multi-peer consensus). Run:
+<code>go test ./internal/memory/providers/... ./internal/worker/...</code>.</li>
+<li>The FAISS change is explicitly an <strong>honest relabel</strong>
+(anti-bluff: making the provider’s reported capability match reality) —
+the paired test asserts the corrected behaviour.</li>
+<li><strong>No captured runtime transcript was recorded at commit
+time</strong> under <code>docs/qa/</code>. This directory is retroactive
+documentation.</li>
+</ul>
+<h2 id="honesty-statement">Honesty statement</h2>
+<p>Reconstructed documentation. NO faked PASS logs, NO fabricated
+runtime output. Asserted verification = the in-commit FAISS + worker
+unit-test deltas visible in <code>git show c63c8963</code>.</p>
+</body>
+</html>

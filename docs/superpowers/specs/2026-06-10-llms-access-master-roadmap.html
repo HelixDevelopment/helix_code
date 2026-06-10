@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-llms-access-master-roadmap</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-llms-access-master-roadmap</h1>
+</header>
+<h1 id="master-roadmap-models-access-refinement-agents-work-enforcement">Master
+Roadmap — Models-Access Refinement &amp; Agents-Work Enforcement</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>PLANNING COMPLETE — 6 analyses + 5 SP plans written; constitution
+synced; SP3 plan + bundle code-review in flight; awaiting operator on
+decision register (G-1..G-5)</td>
+</tr>
+<tr>
+<td>Source request</td>
+<td><code>docs/requests/helix_code_request_llms_access.txt</code></td>
+</tr>
+<tr>
+<td>Delivery model</td>
+<td><strong>Independent sub-programs</strong> (operator decision
+2026-06-10) — this doc is the index/roadmap; each sub-program gets its
+own spec → plan → release cycle</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>Cascades from <code>constitution/</code> + root
+<code>CLAUDE.md</code>/<code>CONSTITUTION.md</code>; anti-bluff §11.4
+family governs every closure</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4 / §11.4.123):</strong> This roadmap is
+a <em>plan</em>, not a claim of done work. No phase below is “complete”
+until it carries captured runtime evidence per §11.4.5 / §11.4.69 /
+§11.4.107. The brainstorming HARD-GATE applies: <strong>no
+implementation, fork creation, or push happens until each sub-program’s
+design+plan is approved.</strong></p>
+</blockquote>
+<hr />
+<h2 id="operator-decisions-baked-in-2026-06-10">0. Operator decisions
+baked in (2026-06-10)</h2>
+<ol type="1">
+<li><strong>Fork strategy:</strong> Fork <strong>ALL</strong> ~50
+<code>cli_agents/*</code> third-party submodules <strong>now</strong>
+under the <code>vasic-digital</code> org with prefix
+<strong><code>caf-</code></strong> (cli-agent-fork) →
+e.g. <code>git@github.com:vasic-digital/caf-claude-code.git</code>. Swap
+each submodule’s URL to our fork. Auto-merge-from-upstream for every
+fork.</li>
+<li><strong>Delivery:</strong> Independent sub-programs; this is the
+master index.</li>
+<li><strong>Bridge exposure:</strong> <strong>One provider per CLI
+agent</strong> — each working CLI agent surfaces its own
+dynamically-discovered model list + power-features (Vision / Generative
+/ RAG / Memory / MCP / LSP / ACP).</li>
+<li><strong>New “ways-of-working” submodules</strong> (parallel-agents,
+dynamic-flows, …): under the <strong>HelixDevelopment</strong> org.</li>
+<li><strong>Constitution DESCOPED (2026-06-10):</strong> no
+governance-rule authoring, no constitution push — <strong>sync
+only</strong> (fetch+pull to current). Reusable fork/merge scripts live
+<strong>local to HelixCode</strong> (<code>scripts/caf/</code>), not in
+<code>constitution/scripts/</code>.</li>
+</ol>
+<hr />
+<h2 id="architecture-grounding-verified-from-repo-2026-06-10">1.
+Architecture grounding (verified from repo, 2026-06-10)</h2>
+<ul>
+<li><strong>HelixAgent is the “root”</strong> the request extends —
+<code>submodules/helix_agent/internal/</code> already contains
+<code>ensemble</code>, <code>llm</code>, <code>router</code>,
+<code>verifier</code>, <code>providers</code>, <code>modelsdev</code>,
+<code>models</code>, <code>clis</code>, <code>mcp</code>,
+<code>rag</code>, <code>memory</code>, <code>agentic</code>,
+<code>agents</code>, <code>concurrency</code>, <code>planning</code>,
+<code>background</code>. (Verified by <code>ls</code>.)</li>
+<li><strong>LLMsVerifier</strong>
+(<code>submodules/llms_verifier</code>) is the single source of truth
+for working models (CONST-036/040) — all dynamic discovery flows through
+it; hardcoded model lists are violations.</li>
+<li><strong>Inner Go app</strong> (<code>helix_code/</code>) has
+<code>internal/llm/*_provider.go</code> (anthropic, azure, bedrock,
+copilot, deepseek, gemini, groq, …), <code>internal/provider</code>,
+<code>internal/providers</code>, <code>internal/agent</code>.</li>
+<li><strong>Constitution scripts</strong> live in
+<code>constitution/scripts/</code> (codegraph, action-prefix,
+subagent-tiering, token-accounting, workable-items, hooks). <strong>No
+fork-maintenance scripts exist yet</strong> — Sub-program SP0 adds
+them.</li>
+<li><strong>~50 CLI agents</strong> under <code>cli_agents/</code> as
+third-party submodules (verified <code>.gitmodules</code>).</li>
+</ul>
+<p>Per-workstream evidence-backed analyses (produced by 6 parallel
+subagents, 2026-06-10) land in
+<code>docs/superpowers/specs/analysis/2026-06-10-{A..F}-*.md</code> and
+feed the detailed sub-program specs.</p>
+<hr />
+<h2 id="a.-real-defects-surfaced-during-planning-evidence-backed-to-be-fixed-inside-the-relevant-sp-red-first-11.4.115">1a.
+Real defects surfaced during planning (evidence-backed — to be fixed
+inside the relevant SP, RED-first §11.4.115)</h2>
+<p>These are concrete §11.4 anti-bluff / CONST violations found by the
+analysis subagents with <code>file:line</code> evidence — independent of
+the new features, they are pre-existing defects:</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 25%" />
+<col style="width: 31%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Defect</th>
+<th>Evidence</th>
+<th>Owner SP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-1</td>
+<td><code>/v1/completion/models</code> returns a <strong>hardcoded
+3-model list</strong></td>
+<td><code>helix_agent/internal/handlers/completion.go:406</code></td>
+<td>SP2 (CONST-036/BLUFF-002)</td>
+</tr>
+<tr>
+<td>D-2</td>
+<td>CLI <code>handleListModels</code> lists
+<code>failed</code>/<code>pending</code> models as
+<strong>available</strong></td>
+<td><code>helix_code/.../cmd/cli/main.go:1361</code></td>
+<td>SP1</td>
+</tr>
+<tr>
+<td>D-3</td>
+<td><code>secrets.LoadAPIKeys</code> is <strong>DEAD code</strong>
+(never called in prod)</td>
+<td><code>helix_code/internal/secrets/loader.go:30</code></td>
+<td>SP1</td>
+</tr>
+<tr>
+<td>D-4</td>
+<td>“Working-model” filter (<code>Verified ∧ score≥min</code>)
+<strong>loaded but never applied</strong></td>
+<td><code>adapter.go:175</code></td>
+<td>SP1</td>
+</tr>
+<tr>
+<td>D-5</td>
+<td><strong>Hardcoded provider model lists</strong>
+(OpenAI/Anthropic/DeepSeek/Mistral +~8)</td>
+<td><code>openai_provider.go:203</code>,
+<code>anthropic_provider.go:205</code>, …</td>
+<td>SP1 (CONST-036)</td>
+</tr>
+<tr>
+<td>D-6</td>
+<td>Stub CLI-agent packages return <strong>hardcoded strings, never
+exec</strong> the binary</td>
+<td><code>helix_agent/internal/clis/agents/qwencode/qwencode.go:101/115/137</code></td>
+<td>SP4 (CONST-035)</td>
+</tr>
+<tr>
+<td>D-7</td>
+<td><code>helix_code/go.mod</code> lacks
+<code>replace dev.helix.agent</code> → can’t import the real
+<code>clis</code>/<code>agentic</code> substrate</td>
+<td><code>helix_code/go.mod</code></td>
+<td>SP4/SP5</td>
+</tr>
+<tr>
+<td>D-8</td>
+<td>Constitution <code>CLAUDE.md</code> Revision-table drift</td>
+<td><code>constitution/CLAUDE.md</code></td>
+<td><del>SP0</del> resolved by sync (now Rev 21 @ f26368b)</td>
+</tr>
+<tr>
+<td>D-9</td>
+<td><strong>Pooled dispatch methods are stubs too</strong> — return
+<code>&quot;&lt;Agent&gt; execution completed&quot;</code>, no exec</td>
+<td><code>helix_agent/internal/clis/instance_manager.go:906-942</code>
+(executeAider/ClaudeCode/Codex/Cline/OpenHands)</td>
+<td>✅ FIXED (SP4, real os/exec, pin guards GREEN)</td>
+</tr>
+<tr>
+<td>D-6</td>
+<td>qwencode stub returns templated strings, never execs</td>
+<td><code>helix_agent/.../qwencode/qwencode.go:101</code></td>
+<td>✅ FIXED (SP4, real os/exec)</td>
+</tr>
+<tr>
+<td>D-10</td>
+<td>2 pre-existing flaky tests (nanosecond ID-collision)</td>
+<td><code>helix_agent</code>
+<code>TestCompletionHandler_IDGeneration</code>,
+<code>TestGenerateTeamID</code></td>
+<td>open (pre-existing, low-pri)</td>
+</tr>
+<tr>
+<td>D-11</td>
+<td>pre-existing <code>&quot;For now, allow all types&quot;</code> bluff</td>
+<td><code>helix_agent/internal/clis/instance_manager.go:389</code>
+(IsAgentTypeAvailable)</td>
+<td>open (SP4 follow-up)</td>
+</tr>
+<tr>
+<td>D-12</td>
+<td>~34 more <code>execute*</code> dispatch methods still stubbed</td>
+<td><code>helix_agent/internal/clis/instance_manager.go</code>
+(executeKiro…executeLlamaCode)</td>
+<td>open (SP4 follow-up wave)</td>
+</tr>
+<tr>
+<td>D-13</td>
+<td>CONST-066 doc-export gap: 95+ <code>docs/**/*.md</code> (+ new
+specs/research) lack <code>.html</code>/<code>.pdf</code> siblings</td>
+<td>repo-wide <code>docs/**</code></td>
+<td>open (D-13; F1 hook scoped too leniently — reconcile)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sub-program-decomposition">2. Sub-program decomposition</h2>
+<p>Each sub-program (SP) is independent: own spec, own plan, own
+evidence-backed release. Dependency order shown.</p>
+<pre><code>SP0 Constitution + fork-mandate + reusable scripts   (must land first — CONST-049)
+        │
+        ├──&gt; SP1 Model-access refinement (keys → working models via LLMsVerifier)
+        │        │
+        │        └──&gt; SP2 HelixAgent exposure extension (each provider+models, ensemble, HelixLLM)
+        │                 │
+        ├──&gt; SP3 Fork-ALL mechanism + auto-merge scripts ──┐
+        │                                                  ▼
+        │                                          SP4 CLI-agent bridge providers
+        │                                            (one provider per agent + power features)
+        │
+        ├──&gt; SP5 Parallel/subagent-driven enforcement (coordinated multi-agent execution)
+        │
+        └──&gt; SP6 Other execution models (dynamic flows…) as new HelixDevelopment submodules
+
+SP7 Testing &amp; QA  ── cross-cutting, binds every SP (100% test-type coverage + Challenges + HelixQA + autonomous QA)</code></pre>
+<hr />
+<h2 id="sp0-constitution-sync-only-descoped-per-operator-2026-06-10">SP0
+— Constitution SYNC ONLY (DESCOPED per operator 2026-06-10)</h2>
+<p><strong>Operator decision 2026-06-10:</strong> <em>“We dont have need
+to change the constitution Submodule at all… just make constitution
+Submodule up to date, fetch and pull.”</em> → <strong>No
+<code>§11.4.N</code> authoring, no constitution push.</strong> The
+reusable fork/merge scripts relocate to
+<strong><code>scripts/caf/</code> local to HelixCode</strong> (not
+<code>constitution/scripts/</code>). Analysis-A’s drafted anchor is
+archived, unused (and <code>§11.4.142</code> was in any case already
+taken upstream by the Universal-code-review mandate).</p>
+<p><strong>Status: DONE (this session).</strong> - ✅ Fetched all 8
+constitution remotes; <strong>fast-forwarded
+<code>60e2d66 → f26368b</code> on <code>main</code></strong> (0 ahead /
+4 behind / ancestor → no loss, §11.4.113 no-force). - ✅ Recursive
+check: <strong>no nested constitution submodules</strong> (root-only,
+CONST-051 clean); <code>submodules/*/CONSTITUTION.md</code> are cascade
+file-copies. - ✅ New anchors now in force: <strong>§11.4.142 Universal
+code-review</strong> (every change → independent review before
+commit/build — applies to all SP implementation), <strong>§11.4.143
+video-journey</strong> (N/A to HelixCode). - ⏳ <strong>Pending
+follow-up:</strong> bump superproject submodule pointer
+<code>60e2d66 → f26368b</code> (a meta-repo commit; itself subject to
+§11.4.142 review) — batch with next commit. - ⏳ <strong>Requested but
+not yet run</strong> (request “Before we begin”): CONST-055 post-pull
+full-rule validation sweep across project + submodules; correct any
+violation found. → tracked as <strong>SP0.b</strong>.</p>
+<h3 id="original-sp0-superseded-constitution-mandate-scripts"><del>Original
+SP0 (superseded)</del> — Constitution mandate + scripts</h3>
+<p><strong>Goal:</strong> Land the new mandatory rule + generic reusable
+scripts in the constitution submodule BEFORE building on them (CONST-049
+ordering). Feeds: analysis <code>…-A-…</code>. <em>(Superseded by the
+descope above; the script designs from analysis-A/E are reused but land
+in <code>scripts/caf/</code> local to HelixCode under SP3.)</em></p>
+<ul>
+<li><strong>P0.1 Fetch/pull constitution (deep, recursive).</strong>
+<ul>
+<li>T0.1.1 <code>git -C constitution fetch --all --prune</code>; pull;
+capture <code>HEAD..@{u}</code>.</li>
+<li>T0.1.2 Recurse: <code>git submodule foreach --recursive</code>
+locate every nested <code>constitution</code>/governance copy;
+fetch/pull each. Evidence: per-path log.</li>
+<li>T0.1.3 Run <code>scripts/verify-all-constitution-rules.sh</code>
+(CONST-055) post-pull; record verdict.</li>
+</ul></li>
+<li><strong>P0.2 Audit project + submodules against ALL mandatory
+rules</strong> (request §“Before we begin”).
+<ul>
+<li>T0.2.1 Run cascade verifier; enumerate any skipping/violation; open
+tracker items.</li>
+<li>T0.2.2 Correct every detected violation (own sub-tasks per
+finding).</li>
+</ul></li>
+<li><strong>P0.3 Author the new fork-and-maintain anchor —
+§11.4.142</strong> (next free number CONFIRMED by analysis-A; gate
+<code>CM-COVENANT-114-142-PROPAGATION</code>). ⚠️ Constitution submodule
+is <strong>detached HEAD @ <code>60e2d66</code></strong> →
+<code>git checkout main</code> inside it FIRST; fix
+<code>CLAUDE.md</code> Revision-table drift (lags at Rev 23) per
+§11.4.44 in the same edit.
+<ul>
+<li>T0.3.1 Use analysis-A’s drafted anchor (forensic anchor = verbatim
+request lines 14–15; 6-clause body: fork+prefix → pointer-swap →
+recursive nested fork → automated upstream-merge →
+§11.4.28(B)-preserving edit allow-list
+[gitignore/remote-config/CI-disable/governance-pointers ONLY] →
+anti-bluff; composes §11.4.113 no-force-push).</li>
+<li>T0.3.2 Cascade into
+<code>constitution/{Constitution,CLAUDE,AGENTS}.md</code> +
+<code>QWEN.md</code>; consumer-side index updates.</li>
+<li>T0.3.3 Meta-test + paired §1.1 mutation for the propagation gate + 3
+recommended per-family gates.</li>
+</ul></li>
+<li><strong>P0.4 Reusable generic scripts</strong> in
+<code>constitution/scripts/</code> (decoupled CONST-051;
+inherited-by-reference §11.4.80 — never copied). Names per analysis-A:
+<ul>
+<li>T0.4.1 <code>fork_third_party_submodule.sh</code> (gh+glab
+fork-or-create under org+prefix <code>caf-</code>, params only, no force
+§11.4.113).</li>
+<li>T0.4.2 <code>update_fork_from_upstream.sh</code> (fetch upstream
+main/master → merge into fork → push fast-forward-only).</li>
+<li>T0.4.3 <code>resolve_recursive_fork_deps.sh</code> (recursive
+nested-dep handling; own-org → root per CONST-051; 3rd-party nested →
+fork).</li>
+<li>T0.4.4 Anti-bluff Challenge + §1.1 mutation per script (throwaway
+repo bootstrap → assert remotes/merge).</li>
+</ul></li>
+<li><strong>P0.5 Commit + push constitution to ALL upstreams; bump
+pointer</strong> (CONST-049 steps 4–7).</li>
+</ul>
+<p><strong>Done when:</strong> new anchor present + cascade-verified
+across fleet; scripts pass their Challenges with captured output;
+constitution pushed to all upstreams; meta-repo <code>.gitmodules</code>
+pointer bumped in same commit.</p>
+<hr />
+<h2 id="sp1-model-access-refinement">SP1 — Model-access refinement</h2>
+<p><strong>Goal:</strong> For every provider, an API key supplied OR
+auto-recognized from <code>.env</code> / <code>.api_keys</code> / shell
+exports makes that provider’s <strong>working</strong> models available
+— dynamically obtained, validated, verified via LLMsVerifier. Feeds:
+analysis <code>…-B-…</code>.</p>
+<blockquote>
+<p><strong>Verified facts (analysis-B):</strong> verifier consumption is
+REAL (<code>verifier/client.go</code> live HTTP;
+<code>adapter.GetVerifiedModels:183</code> cache→live→stale→fallback).
+But: <code>secrets.LoadAPIKeys</code> (<code>loader.go:30</code>, reads
+<code>api_keys.sh</code>+<code>.env</code>) is <strong>DEAD
+code</strong> (zero production call-sites); no key-presence gate; the
+“working-model” predicate
+(<code>Verified==true ∧ status==&quot;verified&quot; ∧ score≥GetMinAcceptableScore()</code>)
+is loaded (<code>adapter.go:175</code>) but <strong>never
+applied</strong>; CLI <code>handleListModels:1361</code> lists
+<code>failed</code>/<code>pending</code> as available. <strong>The
+target flow already exists in <code>helix_agent</code>
+(<code>verifier/provider_types.go:349</code>
+<code>SupportedProviders.EnvVars</code> multi-alias +
+<code>startup.go:389</code> per-key→<code>DiscoverModels</code>) +
+<code>llms_verifier/api_keys/</code></strong> → lift/extend per
+§11.4.74.</p>
+</blockquote>
+<ul>
+<li><strong>P1.1 Key auto-recognition.</strong>
+<ul>
+<li>T1.1.1 <strong>Wire <code>secrets.LoadAPIKeys</code> at
+startup</strong> in <code>cmd/server</code> +
+<code>cmd/cli/main.go</code> BEFORE config load (§11.4.124 — wire, don’t
+delete the dead code).</li>
+<li>T1.1.2 Multi-alias key-recognition table (reuse helix_agent
+<code>SupportedProviders.EnvVars</code>): <code>.env</code> →
+<code>.api_keys</code>/<code>api_keys.sh</code> → shell-exported
+precedence; per-provider detection.</li>
+<li>T1.1.3 Tests (unit: precedence + absence; integration: real key →
+provider enabled).</li>
+</ul></li>
+<li><strong>P1.2 Key-presence → provider-availability gate</strong> —
+filter the verifier catalog by present keys (no key ⇒ provider hidden);
+fix <code>factory.go:9</code> (single-provider) → enumerate every
+key-present provider.</li>
+<li><strong>P1.3 Dynamic working-model exposure via
+LLMsVerifier.</strong>
+<ul>
+<li>T1.3.1 Apply the unused “working-model” filter (key-present ∧
+<code>Verified==true</code> ∧ status verified ∧ score≥min); poll ≤60s
+(CONST-038); verified ≤24h (CONST-037).</li>
+<li>T1.3.2 Replace hardcoded model lists (OpenAI:203, Anthropic:205,
+DeepSeek, Mistral, +~8) with verifier-sourced / dynamic fetch
+(CONST-036).</li>
+<li>T1.3.3 Define safe verifier-disabled/cold behaviour —
+<code>FallbackModels</code> (CLI:1387) must NOT be shown as “working”
+without validation (else §11.4 PASS-bluff).</li>
+</ul></li>
+<li><strong>P1.4 Docs/guides/manuals</strong> for key setup + model
+availability + verification flow.</li>
+<li><strong>P1.5 Test coverage</strong> (unit/integration/e2e/Challenge)
+— real keys where available, anti-bluff liveness (§11.4.107).</li>
+</ul>
+<hr />
+<h2 id="sp2-helixagent-exposure-extension">SP2 — HelixAgent exposure
+extension</h2>
+<p><strong>Goal:</strong> Under one root expose: AI debate ensemble +
+HelixLLM (if enabled) + <strong>every</strong> discovered provider
+individually + each provider’s working models; update provider SDKs to
+latest. Naming fits existing conventions. Feeds: analysis
+<code>…-C-…</code>.</p>
+<blockquote>
+<p><strong>Verified facts (analysis-C):</strong> exposure surface =
+<code>helix_agent/internal/router/router.go</code> (Gin
+<code>/v1</code>): ensemble
+<code>POST /v1/ensemble/completions:676</code>, providers
+<code>GET /v1/providers:773</code> (reads
+<code>GetCapabilities().SupportedModels</code>), discovery
+<code>:1306</code>, verification <code>:1378</code>; runtime registry
+<code>services.ProviderRegistry</code>
+(<code>provider_registry.go:82</code>). <code>LLMProvider</code>
+interface has <strong>no <code>GetModels()</code></strong> — models only
+via <code>GetCapabilities().SupportedModels</code>. 48 hand-rolled HTTP
+providers, no vendor SDKs. HelixLLM buried as gated provider
+<code>&quot;helixllm&quot;</code> (<code>USE_HELIX_LLM=true</code>). “Working
+model” = <code>DiscoveredModel.Verified == true</code> (verifier).
+Building blocks exist; <strong>no unified catalog joins ensemble +
+HelixLLM + each provider + each verified model</strong>. Inner Go module
+is at <code>helix_code/go.mod</code> (not
+<code>helix_code/helix_code/go.mod</code>).</p>
+</blockquote>
+<ul>
+<li><strong>P2.0 Bluff remediation:</strong>
+<code>GET /v1/completion/models</code>
+(<code>handlers/completion.go:406</code>) returns a <strong>hardcoded
+3-model list</strong> → replace with verifier-sourced (CONST-036 /
+BLUFF-002). RED→GREEN + §11.4.135 guard.</li>
+<li><strong>P2.1 Unified catalog</strong> joining ensemble + HelixLLM +
+each provider + each verified model as uniformly-named selectable
+targets (the missing layer).</li>
+<li><strong>P2.2 Per-provider individual exposure</strong> under the
+root alongside ensemble + HelixLLM.
+<ul>
+<li>T2.2.1 Provider catalog entry per discovered provider
+(verifier-sourced).</li>
+<li>T2.2.2 Per-provider working-model list
+(<code>Verified==true</code>); consider adding <code>GetModels()</code>
+to the provider interface.</li>
+<li>T2.2.3 Naming scheme (analysis-C): <code>ensemble</code>,
+<code>ensemble/confidence_weighted</code>, <code>helixllm</code>,
+<code>helixllm/helixllm-default</code>,
+<code>anthropic/claude-3-sonnet-20240229</code>,
+<code>openrouter/x-ai/grok-4</code> (reuses existing lowercase +
+<code>vendor/model</code> slash form).</li>
+<li>T2.2.4 Promote HelixLLM to first-class root entry (not buried).</li>
+</ul></li>
+<li><strong>P2.3 SDK/API currency</strong> — deep web research (§11.4.99
+latest-source) → update each provider SDK to latest
+(bedrockruntime/azcore/azidentity/tree-sitter pin; resolve gin
+1.11.0↔︎1.12.0 skew across helix_code/helix_agent); bridged CLI agents +
+their models up to date.</li>
+<li><strong>P2.4 Docs/guides/manuals/graphs/schemes/SQL</strong> +
+website + video-course updates (request-mandated deliverables).</li>
+<li><strong>P2.5 Full test coverage.</strong></li>
+</ul>
+<hr />
+<h2 id="sp3-fork-all-mechanism-auto-merge">SP3 — Fork-ALL mechanism +
+auto-merge</h2>
+<p><strong>Goal:</strong> Fork every <code>cli_agents/*</code> under
+<code>vasic-digital/caf-*</code>, swap submodules to forks, recursively
+handle nested deps, auto-merge upstream regularly. Feeds: analysis
+<code>…-E-…</code>. Uses SP0 scripts.</p>
+<blockquote>
+<p><strong>Verified facts (analysis-E, parsed from 381-line
+<code>.gitmodules</code>):</strong> 50 fork entries (49 top-level + 1
+nested). <strong>EXCLUSIONS:</strong>
+<code>cli_agents/claude-code-source</code> is already the operator’s own
+GitLab mirror (<code>milos85vasic/ccode-private</code>) → <strong>skip
+fork</strong> (default-excluded). Only ONE nested submodule fleet-wide:
+<code>cline/.gitmodules → cline-bench</code> (HTTPS → SSH
+<code>caf-cline-bench</code>); max depth 1, no own-org nested chains
+(CONST-051 clean). OpenAI-Cookbook uses
+<code>org-NNNN@github.com:</code> alias (out of scope, resources dir) —
+parser must normalize.</p>
+</blockquote>
+<ul>
+<li><strong>P3.1 Fork mapping table</strong> — built (49 GitHub
+upstreams → <code>vasic-digital/caf-&lt;name&gt;</code>, kebab names
+preserved); GitHub+GitLab dual-remote.</li>
+<li><strong>P3.2 Execute fork-all</strong> via the SP0 fork script
+(operator-gated; <strong>high blast radius → §11.4.101 explicit confirm
+before any external mutation</strong>; async fork-readiness
+polling).</li>
+<li><strong>P3.3 Submodule swap</strong> (.gitmodules URL rewrite +
+<code>git submodule sync --recursive</code>), per-fork validate
+buildable.</li>
+<li><strong>P3.4 Nested-submodule resolution</strong> (just
+<code>cline-bench</code> today; own-org → root per CONST-051; 3rd-party
+nested → fork).</li>
+<li><strong>P3.5 Auto-merge automation</strong> (scheduled
+merge-into-fork-only, <strong>no-force §11.4.113</strong>, clean commits
+§11.4.30).</li>
+<li><strong>P3.6 Build + install each locally</strong> with correct
+git-ignore hygiene (no stray files committed).</li>
+<li><strong>P3.7 Reconcile script naming</strong> between analysis-A
+(<code>fork_third_party_submodule.sh</code>) and analysis-E
+(<code>caf_fork_all.sh</code> + <code>caf_lib.sh</code>) into one
+unified, decoupled set before authoring.</li>
+</ul>
+<hr />
+<h2 id="sp4-cli-agent-bridge-providers-one-provider-per-agent">SP4 —
+CLI-agent bridge providers (one provider per agent)</h2>
+<p><strong>Goal:</strong> Each working CLI agent = its own provider
+proxying prompts via CLI + exposing power-features
+(Vision/Generative/RAG/Memory/MCP/LSP/ACP). Primary = system-installed;
+fallback = submodule-built. Re-export+install+validate every CLI config.
+Feeds: analysis <code>…-D-…</code>.</p>
+<blockquote>
+<p><strong>Verified facts (analysis-D):</strong> 8 agents
+system-installed NOW
+(claude/qwen/opencode/gemini/crush/codex/goose/copilot — versions
+captured). The real <code>exec.LookPath</code> orchestration lives in
+<code>helix_agent/internal/clis</code>
+(<code>agents/base/base.go:120</code>,
+<code>instance_manager.go</code>), NOT in
+<code>helix_code/internal/llm</code> (its
+<code>copilot_provider.go</code> is HTTP/token, not CLI-exec).
+<code>llm.Provider</code> contract at <code>missing_types.go:356</code>.
+Re-export exists (<code>helixagent --generate-all-agents</code>,
+<code>main.go:4522</code>).</p>
+</blockquote>
+<ul>
+<li><strong>P4.0 Pre-req remediation (anti-bluff, BLOCKS the
+rest).</strong>
+<ul>
+<li>T4.0.1 <strong>Fix stub per-agent packages</strong> in
+<code>helix_agent/internal/clis</code> that return hardcoded strings
+without exec (e.g. <code>agents/qwencode/qwencode.go:101/115/137</code>)
+— these are live §11.4 / CONST-035 bluffs. RED-on-stub →
+GREEN-on-real-exec (§11.4.115).</li>
+<li>T4.0.2 Add <code>replace dev.helix.agent</code> wiring so HelixCode
+can import the <code>clis</code> layer (or thin adapter per
+CONST-051/§11.4.74).</li>
+</ul></li>
+<li><strong>P4.1 Per-agent provider contract</strong> — one parametrized
+<code>CLIAgentProvider</code> implementing <code>llm.Provider</code>;
+reuse the <code>clis</code> layer via adapter, don’t reimplement.</li>
+<li><strong>P4.2 Primary-vs-fallback selection</strong> (real
+<code>exec.LookPath</code> system-installed → submodule-built).</li>
+<li><strong>P4.3 Power-feature passthrough</strong>
+(RAG/Memory/MCP/LSP/ACP/Vision) + dynamic <code>GetModels</code> per
+agent (CONST-036) + capabilities from LLMsVerifier (CONST-040) —
+research per agent (§11.4.99): OpenCode/Zen non-interactive flags,
+Claude Code <code>-p/--output-format</code>, Qwen Code.</li>
+<li><strong>P4.4 Config re-export+install+validate</strong> — re-export
+exists; <strong>add the ABSENT filesystem-install + LIVE post-install
+validation</strong> (each installed config drives a real proxied prompt
+→ real result, captured evidence). Note: current configs point agents
+<em>at</em> HelixAgent (reverse) — D adds the forward bridge
+direction.</li>
+<li><strong>P4.5 Tier-1 agents first</strong> (the 8 installed) → expand
+to ~43 candidates.</li>
+<li><strong>P4.6 Full test coverage</strong> per agent (real proxied
+prompt → real result, anti-bluff §11.4.98 fully automated).</li>
+</ul>
+<hr />
+<h2 id="sp5-parallel-subagent-driven-enforcement">SP5 — Parallel /
+subagent-driven enforcement</h2>
+<p><strong>Goal:</strong> All HelixCode work can be done by coordinated
+parallel agents; subagents-driven used maximally without harming the
+main stream. Feeds: analysis <code>…-F-…</code>. As a new
+HelixDevelopment submodule if warranted.</p>
+<blockquote>
+<p><strong>Verified facts (analysis-F):</strong> capability
+<strong>exists twice, duplicated not shared</strong> — HelixCode
+(<code>internal/agent/coordinator.go:11-50</code>
+registry+queue+circuit-breakers+voting, <code>agent/subagent/</code>
+in-process+subprocess+worktree spawners, <code>worker/</code> SSH pool,
+<code>workflow/</code> DAG) vs HelixAgent
+(<code>internal/agentic/workflow.go:28</code> LangGraph-style,
+<code>agents/swarm/</code>, <code>ensemble/</code>,
+<code>planning/{tree_of_thoughts,mcts,hiplan}</code>).
+<strong>GAP:</strong> <code>helix_code/go.mod</code> doesn’t import the
+own-org agentic/concurrency/planning substrate; no universal “every
+operation is a parallel-dispatchable agent unit.”</p>
+</blockquote>
+<ul>
+<li><strong>P5.1 Map existing multi-agent/worker/queue
+capability.</strong> (done — analysis-F)</li>
+<li><strong>P5.2 De-duplicate into a shared substrate</strong> (reuse
+before reimplement §11.4.74) — universal parallel-dispatchable
+agent-unit abstraction.</li>
+<li><strong>P5.3 Coordination layer</strong> (dispatch, isolation,
+quiescence §11.4.84, PWU §11.4.58, §11.4.103 ≥3 streams).</li>
+<li><strong>P5.4 Wire into HelixCode + HelixAgent</strong> (add the
+missing own-org imports).</li>
+<li><strong>P5.5 Full test coverage</strong> (stress/chaos §11.4.85 for
+concurrency).</li>
+</ul>
+<hr />
+<h2 id="sp6-other-execution-models-dynamic-flows">SP6 — Other execution
+models (dynamic flows, …)</h2>
+<p><strong>Goal:</strong> Dynamic flows + other execution models as NEW
+decoupled public submodules under HelixDevelopment, wired into HelixCode
++ HelixAgent. Feeds: analysis <code>…-F-…</code>.</p>
+<blockquote>
+<p><strong>Verified facts (analysis-F):</strong> existing models = DAG
+workflow (HelixCode), graph/state-machine
+(<code>helix_agent/agentic</code>), ToT/MCTS/hierarchical planning.
+<strong>ABSENT as named packages:</strong> <code>pipeline</code>,
+standalone <code>dag</code>, dataflow, reactive, saga, behavior-tree.
+Reuse candidates already in tree. Proposed NEW HelixDevelopment
+submodules: <strong>flow_engine, dag_orchestrator, pipeline_runtime,
+agent_mesh/swarm_kit, flow_dsl</strong>; 12 deep-research topics
+enumerated.</p>
+</blockquote>
+<ul>
+<li><strong>P6.1 Deep web research</strong> on execution models (dynamic
+flow + others) — 12 topics in analysis-F (§11.4.99 latest-source).</li>
+<li><strong>P6.2 Create public submodules</strong> (gh+glab) under
+HelixDevelopment: flow_engine / dag_orchestrator / pipeline_runtime /
+agent_mesh / flow_dsl; decoupled (CONST-051),
+<code>helix-deps.yaml</code> (CONST-054). Reuse existing own-org pieces
+first (§11.4.74).</li>
+<li><strong>P6.3 Integration analysis + wiring</strong> into both
+consumers (shared
+<code>Node</code>/<code>Scheduler</code>/<code>Dispatcher</code>/<code>Resolver</code>
+interfaces + <code>go.mod</code> replace).</li>
+<li><strong>P6.4 Full test coverage + Challenges.</strong></li>
+</ul>
+<hr />
+<h2 id="sp7-testing-qa-cross-cutting">SP7 — Testing &amp; QA
+(cross-cutting)</h2>
+<p><strong>Goal:</strong> 100% coverage across every supported test type
++ Challenges + HelixQA banks + fully-autonomous QA sessions; no bluff;
+independent-agent confirmation (CONST-050/048/098). Feeds: analysis
+<code>…-F-…</code>.</p>
+<blockquote>
+<p><strong>Verified facts (analysis-F):</strong> HelixCode strong on
+unit/integration/e2e/security/chaos/stress/performance/benchmarking +
+§1.1 mutation meta-tests
+(<code>tests/stresschaos/stresschaos_meta_test.go</code>) + regression
+dir. <strong>HelixCode-local GAPS:</strong> ddos, scaling, ux have no
+local harness (HelixQA/challenge-only); ui thin → delegation risks a
+coverage bluff unless evidence-backed. ⚠️ <strong>HelixQA is
+STALE</strong> (README round 219 / 2026-05-19).</p>
+</blockquote>
+<ul>
+<li><strong>P7.1 Update HelixQA</strong> submodule to latest (fetch/pull
++ pointer bump).</li>
+<li><strong>P7.2 Test-type coverage matrix</strong>
+(unit/integration/e2e/full-automation/security/ddos/scaling/chaos/stress/performance/benchmark/ui/ux/Challenges/HelixQA)
+× every new feature.</li>
+<li><strong>P7.3 Autonomous QA sessions</strong> executing every
+registered bank with captured wire evidence.</li>
+<li><strong>P7.4 Independent code-review agents</strong> confirm each
+closure (§11.4.125/§11.4.134).</li>
+<li><strong>P7.5 Regression-guard registration</strong> for every fixed
+defect (§11.4.135).</li>
+</ul>
+<hr />
+<h2 id="cross-cutting-mandatory-constraints-apply-to-every-sp">3.
+Cross-cutting mandatory constraints (apply to every SP)</h2>
+<ul>
+<li><strong>Anti-bluff §11.4 family</strong> — captured evidence on
+every closure; no metadata-only PASS.</li>
+<li><strong>No-force-push §11.4.113</strong>; merge-onto-latest-main for
+every repo/submodule.</li>
+<li><strong>CONST-049</strong> ordering for all constitution edits.</li>
+<li><strong>Subagent-driven default §11.4.70 / §11.4.103</strong> — ≥3
+parallel background streams while actionable items exist.</li>
+<li><strong>Fully-automated tests §11.4.98</strong>;
+<strong>rock-solid-proof-or-research §11.4.123</strong>.</li>
+<li><strong>§11.4.122</strong> — no silent removal of existing
+capabilities without operator confirmation.</li>
+<li><strong>CONST-046</strong> — no hardcoded user-facing content;
+<strong>CONST-036</strong> — no hardcoded model lists.</li>
+<li><strong>Continuation §13.1 (CONST-044)</strong> kept in sync each
+state-advancing commit.</li>
+</ul>
+<hr />
+<h2 id="detailed-implementation-plans-written-2026-06-10">4. Detailed
+implementation plans (written 2026-06-10)</h2>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 47%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>SP</th>
+<th>Plan doc</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SP1</td>
+<td><code>plans/2026-06-10-SP1-model-access-plan.md</code></td>
+<td>6 phases / 18 TDD tasks / 4 decisions</td>
+</tr>
+<tr>
+<td>SP2</td>
+<td><code>plans/2026-06-10-SP2-helixagent-exposure-plan.md</code></td>
+<td>7 phases / 21 tasks / 6 decisions</td>
+</tr>
+<tr>
+<td>SP3</td>
+<td><code>plans/2026-06-10-SP3-fork-mechanism-plan.md</code></td>
+<td>50-fork map + 3 scripts at <code>scripts/caf/</code> / tasks
+T3.0–T3.7 / G-1 gated</td>
+</tr>
+<tr>
+<td>SP4</td>
+<td><code>plans/2026-06-10-SP4-cli-bridge-plan.md</code></td>
+<td>7 phases / 34 tasks / 4 decisions</td>
+</tr>
+<tr>
+<td>SP5+SP6</td>
+<td><code>plans/2026-06-10-SP5-SP6-parallel-dynamic-plan.md</code></td>
+<td>reuse-first; create 2 repos / 5 decisions</td>
+</tr>
+<tr>
+<td>SP7</td>
+<td><code>plans/2026-06-10-SP7-testing-qa-plan.md</code></td>
+<td>phases A–E / 6 gaps / 5 decisions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="consolidated-decision-register">5. Consolidated decision
+register</h2>
+<p><strong>(a) Operator-GATED — irreversible / high-blast / genuinely
+ambiguous (I will NOT proceed without explicit go):</strong> -
+<strong>G-1</strong> Execute <strong>fork-ALL 49 repos</strong> under
+<code>vasic-digital/caf-*</code> (SP3) — irreversible external.
+<strong>✅ PRE-AUTHORIZED by operator 2026-06-10</strong> — may run once
+the SP3 scripts pass their anti-bluff Challenge (no re-ask). -
+<strong>G-2</strong> Create <strong>2 new HelixDevelopment
+repos</strong> <code>dag_orchestrator</code> +
+<code>pipeline_runtime</code> (SP6) — irreversible external.
+<strong>Still requires explicit go.</strong> - <strong>G-3</strong>
+<strong>SDK-update blast radius</strong> (SP2) — bumping
+bedrockruntime/azcore/tree-sitter + resolving gin 1.11.0↔︎1.12.0 across
+both modules can break builds → operator scope/sequence call. -
+<strong>G-4</strong> <strong>Video-course / website production
+scope</strong> (SP2 OP-6) — defer vs in-scope. - <strong>G-5</strong>
+Whether to <strong>de-bluff all ~70 agent packages now</strong> vs
+tier-1-first + track-rest (SP4 D-C; D-6/D-9 live in
+<code>helix_agent</code>, a CONST-047 submodule).</p>
+<p><strong>(b) Reversible / clear-default — I’ll proceed on the
+subagents’ recommended defaults unless you object (§11.4.101):</strong>
+- Lift a decoupled key-recognition table from helix_agent
+<code>SupportedProviders.EnvVars</code> (SP1); LoadAPIKeys precedence =
+gap-fill (don’t override already-exported shell env). -
+Verifier-disabled = honest empty + opt-in
+<code>--include-unverified</code> live path (never show
+<code>FallbackModels</code> as “working”). - Unified catalog at
+<code>internal/catalog/</code> + <code>GET /v1/catalog</code>; promote
+HelixLLM to first-class; naming
+<code>ensemble//helixllm//&lt;provider&gt;/&lt;model&gt;</code>. -
+De-hardcode funnel-first, then OpenAI/Anthropic/DeepSeek/Mistral. - SP5
+substrate = EXTEND <code>Concurrency</code>/<code>Agentic</code>, REUSE
+<code>Planning</code>, FOLD agent_mesh in; first task adds the
+<code>replace</code> directives (closes D-7). <strong>[M-1 fix] SP5 T5.2
+is the SOLE owner of the <code>replace dev.helix.agent</code> +
+<code>replace dev.helix.substrate</code> <code>helix_code/go.mod</code>
+edits; SP4 T4.0.x CONSUMES them as a prerequisite (depends-on SP5
+wiring) and NEVER re-edits go.mod</strong> — resolves the
+parallel-stream edit-collision. - New local harnesses for
+ddos/scaling/ux/ui with anti-delegation-bluff gates; HelixQA
+fetch-to-latest (§11.4.71 merge-onto-main).</p>
+<h2 id="a.-bundle-code-review-11.4.142-verdict-fixes-applied">5a. Bundle
+code-review (§11.4.142) — verdict + fixes applied</h2>
+<p>Independent review <code>2026-06-10-planning-bundle-review.md</code>:
+<strong>GO-WITH-FIXES</strong> (0 BLOCKER · 1 MAJOR · 5 MINOR); 18
+anchors spot-checked incl. all of D-1..D-9 — zero fabricated/drifted.
+Fixes: - <strong>M-1 (MAJOR) — FIXED:</strong>
+<code>replace dev.helix.agent</code>/<code>dev.helix.substrate</code>
+go.mod edits sole-owned by SP5 T5.2; SP4 consumes as prerequisite (see
+§5(b)). - <strong>m-1 — N/A:</strong> analysis-A’s
+<code>§11.4.142</code> choice is moot (SP0 constitution authoring
+descoped; upstream already has §11.4.142). - <strong>m-2 —
+noted:</strong> SP4’s “beyond roadmap” label for D-9 is cosmetic; D-9 is
+in the ledger (§1a). - <strong>m-3 — TODO in SP7:</strong> add a D-9
+regression-guard row to the registry (carried into SP7 execution). -
+<strong>m-4 — RESOLVED:</strong> SP3 plan now written. - <strong>m-5 —
+tracked:</strong> CONST-055 full-rule audit = SP0.b (still unrun;
+offered to operator).</p>
+<h2 id="next-actions">6. Next actions</h2>
+<ol type="1">
+<li>✅ Planning complete: 6 analyses + 5 SP plans + defect ledger
+D-1..D-9. SP3 plan + planning-bundle code-review in flight.</li>
+<li><strong>▶ HERE:</strong> operator confirms the <strong>decision
+register</strong> (esp. the 5 gated items G-1..G-5).</li>
+<li>Commit the planning bundle (needs §11.4.142 independent review GO +
+§11.4.75 <code>.html</code>/<code>.pdf</code> siblings + superproject
+pointer bump) — <strong>operator: commit now?</strong></li>
+<li>On go: implement RED-first per SP, each change through the §11.4.142
+review gate; parallel non-contending streams (§11.4.103); irreversible
+externals only after G-1/G-2 go.</li>
+</ol>
+</body>
+</html>

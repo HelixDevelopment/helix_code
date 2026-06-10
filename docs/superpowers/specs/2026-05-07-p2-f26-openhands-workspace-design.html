@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f26-openhands-workspace-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f26-openhands-workspace-design</h1>
+</header>
+<h1 id="phase-2-feature-26-openhands-workspace-task-planner-step-executor">Phase
+2 / Feature 26 — Openhands Workspace + Task Planner + Step Executor</h1>
+<p><strong>Date:</strong> 2026-05-07 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 2 port (openhands — workspace, planner,
+executor)</p>
+<blockquote>
+<p><strong>Programme position:</strong> F26 is the
+<strong>sixth</strong> Phase 2 feature (F21-F25 shipped before it). T01
+appends an F26 evidence section to
+<code>docs/improvements/07_phase_2_evidence.md</code>.</p>
+</blockquote>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, end-to-end <strong>workspace + task planner + step
+executor</strong> subsystem for the HelixCode CLI agent, modelled on
+Openhands’ agent orchestration architecture
+(<code>cli_agents/openhands/</code>). Three components: (1)
+container-based per-task workspaces managed through the containers
+submodule (<code>digital.vasic.containers</code>), (2) a sequential step
+executor that walks F25 plan trees and dispatches shell/LLM steps, and
+(3) a task planner that bridges F25’s structured plan trees with
+Openhands-style execution pipelines. Tools surface:
+<code>workspace_create</code>, <code>workspace_list</code>,
+<code>workspace_cleanup</code>, <code>task_plan</code>,
+<code>task_step</code>. Slash: <code>/openhands</code>. Cobra:
+<code>helixcode workspace {create,list,cleanup}</code>.</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<pre><code>                 Agent (LLM loop)
+                      │
+         ┌────────────┼──────────────┐
+         ▼            ▼              ▼
+    Workspace     Task Planner    Step Executor
+    Manager       (F25 plan       (sequential
+    (container    tree adapter)   shell/LLM
+     lifecycle)                    dispatch)
+         │            │              │
+         ▼            ▼              ▼
+    containers    plantree        llm.Provider
+    (Docker/      PlanTree/       workflow.
+     Podman)      PlanNode        Executor</code></pre>
+<h3 id="workspace-manager">2.1 Workspace Manager</h3>
+<ul>
+<li><strong>Package:</strong> <code>internal/workspace/</code> (NEW —
+avoids collision with <code>internal/tools/worktree/</code> from
+F04)</li>
+<li>Container-based per-task workspaces using
+<code>digital.vasic.containers</code> orchestrator</li>
+<li>Lifecycle: CreateWorkspace → RunTask → CleanupWorkspace</li>
+<li>Each workspace is a Docker/Podman container with:
+<ul>
+<li>Mounted project directory (read-write)</li>
+<li>Isolated network (default deny; opt-in for web tasks)</li>
+<li>Resource limits (CPU/memory caps)</li>
+<li>Auto-cleanup TTL (idle timeout)</li>
+</ul></li>
+</ul>
+<h3 id="task-planner">2.2 Task Planner</h3>
+<ul>
+<li><strong>Package:</strong> <code>internal/planner/</code> (NEW)</li>
+<li>Bridges F25 plan trees with execution: converts a PlanNode to a
+TaskStep chain</li>
+<li>Validates dependencies between steps</li>
+<li>Tracks execution state (Pending → Running → Completed/Failed)</li>
+<li>Reports progress back to the plan tree (updates
+PlanNode.Status)</li>
+</ul>
+<h3 id="step-executor">2.3 Step Executor</h3>
+<ul>
+<li><strong>Package:</strong> <code>internal/planner/executor.go</code>
+(within planner package)</li>
+<li>Sequential step execution with retry</li>
+<li>Two executor types: ShellStep (real shell execution via F06
+executor) and LLMStep (LLM provider call)</li>
+<li>Each step has: timeout, retry count, action type, parameters</li>
+<li>Status propagation to plan tree nodes</li>
+</ul>
+<hr />
+<h2 id="data-model">3. Data Model</h2>
+<h3 id="workspace">3.1 Workspace</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Workspace <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span>    <span class="co">// UUID</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span>    <span class="co">// human-readable</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    ContainerID <span class="dt">string</span>    <span class="co">// Docker/Podman container ID</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Image       <span class="dt">string</span>    <span class="co">// container image (default: alpine:latest)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ProjectDir  <span class="dt">string</span>    <span class="co">// host path mounted into container</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    Status      WorkspaceStatus  <span class="co">// Creating/Running/Stopped/Error</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    CreatedAt   time<span class="op">.</span>Time</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    TTL         time<span class="op">.</span>Duration    <span class="co">// idle timeout before auto-cleanup</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="taskstep">3.2 TaskStep</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StepType <span class="dt">int</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    StepShell StepType <span class="op">=</span> <span class="ot">iota</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    StepLLM</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskStep <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    PlanNodeID  <span class="dt">string</span>            <span class="co">// backlink to F25 PlanNode</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    Type        StepType</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    Command     <span class="dt">string</span>            <span class="co">// for StepShell</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    Prompt      <span class="dt">string</span>            <span class="co">// for StepLLM</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    Timeout     time<span class="op">.</span>Duration</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    MaxRetries  <span class="dt">int</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    Status      StepStatus        <span class="co">// Pending/Running/Completed/Failed</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    Output      <span class="dt">string</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    Error       <span class="dt">string</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    StartedAt   time<span class="op">.</span>Time</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    CompletedAt time<span class="op">.</span>Time</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="taskplan">3.3 TaskPlan</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskPlan <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    WorkspaceID <span class="dt">string</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Steps       <span class="op">[]</span>TaskStep</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Status      PlanStatus</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    PlanTree    <span class="op">*</span>plantree<span class="op">.</span>PlanTree  <span class="co">// backlink to F25</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="components">4. Components</h2>
+<h3 id="new-files">4.1 New files</h3>
+<table>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/workspace/types.go</code></td>
+<td>Workspace, WorkspaceStatus, sentinels</td>
+</tr>
+<tr>
+<td><code>internal/workspace/manager.go</code></td>
+<td>Container lifecycle via containers orchestrator</td>
+</tr>
+<tr>
+<td><code>internal/workspace/workspace_tools.go</code></td>
+<td>workspace_create/list/cleanup tools.Tool impls</td>
+</tr>
+<tr>
+<td><code>internal/planner/types.go</code></td>
+<td>TaskStep, TaskPlan, StepType, StepStatus</td>
+</tr>
+<tr>
+<td><code>internal/planner/executor.go</code></td>
+<td>Sequential step executor with retry</td>
+</tr>
+<tr>
+<td><code>internal/planner/planner_tools.go</code></td>
+<td>task_plan, task_step tools.Tool impls</td>
+</tr>
+<tr>
+<td><code>internal/commands/openhands_command.go</code></td>
+<td>/openhands slash</td>
+</tr>
+<tr>
+<td><code>cmd/cli/workspace_cmd.go</code></td>
+<td>Cobra subcommands</td>
+</tr>
+</tbody>
+</table>
+<h3 id="modified-files">4.2 Modified files</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd/cli/main.go</code></td>
+<td>Wire workspace manager + planner + tools + slash</td>
+</tr>
+<tr>
+<td><code>internal/tools/registry.go</code></td>
+<td>Register CategoryWorkspace</td>
+</tr>
+<tr>
+<td><code>internal/commands/builtin/register.go</code></td>
+<td>Register /openhands</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="anti-bluff-hot-zone">5. Anti-Bluff Hot Zone</h2>
+<p>Five critical degenerate patterns:</p>
+<ol type="1">
+<li><strong>Workspace created but container not running</strong> —
+<code>docker ps</code> after CreateWorkspace MUST show container</li>
+<li><strong>Step executor claims completed but command never
+ran</strong> — step.Output MUST contain real command output</li>
+<li><strong>Task plan references workspace that doesn’t exist</strong> —
+Validate workspace ID before starting plan</li>
+<li><strong>Cleanup claims success but container still running</strong>
+— <code>docker ps</code> after CleanupWorkspace MUST NOT show
+container</li>
+<li><strong>Executor returns success on failed step</strong> —
+StepStatus MUST match exit code / LLM error</li>
+</ol>
+<hr />
+<h2 id="task-breakdown">6. Task Breakdown</h2>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 28%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>Bootstrap</td>
+<td>F26 evidence + advance PROGRESS + CONTINUATION</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>workspace/types.go + manager.go</td>
+<td>Workspace + Manager (container lifecycle) (TDD)</td>
+</tr>
+<tr>
+<td>T03</td>
+<td>workspace/workspace_tools.go</td>
+<td>workspace_create/list/cleanup tools (TDD)</td>
+</tr>
+<tr>
+<td>T04</td>
+<td>planner/types.go + executor.go</td>
+<td>TaskStep + TaskPlan + StepExecutor (TDD)</td>
+</tr>
+<tr>
+<td>T05</td>
+<td>planner/planner_tools.go</td>
+<td>task_plan, task_step tools (TDD)</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>/openhands slash + Cobra subcommands</td>
+<td>(TDD)</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>main.go wiring</td>
+<td>Register tools + slash + cobra</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>Challenge harness + close-out</td>
+<td>5 phases + push 4 remotes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>F26 spec — Openhands workspace + task planner + step
+executor.</em></p>
+</body>
+</html>

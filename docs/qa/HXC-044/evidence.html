@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-044-cognee-amd-gpu-rocm-smi-json-parser-returns--1-sentinel-instead-of-parsed-value">HXC-044
+— cognee AMD-GPU rocm-smi JSON parser returns -1 sentinel instead of
+parsed value</h1>
+<p>Found by isolated-worktree
+<code>go test -count=1 ./internal/...</code> (HEAD 54ab4e95, go 1.26.2).
+internal/cognee TestProbeAMDGPU_ParsesRocmSmiJSON —
+performance_optimizer_gpu_amd_test.go:111: “Max difference between 42
+and -1 … difference was 43” — hermetic test (fake rocm-smi on PATH via
+t.Setenv, no infra) drove real queryAMDGPUUsage() with {“card0”:{“GPU
+use (%)”:“42”}} and got -1 (unavailable sentinel) instead of 42. The
+rocm-smi single-card JSON parse path does not surface the reading.
+Genuine parser defect.</p>
+<h2 id="reclassified-obsolete-does-not-reproduce-in-main-tree-not-a-real-product-defect">RECLASSIFIED
+OBSOLETE — does NOT reproduce in main tree (not a real product
+defect)</h2>
+<p>S4 caught the failure ONLY in an isolated git-worktree (which also
+had 6 unrelated setup-failed packages from a missing
+submodules/challenges checkout). In the real main tree:
+<code>go test -count=10 -run TestProbeAMDGPU ./internal/cognee/</code> →
+ok 10/10; full cognee package green. The parser parseRocmSmiUtilization
+correctly returns 42.0 for {“card0”:{“GPU use (%)”:“42”}}. Root cause of
+the worktree failure = environment (PATH-scrub / missing shell for the
+hermetic fake rocm-smi echo script in that worktree), NOT the code. No
+fix fabricated (§11.4.6 — fixing a non-reproducing bug would itself be a
+bluff). Obsolete-Details: Since 2026-06-09; Reason:
+not-reproducible-environment-artifact (isolated-worktree PATH/shell);
+Superseding-item: none; Evidence: 10/10 main-tree PASS above.</p>
+</body>
+</html>

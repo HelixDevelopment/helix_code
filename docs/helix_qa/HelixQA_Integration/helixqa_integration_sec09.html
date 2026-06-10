@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec09</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec09</h1>
+</header>
+<h1 id="phase-8-enterprise-ux-validation">9. Phase 8: Enterprise UX
+Validation</h1>
+<p>Phase 8 validates that every client surface—Web, Desktop, Mobile,
+CLI, and TUI—delivers an enterprise-grade user experience for
+translation workflows. The scope covers interaction patterns,
+provider-model coverage across forty-two LLM providers, and the
+non-functional requirements (multi-tenancy, reliability, cost control,
+auditability) that separate a prototype from a production system.
+Findings are derived from the HelixCode client-application architecture,
+the HelixQA provider registry, and the <code>.env.example</code>
+configuration manifest[<sup>1</sup>].</p>
+<h2 id="translation-tool-ux-matrix">9.1 Translation Tool UX Matrix</h2>
+<p>The HelixCode ecosystem ships five client applications: a
+browser-based Web interface, a Fyne v2 Desktop application,
+gomobile-based Android and iOS binaries, a Cobra/Viper CLI, and a
+<code>tview</code>/<code>tcell</code> Terminal User Interface (TUI).
+HelixQA must verify every translation-related interaction pattern with
+surface-appropriate tooling.</p>
+<h3 id="web-ux">9.1.1 Web UX</h3>
+<p>The Web client is served by the Gin HTTP server and rendered in
+Chromium via Playwright. Translation features live on
+<code>/settings</code> (language selection), <code>/subtitles</code>
+(subtitle management), and <code>/media</code> (non-Latin filenames).
+The language-selector dropdown triggers a UI re-render plus an
+asynchronous <code>PUT /api/v1/config</code> call. Provider selection is
+surfaced through a configuration panel listing auto-discovered providers
+from <code>pkg/llm/providers_registry.go</code>. Model quality is
+communicated via a score badge from the LLMsVerifier registry
+(<code>VerifiedModel.Score</code>, refreshed every 300
+seconds)[<sup>1</sup>].</p>
+<h3 id="desktop-ux">9.1.2 Desktop UX</h3>
+<p>The Desktop application
+(<code>HelixCode/applications/desktop/</code>) uses Fyne v2 and compiles
+to native binaries for Windows, macOS, and Linux. It integrates through
+a system-tray icon (systray), native file dialogs, and global menu
+shortcuts. Language settings are presented in a modal dialog that writes
+to the platform-specific preferences store. Offline mode is supported
+when <code>HELIX_OLLAMA_URL</code> points to a local host; HelixQA
+validates this by disconnecting the test machine and confirming that
+<code>ollama</code> (<code>llava:7b</code> or <code>minicpm-v:8b</code>)
+still responds within 30 seconds.</p>
+<h3 id="mobile-ux">9.1.3 Mobile UX</h3>
+<p>Android and iOS clients are produced via gomobile. The Android
+package uses Material3 components; the test bank
+(<code>banks/full-qa-android.yaml</code>) contains cases for Cyrillic
+search (<code>FQA-AND-044</code>) and biometric-dialog subtitle
+verification (<code>FQA-AND-012</code>). Touch targets must be at least
+48 dp × 48 dp. Push notifications for long translations are surfaced via
+<code>internal/notification/</code>; HelixQA verifies delivery by
+triggering a long task and asserting that the notification payload
+contains the completed locale identifier.</p>
+<h3 id="cli-ux">9.1.4 CLI UX</h3>
+<p>The CLI (<code>HelixCode/cmd/cli/</code>, built with Cobra) exposes
+translation commands. Batch mode is exercised through
+<code>helix translate --batch --provider auto --format json</code>.
+Progress bars render as a spinner on <code>stderr</code>; HelixQA
+captures <code>stderr</code> and validates 10–60 updates per minute.
+Fallback chains are triggered by injecting a bad primary API key and
+asserting success through the secondary. Output formatting is validated
+for <code>json</code>, <code>csv</code>, and <code>txt</code> by
+schema-checking emitted bytes.</p>
+<h3 id="tui-ux">9.1.5 TUI UX</h3>
+<p>The TUI (<code>HelixCode/applications/terminal_ui/</code>, built with
+<code>rivo/tview</code>) is the richest keyboard-driven interface.
+Provider selection uses a list widget populated from the verifier cache;
+real-time streaming display is implemented through a
+<code>TextView</code> with <code>SetDynamicColors(true)</code> receiving
+WebSocket messages from <code>/ws/v1/chat</code>. Keyboard shortcuts
+(<code>Ctrl+P</code> provider panel, <code>Ctrl+M</code> model
+selection, <code>Ctrl+R</code> report export) are verified by sending
+<code>tcell</code> key events through the headless test harness.
+Color-coded quality scores use a four-tier palette: green ≥ 0.85, yellow
+0.60–0.84, red &lt; 0.60, gray for unverified providers.</p>
+<p><strong>Table 1. Complete UX Matrix: Client Type × UX Element ×
+Interaction Pattern × QA Verification Method</strong></p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 14%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Client</th>
+<th>UX Element</th>
+<th>Interaction Pattern</th>
+<th>QA Verification Method</th>
+<th>Pass Criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web</td>
+<td>Language selector dropdown</td>
+<td><code>&lt;select&gt;</code> change → <code>PUT /api/v1/config</code>
+→ UI re-render</td>
+<td>Playwright screenshot before/after + OCR diff</td>
+<td>Labels differ; layout SSIM ≥ 0.95[<sup>1</sup>]</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>Real-time preview</td>
+<td>Screenshot → vision provider → text extraction</td>
+<td>Anthropic/Gemini vision analysis of localized UI</td>
+<td>Text matches target locale; no truncation</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>Provider selection</td>
+<td>Config panel lists auto-discovered providers</td>
+<td>API contract: <code>GET /api/v1/llm/providers</code></td>
+<td>Response contains ≥ 1 provider with non-empty <code>Name</code></td>
+</tr>
+<tr>
+<td>Web</td>
+<td>Model quality indicator</td>
+<td>Score badge from LLMsVerifier</td>
+<td>Schema validation on <code>VerifiedModel.Score</code></td>
+<td>Score ∈ [0.0, 1.0]; <code>Verified</code> boolean present</td>
+</tr>
+<tr>
+<td>Desktop</td>
+<td>Native OS integration</td>
+<td>Menu shortcuts (<code>Ctrl+,</code> Settings, <code>Ctrl+Q</code>
+Quit)</td>
+<td>AT-SPI2 (Linux), AXTree (macOS), UIA (Windows)</td>
+<td>Shortcut triggers correct window state change</td>
+</tr>
+<tr>
+<td>Desktop</td>
+<td>Tray icon status</td>
+<td>Systray menu with provider health indicator</td>
+<td>Window capture + pixel color assertion</td>
+<td>Green dot when ≥ 1 provider healthy; red when all down</td>
+</tr>
+<tr>
+<td>Desktop</td>
+<td>Offline mode</td>
+<td>No cloud keys + local Ollama URL</td>
+<td>Disconnect network; run <code>helix chat --prompt &quot;test&quot;</code></td>
+<td>Response from <code>ollama</code> within 30 s</td>
+</tr>
+<tr>
+<td>Mobile</td>
+<td>Touch-optimized targets</td>
+<td>Material3 buttons ≥ 48 dp</td>
+<td>Appium <code>getSize()</code> assertion</td>
+<td>Width ≥ 48, Height ≥ 48 in device-independent pixels</td>
+</tr>
+<tr>
+<td>Mobile</td>
+<td>Cyrillic on-screen keyboard</td>
+<td>System IME switches to Cyrillic layout</td>
+<td>ADB <code>input text</code> with Serbian Unicode + screenshot</td>
+<td>Characters render without tofu (□) glyphs</td>
+</tr>
+<tr>
+<td>Mobile</td>
+<td>Push notifications</td>
+<td>FCM/APNs payload for completed translation</td>
+<td>Trigger long task; capture notification payload</td>
+<td>Payload contains <code>locale</code> field matching request</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>Batch translation mode</td>
+<td><code>--batch</code> flag reads file list from stdin</td>
+<td>Script 100 files; measure wall-clock time</td>
+<td>All files processed; exit code 0; output valid JSON</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>Progress bars</td>
+<td>Spinner on <code>stderr</code> during long operations</td>
+<td>Capture <code>stderr</code> bytes; count spinner frames</td>
+<td>10–60 updates/min; no interleaving with stdout</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>Provider fallback chains</td>
+<td>Bad primary key → auto-fallback to secondary</td>
+<td>Inject invalid <code>ANTHROPIC_API_KEY</code>; request succeeds</td>
+<td>Request succeeds via <code>OPENAI_API_KEY</code> within timeout</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>Output formatting</td>
+<td><code>--format json/csv/txt</code></td>
+<td>Schema validate each format</td>
+<td>JSON parses; CSV has header + equal columns; TXT is UTF-8</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td>Interactive provider selection</td>
+<td><code>List</code> widget with verifier-populated items</td>
+<td>Headless <code>tcell</code> key events → screenshot</td>
+<td>Selected provider highlighted; detail pane updated</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td>Real-time streaming display</td>
+<td><code>TextView</code> receives WebSocket chunks</td>
+<td>Mock WebSocket server; inject tokens; capture screen</td>
+<td>Text appends without flicker; ANSI colors stripped</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td>Keyboard shortcuts</td>
+<td><code>Ctrl+P</code>, <code>Ctrl+M</code>, <code>Ctrl+R</code> mapped
+to actions</td>
+<td>Send <code>tcell.EventKey</code> sequences; assert view change</td>
+<td>Correct view gains focus within 100 ms</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td>Color-coded quality scores</td>
+<td>Four-tier palette in provider list</td>
+<td>Screenshot → parse foreground color codes</td>
+<td>Green ≥ 0.85; yellow 0.60–0.84; red &lt; 0.60; gray unverified</td>
+</tr>
+</tbody>
+</table>
+<p>Table 1 maps nineteen UX elements across five client surfaces to
+concrete QA methods with measurable pass criteria. Web and Desktop rely
+on screenshot-plus-OCR pipelines (Tesseract for deterministic text
+extraction, LLM vision for semantic layout validation), Mobile requires
+Appium plus ADB instrumentation, and CLI/TUI lean on byte-capture and
+headless terminal emulation. This heterogeneity means HelixQA must
+maintain five separate driver backends—Playwright/chromedp,
+AT-SPI2/AXTree/UIA, Appium/UiAutomator2, Cobra command capture, and
+tcell—yet all routes converge on the same evidence format: screenshot or
+capture file plus structured JSON rationale.</p>
+<h2 id="provider-model-coverage">9.2 Provider &amp; Model Coverage</h2>
+<p>HelixCode’s LLM subsystem (<code>HelixCode/internal/llm/</code>)
+implements a unified <code>Provider</code> interface with
+<code>Chat</code>, <code>Vision</code>, and <code>SupportsVision</code>
+methods. Auto-discovery at startup scans environment variables and
+registers every provider whose key is present. The
+<code>.env.example</code> file lists forty-two distinct provider
+environment variables, divided into Tier 1 (native adapters) and Tier 2
+(OpenAI-compatible adapters)[<sup>1</sup>].</p>
+<h3 id="tier-1-providers-native">9.2.1 Tier 1 Providers (Native)</h3>
+<p>Tier 1 providers have bespoke Go adapter files
+(<code>*_provider.go</code>) in <code>HelixCode/internal/llm/</code>.
+Each adapter handles provider-specific authentication, request
+marshaling, response unmarshaling, and error-code translation. The
+fourteen native providers, their environment variables, default models,
+and vision capability are listed below.</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 28%" />
+<col style="width: 32%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Env Variable</th>
+<th>Default Model</th>
+<th>Vision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic</td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td><code>claude-sonnet-4</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>OpenAI</td>
+<td><code>OPENAI_API_KEY</code></td>
+<td><code>gpt-4o</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Google Gemini</td>
+<td><code>GEMINI_API_KEY</code></td>
+<td><code>gemini-pro</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td><code>OPENROUTER_API_KEY</code></td>
+<td><code>anthropic/claude-sonnet-4</code></td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td><code>DEEPSEEK_API_KEY</code></td>
+<td><code>deepseek-chat</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td><code>GROQ_API_KEY</code></td>
+<td><code>llama-3.3-70b-versatile</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td><code>HELIX_OLLAMA_URL</code></td>
+<td><code>llava:7b</code> (local)</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>Astica</td>
+<td><code>ASTICA_API_KEY</code></td>
+<td>(specialized vision)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Kimi (Moonshot)</td>
+<td><code>KIMI_API_KEY</code></td>
+<td><code>kimi-k2.5</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Qwen (Alibaba)</td>
+<td><code>QWEN_API_KEY</code></td>
+<td><code>qwen-vl-max</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Stepfun</td>
+<td><code>STEPFUN_API_KEY</code></td>
+<td><code>step-1.5v-mini</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>NVIDIA NIM</td>
+<td><code>NVIDIA_API_KEY</code></td>
+<td><code>meta/llama-3.2-90b-vision-instruct</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>xAI (Grok)</td>
+<td><code>XAI_API_KEY</code></td>
+<td><code>grok-3</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Mistral</td>
+<td><code>MISTRAL_API_KEY</code></td>
+<td><code>mistral-large-latest</code></td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-2-providers-openai-compatible">9.2.2 Tier 2 Providers
+(OpenAI-Compatible)</h3>
+<p>Tier 2 providers reuse a generic OpenAI-compatible adapter. The
+<code>factory.go</code> instantiates the same HTTP client with a
+configurable base URL and model name, which is why the system can absorb
+new providers without code changes when they follow the
+<code>chat/completions</code> contract.</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Env Variable</th>
+<th>Vision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI21</td>
+<td><code>AI21_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cerebras</td>
+<td><code>CEREBRAS_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Chutes</td>
+<td><code>CHUTES_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td><code>CLOUDFLARE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Codestral</td>
+<td><code>CODESTRAL_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cohere</td>
+<td><code>COHERE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Fireworks</td>
+<td><code>FIREWORKS_API_KEY</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>GitHub Models</td>
+<td><code>GITHUB_MODELS_API_KEY</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>HuggingFace</td>
+<td><code>HUGGINGFACE_API_KEY</code></td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>Hyperbolic</td>
+<td><code>HYPERBOLIC_API_KEY</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Modal</td>
+<td><code>MODAL_API_KEY</code></td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>Novita</td>
+<td><code>NOVITA_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Perplexity</td>
+<td><code>PERPLEXITY_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>PublicAI</td>
+<td><code>PUBLICAI_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Replicate</td>
+<td><code>REPLICATE_API_KEY</code></td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>SambaNova</td>
+<td><code>SAMBANOVA_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Sarvam</td>
+<td><code>SARVAM_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>SiliconFlow</td>
+<td><code>SILICONFLOW_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Together AI</td>
+<td><code>TOGETHER_API_KEY</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Upstage</td>
+<td><code>UPSTAGE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Venice</td>
+<td><code>VENICE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Vulavula</td>
+<td><code>VULAVULA_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>ZAI (BigModel)</td>
+<td><code>ZAI_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Zen</td>
+<td><code>ZEN_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Zhipu</td>
+<td><code>ZHIPU_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Junie</td>
+<td><code>JUNIE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>NLPCloud</td>
+<td><code>NLPCLOUD_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>NIA</td>
+<td><code>NIA_API_KEY</code></td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vision-capable-providers">9.2.3 Vision-Capable Providers</h3>
+<p>Twelve providers expose vision endpoints: OpenAI
+(<code>gpt-4o</code>), Anthropic (Claude), Google Gemini, OpenRouter,
+Fireworks, Together AI, Hyperbolic, NVIDIA NIM, xAI Grok, Kimi K2.5,
+Qwen-VL, Stepfun Step-GUI, Astica (specialized caption/OCR), and Ollama
+(when <code>llava</code>, <code>minicpm-v</code>, <code>bakllava</code>,
+or <code>moondream</code> is pulled). Vision provider selection uses the
+scoring formula</p>
+<p><span class="math display">Score = (0.6 × QualityScore + 0.4 × ReliabilityScore) × AvailabilityBoost × CostBonus</span></p>
+<p>where <code>AvailabilityBoost</code> is 1.0 if the API key is
+configured and 0.5 otherwise, while <code>CostBonus</code> is 1.10 for
+free providers (Ollama), 1.05 for providers costing less than $0.002 per
+1k tokens, and 1.0 otherwise[<sup>1</sup>]. The ranked output drives
+adaptive routing: a screenshot containing Cyrillic text is routed to
+Anthropic or Gemini (highest OCR accuracy for non-Latin scripts), while
+a routine UI-navigation screenshot may be routed to Kimi K2.5
+($0.0006/1k tokens, 0.88 quality) to minimize burn rate.</p>
+<h3 id="qa-verification-every-provider-every-script">9.2.4 QA
+Verification: Every Provider, Every Script</h3>
+<p>HelixQA must verify that every configured provider returns a real
+translation (not an empty string or generic error placeholder) and that
+every vision-capable model handles Cyrillic and Unicode correctly.</p>
+<p><strong>Table 2. Provider Coverage Matrix: Tier, Vision, Translation
+Verified, Fallback Tested, Cyrillic Tested</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 12%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+<col style="width: 25%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Provider</th>
+<th>Tier</th>
+<th>Vision</th>
+<th>Translation Verified</th>
+<th>Fallback Tested</th>
+<th>Cyrillic Tested</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Anthropic</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>2</td>
+<td>OpenAI</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Google Gemini</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>4</td>
+<td>OpenRouter</td>
+<td>1</td>
+<td>Varies</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>5</td>
+<td>DeepSeek</td>
+<td>1</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Groq</td>
+<td>1</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Ollama</td>
+<td>1</td>
+<td>Optional</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Astica</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Kimi</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Qwen</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Stepfun</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>12</td>
+<td>NVIDIA</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>13</td>
+<td>xAI</td>
+<td>1</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Mistral</td>
+<td>1</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>15</td>
+<td>AI21</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Cerebras</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Chutes</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>18</td>
+<td>Cloudflare</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>19</td>
+<td>Codestral</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>20</td>
+<td>Cohere</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>21</td>
+<td>Fireworks</td>
+<td>2</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>22</td>
+<td>GitHub Models</td>
+<td>2</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>23</td>
+<td>HuggingFace</td>
+<td>2</td>
+<td>Varies</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>24</td>
+<td>Hyperbolic</td>
+<td>2</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>25</td>
+<td>Modal</td>
+<td>2</td>
+<td>Varies</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>26</td>
+<td>Novita</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>27</td>
+<td>Perplexity</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>28</td>
+<td>PublicAI</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>29</td>
+<td>Replicate</td>
+<td>2</td>
+<td>Varies</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>30</td>
+<td>SambaNova</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>31</td>
+<td>Sarvam</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>32</td>
+<td>SiliconFlow</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>33</td>
+<td>Together AI</td>
+<td>2</td>
+<td>Yes</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>34</td>
+<td>Upstage</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>35</td>
+<td>Venice</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>36</td>
+<td>Vulavula</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>37</td>
+<td>ZAI</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>38</td>
+<td>Zen</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>39</td>
+<td>Zhipu</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>40</td>
+<td>Junie</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>41</td>
+<td>NLPCloud</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+<tr>
+<td>42</td>
+<td>NIA</td>
+<td>2</td>
+<td>No</td>
+<td>Mandatory</td>
+<td>N/A</td>
+<td>Mandatory</td>
+</tr>
+</tbody>
+</table>
+<p>Table 2 contains forty-two rows, one per provider identified in
+<code>.env.example</code> and the provider registry[<sup>1</sup>]. The
+“Fallback Tested” column is marked “N/A” for Tier 2 because fallback
+chains are implemented at the Tier 1 adapter level
+(<code>adaptive.go</code>); Tier 2 providers are invoked through the
+generic OpenAI-compatible adapter, which itself falls back to another
+Tier 1 provider when the requested Tier 2 endpoint returns a 5xx or 429
+status. Every provider is marked “Mandatory” for Cyrillic testing
+because the system guarantees Unicode fidelity across the entire
+surface; this is enforced by <code>T-I18N-010</code> in the test
+bank[<sup>1</sup>].</p>
+<h3 id="specific-test-cases-for-translation-workflow-validation">Specific
+Test Cases for Translation Workflow Validation</h3>
+<p>HelixQA executes three canonical test cases during every regression
+run that covers i18n functionality.</p>
+<p><strong>Test Case TC-TRANS-01: Cyrillic Search and Display (Serbian
+“Титаник”)</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Objective</td>
+<td>Verify that Cyrillic query strings are preserved end-to-end through
+search input, API transport, database storage, and result
+rendering.</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>Search query <code>Титаник</code> (Serbian Cyrillic for
+“Titanic”).</td>
+</tr>
+<tr>
+<td>Steps</td>
+<td>1. Navigate to <code>/media</code>. 2. Enter <code>Титаник</code> in
+the search field. 3. Submit. 4. Capture screenshot of results. 5. OCR
+with Tesseract (script map <code>&quot;Cyrillic&quot;: &quot;rus&quot;</code>). 6. Verify
+API response contains <code>&quot;query&quot;: &quot;Титаник&quot;</code>. 7. Export results
+to JSON/CSV/TXT and verify encoding.</td>
+</tr>
+<tr>
+<td>Provider Routing</td>
+<td>Vision: Anthropic Claude (primary) or Google Gemini (secondary). API
+validation: Groq (fastest) or DeepSeek (cheapest). Fallback: Ollama
+<code>minicpm-v:8b</code> if all cloud keys fail.</td>
+</tr>
+<tr>
+<td>Pass Criteria</td>
+<td>OCR extracts <code>&quot;Титаник&quot;</code> with Character Error Rate (CER)
+= 0. API payload preserves exact Unicode code points. Export files are
+valid UTF-8; no <code>U+FFFD</code> replacement characters. Layout SSIM
+≥ 0.95 compared to Latin-query baseline.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Test Case TC-TRANS-02: Language Setting Persistence Across
+Sessions</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Objective</td>
+<td>Confirm that a user’s language preference survives logout, login,
+and application restart.</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>Language code <code>sr</code> (Serbian).</td>
+</tr>
+<tr>
+<td>Steps</td>
+<td>1. Authenticate. 2. Navigate to Settings → Language. 3. Select
+<code>sr</code>. 4. Capture screenshot; OCR verify localized labels. 5.
+Logout. 6. Clear browser cookies (Web) or wipe
+<code>NSUserDefaults</code> key (Desktop) or force-stop app (Mobile). 7.
+Re-authenticate. 8. Capture screenshot of landing page. 9. OCR verify
+still localized. 10. Query <code>GET /api/v1/config</code>; assert
+<code>language</code> field.</td>
+</tr>
+<tr>
+<td>Provider Routing</td>
+<td>API validation: Groq. Vision validation: Anthropic.</td>
+</tr>
+<tr>
+<td>Pass Criteria</td>
+<td>Landing page text is Serbian after re-authentication without
+re-selecting language. API returns <code>&quot;language&quot;: &quot;sr&quot;</code>. No
+regression to default locale (<code>en</code>).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Test Case TC-TRANS-03: Subtitle Download Encoding
+Integrity</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Objective</td>
+<td>Verify that subtitle files downloaded through the API retain UTF-8
+encoding and render Cyrillic characters correctly in external
+players.</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>Media ID with Serbian subtitle track; download endpoint
+<code>GET /api/v1/subtitles/download/{id}?lang=sr</code>.</td>
+</tr>
+<tr>
+<td>Steps</td>
+<td>1. Query <code>GET /api/v1/subtitles/languages</code>; assert
+<code>sr</code> present. 2. Download <code>.srt</code> file. 3.
+Byte-level inspection: assert BOM absent, valid UTF-8 sequence. 4. Parse
+SRT; assert subtitle text blocks contain Cyrillic. 5. Open file in VLC
+(Desktop) or system player (Mobile); screenshot with subtitles enabled.
+6. OCR screenshot; compare against ground-truth subtitle text.</td>
+</tr>
+<tr>
+<td>Provider Routing</td>
+<td>Vision: Anthropic (subtitle detail). API: DeepSeek (cost-sensitive
+bulk check).</td>
+</tr>
+<tr>
+<td>Pass Criteria</td>
+<td>File is valid UTF-8 without BOM. SRT index blocks are well-formed.
+OCR CER against ground truth = 0. Video screenshot shows Cyrillic
+overlay without truncation.</td>
+</tr>
+</tbody>
+</table>
+<p>These three cases form the core Cyrillic/Unicode validation suite.
+TC-TRANS-01 exercises the critical path from user input to visual
+output; TC-TRANS-02 validates state durability, a frequent source of
+enterprise support tickets; TC-TRANS-03 ensures binary artifact
+integrity for subtitle-distribution workflows. All three are tagged
+<code>i18n</code>, <code>cyrillic</code>, and <code>subtitles</code> in
+the test-bank YAML and are filtered automatically when HelixQA runs with
+<code>--tags i18n,cyrillic</code>[<sup>1</sup>].</p>
+<h2 id="enterprise-quality-requirements">9.3 Enterprise Quality
+Requirements</h2>
+<p>Enterprise translation tooling demands guarantees beyond functional
+correctness. The HelixCode system addresses four non-functional domains
+that HelixQA must continuously validate.</p>
+<h3 id="multi-tenancy">9.3.1 Multi-Tenancy</h3>
+<p>Multi-tenancy is implemented through per-session isolation. Each
+HelixQA session receives a unique session identifier and an isolated
+browser profile (incognito mode, fresh <code>localStorage</code>,
+separate cookie jar). For desktop and mobile tests, the device pool
+assigns discrete emulator or physical-device slots. Per-tenant provider
+quotas are enforced in <code>pkg/llm/cost_tracker.go</code>: every
+<code>Chat</code> and <code>Vision</code> call records token counts and
+estimated cost in a per-session <code>llm_usage</code> JSON object.
+HelixQA validates isolation by running two concurrent sessions with
+different language settings and asserting that Session A’s Cyrillic
+search history does not appear in Session B’s <code>localStorage</code>
+after both complete.</p>
+<h3 id="reliability">9.3.2 Reliability</h3>
+<p>The reliability target is 99.9% uptime for the LLM routing layer,
+measured as the ratio of successful requests to total requests over a
+30-day rolling window. The <code>adaptive.go</code> file implements
+circuit breakers with three cooldown tiers: 60 seconds for HTTP 429
+(rate limit), 300 seconds for HTTP 5xx (server error), and 120 seconds
+for network timeout[<sup>1</sup>]. HelixQA validates reliability through
+a chaos test: every provider is blocked in turn (via
+<code>iptables</code> DROP or invalid key injection), and the system
+must complete a standard translation task without human intervention by
+following the fallback chain Vision: Anthropic → OpenAI → Ollama
+(<code>llava</code>) → FAIL, and Reasoning: Groq → Cerebras → DeepSeek →
+OpenAI → Anthropic → FAIL[<sup>1</sup>]. Automatic failover is confirmed
+when the session report lists the blocked provider in
+<code>unavailable_providers</code> and the successful provider in
+<code>actual_provider</code>.</p>
+<h3 id="cost-control">9.3.3 Cost Control</h3>
+<p>Cost control operates at three layers. First, per-request billing is
+recorded in the <code>llm_usage</code> JSON attached to every session
+report. Second, budget caps are enforced by the
+<code>cost_tracker.go</code> middleware: when the running total exceeds
+a configurable threshold (default $10.00 per session), subsequent
+requests are routed to Ollama or rejected with error
+<code>ErrBudgetExceeded</code>. Third, provider cost optimization uses
+the <code>CostBonus</code> factor in the vision-ranking formula to
+prefer cheaper providers for low-risk tasks. HelixQA validates cost
+control by running the full i18n test suite and asserting that the
+summed <code>estimated_cost_usd</code> in the final report matches an
+independently calculated projection within ±5%. Caching is validated by
+repeating an identical Cyrillic search twice and asserting that the
+second invocation does not increment the provider token counter.</p>
+<h3 id="auditability">9.3.4 Auditability</h3>
+<p>Auditability is governed by Constitution §11.4, which mandates that
+every QA decision carries a non-empty <code>Rationale</code> field and
+at least one evidence artifact[<sup>1</sup>]. For translation workflows,
+the evidence set must include: (a) a screenshot of the localized UI, (b)
+the OCR-extracted text, (c) the API request/response payload, and (d)
+the provider routing decision with cost. Full request/response logging
+is implemented in <code>internal/logging/</code> with structured JSON
+output; sensitive fields are redacted via a <code>Sanitize</code>
+middleware. Screenshot evidence is stored in
+<code>HELIX_OUTPUT_DIR</code> with filenames following
+<code>{session_id}_{test_id}_{timestamp}.png</code>. Compliance
+reporting aggregates these artifacts into a Markdown + HTML + JSON
+bundle suitable for Sarbanes-Oxley (SOX) or General Data Protection
+Regulation (GDPR) review. HelixQA validates auditability by inspecting
+the output directory after a translation test run and asserting that
+every <code>T-I18N-*</code> test case has at least four evidence files
+and a non-empty <code>Rationale</code> in the JSON report.</p>
+</body>
+</html>

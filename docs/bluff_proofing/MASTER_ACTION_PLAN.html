@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MASTER_ACTION_PLAN</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">MASTER_ACTION_PLAN</h1>
+</header>
+<h1 id="helixcode-zero-bluff-master-action-plan">HelixCode Zero-Bluff
+Master Action Plan</h1>
+<p><strong>Version</strong>: 1.0.0 <strong>Date</strong>: 2026-04-30
+<strong>Status</strong>: Comprehensive plan based on ALL bluff-proofing
+materials <strong>Timeline</strong>: 14 Weeks (7 Phases) <strong>Current
+State</strong>: 40% bluff / 60% real (by feature count) <strong>Target
+State</strong>: 100% real, zero-bluff, exceeds Tier 1 CLI agents</p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This plan transforms HelixCode from its current state (with verified
+critical bluff areas) into a <strong>fully complete, zero-bluff
+project</strong> that exceeds all Tier 1 CLI agent capabilities.</p>
+<h3 id="critical-bluffs-identified-must-fix">Critical Bluffs Identified
+(MUST FIX):</h3>
+<ol type="1">
+<li><strong>BLUFF-001</strong>: LLM Generation is Completely Simulated
+(<code>cmd/cli/main.go:190-214</code>)</li>
+<li><strong>BLUFF-002</strong>: Model Listing is Hardcoded
+(<code>cmd/cli/main.go:101-128</code>)</li>
+<li><strong>BLUFF-003</strong>: Command Execution is Simulated
+(<code>cmd/cli/main.go:237-250</code>)</li>
+<li><strong>BLUFF-004</strong>: Worker Pool Statistics May Be Simulated
+(verification required)</li>
+<li><strong>BLUFF-005</strong>: Minimal Go Dependencies vs Advertised
+Features (<code>go.mod</code> only 3 deps)</li>
+<li><strong>BLUFF-006</strong>: Notification System - Unknown Real
+Implementation</li>
+<li><strong>BLUFF-007</strong>: Database Schema Advertised but Not
+Verified</li>
+<li><strong>BLUFF-008</strong>: Docker Compose References Non-Existent
+Files</li>
+<li><strong>BLUFF-009</strong>: Terminal UI Application Build
+Target</li>
+</ol>
+<h3 id="verified-real-implementations">Verified Real
+Implementations:</h3>
+<ul>
+<li><strong>REAL-001</strong>: Authentication System
+(<code>internal/auth/auth.go</code> - 470 lines, production-ready)</li>
+<li><strong>REAL-002</strong>: CLI Structure and Flag Parsing (partial,
+15+ flags)</li>
+<li><strong>REAL-003</strong>: Dockerfile Multi-Stage Build
+(partial)</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-mandate-const-035">Anti-Bluff Mandate
+(CONST-035)</h2>
+<p>Every task in this plan MUST adhere to CONST-035: End-User Usability
+Mandate:</p>
+<p>A test or Challenge that PASSES is a CLAIM that the tested behavior
+<strong>works for the end user</strong>.</p>
+<p>Every PASS result MUST guarantee: - <strong>Quality</strong> -
+Feature behaves correctly under real user inputs, edge cases,
+concurrency - <strong>Completion</strong> - Feature is wired end-to-end
+with no stub/placeholder gaps - <strong>Full Usability</strong> - A user
+following documentation SUCCEEDS</p>
+<h3 id="bluff-taxonomy-forbidden-patterns">Bluff Taxonomy (Forbidden
+Patterns):</h3>
+<ul>
+<li><strong>Wrapper bluff</strong> - Assertions PASS but wrapper’s
+exit-code logic is buggy</li>
+<li><strong>Contract bluff</strong> - System advertises capability but
+rejects it in dispatch</li>
+<li><strong>Structural bluff</strong> - File exists but doesn’t contain
+working code</li>
+<li><strong>Comment bluff</strong> - Comment promises behavior code
+doesn’t have</li>
+<li><strong>Skip bluff</strong> - <code>t.Skip(&quot;not running yet&quot;)</code>
+without <code>SKIP-OK: #&lt;ticket&gt;</code> marker</li>
+</ul>
+<hr />
+<h2 id="phase-0-foundation-repair-week-1">Phase 0: Foundation Repair
+(Week 1)</h2>
+<h3 id="p0-001-fix-go.mod---add-all-advertised-dependencies">P0-001: Fix
+go.mod - Add All Advertised Dependencies</h3>
+<p><strong>File</strong>: <code>helix_code/go.mod</code> (replace root
+go.mod) <strong>Current State</strong>: Only 3 dependencies (uuid,
+errors, yaml) <strong>Target State</strong>: Full dependency manifest
+with 20+ dependencies</p>
+<h4 id="sub-tasks">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P0-001-1</strong>: Replace root <code>go.mod</code> with
+complete dependency list</p>
+<ul>
+<li>Module: <code>dev.helix.code</code></li>
+<li>Go version: <code>go 1.24.0</code></li>
+<li>Toolchain: <code>go1.24.9</code></li>
+</ul></li>
+<li><p><strong>P0-001-2</strong>: Add HTTP Framework</p>
+<ul>
+<li><code>github.com/gin-gonic/gin v1.11.0</code></li>
+</ul></li>
+<li><p><strong>P0-001-3</strong>: Add Authentication dependencies</p>
+<ul>
+<li><code>github.com/golang-jwt/jwt/v4 v4.5.2</code></li>
+<li><code>golang.org/x/crypto v0.36.0</code></li>
+</ul></li>
+<li><p><strong>P0-001-4</strong>: Add Database dependencies</p>
+<ul>
+<li><code>github.com/jackc/pgx/v5 v5.7.4</code></li>
+</ul></li>
+<li><p><strong>P0-001-5</strong>: Add Redis dependencies</p>
+<ul>
+<li><code>github.com/redis/go-redis/v9 v9.7.3</code></li>
+</ul></li>
+<li><p><strong>P0-001-6</strong>: Add Configuration dependencies</p>
+<ul>
+<li><code>github.com/spf13/viper v1.21.0</code></li>
+</ul></li>
+<li><p><strong>P0-001-7</strong>: Add CLI dependencies</p>
+<ul>
+<li><code>github.com/spf13/cobra v1.8.0</code></li>
+</ul></li>
+<li><p><strong>P0-001-8</strong>: Add Testing dependencies</p>
+<ul>
+<li><code>github.com/stretchr/testify v1.11.1</code></li>
+</ul></li>
+<li><p><strong>P0-001-9</strong>: Add UI dependencies</p>
+<ul>
+<li><code>github.com/rivo/tview v0.42.0</code></li>
+<li><code>fyne.io/fyne/v2 v2.7.0</code></li>
+</ul></li>
+<li><p><strong>P0-001-10</strong>: Add Browser Automation</p>
+<ul>
+<li><code>github.com/chromedp/chromedp v0.14.2</code></li>
+</ul></li>
+<li><p><strong>P0-001-11</strong>: Add Web Scraping</p>
+<ul>
+<li><code>github.com/PuerkitoBio/goquery v1.10.3</code></li>
+</ul></li>
+<li><p><strong>P0-001-12</strong>: Add Tree-sitter</p>
+<ul>
+<li><code>github.com/smacker/go-tree-sitter v0.0.0-20240625050157-a31a98a7c127</code></li>
+</ul></li>
+<li><p><strong>P0-001-13</strong>: Add Observability</p>
+<ul>
+<li><code>github.com/prometheus/client_golang v1.22.0</code></li>
+<li><code>github.com/sirupsen/logrus v1.9.3</code></li>
+</ul></li>
+<li><p><strong>P0-001-14</strong>: Add SSE for MCP</p>
+<ul>
+<li><code>github.com/r3labs/sse/v2 v2.10.0</code></li>
+</ul></li>
+<li><p><strong>P0-001-15</strong>: Run <code>go mod tidy</code> and
+verify no errors</p></li>
+<li><p><strong>P0-001-16</strong>: Verify <code>go build ./...</code>
+compiles all packages</p></li>
+<li><p><strong>P0-001-17</strong>: Verify <code>go list -m all</code>
+shows all dependencies resolved</p></li>
+<li><p><strong>P0-001-18</strong>: Create unit test that verifies all
+imports resolve</p></li>
+<li><p><strong>P0-001-19</strong>: Create Challenge
+<code>go_mod_complete_challenge.sh</code></p>
+<ul>
+<li>Challenge must verify all advertised deps are present</li>
+<li>Challenge must fail if deps missing</li>
+<li>Anti-bluff: grep for gin, pgx, viper, cobra in go.mod</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification</strong>: - [ ]
+<code>go mod tidy</code> completes without errors - [ ]
+<code>go build ./...</code> compiles all packages - [ ]
+<code>go list -m all</code> shows all dependencies resolved - [ ]
+Challenge <code>go_mod_complete_challenge.sh</code> PASSES - [ ] NO
+“simulated” or “for now” in production code</p>
+<hr />
+<h3 id="p0-002-create-missing-docker-entrypoint.sh">P0-002: Create
+Missing docker-entrypoint.sh</h3>
+<p><strong>File</strong>: <code>docker/docker-entrypoint.sh</code> (new
+file) <strong>Current State</strong>: Referenced in Dockerfile but
+doesn’t exist</p>
+<h4 id="sub-tasks-1">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P0-002-1</strong>: Create
+<code>docker/docker-entrypoint.sh</code> with proper shebang and set
+-e</p></li>
+<li><p><strong>P0-002-2</strong>: Add validation for required
+environment variables</p>
+<ul>
+<li>HELIX_AUTH_JWT_SECRET (REQUIRED)</li>
+<li>HELIX_DATABASE_PASSWORD (WARNING if missing)</li>
+</ul></li>
+<li><p><strong>P0-002-3</strong>: Add wait-for-PostgreSQL logic</p>
+<ul>
+<li>Use <code>pg_isready</code> in loop until ready</li>
+<li>Timeout after 60 seconds</li>
+</ul></li>
+<li><p><strong>P0-002-4</strong>: Add wait-for-Redis logic</p>
+<ul>
+<li>Use <code>redis-cli ping</code> in loop until PONG</li>
+<li>Timeout after 60 seconds</li>
+</ul></li>
+<li><p><strong>P0-002-5</strong>: Add database migration execution</p>
+<ul>
+<li>Check for <code>./scripts/migrate.sh</code></li>
+<li>Execute if exists</li>
+</ul></li>
+<li><p><strong>P0-002-6</strong>: Add service type selection</p>
+<ul>
+<li>HELIX_SERVICE_TYPE environment variable</li>
+<li>Support: server, cli, worker</li>
+<li>Use <code>exec</code> for proper signal handling</li>
+</ul></li>
+<li><p><strong>P0-002-7</strong>: Make script executable</p>
+<ul>
+<li><code>chmod +x docker/docker-entrypoint.sh</code></li>
+</ul></li>
+<li><p><strong>P0-002-8</strong>: Update Dockerfile to copy entrypoint
+to /usr/local/bin/</p></li>
+<li><p><strong>P0-002-9</strong>: Test:
+<code>docker build -t helixcode:test .</code></p></li>
+<li><p><strong>P0-002-10</strong>: Create Challenge
+<code>docker_entrypoint_challenge.sh</code></p>
+<ul>
+<li>Verify container builds without “file not found” errors</li>
+<li>Verify container actually waits for dependencies</li>
+<li>Verify health endpoint responds after start</li>
+<li>Anti-bluff: Actually curl health endpoint, verify deep checks</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification</strong>: - [ ] Container builds
+successfully: <code>docker build -t helixcode:test .</code> - [ ]
+Container starts without “file not found” errors - [ ] Container
+actually waits for dependencies (not just echoes) - [ ] Health endpoint
+responds after container starts - [ ] Challenge
+<code>docker_entrypoint_challenge.sh</code> PASSES</p>
+<hr />
+<h3 id="p0-003-add-root-level-governance-files">P0-003: Add Root-Level
+Governance Files</h3>
+<p><strong>Files</strong>: - <code>CONSTITUTION.md</code> (new at root)
+- <code>CLAUDE.md</code> (new at root) - <code>AGENTS.md</code> (update
+existing)</p>
+<h4 id="sub-tasks-2">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P0-003-1</strong>: Create <code>CONSTITUTION.md</code> at
+root
+<ul>
+<li>Include all 36 rules from
+<code>HELIXCODE_CONSTITUTION.md</code></li>
+<li>CONST-001: No CI/CD Pipelines</li>
+<li>CONST-002: No Mocks in Production</li>
+<li>CONST-003: No HTTPS for Git</li>
+<li>CONST-004: No Manual Container Commands</li>
+<li>CONST-005: 100% Real Data for Non-Unit Tests</li>
+<li>CONST-006: Challenge Coverage</li>
+<li>CONST-007: Health &amp; Observability</li>
+<li>CONST-008: Documentation &amp; Quality</li>
+<li>CONST-009: Validation Before Release</li>
+<li>CONST-010: Comprehensive Verification</li>
+<li>CONST-011: Resource Limits for Tests &amp; Challenges</li>
+<li>CONST-012: Bugfix Documentation</li>
+<li>CONST-013: Real Infrastructure for All Non-Unit Tests</li>
+<li>CONST-014: Reproduction-Before-Fix</li>
+<li>CONST-015: Concurrent-Safe Containers</li>
+<li>CONST-016: Definition of Done</li>
+<li>CONST-017: Zero-Bluff Testing (CONST-035)</li>
+<li>CONST-018: Host Power Management Hard Ban</li>
+<li>CONST-019: Container Up ≠ Healthy</li>
+<li>CONST-020: Provider Fallback Chain Reality</li>
+<li>CONST-021: No Mocks Above Unit Build Target</li>
+<li>CONST-022: Submodule Governance Propagation</li>
+<li>CONST-023: Docker Health Checks Mandatory</li>
+<li>CONST-024: Version Pinning</li>
+<li>CONST-025: Secret Management</li>
+<li>CONST-026: Minimal Privilege Containers</li>
+<li>CONST-027: Network Isolation</li>
+<li>CONST-028: Backup Before Destructive Operations</li>
+<li>CONST-029: Input Validation at All Boundaries</li>
+<li>CONST-030: Graceful Degradation</li>
+<li>CONST-031: Audit Trail</li>
+<li>CONST-032: Emergency Stop</li>
+<li>CONST-033: Data Integrity</li>
+<li>CONST-034: API Stability</li>
+<li>CONST-035: End-User Usability Mandate (strengthened 2026-04-29)</li>
+<li>CONST-036: Propagation to Submodules</li>
+</ul></li>
+<li><strong>P0-003-2</strong>: Create <code>CLAUDE.md</code> at root
+(491 lines)
+<ul>
+<li>Section 1: Agent Identity &amp; Purpose</li>
+<li>Section 2: Universal Mandatory Rules (10 rules)</li>
+<li>Section 3: HelixCode-Specific Architecture</li>
+<li>Section 4: Code Patterns for Agents</li>
+<li>Section 5: Anti-Bluff Checklist for Every Task</li>
+<li>Section 6: Common Anti-Patterns to Avoid</li>
+<li>Section 7: Working with Submodules</li>
+<li>Section 8: Emergency Procedures</li>
+<li>Section 9: Reference Commands</li>
+<li>Section 10: Contact &amp; Escalation</li>
+</ul></li>
+<li><strong>P0-003-3</strong>: Update <code>AGENTS.md</code> at root
+<ul>
+<li>Combine existing AGENTS.md with HELIXCODE_AGENTS.md content</li>
+<li>Add CONST-035 section with bluff taxonomy</li>
+<li>Add verified bluff areas (BLUFF-001 through BLUFF-009)</li>
+<li>Add verified real implementations (REAL-001 through REAL-003)</li>
+<li>Add anti-bluff testing rules</li>
+</ul></li>
+<li><strong>P0-003-4</strong>: Propagate to ALL submodules
+<ul>
+<li>For each submodule in <code>.gitmodules</code> (80+ submodules):
+<ul>
+<li>Option A: Create symlink to parent governance files</li>
+<li>Option B: Copy governance files to submodule root</li>
+<li>Option C: Add reference comment in submodule README</li>
+</ul></li>
+<li>Verify: Every submodule has Constitution.md, CLAUDE.md,
+AGENTS.md</li>
+</ul></li>
+<li><strong>P0-003-5</strong>: Verify no forbidden patterns in
+production code
+<ul>
+<li><code>grep -r &quot;simulated&quot; internal/ cmd/ applications/</code></li>
+<li><code>grep -r &quot;for now&quot; internal/ cmd/ applications/</code></li>
+<li><code>grep -r &quot;TODO implement&quot; internal/ cmd/ applications/</code></li>
+<li><code>grep -r &quot;placeholder&quot; internal/ cmd/ applications/</code></li>
+<li>MUST return NOTHING</li>
+</ul></li>
+<li><strong>P0-003-6</strong>: Create Challenge
+<code>constitution_validation_challenge.sh</code>
+<ul>
+<li>Verify CONSTITUTION.md exists at root</li>
+<li>Verify CONST-035 is present</li>
+<li>Verify all 36 rules are present</li>
+<li>Verify CLAUDE.md exists at root (490+ lines)</li>
+<li>Verify AGENTS.md exists at root (390+ lines)</li>
+<li>Verify all submodules have governance files</li>
+<li>Anti-bluff: Actually read files, not just check existence</li>
+</ul></li>
+<li><strong>P0-003-7</strong>: Create Challenge
+<code>no_simulation_challenge.sh</code>
+<ul>
+<li>Scan all production code for simulation markers</li>
+<li>Must return 0 findings</li>
+<li>Anti-bluff: Actually read file contents</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification</strong>: - [ ] CONSTITUTION.md
+exists at root (330+ lines) - [ ] CLAUDE.md exists at root (490+ lines)
+- [ ] AGENTS.md exists at root (390+ lines) - [ ] All 80+ submodules
+have governance files - [ ] grep for “simulated” returns NOTHING in
+production code - [ ] Challenge
+<code>constitution_validation_challenge.sh</code> PASSES - [ ] Challenge
+<code>no_simulation_challenge.sh</code> PASSES</p>
+<hr />
+<h3 id="p0-004-create-anti-bluff-testing-framework">P0-004: Create
+Anti-Bluff Testing Framework</h3>
+<p><strong>File</strong>: <code>tests/anti_bluff_framework.go</code>
+(new)</p>
+<h4 id="sub-tasks-3">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P0-004-1</strong>: Create <code>AntiBluffVerifier</code>
+struct
+<ul>
+<li>Wrap testing.T</li>
+<li>Provide assertion methods that check REAL behavior</li>
+</ul></li>
+<li><strong>P0-004-2</strong>: Implement <code>AssertRealHTTPCall</code>
+<ul>
+<li>Check response does NOT contain “simulated”</li>
+<li>Check response does NOT contain “This is a simulated”</li>
+<li>Verify actual content is meaningful</li>
+</ul></li>
+<li><strong>P0-004-3</strong>: Implement
+<code>AssertRealFileChange</code>
+<ul>
+<li>Verify file was actually modified</li>
+<li>Check expected content exists in file</li>
+<li>Not just that function was called</li>
+</ul></li>
+<li><strong>P0-004-4</strong>: Implement
+<code>AssertRealProcessExecution</code>
+<ul>
+<li>Verify actual system calls were made</li>
+<li>Check process actually ran</li>
+<li>Verify output is real</li>
+</ul></li>
+<li><strong>P0-004-5</strong>: Create Challenge wrapper template
+<ul>
+<li>Use robust failure tracking (grep “|FAILED|” pattern)</li>
+<li>NOT just exit codes</li>
+<li>Continue running after failures</li>
+<li>Generate JSON report</li>
+</ul></li>
+<li><strong>P0-004-6</strong>: Implement
+<code>run_all_challenges.sh</code> master runner
+<ul>
+<li>Run ALL challenges</li>
+<li>Use robust failure detection</li>
+<li>Generate JSON report with per-challenge results</li>
+<li>Fail if ANY challenge fails</li>
+<li>Respect resource limits: GOMAXPROCS=2, nice -n 19</li>
+</ul></li>
+<li><strong>P0-004-7</strong>: Create minimum 10 challenges for P0
+features
+<ul>
+<li><code>go_mod_complete_challenge.sh</code></li>
+<li><code>docker_entrypoint_challenge.sh</code></li>
+<li><code>constitution_validation_challenge.sh</code></li>
+<li><code>no_simulation_challenge.sh</code></li>
+<li><code>anti_bluff_framework_challenge.sh</code></li>
+<li>etc.</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification</strong>: - [ ] Anti-bluff framework
+code exists - [ ] <code>run_all_challenges.sh</code> runs without buggy
+wrapper logic - [ ] All P0 challenges PASS - [ ] Wrapper correctly
+propagates failures (grep “|FAILED|” pattern)</p>
+<hr />
+<h2 id="phase-1-core-llm-integration-weeks-2-3">Phase 1: Core LLM
+Integration (Weeks 2-3)</h2>
+<h3 id="p1-001-implement-real-llm-provider-interface">P1-001: Implement
+Real LLM Provider Interface</h3>
+<p><strong>File</strong>: <code>internal/llm/provider.go</code>
+(verify/update)</p>
+<h4 id="sub-tasks-4">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P1-001-1</strong>: Define complete Provider interface</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(&lt;-</span><span class="kw">chan</span> <span class="op">*</span>GenerateChunk<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    GetCapabilities<span class="op">()</span> <span class="op">*</span>Capabilities</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span>  <span class="co">// MUST return real models</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    ValidateConfig<span class="op">(</span>config <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    HealthCheck<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span>  <span class="co">// NEW: for anti-bluff</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+<li><p><strong>P1-001-2</strong>: Define GenerateRequest struct</p>
+<ul>
+<li>Prompt, Model, MaxTokens, Temperature</li>
+<li>Stream flag, Context, etc.</li>
+</ul></li>
+<li><p><strong>P1-001-3</strong>: Define GenerateResponse struct</p>
+<ul>
+<li>Text, Model, Provider</li>
+<li>Completed flag, TokensUsed, etc.</li>
+</ul></li>
+<li><p><strong>P1-001-4</strong>: Define Model struct</p>
+<ul>
+<li>ID, Name, Provider</li>
+<li>ContextSize, Capabilities</li>
+</ul></li>
+<li><p><strong>P1-001-5</strong>: Create unit tests for interface
+compliance</p></li>
+<li><p><strong>P1-001-6</strong>: Create Challenge
+<code>provider_interface_challenge.sh</code></p>
+<ul>
+<li>Verify interface is implemented</li>
+<li>Verify all methods are present</li>
+<li>Anti-bluff: Actually call methods, not just check existence</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p1-002-implement-ollama-provider-local---priority-1">P1-002:
+Implement Ollama Provider (Local - Priority 1)</h3>
+<p><strong>File</strong>:
+<code>internal/llm/providers/ollama/ollama.go</code> (new)</p>
+<h4 id="sub-tasks-5">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P1-002-1</strong>: Create OllamaProvider struct</p>
+<ul>
+<li>baseURL, httpClient</li>
+<li>Default URL: <code>http://localhost:11434</code></li>
+</ul></li>
+<li><p><strong>P1-002-2</strong>: Implement Generate method</p>
+<ul>
+<li>ANTI-BLUFF: MUST make REAL HTTP call to Ollama API</li>
+<li>POST to <code>/api/generate</code> with proper JSON payload</li>
+<li>Parse response, return actual generated text</li>
+<li>NO simulation. NO echoing prompt. NO canned responses.</li>
+</ul></li>
+<li><p><strong>P1-002-3</strong>: Implement GenerateStream method</p>
+<ul>
+<li>Stream responses via SSE from Ollama</li>
+<li>Return channel of chunks</li>
+<li>Actually stream, not simulate</li>
+</ul></li>
+<li><p><strong>P1-002-4</strong>: Implement GetModels method</p>
+<ul>
+<li>ANTI-BLUFF: Query Ollama’s <code>/api/tags</code> endpoint</li>
+<li>Return REAL available models, not hardcoded list</li>
+<li>Parse response, extract model names</li>
+</ul></li>
+<li><p><strong>P1-002-5</strong>: Implement HealthCheck method</p>
+<ul>
+<li>ANTI-BLUFF: Real health check, not just “return nil”</li>
+<li>Make HTTP request to <code>/api/tags</code></li>
+<li>Verify 200 response</li>
+</ul></li>
+<li><p><strong>P1-002-6</strong>: Implement GetCapabilities method</p>
+<ul>
+<li>Return actual capabilities</li>
+<li>Context size, streaming support, etc.</li>
+</ul></li>
+<li><p><strong>P1-002-7</strong>: Add unit tests with mocks (allowed at
+unit level)</p></li>
+<li><p><strong>P1-002-8</strong>: Add integration test with REAL
+Ollama</p>
+<ul>
+<li>Skip if Ollama not available</li>
+<li>Make real generation request</li>
+<li>Verify response is not simulated</li>
+<li>Anti-bluff: Check response does NOT contain “simulated”</li>
+</ul></li>
+<li><p><strong>P1-002-9</strong>: Create Challenge
+<code>ollama_generation_challenge.sh</code></p>
+<ul>
+<li>Start Ollama if not running</li>
+<li>Make generation request via API</li>
+<li>Verify response contains actual AI-generated text</li>
+<li>Verify response does NOT contain “simulated”</li>
+<li>Verify response answers the question (not just echoes)</li>
+<li>Anti-bluff: Check response has reasonable length (&gt;50 chars)</li>
+</ul></li>
+<li><p><strong>P1-002-10</strong>: Create Challenge
+<code>ollama_models_challenge.sh</code></p>
+<ul>
+<li>Query Ollama for available models</li>
+<li>Verify dynamic list (not hardcoded)</li>
+<li>Verify models actually exist in Ollama</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification</strong>: - [ ]
+<code>./bin/cli --prompt &quot;What is 2+2?&quot;</code> returns REAL AI-generated
+answer - [ ] Response does NOT contain “simulated” or “This is a
+simulated” - [ ] Response actually answers: “4” or “four” - [ ]
+<code>./bin/cli --list-models</code> returns dynamic models from Ollama
+- [ ] Integration test passes with real Ollama - [ ] Challenge
+<code>ollama_generation_challenge.sh</code> PASSES - [ ] Challenge
+<code>ollama_models_challenge.sh</code> PASSES</p>
+<hr />
+<h3 id="p1-003-implement-openai-provider-cloud---priority-2">P1-003:
+Implement OpenAI Provider (Cloud - Priority 2)</h3>
+<p><strong>File</strong>:
+<code>internal/llm/providers/openai/openai.go</code> (new)</p>
+<h4 id="sub-tasks-6">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P1-003-1</strong>: Create OpenAIProvider struct
+<ul>
+<li>baseURL: <code>https://api.openai.com/v1</code></li>
+<li>apiKey from config</li>
+<li>httpClient with timeout</li>
+</ul></li>
+<li><strong>P1-003-2</strong>: Implement Generate method
+<ul>
+<li>REAL HTTP POST to <code>/v1/chat/completions</code></li>
+<li>Proper authentication header:
+<code>Bearer &lt;api-key&gt;</code></li>
+<li>Parse response, return actual generated text</li>
+</ul></li>
+<li><strong>P1-003-3</strong>: Implement GenerateStream method
+<ul>
+<li>Stream via SSE</li>
+<li>Return channel of chunks</li>
+</ul></li>
+<li><strong>P1-003-4</strong>: Implement GetModels method
+<ul>
+<li>Query <code>/v1/models</code> endpoint</li>
+<li>Return real available models</li>
+</ul></li>
+<li><strong>P1-003-5</strong>: Implement HealthCheck method
+<ul>
+<li>Make test request</li>
+<li>Verify API is accessible</li>
+</ul></li>
+<li><strong>P1-003-6</strong>: Add integration test with REAL OpenAI API
+<ul>
+<li>Skip if OPENAI_API_KEY not set</li>
+<li>Make real generation request</li>
+<li>Verify response is not simulated</li>
+</ul></li>
+<li><strong>P1-003-7</strong>: Create Challenge
+<code>openai_generation_challenge.sh</code>
+<ul>
+<li>Requires OPENAI_API_KEY</li>
+<li>Verify real generation</li>
+<li>Anti-bluff checks</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p1-004-implement-anthropic-claude-provider-cloud---priority-3">P1-004:
+Implement Anthropic Claude Provider (Cloud - Priority 3)</h3>
+<p><strong>File</strong>:
+<code>internal/llm/providers/anthropic/anthropic.go</code> (new)</p>
+<h4 id="sub-tasks-7">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P1-004-1</strong>: Create AnthropicProvider struct
+<ul>
+<li>baseURL: <code>https://api.anthropic.com/v1</code></li>
+<li>apiKey, apiVersion from config</li>
+</ul></li>
+<li><strong>P1-004-2</strong>: Implement Generate method
+<ul>
+<li>REAL HTTP POST to <code>/v1/messages</code></li>
+<li>Proper authentication: <code>x-api-key</code> header</li>
+<li>Support Claude 3.5 Sonnet, Opus, Haiku</li>
+<li>Parse response, return actual text</li>
+</ul></li>
+<li><strong>P1-004-3</strong>: Implement extended thinking mode
+<ul>
+<li>Support 200K context</li>
+<li>Support 50K output tokens</li>
+</ul></li>
+<li><strong>P1-004-4</strong>: Implement GetModels method
+<ul>
+<li>Return advertised Claude models</li>
+</ul></li>
+<li><strong>P1-004-5</strong>: Create Challenge
+<code>anthropic_generation_challenge.sh</code>
+<ul>
+<li>Requires ANTHROPIC_API_KEY</li>
+<li>Verify real generation with Claude</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p1-005-implement-12-more-providers">P1-005: Implement 12 More
+Providers</h3>
+<p><strong>Files</strong>:
+<code>internal/llm/providers/*/provider.go</code> (new for each)</p>
+<h4 id="providers-to-implement">Providers to Implement:</h4>
+<ol type="1">
+<li><strong>Gemini</strong>
+(<code>internal/llm/providers/gemini/</code>)
+<ul>
+<li>2M token context (largest available)</li>
+<li>Multimodal, function calling</li>
+</ul></li>
+<li><strong>xAI/Grok</strong> (<code>internal/llm/providers/xai/</code>)
+<ul>
+<li>grok-3-fast-beta, grok-3-mini-fast-beta</li>
+<li>Free tier available</li>
+</ul></li>
+<li><strong>OpenRouter</strong>
+(<code>internal/llm/providers/openrouter/</code>)
+<ul>
+<li>Free models from various providers</li>
+<li>deepseek-r1-free, meta-llama/llama-3.2-3b-instruct:free</li>
+</ul></li>
+<li><strong>GitHub Copilot</strong>
+(<code>internal/llm/providers/github/</code>)
+<ul>
+<li>gpt-4o, claude-3.5-sonnet, o1</li>
+<li>Free with GitHub subscription</li>
+</ul></li>
+<li><strong>Qwen</strong> (<code>internal/llm/providers/qwen/</code>)
+<ul>
+<li>2,000 requests/day free tier</li>
+<li>OAuth2 authentication</li>
+</ul></li>
+<li><strong>Llama.cpp</strong>
+(<code>internal/llm/providers/llamacpp/</code>)
+<ul>
+<li>Local server via HTTP</li>
+<li>/completion endpoint</li>
+</ul></li>
+<li><strong>vLLM</strong> (<code>internal/llm/providers/vllm/</code>)
+<ul>
+<li>Local server via HTTP</li>
+<li>/v1/completions endpoint</li>
+</ul></li>
+<li><strong>Azure Bedrock</strong>
+(<code>internal/llm/providers/azure/</code>)
+<ul>
+<li>Azure’s enterprise OpenAI models</li>
+</ul></li>
+<li><strong>AWS Bedrock</strong>
+(<code>internal/llm/providers/bedrock/</code>)
+<ul>
+<li>AWS SDK integration</li>
+<li>Claude, Titan, Jurassic models</li>
+</ul></li>
+<li><strong>VertexAI</strong>
+(<code>internal/llm/providers/vertexai/</code>)
+<ul>
+<li>Google’s enterprise models</li>
+</ul></li>
+<li><strong>Groq</strong> (<code>internal/llm/providers/groq/</code>)
+<ul>
+<li>Ultra-fast inference</li>
+<li>Llama and Mixtral models</li>
+</ul></li>
+<li><strong>KoboldAI</strong>
+(<code>internal/llm/providers/koboldai/</code>)
+<ul>
+<li>Local server via HTTP</li>
+<li>/api/v1/generate endpoint</li>
+</ul></li>
+</ol>
+<p><strong>For EACH provider, implement ALL</strong>: - Generate method
+(REAL HTTP call) - GenerateStream method (REAL streaming) - GetModels
+method (REAL discovery) - HealthCheck method (REAL probe) -
+GetCapabilities method - Unit tests (mocks allowed) - Integration test
+(real API, skip if unavailable) - Challenge script (anti-bluff
+verification)</p>
+<hr />
+<h3 id="p1-006-implement-provider-manager-with-fallback">P1-006:
+Implement Provider Manager with Fallback</h3>
+<p><strong>File</strong>: <code>internal/llm/manager.go</code>
+(verify/fix)</p>
+<h4 id="sub-tasks-8">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P1-006-1</strong>: Create ProviderManager struct</p>
+<ul>
+<li>providers map[string]Provider</li>
+<li>fallbackChain []string (ordered list)</li>
+<li>circuitBreakers map[string]*CircuitBreaker</li>
+</ul></li>
+<li><p><strong>P1-006-2</strong>: Implement RegisterProvider method</p>
+<ul>
+<li>Add provider to map</li>
+<li>Initialize circuit breaker</li>
+</ul></li>
+<li><p><strong>P1-006-3</strong>: Implement Generate method with
+fallback</p>
+<ul>
+<li>ANTI-BLUFF: Must try REAL providers</li>
+<li>Iterate through fallbackChain</li>
+<li>Skip open/circuit-broken providers</li>
+<li>Call provider.Generate()</li>
+<li>Record success/failure to circuit breaker</li>
+<li>Return first successful response</li>
+</ul></li>
+<li><p><strong>P1-006-4</strong>: Implement GenerateStream with
+fallback</p>
+<ul>
+<li>Similar to Generate but with streaming</li>
+</ul></li>
+<li><p><strong>P1-006-5</strong>: Implement model discovery across
+providers</p>
+<ul>
+<li>Query all providers for models</li>
+<li>Merge and deduplicate</li>
+<li>Cache with TTL</li>
+</ul></li>
+<li><p><strong>P1-006-6</strong>: Add unit tests</p></li>
+<li><p><strong>P1-006-7</strong>: Add integration test</p>
+<ul>
+<li>Test fallback chain with real providers</li>
+<li>Test circuit breaker opens on failures</li>
+</ul></li>
+<li><p><strong>P1-006-8</strong>: Create Challenge
+<code>provider_fallback_challenge.sh</code></p>
+<ul>
+<li>Test fallback from failing provider to working provider</li>
+<li>MUST use real failures (not simulated)</li>
+<li>Verify circuit breaker opens</li>
+<li>Anti-bluff: Actually cause a provider to fail</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p1-007-implement-circuit-breaker-pattern">P1-007: Implement
+Circuit Breaker Pattern</h3>
+<p><strong>File</strong>: <code>internal/llm/circuit_breaker.go</code>
+(new - port from HelixAgent)</p>
+<h4 id="sub-tasks-9">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P1-007-1</strong>: Create CircuitBreaker struct
+<ul>
+<li>state (Closed, Open, HalfOpen)</li>
+<li>failureCount, successCount</li>
+<li>threshold, timeout</li>
+<li>lastFailure time</li>
+<li>sync.RWMutex for thread safety</li>
+</ul></li>
+<li><strong>P1-007-2</strong>: Implement State method
+<ul>
+<li>Return current circuit state</li>
+</ul></li>
+<li><strong>P1-007-3</strong>: Implement RecordSuccess method
+<ul>
+<li>Reset failure count if in HalfOpen</li>
+<li>Transition to Closed if success threshold met</li>
+</ul></li>
+<li><strong>P1-007-4</strong>: Implement RecordFailure method
+<ul>
+<li>Increment failure count</li>
+<li>Transition to Open if threshold exceeded</li>
+<li>Record lastFailure time</li>
+</ul></li>
+<li><strong>P1-007-5</strong>: Implement CanAttempt method
+<ul>
+<li>Return true if Closed</li>
+<li>Return true if HalfOpen and timeout expired</li>
+<li>Return false if Open</li>
+</ul></li>
+<li><strong>P1-007-6</strong>: Add unit tests
+<ul>
+<li>Test state transitions</li>
+<li>Test threshold behavior</li>
+</ul></li>
+<li><strong>P1-007-7</strong>: Create Challenge
+<code>circuit_breaker_challenge.sh</code>
+<ul>
+<li>Cause real provider failures</li>
+<li>Verify circuit opens</li>
+<li>Verify requests are skipped when open</li>
+<li>Anti-bluff: Actually cause failures</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p1-008-fix-cli-handlegenerate-to-use-real-providers">P1-008: Fix
+CLI handleGenerate to Use Real Providers</h3>
+<p><strong>File</strong>: <code>cmd/cli/main.go</code> lines 190-214
+(CRITICAL FIX)</p>
+<h4 id="sub-tasks-10">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P1-008-1</strong>: Replace simulated generation with real
+provider call</p>
+<ul>
+<li>Remove “For now, simulate generation” comment</li>
+<li>Remove simulated response code</li>
+<li>ANTI-BLUFF: MUST use real LLM provider</li>
+</ul></li>
+<li><p><strong>P1-008-2</strong>: Initialize provider from config or
+default to local</p>
+<ul>
+<li>Check config for default_provider</li>
+<li>Fall back to Ollama if local</li>
+</ul></li>
+<li><p><strong>P1-008-3</strong>: Create GenerateRequest from CLI
+flags</p>
+<ul>
+<li>Prompt, Model, MaxTokens, Temperature</li>
+</ul></li>
+<li><p><strong>P1-008-4</strong>: Call provider.Generate (or
+GenerateStream for streaming)</p>
+<ul>
+<li>Handle errors properly</li>
+<li>Print actual response text</li>
+</ul></li>
+<li><p><strong>P1-008-5</strong>: Fix streaming mode</p>
+<ul>
+<li>Actually stream from provider</li>
+<li>Print chunks as they arrive</li>
+<li>NOT simulate with time.Sleep</li>
+</ul></li>
+<li><p><strong>P1-008-6</strong>: Add unit tests</p></li>
+<li><p><strong>P1-008-7</strong>: Create Challenge
+<code>cli_generation_challenge.sh</code></p>
+<ul>
+<li>Run
+<code>./bin/cli --prompt &quot;What is capital of France?&quot;</code></li>
+<li>Verify response contains “Paris”</li>
+<li>Verify response does NOT contain “simulated”</li>
+<li>Verify response is not just echoing prompt</li>
+<li>Anti-bluff: Check response quality</li>
+</ul></li>
+<li><p><strong>P1-008-8</strong>: Verify no “simulated” in production
+code</p>
+<ul>
+<li><code>grep -n &quot;simulated&quot; cmd/cli/main.go</code></li>
+<li>MUST return nothing</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification for Phase 1</strong>: - [ ]
+<code>go test ./internal/llm/...</code> passes - [ ] Integration test
+calls real Ollama instance (or mock server in test) - [ ]
+<code>./bin/cli --prompt &quot;What is 2+2?&quot;</code> returns actual
+AI-generated text - [ ] <code>./bin/cli --list-models</code> returns
+dynamic models from running provider - [ ] Health check verifies
+provider is actually responding - [ ] Challenge script generates a real
+project using LLM calls - [ ] NO “simulated” or “for now” comments in
+production LLM code - [ ] All 15+ providers have real implementations -
+[ ] Circuit breakers work for all providers - [ ] Fallback chain tested
+with real failures</p>
+<hr />
+<h2 id="phase-2-tools-editor-weeks-4-5">Phase 2: Tools &amp; Editor
+(Weeks 4-5)</h2>
+<h3 id="p2-001-implement-real-filesystem-tools">P2-001: Implement Real
+Filesystem Tools</h3>
+<p><strong>Files</strong>:
+<code>internal/tools/filesystem/*.go</code></p>
+<h4 id="sub-tasks-11">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P2-001-1</strong>: Implement <code>fs_read</code>
+tool</p>
+<ul>
+<li>Actually read file from disk using os.ReadFile</li>
+<li>Path validation to prevent directory traversal</li>
+<li>Return file contents</li>
+</ul></li>
+<li><p><strong>P2-001-2</strong>: Implement <code>fs_write</code>
+tool</p>
+<ul>
+<li>Actually write file to disk using os.WriteFile</li>
+<li>Atomic operation (write to temp, rename)</li>
+<li>Create backup before overwrite</li>
+</ul></li>
+<li><p><strong>P2-001-3</strong>: Implement <code>fs_edit</code>
+tool</p>
+<ul>
+<li>Edit file with backup</li>
+<li>Support various edit formats</li>
+<li>Verify file actually modified</li>
+</ul></li>
+<li><p><strong>P2-001-4</strong>: Implement <code>glob</code> tool</p>
+<ul>
+<li>Pattern matching using filepath.Glob</li>
+<li>Return actual matching files</li>
+</ul></li>
+<li><p><strong>P2-001-5</strong>: Implement <code>grep</code> tool</p>
+<ul>
+<li>Content search using regexp</li>
+<li>Return actual matching lines</li>
+</ul></li>
+<li><p><strong>P2-001-6</strong>: Add path validation for all tools</p>
+<ul>
+<li>Prevent <code>../</code> traversal</li>
+<li>Restrict to workspace directory</li>
+</ul></li>
+<li><p><strong>P2-001-7</strong>: Add unit tests with mocks</p></li>
+<li><p><strong>P2-001-8</strong>: Add integration tests with real temp
+files</p>
+<ul>
+<li>ANTI-BLUFF: Use real temp files on disk</li>
+<li>Verify file actually created/read/written</li>
+</ul></li>
+<li><p><strong>P2-001-9</strong>: Create Challenge
+<code>filesystem_tools_challenge.sh</code></p>
+<ul>
+<li>Write a file, read it back</li>
+<li>Verify content matches</li>
+<li>Edit file, verify change</li>
+<li>Glob for files, verify results</li>
+<li>Grep for content, verify matches</li>
+<li>Anti-bluff: Actually check file contents on disk</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p2-002-implement-real-shell-tool-with-sandboxing">P2-002:
+Implement Real Shell Tool with Sandboxing</h3>
+<p><strong>File</strong>: <code>internal/tools/shell/shell.go</code></p>
+<h4 id="sub-tasks-12">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P2-002-1</strong>: Implement ShellTool.Execute</p>
+<ul>
+<li>ANTI-BLUFF: MUST execute real shell commands</li>
+<li>Use os/exec.CommandContext</li>
+<li>Set working directory</li>
+</ul></li>
+<li><p><strong>P2-002-2</strong>: Add command validation against
+blocklist</p>
+<ul>
+<li>Prevent dangerous commands (rm -rf /, etc.)</li>
+<li>Configurable blocklist</li>
+</ul></li>
+<li><p><strong>P2-002-3</strong>: Add timeout and resource limits</p>
+<ul>
+<li>Context.WithTimeout</li>
+<li>Nice values, ionice</li>
+</ul></li>
+<li><p><strong>P2-002-4</strong>: Capture stdout/stderr</p>
+<ul>
+<li>Return actual output</li>
+<li>Return actual exit code</li>
+</ul></li>
+<li><p><strong>P2-002-5</strong>: Implement shell_background tool</p>
+<ul>
+<li>Start long-running process</li>
+<li>Return process ID</li>
+</ul></li>
+<li><p><strong>P2-002-6</strong>: Implement shell_output tool</p>
+<ul>
+<li>Quick output capture</li>
+</ul></li>
+<li><p><strong>P2-002-7</strong>: Implement shell_kill tool</p>
+<ul>
+<li>Kill background process by ID</li>
+</ul></li>
+<li><p><strong>P2-002-8</strong>: Add unit tests</p></li>
+<li><p><strong>P2-002-9</strong>: Add integration test with real
+commands</p>
+<ul>
+<li>ANTI-BLUFF: Actually run <code>echo hello</code></li>
+<li>Verify output is “hello”</li>
+<li>Not just simulation</li>
+</ul></li>
+<li><p><strong>P2-002-10</strong>: Create Challenge
+<code>shell_execution_challenge.sh</code></p>
+<ul>
+<li>Run <code>echo BLUFF_TEST_12345</code></li>
+<li>Verify output contains “BLUFF_TEST_12345”</li>
+<li>Run <code>ls</code> and verify actual file listing</li>
+<li>Anti-bluff: Check real output, not canned</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p2-003-implement-git-tool">P2-003: Implement Git Tool</h3>
+<p><strong>File</strong>: <code>internal/tools/git/git.go</code></p>
+<h4 id="sub-tasks-13">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P2-003-1</strong>: Implement <code>git_status</code> tool
+<ul>
+<li>Run <code>git status</code> in repo</li>
+<li>Return actual status output</li>
+</ul></li>
+<li><strong>P2-003-2</strong>: Implement <code>git_diff</code> tool
+<ul>
+<li>Run <code>git diff</code></li>
+<li>Return actual diff</li>
+</ul></li>
+<li><strong>P2-003-3</strong>: Implement <code>git_add</code> tool
+<ul>
+<li>Run <code>git add</code> for files</li>
+</ul></li>
+<li><strong>P2-003-4</strong>: Implement <code>git_commit</code> tool
+<ul>
+<li>Generate smart commit message</li>
+<li>Run <code>git commit</code></li>
+</ul></li>
+<li><strong>P2-003-5</strong>: Implement <code>git_branch</code> tool
+<ul>
+<li>List or create branches</li>
+</ul></li>
+<li><strong>P2-003-6</strong>: Implement <code>git_blame</code> tool
+<ul>
+<li>Attribution for code lines</li>
+</ul></li>
+<li><strong>P2-003-7</strong>: Add integration tests with real git repo
+<ul>
+<li>ANTI-BLUFF: Actually run git commands</li>
+<li>Verify real git operations</li>
+</ul></li>
+<li><strong>P2-003-8</strong>: Create Challenge
+<code>git_tools_challenge.sh</code>
+<ul>
+<li>Initialize git repo</li>
+<li>Create a file, commit it</li>
+<li>Check status, verify clean</li>
+<li>Anti-bluff: Actually check git log</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p2-004-implement-browser-automation-tools">P2-004: Implement
+Browser Automation Tools</h3>
+<p><strong>File</strong>:
+<code>internal/tools/browser/browser.go</code></p>
+<h4 id="sub-tasks-14">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P2-004-1</strong>: Implement <code>browser_launch</code>
+tool
+<ul>
+<li>Use chromedp to launch browser</li>
+<li>REAL browser automation, not simulation</li>
+</ul></li>
+<li><strong>P2-004-2</strong>: Implement <code>browser_navigate</code>
+tool
+<ul>
+<li>Navigate to URL</li>
+<li>Wait for page load</li>
+</ul></li>
+<li><strong>P2-004-3</strong>: Implement <code>browser_screenshot</code>
+tool
+<ul>
+<li>Take actual screenshot</li>
+<li>Save to file or return bytes</li>
+</ul></li>
+<li><strong>P2-004-4</strong>: Implement <code>browser_click</code>,
+<code>browser_type</code>, etc.
+<ul>
+<li>Full browser interaction</li>
+</ul></li>
+<li><strong>P2-004-5</strong>: Add integration tests with real browser
+<ul>
+<li>Launch, navigate, screenshot</li>
+<li>ANTI-BLUFF: Verify screenshot file created</li>
+</ul></li>
+<li><strong>P2-004-6</strong>: Create Challenge
+<code>browser_automation_challenge.sh</code>
+<ul>
+<li>Launch browser</li>
+<li>Navigate to URL</li>
+<li>Take screenshot</li>
+<li>Verify screenshot exists and has content</li>
+<li>Anti-bluff: Actually check image file</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p2-005-implement-editor-with-multi-format-support">P2-005:
+Implement Editor with Multi-Format Support</h3>
+<p><strong>File</strong>: <code>internal/editor/editor.go</code></p>
+<h4 id="sub-tasks-15">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P2-005-1</strong>: Implement Diff Format editing
+<ul>
+<li>Parse unified diff</li>
+<li>Apply to file</li>
+<li>Best for GPT-4, Gemini Pro, DeepSeek Coder</li>
+</ul></li>
+<li><strong>P2-005-2</strong>: Implement Whole File replacement
+<ul>
+<li>Replace entire file content</li>
+<li>Best for Claude, O1 models, Llama 3 8B</li>
+</ul></li>
+<li><strong>P2-005-3</strong>: Implement Search/Replace editing
+<ul>
+<li>Pattern-based with regex</li>
+<li>Best for Claude, GPT-3.5, Mistral</li>
+</ul></li>
+<li><strong>P2-005-4</strong>: Implement Line-Based editing
+<ul>
+<li>Edit specific line ranges</li>
+<li>Best for GPT-4, Claude, Gemini</li>
+</ul></li>
+<li><strong>P2-005-5</strong>: Add automatic format selection
+<ul>
+<li>Based on model capabilities</li>
+</ul></li>
+<li><strong>P2-005-6</strong>: Add thread-safe concurrent editing
+<ul>
+<li>Use sync.RWMutex</li>
+</ul></li>
+<li><strong>P2-005-7</strong>: Add built-in validation
+<ul>
+<li>Verify edit actually applied</li>
+</ul></li>
+<li><strong>P2-005-8</strong>: Add backup support
+<ul>
+<li>Create backup before edit</li>
+<li>Restorable backups</li>
+</ul></li>
+<li><strong>P2-005-9</strong>: Create Challenge
+<code>editor_challenge.sh</code>
+<ul>
+<li>Apply each edit format</li>
+<li>Verify file actually changed</li>
+<li>Check backup created</li>
+<li>Anti-bluff: Read file after edit, verify content</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p2-006-implement-additional-tools">P2-006: Implement Additional
+Tools</h3>
+<p><strong>Files</strong>: <code>internal/tools/*/tool.go</code></p>
+<h4 id="tools-to-implement">Tools to Implement:</h4>
+<ol type="1">
+<li><strong>Web Tools</strong> (<code>internal/tools/web/</code>)
+<ul>
+<li><code>web_fetch</code>: Fetch URL content (REAL HTTP GET)</li>
+<li><code>web_search</code>: Search with rate limiting and caching</li>
+</ul></li>
+<li><strong>MultiEdit Tool</strong>
+(<code>internal/tools/multiedit/</code>)
+<ul>
+<li>Transactional multi-file editing</li>
+<li>All-or-nothing rollback</li>
+</ul></li>
+<li><strong>Mapping Tool</strong> (<code>internal/tools/mapping/</code>)
+<ul>
+<li>Codebase analysis with treesitter</li>
+<li>Parse code structure</li>
+</ul></li>
+<li><strong>Voice Tool</strong> (<code>internal/tools/voice/</code>)
+<ul>
+<li>Voice input and transcription</li>
+</ul></li>
+<li><strong>Confirmation Tool</strong>
+(<code>internal/tools/confirmation/</code>)
+<ul>
+<li>User interaction with audit trails</li>
+</ul></li>
+<li><strong>Notebook Tool</strong>
+(<code>internal/tools/notebook/</code>)
+<ul>
+<li>Jupyter notebook integration</li>
+</ul></li>
+</ol>
+<p><strong>For EACH tool, implement ALL</strong>: - Real implementation
+(no simulation) - Schema validation - Execute method - Unit tests (mocks
+allowed) - Integration tests (real infrastructure) - Challenge script
+(anti-bluff)</p>
+<p><strong>Anti-Bluff Verification for Phase 2</strong>: - [ ]
+<code>fs_write</code> actually creates files - [ ] <code>shell</code>
+actually runs commands and returns real output - [ ]
+<code>git_status</code> returns real git status - [ ] Editor formats
+apply actual changes to files - [ ] Browser tools actually launch
+browser and take screenshots - [ ] Challenge: Edit a file and verify the
+change persists - [ ] Challenge: Run command and verify output is real -
+[ ] ALL 40+ tools have real implementations - [ ] ALL tools have
+challenges that verify real behavior</p>
+<hr />
+<h2 id="phase-3-worker-distributed-computing-weeks-6-7">Phase 3: Worker
+&amp; Distributed Computing (Weeks 6-7)</h2>
+<h3 id="p3-001-verifyfix-ssh-worker-implementation">P3-001: Verify/Fix
+SSH Worker Implementation</h3>
+<p><strong>Files</strong>: <code>internal/worker/ssh.go</code>,
+<code>internal/worker/pool.go</code></p>
+<h4 id="sub-tasks-16">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P3-001-1</strong>: Read current implementation</p>
+<ul>
+<li>Determine if real or simulated</li>
+<li>If simulated, replace with real</li>
+</ul></li>
+<li><p><strong>P3-001-2</strong>: Implement real SSH connection
+management</p>
+<ul>
+<li>Use <code>golang.org/x/crypto/ssh</code></li>
+<li>Real TCP connection to worker</li>
+</ul></li>
+<li><p><strong>P3-001-3</strong>: Implement health checks</p>
+<ul>
+<li>Real TCP/SSH probes</li>
+<li>Periodic check every 30s</li>
+<li>Update last_heartbeat</li>
+</ul></li>
+<li><p><strong>P3-001-4</strong>: Implement task distribution</p>
+<ul>
+<li>Assign tasks to real workers</li>
+<li>Based on capability matching (CPU, GPU, memory)</li>
+</ul></li>
+<li><p><strong>P3-001-5</strong>: Implement result collection</p>
+<ul>
+<li>Gather actual execution results</li>
+<li>Not just “Command completed successfully”</li>
+</ul></li>
+<li><p><strong>P3-001-6</strong>: Implement worker auto-installation</p>
+<ul>
+<li>Via SSH exec</li>
+<li>Check if helix binary exists</li>
+<li>If not, install via package or compile</li>
+</ul></li>
+<li><p><strong>P3-001-7</strong>: Add unit tests</p></li>
+<li><p><strong>P3-001-8</strong>: Add integration test with real SSH</p>
+<ul>
+<li>Skip if no SSH available</li>
+<li>Connect to real worker</li>
+<li>Execute real command</li>
+<li>Verify result</li>
+</ul></li>
+<li><p><strong>P3-001-9</strong>: Create Challenge
+<code>ssh_worker_challenge.sh</code></p>
+<ul>
+<li>Add worker via SSH</li>
+<li>Verify connection successful</li>
+<li>Run task on worker</li>
+<li>Verify task actually executed</li>
+<li>Anti-bluff: Check real SSH connection</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p3-002-implement-task-checkpointing">P3-002: Implement Task
+Checkpointing</h3>
+<p><strong>File</strong>: <code>internal/task/checkpoint.go</code></p>
+<h4 id="sub-tasks-17">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P3-002-1</strong>: Define Checkpoint struct</p>
+<ul>
+<li>TaskID, Sequence, State (map), CreatedAt</li>
+</ul></li>
+<li><p><strong>P3-002-2</strong>: Implement CreateCheckpoint</p>
+<ul>
+<li>ANTI-BLUFF: Must persist to real database</li>
+<li>Not just in-memory map</li>
+<li>Use db.SaveCheckpoint()</li>
+</ul></li>
+<li><p><strong>P3-002-3</strong>: Implement LoadCheckpoint</p>
+<ul>
+<li>Load from database</li>
+<li>Restore task state</li>
+</ul></li>
+<li><p><strong>P3-002-4</strong>: Implement automatic checkpointing</p>
+<ul>
+<li>Every 300s (configurable)</li>
+<li>In background goroutine</li>
+</ul></li>
+<li><p><strong>P3-002-5</strong>: Add database migration for checkpoints
+table</p></li>
+<li><p><strong>P3-002-6</strong>: Create Challenge
+<code>checkpoint_challenge.sh</code></p>
+<ul>
+<li>Start long-running task</li>
+<li>Verify checkpoint created in database</li>
+<li>Kill task, restart</li>
+<li>Verify state restored from checkpoint</li>
+<li>Anti-bluff: Actually query database</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p3-003-implement-real-task-distribution">P3-003: Implement Real
+Task Distribution</h3>
+<p><strong>File</strong>: <code>internal/task/distributor.go</code></p>
+<h4 id="sub-tasks-18">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P3-003-1</strong>: Implement task assignment
+<ul>
+<li>Assign to real workers based on capability</li>
+<li>Not just round-robin simulation</li>
+</ul></li>
+<li><strong>P3-003-2</strong>: Implement progress monitoring
+<ul>
+<li>Track actual progress</li>
+<li>Not just mark “running”</li>
+</ul></li>
+<li><strong>P3-003-3</strong>: Implement result collection
+<ul>
+<li>Gather from actual worker execution</li>
+<li>Handle timeouts and failures</li>
+</ul></li>
+<li><strong>P3-003-4</strong>: Implement failover
+<ul>
+<li>On worker failure, retry on different worker</li>
+<li>Respect max_retries</li>
+</ul></li>
+<li><strong>P3-003-5</strong>: Create Challenge
+<code>task_distribution_challenge.sh</code>
+<ul>
+<li>Submit task</li>
+<li>Verify it runs on real worker</li>
+<li>Check result is actual output</li>
+<li>Test failover by killing worker</li>
+<li>Anti-bluff: Verify task actually executed</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p3-004-implement-worker-pool-statistics">P3-004: Implement
+Worker Pool Statistics</h3>
+<p><strong>File</strong>: <code>internal/worker/stats.go</code></p>
+<h4 id="sub-tasks-19">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P3-004-1</strong>: Implement GetWorkerStats
+<ul>
+<li>Return REAL statistics</li>
+<li>Not fabricated numbers</li>
+<li>Query actual worker health</li>
+</ul></li>
+<li><strong>P3-004-2</strong>: Implement worker count by status
+<ul>
+<li>Healthy, unhealthy, offline</li>
+</ul></li>
+<li><strong>P3-004-3</strong>: Implement task queue statistics
+<ul>
+<li>Pending, running, completed, failed</li>
+</ul></li>
+<li><strong>P3-004-4</strong>: Create Challenge
+<code>worker_stats_challenge.sh</code>
+<ul>
+<li>Add real workers</li>
+<li>Query stats</li>
+<li>Verify numbers match reality</li>
+<li>Anti-bluff: Actually count workers</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification for Phase 3</strong>: - [ ] Worker
+pool connects to real SSH endpoints - [ ] Task execution happens on
+remote workers - [ ] Checkpoints are stored in PostgreSQL - [ ] Task
+failures trigger retry on different workers - [ ] Challenge: Distribute
+a build task across 2 workers - [ ] All worker operations are REAL, not
+simulated - [ ] All task operations persist to real database</p>
+<hr />
+<h2 id="phase-4-workflow-session-weeks-8-9">Phase 4: Workflow &amp;
+Session (Weeks 8-9)</h2>
+<h3 id="p4-001-implement-workflow-engine">P4-001: Implement Workflow
+Engine</h3>
+<p><strong>File</strong>: <code>internal/workflow/engine.go</code></p>
+<h4 id="sub-tasks-20">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P4-001-1</strong>: Define Workflow struct</p>
+<ul>
+<li>ID, Name, Steps, Status</li>
+<li>Dependencies between steps</li>
+</ul></li>
+<li><p><strong>P4-001-2</strong>: Define Step struct</p>
+<ul>
+<li>ID, Type, Action, Dependencies</li>
+<li>Config map</li>
+</ul></li>
+<li><p><strong>P4-001-3</strong>: Implement workflow execution</p>
+<ul>
+<li>ANTI-BLUFF: Must execute real steps</li>
+<li>Resolve dependencies</li>
+<li>Execute with real action calls</li>
+<li>Not just mark complete</li>
+</ul></li>
+<li><p><strong>P4-001-4</strong>: Implement action registry</p>
+<ul>
+<li>Register action handlers</li>
+<li>Support: shell, git, llm, etc.</li>
+</ul></li>
+<li><p><strong>P4-001-5</strong>: Implement rollback on failure</p>
+<ul>
+<li>Undo completed steps</li>
+<li>Restore previous state</li>
+</ul></li>
+<li><p><strong>P4-001-6</strong>: Add unit tests</p></li>
+<li><p><strong>P4-001-7</strong>: Add integration test with real
+actions</p>
+<ul>
+<li>ANTI-BLUFF: Actually run workflow</li>
+<li>Verify steps executed</li>
+</ul></li>
+<li><p><strong>P4-001-8</strong>: Create Challenge
+<code>workflow_execution_challenge.sh</code></p>
+<ul>
+<li>Define workflow with multiple steps</li>
+<li>Execute workflow</li>
+<li>Verify all steps ran</li>
+<li>Verify results are real</li>
+<li>Anti-bluff: Check actual artifacts created</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p4-002-implement-session-management-with-redis">P4-002:
+Implement Session Management with Redis</h3>
+<p><strong>File</strong>: <code>internal/session/manager.go</code></p>
+<h4 id="sub-tasks-21">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P4-002-1</strong>: Implement session creation
+<ul>
+<li>Store in REAL Redis (not memory)</li>
+<li>Use provided Redis client</li>
+</ul></li>
+<li><strong>P4-002-2</strong>: Implement session retrieval
+<ul>
+<li>Fetch from Redis</li>
+<li>Handle TTL and expiration</li>
+</ul></li>
+<li><strong>P4-002-3</strong>: Implement context storage
+<ul>
+<li>Mentions, search results, history</li>
+<li>Store as JSON in Redis</li>
+</ul></li>
+<li><strong>P4-002-4</strong>: Implement multi-session tracking
+<ul>
+<li>List all sessions for user</li>
+<li>Switch between sessions</li>
+</ul></li>
+<li><strong>P4-002-5</strong>: Add Redis connection check
+<ul>
+<li>Health check for Redis</li>
+</ul></li>
+<li><strong>P4-002-6</strong>: Create Challenge
+<code>session_persistence_challenge.sh</code>
+<ul>
+<li>Create session</li>
+<li>Add context</li>
+<li>Restart server (or simulate)</li>
+<li>Verify session data persists</li>
+<li>Anti-bluff: Actually query Redis</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p4-003-implement-project-lifecycle">P4-003: Implement Project
+Lifecycle</h3>
+<p><strong>File</strong>: <code>internal/project/manager.go</code></p>
+<h4 id="sub-tasks-22">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P4-003-1</strong>: Implement project creation
+<ul>
+<li>Store in real database</li>
+<li>Not just in-memory</li>
+</ul></li>
+<li><strong>P4-003-2</strong>: Implement lifecycle transitions
+<ul>
+<li>planning -&gt; building -&gt; testing -&gt; deploying</li>
+<li>Validate transitions</li>
+</ul></li>
+<li><strong>P4-003-3</strong>: Implement task association
+<ul>
+<li>Link tasks to projects</li>
+<li>Query project tasks</li>
+</ul></li>
+<li><strong>P4-003-4</strong>: Implement artifact generation
+<ul>
+<li>Generate actual project files</li>
+<li>Build outputs, test reports</li>
+</ul></li>
+<li><strong>P4-003-5</strong>: Create Challenge
+<code>project_lifecycle_challenge.sh</code>
+<ul>
+<li>Create project</li>
+<li>Transition through lifecycle</li>
+<li>Verify state changes in database</li>
+<li>Verify artifacts generated</li>
+<li>Anti-bluff: Query database, check files</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p4-004-implement-database-migrations">P4-004: Implement Database
+Migrations</h3>
+<p><strong>Files</strong>:
+<code>internal/database/migrations/*.sql</code></p>
+<h4 id="sub-tasks-23">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P4-004-1</strong>: Create migration for users table</p>
+<ul>
+<li>ID, username, email, password_hash, etc.</li>
+</ul></li>
+<li><p><strong>P4-004-2</strong>: Create migration for sessions
+table</p></li>
+<li><p><strong>P4-004-3</strong>: Create migration for workers
+table</p></li>
+<li><p><strong>P4-004-4</strong>: Create migration for tasks table</p>
+<ul>
+<li>With checkpoint_data JSONB</li>
+</ul></li>
+<li><p><strong>P4-004-5</strong>: Create migration for projects
+table</p></li>
+<li><p><strong>P4-004-6</strong>: Create migration for llm_providers
+table</p></li>
+<li><p><strong>P4-004-7</strong>: Create migration for notifications
+table</p></li>
+<li><p><strong>P4-004-8</strong>: Implement migration runner</p>
+<ul>
+<li>Apply migrations in order</li>
+<li>Track applied migrations</li>
+</ul></li>
+<li><p><strong>P4-004-9</strong>: Create Challenge
+<code>database_migration_challenge.sh</code></p>
+<ul>
+<li>Run migrations</li>
+<li>Verify all 11 tables created</li>
+<li>Verify foreign keys work</li>
+<li>Anti-bluff: Query information_schema</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification for Phase 4</strong>: - [ ] Workflow
+executes all steps in order - [ ] Session data persists across restarts
+(via Redis) - [ ] Project state changes are saved to database - [ ]
+Challenge: Create project, run workflow, verify artifacts - [ ] All
+database operations use real PostgreSQL - [ ] All session operations use
+real Redis - [ ] All 11 tables exist and are properly linked</p>
+<hr />
+<h2 id="phase-5-mcp-memory-notifications-weeks-10-11">Phase 5: MCP,
+Memory &amp; Notifications (Weeks 10-11)</h2>
+<h3 id="p5-001-full-mcp-protocol-implementation">P5-001: Full MCP
+Protocol Implementation</h3>
+<p><strong>File</strong>: <code>internal/mcp/server.go</code></p>
+<h4 id="sub-tasks-24">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P5-001-1</strong>: Implement stdio transport
+<ul>
+<li>Read from stdin, write to stdout</li>
+<li>JSON-RPC 2.0 protocol</li>
+</ul></li>
+<li><strong>P5-001-2</strong>: Implement SSE transport
+<ul>
+<li>Server-Sent Events via HTTP</li>
+<li>Real bidirectional communication</li>
+</ul></li>
+<li><strong>P5-001-3</strong>: Implement tool registration
+<ul>
+<li>Register tools with MCP server</li>
+<li>Execute tool via MCP protocol</li>
+</ul></li>
+<li><strong>P5-001-4</strong>: Implement resource management
+<ul>
+<li>Expose resources via MCP</li>
+</ul></li>
+<li><strong>P5-001-5</strong>: Create Challenge
+<code>mcp_protocol_challenge.sh</code>
+<ul>
+<li>Start MCP server (stdio or SSE)</li>
+<li>Register tool</li>
+<li>Execute tool via protocol</li>
+<li>Verify real execution</li>
+<li>Anti-bluff: Actually invoke tool</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p5-002-real-memory-provider-integration">P5-002: Real Memory
+Provider Integration</h3>
+<p><strong>Files</strong>:
+<code>internal/memory/providers/*.go</code></p>
+<h4 id="memory-providers-to-implement-9-total">Memory Providers to
+Implement (9 total):</h4>
+<ol type="1">
+<li><strong>Mem0</strong> - Advanced memory with embeddings</li>
+<li><strong>Zep</strong> - Long-term conversational memory</li>
+<li><strong>Memonto</strong> - Knowledge graph-based</li>
+<li><strong>BaseAI</strong> - Comprehensive platform</li>
+<li><strong>ChromaDB</strong> - Vector database</li>
+<li><strong>FAISS</strong> - Facebook AI’s vector library</li>
+<li><strong>Pinecone</strong> - Managed vector database</li>
+<li><strong>Qdrant</strong> - Vector database</li>
+<li><strong>Weaviate</strong> - Knowledge graph with vector search</li>
+</ol>
+<p><strong>For EACH provider, implement</strong>: - Real API client
+(HTTP calls) - HealthCheck method - Store and retrieve operations -
+Integration test (skip if unavailable) - Challenge script</p>
+<hr />
+<h3 id="p5-003-real-notification-dispatch">P5-003: Real Notification
+Dispatch</h3>
+<p><strong>Files</strong>:
+<code>internal/notification/channels/*.go</code></p>
+<h4 id="channels-to-implement-4-total">Channels to Implement (4
+total):</h4>
+<ol type="1">
+<li><strong>Slack</strong> - Real webhook POST</li>
+<li><strong>Discord</strong> - Real webhook POST</li>
+<li><strong>Email</strong> - Real SMTP connection</li>
+<li><strong>Telegram</strong> - Real bot API call</li>
+</ol>
+<p><strong>For EACH channel, implement</strong>: - Send method with real
+HTTP/SMTP calls - Validate configuration - Integration test (skip if
+unavailable) - Challenge script</p>
+<hr />
+<h3 id="p5-004-implement-health-endpoints">P5-004: Implement Health
+Endpoints</h3>
+<p><strong>File</strong>: <code>internal/server/health.go</code></p>
+<h4 id="sub-tasks-25">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P5-004-1</strong>: Implement <code>/health</code> endpoint
+<ul>
+<li>Deep checks (not just return 200)</li>
+<li>Check database connection (SELECT 1)</li>
+<li>Check Redis connection (PING)</li>
+<li>Check provider availability (real generation request)</li>
+</ul></li>
+<li><strong>P5-004-2</strong>: Implement <code>/metrics</code> endpoint
+<ul>
+<li>Prometheus metrics</li>
+<li>Request counts, durations, etc.</li>
+</ul></li>
+<li><strong>P5-004-3</strong>: Add health checks to Dockerfile
+<ul>
+<li>HEALTHCHECK instruction</li>
+<li>Interval, timeout, retries</li>
+</ul></li>
+<li><strong>P5-004-4</strong>: Create Challenge
+<code>health_endpoint_challenge.sh</code>
+<ul>
+<li>Start server</li>
+<li>Call /health</li>
+<li>Verify deep checks passed</li>
+<li>Verify metrics endpoint returns data</li>
+<li>Anti-bluff: Actually check dependencies</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification for Phase 5</strong>: - [ ] MCP
+server accepts real connections - [ ] Memory providers store and
+retrieve actual data - [ ] Notifications arrive at real endpoints - [ ]
+Challenge: Send notification, verify receipt - [ ] All 9 memory
+providers have real implementations - [ ] All 4 notification channels
+work - [ ] Health endpoint performs deep checks</p>
+<hr />
+<h2 id="phase-6-testing-challenges-weeks-12-13">Phase 6: Testing &amp;
+Challenges (Weeks 12-13)</h2>
+<h3 id="p6-001-achieve-100-test-coverage">P6-001: Achieve 100% Test
+Coverage</h3>
+<h4 id="sub-tasks-26">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P6-001-1</strong>: Audit current test coverage
+<ul>
+<li><code>go test -cover ./...</code></li>
+<li>Identify untested packages</li>
+</ul></li>
+<li><strong>P6-001-2</strong>: Write unit tests for all packages
+<ul>
+<li>Target: 80%+ coverage per package</li>
+<li>Use testify for assertions</li>
+<li>Table-driven tests with t.Run()</li>
+</ul></li>
+<li><strong>P6-001-3</strong>: Write contract tests for all providers
+<ul>
+<li>Test real API schemas</li>
+<li>Use recorded responses (vcr-style) for CI</li>
+<li>Skip (not fail) if API unavailable</li>
+</ul></li>
+<li><strong>P6-001-4</strong>: Write component tests
+<ul>
+<li>Real subsystems wired together</li>
+<li>Use testcontainers for PostgreSQL, Redis</li>
+<li>Clean state between tests</li>
+</ul></li>
+<li><strong>P6-001-5</strong>: Write integration tests
+<ul>
+<li>Full app with real dependencies</li>
+<li>Start full docker-compose stack</li>
+<li>Make real HTTP requests</li>
+</ul></li>
+<li><strong>P6-001-6</strong>: Write security tests
+<ul>
+<li>SQL injection attempts</li>
+<li>Path traversal tests</li>
+<li>Command injection tests</li>
+<li>JWT tampering tests</li>
+</ul></li>
+<li><strong>P6-001-7</strong>: Write performance benchmarks
+<ul>
+<li>LLM generation latency</li>
+<li>Concurrent task handling</li>
+<li>Database query performance</li>
+</ul></li>
+<li><strong>P6-001-8</strong>: Verify NO mocks above unit level
+<ul>
+<li>Create <code>no-mocks-above-unit</code> make target</li>
+<li>Fail build if mocks found outside *_test.go</li>
+</ul></li>
+<li><strong>P6-001-9</strong>: Verify resource limits
+<ul>
+<li>GOMAXPROCS=2 for all tests</li>
+<li>nice -n 19 for all tests</li>
+<li>ionice -c 3 for all tests</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p6-002-create-100-challenges">P6-002: Create 100+
+Challenges</h3>
+<h4 id="challenge-categories-per-const-035">Challenge Categories (per
+CONST-035):</h4>
+<ol type="1">
+<li><strong>System Boot</strong> (5 challenges)
+<ul>
+<li><code>full_system_boot_challenge.sh</code></li>
+<li><code>docker_health_challenge.sh</code></li>
+<li>etc.</li>
+</ul></li>
+<li><strong>Constitution</strong> (3 challenges)
+<ul>
+<li><code>constitution_validation_challenge.sh</code></li>
+<li><code>no_simulation_challenge.sh</code></li>
+<li><code>governance_propagation_challenge.sh</code></li>
+</ul></li>
+<li><strong>LLM Providers</strong> (15 challenges)
+<ul>
+<li><code>ollama_generation_challenge.sh</code></li>
+<li><code>openai_generation_challenge.sh</code></li>
+<li><code>anthropic_generation_challenge.sh</code></li>
+<li>etc. (one per provider)</li>
+</ul></li>
+<li><strong>Tools</strong> (20 challenges)
+<ul>
+<li><code>shell_execution_challenge.sh</code></li>
+<li><code>filesystem_tools_challenge.sh</code></li>
+<li><code>git_tools_challenge.sh</code></li>
+<li><code>browser_automation_challenge.sh</code></li>
+<li><code>editor_challenge.sh</code></li>
+<li>etc. (one per tool)</li>
+</ul></li>
+<li><strong>Workflows</strong> (10 challenges)
+<ul>
+<li><code>plan_build_test_challenge.sh</code></li>
+<li><code>workflow_execution_challenge.sh</code></li>
+<li><code>project_lifecycle_challenge.sh</code></li>
+</ul></li>
+<li><strong>Security</strong> (5 challenges)
+<ul>
+<li><code>auth_penetration_challenge.sh</code></li>
+<li><code>sql_injection_challenge.sh</code></li>
+<li><code>command_injection_challenge.sh</code></li>
+</ul></li>
+<li><strong>Performance</strong> (5 challenges)
+<ul>
+<li><code>concurrent_tasks_challenge.sh</code></li>
+<li><code>llm_latency_challenge.sh</code></li>
+</ul></li>
+<li><strong>Anti-Bluff</strong> (10 challenges)
+<ul>
+<li><code>no_simulation_challenge.sh</code></li>
+<li><code>provider_fallback_challenge.sh</code></li>
+<li><code>circuit_breaker_challenge.sh</code></li>
+</ul></li>
+<li><strong>Containers</strong> (5 challenges)
+<ul>
+<li><code>docker_health_challenge.sh</code></li>
+<li><code>docker_compose_challenge.sh</code></li>
+</ul></li>
+<li><strong>Submodules</strong> (10 challenges)
+<ul>
+<li>One per major submodule</li>
+<li>Verify they actually work</li>
+</ul></li>
+</ol>
+<p><strong>For EACH challenge, implement</strong>: - Robust failure
+tracking (grep “|FAILED|” pattern) - Anti-bluff checks (verify REAL
+behavior) - JSON report generation - Skip properly if infrastructure
+unavailable (with SKIP-OK marker)</p>
+<hr />
+<h3 id="p6-003-master-challenge-runner">P6-003: Master Challenge
+Runner</h3>
+<p><strong>File</strong>:
+<code>tests/e2e/challenges/run_all_challenges.sh</code></p>
+<h4 id="sub-tasks-27">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P6-003-1</strong>: Run ALL challenges
+<ul>
+<li>Loop through challenges directory</li>
+<li>Execute each challenge script</li>
+</ul></li>
+<li><strong>P6-003-2</strong>: Use robust failure detection
+<ul>
+<li>grep “|FAILED|” in log files</li>
+<li>NOT just exit codes</li>
+</ul></li>
+<li><strong>P6-003-3</strong>: Generate JSON report
+<ul>
+<li>Per-challenge results</li>
+<li>Passed, failed, skipped counts</li>
+<li>Log file paths</li>
+</ul></li>
+<li><strong>P6-003-4</strong>: Fail if ANY challenge fails
+<ul>
+<li>No silent swallowing</li>
+</ul></li>
+<li><strong>P6-003-5</strong>: Respect resource limits
+<ul>
+<li>GOMAXPROCS=2</li>
+<li>nice -n 19</li>
+<li>ionice -c 3</li>
+</ul></li>
+<li><strong>P6-003-6</strong>: Create sample runner
+<ul>
+<li>Run 10% of challenges</li>
+<li>For quick smoke tests</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p6-004-anti-bluff-testing-framework-enhancement">P6-004:
+Anti-Bluff Testing Framework Enhancement</h3>
+<p><strong>File</strong>: <code>tests/anti_bluff_framework.go</code>
+(enhance)</p>
+<h4 id="sub-tasks-28">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P6-004-1</strong>: Add more verification methods
+<ul>
+<li>AssertRealDatabaseWrite</li>
+<li>AssertRealHTTPResponse</li>
+<li>AssertRealFileModification</li>
+</ul></li>
+<li><strong>P6-004-2</strong>: Add concurrency testing
+<ul>
+<li>Verify thread-safety</li>
+<li>Run with goroutines</li>
+</ul></li>
+<li><strong>P6-004-3</strong>: Add failure injection testing
+<ul>
+<li>Simulate provider failures</li>
+<li>Verify circuit breakers</li>
+</ul></li>
+<li><strong>P6-004-4</strong>: Create Challenge
+<code>anti_bluff_framework_challenge.sh</code>
+<ul>
+<li>Verify framework works</li>
+<li>Run sample verifications</li>
+</ul></li>
+</ol>
+<p><strong>Anti-Bluff Verification for Phase 6</strong>: - [ ] Unit test
+coverage: 80%+ per package - [ ] <code>run_all_challenges.sh</code>
+fails when BLUFF-001 is present - [ ] Test framework detects simulated
+responses - [ ] Wrapper correctly reports failures - [ ] Challenge
+validates actual end-user workflow - [ ] 100% of P0 features have
+challenges - [ ] 80% of P1 features have challenges - [ ] 100+ total
+challenges created - [ ] ALL challenges PASS with real behavior</p>
+<hr />
+<h2 id="phase-7-documentation-deployment-week-14">Phase 7: Documentation
+&amp; Deployment (Week 14)</h2>
+<h3 id="p7-001-update-all-documentation">P7-001: Update All
+Documentation</h3>
+<h4 id="sub-tasks-29">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P7-001-1</strong>: Update README.md</p>
+<ul>
+<li>Reflect actual implemented features (not aspirational)</li>
+<li>Include working code examples</li>
+<li>Verify examples work when copy-pasted</li>
+</ul></li>
+<li><p><strong>P7-001-2</strong>: Update
+docs/ARCHITECTURE_AND_DIAGRAMS.md</p>
+<ul>
+<li>Mark all components as REAL or BLUFF (now all REAL)</li>
+<li>Update diagrams</li>
+</ul></li>
+<li><p><strong>P7-001-3</strong>: Update API documentation</p>
+<ul>
+<li>List all actual endpoints</li>
+<li>Include real request/response examples</li>
+</ul></li>
+<li><p><strong>P7-001-4</strong>: Create docs/DEPLOYMENT.md</p>
+<ul>
+<li>Docker Compose with real health checks</li>
+<li>Kubernetes manifests</li>
+<li>Environment variable reference</li>
+<li>Troubleshooting with real diagnostic commands</li>
+</ul></li>
+<li><p><strong>P7-001-5</strong>: Create docs/DEVELOPER_GUIDE.md</p>
+<ul>
+<li>Setup instructions</li>
+<li>Build instructions</li>
+<li>Test instructions</li>
+<li>How to add new features</li>
+</ul></li>
+<li><p><strong>P7-001-6</strong>: Verify no “simulated” in documentation
+examples</p></li>
+<li><p><strong>P7-001-7</strong>: Create Challenge
+<code>documentation_challenge.sh</code></p>
+<ul>
+<li>Copy-paste each README example</li>
+<li>Verify it actually works</li>
+<li>Anti-bluff: Actually execute examples</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p7-002-create-kubernetes-manifests">P7-002: Create Kubernetes
+Manifests</h3>
+<p><strong>Directory</strong>: <code>k8s/</code></p>
+<h4 id="sub-tasks-30">Sub-Tasks:</h4>
+<ol type="1">
+<li><p><strong>P7-002-1</strong>: Create namespace.yaml</p></li>
+<li><p><strong>P7-002-2</strong>: Create secrets.yaml</p>
+<ul>
+<li>JWT secret, database password, redis password</li>
+</ul></li>
+<li><p><strong>P7-002-3</strong>: Create configmap.yaml</p>
+<ul>
+<li>Application configuration</li>
+</ul></li>
+<li><p><strong>P7-002-4</strong>: Create deployment.yaml</p>
+<ul>
+<li>HelixCode server deployment</li>
+<li>3+ replicas with HPA</li>
+</ul></li>
+<li><p><strong>P7-002-5</strong>: Create service.yaml</p>
+<ul>
+<li>LoadBalancer or ClusterIP</li>
+</ul></li>
+<li><p><strong>P7-002-6</strong>: Create
+postgres-statefulset.yaml</p></li>
+<li><p><strong>P7-002-7</strong>: Create redis-cluster.yaml</p></li>
+<li><p><strong>P7-002-8</strong>: Create ingress.yaml</p>
+<ul>
+<li>nginx-ingress with TLS</li>
+</ul></li>
+<li><p><strong>P7-002-9</strong>: Create monitoring manifests</p>
+<ul>
+<li>Prometheus + Grafana</li>
+</ul></li>
+<li><p><strong>P7-002-10</strong>: Create Challenge
+<code>k8s_deployment_challenge.sh</code></p>
+<ul>
+<li>Deploy to K8s cluster</li>
+<li>Verify all pods running</li>
+<li>Verify health checks pass</li>
+<li>Anti-bluff: Actually curl health endpoint</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p7-003-submodule-governance-propagation">P7-003: Submodule
+Governance Propagation</h3>
+<h4 id="sub-tasks-31">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P7-003-1</strong>: For each submodule in
+<code>.gitmodules</code> (80+):
+<ul>
+<li>Check if Constitution.md exists</li>
+<li>If not, create symlink or copy from parent</li>
+<li>Verify CLAUDE.md exists</li>
+<li>Verify AGENTS.md exists</li>
+</ul></li>
+<li><strong>P7-003-2</strong>: Add reference to parent governance
+<ul>
+<li>If submodule can’t have files, add README note</li>
+<li>Point to parent Constitution.md</li>
+</ul></li>
+<li><strong>P7-003-3</strong>: Verify anti-bluff testing requirements
+propagated
+<ul>
+<li>Each submodule should have its own challenges</li>
+<li>Or reference parent’s challenges</li>
+</ul></li>
+<li><strong>P7-003-4</strong>: Create Challenge
+<code>submodule_governance_challenge.sh</code>
+<ul>
+<li>Check all submodules have governance files</li>
+<li>Verify they reference parent</li>
+<li>Anti-bluff: Actually read files</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p7-004-final-validation">P7-004: Final Validation</h3>
+<h4 id="sub-tasks-32">Sub-Tasks:</h4>
+<ol type="1">
+<li><strong>P7-004-1</strong>: Run full test suite
+<ul>
+<li><code>make test</code> (unit tests)</li>
+<li><code>make integration-test</code> (integration tests)</li>
+<li><code>make benchmark</code> (performance tests)</li>
+<li><code>make security-test</code> (security tests)</li>
+</ul></li>
+<li><strong>P7-004-2</strong>: Run ALL challenges
+<ul>
+<li><code>./tests/e2e/challenges/run_all_challenges.sh</code></li>
+<li>Verify ALL PASS</li>
+</ul></li>
+<li><strong>P7-004-3</strong>: Build all targets
+<ul>
+<li><code>make build</code> (Linux)</li>
+<li><code>make prod</code> (cross-platform)</li>
+<li><code>make mobile</code> (iOS + Android)</li>
+<li><code>make aurora-os</code></li>
+<li><code>make harmony-os</code></li>
+</ul></li>
+<li><strong>P7-004-4</strong>: Docker Compose verification
+<ul>
+<li><code>docker-compose up -d</code></li>
+<li>Verify all containers healthy</li>
+<li><code>docker-compose ps</code></li>
+</ul></li>
+<li><strong>P7-004-5</strong>: Documentation verification
+<ul>
+<li>Verify all README examples work</li>
+<li>Copy-paste and execute</li>
+</ul></li>
+<li><strong>P7-004-6</strong>: Create FINAL_VALIDATION_REPORT.md
+<ul>
+<li>Summary of all work done</li>
+<li>List of all bluffs fixed</li>
+<li>Test coverage numbers</li>
+<li>Challenge results</li>
+<li>Remaining work (if any)</li>
+</ul></li>
+</ol>
+<hr />
+<h3 id="p7-005-success-criteria-checklist">P7-005: Success Criteria
+Checklist</h3>
+<p>HelixCode achieves zero-bluff status when ALL of the following are
+TRUE:</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><code>./bin/cli --prompt &quot;What is 2+2?&quot;</code> returns
+a real AI-generated answer (not simulated)</label></li>
+<li><label><input type="checkbox"></input><code>./bin/cli --list-models</code>
+returns dynamic models from running providers</label></li>
+<li><label><input type="checkbox"></input><code>./bin/cli --command &quot;echo hello&quot;</code> actually
+runs the command and returns “hello”</label></li>
+<li><label><input type="checkbox"></input><code>go build ./...</code> compiles
+ALL packages without errors</label></li>
+<li><label><input type="checkbox"></input><code>docker-compose up</code>
+starts all services, health checks pass</label></li>
+<li><label><input type="checkbox"></input><code>make test</code> runs unit
+tests with mocks only where allowed</label></li>
+<li><label><input type="checkbox"></input><code>make integration-test</code>
+runs against real PostgreSQL + Redis</label></li>
+<li><label><input type="checkbox"></input><code>./tests/e2e/challenges/run_all_challenges.sh</code>
+passes ALL challenges</label></li>
+<li><label><input type="checkbox"></input>NO “simulated”, “for now”, “TODO”,
+“placeholder” text in production code</label></li>
+<li><label><input type="checkbox"></input>CONSTITUTION.md, CLAUDE.md,
+AGENTS.md exist at root and in all submodules</label></li>
+<li><label><input type="checkbox"></input>All features advertised in README
+are exercised by at least one challenge</label></li>
+<li><label><input type="checkbox"></input>HelixCode exceeds Aider’s capability
+in: MCP support, distributed workers, memory integration</label></li>
+<li><label><input type="checkbox"></input>100% test coverage (unit,
+integration, E2E, security, benchmark)</label></li>
+<li><label><input type="checkbox"></input>100% challenge coverage (every
+component has challenge)</label></li>
+<li><label><input type="checkbox"></input>All 15+ LLM providers have real
+implementations</label></li>
+<li><label><input type="checkbox"></input>All 40+ tools have real
+implementations</label></li>
+<li><label><input type="checkbox"></input>All 9 memory providers have real
+implementations</label></li>
+<li><label><input type="checkbox"></input>All 4 notification channels
+work</label></li>
+<li><label><input type="checkbox"></input>All submodules have governance
+files</label></li>
+</ul>
+<hr />
+<h2 id="appendix-a-reference-implementations-to-port-from-helixagent">Appendix
+A: Reference Implementations to Port from HelixAgent</h2>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 35%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>HelixAgent File</th>
+<th>HelixCode Target</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/llm/circuit_breaker.go</code></td>
+<td><code>internal/llm/circuit_breaker.go</code></td>
+<td>Production circuit breaker</td>
+</tr>
+<tr>
+<td><code>internal/llm/ensemble.go</code></td>
+<td><code>internal/llm/ensemble.go</code></td>
+<td>Parallel provider execution</td>
+</tr>
+<tr>
+<td><code>internal/llm/providers/*/provider.go</code></td>
+<td><code>internal/llm/providers/*/</code></td>
+<td>Real provider implementations</td>
+</tr>
+<tr>
+<td><code>internal/tools/handler.go</code></td>
+<td><code>internal/tools/</code></td>
+<td>1000+ line tool handler</td>
+</tr>
+<tr>
+<td><code>internal/services/boot_manager.go</code></td>
+<td><code>internal/server/boot.go</code></td>
+<td>Service boot orchestration</td>
+</tr>
+<tr>
+<td><code>challenges/scripts/run_all_challenges.sh</code></td>
+<td><code>tests/e2e/challenges/run_all.sh</code></td>
+<td>Master challenge runner</td>
+</tr>
+<tr>
+<td><code>challenges/scripts/challenge_framework.sh</code></td>
+<td><code>tests/e2e/challenges/framework.sh</code></td>
+<td>Challenge framework</td>
+</tr>
+<tr>
+<td><code>CONSTITUTION.md</code></td>
+<td><code>CONSTITUTION.md</code></td>
+<td>36-rule governance</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td><code>CLAUDE.md</code></td>
+<td>70KB agent manual</td>
+</tr>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td><code>docker-compose.yml</code></td>
+<td>Production orchestration</td>
+</tr>
+<tr>
+<td><code>k8s/</code></td>
+<td><code>k8s/</code></td>
+<td>Kubernetes manifests</td>
+</tr>
+<tr>
+<td><code>internal/skills/</code></td>
+<td><code>internal/skills/</code></td>
+<td>Skills system</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-b-file-creation-checklist">Appendix B: File Creation
+Checklist</h2>
+<h3 id="new-files-to-create">New Files to Create:</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><code>CONSTITUTION.md</code> (root,
+330+ lines)</label></li>
+<li><label><input type="checkbox"></input><code>CLAUDE.md</code> (root, 490+
+lines)</label></li>
+<li><label><input type="checkbox"></input><code>AGENTS.md</code> (root, 390+
+lines)</label></li>
+<li><label><input type="checkbox"></input><code>helix_code/go.mod</code> (full
+dependencies)</label></li>
+<li><label><input type="checkbox"></input><code>docker/docker-entrypoint.sh</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/provider.go</code>
+(interface)</label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/manager.go</code>
+(provider manager)</label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/circuit_breaker.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/ollama/ollama.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/openai/openai.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/anthropic/anthropic.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/gemini/gemini.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/xai/xai.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/openrouter/openrouter.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/github/github.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/qwen/qwen.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/llamacpp/llamacpp.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/vllm/vllm.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/azure/azure.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/bedrock/bedrock.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/vertexai/vertexai.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/groq/groq.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/llm/providers/koboldai/koboldai.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/tools/filesystem/*.go</code> (5+
+tools)</label></li>
+<li><label><input type="checkbox"></input><code>internal/tools/shell/shell.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/tools/git/git.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/tools/browser/browser.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/tools/web/web.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/tools/multiedit/multiedit.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/tools/mapping/mapping.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/editor/editor.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/worker/ssh.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/worker/pool.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/worker/stats.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/task/checkpoint.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/task/distributor.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/workflow/engine.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/session/manager.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/project/manager.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/database/migrations/*.sql</code> (11
+tables)</label></li>
+<li><label><input type="checkbox"></input><code>internal/mcp/server.go</code></label></li>
+<li><label><input type="checkbox"></input><code>internal/memory/providers/*.go</code> (9
+providers)</label></li>
+<li><label><input type="checkbox"></input><code>internal/notification/channels/*.go</code> (4
+channels)</label></li>
+<li><label><input type="checkbox"></input><code>internal/server/health.go</code></label></li>
+<li><label><input type="checkbox"></input><code>tests/anti_bluff_framework.go</code></label></li>
+<li><label><input type="checkbox"></input><code>tests/e2e/challenges/run_all_challenges.sh</code></label></li>
+<li><label><input type="checkbox"></input><code>tests/e2e/challenges/*.sh</code> (100+
+challenges)</label></li>
+<li><label><input type="checkbox"></input><code>k8s/*.yaml</code> (10+
+manifests)</label></li>
+<li><label><input type="checkbox"></input><code>docs/DEPLOYMENT.md</code></label></li>
+<li><label><input type="checkbox"></input><code>docs/DEVELOPER_GUIDE.md</code></label></li>
+<li><label><input type="checkbox"></input><code>docs/issues/fixed/BUGFIXES.md</code></label></li>
+<li><label><input type="checkbox"></input><code>docs/issues/BLUFFS.md</code></label></li>
+</ul>
+<h3 id="files-to-update">Files to Update:</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><code>cmd/cli/main.go</code> (fix
+BLUFF-001, BLUFF-002, BLUFF-003)</label></li>
+<li><label><input type="checkbox"></input><code>Dockerfile</code> (reference
+correct entrypoint)</label></li>
+<li><label><input type="checkbox"></input><code>AGENTS.md</code> (merge with
+HELIXCODE_AGENTS.md)</label></li>
+<li><label><input type="checkbox"></input><code>README.md</code> (reflect
+reality)</label></li>
+</ul>
+<hr />
+<h2 id="appendix-c-verification-commands-for-every-phase">Appendix C:
+Verification Commands for Every Phase</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify no bluffs in code</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> internal/ cmd/ applications/</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: NOTHING</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify real LLM calls</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/llm/generate <span class="dt">\</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;prompt&quot;:&quot;What is 2+2?&quot;,&quot;model&quot;:&quot;llama3.2&quot;}&#39;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return actual AI-generated text, NOT &quot;This is a simulated response&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify model listing is dynamic</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/api/v1/llm/models</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return dynamic list, not just 3 hardcoded models</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify command execution is real</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--command</span> <span class="st">&quot;echo hello world&quot;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Should output &quot;hello world&quot;, not just &quot;Command completed successfully&quot;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify go.mod dependencies</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> helix_code/go.mod <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;gin|pgx|viper|cobra|chromedp|tview|fyne&quot;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return all advertised dependencies</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify tests use real infrastructure</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;t.Skip&quot;</span> tests/ <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;SKIP-OK&quot;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return NOTHING (no bare skips)</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify challenges catch bluffs</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="ex">./tests/e2e/challenges/run_all_challenges.sh</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co"># ALL must PASS</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify Constitution propagated</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-name</span> <span class="st">&quot;CONSTITUTION.md&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Should be 1 + number of submodules with governance</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify no mocks above unit tests</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> no-mocks-above-unit</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Should pass</span></span></code></pre></div>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>This Master Action Plan transforms HelixCode from a project with
+significant bluff areas into a <strong>fully complete, zero-bluff,
+production-ready platform</strong> that exceeds all Tier 1 CLI agent
+capabilities.</p>
+<p><strong>Key Principles</strong>: 1. <strong>No Bluffs</strong>: Every
+feature MUST actually work 2. <strong>Real Infrastructure</strong>:
+Non-unit tests MUST use real services 3. <strong>Anti-Bluff
+Verification</strong>: Tests/Challenges MUST verify REAL behavior 4.
+<strong>100% Coverage</strong>: Every component has tests AND challenges
+5. <strong>Governance</strong>: Constitution + CLAUDE.md + AGENTS.md
+everywhere</p>
+<p><strong>Execution Order</strong>: - Phase 0: Foundation (Week 1) -
+CRITICAL - Phase 1: LLM Integration (Weeks 2-3) - CRITICAL - Phase 2:
+Tools &amp; Editor (Weeks 4-5) - Phase 3: Worker &amp; Distributed
+(Weeks 6-7) - Phase 4: Workflow &amp; Session (Weeks 8-9) - Phase 5:
+MCP, Memory, Notifications (Weeks 10-11) - Phase 6: Testing &amp;
+Challenges (Weeks 12-13) - Phase 7: Documentation &amp; Deployment (Week
+14)</p>
+<p><strong>Success Metric</strong>: When
+<code>./tests/e2e/challenges/run_all_challenges.sh</code> passes ALL
+100+ challenges, HelixCode is zero-bluff.</p>
+<hr />
+<p><em>This plan is a living document. Every change to HelixCode MUST
+update this plan and verify against the anti-bluff criteria defined
+herein.</em></p>
+<p><strong>Total Estimated Time</strong>: 14 weeks <strong>Total
+Tasks</strong>: 200+ fine-grained tasks <strong>Total
+Challenges</strong>: 100+ <strong>Total Tests</strong>: 500+ (unit,
+integration, E2E, security, benchmark)</p>
+</body>
+</html>

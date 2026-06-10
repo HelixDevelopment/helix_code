@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-049-doc_processor-testautomation_upstreamsexist-case-drift-const-052">HXC-049
+— doc_processor TestAutomation_UpstreamsExist case-drift
+(CONST-052)</h1>
+<p>Found by owned-submodule health sweep (D-2). automation_test.go:140
+read os.ReadDir(“Upstreams”) (capital) but the canonical dir is
+lowercase “upstreams” (CONST-052) → deterministic FAIL every run. FIX:
+“Upstreams”→“upstreams” + msgs. GREEN: go test -run
+TestAutomation_UpstreamsExist . → ok digital.vasic.docprocessor 0.170s.
+doc_processor commit ecb384f.</p>
+</body>
+</html>

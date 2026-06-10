@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f20-theme-system</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f20-theme-system</h1>
+</header>
+<h1 id="p1-f20-theme-system-implementation-plan-final-phase-1-feature">P1-F20
+— Theme System Implementation Plan (FINAL Phase 1 feature)</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<blockquote>
+<p><strong>Programme position:</strong> F20 is the <strong>last</strong>
+Phase 1 feature of CLI-Agent Fusion. Task T09 close-out records “Phase 1
+of CLI-Agent Fusion programme complete” in PROGRESS.md alongside the F20
+summary.</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, end-to-end <strong>5-role
+semantic theme system</strong> for the HelixCode CLI agent. F20 adds an
+<code>internal/theme/</code> package with <code>Theme</code> /
+<code>Role</code> / <code>Color</code> / <code>ColorDepth</code> /
+<code>ThemeName</code> value types, three frozen built-in themes
+(<code>dark</code> / <code>light</code> / <code>none</code>), an env-var
++ <code>$COLORFGBG</code>-fallback theme-name resolver, a
+<code>$COLORTERM</code>/<code>$TERM</code>-driven color-depth
+auto-detector, an optional YAML override loader at
+<code>$XDG_CONFIG_HOME/helixcode/theme.yaml</code>, and a
+<code>Styler</code> that wraps text with role-coded ANSI SGR sequences
+(or returns text unchanged for plain mode / depth=Off / theme=none).
+Wires through F18’s existing <code>RenderTextBlock</code> /
+<code>RenderLines</code> helpers via a decorator pattern — F18’s
+<code>Renderer</code> interface is <strong>unchanged</strong>. Adds a
+read-only <code>/theme</code> slash command (<code>status</code> /
+<code>list</code> / <code>show &lt;name&gt;</code>); NO cobra
+subcommand. Plain-mode-zero-color is structurally enforced by overriding
+the Styler’s depth to <code>DepthOff</code> whenever
+<code>renderer.Mode() == render.ModePlain</code>.</p>
+<p><strong>Architecture:</strong> New <code>internal/theme/</code>
+package with <code>types.go</code> (<code>Theme</code> +
+<code>Role</code> enum + <code>Color</code> + <code>ColorDepth</code> +
+<code>ThemeName</code> + sentinels
+<code>ErrUnknownTheme</code>/<code>ErrInvalidYAML</code>/<code>ErrInvalidRole</code>
++ <code>Reset</code> const + <code>numRoles</code> private const),
+<code>builtin.go</code> (concrete <code>ThemeDark</code> /
+<code>ThemeLight</code> / <code>ThemeNone</code> literals with full
+per-depth palettes per spec §3.4 + <code>BuiltIn()</code> registry
+function), <code>detect.go</code>
+(<code>DetectThemeName(env func(string) string) (ThemeName, ResolvedSource)</code>
++ <code>DetectColorDepth(env func(string) string) ColorDepth</code> —
+both pure functions of an injected env closure, no
+<code>os.Getenv</code> inside), <code>loader.go</code>
+(<code>LoaderOptions{Env, ConfigDir, Filesystem}</code> +
+<code>Loader.Load() (*Styler, ResolvedSource, error)</code> +
+<code>Styler{Stylize, Theme, Depth, Source, WithDepth}</code> + YAML
+merge into the <code>dark</code> built-in baseline + ResolvedSource
+constants
+<code>SourceEnv</code>/<code>SourceColorFGBG</code>/<code>SourceDefault</code>).
+New <code>internal/commands/theme_command.go</code> for the
+<code>/theme</code> slash command (<code>Name() == &quot;theme&quot;</code>;
+subcommands <code>status</code> / <code>list</code> /
+<code>show &lt;name&gt;</code>). Two existing files get tiny additions:
+<code>cmd/cli/main.go</code> (construct <code>theme.Loader</code> +
+<code>theme.Styler</code> adjacent to F18’s renderer; wire the Styler
+into the <code>handleGenerate</code> non-stream
+<code>RenderTextBlock</code> call; register <code>/theme</code>);
+<code>internal/commands/registry.go</code> (no schema change; one new
+<code>Register(...)</code> call site).</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, zap (already in
+<code>go.mod</code>), <code>gopkg.in/yaml.v3</code> (currently indirect;
+F20 promotes to direct at the version already in <code>go.sum</code>).
+<strong>Zero new external deps.</strong> F18’s
+<code>internal/render</code> is reused for the rendering boundary; F19’s
+<code>internal/tools/askuser</code> is unchanged.
+<code>go mod tidy</code> after T05 must produce ONLY the indirect→direct
+promotion line of yaml.v3 in <code>go.mod</code>; no new entries in
+<code>go.sum</code>. T08’s verification step asserts this loudly.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-06-p1-f20-theme-system-design.md</code>
+(commit <code>0e97afa</code>).</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F20
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/theme internal/commands/theme_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — F20 can
+degenerate in four ways: (a) the package compiles,
+<code>/theme list</code> lists three themes, but no call site actually
+wraps text with the Styler, so fancy-mode output never carries an ANSI
+byte (theme “applied” without ANSI evidence); (b) the depth detector or
+loader picks <code>Truecolor</code> regardless of
+<code>$COLORTERM</code> value, so users on 16-color terminals see
+truecolor escapes as visual garbage; (c) plain-mode somehow leaks ANSI
+through the theme path (e.g. a regression in the <code>DepthOff</code>
+branch, or a call site bypassing the Styler and indexing
+<code>theme.ThemeDark.Truecolor[RoleInfo]</code> directly); (d) the env
+var <code>HELIXCODE_THEME</code> is honoured but the
+<code>$COLORFGBG</code>/<code>$COLORTERM</code>/<code>$TERM</code>
+detection branches are never exercised in tests, so a regression
+silently downgrades every user. The four “what counts as theme system
+works” criteria — (1) the production <code>Styler.Stylize</code> wraps
+text with the expected SGR open + reset bytes for each (role × depth) of
+each built-in (Phase A/B byte assertions); (2) plain-mode renderer +
+Styler force-overridden to <code>DepthOff</code> produces ZERO
+<code>0x1b</code> bytes in captured output (Phase C zero-byte
+invariant); (3) the depth auto-detector covers <code>Truecolor</code> /
+<code>ANSI256</code> / <code>ANSI16</code> / <code>Off</code> branches
+with synthesised env vars (Phase D); (4) YAML override loads custom
+palette and merges into the <code>dark</code> baseline correctly (Phase
+E byte equality on overridden vs inherited slots) — are each tested with
+both unit assertions AND a Challenge phase. The Challenge harness uses
+positive evidence: byte counts (Phase A: exactly 2 ANSI sequences per
+token), byte content + ordering (Phase B: open &lt; literal &lt; reset
+by offset), zero-byte invariants (Phase C:
+<code>bytes.IndexByte(captured, 0x1b) == -1</code>), depth-resolution
+byte-equality (Phase D), and YAML-merge byte-equality (Phase E).
+Byte-evidence mismatch is a hard Challenge failure. Absence-of-error is
+NEVER acceptable.</p>
+<p><strong>Why this is consequential:</strong> the theme system is the
+visible surface every Phase 1 feature flows through. F18’s renderer
+carries the bytes; F19’s prompter formats the menu; every slash command
+from F09 through F19 prints text the user reads — F20 is what makes that
+text <em>legible</em> (errors stand out from info; highlights mark
+choices; dim de-emphasises hints). F20’s discriminating tests are: (i)
+the Challenge’s PHASE-A (byte-count invariant
+<code>bytes.Count(out, &quot;\x1b[&quot;) == 2 * tokens</code> — proves real ANSI
+emission, not zero or excess); (ii) the Challenge’s PHASE-C (plain-mode
+zero-<code>0x1b</code> invariant — proves the no-leak guarantee survives
+the production code path, not just the unit-tested helper); (iii) the
+Challenge’s PHASE-D (six representative env combos resolving to the
+expected <code>(name, source, depth)</code> tuple — proves the detection
+ladder is wired correctly, not just present); (iv) the Challenge’s
+PHASE-E (YAML override on tempdir + <code>LoaderOptions.ConfigDir</code>
+injection asserts custom slot wraps with custom code AND un-mentioned
+slot inherits from <code>dark</code> baseline — proves merge semantics
+work end-to-end). All four must produce positive evidence; none can be
+satisfied by absence-of-error.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F20-T01 — bootstrap
+evidence + advance PROGRESS to F20</label></li>
+<li><label><input type="checkbox" checked></input>P1-F20-T02 —
+<code>internal/theme/types.go</code>: Theme + Role + Color + ColorDepth
++ ThemeName + sentinels + Reset const (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F20-T03 —
+<code>internal/theme/builtin.go</code>: ThemeDark + ThemeLight +
+ThemeNone literals + BuiltIn() registry (TDD; pin §3.4 byte
+tables)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F20-T04 —
+<code>internal/theme/detect.go</code>: DetectThemeName +
+DetectColorDepth pure functions of an injected env closure (TDD;
+table-drive every branch)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F20-T05 —
+<code>internal/theme/loader.go</code>: LoaderOptions + Loader.Load +
+Styler + Stylize + WithDepth + YAML merge into dark baseline (TDD; real
+tempdir + injected fs)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F20-T06 — Wire Styler
+into F18 in <code>cmd/cli/main.go</code> (handleGenerate non-stream
+RenderTextBlock + plain-mode WithDepth(Off) override) (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F20-T07 —
+<code>/theme</code> slash command (status / list / show <name>) +
+main.go registration (TDD) + integration test</label></li>
+<li><label><input type="checkbox" checked></input>P1-F20-T08 — Challenge
+harness: 5 always-run phases (BUILT-IN-DARK + BUILT-IN-LIGHT +
+PLAIN-MODE-ZERO-COLOR + DEPTH-AUTO-DETECT + YAML-OVERRIDE) with positive
+byte evidence</label></li>
+<li><label><input type="checkbox" checked></input>P1-F20-T09 — Feature 20
+close-out + push 4 remotes non-force — <strong>PHASE 1 OF CLI-AGENT
+FUSION PROGRAMME COMPLETE</strong></label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F20 evidence section header (spec <code>0e97afa</code>),
+update PROGRESS current focus to F20 (replacing F19 close-out’s “F20
+next candidate” pointer), insert F20 task list (9 items) after F19’s,
+ensure <code>06_phase_1_evidence.md</code> has an F20 anchor. Verify
+<code>gopkg.in/yaml.v3</code> is currently in
+<code>helix_code/go.mod</code> (likely indirect; sanity check before T05
+imports it).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="st">&quot;yaml.v3&quot;</span> go.mod  <span class="co"># confirm presence (indirect or direct)</span></span></code></pre></div>
+<p>Commit:
+<code>docs(P1-F20-T01): bootstrap Phase 1 / Feature 20 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/theme/types.go</code>, new
+<code>helix_code/internal/theme/types_test.go</code>.</p>
+<p>Define: - <code>Role int</code> enum + 5 values
+(<code>RoleInfo</code> / <code>RoleWarn</code> / <code>RoleError</code>
+/ <code>RoleHighlight</code> / <code>RoleDim</code>) + private
+<code>numRoles</code> sentinel for array sizing. -
+<code>Role.String()</code> returning lowercase names;
+<code>ParseRole(s string) (Role, error)</code> returning
+<code>ErrInvalidRole</code> for unknown. - <code>ColorDepth int</code>
+enum + 4 values (<code>DepthOff</code> / <code>DepthANSI16</code> /
+<code>DepthANSI256</code> / <code>DepthTruecolor</code>) +
+<code>ColorDepth.String()</code>. - <code>ThemeName string</code> type +
+3 constants (<code>ThemeDarkName</code> / <code>ThemeLightName</code> /
+<code>ThemeNoneName</code>). -
+<code>Color struct { Open string }</code>. - <code>Reset</code> const
+(<code>&quot;\x1b[0m&quot;</code>). -
+<code>Theme struct { Name ThemeName; ANSI16 [numRoles]Color; ANSI256 [numRoles]Color; Truecolor [numRoles]Color }</code>.
+- Error sentinels (<code>ErrUnknownTheme</code>,
+<code>ErrInvalidYAML</code>, <code>ErrInvalidRole</code>).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRole_String_LowercaseNames<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;info&quot;</span><span class="op">,</span> RoleInfo<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;warn&quot;</span><span class="op">,</span> RoleWarn<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;error&quot;</span><span class="op">,</span> RoleError<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;highlight&quot;</span><span class="op">,</span> RoleHighlight<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;dim&quot;</span><span class="op">,</span> RoleDim<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRole_ParseRole_OK_ForAll5<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name<span class="op">,</span> want <span class="op">:=</span> <span class="kw">range</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>Role<span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;info&quot;</span><span class="op">:</span> RoleInfo<span class="op">,</span> <span class="st">&quot;warn&quot;</span><span class="op">:</span> RoleWarn<span class="op">,</span> <span class="st">&quot;error&quot;</span><span class="op">:</span> RoleError<span class="op">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;highlight&quot;</span><span class="op">:</span> RoleHighlight<span class="op">,</span> <span class="st">&quot;dim&quot;</span><span class="op">:</span> RoleDim<span class="op">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        got<span class="op">,</span> err <span class="op">:=</span> ParseRole<span class="op">(</span>name<span class="op">)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">);</span> require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> want<span class="op">,</span> got<span class="op">)</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRole_ParseRole_Unknown_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> ParseRole<span class="op">(</span><span class="st">&quot;bogus&quot;</span><span class="op">)</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrInvalidRole<span class="op">)</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestColorDepth_String_AllFourValues<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;off&quot;</span><span class="op">,</span>       DepthOff<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;ansi16&quot;</span><span class="op">,</span>    DepthANSI16<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;ansi256&quot;</span><span class="op">,</span>   DepthANSI256<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;truecolor&quot;</span><span class="op">,</span> DepthTruecolor<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestThemeName_StableConstants<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeName<span class="op">(</span><span class="st">&quot;dark&quot;</span><span class="op">),</span>  ThemeDarkName<span class="op">)</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeName<span class="op">(</span><span class="st">&quot;light&quot;</span><span class="op">),</span> ThemeLightName<span class="op">)</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeName<span class="op">(</span><span class="st">&quot;none&quot;</span><span class="op">),</span>  ThemeNoneName<span class="op">)</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestColor_OpenZeroValueIsEmpty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> Color<span class="op">{}.</span>Open<span class="op">)</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestReset_LiteralByteSequence<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[0m&quot;</span><span class="op">,</span> Reset<span class="op">)</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestErrorSentinels_DistinctErrorsIs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">error</span><span class="op">{</span>ErrUnknownTheme<span class="op">,</span> ErrInvalidYAML<span class="op">,</span> ErrInvalidRole<span class="op">}</span> <span class="op">{</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>        wrapped <span class="op">:=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;wrapped: %w&quot;</span><span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> wrapped<span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F20-T02): theme types - Role + Color + ColorDepth + Theme + sentinels + Reset const</code>.</p>
+<hr />
+<h2 id="task-3-builtin.go-tdd-pin-3.4-byte-tables">Task 3: builtin.go
+(TDD; pin §3.4 byte tables)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/theme/builtin.go</code>, new
+<code>helix_code/internal/theme/builtin_test.go</code>.</p>
+<p><code>builtin.go</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> ThemeDark <span class="op">=</span> Theme<span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">:</span> ThemeDarkName<span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ANSI16<span class="op">:</span> <span class="op">[</span>numRoles<span class="op">]</span>Color<span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        RoleInfo<span class="op">:</span>      <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[37m&quot;</span><span class="op">},</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        RoleWarn<span class="op">:</span>      <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[33m&quot;</span><span class="op">},</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        RoleError<span class="op">:</span>     <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[31m&quot;</span><span class="op">},</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        RoleHighlight<span class="op">:</span> <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[36m&quot;</span><span class="op">},</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        RoleDim<span class="op">:</span>       <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[90m&quot;</span><span class="op">},</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    ANSI256<span class="op">:</span> <span class="op">[</span>numRoles<span class="op">]</span>Color<span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        RoleInfo<span class="op">:</span>      <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;250m&quot;</span><span class="op">},</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        RoleWarn<span class="op">:</span>      <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;214m&quot;</span><span class="op">},</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        RoleError<span class="op">:</span>     <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;196m&quot;</span><span class="op">},</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        RoleHighlight<span class="op">:</span> <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;51m&quot;</span><span class="op">},</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        RoleDim<span class="op">:</span>       <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;243m&quot;</span><span class="op">},</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    Truecolor<span class="op">:</span> <span class="op">[</span>numRoles<span class="op">]</span>Color<span class="op">{</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        RoleInfo<span class="op">:</span>      <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;220;220;220m&quot;</span><span class="op">},</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        RoleWarn<span class="op">:</span>      <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;255;176;0m&quot;</span><span class="op">},</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        RoleError<span class="op">:</span>     <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;255;64;64m&quot;</span><span class="op">},</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        RoleHighlight<span class="op">:</span> <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;0;200;220m&quot;</span><span class="op">},</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        RoleDim<span class="op">:</span>       <span class="op">{</span>Open<span class="op">:</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;128;128;128m&quot;</span><span class="op">},</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> ThemeLight <span class="op">=</span> Theme<span class="op">{</span> <span class="co">/* per spec §3.4 */</span> <span class="op">}</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> ThemeNone  <span class="op">=</span> Theme<span class="op">{</span> Name<span class="op">:</span> ThemeNoneName <span class="co">/* all Color{} zero values */</span> <span class="op">}</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> BuiltIn<span class="op">()</span> <span class="kw">map</span><span class="op">[</span>ThemeName<span class="op">]</span>Theme <span class="op">{</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">map</span><span class="op">[</span>ThemeName<span class="op">]</span>Theme<span class="op">{</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        ThemeDarkName<span class="op">:</span>  ThemeDark<span class="op">,</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        ThemeLightName<span class="op">:</span> ThemeLight<span class="op">,</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        ThemeNoneName<span class="op">:</span>  ThemeNone<span class="op">,</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (pin every byte from spec §3.4):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBuiltIn_DarkAllRolesAllDepths_BytesPinned<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANSI16</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[37m&quot;</span><span class="op">,</span>  ThemeDark<span class="op">.</span>ANSI16<span class="op">[</span>RoleInfo<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[33m&quot;</span><span class="op">,</span>  ThemeDark<span class="op">.</span>ANSI16<span class="op">[</span>RoleWarn<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[31m&quot;</span><span class="op">,</span>  ThemeDark<span class="op">.</span>ANSI16<span class="op">[</span>RoleError<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[36m&quot;</span><span class="op">,</span>  ThemeDark<span class="op">.</span>ANSI16<span class="op">[</span>RoleHighlight<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[90m&quot;</span><span class="op">,</span>  ThemeDark<span class="op">.</span>ANSI16<span class="op">[</span>RoleDim<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANSI256</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;250m&quot;</span><span class="op">,</span> ThemeDark<span class="op">.</span>ANSI256<span class="op">[</span>RoleInfo<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;214m&quot;</span><span class="op">,</span> ThemeDark<span class="op">.</span>ANSI256<span class="op">[</span>RoleWarn<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;196m&quot;</span><span class="op">,</span> ThemeDark<span class="op">.</span>ANSI256<span class="op">[</span>RoleError<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;51m&quot;</span><span class="op">,</span>  ThemeDark<span class="op">.</span>ANSI256<span class="op">[</span>RoleHighlight<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;243m&quot;</span><span class="op">,</span> ThemeDark<span class="op">.</span>ANSI256<span class="op">[</span>RoleDim<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Truecolor</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;220;220;220m&quot;</span><span class="op">,</span> ThemeDark<span class="op">.</span>Truecolor<span class="op">[</span>RoleInfo<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;255;176;0m&quot;</span><span class="op">,</span>   ThemeDark<span class="op">.</span>Truecolor<span class="op">[</span>RoleWarn<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;255;64;64m&quot;</span><span class="op">,</span>   ThemeDark<span class="op">.</span>Truecolor<span class="op">[</span>RoleError<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;0;200;220m&quot;</span><span class="op">,</span>   ThemeDark<span class="op">.</span>Truecolor<span class="op">[</span>RoleHighlight<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;128;128;128m&quot;</span><span class="op">,</span> ThemeDark<span class="op">.</span>Truecolor<span class="op">[</span>RoleDim<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBuiltIn_LightAllRolesAllDepths_BytesPinned<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* spec §3.4 light table */</span> <span class="op">}</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBuiltIn_NoneAllOpenAreEmpty_AllDepthsAllRoles<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="op">:=</span> Role<span class="op">(</span><span class="dv">0</span><span class="op">);</span> r <span class="op">&lt;</span> numRoles<span class="op">;</span> r<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> ThemeNone<span class="op">.</span>ANSI16<span class="op">[</span>r<span class="op">].</span>Open<span class="op">,</span>    <span class="st">&quot;ANSI16[%v]&quot;</span><span class="op">,</span> r<span class="op">)</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> ThemeNone<span class="op">.</span>ANSI256<span class="op">[</span>r<span class="op">].</span>Open<span class="op">,</span>   <span class="st">&quot;ANSI256[%v]&quot;</span><span class="op">,</span> r<span class="op">)</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> ThemeNone<span class="op">.</span>Truecolor<span class="op">[</span>r<span class="op">].</span>Open<span class="op">,</span> <span class="st">&quot;Truecolor[%v]&quot;</span><span class="op">,</span> r<span class="op">)</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBuiltIn_RegistryReturnsThreeThemes<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> BuiltIn<span class="op">()</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> m<span class="op">,</span> <span class="dv">3</span><span class="op">)</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> m<span class="op">,</span> ThemeDarkName<span class="op">)</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> m<span class="op">,</span> ThemeLightName<span class="op">)</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> m<span class="op">,</span> ThemeNoneName<span class="op">)</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBuiltIn_NamesMatchConstants<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeDarkName<span class="op">,</span>  ThemeDark<span class="op">.</span>Name<span class="op">)</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeLightName<span class="op">,</span> ThemeLight<span class="op">.</span>Name<span class="op">)</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeNoneName<span class="op">,</span>  ThemeNone<span class="op">.</span>Name<span class="op">)</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F20-T03): builtin themes dark/light/none with pinned byte tables</code>.</p>
+<hr />
+<h2 id="task-4-detect.go-tdd-table-drive-every-branch">Task 4: detect.go
+(TDD; table-drive every branch)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/theme/detect.go</code>, new
+<code>helix_code/internal/theme/detect_test.go</code>.</p>
+<p><code>detect.go</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ResolvedSource <span class="dt">string</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    SourceEnv       ResolvedSource <span class="op">=</span> <span class="st">&quot;env&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    SourceColorFGBG ResolvedSource <span class="op">=</span> <span class="st">&quot;colorfgbg&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    SourceDefault   ResolvedSource <span class="op">=</span> <span class="st">&quot;default&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">// DetectThemeName resolves the active theme name per spec §3.6 ladder.</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">// env is the env-var lookup closure; passing os.Getenv yields production</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">// behaviour. Tests inject a fake closure to exercise every branch.</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DetectThemeName<span class="op">(</span>env <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>ThemeName<span class="op">,</span> ResolvedSource<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> v <span class="op">:=</span> env<span class="op">(</span><span class="st">&quot;HELIXCODE_THEME&quot;</span><span class="op">);</span> v <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">// matched against built-ins OR YAML names — names are opaque, so</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// the loader (Task 5) is the place that disambiguates &quot;unknown&quot;.</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// detect.go just returns the raw name + SourceEnv so the loader</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// can warn-and-fall-through if the name doesn&#39;t match anything.</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ThemeName<span class="op">(</span>v<span class="op">),</span> SourceEnv</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> v <span class="op">:=</span> env<span class="op">(</span><span class="st">&quot;COLORFGBG&quot;</span><span class="op">);</span> v <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> name<span class="op">,</span> ok <span class="op">:=</span> parseColorFGBG<span class="op">(</span>v<span class="op">);</span> ok <span class="op">{</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> name<span class="op">,</span> SourceColorFGBG</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ThemeDarkName<span class="op">,</span> SourceDefault</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">// DetectColorDepth resolves the active color depth per spec §3.6.</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DetectColorDepth<span class="op">(</span>env <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span><span class="op">)</span> ColorDepth <span class="op">{</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> env<span class="op">(</span><span class="st">&quot;COLORTERM&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;truecolor&quot;</span><span class="op">,</span> <span class="st">&quot;24bit&quot;</span><span class="op">:</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DepthTruecolor</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    term <span class="op">:=</span> env<span class="op">(</span><span class="st">&quot;TERM&quot;</span><span class="op">)</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> term <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">||</span> term <span class="op">==</span> <span class="st">&quot;dumb&quot;</span> <span class="op">{</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DepthOff</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>HasSuffix<span class="op">(</span>term<span class="op">,</span> <span class="st">&quot;-256color&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DepthANSI256</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> DepthANSI16</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="co">// parseColorFGBG returns the inferred theme name from the bg index of the</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;fg;bg&quot; pair. Returns (_, false) for unparseable values (silent — opportunistic</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="co">// signal per spec §5.1).</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> parseColorFGBG<span class="op">(</span>v <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>ThemeName<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    parts <span class="op">:=</span> strings<span class="op">.</span>Split<span class="op">(</span>v<span class="op">,</span> <span class="st">&quot;;&quot;</span><span class="op">)</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>parts<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">2</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    bg<span class="op">,</span> err <span class="op">:=</span> strconv<span class="op">.</span>Atoi<span class="op">(</span>parts<span class="op">[</span><span class="bu">len</span><span class="op">(</span>parts<span class="op">)-</span><span class="dv">1</span><span class="op">])</span> <span class="co">// tolerate &quot;fg;_;bg&quot; and &quot;fg;bg&quot;</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Dark backgrounds: 0,1,2,3,4,5,6,8 (per xterm convention)</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Light backgrounds: 7,9..15</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> bg <span class="op">==</span> <span class="dv">7</span> <span class="op">||</span> <span class="op">(</span>bg <span class="op">&gt;=</span> <span class="dv">9</span> <span class="op">&amp;&amp;</span> bg <span class="op">&lt;=</span> <span class="dv">15</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ThemeLightName<span class="op">,</span> <span class="ot">true</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> bg <span class="op">&gt;=</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> bg <span class="op">&lt;=</span> <span class="dv">8</span> <span class="op">{</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ThemeDarkName<span class="op">,</span> <span class="ot">true</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="ot">false</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (table-driven):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> fakeEnv<span class="op">(</span>m <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">)</span> <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">func</span><span class="op">(</span>k <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> m<span class="op">[</span>k<span class="op">]</span> <span class="op">}</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectThemeName_EnvSet_ReturnsEnv<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    name<span class="op">,</span> src <span class="op">:=</span> DetectThemeName<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_THEME&quot;</span><span class="op">:</span> <span class="st">&quot;light&quot;</span><span class="op">}))</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeName<span class="op">(</span><span class="st">&quot;light&quot;</span><span class="op">),</span> name<span class="op">)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceEnv<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectThemeName_NoEnv_ColorFGBGDarkBg_ReturnsDark<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    name<span class="op">,</span> src <span class="op">:=</span> DetectThemeName<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;COLORFGBG&quot;</span><span class="op">:</span> <span class="st">&quot;15;0&quot;</span><span class="op">}))</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeDarkName<span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceColorFGBG<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectThemeName_NoEnv_ColorFGBGLightBg_ReturnsLight<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    name<span class="op">,</span> src <span class="op">:=</span> DetectThemeName<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;COLORFGBG&quot;</span><span class="op">:</span> <span class="st">&quot;0;15&quot;</span><span class="op">}))</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeLightName<span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceColorFGBG<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectThemeName_NoEnv_ColorFGBGUnparseable_FallsThrough<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    name<span class="op">,</span> src <span class="op">:=</span> DetectThemeName<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;COLORFGBG&quot;</span><span class="op">:</span> <span class="st">&quot;garbage&quot;</span><span class="op">}))</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeDarkName<span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceDefault<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectThemeName_NoSignals_ReturnsDarkDefault<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    name<span class="op">,</span> src <span class="op">:=</span> DetectThemeName<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}))</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeDarkName<span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceDefault<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectColorDepth_ColorTermTruecolor<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthTruecolor<span class="op">,</span> DetectColorDepth<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;COLORTERM&quot;</span><span class="op">:</span> <span class="st">&quot;truecolor&quot;</span><span class="op">})))</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectColorDepth_ColorTerm24bit<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthTruecolor<span class="op">,</span> DetectColorDepth<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;COLORTERM&quot;</span><span class="op">:</span> <span class="st">&quot;24bit&quot;</span><span class="op">})))</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectColorDepth_TermXterm256<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthANSI256<span class="op">,</span> DetectColorDepth<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;TERM&quot;</span><span class="op">:</span> <span class="st">&quot;xterm-256color&quot;</span><span class="op">})))</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectColorDepth_TermXtermPlain<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthANSI16<span class="op">,</span> DetectColorDepth<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;TERM&quot;</span><span class="op">:</span> <span class="st">&quot;xterm&quot;</span><span class="op">})))</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectColorDepth_TermDumb_Off<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthOff<span class="op">,</span> DetectColorDepth<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;TERM&quot;</span><span class="op">:</span> <span class="st">&quot;dumb&quot;</span><span class="op">})))</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectColorDepth_TermUnset_Off<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthOff<span class="op">,</span> DetectColorDepth<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{})))</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetectColorDepth_ColorTermBeatsTERM<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">// COLORTERM=truecolor wins even if TERM=dumb</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthTruecolor<span class="op">,</span> DetectColorDepth<span class="op">(</span>fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;COLORTERM&quot;</span><span class="op">:</span> <span class="st">&quot;truecolor&quot;</span><span class="op">,</span> <span class="st">&quot;TERM&quot;</span><span class="op">:</span> <span class="st">&quot;dumb&quot;</span><span class="op">,</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>    <span class="op">})))</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F20-T04): theme name + color depth detection from injected env closure</code>.</p>
+<hr />
+<h2 id="task-5-loader.go-tdd-yaml-merge-into-dark-baseline">Task 5:
+loader.go (TDD; YAML merge into dark baseline)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/theme/loader.go</code>, new
+<code>helix_code/internal/theme/loader_test.go</code>.
+<strong>Modify</strong> <code>helix_code/go.mod</code> to promote
+<code>gopkg.in/yaml.v3</code> from indirect to direct (verify with
+<code>go mod tidy</code> produces no new <code>go.sum</code>
+entries).</p>
+<p><code>loader.go</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LoaderOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    Env        <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="co">// default os.Getenv</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    ConfigDir  <span class="dt">string</span>              <span class="co">// default $XDG_CONFIG_HOME/helixcode (or $HOME/.config/helixcode)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    Filesystem fs<span class="op">.</span>FS               <span class="co">// default os.DirFS — injected for tests</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Loader <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    env       <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    configDir <span class="dt">string</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    fsys      fs<span class="op">.</span>FS</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLoader<span class="op">(</span>opts LoaderOptions<span class="op">)</span> <span class="op">*</span>Loader <span class="op">{</span> <span class="co">/* fill defaults */</span> <span class="op">}</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>Loader<span class="op">)</span> Load<span class="op">()</span> <span class="op">(*</span>Styler<span class="op">,</span> ResolvedSource<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    name<span class="op">,</span> source <span class="op">:=</span> DetectThemeName<span class="op">(</span>l<span class="op">.</span>env<span class="op">)</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    depth        <span class="op">:=</span> DetectColorDepth<span class="op">(</span>l<span class="op">.</span>env<span class="op">)</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    builtIns <span class="op">:=</span> BuiltIn<span class="op">()</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    yamlThemes<span class="op">,</span> err <span class="op">:=</span> l<span class="op">.</span>loadYAML<span class="op">()</span>  <span class="co">// returns map[ThemeName]Theme; nil error if file missing</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// wrap with ErrInvalidYAML; warn to stderr; proceed with built-ins only.</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Fprintf<span class="op">(</span>os<span class="op">.</span>Stderr<span class="op">,</span> <span class="st">&quot;theme: %s: falling back to built-ins</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        yamlThemes <span class="op">=</span> <span class="ot">nil</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> theme Theme</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">,</span> ok <span class="op">:=</span> yamlThemes<span class="op">[</span>name<span class="op">];</span> ok <span class="op">{</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        theme <span class="op">=</span> t</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="cf">if</span> t<span class="op">,</span> ok <span class="op">:=</span> builtIns<span class="op">[</span>name<span class="op">];</span> ok <span class="op">{</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        theme <span class="op">=</span> t</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// unknown name: warn + fall back to dark default</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Fprintf<span class="op">(</span>os<span class="op">.</span>Stderr<span class="op">,</span> <span class="st">&quot;theme: HELIXCODE_THEME=%q not found; falling back to %q</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> name<span class="op">,</span> ThemeDarkName<span class="op">)</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        theme <span class="op">=</span> builtIns<span class="op">[</span>ThemeDarkName<span class="op">]</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        source <span class="op">=</span> SourceDefault</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        name <span class="op">=</span> ThemeDarkName</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>Styler<span class="op">{</span>theme<span class="op">:</span> theme<span class="op">,</span> depth<span class="op">:</span> depth<span class="op">,</span> source<span class="op">:</span> source<span class="op">}</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">,</span> source<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="co">// loadYAML reads $ConfigDir/theme.yaml if present; returns parsed themes</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a><span class="co">// merged into the dark built-in baseline (slot-by-slot overlay). Missing file</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a><span class="co">// returns (nil, nil); parse error returns (nil, ErrInvalidYAML wrapped).</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>Loader<span class="op">)</span> loadYAML<span class="op">()</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span>ThemeName<span class="op">]</span>Theme<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Styler <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    theme  Theme</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    depth  ColorDepth</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    source ResolvedSource</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> Stylize<span class="op">(</span>role Role<span class="op">,</span> text <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s<span class="op">.</span>depth <span class="op">==</span> DepthOff <span class="op">{</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> text</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> role <span class="op">&lt;</span> <span class="dv">0</span> <span class="op">||</span> role <span class="op">&gt;=</span> numRoles <span class="op">{</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> text</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> c Color</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> s<span class="op">.</span>depth <span class="op">{</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> DepthANSI16<span class="op">:</span>    c <span class="op">=</span> s<span class="op">.</span>theme<span class="op">.</span>ANSI16<span class="op">[</span>role<span class="op">]</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> DepthANSI256<span class="op">:</span>   c <span class="op">=</span> s<span class="op">.</span>theme<span class="op">.</span>ANSI256<span class="op">[</span>role<span class="op">]</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> DepthTruecolor<span class="op">:</span> c <span class="op">=</span> s<span class="op">.</span>theme<span class="op">.</span>Truecolor<span class="op">[</span>role<span class="op">]</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c<span class="op">.</span>Open <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> text</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> c<span class="op">.</span>Open <span class="op">+</span> text <span class="op">+</span> Reset</span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> Theme<span class="op">()</span>  Theme           <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>theme <span class="op">}</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> Depth<span class="op">()</span>  ColorDepth      <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>depth <span class="op">}</span></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> Source<span class="op">()</span> ResolvedSource  <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>source <span class="op">}</span></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a><span class="co">// WithDepth returns a NEW Styler with the given depth; the original is</span></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a><span class="co">// immutable (zero-allocation pointer to value-type copy).</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> WithDepth<span class="op">(</span>d ColorDepth<span class="op">)</span> <span class="op">*</span>Styler <span class="op">{</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Styler<span class="op">{</span>theme<span class="op">:</span> s<span class="op">.</span>theme<span class="op">,</span> depth<span class="op">:</span> d<span class="op">,</span> source<span class="op">:</span> s<span class="op">.</span>source<span class="op">}</span></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Implementation notes: - YAML merge: parse the file into a
+<code>map[string]map[string]map[string]string</code> (theme name → depth
+key → role key → open code), then for each theme name overlay onto a
+copy of <code>ThemeDark</code> (per spec §3.7 v1 simplification; F20.5
+may add <code>base:</code> field). Validate every role/depth key + every
+open code starts with <code>\x1b[</code> and ends with <code>m</code> —
+surface unknown keys + malformed open codes as
+<code>ErrInvalidYAML</code>-wrapped errors. - <code>loadYAML</code> uses
+<code>fs.ReadFile(l.fsys, &quot;theme.yaml&quot;)</code> for testability (a
+tempdir-backed <code>os.DirFS</code> in production; an
+<code>fstest.MapFS</code> in unit tests). - <code>Stylize</code>
+zero-alloc fast path for <code>DepthOff</code> returns the input string
+by value (Go strings are reference types; no copy). - The detector picks
+<code>name</code> from env (which may be a YAML-only name); the loader
+checks YAML themes first, then built-ins, then warn-fallback to
+dark.</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_NoYAMLFile_BuiltInsOnly<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewLoader<span class="op">(</span>LoaderOptions<span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span> fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_THEME&quot;</span><span class="op">:</span> <span class="st">&quot;dark&quot;</span><span class="op">,</span> <span class="st">&quot;COLORTERM&quot;</span><span class="op">:</span> <span class="st">&quot;truecolor&quot;</span><span class="op">}),</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        Filesystem<span class="op">:</span> fstest<span class="op">.</span>MapFS<span class="op">{},</span> <span class="co">// empty</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> src<span class="op">,</span> err <span class="op">:=</span> loader<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceEnv<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeDarkName<span class="op">,</span> s<span class="op">.</span>Theme<span class="op">().</span>Name<span class="op">)</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthTruecolor<span class="op">,</span> s<span class="op">.</span>Depth<span class="op">())</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_YAMLEmpty_NoError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewLoader<span class="op">(</span>LoaderOptions<span class="op">{</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span> fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}),</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        Filesystem<span class="op">:</span> fstest<span class="op">.</span>MapFS<span class="op">{</span><span class="st">&quot;theme.yaml&quot;</span><span class="op">:</span> <span class="op">&amp;</span>fstest<span class="op">.</span>MapFile<span class="op">{</span>Data<span class="op">:</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">)}},</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> loader<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_YAMLParseErr_FallsBackToBuiltIns<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewLoader<span class="op">(</span>LoaderOptions<span class="op">{</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span> fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}),</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        Filesystem<span class="op">:</span> fstest<span class="op">.</span>MapFS<span class="op">{</span><span class="st">&quot;theme.yaml&quot;</span><span class="op">:</span> <span class="op">&amp;</span>fstest<span class="op">.</span>MapFile<span class="op">{</span>Data<span class="op">:</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;not: valid: yaml: [</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)}},</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> loader<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// load doesn&#39;t return the error — it warns and falls back per §5.1.</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeDarkName<span class="op">,</span> s<span class="op">.</span>Theme<span class="op">().</span>Name<span class="op">)</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_YAMLSchema_UnknownRole_ErrInvalidYAML<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    yaml <span class="op">:=</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;themes:</span><span class="ch">\n</span><span class="st">  custom:</span><span class="ch">\n</span><span class="st">    ansi16:</span><span class="ch">\n</span><span class="st">      infoo: </span><span class="ch">\&quot;\\</span><span class="st">x1b[31m</span><span class="ch">\&quot;\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewLoader<span class="op">(</span>LoaderOptions<span class="op">{</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span> fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_THEME&quot;</span><span class="op">:</span> <span class="st">&quot;custom&quot;</span><span class="op">}),</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>        Filesystem<span class="op">:</span> fstest<span class="op">.</span>MapFS<span class="op">{</span><span class="st">&quot;theme.yaml&quot;</span><span class="op">:</span> <span class="op">&amp;</span>fstest<span class="op">.</span>MapFile<span class="op">{</span>Data<span class="op">:</span> yaml<span class="op">}},</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">// schema violation surfaces via the loader&#39;s WARN-and-fallback path; the</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">// public Load returns no error but the Styler is the dark built-in.</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> loader<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeDarkName<span class="op">,</span> s<span class="op">.</span>Theme<span class="op">().</span>Name<span class="op">)</span> <span class="co">// fell back per §3.7</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_YAMLOverridesBuiltInDark_PerSlot<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    yaml <span class="op">:=</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">`themes:</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="st">  custom:</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="st">    truecolor:</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="st">      error: &quot;\x1b[38;2;220;50;47m&quot;</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="st">`</span><span class="op">)</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewLoader<span class="op">(</span>LoaderOptions<span class="op">{</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span> fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_THEME&quot;</span><span class="op">:</span> <span class="st">&quot;custom&quot;</span><span class="op">,</span> <span class="st">&quot;COLORTERM&quot;</span><span class="op">:</span> <span class="st">&quot;truecolor&quot;</span><span class="op">}),</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>        Filesystem<span class="op">:</span> fstest<span class="op">.</span>MapFS<span class="op">{</span><span class="st">&quot;theme.yaml&quot;</span><span class="op">:</span> <span class="op">&amp;</span>fstest<span class="op">.</span>MapFile<span class="op">{</span>Data<span class="op">:</span> yaml<span class="op">}},</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> loader<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ThemeName<span class="op">(</span><span class="st">&quot;custom&quot;</span><span class="op">),</span> s<span class="op">.</span>Theme<span class="op">().</span>Name<span class="op">)</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;220;50;47m&quot;</span><span class="op">,</span> s<span class="op">.</span>Theme<span class="op">().</span>Truecolor<span class="op">[</span>RoleError<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Un-mentioned slot inherits from dark baseline:</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;220;220;220m&quot;</span><span class="op">,</span> s<span class="op">.</span>Theme<span class="op">().</span>Truecolor<span class="op">[</span>RoleInfo<span class="op">].</span>Open<span class="op">)</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStyler_Stylize_DepthOff_IdentityForAllRoles<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>Styler<span class="op">{</span>theme<span class="op">:</span> ThemeDark<span class="op">,</span> depth<span class="op">:</span> DepthOff<span class="op">}</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="op">:=</span> Role<span class="op">(</span><span class="dv">0</span><span class="op">);</span> r <span class="op">&lt;</span> numRoles<span class="op">;</span> r<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">,</span> s<span class="op">.</span>Stylize<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">))</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStyler_Stylize_DepthANSI16_DarkInfo_BytesPinned<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>Styler<span class="op">{</span>theme<span class="op">:</span> ThemeDark<span class="op">,</span> depth<span class="op">:</span> DepthANSI16<span class="op">}</span></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[37mhello</span><span class="ch">\x1b</span><span class="st">[0m&quot;</span><span class="op">,</span> s<span class="op">.</span>Stylize<span class="op">(</span>RoleInfo<span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">))</span></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStyler_Stylize_DepthANSI256_DarkError_BytesPinned<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>Styler<span class="op">{</span>theme<span class="op">:</span> ThemeDark<span class="op">,</span> depth<span class="op">:</span> DepthANSI256<span class="op">}</span></span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;5;196mboom</span><span class="ch">\x1b</span><span class="st">[0m&quot;</span><span class="op">,</span> s<span class="op">.</span>Stylize<span class="op">(</span>RoleError<span class="op">,</span> <span class="st">&quot;boom&quot;</span><span class="op">))</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStyler_Stylize_DepthTruecolor_DarkHighlight_BytesPinned<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>Styler<span class="op">{</span>theme<span class="op">:</span> ThemeDark<span class="op">,</span> depth<span class="op">:</span> DepthTruecolor<span class="op">}</span></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[38;2;0;200;220mfoo</span><span class="ch">\x1b</span><span class="st">[0m&quot;</span><span class="op">,</span> s<span class="op">.</span>Stylize<span class="op">(</span>RoleHighlight<span class="op">,</span> <span class="st">&quot;foo&quot;</span><span class="op">))</span></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStyler_Stylize_NoneAllDepths_AllRolesIdentity<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> depth <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span>ColorDepth<span class="op">{</span>DepthANSI16<span class="op">,</span> DepthANSI256<span class="op">,</span> DepthTruecolor<span class="op">}</span> <span class="op">{</span></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>        s <span class="op">:=</span> <span class="op">&amp;</span>Styler<span class="op">{</span>theme<span class="op">:</span> ThemeNone<span class="op">,</span> depth<span class="op">:</span> depth<span class="op">}</span></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> r <span class="op">:=</span> Role<span class="op">(</span><span class="dv">0</span><span class="op">);</span> r <span class="op">&lt;</span> numRoles<span class="op">;</span> r<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>            require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> s<span class="op">.</span>Stylize<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;x&quot;</span><span class="op">))</span></span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStyler_WithDepth_ReturnsNewStylerCorrectDepth<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a>    s1 <span class="op">:=</span> <span class="op">&amp;</span>Styler<span class="op">{</span>theme<span class="op">:</span> ThemeDark<span class="op">,</span> depth<span class="op">:</span> DepthTruecolor<span class="op">}</span></span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a>    s2 <span class="op">:=</span> s1<span class="op">.</span>WithDepth<span class="op">(</span>DepthOff<span class="op">)</span></span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthOff<span class="op">,</span> s2<span class="op">.</span>Depth<span class="op">())</span></span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> DepthTruecolor<span class="op">,</span> s1<span class="op">.</span>Depth<span class="op">(),</span> <span class="st">&quot;original Styler must be unchanged&quot;</span><span class="op">)</span></span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNoDirectPaletteAccess_BypassesStyler_SourceScan<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a>    <span class="co">// anti-bluff (c) — no call site outside internal/theme should index the</span></span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a>    <span class="co">// theme array directly. Greps cmd/cli/ + internal/commands/theme_command.go.</span></span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a>    paths <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;../../cmd/cli&quot;</span><span class="op">,</span> <span class="st">&quot;../../internal/commands/theme_command.go&quot;</span><span class="op">}</span></span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a>    pattern <span class="op">:=</span> regexp<span class="op">.</span>MustCompile<span class="op">(</span><span class="st">`theme\.Theme(Dark|Light|None)\.(Truecolor|ANSI256|ANSI16)\[`</span><span class="op">)</span></span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a>    <span class="co">// walk paths; assert pattern.Match returns no hits in any .go file</span></span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a>    <span class="co">// (full impl in test file)</span></span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>After T05 implementation:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> mod tidy</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff go.mod   <span class="co"># should ONLY show yaml.v3 indirect→direct line</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff go.sum   <span class="co"># should be empty</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F20-T05): theme loader + Styler with YAML merge into dark baseline (TDD)</code>.</p>
+<hr />
+<h2 id="task-6-wire-styler-into-f18-tdd">Task 6: Wire Styler into F18
+(TDD)</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/cmd/cli/main.go</code>. Add new test
+<code>helix_code/cmd/cli/main_theme_wire_test.go</code> if a focused
+unit harness fits, otherwise the integration test in T07 carries the
+byte assertions.</p>
+<p>Three small additions in <code>cmd/cli/main.go</code>:</p>
+<ol type="1">
+<li><p>Construct <code>theme.Loader</code> adjacent to F18’s
+renderer:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>themeLoader <span class="op">:=</span> theme<span class="op">.</span>NewLoader<span class="op">(</span>theme<span class="op">.</span>LoaderOptions<span class="op">{})</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>styler<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> themeLoader<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;theme: %v; using built-ins&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> c<span class="op">.</span>renderer<span class="op">.</span>Mode<span class="op">()</span> <span class="op">==</span> render<span class="op">.</span>ModePlain <span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    styler <span class="op">=</span> styler<span class="op">.</span>WithDepth<span class="op">(</span>theme<span class="op">.</span>DepthOff<span class="op">)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span>styler <span class="op">=</span> styler</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span>themeLoader <span class="op">=</span> themeLoader</span></code></pre></div></li>
+<li><p>Wire the Styler into <code>handleGenerate</code>’s non-stream
+branch (the <code>RenderTextBlock</code> call added in F18-T08). Style
+the response body with <code>RoleInfo</code>; style any
+<code>err.Error()</code> output emitted on the same path with
+<code>RoleError</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>styled <span class="op">:=</span> c<span class="op">.</span>styler<span class="op">.</span>Stylize<span class="op">(</span>theme<span class="op">.</span>RoleInfo<span class="op">,</span> resp<span class="op">.</span>Text<span class="op">)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">:=</span> render<span class="op">.</span>RenderTextBlock<span class="op">(</span>c<span class="op">.</span>renderer<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> styled<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span></code></pre></div></li>
+<li><p>Add the <code>c.styler</code> and <code>c.themeLoader</code>
+fields to the <code>*CLI</code> struct.</p></li>
+</ol>
+<p>Failing tests FIRST (focus on the byte-evidence at the wire
+point):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCLIWire_HandleGenerate_FancyRenderer_StyledResponseHasANSIBytes<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// wire a real ansiRenderer (via FactoryOptions IsTTY=true) + real Styler</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// (dark + Truecolor) into a *CLI; call handleGenerate&#39;s non-stream branch</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// with a stub provider that returns &quot;hello&quot; → captured stdout MUST contain</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">//   \x1b[38;2;220;220;220mhello\x1b[0m</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// (one open + literal + one reset).</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCLIWire_PlainRenderer_StylerOverriddenToOff_NoANSIInOutput<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// wire a real plainRenderer + Styler force-overridden to DepthOff via</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// WithDepth; assert captured stdout contains &quot;hello&quot; but NO 0x1b byte.</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>If the existing <code>handleGenerate</code> test seam in
+<code>main.go</code> is too tangled for a focused unit test, defer the
+byte-assertions to T07’s integration test
+(<code>tests/integration/theme_test.go::TestTheme_Integration_FancyRenderer_DarkInfoEmitsANSI</code>).
+Either way, the byte-evidence is asserted via the production code path
+before T08’s Challenge.</p>
+<p>Subject:
+<code>feat(P1-F20-T06): wire theme.Styler into handleGenerate via F18 RenderTextBlock</code>.</p>
+<hr />
+<h2 id="task-7-theme-slash-command-integration-test-tdd">Task 7: /theme
+slash command + integration test (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/theme_command.go</code>, new
+<code>helix_code/internal/commands/theme_command_test.go</code>, modify
+<code>helix_code/cmd/cli/main.go</code> (one line: register the
+command), new <code>helix_code/tests/integration/theme_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p><code>theme_command.go</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ThemeCommand <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    styler <span class="op">*</span>theme<span class="op">.</span>Styler  <span class="co">// active styler</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">*</span>theme<span class="op">.</span>Loader  <span class="co">// for /theme list discovery (re-reads YAML names)</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewThemeCommand<span class="op">(</span>s <span class="op">*</span>theme<span class="op">.</span>Styler<span class="op">,</span> l <span class="op">*</span>theme<span class="op">.</span>Loader<span class="op">)</span> <span class="op">*</span>ThemeCommand <span class="op">{</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>ThemeCommand<span class="op">{</span>styler<span class="op">:</span> s<span class="op">,</span> loader<span class="op">:</span> l<span class="op">}</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ThemeCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;theme&quot;</span> <span class="op">}</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ThemeCommand<span class="op">)</span> Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span>    <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ThemeCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;Show the active theme, list available themes, or preview a theme by name.&quot;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ThemeCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span>        <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/theme [status|list|show &lt;name&gt;]&quot;</span> <span class="op">}</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ThemeCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> cc<span class="op">.</span>Args</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="st">&quot;status&quot;</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>args<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span> sub <span class="op">=</span> args<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">}</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> sub <span class="op">{</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;status&quot;</span><span class="op">:</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>status<span class="op">(),</span> <span class="ot">nil</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;list&quot;</span><span class="op">:</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>list<span class="op">(),</span> <span class="ot">nil</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;show&quot;</span><span class="op">:</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>args<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">2</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;/theme show &lt;name&gt;&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>show<span class="op">(</span>args<span class="op">[</span><span class="dv">1</span><span class="op">])</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;/theme: unknown subcommand %q (want status|list|show)&quot;</span><span class="op">,</span> sub<span class="op">)</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="co">// status prints &quot;active=&lt;name&gt; depth=&lt;depth&gt; source=&lt;source&gt;&quot; three-line table.</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ThemeCommand<span class="op">)</span> status<span class="op">()</span> <span class="op">*</span>CommandResult <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="co">// list prints all available theme names: built-ins + YAML; active one</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a><span class="co">// prefixed with &quot;* &quot; (RoleHighlight).</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ThemeCommand<span class="op">)</span> list<span class="op">()</span> <span class="op">*</span>CommandResult <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="co">// show looks up &lt;name&gt; in built-ins + YAML; renders the 5 sample lines using</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="co">// the named theme&#39;s palette at the active depth (per spec §4.3).</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ThemeCommand<span class="op">)</span> show<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestThemeCommand_Name_IsTheme<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;theme&quot;</span><span class="op">,</span> NewThemeCommand<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> <span class="ot">nil</span><span class="op">).</span>Name<span class="op">())</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestThemeCommand_Status_PrintsActiveNameAndDepthAndSource<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>theme<span class="op">.</span>Styler<span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span>  <span class="co">// dark + Truecolor + SourceEnv</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewThemeCommand<span class="op">(</span>s<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;status&quot;</span><span class="op">}})</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;active=dark&quot;</span><span class="op">)</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;depth=truecolor&quot;</span><span class="op">)</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;source=env&quot;</span><span class="op">)</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestThemeCommand_List_IncludesAllBuiltIns<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestThemeCommand_List_IncludesYAMLOverrides<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestThemeCommand_Show_KnownName_RendersFiveRoles<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestThemeCommand_Show_UnknownName_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewThemeCommand<span class="op">(</span><span class="co">/* ... */</span><span class="op">)</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;show&quot;</span><span class="op">,</span> <span class="st">&quot;nope&quot;</span><span class="op">}})</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestThemeCommand_Show_UsesNamedThemePalette_NotActive<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// active styler is dark+Truecolor; /theme show light produces light&#39;s</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Truecolor codes in the rendered samples.</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>main.go</code> registration:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> regErr <span class="op">:=</span> c<span class="op">.</span>commandRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewThemeCommand<span class="op">(</span>c<span class="op">.</span>styler<span class="op">,</span> c<span class="op">.</span>themeLoader<span class="op">));</span> regErr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;theme: register slash command failed: %v&quot;</span><span class="op">,</span> regErr<span class="op">)</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Integration tests (<code>tests/integration/theme_test.go</code> —
+<code>//go:build integration</code>; ALWAYS-runs):</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> integration</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTheme_Integration_FancyRenderer_DarkInfoEmitsANSI<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// wire real ansiRenderer (FactoryOptions IsTTY=true on bytes.Buffer) +</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// real Styler (dark, Truecolor) → RenderTextBlock with Stylize-wrapped text</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// → assert captured contains \x1b[38;2;220;220;220m AND &quot;hello&quot; AND \x1b[0m.</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTheme_Integration_PlainRenderer_StylerForcedOff_ZeroANSI<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// wire real plainRenderer + Styler force-overridden to DepthOff →</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// RenderTextBlock with Stylize-wrapped text → assert bytes.IndexByte(out, 0x1b) == -1.</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTheme_Integration_DepthAutoDetect_AllFourBranches<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4 sub-cases via injected Env closure on Loader.</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTheme_Integration_YAMLOverride_CustomNameLoads<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// os.MkdirTemp + write theme.yaml + LoaderOptions.ConfigDir injection.</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F20-T07): /theme slash command (status/list/show) + main.go wiring + integration test</code>.</p>
+<hr />
+<h2 id="task-8-challenge-harness-5-always-run-phases-positive-byte-evidence">Task
+8: Challenge harness (5 always-run phases, positive byte evidence)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p1f20_challenge/main.go</code>,
+new <code>challenges/p1-f20-theme-system/CHALLENGE.md</code>, new
+<code>challenges/p1-f20-theme-system/run.sh</code>.</p>
+<p>Harness phases (per spec §6.3):</p>
+<ol type="1">
+<li><strong>PHASE-A: BUILT-IN-DARK (always runs)</strong> — real
+<code>ansiRenderer</code> + Styler(dark, Truecolor) → write 5 styled
+tokens via
+<code>RenderTextBlock(r, &quot;&quot;, styler.Stylize(roleI, tokenI))</code> for
+the 5 roles → assert (i) captured contains
+<code>\x1b[38;2;220;220;220m</code> (Info Truecolor open), (ii) captured
+contains all 5 role-colored byte sequences, (iii)
+<code>bytes.Count(captured, []byte(&quot;\x1b[&quot;)) == 2 * 5</code> (one open +
+one reset per token).</li>
+<li><strong>PHASE-B: BUILT-IN-LIGHT (always runs)</strong> — same wiring
+with <code>light</code> theme + Truecolor → assert byte offsets put open
+&lt; literal &lt; reset for each token.</li>
+<li><strong>PHASE-C: PLAIN-MODE-ZERO-COLOR (always runs)</strong> — real
+<code>plainRenderer</code> + Styler(dark, Truecolor) force-overridden to
+<code>DepthOff</code> → write 100 styled tokens → assert
+<code>bytes.IndexByte(captured, 0x1b) == -1</code> AND captured contains
+all 100 token literals.</li>
+<li><strong>PHASE-D: DEPTH-AUTO-DETECT (always runs)</strong> — 6
+representative env combinations via <code>Loader</code> with injected
+<code>Env</code> closure → for each, assert resolved
+<code>(name, source, depth)</code> tuple matches expected:
+<ul>
+<li><code>{COLORTERM:truecolor, TERM:xterm-256color}</code> →
+<code>(dark, default, truecolor)</code></li>
+<li><code>{TERM:xterm-256color}</code> →
+<code>(dark, default, ansi256)</code></li>
+<li><code>{TERM:xterm}</code> →
+<code>(dark, default, ansi16)</code></li>
+<li><code>{TERM:dumb}</code> → <code>(dark, default, off)</code></li>
+<li><code>{}</code> → <code>(dark, default, off)</code></li>
+<li><code>{HELIXCODE_THEME:nope, COLORFGBG:15;0}</code> →
+<code>(dark, colorfgbg, off)</code> <em>(unknown env name + colorfgbg
+dark bg → fall through to dark via SourceColorFGBG)</em></li>
+</ul></li>
+<li><strong>PHASE-E: YAML-OVERRIDE (always runs)</strong> —
+<code>os.MkdirTemp</code> + write <code>theme.yaml</code> containing
+<code>custom-solarized</code> palette + Env injection
+(<code>HELIXCODE_THEME=custom-solarized</code>,
+<code>COLORTERM=truecolor</code>) + <code>Loader.Load()</code> → assert
+(i) <code>Styler.Theme().Name == &quot;custom-solarized&quot;</code>, (ii)
+<code>Stylize(RoleError, &quot;x&quot;) == &quot;\x1b[38;2;220;50;47m&quot; + &quot;x&quot; + &quot;\x1b[0m&quot;</code>,
+(iii) un-mentioned slot (e.g. RoleHighlight at ANSI16) inherits from
+<code>dark</code> (<code>\x1b[36m</code>).</li>
+</ol>
+<p>Output skeleton (verbatim per spec §6.3) ends with:</p>
+<pre><code>SUMMARY: PHASE-A=6/6 PASS; PHASE-B=4/4 PASS; PHASE-C=4/4 PASS; PHASE-D=6/6 PASS; PHASE-E=5/5 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch.
+Absence-of-error is NEVER acceptable. Anti-bluff smoke clean check
+appended to harness output. Verbatim output captured into
+<code>06_phase_1_evidence.md</code>. Dual commit (Challenges submodule +
+meta-repo bump).</p>
+<p><code>challenges/p1-f20-theme-system/run.sh</code> mirrors F18/F19
+structure:
+<code>cd HelixCode &amp;&amp; go run ./tests/integration/cmd/p1f20_challenge/main.go</code>.</p>
+<p>Subject:
+<code>feat(P1-F20-T08): challenge with 5 always-run phases + byte-count + zero-byte + depth-resolution + YAML-merge positive evidence</code>.</p>
+<hr />
+<h2 id="task-9-close-out-push-phase-1-programme-complete">Task 9:
+Close-out + push — PHASE 1 PROGRAMME COMPLETE</h2>
+<p>Tick all 9 items in PROGRESS, advance PROGRESS focus from F20 to
+<strong>“Phase 1 of CLI-Agent Fusion programme COMPLETE”</strong> (with
+a one-paragraph synthesis summarising the 20 features shipped + key
+invariants). Run final verification:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  internal/theme internal/commands/theme_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/theme/...</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/commands/...</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration ./tests/integration/...</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--exit-code</span> go.sum  <span class="co"># MUST be no-op (yaml.v3 was already in go.sum)</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff go.mod  <span class="co"># may show ONLY the yaml.v3 indirect→direct promotion line</span></span></code></pre></div>
+<p>Cross-compile check (matches F18/F19):</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="va">GOOS</span><span class="op">=</span>linux <span class="va">GOARCH</span><span class="op">=</span>amd64 <span class="ex">go</span> build <span class="at">-o</span> /tmp/helixcode-linux-amd64 ./cmd/server</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> /tmp/helixcode-linux-amd64  <span class="co"># confirm produced binary</span></span></code></pre></div>
+<p>Commit
+<code>chore(P1-F20-T09): close out feature 20 — Phase 1 of CLI-Agent Fusion programme COMPLETE</code>.
+Push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions). Request explicit user authorization at this step
+(CONST-043).</p>
+<p>PROGRESS.md milestone entry (verbatim):</p>
+<pre><code>- 2026-05-06 — Feature 20 (Theme System) closed. 9 task commits (T01 ..., T09 close-out).
+  Real, end-to-end 5-role semantic theme system for the HelixCode CLI agent: built-in
+  dark/light/none + optional YAML override at $XDG_CONFIG_HOME/helixcode/theme.yaml;
+  env-var (HELIXCODE_THEME) + $COLORFGBG fallback for theme name resolution;
+  $COLORTERM/$TERM auto-detect for color depth (Truecolor/ANSI256/ANSI16/Off);
+  /theme slash command (status/list/show &lt;name&gt;); zero new external deps
+  (yaml.v3 promoted indirect→direct, already in go.sum). [5-phase Challenge
+  evidence summary]. **Phase 1 of CLI-Agent Fusion programme COMPLETE — 20
+  features shipped (F01..F20).**</code></pre>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types + sentinels (§3.3), T03 built-in palettes (§3.4 byte tables),
+T04 detection (§3.6), T05 loader + Styler + YAML merge (§3.3 Styler API
++ §3.7 YAML schema + §5.5 cross-depth gap), T06 wire into F18 (§2
+wire-points + §4.1 startup), T07 /theme slash (§4.3) + integration tests
+(§6.2), T08 Challenge five phases (§5.2 + §6.3), T09 close-out (§9 +
+Phase 1 milestone).</li>
+<li><strong>TDD:</strong> every code task starts with failing tests.
+Built-in tests pin §3.4’s tables byte-for-byte (no rounding, no
+recomputation — the literals in code MUST equal the literals in spec).
+Detection tests use a <code>func(string) string</code> closure (no
+<code>os.Setenv</code> ever — pure-function tests). Loader tests use
+<code>fstest.MapFS</code> for YAML inputs. Styler tests assert byte
+equality on the wrapped text. /theme command tests use a constructed
+Styler value type (no mocks). Integration tests wire the production
+<code>Loader</code> + <code>Styler</code> end-to-end through F18’s real
+<code>ansiRenderer</code> and <code>plainRenderer</code>.</li>
+<li><strong>Type consistency:</strong> <code>Theme</code>,
+<code>Role</code>, <code>Color</code>, <code>ColorDepth</code>,
+<code>ThemeName</code>, <code>Styler</code>, <code>LoaderOptions</code>,
+<code>ResolvedSource</code>, error sentinels
+(<code>ErrUnknownTheme</code>, <code>ErrInvalidYAML</code>,
+<code>ErrInvalidRole</code>), constants (<code>Reset</code>,
+<code>numRoles</code>, <code>ThemeDarkName</code>,
+<code>ThemeLightName</code>, <code>ThemeNoneName</code>,
+<code>SourceEnv</code>, <code>SourceColorFGBG</code>,
+<code>SourceDefault</code>), command name <code>theme</code>, env var
+<code>HELIXCODE_THEME</code> — all match across spec §3.3 and plan
+T02–T07.</li>
+<li><strong>Zero new external deps:</strong> stdlib + existing
+testify/zap + <code>gopkg.in/yaml.v3</code> (indirect→direct promotion
+only; the module is already in <code>go.sum</code> via viper/cobra).
+<code>go mod tidy</code> after T05 produces ONLY the indirect→direct
+promotion line in <code>go.mod</code>; ZERO new entries in
+<code>go.sum</code>. T09’s verification step asserts
+<code>git diff --exit-code go.sum</code> is no-op.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has FIVE always-run
+phases. Every phase records positive evidence: byte counts (Phase A:
+exactly 2 ANSI sequences per token), byte content + ordering (Phase B:
+open &lt; literal &lt; reset by offset), zero-byte invariants (Phase C:
+<code>bytes.IndexByte == -1</code>), depth-resolution byte-equality
+(Phase D: 6 env combos), YAML-merge byte-equality (Phase E: custom +
+inherited slots). The four real-execution criteria — (a) production
+Styler emits expected bytes for each (role × depth) (Phase A/B); (b)
+plain mode + force-Off Styler produces zero <code>0x1b</code> (Phase C);
+(c) detection covers all four depth branches (Phase D); (d) YAML
+override merges into dark baseline correctly (Phase E) — each have
+dedicated unit + integration + Challenge assertions. Source-scan unit
+test ensures no call site bypasses the Styler with direct palette
+indexing. Byte-evidence mismatch is a hard Challenge failure.</li>
+<li><strong>CONST-042:</strong> theme YAML carries no secrets (color
+codes are non-sensitive); file mode 0644 is acceptable. Loader does NOT
+log file contents at any level. A unit test scans
+<code>internal/theme/*.go</code> for
+<code>logger\.\b(Info|Debug)\b.*\b(palette|color|open|reset)\b</code>
+matches and FAILS on any hit (defensive log discipline; consistent with
+F19’s stance even though there are no actual secrets to leak here).</li>
+<li><strong>CONST-043:</strong> stays on <code>main</code>, non-force to
+all four remotes; explicit user authorization is requested at T09 before
+pushing.</li>
+<li><strong>CONST-033:</strong> F20 emits SGR
+(<code>\x1b[&lt;n&gt;m</code>) sequences only — no device-status-report,
+no terminal-state-mutation escapes. Spec §9 records this
+explicitly.</li>
+<li><strong>Decorator pattern (Stylize wraps text) vs renderer extension
+— non-obvious call</strong> (recorded in spec §2 trailer + §11 #1):
+keeps F18’s <code>Renderer</code> interface unchanged; plain mode
+statically proves no-leak via <code>DepthOff</code>; tests pin byte
+sequences without instantiating a renderer; migration is incremental
+(un-migrated call sites still emit unstyled text correctly).</li>
+<li><strong>Five roles, not three or seven — non-obvious call</strong>
+(recorded in spec §11 #2): <code>Info</code> / <code>Warn</code> /
+<code>Error</code> / <code>Highlight</code> / <code>Dim</code> covers
+the 80% case. Three is too few (no accent for chosen choice / current
+model name); seven adds noise (<code>Success</code> overlaps
+<code>Info</code>, <code>Critical</code> overlaps
+<code>Error</code>).</li>
+<li><strong>Per-Theme <code>[5]Color</code> × 3 depth tiers (no runtime
+cross-depth conversion) — non-obvious call</strong> (recorded in spec
+§11 #3): a theme designer hand-picks codes per depth so a
+<code>Truecolor</code> palette is not auto-derived from ANSI16 (which
+would lose the designer’s intent); cost is more YAML lines for a custom
+theme; benefit is faithful palette rendering.</li>
+<li><strong><code>$COLORFGBG</code> parsing is opportunistic, NOT
+configured — non-obvious call</strong> (recorded in spec §11 #4):
+malformed values fall through silently (no warn) because terminal
+emulators set this inconsistently (xterm sets <code>15;0</code>,
+gnome-terminal sets <code>7;0</code>, alacritty does not set it at all);
+warn-on-unparseable would WARN-spam every alacritty user.</li>
+<li><strong>Plain-mode forces Styler depth=Off via
+<code>WithDepth(DepthOff)</code> at startup — non-obvious call</strong>
+(recorded in spec §11 #5): belt-and-suspenders against future
+regressions in the renderer or Styler. Even if
+<code>DetectColorDepth</code> returns Truecolor, plain-mode
+<code>Stylize</code> is identity. Test
+<code>TestStyler_Stylize_DepthOff_IdentityForAllRoles</code> pins
+this.</li>
+<li><strong>YAML merge always starts from <code>dark</code> in v1 —
+non-obvious call</strong> (recorded in spec §11 #6): no
+<code>base:</code> field. Merge semantics simple (overlay slot-by-slot);
+optional base-selection deferred to F20.5. v1 docs the limitation in
+§3.7.</li>
+<li><strong><code>none</code> theme is distinct from depth=Off —
+non-obvious call</strong> (recorded in spec §11 #7): both produce
+identical bytes (<code>Stylize(role, x) == x</code>); the distinction
+matters for <code>/theme status</code> (source / depth reporting) and
+for tests that pin each path independently.</li>
+<li><strong>Styler does NOT probe TTY itself — non-obvious call</strong>
+(recorded in spec §11 #8): F18’s renderer factory is the source of
+truth; F20’s startup code reads <code>renderer.Mode()</code> and
+conditionally overrides the Styler. Two probes would risk drift.</li>
+<li><strong><code>/theme show &lt;name&gt;</code> previews the named
+theme’s palette, NOT the active styler’s — non-obvious call</strong>
+(recorded in spec §11 #9): the user is asking “what does light look
+like”; the answer must use light’s data. Test
+<code>TestThemeCommand_Show_UsesNamedThemePalette_NotActive</code> pins
+this.</li>
+<li><strong>Phase 1 close-out:</strong> F20 is the
+<strong>final</strong> Phase 1 feature. T09 commit subject + PROGRESS.md
+milestone entry both record “Phase 1 of CLI-Agent Fusion programme
+COMPLETE” alongside the F20 close-out summary. The 20 features shipped
+(F01..F20) span auto-compaction, permission rules, tool-result
+persistence, git-worktree agent isolation, hooks, MCP, background tasks,
+plan mode, slash commands, skills, session resume, multi-provider, LSP,
+sandboxed shell, subagent team, OpenTelemetry, smart edit, no-flicker
+rendering, ask-user, and theme system.</li>
+</ol>
+</body>
+</html>

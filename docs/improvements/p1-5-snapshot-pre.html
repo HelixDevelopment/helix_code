@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>p1-5-snapshot-pre</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">p1-5-snapshot-pre</h1>
+</header>
+<h1 id="phase-1.5-pre-state-snapshot-foundation-cleanup">Phase 1.5
+Pre-State Snapshot — Foundation Cleanup</h1>
+<p><strong>Captured:</strong> 2026-05-06T16:29 +03:00
+<strong>Purpose:</strong> Reversibility anchor per Article XI §11.9. Any
+later WP that breaks the submodule tree must be diagnosable +
+rollback-able from this file.</p>
+<p><strong>WP1 status at capture:</strong> Pre-WP1 cleanup complete
+(HelixAgent gitlinks committed, Challenges gitlinks committed, root
+tracked changes committed, Example_Projects/ fully removed, .gitignore
+updated). Recursive <code>git submodule update --init</code> ran but
+ABORTED with three unreachable remotes (see §Reachability). T01.01
+evidence is partial (160/196 submodules accounted for; init aborted by
+HelixAgent DebateOrchestrator double-failure). Halted at user
+STOP-protocol checkpoint.</p>
+<hr />
+<h2 id="initial-commit-set-root-meta-repo-pre-wp1-state">Initial
+commit-set (root meta-repo) — pre-WP1 state</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Step</th>
+<th>Commit SHA</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1a (HelixAgent)</td>
+<td><code>aad6a67d</code></td>
+<td>chore(governance-cascade): preserve in-flight nested gitlink updates
+pre-P1.5</td>
+</tr>
+<tr>
+<td>1b (Challenges)</td>
+<td><code>47dc905a</code></td>
+<td>chore(P1.5): preserve nested gitlink updates
+pre-foundation-cleanup</td>
+</tr>
+<tr>
+<td>1c (root)</td>
+<td><code>d0ad6fd3</code></td>
+<td>chore(P1.5): preserve in-flight tracked changes + submodule gitlink
+advances pre-foundation-cleanup</td>
+</tr>
+<tr>
+<td>2 (Examples)</td>
+<td><code>ad5e108c</code></td>
+<td>feat(P1.5-pre): remove Example_Projects/ entirely</td>
+</tr>
+<tr>
+<td>3 (gitignore)</td>
+<td><code>cff2d90f</code></td>
+<td>chore(P1.5-pre): gitignore phase-1 development artefacts</td>
+</tr>
+</tbody>
+</table>
+<p>Root HEAD at capture:
+<code>cff2d90fe550fe069eb3632b7074c412e69c6ddb</code>
+(<code>main</code>).</p>
+<h2 id="submodule-counts-post-init-pre-fetch-loop">Submodule counts
+(post-init, pre-fetch-loop)</h2>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Initialised</th>
+<th>Uninitialised</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Whole tree (<code>git submodule status --recursive</code>)</td>
+<td>~160</td>
+<td>36</td>
+<td>~196</td>
+</tr>
+<tr>
+<td>Root meta-repo <code>.gitmodules</code></td>
+<td>21</td>
+<td></td>
+<td>21</td>
+</tr>
+<tr>
+<td>HelixAgent <code>.gitmodules</code></td>
+<td>~134</td>
+<td>36</td>
+<td>170</td>
+</tr>
+</tbody>
+</table>
+<p>Top-level uninitialised: helix_agent/DebateOrchestrator
+(unreachable), helix_agent/HelixLLM/submodules/* (~33 entries deferred
+since Phase 0), helix_agent/cli_agents/{kiro-cli,ollama-code}
+(unreachable upstream).</p>
+<p>Captured listing: <code>docs/improvements/p1-5-fetch.log</code> (init
+log) and <code>docs/improvements/p1-5-remote-reachability.md</code>
+(per-URL ls-remote result).</p>
+<h2 id="reachability-the-wp1-stop">Reachability — the WP1 STOP</h2>
+<p>Comprehensive ls-remote sweep across 181 unique URLs (root +
+HelixAgent combined) found <strong>3 truly unreachable remotes</strong>
+(after a 30s-timeout retry to filter 2 false-positives caused by
+15s-timeout flake on cold SSH sessions):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule (HelixAgent path)</th>
+<th>URL</th>
+<th>Status</th>
+<th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>helix_agent/DebateOrchestrator</td>
+<td><code>git@github.com:vasic-digital/DebateOrchestrator.git</code></td>
+<td>UNREACHABLE</td>
+<td>vasic-digital owned — repo missing/never-created. Needs user
+decision: create vs delete.</td>
+</tr>
+<tr>
+<td>helix_agent/cli_agents/kiro-cli</td>
+<td><code>git@github.com:stark1tty/kiro-cli.git</code></td>
+<td>UNREACHABLE</td>
+<td>Third-party fork deleted upstream. Already in Phase 0 §3.3 parking
+lot.</td>
+</tr>
+<tr>
+<td>helix_agent/cli_agents/ollama-code</td>
+<td><code>git@github.com:tcsenpai/ollama-code.git</code></td>
+<td>UNREACHABLE</td>
+<td>Third-party repo deleted upstream. Same parking-lot
+disposition.</td>
+</tr>
+</tbody>
+</table>
+<p><code>git submodule update --init --recursive</code> aborted on
+DebateOrchestrator (double-failure-aborts behaviour). The pull-loop
+(<code>foreach --recursive ... git fetch + git pull --ff-only</code>)
+ran against ~155 initialised submodules in sequence, then was killed at
+<code>helix_agent/cli_agents/HelixCode</code> (a circular self-reference
+whose HEAD is <code>refs/heads/.invalid</code> and therefore
+non-fetchable — scheduled for removal in plan T02.01).</p>
+<p>Pull-loop log: <code>docs/improvements/p1-5-pull.log</code> (548
+lines, ~155 submodules processed before kill).</p>
+<p>Per user STOP protocol, WP1 is halted here pending user decision on
+the 3 unreachable remotes. Reachability detail in
+<code>docs/improvements/p1-5-remote-reachability.md</code>.</p>
+<h2 id="gitmodules-content-root-meta-repo-post-example_projects-removal">.gitmodules
+content (root meta-repo, post-Example_Projects removal)</h2>
+<p>Root <code>.gitmodules</code> is now 63 lines (was 264 lines
+pre-removal). All 67 <code>Example_Projects/...</code> blocks removed;
+remaining entries: - Challenges, HelixAgent, HelixQA, Containers,
+Security, Assets, Github-Pages-Website, dependencies/{LLama_CPP, Ollama,
+HuggingFace_Hub}.</p>
+<p>HelixAgent <code>.gitmodules</code> unchanged: 170 submodules across
+cli_agents/, MCP/, HelixLLM/submodules/, Toolkit/, Veritas,
+VisionEngine, etc.</p>
+<h2 id="dirty-state-per-submodule-post-init">Dirty-state per submodule
+(post-init)</h2>
+<p><code>git status</code> at root reports <code>M HelixAgent</code>
+only — the bare M reflects the <code>-dirty</code> suffix on
+HelixAgent’s gitlink because HelixAgent has nested unstageable submodule
+modifications cascade. No tracked-modified files at root after the
+5-commit pre-WP1 cleanup.</p>
+<p>Inside HelixAgent: 94 nested gitlinks still show <code>-dirty</code>
+because their own inner submodules carry uncommitted work (the
+intentional “preserve in-flight state” from Step 1a above). These
+dirty-trees are committed at the HelixAgent gitlink-pin-bumping level
+(<code>aad6a67d</code>) but the inner submodule WIP was not walked
+deeper — by user mandate.</p>
+<h2 id="decided-canonical-paths-for-wp3-dedup-placeholder-populated-by-t01.04">Decided
+canonical paths for WP3 dedup (placeholder — populated by T01.04)</h2>
+<p>See <code>docs/improvements/p1-5-dedup-canonical.md</code>.</p>
+<h2 id="rollback-recipe">Rollback recipe</h2>
+<p>If WP2/WP3 breaks the submodule tree:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Restore root meta to pre-WP1</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> reset <span class="at">--hard</span> cff2d90f</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule sync <span class="at">--recursive</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span> <span class="at">--force</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Restore HelixAgent to its pre-WP1 commit</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixAgent</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> reset <span class="at">--hard</span> aad6a67d</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule sync <span class="at">--recursive</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span> <span class="at">--force</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Restore Challenges to its pre-WP1 commit</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> Challenges</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> reset <span class="at">--hard</span> 47dc905a</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Re-add the four root remotes if any push partially landed</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote <span class="at">-v</span>   <span class="co"># confirm origin/github/gitlab/upstream all present</span></span></code></pre></div>
+<p>The destructive <code>--hard</code> is intentional for rollback. Do
+NOT run unless WP2/WP3 left the tree unrecoverable.</p>
+<h2 id="open-issues-at-this-snapshot">Open issues at this snapshot</h2>
+<ol type="1">
+<li>Three unreachable remotes (DebateOrchestrator, kiro-cli,
+ollama-code). See §Reachability. <strong>WP1 STOP — user decision
+required.</strong></li>
+<li>HelixAgent has 94 nested <code>-dirty</code> gitlinks. Captured in
+commit <code>aad6a67d</code> but not walked deeper.</li>
+<li>helix_agent/HelixLLM/submodules/* (~33 entries) remain uninitialised
+from Phase 0 — out of scope for P1.5.</li>
+<li>Recursive fetch+pull-loop (T01.01 second half) was started but is
+still running at capture; partial output in
+<code>/tmp/p1-5-pull.log</code>.</li>
+</ol>
+</body>
+</html>

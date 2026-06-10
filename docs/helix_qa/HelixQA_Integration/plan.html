@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">plan</h1>
+</header>
+<h1 id="plan-helixqa-full-integration-into-helixcode-system">Plan:
+HelixQA Full Integration into HelixCode System</h1>
+<h2 id="overview">Overview</h2>
+<p>Deep, bluff-proof integration of the HelixQA submodule (with all its
+dependencies) into the HelixCode enterprise CLI agent system, with an
+example integration into the Catalogizer project. The goal is
+enterprise-grade QA coverage (100% of all supported test types and
+Challenges) that actually guarantees real functionality—not just passing
+tests that don’t verify real usability.</p>
+<hr />
+<h2 id="stage-1-deep-repository-analysis-parallel-research-swarm">Stage
+1 — Deep Repository Analysis (Parallel Research Swarm)</h2>
+<p><strong>Skill</strong>: <code>deep-research-swarm</code>
+<strong>Objective</strong>: Exhaustive analysis of all three
+repositories and all documentation.</p>
+<h3 id="sub-agents-all-parallel">Sub-agents (all parallel):</h3>
+<ol type="1">
+<li><strong>HelixCode_Architecture_Analyst</strong>: Deep-dive into
+HelixCode repo structure, submodules, CLI architecture, client app types
+(Web, Desktop, Mobile, CLI, TUI), APIs/Services, configuration, build
+system, existing test infrastructure, and all MD docs.</li>
+<li><strong>HelixQA_Architecture_Analyst</strong>: Deep-dive into
+HelixQA repo—its testing framework, supported test types, Challenge
+system, screenshot capabilities, AI-driven QA sessions, dependencies,
+and all documentation.</li>
+<li><strong>Catalogizer_Integration_Analyst</strong>: Deep-dive into
+Catalogizer repo to understand how it integrates with HelixCode and how
+HelixQA can be added as a submodule.</li>
+<li>**Docs_&amp;_Guides_Analyst**: Read ALL README, CLAUDE.MD,
+AGENTS.MD, manuals, user guides, architecture diagrams in all three
+repos.</li>
+<li>**QA_Types_&amp;_Challenges_Analyst**: Map every test type,
+Challenge type, and AI-driven QA capability in HelixQA; cross-reference
+with HelixCode’s client matrix.</li>
+<li>**UX_&amp;_Enterprise_Analyst**: Map the translation-tool UX,
+provider/model support, enterprise-grade requirements, and how QA must
+cover end-user workflows.</li>
+</ol>
+<p><strong>Output</strong>: Six detailed research briefs covering exact
+file paths, line ranges, architectural decisions, gaps, and integration
+points.</p>
+<hr />
+<h2 id="stage-2-cross-validation-gap-analysis">Stage 2 —
+Cross-Validation &amp; Gap Analysis</h2>
+<p><strong>Skill</strong>: <code>deep-research-swarm</code> (synthesis
+phase) <strong>Objective</strong>: Cross-check findings, identify
+anti-bluff gaps, missing test coverage, and screenshot requirements.</p>
+<h3 id="sub-agents">Sub-agents:</h3>
+<ol type="1">
+<li><strong>Cross_Validator</strong>: Reconcile all six briefs, flag
+contradictions or omissions.</li>
+<li><strong>Gap_Analyst</strong>: Identify every place where tests exist
+but don’t actually verify real usability; map missing coverage for
+Web/Desktop/Mobile/CLI/TUI.</li>
+<li><strong>Screenshot_Requirements_Analyst</strong>: Define exact
+on-demand screenshot pipeline requirements per client app type during
+HelixQA sessions.</li>
+<li>**Constitution_&amp;_Governance_Analyst**: Check all CLAUDE.MD,
+AGENTS.MD, Constitution files for anti-bluff testing mandates; identify
+missing ones.</li>
+</ol>
+<p><strong>Output</strong>: Validated, gap-free consolidated brief with
+risk register.</p>
+<hr />
+<h2 id="stage-3-master-integration-plan-writing">Stage 3 — Master
+Integration Plan Writing</h2>
+<p><strong>Skill</strong>: <code>report-writing</code>
+<strong>Objective</strong>: Produce the final, in-depth, phase-by-phase
+integration plan.</p>
+<h3 id="structure-of-the-plan">Structure of the Plan:</h3>
+<ul>
+<li><strong>Phase 0: Constitution &amp; Governance Update</strong> —
+Update CLAUDE.MD, AGENTS.MD, Constitution across all submodules with
+anti-bluff mandate.</li>
+<li><strong>Phase 1: Submodule Dependency Resolution</strong> — Exact
+git submodule commands, dependency mapping, version locking.</li>
+<li><strong>Phase 2: HelixQA Core Integration into HelixCode</strong> —
+Exact files, line references, configuration injection, CLI command
+registration.</li>
+<li><strong>Phase 3: Screenshot Pipeline Implementation</strong> —
+On-demand screenshot architecture per client app (Web, Desktop, Mobile,
+CLI, TUI).</li>
+<li><strong>Phase 4: Test Type &amp; Challenge Coverage Matrix</strong>
+— 100% coverage mapping for every test type and Challenge.</li>
+<li><strong>Phase 5: Catalogizer Example Integration</strong> —
+Step-by-step, line-by-line integration of HelixQA into Catalogizer.</li>
+<li><strong>Phase 6: Anti-Bluff Testing Framework</strong> —
+Real-usability verification layer, synthetic-user workflows, end-to-end
+guarantees.</li>
+<li><strong>Phase 7: AI-Driven QA Session Orchestration</strong> — How
+HelixQA drives heavy QA sessions across all clients and APIs.</li>
+<li><strong>Phase 8: Enterprise UX Validation</strong> —
+Translation-tool UX validation across providers and models.</li>
+<li><strong>Phase 9: CI/CD &amp; Automation Integration</strong> —
+HelixQA in CI/CD, nightly heavy QA sessions, reporting.</li>
+<li><strong>Phase 10: Monitoring, Reporting &amp; Compliance</strong> —
+Dashboards, coverage reports, compliance with Constitution.</li>
+</ul>
+<p><strong>Output</strong>: <code>helixqa-integration-plan.md</code>
+(final master document).</p>
+<hr />
+<h2 id="stage-4-conversion-to-professional-document">Stage 4 —
+Conversion to Professional Document</h2>
+<p><strong>Skill</strong>: <code>docx</code> <strong>Objective</strong>:
+Convert the final Markdown plan to a professionally formatted Word
+document.</p>
+<p><strong>Output</strong>:
+<code>helixqa-integration-plan.docx</code></p>
+<hr />
+<h2 id="file-propagation">File Propagation</h2>
+<ul>
+<li>Stage 1 outputs → Stage 2 inputs (all six briefs)</li>
+<li>Stage 2 output → Stage 3 input (consolidated brief)</li>
+<li>Stage 3 output → Stage 4 input (helixqa-integration-plan.md)</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-mandate">Anti-Bluff Mandate</h2>
+<p>Every recommendation in the final plan MUST include: 1. Exact file
+path and line range 2. What the current code does 3. What the gap/risk
+is 4. Exact change to make 5. How the change guarantees real usability
+(not just test-passing) 6. Challenge/test that proves real usability</p>
+<p>This mandate MUST be codified in all Constitution/CLAUDE.MD/AGENTS.MD
+files.</p>
+</body>
+</html>

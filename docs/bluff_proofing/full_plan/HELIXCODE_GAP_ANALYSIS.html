@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HELIXCODE_GAP_ANALYSIS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HELIXCODE_GAP_ANALYSIS</h1>
+</header>
+<h1 id="helixcode-comprehensive-gap-analysis-bluff-assessment">HelixCode
+Comprehensive Gap Analysis &amp; Bluff Assessment</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p><strong>Date</strong>: 2026-04-30 <strong>Scope</strong>: HelixCode
+(https://github.com/HelixDevelopment/HelixCode) vs HelixAgent
+(https://github.com/HelixDevelopment/HelixAgent) and Tier 1 CLI Agents
+<strong>Assessment Type</strong>: Zero-Bluff Verification
+<strong>Status</strong>: CRITICAL GAPS IDENTIFIED</p>
+<p>HelixCode advertises itself as a “FULLY COMPLETE” enterprise-grade
+distributed AI development platform with 5 completed implementation
+phases. However, our forensic code analysis reveals a
+<strong>significant bluff-to-reality gap</strong>: while the project has
+solid architectural foundations in some areas (authentication,
+configuration structure), <strong>core advertised features are simulated
+rather than implemented</strong>. This document catalogs every verified
+bluff, every real implementation, and every gap that must be closed for
+HelixCode to exceed Tier 1 CLI agent capabilities.</p>
+<hr />
+<h2 id="bluff-taxonomy-applied-to-helixcode">1. Bluff Taxonomy Applied
+to HelixCode</h2>
+<p>Using the CONST-035 anti-bluff mandate from HelixAgent’s governance
+framework, we classify every finding:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Bluff Type</th>
+<th>Definition</th>
+<th>HelixCode Instances</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Wrapper Bluff</strong></td>
+<td>Test passes but wrapper logic is buggy</td>
+<td>Challenge scripts may pass without verifying actual behavior</td>
+</tr>
+<tr>
+<td><strong>Contract Bluff</strong></td>
+<td>System advertises capability but rejects in dispatch</td>
+<td>LLM generation simulated, not real</td>
+</tr>
+<tr>
+<td><strong>Structural Bluff</strong></td>
+<td>File exists but doesn’t contain working code</td>
+<td>Multiple <code>*_test.go</code> files may only test stubs</td>
+</tr>
+<tr>
+<td><strong>Comment Bluff</strong></td>
+<td>Comment promises behavior code doesn’t have</td>
+<td>“For now, simulate generation” - CLI main.go:196</td>
+</tr>
+<tr>
+<td><strong>Skip Bluff</strong></td>
+<td>Tests skipped without SKIP-OK marker</td>
+<td>To be verified across test suite</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="verified-bluffs-confirmed-by-code-inspection">2. VERIFIED BLUFFS
+(Confirmed by Code Inspection)</h2>
+<h3 id="bluff-001-llm-generation-is-completely-simulated-critical">BLUFF-001:
+LLM Generation is Completely Simulated (CRITICAL)</h3>
+<p><strong>Location</strong>: <code>helix_code/cmd/cli/main.go</code>
+lines 190-214 <strong>Severity</strong>: CRITICAL <strong>Bluff
+Type</strong>: Contract + Comment</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Line 196: &quot;For now, simulate generation&quot;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Line 197: &quot;In production, this would use the actual LLM provider&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> stream <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    words <span class="op">:=</span> strings<span class="op">.</span>Split<span class="op">(</span>prompt<span class="op">+</span><span class="st">&quot; This is a simulated streaming response from the model.&quot;</span><span class="op">,</span> <span class="st">&quot; &quot;</span><span class="op">)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> word <span class="op">:=</span> <span class="kw">range</span> words <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;%s &quot;</span><span class="op">,</span> word<span class="op">)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">100</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    response <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;Generated response for: %s</span><span class="ch">\n\n</span><span class="st">This is a simulated response...&quot;</span><span class="op">,</span> prompt<span class="op">,</span> model<span class="op">)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Println<span class="op">(</span>response<span class="op">)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Evidence</strong>: The CLI’s <code>--prompt</code> flag does
+NOT connect to any LLM provider. It simply echoes back the prompt with
+canned text. The <code>llm.Provider</code> interface is imported but
+never used for actual generation.</p>
+<p><strong>Impact</strong>: Users following the README’s documented CLI
+usage (<code>./cli --prompt &quot;Hello world&quot; --model llama-3-8b</code>)
+receive fake responses, not AI-generated content.</p>
+<p><strong>Fix Required</strong>: 1. Implement actual provider dispatch
+in <code>handleGenerate()</code> 2. Connect to real LLM providers
+(Ollama, Llama.cpp, OpenAI, etc.) 3. Implement actual streaming via
+provider’s streaming interface 4. Add comprehensive tests that verify
+REAL HTTP calls to providers</p>
+<hr />
+<h3 id="bluff-002-model-listing-is-hardcoded-not-dynamic-critical">BLUFF-002:
+Model Listing is Hardcoded, Not Dynamic (CRITICAL)</h3>
+<p><strong>Location</strong>: <code>helix_code/cmd/cli/main.go</code>
+lines 101-128 <strong>Severity</strong>: CRITICAL <strong>Bluff
+Type</strong>: Contract + Comment</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Line 104: &quot;For now, return static list&quot;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Line 105: &quot;In production, this would query the model manager&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>models <span class="op">:=</span> <span class="op">[]</span><span class="kw">struct</span><span class="op">{...}{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span><span class="st">&quot;llama-3-8b&quot;</span><span class="op">,</span> <span class="st">&quot;Llama 3 8B&quot;</span><span class="op">,</span> <span class="st">&quot;llama.cpp&quot;</span><span class="op">,</span> <span class="dv">8192</span><span class="op">,</span> <span class="st">&quot;available&quot;</span><span class="op">},</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span><span class="st">&quot;mistral-7b&quot;</span><span class="op">,</span> <span class="st">&quot;Mistral 7B&quot;</span><span class="op">,</span> <span class="st">&quot;ollama&quot;</span><span class="op">,</span> <span class="dv">4096</span><span class="op">,</span> <span class="st">&quot;available&quot;</span><span class="op">},</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span><span class="st">&quot;phi-3-mini&quot;</span><span class="op">,</span> <span class="st">&quot;Phi-3 Mini&quot;</span><span class="op">,</span> <span class="st">&quot;openai&quot;</span><span class="op">,</span> <span class="dv">128000</span><span class="op">,</span> <span class="st">&quot;available&quot;</span><span class="op">},</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Evidence</strong>: Only 3 hardcoded models are returned. The
+system advertises 15+ providers and “intelligent model selection based
+on capabilities” but cannot actually list available models from any
+provider.</p>
+<p><strong>Fix Required</strong>: 1. Implement provider model discovery
+for each provider (Ollama /api/tags, OpenAI /v1/models, etc.) 2. Cache
+model lists with TTL 3. Implement capability-based filtering 4. Test
+with REAL provider endpoints</p>
+<hr />
+<h3 id="bluff-003-command-execution-is-simulated-high">BLUFF-003:
+Command Execution is Simulated (HIGH)</h3>
+<p><strong>Location</strong>: <code>helix_code/cmd/cli/main.go</code>
+lines 237-250 <strong>Severity</strong>: HIGH <strong>Bluff
+Type</strong>: Contract + Comment</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Line 243: &quot;For now, simulate command execution&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Line 244: &quot;In production, this would execute on a worker&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Executing: %s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> command<span class="op">)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">1</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Command completed successfully</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Evidence</strong>: The <code>--command</code> flag and
+interactive <code>handleCommand()</code> do NOT execute any commands.
+They just sleep for 1 second and print success.</p>
+<p><strong>Fix Required</strong>: 1. Implement actual shell execution
+with sandboxing (whitelist, timeout, resource limits) 2. Implement
+worker dispatch for distributed execution 3. Capture stdout/stderr 4.
+Return actual exit codes 5. Security validation against command
+blocklist</p>
+<hr />
+<h3 id="bluff-004-worker-pool-statistics-may-be-simulated-high">BLUFF-004:
+Worker Pool Statistics May Be Simulated (HIGH)</h3>
+<p><strong>Location</strong>: <code>helix_code/cmd/cli/main.go</code>
+lines 86-99 <strong>Severity</strong>: HIGH <strong>Bluff Type</strong>:
+Contract (to be verified)</p>
+<p><code>handleListWorkers()</code> calls
+<code>c.workerPool.GetWorkerStats(ctx)</code> which returns statistics.
+Without seeing the full <code>internal/worker/</code> implementation, we
+cannot confirm if workers are actually connected and health-checked, or
+if stats are fabricated.</p>
+<p><strong>Verification Required</strong>: Read
+<code>internal/worker/worker.go</code>,
+<code>internal/worker/pool.go</code>,
+<code>internal/worker/ssh.go</code></p>
+<p><strong>Fix Required</strong> (if bluff confirmed): 1. Implement real
+SSH connection management 2. Implement health checks with actual TCP/SSH
+probes 3. Implement task distribution to real workers 4. Implement
+worker auto-installation via SSH</p>
+<hr />
+<h3 id="bluff-005-minimal-go-dependencies-vs-advertised-features-high">BLUFF-005:
+Minimal Go Dependencies vs Advertised Features (HIGH)</h3>
+<p><strong>Location</strong>: <code>helix_code/go.mod</code>
+<strong>Severity</strong>: HIGH <strong>Bluff Type</strong>:
+Structural</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>module dev<span class="op">.</span>helix<span class="op">.</span>code</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">go</span> <span class="fl">1.25</span><span class="er">.2</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>require <span class="op">(</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>google<span class="op">/</span>uuid v1<span class="fl">.6</span><span class="er">.0</span> <span class="co">// indirect</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>pkg<span class="op">/</span>errors v0<span class="fl">.9</span><span class="er">.1</span> <span class="co">// indirect</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    gopkg<span class="op">.</span>in<span class="op">/</span>yaml<span class="op">.</span>v2 v2<span class="fl">.4</span><span class="er">.0</span> <span class="co">// indirect</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p><strong>Evidence</strong>: The root <code>go.mod</code> has ONLY 3
+dependencies. The AGENTS.md advertises: - Gin HTTP framework v1.11.0 -
+NOT in go.mod - JWT v4.5.2 - NOT in go.mod (but internal/auth imports
+jwt/v4 - inconsistent) - pgx/v5 PostgreSQL driver - NOT in go.mod -
+Viper configuration - NOT in go.mod - Cobra CLI - NOT in go.mod -
+chromedp browser automation - NOT in go.mod - go-tree-sitter - NOT in
+go.mod - tview terminal UI - NOT in go.mod - Fyne desktop UI - NOT in
+go.mod</p>
+<p><strong>Fix Required</strong>: 1. Create proper <code>go.mod</code>
+with ALL advertised dependencies 2. Run <code>go mod tidy</code> to
+verify all imports resolve 3. Ensure the project actually compiles with
+all features</p>
+<hr />
+<h3 id="bluff-006-notification-system---unknown-real-implementation-medium">BLUFF-006:
+Notification System - Unknown Real Implementation (MEDIUM)</h3>
+<p><strong>Location</strong>: <code>helix_code/cmd/cli/main.go</code>
+lines 217-235 <strong>Severity</strong>: MEDIUM <strong>Bluff
+Type</strong>: Contract (partial)</p>
+<p>The notification system imports <code>internal/notification</code>
+and calls <code>SendDirect()</code>. Without reading the full
+notification package, we cannot confirm if: - Slack webhooks are
+actually sent - Discord notifications are dispatched - Email SMTP
+connections are made - Telegram bots are invoked</p>
+<p><strong>Verification Required</strong>: Read
+<code>internal/notification/</code> package files</p>
+<hr />
+<h3 id="bluff-007-database-schema-advertised-but-not-verified-medium">BLUFF-007:
+Database Schema Advertised but Not Verified (MEDIUM)</h3>
+<p><strong>Location</strong>: README.md claims “Complete PostgreSQL
+schema with 11 tables” <strong>Severity</strong>: MEDIUM <strong>Bluff
+Type</strong>: Structural</p>
+<p>The README advertises 11 tables: users, workers, tasks, projects,
+sessions, llm_providers, notifications. Without seeing migration files
+or schema definitions, we cannot confirm: - Whether migrations exist -
+Whether tables match the advertised schema - Whether foreign key
+relationships are correct</p>
+<p><strong>Verification Required</strong>: Check for
+<code>internal/database/migrations/</code>, schema files, or SQL
+definitions</p>
+<hr />
+<h3 id="bluff-008-docker-compose-references-non-existent-files-medium">BLUFF-008:
+Docker Compose References Non-Existent Files (MEDIUM)</h3>
+<p><strong>Location</strong>: <code>helix_code/Dockerfile</code> lines
+40-42 <strong>Severity</strong>: MEDIUM <strong>Bluff Type</strong>:
+Structural</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> docker-entrypoint.sh /usr/local/bin/</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">chmod</span> +x /usr/local/bin/docker-entrypoint.sh</span></code></pre></div>
+<p><strong>Evidence</strong>: The Dockerfile copies
+<code>docker-entrypoint.sh</code> but this file may not exist in the
+repository. Without the entrypoint script, the container cannot start
+properly.</p>
+<p><strong>Fix Required</strong>: Create the missing
+<code>docker-entrypoint.sh</code> or update Dockerfile</p>
+<hr />
+<h3 id="bluff-009-terminal-ui-application-build-target-medium">BLUFF-009:
+Terminal UI Application Build Target (MEDIUM)</h3>
+<p><strong>Location</strong>: <code>helix_code/Dockerfile</code> line 21
+<strong>Severity</strong>: MEDIUM <strong>Bluff Type</strong>:
+Structural</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="va">CGO_ENABLED</span><span class="op">=</span>0 <span class="va">GOOS</span><span class="op">=</span>linux <span class="ex">go</span> build ... <span class="at">-o</span> bin/terminal-ui ./applications/terminal_ui</span></code></pre></div>
+<p><strong>Evidence</strong>: The Dockerfile tries to build
+<code>applications/terminal_ui</code> but without reading the tree
+structure, we cannot confirm this directory exists or contains valid Go
+code.</p>
+<hr />
+<h2 id="verified-real-implementations">3. VERIFIED REAL
+IMPLEMENTATIONS</h2>
+<h3 id="real-001-authentication-system-fully-implemented">REAL-001:
+Authentication System (FULLY IMPLEMENTED)</h3>
+<p><strong>Location</strong>: <code>internal/auth/auth.go</code>
+<strong>Confidence</strong>: HIGH</p>
+<p>Verified real implementations: - User registration with validation
+(username, email, password length) - Password hashing with bcrypt
+(default cost) + argon2 fallback - Argon2id parameter parsing with
+constant-time comparison - JWT token generation with HS256 signing - JWT
+verification with signing method validation - Session creation with
+cryptographically random tokens - Session expiration handling - User
+lookup by username or email - Account deactivation checks - Password
+verification with bcrypt + argon2 fallback chain</p>
+<p><strong>Code Quality</strong>: Production-ready with proper crypto
+(bcrypt, argon2, JWT), input validation, error handling, and
+constant-time password comparison.</p>
+<p><strong>Note</strong>: Uses hardcoded default JWT secret - MUST be
+overridden in production.</p>
+<hr />
+<h3 id="real-002-cli-structure-and-flag-parsing-partial">REAL-002: CLI
+Structure and Flag Parsing (PARTIAL)</h3>
+<p><strong>Location</strong>: <code>cmd/cli/main.go</code>
+<strong>Confidence</strong>: MEDIUM</p>
+<p>Verified real implementations: - Command-line flag parsing (15+
+flags) - Interactive mode with signal handling (SIGINT/SIGTERM) - Help
+system - Worker addition with SSH config validation - Notification
+dispatch (calls real notification engine)</p>
+<p><strong>Gaps</strong>: LLM generation, model listing, command
+execution are simulated (see BLUFF-001 through BLUFF-003).</p>
+<hr />
+<h3 id="real-003-dockerfile-multi-stage-build-partial">REAL-003:
+Dockerfile Multi-Stage Build (PARTIAL)</h3>
+<p><strong>Location</strong>: <code>Dockerfile</code>
+<strong>Confidence</strong>: MEDIUM</p>
+<p>Verified real implementations: - Multi-stage build (builder +
+runtime) - Build dependency installation - Cross-compilation flags -
+Version injection via ldflags - Runtime dependency installation -
+Non-root user preparation (implied by copying to /app) - Port exposure -
+Environment variable defaults</p>
+<p><strong>Gaps</strong>: References missing
+<code>docker-entrypoint.sh</code>, may reference missing
+<code>applications/terminal_ui</code></p>
+<hr />
+<h2 id="comparative-gap-analysis-helixcode-vs-tier-1-cli-agents">4.
+COMPARATIVE GAP ANALYSIS: HelixCode vs Tier 1 CLI Agents</h2>
+<h3 id="feature-matrix">4.1 Feature Matrix</h3>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 23%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 13%" />
+<col style="width: 8%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>HelixCode (Actual)</th>
+<th>Aider</th>
+<th>Codex</th>
+<th>OpenHands</th>
+<th>Cline</th>
+<th>Required for Tier 1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real LLM Provider Calls</td>
+<td>NO (simulated)</td>
+<td>YES</td>
+<td>YES</td>
+<td>YES</td>
+<td>YES</td>
+<td>MUST HAVE</td>
+</tr>
+<tr>
+<td>Multi-Provider Support</td>
+<td>0 working</td>
+<td>100+ models</td>
+<td>OpenAI</td>
+<td>10+</td>
+<td>5+</td>
+<td>5+ minimum</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>Unknown</td>
+<td>Full (auto-commit, diff)</td>
+<td>Full</td>
+<td>Full</td>
+<td>Full</td>
+<td>MUST HAVE</td>
+</tr>
+<tr>
+<td>Code Editing (Real)</td>
+<td>Unknown</td>
+<td>Edit blocks, diffs</td>
+<td>Diffs</td>
+<td>Full</td>
+<td>Full</td>
+<td>MUST HAVE</td>
+</tr>
+<tr>
+<td>Repository Mapping</td>
+<td>Unknown</td>
+<td>Tree-sitter, 100+ langs</td>
+<td>Basic</td>
+<td>Full</td>
+<td>Full</td>
+<td>MUST HAVE</td>
+</tr>
+<tr>
+<td>Browser Automation</td>
+<td>Unknown</td>
+<td>No</td>
+<td>No</td>
+<td>Yes (headless)</td>
+<td>Yes</td>
+<td>HIGH VALUE</td>
+</tr>
+<tr>
+<td>Sandboxing</td>
+<td>Unknown</td>
+<td>No</td>
+<td>Seatbelt</td>
+<td>Docker/E2B</td>
+<td>No</td>
+<td>HIGH VALUE</td>
+</tr>
+<tr>
+<td>Testing Integration</td>
+<td>Unknown</td>
+<td>Lint, test, fix loops</td>
+<td>No</td>
+<td>Full</td>
+<td>No</td>
+<td>MUST HAVE</td>
+</tr>
+<tr>
+<td>Voice Commands</td>
+<td>Unknown</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>NICE TO HAVE</td>
+</tr>
+<tr>
+<td>MCP Protocol</td>
+<td>Advertised</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>DIFFERENTIATOR</td>
+</tr>
+<tr>
+<td>Multi-Platform</td>
+<td>Advertised</td>
+<td>Cross-platform</td>
+<td>macOS</td>
+<td>Cross-platform</td>
+<td>VS Code</td>
+<td>MUST HAVE</td>
+</tr>
+<tr>
+<td>Memory Systems</td>
+<td>Advertised</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>DIFFERENTIATOR</td>
+</tr>
+<tr>
+<td>Workflow Automation</td>
+<td>Advertised</td>
+<td>6 modes</td>
+<td>No</td>
+<td>Yes</td>
+<td>Plan mode</td>
+<td>MUST HAVE</td>
+</tr>
+<tr>
+<td>Container Orchestration</td>
+<td>Advertised</td>
+<td>No</td>
+<td>No</td>
+<td>Docker</td>
+<td>No</td>
+<td>DIFFERENTIATOR</td>
+</tr>
+<tr>
+<td>E2E Challenge Framework</td>
+<td>Partial</td>
+<td>No</td>
+<td>No</td>
+<td>SWE-bench</td>
+<td>No</td>
+<td>DIFFERENTIATOR</td>
+</tr>
+</tbody>
+</table>
+<h3 id="helixcode-vs-helixagent-main-repository">4.2 HelixCode vs
+HelixAgent Main Repository</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 28%" />
+<col style="width: 30%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>HelixCode</th>
+<th>HelixAgent</th>
+<th>Gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Constitution.md</td>
+<td>NO</td>
+<td>YES (36 rules)</td>
+<td>MUST ADD</td>
+</tr>
+<tr>
+<td>CLAUDE.md</td>
+<td>NO</td>
+<td>YES (70KB)</td>
+<td>MUST ADD</td>
+</tr>
+<tr>
+<td>Challenge Framework</td>
+<td>Partial</td>
+<td>654+ scripts</td>
+<td>MUST ENHANCE</td>
+</tr>
+<tr>
+<td>Test Banks</td>
+<td>Unknown</td>
+<td>3 YAML banks</td>
+<td>MUST ADD</td>
+</tr>
+<tr>
+<td>Container Auto-Discovery</td>
+<td>Unknown</td>
+<td>YES</td>
+<td>MUST ADD</td>
+</tr>
+<tr>
+<td>K8s Manifests</td>
+<td>Unknown</td>
+<td>YES</td>
+<td>SHOULD ADD</td>
+</tr>
+<tr>
+<td>Circuit Breaker</td>
+<td>Unknown</td>
+<td>YES</td>
+<td>MUST ADD</td>
+</tr>
+<tr>
+<td>Provider Ensemble</td>
+<td>Unknown</td>
+<td>YES</td>
+<td>SHOULD ADD</td>
+</tr>
+<tr>
+<td>Health Probes (Protocol Layer)</td>
+<td>Unknown</td>
+<td>YES</td>
+<td>MUST ADD</td>
+</tr>
+<tr>
+<td>Skills System</td>
+<td>Unknown</td>
+<td>YES (1500+ dirs)</td>
+<td>DIFFERENTIATOR</td>
+</tr>
+<tr>
+<td>Debate Framework</td>
+<td>Unknown</td>
+<td>YES (2 implementations)</td>
+<td>DIFFERENTIATOR</td>
+</tr>
+<tr>
+<td>No-Mocks-Above-Unit Build Target</td>
+<td>Unknown</td>
+<td>YES</td>
+<td>MUST ADD</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="critical-implementation-gaps-priority-order">5. CRITICAL
+IMPLEMENTATION GAPS (Priority Order)</h2>
+<h3 id="p0---critical-must-fix-for-zero-bluff">P0 - CRITICAL (Must Fix
+for Zero-Bluff)</h3>
+<ol type="1">
+<li><strong>LLM Provider Integration</strong> - Replace ALL simulated
+generation with real provider calls</li>
+<li><strong>Model Discovery</strong> - Implement dynamic model listing
+from all providers</li>
+<li><strong>Command Execution</strong> - Replace simulation with real
+sandboxed execution</li>
+<li><strong>Go Dependencies</strong> - Fix go.mod to include all
+advertised dependencies</li>
+<li><strong>Docker Entrypoint</strong> - Create missing
+docker-entrypoint.sh</li>
+<li><strong>Constitution + CLAUDE.md + AGENTS.md</strong> - Add
+governance framework</li>
+<li><strong>Anti-Bluff Testing</strong> - Create tests that verify REAL
+behavior, not simulation</li>
+</ol>
+<h3 id="p1---high-required-for-production-use">P1 - HIGH (Required for
+Production Use)</h3>
+<ol start="8" type="1">
+<li><strong>Git Integration</strong> - Implement real git operations
+(status, diff, commit, branch)</li>
+<li><strong>Code Editor Tools</strong> - Implement actual file editing
+(read, write, diff, search/replace)</li>
+<li><strong>Worker Pool Reality</strong> - Verify and fix SSH worker
+implementation</li>
+<li><strong>Database Migrations</strong> - Create verified schema
+migrations</li>
+<li><strong>Notification Real Dispatch</strong> - Verify Slack, Discord,
+Email, Telegram actually send</li>
+<li><strong>Browser Automation</strong> - Implement chromedp-based
+browser tools or remove from advertising</li>
+<li><strong>Repository Mapping</strong> - Implement tree-sitter based
+codebase analysis</li>
+</ol>
+<h3 id="p2---medium-required-for-tier-1-competitiveness">P2 - MEDIUM
+(Required for Tier 1 Competitiveness)</h3>
+<ol start="15" type="1">
+<li><strong>MCP Protocol</strong> - Full stdio + SSE transport
+implementation</li>
+<li><strong>Memory Integration</strong> - Real connections to 9
+advertised memory providers</li>
+<li><strong>Workflow Engine</strong> - Real workflow execution with
+dependency resolution</li>
+<li><strong>Testing Integration</strong> - Run actual lint/test and
+iterate on failures</li>
+<li><strong>Challenge Framework</strong> - Comprehensive challenge
+system with honest validation</li>
+<li><strong>Circuit Breakers</strong> - Add resilience patterns for all
+external calls</li>
+<li><strong>Health Probes</strong> - Protocol-layer health checks (not
+just container up)</li>
+<li><strong>Multi-Platform Builds</strong> - Verify Aurora OS, Harmony
+OS, Mobile actually build</li>
+</ol>
+<h3 id="p3---low-differentiators">P3 - LOW (Differentiators)</h3>
+<ol start="23" type="1">
+<li><strong>Skills System</strong> - Plugin architecture for extensible
+capabilities</li>
+<li><strong>Debate Framework</strong> - Multi-agent reasoning and
+consensus</li>
+<li><strong>Voice Commands</strong> - Speech-to-text integration</li>
+<li><strong>Advanced Monitoring</strong> - Prometheus + Grafana
+integration</li>
+<li><strong>K8s Deployment</strong> - Helm charts and manifests</li>
+</ol>
+<hr />
+<h2 id="anti-bluff-verification-checklist">6. ANTI-BLUFF VERIFICATION
+CHECKLIST</h2>
+<p>For each feature, the following MUST be true before marking as
+“implemented”:</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Code contains REAL implementation
+(not simulation/stub/placeholder)</label></li>
+<li><label><input type="checkbox"></input>Code is WIRED into the application
+(imported, initialized, dispatched)</label></li>
+<li><label><input type="checkbox"></input>Test exists that exercises REAL
+behavior (not just interface existence)</label></li>
+<li><label><input type="checkbox"></input>Challenge exists that validates
+end-to-end user workflow</label></li>
+<li><label><input type="checkbox"></input>Documentation example actually works
+when executed</label></li>
+<li><label><input type="checkbox"></input>No “For now”, “simulate”, “TODO”,
+“placeholder” comments in production paths</label></li>
+<li><label><input type="checkbox"></input>Feature works with real
+infrastructure (real HTTP calls, real DB, real containers)</label></li>
+<li><label><input type="checkbox"></input>Error handling covers real failure
+modes (network, auth, rate limits)</label></li>
+</ul>
+<hr />
+<h2 id="submodule-governance-gaps">7. SUBMODULE GOVERNANCE GAPS</h2>
+<p>The HelixCode <code>.gitmodules</code> file references 80+
+submodules. Each submodule MUST have:</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Its own Constitution.md (or
+reference to parent)</label></li>
+<li><label><input type="checkbox"></input>Its own CLAUDE.md (or reference to
+parent)</label></li>
+<li><label><input type="checkbox"></input>Its own AGENTS.md (or reference to
+parent)</label></li>
+<li><label><input type="checkbox"></input>Anti-bluff testing requirements
+propagated</label></li>
+<li><label><input type="checkbox"></input>Zero-mock-in-production rule
+enforced</label></li>
+</ul>
+<p><strong>Current State</strong>: UNKNOWN - submodules are external
+repositories (Aider, Cline, OpenHands, etc.) and may not have Helix
+governance applied.</p>
+<hr />
+<h2 id="conclusion">8. CONCLUSION</h2>
+<p>HelixCode has a <strong>solid architectural foundation</strong> in
+authentication and CLI structure, but suffers from <strong>critical
+bluff areas</strong> in its most important user-facing features:</p>
+<ol type="1">
+<li><strong>LLM generation is fake</strong> - the core AI feature
+doesn’t call any AI</li>
+<li><strong>Model listing is static</strong> - cannot discover actual
+available models</li>
+<li><strong>Command execution is fake</strong> - doesn’t run any
+commands</li>
+<li><strong>Dependencies are missing</strong> - go.mod doesn’t support
+advertised features</li>
+<li><strong>Governance is missing</strong> - no Constitution, no
+CLAUDE.md, no AGENTS.md at root</li>
+<li><strong>Testing is unverified</strong> - we cannot confirm tests
+validate real vs simulated behavior</li>
+</ol>
+<p><strong>To achieve zero-bluff status and exceed Tier 1 CLI
+agents</strong>, HelixCode must: 1. Implement REAL LLM provider
+integration (highest priority) 2. Add honest governance (Constitution,
+CLAUDE.md, AGENTS.md) 3. Create anti-bluff tests that fail if features
+are simulated 4. Port all HelixAgent advanced features (circuit
+breakers, ensembles, health probes) 5. Close all P0 and P1 gaps within
+the implementation roadmap</p>
+<p><strong>Bluff-to-Reality Ratio Estimate</strong>: 40% bluff / 60%
+real (by feature count) <strong>Production Readiness</strong>: NOT READY
+for end users without P0 fixes</p>
+<hr />
+<h2 id="appendix-a-files-examined">Appendix A: Files Examined</h2>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Path</th>
+<th>Lines</th>
+<th>Assessment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>README.md</td>
+<td>root</td>
+<td>271</td>
+<td>Advertises completed features</td>
+</tr>
+<tr>
+<td>AGENTS.md</td>
+<td>root</td>
+<td>1053</td>
+<td>Contains CONST-035 anti-bluff mandate</td>
+</tr>
+<tr>
+<td>.gitmodules</td>
+<td>root</td>
+<td>233</td>
+<td>80+ submodules</td>
+</tr>
+<tr>
+<td>go.mod</td>
+<td>root</td>
+<td>10</td>
+<td>CRITICAL: Only 3 dependencies</td>
+</tr>
+<tr>
+<td>Dockerfile</td>
+<td>root</td>
+<td>55</td>
+<td>Multi-stage but references missing files</td>
+</tr>
+<tr>
+<td>cmd/cli/main.go</td>
+<td>helix_code/</td>
+<td>341</td>
+<td>BLUFF-001, BLUFF-002, BLUFF-003 confirmed</td>
+</tr>
+<tr>
+<td>internal/auth/auth.go</td>
+<td>helix_code/</td>
+<td>470</td>
+<td>REAL-001: Fully implemented</td>
+</tr>
+</tbody>
+</table>
+<h2 id="appendix-b-verification-commands-for-auditors">Appendix B:
+Verification Commands for Auditors</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify LLM generation is real (should fail if bluff)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/llm/generate <span class="dt">\</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;prompt&quot;:&quot;What is 2+2?&quot;,&quot;model&quot;:&quot;llama-3-8b&quot;}&#39;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Bluff indicator: Response contains &quot;simulated&quot; or echoes prompt</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify model listing is dynamic</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/api/v1/llm/models</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Bluff indicator: Only returns 3 hardcoded models</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify command execution is real</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> <span class="at">--command</span> <span class="st">&quot;echo &#39;hello world&#39;&quot;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Bluff indicator: Prints &quot;Command completed successfully&quot; without actual output</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify go.mod dependencies</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> helix_code/go.mod <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;gin|pgx|viper|cobra|chromedp|tview|fyne&quot;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Bluff indicator: Returns empty (no dependencies found)</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify tests use real infrastructure</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;t.Skip&quot;</span> tests/ <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;SKIP-OK&quot;</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Bluff indicator: Skips without proper markers</span></span></code></pre></div>
+</body>
+</html>

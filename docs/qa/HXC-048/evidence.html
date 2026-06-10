@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-048-helixcode-system.yaml-helixqa-bank-11-cases-covering-non-auth-server-surface">HXC-048
+— helixcode-system.yaml HelixQA bank (11 cases) covering non-auth server
+surface</h1>
+<p>Authored banks/helixcode-system.yaml (HXC-SYS-001..011): /health,
+/api/v1/server/info, /api/v1/system/status (401), /api/v1/llm/providers,
++ negatives (unknown path 404, wrong method). Uses only runner-consumed
+fields
+(action/body/headers/auth/expect_status/expect_json_path/expect_body_contains/_skip).
+Parse-validated: <code>helixqa list</code> → 11 cases; dry http run vs
+unreachable host fired real requests for 10 active cases + honored _skip
+on SYS-011. Confident body asserts from captured real responses
+(healthy/status, database/redis/go_version, source/ollama); status-only
+where exact message not captured (§11.4.6); SYS-011 _skip (404-vs-405
+not pinned). helix_qa commit f18a5d3b. LIVE-RUN against booted server
+QUEUED (needs server-owning stream).</p>
+<h2 id="closed-live-runtime-evidence-commit-4d2dcb2">CLOSED — live
+runtime evidence (commit 4d2dcb2)</h2>
+<p>Rebuilt helix_code/bin/helixcode from CURRENT source (the on-disk
+binary was stale 12:16; rebuild 17:16). Booted no-infra (db=nil
+graceful, redis off) on :18090, /health 200. Live
+<code>helixqa http</code>: - helixcode-system.yaml: 11/11 PASS (SYS-011
+pinned: non-GET on /health → real 404 “404 page not found”; Gin has no
+HandleMethodNotAllowed → un-skipped). - helixcode-auth.yaml: 16/16 PASS.
+Stale-artifact lesson (§11.4.108/§11.4.139): first auth run on the STALE
+pre-fix binary returned 500 (HXC-043 panic); after rebuild it returns
+401 — re-confirms the HXC-043 fix on a clean artifact. Server SIGTERM
+clean, port freed.</p>
+</body>
+</html>

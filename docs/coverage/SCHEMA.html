@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SCHEMA</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">SCHEMA</h1>
+</header>
+<h1 id="docscoverageschema.md-coverage_ledger.md-row-format">docs/coverage/SCHEMA.md
+— COVERAGE_LEDGER.md row format</h1>
+<p><strong>Round 68 creation.</strong> This document defines the schema
+for <code>COVERAGE_LEDGER.md</code>. Schema changes require an entry in
+the audit-trail table at the bottom of <code>COVERAGE_LEDGER.md</code>
+AND a bump of <code>SCHEMA_VERSION</code> below.</p>
+<p><code>SCHEMA_VERSION = 1.0.0</code></p>
+<h2 id="row-format">1. Row format</h2>
+<p>Every data row in <code>COVERAGE_LEDGER.md</code> has exactly 11
+columns:</p>
+<pre><code>| Submodule | Feature | Platform | I1 anti-bluff | I2 e2e-working | I3 doc-match | I4 no-issues | I5 doc-sync | I6 4-layer-tests | Overall | Notes |</code></pre>
+<h3 id="column-definitions">1.1 Column definitions</h3>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 20%" />
+<col style="width: 15%" />
+<col style="width: 25%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Column</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Submodule</td>
+<td>string</td>
+<td>yes</td>
+<td>Path-from-repo-root identifier per
+<code>docs/improvements/submodule_owned.txt</code>
+(e.g. <code>submodules/auto_temp</code>, <code>helix_qa</code>,
+<code>challenges</code>).</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Feature</td>
+<td>string</td>
+<td>yes</td>
+<td>Short description of the capability under audit
+(e.g. <code>grid-search temperature tuning</code>,
+<code>OpenCode CLI adapter</code>). May be <code>whole-module</code> for
+submodules audited as one unit.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Platform</td>
+<td>string</td>
+<td>yes</td>
+<td>Comma-separated platform list from {<code>linux</code>,
+<code>macos</code>, <code>windows</code>, <code>ios</code>,
+<code>android</code>, <code>aurora-os</code>, <code>harmony-os</code>,
+<code>containers</code>, <code>headless</code>}.
+<code>all-platforms</code> permitted only for platform-agnostic Go
+code.</td>
+</tr>
+<tr>
+<td>4-9</td>
+<td>I1..I6</td>
+<td>status</td>
+<td>yes</td>
+<td>CONST-048 invariant status per §2 vocabulary below.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Overall</td>
+<td>status</td>
+<td>yes</td>
+<td>Rollup: <code>PASS</code> only if every I1..I6 is <code>PASS</code>
+or <code>N/A</code>; otherwise <code>PARTIAL</code> or
+<code>UNCONFIRMED:</code>. Generator computes mechanically.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Notes</td>
+<td>string</td>
+<td>yes</td>
+<td>MUST include either (a) CONTINUATION round reference
+(e.g. <code>round 37 wired Real backends</code>) for any PASS marker, OR
+(b) free-text gap description for non-PASS cells. Blank Notes column on
+a PASS row is a CONST-035 PASS-bluff.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="row-uniqueness">1.2 Row uniqueness</h3>
+<p>The tuple <code>(Submodule, Feature, Platform)</code> MUST be unique.
+Duplicate rows are a violation; collapse them by merging Notes.</p>
+<h3 id="submodule-coverage-requirement">1.3 Submodule coverage
+requirement</h3>
+<p>Every entry in <code>docs/improvements/submodule_owned.txt</code>
+MUST appear in at least one row. The generator’s <code>--check</code>
+mode (<code>scripts/generate-coverage-ledger.sh --check</code>) exits
+non-zero if any owned submodule has zero ledger rows — this is the round
+68 enforcement gate for CONST-048’s “rows that quietly omit a platform
+are CONST-048 violations” mandate.</p>
+<h2 id="status-vocabulary">2. Status vocabulary</h2>
+<p>Closed set; values outside this list are violations.</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 26%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Semantics</th>
+<th>Evidence requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PASS</code></td>
+<td>Invariant met in current cycle with captured runtime evidence.</td>
+<td>Notes column MUST cite CONTINUATION round OR pasted evidence
+path.</td>
+</tr>
+<tr>
+<td><code>PENDING_FORENSICS:</code></td>
+<td>Work landed in source/tests but evidence not yet captured into
+ledger.</td>
+<td>Notes SHOULD cite the commit SHA that introduced the work.</td>
+</tr>
+<tr>
+<td><code>OPERATOR-BLOCKED:</code></td>
+<td>Cannot complete without operator action (real LLM key, hardware,
+real network).</td>
+<td>Notes MUST cite the operator dependency per §11.4.21 audit
+pattern.</td>
+</tr>
+<tr>
+<td><code>UNCONFIRMED:</code></td>
+<td>Not yet audited. Default for new rows.</td>
+<td>Notes SHOULD describe what audit is needed.</td>
+</tr>
+<tr>
+<td><code>SKIP-OK: #&lt;ticket&gt;</code></td>
+<td>Intentionally not covered.</td>
+<td>Notes MUST cite the ticket explaining the skip.</td>
+</tr>
+<tr>
+<td><code>PARTIAL</code></td>
+<td>Some platforms / scenarios covered but not all.</td>
+<td>Notes MUST enumerate which platforms/scenarios pass vs. fail.</td>
+</tr>
+<tr>
+<td><code>N/A</code></td>
+<td>Invariant does not apply (e.g. I2 e2e-working for a
+build-tooling-only submodule).</td>
+<td>Notes SHOULD justify the N/A.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Default cell status is <code>UNCONFIRMED:</code></strong> —
+never <code>PASS</code>. PASS without (a) CONTINUATION reference or (b)
+pasted evidence is a CONST-035 PASS-bluff equivalent in severity to a
+false-success test result (per Article XI §11.9).</p>
+<h2 id="cross-reference-points">3. Cross-reference points</h2>
+<p>The ledger does NOT duplicate evidence — it points to canonical
+sources.</p>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 36%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Invariant</th>
+<th>Canonical source</th>
+<th>Cross-check command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I1 anti-bluff</td>
+<td>CONTINUATION.md round narrative + commit SHA</td>
+<td><code>grep -n &quot;round &lt;N&gt;&quot; docs/CONTINUATION.md</code></td>
+</tr>
+<tr>
+<td>I2 e2e-working</td>
+<td>Real-infra test logs (<code>/tmp/coverage-*</code>) + CONTINUATION
+captured evidence</td>
+<td><code>grep -rn &quot;real &lt;provider&gt;\|wire evidence&quot; docs/CONTINUATION.md</code></td>
+</tr>
+<tr>
+<td>I3 doc-match</td>
+<td>User manual + <code>docs/COMPLETE_*.md</code> references</td>
+<td><code>grep -rn &quot;&lt;feature&gt;&quot; docs/COMPLETE_*</code></td>
+</tr>
+<tr>
+<td>I4 no-issues</td>
+<td><code>Issues.md</code> / <code>Issues_Summary.md</code> (if
+maintained) + source-tree <code>TODO(round-N)</code> /
+<code>BUG #NN:</code> markers</td>
+<td><code>grep -rn &quot;TODO(round-\|BUG #&quot; &lt;submodule&gt;/</code></td>
+</tr>
+<tr>
+<td>I5 doc-sync</td>
+<td>Last-modified timestamp of user manual + submodule docs/ tree</td>
+<td><code>find &lt;submodule&gt;/docs -newer &lt;submodule&gt;/cmd -type f</code></td>
+</tr>
+<tr>
+<td>I6 4-layer-tests</td>
+<td>Pre-build gate (<code>make verify-compile</code>) + post-build
+(<code>make test</code>) + runtime (challenges/e2e) + paired mutation
+(search for <code>_test.go</code> + sibling mutation gate)</td>
+<td><code>find &lt;submodule&gt; -name &quot;*_test.go&quot; \| xargs grep -l &quot;SKIP-OK\|TestMutation&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="no-bugs-cross-check-i4-helixcode-specific-note">3.1 No-bugs
+cross-check (I4) — HelixCode-specific note</h3>
+<p>HelixCode does not currently maintain a root-level
+<code>Issues.md</code> tracker (per round 32 audit). I4 cross-check
+therefore relies on:</p>
+<ol type="1">
+<li>Source-tree markers:
+<code>grep -rn &quot;TODO(round-\|BUG #\|FIXME(round-\|XXX(round-&quot; &lt;submodule-path&gt;/</code>
+— non-empty result = I4 cannot be <code>PASS</code>.</li>
+<li><code>docs/CONTINUATION.md</code> <code>Known issues</code> /
+<code>Deferred work</code> sections — if the submodule is named in a
+known-issue paragraph, I4 cannot be <code>PASS</code>.</li>
+<li>Open BLUFFS in <code>docs/issues/BLUFFS.md</code> (if file exists)
+naming the submodule — I4 cannot be <code>PASS</code>.</li>
+</ol>
+<p>Future rounds may introduce a per-submodule <code>Issues.md</code>
+tracker per CONST-057 / §11.4.16; the generator script will adopt it
+automatically when present.</p>
+<h2 id="status-rollup-column-10-overall">4. Status rollup (column 10
+“Overall”)</h2>
+<p>Mechanical rollup computed by
+<code>scripts/generate-coverage-ledger.sh --refresh</code>:</p>
+<pre><code>if all(I1..I6 in {PASS, N/A}):           Overall = PASS
+elif any(I1..I6 in {OPERATOR-BLOCKED:}): Overall = OPERATOR-BLOCKED:
+elif any(I1..I6 in {PENDING_FORENSICS:}): Overall = PENDING_FORENSICS:
+elif any(I1..I6 in {PARTIAL}):            Overall = PARTIAL
+elif any(I1..I6 in {SKIP-OK: ...}):      Overall = PARTIAL  (any skip is a partial)
+else:                                     Overall = UNCONFIRMED:</code></pre>
+<p>The generator NEVER promotes individual invariant cells — it only
+computes the Overall rollup from whatever cells the operator has
+hand-marked.</p>
+<h2 id="anti-bluff-guarantees-cascade-from-const-035-article-xi-11.9">5.
+Anti-bluff guarantees (cascade from CONST-035 / Article XI §11.9)</h2>
+<ol type="1">
+<li><strong>No PASS-by-default.</strong> Every cell starts
+<code>UNCONFIRMED:</code> until hand-marked with evidence
+reference.</li>
+<li><strong>No silent omissions.</strong> Every owned submodule has at
+least one row; <code>generate-coverage-ledger.sh --check</code> fails
+otherwise.</li>
+<li><strong>Evidence-required Notes.</strong> PASS in any cell requires
+Notes content; blank Notes on a PASS row = violation.</li>
+<li><strong>Status vocabulary is closed.</strong> Values outside the §2
+list = violation.</li>
+<li><strong>Schema version bump.</strong> Any change to column count /
+column order / new status symbol requires <code>SCHEMA_VERSION</code>
+bump + audit-trail entry.</li>
+<li><strong>Cross-ledger consistency.</strong> Feature names used here
+MUST be discoverable in either <code>docs/coverage/ledger.md</code>
+(F01..FNN catalogue) OR
+<code>docs/user_manual/ZERO_BLUFF_USER_MANUAL.md</code>; otherwise the
+feature is a phantom and the row is a violation.</li>
+</ol>
+<h2 id="regeneration-refresh-contract">6. Regeneration / refresh
+contract</h2>
+<p><code>scripts/generate-coverage-ledger.sh</code> has two modes:</p>
+<ul>
+<li><code>--scaffold</code> (default): emit a baseline ledger with one
+row per owned submodule, all invariants <code>UNCONFIRMED:</code>. Used
+when bootstrapping a fresh ledger.</li>
+<li><code>--check</code>: walk the current
+<code>COVERAGE_LEDGER.md</code>, assert each owned submodule has ≥1 row,
+assert schema invariants, assert every PASS has Notes. Exit non-zero on
+any violation.</li>
+</ul>
+<p>Neither mode auto-promotes cells. Neither mode rewrites
+operator-marked PASS values.</p>
+<h2 id="audit-trail-discipline">7. Audit-trail discipline</h2>
+<p>Schema changes append a row to <code>COVERAGE_LEDGER.md</code>’s
+audit-trail table with: - Date (ISO YYYY-MM-DD) - Author (agent ID or
+operator name) - Round (close-outNN or round-NN) - Schema version bump
+(e.g. <code>1.0.0 → 1.1.0</code>) - One-line rationale</p>
+<p>Initial schema (round 68) entry: see <code>COVERAGE_LEDGER.md</code>
+audit trail.</p>
+<h2 id="sources-verified-2026-05-29-internal-governance-doc-no-third-party-service-operator-instructions-to-cross-reference.-this-document-defines-the-rowcolumn-schema-and-status-vocabulary-for-helixcodes-own-coverage_ledger.md-it-references-only-internal-constitutional-anchors-const-035048-11.4.x-and-helixcodes-own-generator-scripts.-no-external-service-library-or-version-pin-appears-so-there-is-nothing-to-webfetch-against-vendor-docs.-version-authority-per-claude.md-3.1-confirmed-in-tree-inner-module-go-1.26-root-go-1.25.2.-reviewed-against-the-live-tree-on-this-date-no-corrections-required.">Sources
+verified 2026-05-29: internal-governance doc — no third-party-service
+operator instructions to cross-reference. This document defines the
+row/column schema and status vocabulary for HelixCode’s own
+<code>COVERAGE_LEDGER.md</code>; it references only internal
+constitutional anchors (CONST-035/048, §11.4.x) and HelixCode’s own
+generator scripts. No external service, library, or version pin appears,
+so there is nothing to WebFetch against vendor docs. Version authority
+per CLAUDE.md §3.1 (confirmed in-tree): inner module
+<code>go 1.26</code>, root <code>go 1.25.2</code>. Reviewed against the
+live tree on this date; no corrections required.</h2>
+</body>
+</html>

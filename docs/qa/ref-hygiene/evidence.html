@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="retroactive-qa-evidence-commit-9970507d-run-id-ref-hygiene">Retroactive
+QA evidence — commit <code>9970507d</code> (run-id
+<code>ref-hygiene</code>)</h1>
+<blockquote>
+<p><strong>RECONSTRUCTED, AFTER-THE-FACT DOCUMENTATION (HXC-039,
+§11.4.83).</strong> This file is NOT a captured-at-the-time end-user
+transcript. It is honest retroactive documentation created during the
+HXC-039 §11.4.83 back-fill, operator-authorised, to give a pre-existing
+feature commit its required <code>docs/qa/&lt;run-id&gt;/</code>
+evidence directory WITHOUT rewriting git history. No runtime output
+below is fabricated (§11.4.6 / §11.4.123).</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Commit SHA</td>
+<td><code>9970507d75c9c758aab5adfd673ae7460532b8bb</code></td>
+</tr>
+<tr>
+<td>Short SHA</td>
+<td><code>9970507d</code></td>
+</tr>
+<tr>
+<td>Authored</td>
+<td>2026-06-03T22:51:55+05:00</td>
+</tr>
+<tr>
+<td>Subject</td>
+<td><code>fix(phase3): helix_code cross-platform build (§11.4.81) + flatten ref-hygiene + helix_agent tidy pointer</code></td>
+</tr>
+<tr>
+<td>run-id basename</td>
+<td><code>ref-hygiene</code> (a verbatim substring of the commit
+subject)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-the-commit-changed-from-git-show---stat">What the commit
+changed (from <code>git show --stat</code>)</h2>
+<pre><code>helix_code/internal/cache/cache.go                 |  2 +-
+helix_code/.../i18n_wiring/wiring_integration_test.go | 2 +-
+helix_code/internal/tools/shell/sandbox.go         | 42 +++++-----------------
+helix_code/internal/tools/shell/sandbox_linux.go   | 32 +++++++++++++++++
+helix_code/internal/tools/shell/sandbox_nonlinux.go | 28 +++++++++++++++
+helix_code/tests/integration/cmd/p1f14_challenge/main.go | 10 ++++--
+scripts/propagate-governance.sh                    |  1 -
+submodules/helix_agent                             |  2 +-
+8 files changed, 79 insertions(+), 40 deletions(-)</code></pre>
+<p>A §11.4.81 <strong>cross-platform-parity</strong> fix: the shell
+sandbox was split into <code>sandbox_linux.go</code> /
+<code>sandbox_nonlinux.go</code> build-tag variants (so the
+<code>helix_code</code> build works on non-Linux platforms), plus a
+cache fix, flatten ref-hygiene, and a <code>helix_agent</code> pointer
+bump.</p>
+<h2 id="verification-that-exists-for-this-commit">Verification that
+exists for this commit</h2>
+<ul>
+<li>The change is a build-tag split implementing §11.4.81 per-OS parity;
+its correctness is a <strong>compile-on-each-platform</strong> property
+(<code>make verify-compile</code> per supported OS) plus the existing
+sandbox unit tests under <code>internal/tools/shell/</code>.</li>
+<li><code>tests/integration/cmd/p1f14_challenge/main.go</code> was
+updated in the same commit (integration challenge harness).</li>
+<li><strong>No captured runtime transcript was recorded at commit
+time</strong> under <code>docs/qa/</code>. This directory is retroactive
+documentation.</li>
+</ul>
+<h2 id="honesty-statement">Honesty statement</h2>
+<p>Reconstructed documentation. NO faked PASS logs, NO fabricated
+runtime output. The asserted verification is the cross-platform compile
+property + existing sandbox tests, both visible in
+<code>git show 9970507d</code>.</p>
+</body>
+</html>

@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SLASH_COMMANDS_USER_GUIDE</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">SLASH_COMMANDS_USER_GUIDE</h1>
+</header>
+<h1 id="slash-commands-user-guide">Slash Commands User Guide</h1>
+<h2 id="helixcode-command-system">HelixCode Command System</h2>
+<p><strong>Version:</strong> 1.0 <strong>Last Updated:</strong> November
+7, 2025 <strong>Feature Status:</strong> ✅ Production Ready</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#quick-start">Quick Start</a></li>
+<li><a href="#built-in-commands">Built-in Commands</a></li>
+<li><a href="#command-reference">Command Reference</a></li>
+<li><a href="#advanced-usage">Advanced Usage</a></li>
+<li><a href="#creating-custom-commands">Creating Custom
+Commands</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ol>
+<hr />
+<h2 id="introduction">Introduction</h2>
+<p>Slash commands in HelixCode provide a powerful way to trigger
+specific actions and workflows without natural language ambiguity.
+Similar to commands in Slack or Discord, slash commands start with
+<code>/</code> and offer structured, predictable behavior.</p>
+<h3 id="benefits">Benefits</h3>
+<ul>
+<li><strong>Speed:</strong> Fast, predictable actions</li>
+<li><strong>Clarity:</strong> No ambiguity in what you want</li>
+<li><strong>Autocomplete:</strong> Tab completion for commands and
+flags</li>
+<li><strong>Consistency:</strong> Same syntax across all commands</li>
+<li><strong>Composability:</strong> Combine with @ mentions for
+power</li>
+</ul>
+<h3 id="available-commands">Available Commands</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Aliases</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/newtask</code></td>
+<td><code>/nt</code>, <code>/task</code></td>
+<td>Create a new task with preserved context</td>
+</tr>
+<tr>
+<td><code>/condense</code></td>
+<td><code>/smol</code>, <code>/compact</code>,
+<code>/summarize</code></td>
+<td>Compress chat history to save tokens</td>
+</tr>
+<tr>
+<td><code>/newrule</code></td>
+<td><code>/rule</code>, <code>/guideline</code></td>
+<td>Generate project rules from conversation</td>
+</tr>
+<tr>
+<td><code>/reportbug</code></td>
+<td><code>/bug</code>, <code>/issue</code></td>
+<td>File a bug report with system info</td>
+</tr>
+<tr>
+<td><code>/workflows</code></td>
+<td><code>/wf</code>, <code>/flow</code></td>
+<td>List or execute workflows</td>
+</tr>
+<tr>
+<td><code>/deepplanning</code></td>
+<td><code>/deepplan</code>, <code>/dp</code>,
+<code>/architect</code></td>
+<td>Enter extended planning mode</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="basic-command">Basic Command</h3>
+<pre><code>/help</code></pre>
+<p>Shows all available commands.</p>
+<h3 id="command-with-arguments">Command with Arguments</h3>
+<pre><code>/newtask Implement user authentication</code></pre>
+<p>Creates a new task with the description “Implement user
+authentication”.</p>
+<h3 id="command-with-flags">Command with Flags</h3>
+<pre><code>/newtask Fix database connection --priority high</code></pre>
+<p>Creates a high-priority task.</p>
+<h3 id="command-with-both">Command with Both</h3>
+<pre><code>/condense --keep-last 10 --preserve-code</code></pre>
+<p>Condenses chat history keeping last 10 messages and preserving code
+blocks.</p>
+<hr />
+<h2 id="built-in-commands">Built-in Commands</h2>
+<h3 id="newtask---create-new-task">/newtask - Create New Task</h3>
+<p><strong>Purpose:</strong> Create a new development task while
+preserving relevant context from the current conversation.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>/newtask &lt;description&gt;
+/newtask &lt;description&gt; --priority &lt;level&gt;
+/newtask &lt;description&gt; --link-previous
+/newtask &lt;description&gt; --transfer-files</code></pre>
+<p><strong>Arguments:</strong> - <code>description</code>: Task
+description (required)</p>
+<p><strong>Flags:</strong> - <code>--priority</code>: Task priority
+(low, normal, high, critical) - default: normal -
+<code>--link-previous</code>: Link to current task as a continuation -
+<code>--transfer-files</code>: Transfer file references from chat
+history to new task</p>
+<p><strong>Examples:</strong></p>
+<p>Basic task:</p>
+<pre><code>/newtask Refactor authentication module</code></pre>
+<p>High-priority task:</p>
+<pre><code>/newtask Fix memory leak in worker pool --priority critical</code></pre>
+<p>Linked task:</p>
+<pre><code>/newtask Add tests for authentication --link-previous --priority high</code></pre>
+<p>With file transfer:</p>
+<pre><code>/newtask Document the API endpoints --transfer-files</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code>Created new task: Fix memory leak in worker pool
+Priority: critical
+Task ID: task-12345</code></pre>
+<p><strong>Use Cases:</strong> - Breaking down large features into
+smaller tasks - Creating follow-up tasks during code review - Tracking
+bugs discovered during development - Planning implementation steps</p>
+<p><strong>Integration:</strong> - Tasks appear in task dashboard - Can
+be exported to GitHub Issues, Jira, etc. - Tracked across sessions</p>
+<hr />
+<h3 id="condense---compress-chat-history">/condense - Compress Chat
+History</h3>
+<p><strong>Purpose:</strong> Summarize and compress conversation history
+to save tokens while preserving important details.</p>
+<p><strong>Aliases:</strong> <code>/smol</code>, <code>/compact</code>,
+<code>/summarize</code></p>
+<p><strong>Syntax:</strong></p>
+<pre><code>/condense
+/condense --keep-last &lt;N&gt;
+/condense --preserve-code
+/condense --preserve-errors
+/condense --ratio &lt;0.1-1.0&gt;</code></pre>
+<p><strong>Flags:</strong> - <code>--keep-last N</code>: Keep last N
+messages uncompressed (default: 5) - <code>--preserve-code</code>: Keep
+all code blocks intact (default: false) -
+<code>--preserve-errors</code>: Keep all error messages intact (default:
+false) - <code>--ratio</code>: Target compression ratio (default: 0.5 =
+50% reduction)</p>
+<p><strong>Examples:</strong></p>
+<p>Basic compression:</p>
+<pre><code>/condense</code></pre>
+<p>Keep last 10 messages:</p>
+<pre><code>/condense --keep-last 10</code></pre>
+<p>Preserve important content:</p>
+<pre><code>/condense --preserve-code --preserve-errors</code></pre>
+<p>Aggressive compression:</p>
+<pre><code>/condense --ratio 0.3 --keep-last 3</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code>Condensing 45 messages (keeping last 5 uncompressed)
+Before: ~12,500 tokens
+After: ~6,200 tokens
+Compression: 50.4%</code></pre>
+<p><strong>What Gets Condensed:</strong> - Repetitive back-and-forth -
+Verbose explanations - Redundant context - Intermediate iterations</p>
+<p><strong>What’s Preserved:</strong> - Recent messages (configurable) -
+Code blocks (if flag set) - Error messages (if flag set) - Key decisions
+and outcomes - File references</p>
+<p><strong>Use Cases:</strong> - Long conversations approaching token
+limit - Before starting a new major topic - When switching contexts -
+Performance optimization</p>
+<p><strong>Best Practices:</strong> - Condense before starting unrelated
+work - Keep more messages for active debugging - Always preserve code
+when debugging - Review condensed summary before continuing</p>
+<hr />
+<h3 id="newrule---generate-project-rules">/newrule - Generate Project
+Rules</h3>
+<p><strong>Purpose:</strong> Analyze conversation patterns and generate
+coding rules or guidelines based on corrections and preferences.</p>
+<p><strong>Aliases:</strong> <code>/rule</code>,
+<code>/guideline</code></p>
+<p><strong>Syntax:</strong></p>
+<pre><code>/newrule [category]
+/newrule [category] --global
+/newrule [category] --name &lt;custom-name&gt;</code></pre>
+<p><strong>Arguments:</strong> - <code>category</code>: Rule category
+(optional) - default: general</p>
+<p><strong>Categories:</strong> - <code>coding-style</code>: Code
+formatting and style preferences - <code>testing</code>: Testing
+requirements and patterns - <code>architecture</code>: Architectural
+decisions - <code>documentation</code>: Documentation standards -
+<code>general</code>: General development practices</p>
+<p><strong>Flags:</strong> - <code>--global</code>: Save as global rule
+(applies to all projects) - default: workspace - <code>--name</code>:
+Custom rule name - default: <code>&lt;category&gt;-rules</code></p>
+<p><strong>Examples:</strong></p>
+<p>From current conversation:</p>
+<pre><code>/newrule coding-style</code></pre>
+<p>Global rule:</p>
+<pre><code>/newrule testing --global</code></pre>
+<p>Custom name:</p>
+<pre><code>/newrule &quot;error handling&quot; --name robust-errors</code></pre>
+<p><strong>How It Works:</strong></p>
+<p>The command analyzes your chat history for patterns: 1.
+<strong>Corrections:</strong> When you say “instead”, “should”,
+“prefer”, “always”, “never” 2. <strong>Preferences:</strong> When you
+specify “use X” or “don’t use Y” 3. <strong>Repeated Issues:</strong>
+Things mentioned multiple times</p>
+<p><strong>Output:</strong></p>
+<pre><code>Generating coding-style rule: coding-style-rules
+Location: .helixrules/coding-style-rules.md
+
+Analyzed: 47 messages
+Found: 8 patterns
+- &quot;Always use tabs instead of spaces&quot;
+- &quot;Prefer const over var for immutable variables&quot;
+- &quot;Never use var, prefer const or let&quot;
+...</code></pre>
+<p><strong>Generated Rule File:</strong></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Coding Style Rules</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>Generated from conversation on 2025-11-07</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">## Indentation</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Always use tabs instead of spaces</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Tab width: 4 spaces</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## Variable Declarations</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Never use <span class="in">`var`</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Prefer <span class="in">`const`</span> for immutable values</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Use <span class="in">`let`</span> only when reassignment needed</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Error Handling</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Always check errors explicitly</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Use named error variables</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div>
+<p><strong>Use Cases:</strong> - Capturing team conventions -
+Documenting decisions made during code review - Creating
+project-specific guidelines - Building coding standards from
+practice</p>
+<p><strong>Integration:</strong> - Rules stored in
+<code>.helixrules/</code> directory - Automatically loaded in future
+sessions - Can be committed to version control - Shared across team</p>
+<hr />
+<h3 id="reportbug---file-bug-report">/reportbug - File Bug Report</h3>
+<p><strong>Purpose:</strong> Create a comprehensive bug report with
+system information, logs, and reproduction steps.</p>
+<p><strong>Aliases:</strong> <code>/bug</code>, <code>/issue</code></p>
+<p><strong>Syntax:</strong></p>
+<pre><code>/reportbug &lt;description&gt;
+/reportbug &lt;description&gt; --title &lt;title&gt;
+/reportbug &lt;description&gt; --labels &lt;label1,label2&gt;
+/reportbug &lt;description&gt; --attach-logs
+/reportbug &lt;description&gt; --auto-submit</code></pre>
+<p><strong>Arguments:</strong> - <code>description</code>: Bug
+description (optional) - default: “Bug report from HelixCode”</p>
+<p><strong>Flags:</strong> - <code>--title</code>: Custom issue title -
+default: “Bug: <description>” - <code>--labels</code>: Comma-separated
+labels - default: “bug” - <code>--attach-logs</code>: Include recent
+logs - default: true - <code>--auto-submit</code>: Automatically submit
+to GitHub - default: false (opens for review)</p>
+<p><strong>Examples:</strong></p>
+<p>Basic bug report:</p>
+<pre><code>/reportbug &quot;LLM timeout error&quot;</code></pre>
+<p>With custom title and labels:</p>
+<pre><code>/reportbug --title &quot;Memory leak in worker pool&quot; --labels bug,critical</code></pre>
+<p>Auto-submit:</p>
+<pre><code>/reportbug &quot;Crash on startup&quot; --auto-submit</code></pre>
+<p><strong>Collected Information:</strong> - <strong>System:</strong>
+OS, architecture, CPU count, Go version, HelixCode version -
+<strong>Logs:</strong> Last 50 log entries (configurable) -
+<strong>Reproduction Steps:</strong> Extracted from recent chat history
+- <strong>Context:</strong> Current session, project, working
+directory</p>
+<p><strong>Generated Report:</strong></p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## Description</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>LLM timeout error when processing large files</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">## System Information</span></span></code></pre></div>
+<p>go_version: go1.26.3 os: darwin arch: arm64 num_cpu: 8 helix_version:
+0.1.0 timestamp: 2025-11-07T14:32:15Z</p>
+<pre><code>
+## Reproduction Steps
+1. Load large file (&gt;10,000 lines)
+2. Request refactoring
+3. Timeout occurs after 60s
+
+## Recent Logs</code></pre>
+<p>[2025-11-07 14:31:45] INFO: Processing file: large_file.go
+[2025-11-07 14:31:47] DEBUG: LLM request sent (12,450 tokens)
+[2025-11-07 14:32:45] ERROR: Timeout waiting for response</p>
+<pre><code>
+## Expected Behavior
+Should handle large files with streaming or chunking
+
+## Actual Behavior
+Times out after 60 seconds
+
+---
+*Generated by HelixCode /reportbug command*</code></pre>
+<p><strong>Use Cases:</strong> - Quick bug reporting during development
+- Capturing error context automatically - Sharing issues with team -
+Creating GitHub issues</p>
+<p><strong>Integration:</strong> - GitHub API integration (if
+configured) - GitLab support (coming soon) - Jira integration (coming
+soon) - Local markdown file export</p>
+<hr />
+<h3 id="workflows---workflow-management">/workflows - Workflow
+Management</h3>
+<p><strong>Purpose:</strong> List, execute, or manage development
+workflows.</p>
+<p><strong>Aliases:</strong> <code>/wf</code>, <code>/flow</code></p>
+<p><strong>Syntax:</strong></p>
+<pre><code>/workflows                          # List all workflows
+/workflows &lt;name&gt;                   # Execute workflow
+/workflows --list                   # List with details
+/workflows &lt;name&gt; --params &lt;params&gt;
+/workflows &lt;name&gt; --async
+/workflows --status &lt;workflow-id&gt;
+/workflows --cancel &lt;workflow-id&gt;</code></pre>
+<p><strong>Arguments:</strong> - <code>name</code>: Workflow name
+(optional for list, required for execute)</p>
+<p><strong>Flags:</strong> - <code>--list</code>: Show detailed workflow
+information - <code>--params</code>: Pass parameters (JSON or key=value)
+- example: <code>unit,integration</code> or <code>type=unit</code> -
+<code>--async</code>: Run workflow in background -
+<code>--status</code>: Check status of running workflow -
+<code>--cancel</code>: Cancel a running workflow</p>
+<p><strong>Built-in Workflows:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Description</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>planning</code></td>
+<td>Analyze requirements and create specifications</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>building</code></td>
+<td>Generate code and manage dependencies</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>testing</code></td>
+<td>Run unit, integration, and E2E tests</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>refactoring</code></td>
+<td>Analyze and optimize code structure</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>debugging</code></td>
+<td>Identify and fix issues</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>deployment</code></td>
+<td>Build, package, and deploy to targets</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<p>List workflows:</p>
+<pre><code>/workflows
+/workflows --list</code></pre>
+<p>Execute workflow:</p>
+<pre><code>/workflows planning</code></pre>
+<p>Execute with parameters:</p>
+<pre><code>/workflows testing --params &quot;unit,integration&quot;</code></pre>
+<p>Background execution:</p>
+<pre><code>/workflows deployment --async</code></pre>
+<p>Check status:</p>
+<pre><code>/workflows --status workflow-12345</code></pre>
+<p>Cancel workflow:</p>
+<pre><code>/workflows --cancel workflow-12345</code></pre>
+<p><strong>Output (List):</strong></p>
+<pre><code>Found 6 available workflows:
+
+1. planning - Analyze requirements and create technical specifications (3 steps)
+2. building - Generate code and manage dependencies (4 steps)
+3. testing - Run unit, integration, and end-to-end tests (5 steps)
+4. refactoring - Analyze and optimize code structure (3 steps)
+5. debugging - Identify and fix issues (4 steps)
+6. deployment - Build, package, and deploy to targets (6 steps)
+
+Use /workflows &lt;name&gt; to execute</code></pre>
+<p><strong>Output (Execute):</strong></p>
+<pre><code>Executing planning workflow...
+
+Step 1/3: Requirements Analysis ✓
+Step 2/3: Architecture Design ⏳
+...</code></pre>
+<p><strong>Use Cases:</strong> - Structured development processes -
+Automated testing pipelines - Code quality checks - Deployment
+automation - Refactoring large codebases</p>
+<p><strong>Custom Workflows:</strong> - Create workflows in
+<code>.helix/workflows/</code> - YAML or JSON format - Full
+documentation: <a href="./CUSTOM_WORKFLOWS.md">Custom Workflows
+Guide</a></p>
+<hr />
+<h3 id="deepplanning---extended-planning-mode">/deepplanning - Extended
+Planning Mode</h3>
+<p><strong>Purpose:</strong> Enter comprehensive planning mode with
+detailed analysis, architecture design, and implementation planning.</p>
+<p><strong>Aliases:</strong> <code>/deepplan</code>, <code>/dp</code>,
+<code>/architect</code></p>
+<p><strong>Syntax:</strong></p>
+<pre><code>/deepplanning &lt;topic&gt;
+/deepplanning &lt;topic&gt; --depth &lt;1-5&gt;
+/deepplanning &lt;topic&gt; --output &lt;file&gt;
+/deepplanning &lt;topic&gt; --include-diagrams
+/deepplanning &lt;topic&gt; --focus &lt;areas&gt;
+/deepplanning &lt;topic&gt; --constraints &lt;constraints&gt;
+/deepplanning --resume &lt;plan-id&gt;</code></pre>
+<p><strong>Arguments:</strong> - <code>topic</code>: Planning topic
+(required unless –resume)</p>
+<p><strong>Flags:</strong> - <code>--depth</code>: Planning depth 1-5
+(default: 3) - higher = more detailed - <code>--output</code>: Save plan
+to file (markdown or JSON) - <code>--include-diagrams</code>: Generate
+architecture diagrams (ASCII/Mermaid) - <code>--focus</code>: Focus
+areas (architecture,security,performance,scalability) -
+<code>--constraints</code>: Constraints (budget=low,timeline=2weeks) -
+<code>--resume</code>: Resume previous planning session</p>
+<p><strong>Planning Phases:</strong></p>
+<ol type="1">
+<li><strong>Requirements Analysis:</strong> Gather and analyze
+requirements</li>
+<li><strong>Architecture Design:</strong> Design system architecture and
+components</li>
+<li><strong>Technology Selection:</strong> Choose appropriate
+technologies</li>
+<li><strong>Implementation Planning:</strong> Break down into tasks and
+milestones</li>
+<li><strong>Risk Assessment:</strong> Identify risks and mitigation
+strategies</li>
+<li><strong>Resource Estimation:</strong> Estimate time, team size,
+resources</li>
+</ol>
+<p><strong>Examples:</strong></p>
+<p>Basic planning:</p>
+<pre><code>/deepplanning &quot;new authentication system&quot;</code></pre>
+<p>Detailed planning:</p>
+<pre><code>/deepplanning &quot;microservices architecture&quot; --depth 5</code></pre>
+<p>With output file:</p>
+<pre><code>/deepplanning &quot;database migration&quot; --output plan.md</code></pre>
+<p>With diagrams:</p>
+<pre><code>/deepplanning &quot;event-driven system&quot; --include-diagrams</code></pre>
+<p>Focused planning:</p>
+<pre><code>/deepplanning &quot;API redesign&quot; --focus architecture,security,performance</code></pre>
+<p>With constraints:</p>
+<pre><code>/deepplanning &quot;mobile app&quot; --constraints &quot;budget=low,timeline=3months&quot;</code></pre>
+<p>Resume planning:</p>
+<pre><code>/deepplanning --resume plan-12345</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code>Starting deep planning for: new authentication system
+Planning depth: 3
+Focus areas: architecture, implementation
+
+Phase 1/6: Requirements Analysis ✓
+- User authentication (email/password)
+- OAuth 2.0 support (Google, GitHub)
+- JWT token-based sessions
+- Role-based access control
+...
+
+Phase 2/6: Architecture Design ⏳
+Components:
+- Auth Service (handles authentication)
+- Token Service (JWT generation/validation)
+- User Service (user management)
+- Role Service (RBAC)
+
+[Architecture Diagram]
++----------------+     +----------------+     +----------------+
+|   Client App   | --&gt; |  Auth Service  | --&gt; | User Database  |
++----------------+     +----------------+     +----------------+
+                              |
+                              v
+                      +----------------+
+                      | Token Service  |
+                      +----------------+
+...</code></pre>
+<p><strong>Saved Plan (if –output specified):</strong></p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Authentication System - Deep Planning</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>**Created:** 2025-11-07</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>**Depth:** 3</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>**Status:** Complete</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## Requirements Analysis</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="fu">### Functional Requirements</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>User authentication with email/password</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>OAuth 2.0 integration (Google, GitHub)</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>JWT token-based sessions</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Role-based access control (RBAC)</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## Architecture Design</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a><span class="fu">### System Components</span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a><span class="fu">## Technology Selection</span></span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation Plan</span></span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a><span class="fu">### Phase 1: Core Authentication (2 weeks)</span></span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Setup database schema</span>
+<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Implement user registration</span>
+<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Implement login/logout</span>
+<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## Risk Assessment</span></span>
+<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Resource Estimation</span></span>
+<span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div>
+<p><strong>Use Cases:</strong> - Large feature planning - System
+architecture design - Refactoring planning - Technology evaluation -
+Team onboarding (documentation)</p>
+<p><strong>Integration:</strong> - Plans saved to
+<code>.helix/plans/</code> - Can be exported to Notion, Confluence -
+Generate tasks from plans - Track implementation progress</p>
+<hr />
+<h2 id="command-reference">Command Reference</h2>
+<h3 id="command-syntax">Command Syntax</h3>
+<pre><code>/command [arguments] [--flag value] [--boolean-flag]</code></pre>
+<p><strong>Components:</strong></p>
+<ol type="1">
+<li><strong>Command Name:</strong> Starts with <code>/</code>
+(required)</li>
+<li><strong>Arguments:</strong> Positional values (space-separated)</li>
+<li><strong>Flags:</strong> Named options with <code>--</code>
+prefix</li>
+</ol>
+<p><strong>Flag Formats:</strong></p>
+<pre><code>--flag value          # Flag with value
+--flag=value          # Alternative syntax
+--boolean-flag        # Boolean flag (value=true)</code></pre>
+<p><strong>Quoting:</strong></p>
+<p>Use quotes for arguments with spaces:</p>
+<pre><code>/newtask &quot;Fix bug in authentication handler&quot;
+/deepplanning &quot;Design microservices architecture&quot;</code></pre>
+<p><strong>Autocomplete:</strong></p>
+<p>Press <code>Tab</code> to autocomplete: - Command names - Flag names
+- File paths (for some commands)</p>
+<hr />
+<h2 id="advanced-usage">Advanced Usage</h2>
+<h3 id="combining-commands-with-mentions">Combining Commands with @
+Mentions</h3>
+<pre><code>/newtask Fix the issue in @file[internal/auth/handler.go] --priority high</code></pre>
+<h3 id="chaining-commands">Chaining Commands</h3>
+<p>Execute multiple commands in sequence:</p>
+<pre><code>/condense --ratio 0.3
+# (wait for completion)
+/newtask Implement the suggested improvements</code></pre>
+<h3 id="workflow-pipelines">Workflow Pipelines</h3>
+<pre><code>/workflows testing --params unit
+# (after tests pass)
+/workflows deployment --async</code></pre>
+<h3 id="planning-to-implementation">Planning to Implementation</h3>
+<pre><code>/deepplanning &quot;user dashboard&quot; --output dashboard-plan.md
+# (review plan)
+/newtask Implement user dashboard --link-previous</code></pre>
+<h3 id="iterative-refinement">Iterative Refinement</h3>
+<pre><code>/newrule coding-style
+# (review generated rules)
+# (continue conversation with corrections)
+/newrule coding-style  # Regenerate with new patterns</code></pre>
+<hr />
+<h2 id="creating-custom-commands">Creating Custom Commands</h2>
+<h3 id="command-structure">Command Structure</h3>
+<p>Custom commands are defined in <code>.helix/commands/</code>:</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># .helix/commands/deploy.yaml</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> deploy</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Deploy to production&quot;</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="fu">aliases</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;ship&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;release&quot;</span><span class="kw">]</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">type</span><span class="kw">:</span><span class="at"> workflow</span></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> testing</span></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">type</span><span class="kw">:</span><span class="at"> shell</span></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">command</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;make build&quot;</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">type</span><span class="kw">:</span><span class="at"> shell</span></span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">command</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;kubectl apply -f k8s/&quot;</span></span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">type</span><span class="kw">:</span><span class="at"> notify</span></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">message</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Deployment complete!&quot;</span></span></code></pre></div>
+<h3 id="more-information">More Information</h3>
+<p>See <a href="./CUSTOM_COMMANDS.md">Custom Commands Guide</a> for full
+documentation.</p>
+<hr />
+<h2 id="examples">Examples</h2>
+<h3 id="example-1-feature-development">Example 1: Feature
+Development</h3>
+<pre><code># Start with planning
+/deepplanning &quot;user profile feature&quot; --depth 3 --output profile-plan.md
+
+# Create tasks from plan
+/newtask Implement user profile API --priority high
+/newtask Implement user profile UI --link-previous
+/newtask Add profile tests --link-previous
+
+# During development, add rules
+/newrule &quot;API design&quot;
+
+# When history gets long
+/condense --keep-last 10 --preserve-code</code></pre>
+<h3 id="example-2-bug-investigation">Example 2: Bug Investigation</h3>
+<pre><code># File bug report
+/reportbug &quot;Memory leak in background worker&quot; --labels bug,critical
+
+# Run debugging workflow
+/workflows debugging
+
+# Create fix task
+/newtask Fix memory leak in background worker --priority critical</code></pre>
+<h3 id="example-3-code-review">Example 3: Code Review</h3>
+<pre><code># Condense old conversation
+/condense --ratio 0.5
+
+# Start review workflow
+/workflows refactoring
+
+# Generate style guide from feedback
+/newrule coding-style --name team-style-guide --global</code></pre>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="command-not-found">Command Not Found</h3>
+<p><strong>Problem:</strong></p>
+<pre><code>Error: command &#39;unknowncmd&#39; not found</code></pre>
+<p><strong>Solutions:</strong> 1. Check spelling: <code>/help</code>
+shows all commands 2. Use autocomplete: type <code>/</code> and press
+Tab 3. Check aliases: some commands have multiple names</p>
+<h3 id="invalid-flag">Invalid Flag</h3>
+<p><strong>Problem:</strong></p>
+<pre><code>Error: unknown flag: --invalid</code></pre>
+<p><strong>Solutions:</strong> 1. Check command help:
+<code>/command --help</code> 2. Use correct syntax:
+<code>--flag value</code> or <code>--flag=value</code> 3. Boolean flags
+don’t need values: <code>--preserve-code</code> not
+<code>--preserve-code true</code></p>
+<h3 id="missing-required-argument">Missing Required Argument</h3>
+<p><strong>Problem:</strong></p>
+<pre><code>Error: description is required</code></pre>
+<p><strong>Solutions:</strong> 1. Provide required arguments 2. Use
+quotes for multi-word arguments 3. Check command syntax in this
+guide</p>
+<h3 id="workflow-not-found">Workflow Not Found</h3>
+<p><strong>Problem:</strong></p>
+<pre><code>Unknown workflow: invalid-workflow</code></pre>
+<p><strong>Solutions:</strong> 1. List workflows:
+<code>/workflows --list</code> 2. Check spelling 3. Custom workflows:
+verify <code>.helix/workflows/</code> directory</p>
+<hr />
+<h2 id="faq">FAQ</h2>
+<p><strong>Q: Can I create my own slash commands?</strong> A: Yes! See
+<a href="./CUSTOM_COMMANDS.md">Custom Commands Guide</a>.</p>
+<p><strong>Q: Do slash commands work with all LLM providers?</strong> A:
+Yes, commands are processed before sending to the LLM.</p>
+<p><strong>Q: Can I use @ mentions in slash commands?</strong> A: Yes!
+Example: <code>/newtask Fix @file[handler.go]</code></p>
+<p><strong>Q: How do I see all available commands?</strong> A: Type
+<code>/help</code> or press <code>/</code> followed by Tab.</p>
+<p><strong>Q: Are slash commands case-sensitive?</strong> A: No,
+<code>/NewTask</code>, <code>/newtask</code>, and <code>/NEWTASK</code>
+all work.</p>
+<p><strong>Q: Can slash commands be abbreviated?</strong> A: Not
+built-in commands, but you can use aliases (e.g., <code>/nt</code> for
+<code>/newtask</code>).</p>
+<p><strong>Q: Do slash commands save history?</strong> A: Yes, all
+commands are logged and can be reviewed.</p>
+<p><strong>Q: Can I undo a slash command?</strong> A: Some commands
+support undo (e.g., <code>/condense</code>). Check command
+documentation.</p>
+<p><strong>Q: How do I cancel a running workflow?</strong> A: Use
+<code>/workflows --cancel &lt;workflow-id&gt;</code></p>
+<p><strong>Q: Can slash commands be scripted?</strong> A: Yes, via CLI
+mode. See <a href="./CLI_SCRIPTING.md">CLI Scripting Guide</a>.</p>
+<hr />
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="./MENTIONS_USER_GUIDE.md">@ Mentions User Guide</a></li>
+<li><a href="./CUSTOM_COMMANDS.md">Custom Commands Guide</a></li>
+<li><a href="./WORKFLOWS.md">Workflow Development Guide</a></li>
+<li><a href="./CONFIGURATION.md">HelixCode Configuration</a></li>
+<li><a href="./API.md">API Documentation</a></li>
+</ul>
+<hr />
+<p><strong>Document Version:</strong> 1.0 <strong>Last Updated:</strong>
+November 7, 2025 <strong>Feedback:</strong> <a href="https://github.com/user/helixcode/issues">GitHub Issues</a></p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest
+stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go
+1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).</p>
+</body>
+</html>

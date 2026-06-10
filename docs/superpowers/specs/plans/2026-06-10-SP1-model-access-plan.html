@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP1-model-access-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP1-model-access-plan</h1>
+</header>
+<h1 id="sp1-model-access-refinement-implementation-plan">SP1 —
+Model-Access Refinement: Implementation Plan</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>draft</td>
+</tr>
+<tr>
+<td>Maintainer</td>
+<td>SP1 planning subagent (READ-ONLY planning pass)</td>
+</tr>
+<tr>
+<td>Source spec</td>
+<td><code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>
+§SP1</td>
+</tr>
+<tr>
+<td>Evidence base</td>
+<td><code>docs/superpowers/specs/analysis/2026-06-10-B-model-access.md</code></td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>Cascades from <code>constitution/</code> + root
+<code>CLAUDE.md</code>/<code>CONSTITUTION.md</code>; anti-bluff §11.4
+governs every closure</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4 / §11.4.123):</strong> This is a
+<em>plan</em>, not a claim of done work. No task below is “complete”
+until it carries captured runtime evidence per §11.4.5 / §11.4.69 /
+§11.4.107. Brainstorming HARD-GATE: no implementation, no push until
+this plan is operator-approved. Subagent-driven execution is the default
+(§11.4.70). TDD RED-first discipline (§11.4.43 / §11.4.115); every
+closed defect gets a standing regression guard (§11.4.135).</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-goal--scope">1. Goal &amp; scope</a></li>
+<li><a href="#2-confirmed-evidence-anchors">2. Confirmed evidence
+anchors (re-verified this pass)</a></li>
+<li><a href="#3-target-design">3. Target design (the working-model
+funnel)</a></li>
+<li><a href="#4-decisions-needing-operator-input">4. Decisions needing
+operator input</a></li>
+<li><a href="#5-files-to-create--modify">5. Files to create /
+modify</a></li>
+<li><a href="#6-phased-tdd-task-list">6. Phased TDD task list</a></li>
+<li><a href="#7-test-type-matrix-for-sp1">7. Test-type matrix for
+SP1</a></li>
+<li><a href="#8-docs--guides-deliverables">8. Docs &amp; guides
+deliverables</a></li>
+<li><a href="#9-reuselift-ledger">9. Reuse/lift ledger
+(§11.4.74)</a></li>
+<li><a href="#10-summary">10. Summary</a></li>
+</ul>
+<hr />
+<h2 id="goal-scope">1. Goal &amp; scope</h2>
+<p><strong>Goal (verbatim from request):</strong> <em>“For every
+provider, if an API key is provided OR recognized from <code>.env</code>
+/ <code>.api_keys</code> / shell-exported, that provider’s WORKING
+models become available — everything dynamically obtained + validated +
+verified via LLMsVerifier.”</em></p>
+<p>SP1 closes five evidence-backed defects (roadmap §1a): -
+<strong>D-2</strong> CLI <code>handleListModels</code> lists
+<code>failed</code>/<code>pending</code> models as available
+(<code>cmd/cli/main.go:1361</code>/<code>:1392</code>). -
+<strong>D-3</strong> <code>secrets.LoadAPIKeys</code> is DEAD code,
+never called in prod (<code>internal/secrets/loader.go:30</code>). -
+<strong>D-4</strong> working-model filter
+(<code>Verified ∧ score≥min</code>) loaded but never applied
+(<code>adapter.go:175</code>). - <strong>D-5</strong> hardcoded provider
+model lists (CONST-036) (<code>openai_provider.go:203</code>,
+<code>anthropic_provider.go:205</code>, …). - Plus the
+<strong>no-key-presence-gate</strong> gap (a user with one key sees
+every provider) and the <strong>single-provider factory</strong> gap
+(<code>factory.go:9</code> builds ONE provider by
+<code>config.Type</code>, no key-present enumerator).</p>
+<p>Out of scope (owned by other SPs): HelixAgent
+<code>/v1/completion/models</code> hardcoded list (D-1 → SP2); CLI-agent
+stub packages (D-6 → SP4); <code>go.mod replace dev.helix.agent</code>
+wiring (D-7 → SP4/SP5); constitution Rev-table drift (D-8 → SP0).</p>
+<hr />
+<h2 id="confirmed-evidence-anchors">2. Confirmed evidence anchors</h2>
+<p>All anchors below were opened and confirmed in this planning pass
+(file:line as read).</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Anchor</th>
+<th>Confirmed fact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/internal/secrets/loader.go:30</code></td>
+<td><code>func LoadAPIKeys() error</code> reads
+<code>$HOME/api_keys.sh</code> (L33-37 <code>loadFromShell</code>), else
+walks up to <code>.env</code> (L119 <code>findEnvFile</code>, L84
+<code>loadFromEnv</code>), <code>os.Setenv</code> each (L78/L103).
+CONST-042-clean (no value logging). Zero prod call-sites = DEAD.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/config/config.go:307-345</code></td>
+<td><code>v.AutomaticEnv()</code> + <code>SetEnvPrefix(&quot;HELIX&quot;)</code>
+(L308-309); 8 single-alias per-provider bindings (L338-345:
+openai/anthropic/gemini/deepseek/groq/mistral/xai/openrouter) — narrower
+than helix_agent’s multi-alias.</td>
+</tr>
+<tr>
+<td><code>helix_code/cmd/cli/main.go:1355-1390</code></td>
+<td><code>handleListModels</code>: P1 verifier
+<code>GetVerifiedModels</code> (L1361) →
+<code>printVerifiedModels</code> (prints ALL, no filter); P2 single
+<code>c.llmProvider.GetModels()</code> (L1372); P3
+<code>verifier.FallbackModels</code> (L1387).</td>
+</tr>
+<tr>
+<td><code>helix_code/cmd/cli/main.go:1392-1414</code></td>
+<td><code>printVerifiedModels</code> renders <code>✓ verified</code> /
+<code>○ pending</code> / <code>✗ failed</code> /
+<code>⏳ rate-limited</code> — i.e. prints failed/pending rows as
+“available” (D-2).</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/verifier/adapter.go:175-180</code></td>
+<td><code>GetMinAcceptableScore()</code> default 6.0 from
+<code>Scoring.MinAcceptableScore</code>. <strong>Never invoked</strong>
+in any listing path.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/verifier/adapter.go:183-224</code></td>
+<td><code>GetVerifiedModels</code>: gated on <code>IsEnabled()</code>;
+cache→live→stale→<code>getFallbackModels()</code>; returns
+<code>filterByProviderConfig(models)</code>. No key-presence, no
+Verified/score filter.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/verifier/adapter.go:277-289</code></td>
+<td><code>filterByProviderConfig</code> drops only
+<code>config.Providers[m.Provider].Enabled == false</code> (manual
+flag).</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/verifier/types.go:27/31/32/33/48/54</code></td>
+<td><code>VerifiedModel{DisplayName, Verified bool, VerificationStatus string, ContextSize, OverallScore float64, LastVerified}</code>
+— the “working” fields.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/openai_provider.go:201-239</code></td>
+<td><code>initializeModels()</code> hardcodes 4 models
+(gpt-4o/4-turbo/4/3.5-turbo). CONST-036 risk.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/anthropic_provider.go:203-205+</code></td>
+<td><code>getAnthropicModels()</code> hardcodes claude-4-sonnet/opus,
+3.x families. CONST-036 risk.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/factory.go:9-101</code></td>
+<td><code>NewProvider(config)</code> switch builds ONE provider by
+<code>config.Type</code>. <code>InitializeModelManager</code> (L135)
+loops <code>configs</code> but only those with
+<code>config.Enabled</code>. No “build every key-present provider”
+enumerator.</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/verifier/provider_types.go:348-385+</code></td>
+<td><code>SupportedProviders map[string]*ProviderTypeInfo</code> with
+per-provider multi-alias <code>EnvVars</code> (claude
+<code>{ANTHROPIC_API_KEY,CLAUDE_API_KEY}</code>, gemini
+<code>{GEMINI_API_KEY,GOOGLE_API_KEY,ApiKey_Gemini}</code>, …). THE
+reuse template.</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/verifier/startup.go:389-414</code></td>
+<td>Per-provider loop: for each <code>EnvVar</code>,
+<code>os.Getenv</code>; if non-empty
+<code>&amp;&amp; !isPlaceholder</code> →
+<code>DiscoverModels(ctx, providerType, apiKey)</code> dynamic-first,
+static <code>info.Models</code> fallback. THE key→discover flow.</td>
+</tr>
+<tr>
+<td><code>submodules/llms_verifier/llm-verifier/api_keys/{env_scanner.go,manager.go,priority.go}</code></td>
+<td><code>EnvVarScanner</code> + faulty-key registry. Imported in
+helix_agent as <code>digital.vasic.llmsverifier/api_keys</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="target-design">3. Target design</h2>
+<p>The working-model funnel (analysis §4.1, anti-bluff-tightened):</p>
+<pre><code>startup (cmd/server/main.go AND cmd/cli/main.go) — BEFORE config load
+  └─ secrets.LoadAPIKeys()                         [D-3 — WIRE; loader.go:30]
+        reads $HOME/api_keys.sh → else walked-up .env → os.Setenv each
+        (precedence note: already-exported shell env is NOT overwritten by loader? — see DECISION-1)
+  └─ config.Load()  (viper AutomaticEnv + BindEnv — now sees loader-populated env)
+  └─ keyrec.PresentProviders()                     [NEW — internal/llm/keyrecognition.go]
+        for each provider, any(os.Getenv(alias)) != &quot;&quot; &amp;&amp; !isPlaceholder(v)
+        alias table sourced from helix_agent SupportedProviders.EnvVars (§11.4.74 reuse)
+        → set[providerType]bool
+  └─ verifier.Adapter.GetWorkingModels(ctx, present) [NEW METHOD — adapter.go]
+        m kept  iff  present[m.Provider]                          (key-presence gate — NEW)
+                AND  m.Verified == true                           (types.go:31)
+                AND  m.VerificationStatus == &quot;verified&quot;           (types.go:32)
+                AND  m.OverallScore &gt;= GetMinAcceptableScore()    (adapter.go:175 — now APPLIED, D-4)
+                AND  config.Providers[m.Provider].Enabled != false (existing flag preserved)
+  └─ expose:
+        - CLI handleListModels (main.go:1361) → GetWorkingModels; printVerifiedModels prints only working
+        - server handlers (internal/server/handlers.go:1049/1140/1206)
+        - model_manager registry (model_manager.go:132 SetVerifierAdapter / :202 getAvailableModels)
+  └─ verifier-DISABLED / cold path  [DECISION-2]
+        NOT FallbackModels-as-working (that = §11.4 / CONST-035 PASS-bluff)</code></pre>
+<p>De-hardcoding (D-5, CONST-036): convert each hardcoded
+<code>initializeModels()</code> to either (a) live catalog fetch (mirror
+OpenRouter <code>fetchCatalog</code> / Ollama <code>/api/tags</code>) OR
+(b) defer to the verifier catalog. The working-model funnel above
+already routes the <em>displayed</em> list through the verifier, so the
+provider <code>GetModels()</code> lists stop being the user-facing
+source — but they remain a CONST-036 violation as long as they ship
+literal slices and are reachable via CLI P2 fallback (main.go:1372). See
+<a href="#4-decisions-needing-operator-input">DECISION-3</a>.</p>
+<hr />
+<h2 id="decisions-needing-operator-input">4. Decisions needing operator
+input</h2>
+<p>These are genuine ambiguities the agent must NOT guess (§11.4.6 /
+§11.4.101 — surface via <code>AskUserQuestion</code> per §11.4.66 before
+the affected task starts):</p>
+<ul>
+<li><p><strong>DECISION-1 — LoadAPIKeys precedence vs shell-exported
+env.</strong> <code>loader.go</code> calls <code>os.Setenv</code>
+unconditionally, so <code>.env</code>/<code>api_keys.sh</code> values
+would OVERRIDE an already-exported shell var. The request says “provided
+OR recognized from <code>.env</code> / <code>.api_keys</code> /
+shell-exported” without ranking them. Options: (a) shell-export wins
+(loader only fills GAPS — safest, least surprising); (b) file wins
+(loader overrides — current loader behaviour); (c) explicit precedence
+<code>.env</code> &lt; <code>api_keys.sh</code> &lt; shell.
+<strong>Recommended: (a) gap-fill</strong> — least destructive, matches
+“recognize if not already set”. Affects T1.1.1 + a loader
+change.</p></li>
+<li><p><strong>DECISION-2 — verifier-disabled behaviour</strong>
+(<code>HELIX_VERIFIER_ENABLED=false</code> default,
+<code>.env.example:30</code>). When the verifier is off there is NO
+authoritative “working” signal. Options: (a) “working models” require
+the verifier — disabled ⇒ empty list + honest notice (“enable
+HELIX_VERIFIER_ENABLED to see working models”); (b) fall back to
+per-provider LIVE <code>GetModels()</code> for key-present providers
+only (never hardcoded fallback), labelled <code>unverified</code>; (c)
+keep today’s <code>FallbackModels</code> path. (c) is a §11.4/CONST-035
+PASS-bluff and is REJECTED. <strong>Recommended: (a)</strong> for the
+headline “working models” command + (b) behind an explicit
+<code>--include-unverified</code> flag. Affects T1.3.3.</p></li>
+<li><p><strong>DECISION-3 — de-hardcoding strategy per provider</strong>
+(CONST-036). Options: (a) delete the literal
+<code>initializeModels</code> slices and have <code>GetModels()</code>
+fetch live (OpenAI <code>/v1/models</code>, Anthropic
+<code>/v1/models</code>, etc.) — most faithful to CONST-036 but adds
+network dependency + needs the API key at construction; (b) keep a thin
+static slice ONLY as an offline fallback but route ALL user-facing
+listing through the verifier funnel (§3) so the literal is never shown
+as authoritative; (c) full per-provider live fetch now for the 8 cloud
+providers, defer Azure/Bedrock/VertexAI/Copilot/Qwen.
+<strong>Recommended: (b)+(c) staged</strong> — funnel first (removes the
+user-facing bluff cheaply), then convert
+OpenAI/Anthropic/DeepSeek/Mistral to live-fetch. Note §11.4.124: the
+hardcoded slices are NOT dead code (CLI P2 reaches them) —
+investigate-before-remove is satisfied; we convert, not silently
+delete.</p></li>
+<li><p><strong>DECISION-4 — key-recognition table source.</strong>
+Options: (a) <code>import</code> helix_agent
+<code>SupportedProviders</code> directly (needs
+<code>replace dev.helix.agent</code> — D-7, owned by SP4/SP5, not yet
+wired); (b) lift a decoupled copy of just the
+<code>{provider → []envVarAlias}</code> map into a new HelixCode
+<code>internal/llm/keyrecognition.go</code> now, with a forward-note to
+converge on the shared substrate when D-7 lands. <strong>Recommended:
+(b)</strong> — unblocks SP1 without taking the SP4/SP5 dependency; the
+map is small, data-only, and CONST-051-decoupled. Record
+<code>Catalogue-Check: extend helix_agent@&lt;sha&gt;</code> per
+§11.4.74.</p></li>
+</ul>
+<hr />
+<h2 id="files-to-create-modify">5. Files to create / modify</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Action</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/internal/llm/keyrecognition.go</code></td>
+<td><strong>create</strong></td>
+<td><code>PresentProviders()</code> + multi-alias
+<code>{provider→[]envVar}</code> table + <code>isPlaceholder()</code>;
+lifted/decoupled from helix_agent
+<code>SupportedProviders.EnvVars</code> (§11.4.74, DECISION-4).</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/keyrecognition_test.go</code></td>
+<td><strong>create</strong></td>
+<td>unit: alias precedence, absence, placeholder rejection (mocks OK —
+unit only).</td>
+</tr>
+<tr>
+<td><code>helix_code/cmd/server/main.go</code></td>
+<td><strong>modify</strong></td>
+<td>call <code>secrets.LoadAPIKeys()</code> first in <code>main()</code>
+(D-3, T1.1.1).</td>
+</tr>
+<tr>
+<td><code>helix_code/cmd/cli/main.go</code></td>
+<td><strong>modify</strong></td>
+<td>call <code>secrets.LoadAPIKeys()</code> first in <code>main()</code>
+(D-3); <code>handleListModels:1361</code> →
+<code>GetWorkingModels</code>; <code>printVerifiedModels:1392</code>
+stops emitting failed/pending as available (D-2); P3 fallback gated by
+DECISION-2.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/secrets/loader.go</code></td>
+<td><strong>modify (DECISION-1 only)</strong></td>
+<td>optional gap-fill precedence (skip <code>os.Setenv</code> when var
+already set).</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/verifier/adapter.go</code></td>
+<td><strong>modify</strong></td>
+<td>new
+<code>GetWorkingModels(ctx, present map[string]bool) ([]*VerifiedModel, error)</code>
+applying key∧Verified∧status∧min-score (D-4, uses
+<code>GetMinAcceptableScore:175</code>); keep
+<code>GetVerifiedModels</code> for raw catalog.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/verifier/adapter_test.go</code></td>
+<td><strong>modify/create</strong></td>
+<td>unit: filter predicate truth-table + paired §1.1 mutation (strip
+key-gate → no-key provider leaks → FAIL).</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/factory.go</code></td>
+<td><strong>modify</strong></td>
+<td>add <code>BuildPresentProviders(configs, present)</code> enumerator
+(build every key-present provider, not ONE by
+<code>config.Type</code>).</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/openai_provider.go</code></td>
+<td><strong>modify (D-5/DECISION-3)</strong></td>
+<td>convert <code>initializeModels:201</code> to live-fetch or
+verifier-deferred.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/anthropic_provider.go</code></td>
+<td><strong>modify (D-5/DECISION-3)</strong></td>
+<td>convert <code>getAnthropicModels:203</code> likewise.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/{deepseek,mistral}_provider.go</code></td>
+<td><strong>modify (D-5)</strong></td>
+<td>convert hardcoded lists.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/server/handlers.go</code></td>
+<td><strong>modify</strong></td>
+<td><code>:1049/:1140/:1206</code> route through
+<code>GetWorkingModels</code> + present-set.</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/model_manager.go</code></td>
+<td><strong>modify</strong></td>
+<td><code>:132 SetVerifierAdapter</code> /
+<code>:202 getAvailableModels</code> populate registry from
+working-model funnel, not hardcoded <code>GetModels()</code>.</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/integration/sp1_model_access_test.go</code></td>
+<td><strong>create</strong></td>
+<td><code>-tags=integration</code>, REAL verifier + REAL provider key,
+NO mocks (CONST-050).</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/e2e/challenges/sp1_working_models/...</code></td>
+<td><strong>create</strong></td>
+<td>one-key→only-that-provider→real-generate E2E (§11.4.107
+liveness).</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/stresschaos/sp1_model_access_stress_test.go</code></td>
+<td><strong>create</strong></td>
+<td>verifier-unreachable / concurrent-list (§11.4.85).</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/regression/sp1_working_model_guard_test.go</code></td>
+<td><strong>create</strong></td>
+<td>standing RED_MODE guards for D-2/D-3/D-4 (§11.4.135).</td>
+</tr>
+<tr>
+<td><code>challenges/banks/sp1_model_access/...</code></td>
+<td><strong>create</strong></td>
+<td>cross-cutting Challenge bank entry (§11.4.83 transcript).</td>
+</tr>
+<tr>
+<td><code>helix_code/docs/guides/model-access.md</code> (+
+<code>.html</code>/<code>.pdf</code>)</td>
+<td><strong>create</strong></td>
+<td>user manual (CONST-066 always-sync).</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td><strong>modify</strong></td>
+<td>document <code>api_keys.sh</code> + <code>.env</code> auto-load +
+per-provider aliases + verifier-disabled behaviour.</td>
+</tr>
+<tr>
+<td><code>docs/ARCHITECTURE.md</code></td>
+<td><strong>modify</strong></td>
+<td>working-model funnel flow.</td>
+</tr>
+<tr>
+<td><code>docs/Issues.md</code> / <code>docs/Issues_Summary.md</code> /
+<code>docs/CONTINUATION.md</code></td>
+<td><strong>modify</strong></td>
+<td>ATM-NNN entries per §11.4.54 / CONST-044.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phased-tdd-task-list">6. Phased TDD task list</h2>
+<p>Each task: <strong>(a) RED</strong> (reproduce gap on current code,
+<code>RED_MODE=1</code>) → <strong>(b) IMPL</strong> (exact file/func) →
+<strong>(c) GREEN+evidence</strong> (<code>RED_MODE=0</code> guard +
+captured runtime proof) → <strong>(d) rollback</strong>.</p>
+<h3 id="phase-p1.0-pre-work-blocking">Phase P1.0 — Pre-work
+(blocking)</h3>
+<ul>
+<li><strong>T1.0.1</strong> Resolve DECISION-1..4 via
+<code>AskUserQuestion</code> (§11.4.66). Capture answers into this plan
+(bump Rev).</li>
+<li><strong>T1.0.2</strong> Catalogue-Check (§11.4.74): record
+<code>extend helix_agent@&lt;sha&gt;</code> +
+<code>reuse llms_verifier/api_keys@&lt;sha&gt;</code> in the ATM-NNN
+tracker entry.</li>
+<li><strong>T1.0.3</strong> <code>git fetch --all --prune</code> +
+<code>git log HEAD..@{u}</code> (§11.4.37) before any edit; capture
+output.</li>
+</ul>
+<h3 id="phase-p1.1-key-auto-recognition-d-3">Phase P1.1 — Key
+auto-recognition (D-3)</h3>
+<ul>
+<li><strong>T1.1.1 — Wire <code>secrets.LoadAPIKeys</code> at
+startup.</strong>
+<ul>
+<li><ol type="a">
+<li>RED:
+<code>tests/integration/sp1_model_access_test.go::TestLoadAPIKeys_WiredAtStartup</code>
+— set ONLY a key in a temp <code>.env</code> (no shell export), boot
+CLI/server entrypoint, assert the provider becomes key-present.
+<code>RED_MODE=1</code> on current tree FAILS (loader never called → key
+not recognized).</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li>IMPL: call <code>secrets.LoadAPIKeys()</code> as the first statement
+of <code>main()</code> in <code>cmd/server/main.go</code> and
+<code>cmd/cli/main.go</code>, BEFORE <code>config.Load()</code>. Apply
+DECISION-1 precedence in <code>loader.go</code> if chosen.</li>
+</ol></li>
+<li><ol start="3" type="a">
+<li>GREEN: <code>RED_MODE=0</code> guard passes; capture stdout proving
+the temp-<code>.env</code> key was recognized (value never printed —
+CONST-042). Evidence path
+<code>docs/qa/&lt;run-id&gt;/loadapikeys/</code>.</li>
+</ol></li>
+<li><ol start="4" type="a">
+<li>Rollback: remove the two <code>main()</code> calls (+ any
+<code>loader.go</code> precedence change); loader returns to DEAD.</li>
+</ol></li>
+</ul></li>
+<li><strong>T1.1.2 — Multi-alias key-recognition table.</strong>
+<ul>
+<li><ol type="a">
+<li>RED:
+<code>keyrecognition_test.go::TestPresentProviders_AliasAndPlaceholder</code>
+— set <code>CLAUDE_API_KEY</code> (alias), assert anthropic present; set
+a placeholder value, assert NOT present. RED FAILS (no table
+exists).</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li>IMPL: create <code>internal/llm/keyrecognition.go</code> with
+<code>PresentProviders() map[string]bool</code>, the
+<code>{provider→[]envVarAlias}</code> map (lifted decoupled from
+helix_agent <code>provider_types.go:349</code>),
+<code>isPlaceholder()</code>.</li>
+</ol></li>
+<li><ol start="3" type="a">
+<li>GREEN: unit table-driven pass; paired §1.1 mutation (drop an alias →
+that alias no longer recognized → test FAILs) captured.</li>
+</ol></li>
+<li><ol start="4" type="a">
+<li>Rollback: delete <code>keyrecognition.go</code> + test.</li>
+</ol></li>
+</ul></li>
+</ul>
+<h3 id="phase-p1.2-key-presence-provider-availability-gate-factory-enumerator">Phase
+P1.2 — Key-presence → provider-availability gate + factory
+enumerator</h3>
+<ul>
+<li><strong>T1.2.1 — Key-presence gate in the verifier path.</strong>
+<ul>
+<li><ol type="a">
+<li>RED:
+<code>adapter_test.go::TestGetWorkingModels_KeyPresenceGate</code> —
+verifier returns OpenAI+Anthropic verified models,
+<code>present={anthropic:true}</code>; assert OpenAI models DROPPED. RED
+FAILS (no <code>GetWorkingModels</code>).</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li>IMPL: add <code>GetWorkingModels(ctx, present)</code> to
+<code>adapter.go</code>; it calls <code>GetVerifiedModels</code> then
+filters by <code>present[m.Provider]</code> (+ the D-4 predicate,
+T1.3.1).</li>
+</ol></li>
+<li><ol start="3" type="a">
+<li>GREEN: predicate truth-table pass; <strong>paired §1.1
+mutation</strong> (strip the <code>present[...]</code> check → no-key
+provider leaks → FAIL) captured.</li>
+</ol></li>
+<li><ol start="4" type="a">
+<li>Rollback: remove <code>GetWorkingModels</code>; callers fall back to
+<code>GetVerifiedModels</code>.</li>
+</ol></li>
+</ul></li>
+<li><strong>T1.2.2 — Key-present provider enumerator
+(<code>factory.go:9</code>).</strong>
+<ul>
+<li><ol type="a">
+<li>RED:
+<code>factory_test.go::TestBuildPresentProviders_EnumeratesAllKeyed</code>
+— present={openai,anthropic}; assert TWO providers built (current
+<code>NewProvider</code> builds one by <code>config.Type</code> → RED
+FAILS for the set case).</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li>IMPL: add
+<code>BuildPresentProviders(configs, present) ([]Provider, error)</code>
+looping every key-present provider, reusing <code>NewProvider</code> per
+type.</li>
+</ol></li>
+<li><ol start="3" type="a">
+<li>GREEN: capture the enumerated provider list; mutation (force
+single-provider → set incomplete → FAIL).</li>
+</ol></li>
+<li><ol start="4" type="a">
+<li>Rollback: remove enumerator; <code>InitializeModelManager</code>
+unchanged.</li>
+</ol></li>
+</ul></li>
+</ul>
+<h3 id="phase-p1.3-dynamic-working-model-exposure-d-4-d-2-d-5">Phase
+P1.3 — Dynamic working-model exposure (D-4, D-2, D-5)</h3>
+<ul>
+<li><strong>T1.3.1 — Apply the working-model filter (D-4).</strong>
+<ul>
+<li><ol type="a">
+<li>RED:
+<code>adapter_test.go::TestGetWorkingModels_VerifiedAndScore</code> —
+feed a <code>failed</code> model, a <code>verified</code> model with
+score 4.0 (&lt;min 6.0), and a <code>verified</code> score 8.0; assert
+only the last survives. RED FAILS today (no path applies
+<code>GetMinAcceptableScore:175</code> / Verified / status).</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li>IMPL: inside <code>GetWorkingModels</code>, apply
+<code>m.Verified &amp;&amp; m.VerificationStatus==&quot;verified&quot; &amp;&amp; m.OverallScore &gt;= a.GetMinAcceptableScore()</code>.
+Honour CONST-038 poll ≤60s + CONST-037 verified ≤24h via existing cache
+TTL.</li>
+</ol></li>
+<li><ol start="3" type="a">
+<li>GREEN: truth-table + paired §1.1 mutation (drop the score check →
+low-score model leaks → FAIL).</li>
+</ol></li>
+<li><ol start="4" type="a">
+<li>Rollback: filter reverts to key-presence-only.</li>
+</ol></li>
+</ul></li>
+<li><strong>T1.3.2 — CLI/server/registry exposure switch (D-2).</strong>
+<ul>
+<li><ol type="a">
+<li>RED: <code>e2e/.../sp1_working_models</code> — set ONLY
+<code>ANTHROPIC_API_KEY</code>, run <code>cli --list-models</code>;
+assert NO <code>failed</code>/<code>pending</code> rows and NO
+non-Anthropic providers. RED FAILS today
+(<code>printVerifiedModels:1392</code> shows failed/pending; P1 lists
+whole catalog).</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li>IMPL: <code>handleListModels:1361</code> →
+<code>GetWorkingModels(ctx, present)</code>;
+<code>printVerifiedModels:1392</code> renders only working rows; server
+<code>handlers.go:1049/1140/1206</code> +
+<code>model_manager.go:132/202</code> likewise.</li>
+</ol></li>
+<li><ol start="3" type="a">
+<li>GREEN: captured CLI transcript shows only Anthropic verified models;
+then a REAL <code>generate</code> returns REAL output (§11.4.107
+liveness, not metadata). Evidence
+<code>docs/qa/&lt;run-id&gt;/working-models/</code>.</li>
+</ol></li>
+<li><ol start="4" type="a">
+<li>Rollback: revert call-sites to <code>GetVerifiedModels</code> + old
+printer.</li>
+</ol></li>
+</ul></li>
+<li><strong>T1.3.3 — Safe verifier-disabled / cold behaviour
+(DECISION-2).</strong>
+<ul>
+<li><ol type="a">
+<li>RED: <code>TestListModels_VerifierDisabled_NoBluff</code> —
+<code>HELIX_VERIFIER_ENABLED=false</code>; assert the command does NOT
+present <code>FallbackModels</code> as “working”. RED FAILS today
+(<code>main.go:1387</code> prints fallback list).</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li>IMPL: per DECISION-2 — empty + honest notice (recommended) or
+<code>--include-unverified</code> live path.</li>
+</ol></li>
+<li><ol start="3" type="a">
+<li>GREEN: capture the honest-notice output; mutation (re-enable
+fallback-as-working → FAIL).</li>
+</ol></li>
+<li><ol start="4" type="a">
+<li>Rollback: restore P3 fallback (NOT recommended — keeps the
+bluff).</li>
+</ol></li>
+</ul></li>
+<li><strong>T1.3.4 — De-hardcode provider model lists (D-5 / CONST-036,
+DECISION-3).</strong>
+<ul>
+<li><ol type="a">
+<li>RED: <code>TestProviderModels_NotHardcoded_OpenAI/Anthropic</code> —
+assert <code>GetModels()</code> does not return the exact literal slice
+when a live source is reachable (or that the user-facing funnel never
+surfaces the literal). RED FAILS today (literal slices at
+<code>openai_provider.go:201</code>,
+<code>anthropic_provider.go:203</code>).</li>
+</ol></li>
+<li><ol start="2" type="a">
+<li>IMPL: per DECISION-3 — funnel-first (route all listing through
+verifier) then convert OpenAI/Anthropic/DeepSeek/Mistral
+<code>initializeModels</code> to live-fetch (mirror OpenRouter
+<code>fetchCatalog</code> / Ollama <code>/api/tags</code>). §11.4.124:
+convert, don’t silently delete.</li>
+</ol></li>
+<li><ol start="3" type="a">
+<li>GREEN: capture a live model list from a real provider endpoint;
+anti-bluff smoke (<code>grep</code> for
+<code>simulated|for now|placeholder</code>) clean.</li>
+</ol></li>
+<li><ol start="4" type="a">
+<li>Rollback: restore literal slices (CONST-036 violation returns).</li>
+</ol></li>
+</ul></li>
+</ul>
+<h3 id="phase-p1.4-docs-guides-const-066-11.4.65">Phase P1.4 — Docs
+&amp; guides (CONST-066 / §11.4.65)</h3>
+<ul>
+<li><strong>T1.4.1</strong> Write
+<code>docs/guides/model-access.md</code> (key setup,
+<code>.env</code>/<code>api_keys.sh</code> auto-load, alias table,
+working-model definition, verifier-disabled behaviour); export
+<code>.html</code>+<code>.pdf</code>.</li>
+<li><strong>T1.4.2</strong> Update <code>.env.example</code> (auto-load
+note + aliases + verifier behaviour) and
+<code>docs/ARCHITECTURE.md</code> (funnel flow). Update README
+Documentation Map (CONST-062).</li>
+</ul>
+<h3 id="phase-p1.5-full-test-type-coverage-regression-guards-11.4.135-const-050">Phase
+P1.5 — Full test-type coverage + regression guards (§11.4.135,
+CONST-050)</h3>
+<ul>
+<li><strong>T1.5.1</strong> Stress/chaos
+(<code>tests/stresschaos/sp1_model_access_stress_test.go</code>):
+verifier-unreachable → honest degradation (not fallback-as-working); 10
+concurrent <code>GetWorkingModels</code>; §11.4.85 evidence.</li>
+<li><strong>T1.5.2</strong> Standing regression guards
+(<code>tests/regression/sp1_working_model_guard_test.go</code>)
+registering D-2, D-3, D-4 with <code>RED_MODE</code> polarity per
+§11.4.115; wire into the release-gate suite (§11.4.40).</li>
+<li><strong>T1.5.3</strong> Challenge bank
+(<code>challenges/banks/sp1_model_access/</code>) + HelixQA
+registration; captured bidirectional transcript under
+<code>docs/qa/&lt;run-id&gt;/</code> (§11.4.83).</li>
+<li><strong>T1.5.4</strong> Code-review gate (§11.4.125/§11.4.134)
+before pre-build + main build; iterate-until-GO.</li>
+</ul>
+<hr />
+<h2 id="test-type-matrix-for-sp1">7. Test-type matrix for SP1</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test type</th>
+<th>Harness</th>
+<th>Anti-bluff requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td><code>keyrecognition_test.go</code>, <code>adapter_test.go</code>,
+<code>factory_test.go</code></td>
+<td>mocks OK (unit only); paired §1.1 mutation per filter.</td>
+</tr>
+<tr>
+<td>Integration (<code>-tags=integration</code>)</td>
+<td><code>tests/integration/sp1_model_access_test.go</code></td>
+<td>REAL verifier (<code>make test-verifier-integration</code>) + REAL
+provider key; NO mocks (CONST-050).</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td><code>tests/e2e/challenges/sp1_working_models</code></td>
+<td>one-key→only-that-provider→REAL generate returns REAL output
+(§11.4.107 liveness).</td>
+</tr>
+<tr>
+<td>Full-automation</td>
+<td>self-driving, <code>-count=3</code> re-runnable</td>
+<td>no operator typing (§11.4.98).</td>
+</tr>
+<tr>
+<td>Stress + chaos</td>
+<td><code>tests/stresschaos/sp1_model_access_stress_test.go</code></td>
+<td>verifier-down honest degradation; concurrency (§11.4.85).</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>reuse <code>make test-security-full</code></td>
+<td>key never logged/committed (CONST-042); placeholder rejection.</td>
+</tr>
+<tr>
+<td>Regression guard</td>
+<td><code>tests/regression/sp1_working_model_guard_test.go</code></td>
+<td>RED_MODE polarity; release-gate blocker (§11.4.135).</td>
+</tr>
+<tr>
+<td>Challenge / HelixQA</td>
+<td><code>challenges/banks/sp1_model_access/</code> + HelixQA bank</td>
+<td>captured transcript (§11.4.83).</td>
+</tr>
+<tr>
+<td>Performance/benchmark</td>
+<td><code>go test -bench</code> on <code>GetWorkingModels</code></td>
+<td>filter is O(n), no regression.</td>
+</tr>
+</tbody>
+</table>
+<p>UI/UX/DDoS/scaling: N/A-or-delegated for this server/CLI-only surface
+— record honest coverage note (§11.4.3), do not fake (SP7 owns the
+cross-cutting matrix).</p>
+<hr />
+<h2 id="docs-guides-deliverables">8. Docs &amp; guides deliverables</h2>
+<ul>
+<li><code>docs/guides/model-access.md</code>
+(+<code>.html</code>/<code>.pdf</code>) — user manual.</li>
+<li><code>.env.example</code> — auto-load + aliases + verifier-disabled
+behaviour.</li>
+<li><code>docs/ARCHITECTURE.md</code> — funnel flow.</li>
+<li>README Documentation Map + revision header (CONST-062/064).</li>
+<li><code>docs/Issues.md</code>/<code>Issues_Summary.md</code>/<code>Fixed.md</code>/<code>CONTINUATION.md</code>
+— ATM-NNN entries, type-aware closure (CONST-057), kept in sync each
+state-advancing commit (CONST-044/063).</li>
+</ul>
+<hr />
+<h2 id="reuselift-ledger">9. Reuse/lift ledger</h2>
+<p>Per §11.4.74 (record in tracker <code>Catalogue-Check:</code>): -
+<strong>Key-recognition table</strong> →
+<code>extend helix_agent@&lt;sha&gt;</code> — lift the decoupled
+<code>{provider→[]envVar}</code> map from
+<code>provider_types.go:349 SupportedProviders.EnvVars</code> into
+<code>internal/llm/keyrecognition.go</code> (DECISION-4(b)); converge on
+the shared substrate when D-7 (<code>replace dev.helix.agent</code>)
+lands under SP4/SP5. - <strong>Key→discover flow</strong> →
+<code>reuse helix_agent@&lt;sha&gt;</code> pattern from
+<code>startup.go:389</code> (per-env-var → DiscoverModels dynamic-first)
+as the de-hardcoding template (T1.3.4). - <strong>Faulty-key registry /
+scanner</strong> → <code>reuse llms_verifier/api_keys@&lt;sha&gt;</code>
+(<code>env_scanner.go</code>/<code>manager.go</code>/
+<code>priority.go</code>) when D-7 wiring exists; until then,
+key-presence is sufficient for SP1. - <strong>Verifier
+client/adapter</strong> → already real (<code>verifier/client.go</code>
+live HTTP) — extend, don’t replace.</p>
+<hr />
+<h2 id="summary">10. Summary</h2>
+<ol type="1">
+<li>SP1 makes a provider’s WORKING models appear iff a key is recognized
+(<code>.env</code>/<code>api_keys.sh</code>/shell) AND the verifier
+validates them — closing D-2, D-3, D-4, D-5 plus the no-key-gate and
+single-factory gaps.</li>
+<li>Root cause is wiring, not new architecture:
+<code>secrets.LoadAPIKeys</code> (loader.go:30) is DEAD; the
+working-model predicate exists in pieces
+(<code>GetMinAcceptableScore:175</code>, <code>VerifiedModel</code>
+fields) but is never assembled.</li>
+<li>The fix adds a <code>keyrecognition.go</code> present-providers
+table (lifted decoupled from helix_agent
+<code>SupportedProviders.EnvVars:349</code>), a
+<code>GetWorkingModels</code> filter (key∧Verified∧status∧min-score), a
+key-present factory enumerator, and routes CLI/server/registry through
+the funnel.</li>
+<li>De-hardcoding (CONST-036) converts OpenAI/Anthropic/DeepSeek/Mistral
+literal lists to live/verifier-sourced; §11.4.124 satisfied — convert,
+never silently delete (CLI P2 reaches them, so not dead code).</li>
+<li>Verifier-disabled MUST NOT present <code>FallbackModels</code> as
+“working” (that is a CONST-035/§11.4 PASS-bluff) — DECISION-2 specifies
+honest empty-or-unverified behaviour.</li>
+<li>Every task is TDD RED-first (§11.4.43/§11.4.115) with a
+<code>RED_MODE</code> polarity switch and a paired §1.1 mutation; every
+closure registers a standing regression guard (§11.4.135).</li>
+<li>Tests beyond unit hit REAL verifier + REAL provider endpoints
+(CONST-050); “working” models are proven by a REAL generate returning
+REAL output (§11.4.107 liveness), never metadata-only.</li>
+<li>Four operator decisions are flagged (precedence, verifier-disabled
+behaviour, de-hardcode strategy, table source) — surfaced via
+AskUserQuestion (§11.4.66) BEFORE the affected tasks; no guessing
+(§11.4.6).</li>
+<li>Deliverables include docs/guides (<code>model-access.md</code>,
+<code>.env.example</code>, ARCHITECTURE), the full SP1 test-type matrix,
+Challenge/HelixQA banks with captured transcripts, and synced
+Issues/Continuation (CONST-044/063/066).</li>
+<li>Reuse-first per §11.4.74: extend helix_agent + llms_verifier rather
+than re-implement; converge on the shared substrate when the SP4/SP5
+<code>replace dev.helix.agent</code> wiring (D-7) lands.</li>
+</ol>
+<p><strong>Ordered task count: 18 tasks</strong> across 6 phases (P1.0:
+3, P1.1: 2, P1.2: 2, P1.3: 4, P1.4: 2, P1.5: 4) + 4 operator decisions
+(DECISION-1..4).</p>
+</body>
+</html>

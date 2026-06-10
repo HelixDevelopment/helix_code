@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixagent_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixagent_analysis</h1>
+</header>
+<h1 id="helixagent-repository-exhaustive-llmsverifier-integration-analysis">HelixAgent
+Repository: Exhaustive LLMsVerifier Integration Analysis</h1>
+<blockquote>
+<p><strong>Reference Implementation Study</strong> — How HelixAgent
+integrates LLMsVerifier, and how HelixCode should replicate it.
+<strong>Analysis Date:</strong> 2026-04-30<br />
+<strong>Repository:</strong>
+https://github.com/HelixDevelopment/HelixAgent<br />
+<strong>Branch:</strong> main (commit <code>fe3f69e</code>)</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-repository-structure">Repository Structure</a></li>
+<li><a href="#2-readme--documentation">README &amp;
+Documentation</a></li>
+<li><a href="#3-constitution--claudemd--agentsmd">Constitution /
+CLAUDE.md / AGENTS.md</a></li>
+<li><a href="#4-llmsverifier-integration-code">LLMsVerifier Integration
+Code</a></li>
+<li><a href="#5-configuration-system">Configuration System</a></li>
+<li><a href="#6-model-management-via-llmsverifier">Model Management via
+LLMsVerifier</a></li>
+<li><a href="#7-model-display-ux">Model Display UX</a></li>
+<li><a href="#8-provider-management">Provider Management</a></li>
+<li><a href="#9-enable--disable-mechanism">Enable / Disable
+Mechanism</a></li>
+<li><a href="#10-real-time-updates-handling">Real-Time Updates
+Handling</a></li>
+<li><a href="#11-error-handling--fallbacks">Error Handling &amp;
+Fallbacks</a></li>
+<li><a href="#12-api-key-provisioning">API Key Provisioning</a></li>
+<li><a href="#13-testing-framework">Testing Framework</a></li>
+<li><a href="#14-architecture-comparison-helixagent--helixcode">Architecture
+Comparison: HelixAgent → HelixCode</a></li>
+<li><a href="#15-all-documentation-files">All Documentation
+Files</a></li>
+</ol>
+<hr />
+<h2 id="repository-structure">1. Repository Structure</h2>
+<h3 id="top-level-layout">1.1 Top-Level Layout</h3>
+<p>The repository is a <strong>Go monorepo</strong> with ~60 Git
+submodules. Key directories at root:</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 24%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd/helixagent/</code></td>
+<td>Directory</td>
+<td>Main binary entry point</td>
+</tr>
+<tr>
+<td><code>internal/</code></td>
+<td>Directory</td>
+<td>Core implementation (verifier, LLM, handlers, services)</td>
+</tr>
+<tr>
+<td><code>pkg/sdk/</code></td>
+<td>Directory</td>
+<td>Multi-language SDKs (Go, Python)</td>
+</tr>
+<tr>
+<td><code>LLMsVerifier/</code></td>
+<td><strong>Submodule</strong></td>
+<td>Points to <code>vasic-digital/LLMsVerifier</code> — the verifier
+service itself</td>
+</tr>
+<tr>
+<td><code>Models/</code></td>
+<td><strong>Submodule</strong></td>
+<td>Points to <code>vasic-digital/Models</code> — model definitions</td>
+</tr>
+<tr>
+<td><code>cli_agents/</code></td>
+<td>Directory</td>
+<td>Analysis docs for 20+ CLI agents including
+<code>HelixCode</code></td>
+</tr>
+<tr>
+<td><code>configs/</code></td>
+<td>Directory</td>
+<td>YAML configuration schemas</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td>Directory</td>
+<td>Comprehensive documentation</td>
+</tr>
+<tr>
+<td><code>tests/</code></td>
+<td>Directory</td>
+<td>Test suites and challenge scripts</td>
+</tr>
+<tr>
+<td><code>scripts/</code></td>
+<td>Directory</td>
+<td>Automation scripts</td>
+</tr>
+<tr>
+<td><code>challenges/</code></td>
+<td>Directory</td>
+<td>Challenge system for validation</td>
+</tr>
+<tr>
+<td><code>challenge-results/</code></td>
+<td>Directory</td>
+<td>Stored challenge outputs</td>
+</tr>
+<tr>
+<td><code>HelixLLM/</code>, <code>HelixMemory/</code>,
+<code>helix_qa/</code>, etc.</td>
+<td>Submodules</td>
+<td>Supporting modules</td>
+</tr>
+</tbody>
+</table>
+<h3 id="llmsverifier-related-files-exact-paths">1.2 LLMsVerifier-Related
+Files (Exact Paths)</h3>
+<pre><code>LLMsVerifier/                              # Submodule (external repo)
+internal/verifier/
+  ├── service.go              (1097 lines)   # Main VerificationService
+  ├── config.go               (398 lines)    # Config structs &amp; YAML loader
+  ├── discovery.go            (526 lines)    # ModelDiscoveryService
+  ├── startup.go              (1873 lines)   # StartupVerifier — provider init
+  ├── provider_types.go       (1043 lines)   # UnifiedProvider, UnifiedModel
+  ├── scoring.go              (754 lines)    # ScoringService
+  ├── enhanced_scoring.go     (730 lines)    # EnhancedScoringService (7-component)
+  ├── events.go               (337 lines)    # Event bus integration
+  ├── health.go               (486 lines)    # Health checking
+  ├── metrics.go              (389 lines)    # Prometheus metrics
+  ├── database.go             (532 lines)    # SQLite persistence
+  ├── subscription_types.go   (202 lines)    # Subscription metadata
+  ├── subscription_detector.go (360 lines)   # 3-tier subscription detection
+  ├── provider_access.go      (403 lines)    # Provider access registry
+  ├── rate_limit_headers.go   (170 lines)    # Rate-limit parsing
+  ├── doc.go                  (151 lines)    # Package documentation
+  └── adapters/
+      ├── provider_adapter.go      (592 lines)
+      ├── extended_registry.go     (564 lines)
+      ├── extended_providers_adapter.go (780 lines)
+      ├── free_adapter.go          (1183 lines)
+      └── oauth_adapter.go         (433 lines)
+internal/services/
+  └── llmsverifier_score_adapter.go  (528 lines)  # Bridge to ProviderDiscovery
+internal/handlers/
+  └── verifier_types.go         (6 lines)   # Handler types
+pkg/sdk/go/verifier/
+  └── client.go                 (385 lines)  # Go SDK client
+pkg/sdk/python/helixagent_verifier/
+  ├── __init__.py
+  ├── client.py                 (462 lines)  # Python SDK client
+  ├── models.py
+  └── exceptions.py
+configs/
+  └── verifier.yaml             (257 lines)  # Full verifier config schema
+docs/guides/
+  └── llms-verifier.md          (328 lines)  # Integration guide
+docs/integration/
+  └── LLMSVERIFIER_INTEGRATION_PLAN.md  (2423 lines)  # Nano-level plan
+docs/verifier/
+  ├── README.md
+  ├── API.md
+  ├── USER_GUIDE.md
+  └── LLMSVERIFIER_POWER_FEATURES.md
+scripts/
+  └── run_llms_verifier.sh      (925 lines)
+tests/helixllm/
+  └── llmsverifier_test_suite.sh (531 lines)
+challenges/scripts/
+  ├── llmsverifier_cliagents_challenge.sh       (304 lines)
+  ├── llmsverifier_startup_verification_challenge.sh (138 lines)
+  └── llmsverifier_submodule_smoke_challenge.sh    (126 lines)</code></pre>
+<p><a href="https://github.com/HelixDevelopment/HelixAgent"><sup>33</sup></a></p>
+<hr />
+<h2 id="readme-documentation">2. README &amp; Documentation</h2>
+<h3 id="readme.md-llmsverifier-mentions">2.1 README.md LLMsVerifier
+Mentions</h3>
+<p>The root <code>README.md</code> (687 lines, 23 KB) references
+LLMsVerifier in these key places:</p>
+<ul>
+<li><strong>Line 52</strong>: <code>Dynamic Provider Selection</code>:
+Real-time verification scores via LLMsVerifier integration</li>
+<li><strong>Line 57</strong>: <code>AI Debate System</code>: Multi-round
+debate between providers for consensus (5 positions x 5 LLMs = 25
+total)</li>
+<li><strong>Line 88</strong>: Architecture diagram includes
+<code>LLMsVerifier</code> as a core component</li>
+<li><strong>Line 318</strong>: Capability Detection links to
+<code>LLMsVerifier/docs/CAPABILITY_DETECTION.md</code></li>
+</ul>
+<p><a href="https://github.com/HelixDevelopment/helix_agent/blob/main/README.md"><sup>6</sup></a></p>
+<h3 id="helixllm_integration_summary.md">2.2
+HELIXLLM_INTEGRATION_SUMMARY.md</h3>
+<p>Exists at root (<code>HELIXLLM_INTEGRATION_SUMMARY.md</code>) and
+documents the HelixLLM ↔︎ HelixAgent integration, which includes verifier
+scoring hooks.</p>
+<hr />
+<h2 id="constitution-claude.md-agents.md">3. Constitution / CLAUDE.md /
+AGENTS.md</h2>
+<h3 id="constitution.md">3.1 CONSTITUTION.md</h3>
+<p><strong>File:</strong> <code>CONSTITUTION.md</code> (494 lines, 28.2
+KB)<br />
+<strong>Version:</strong> 1.3.0 (Updated 2026-04-16)</p>
+<p>33 mandatory rules across 17 categories. Key rules relevant to
+LLMsVerifier integration:</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 18%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+<th>Relevance to Verifier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONST-001</td>
+<td>Comprehensive Decoupling</td>
+<td>LLMsVerifier is a separate submodule</td>
+</tr>
+<tr>
+<td>CONST-002</td>
+<td>100% Test Coverage</td>
+<td>All verifier components have <code>*_test.go</code> files</td>
+</tr>
+<tr>
+<td>CONST-002a</td>
+<td>No Mocks in Production</td>
+<td>Verifier uses real API calls, real DB</td>
+</tr>
+<tr>
+<td>CONST-003</td>
+<td>Comprehensive Challenges</td>
+<td><code>challenges/scripts/llmsverifier_*_challenge.sh</code></td>
+</tr>
+<tr>
+<td>CONST-014</td>
+<td>Stress &amp; Integration Tests</td>
+<td><code>llmsverifier_test_suite.sh</code></td>
+</tr>
+<tr>
+<td>CONST-022</td>
+<td>Infrastructure Before Tests</td>
+<td>Verifier DB must be up before tests run</td>
+</tr>
+<tr>
+<td>CONST-029</td>
+<td>Concurrency Safety</td>
+<td><code>safe.Store</code>, <code>safe.Slice</code>, atomic.Bool,
+Pattern Zeta locks</td>
+</tr>
+<tr>
+<td>CONST-035</td>
+<td>End-User Usability</td>
+<td>Anti-bluff policy — verifier detects canned responses</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-Bluff Connection:</strong> The verifier’s
+<code>IsCannedErrorResponse()</code> function (in
+<code>internal/verifier/service.go</code> lines 44-67) directly
+implements CONST-035’s anti-bluff mandate by detecting fake “I cannot
+assist” responses.</p>
+<p><a href="https://github.com/HelixDevelopment/helix_agent/blob/main/CONSTITUTION.md"><sup>36</sup></a></p>
+<h3 id="agents.md">3.2 AGENTS.md</h3>
+<p><strong>File:</strong> <code>AGENTS.md</code> (616 lines, 31.6
+KB)</p>
+<p>Key verifier-related content: - <strong>Lines 131-132</strong>:
+<code>Performs startup verification using LLMsVerifier to form a &quot;Debate Team&quot; of the best 15 LLMs.</code>
+- Documents the monorepo structure, technology stack, and module
+boundaries - States that deeper <code>AGENTS.md</code> or
+<code>CLAUDE.md</code> files in subdirectories take precedence for files
+within those subtrees</p>
+<p><a href="https://github.com/HelixDevelopment/helix_agent/blob/main/AGENTS.md"><sup>42</sup></a></p>
+<h3 id="claude.md">3.3 CLAUDE.md</h3>
+<p><strong>File:</strong> <code>CLAUDE.md</code> (680 lines, 71 KB)</p>
+<p>Contains the comprehensive developer guide. The verifier integration
+follows CLAUDE.md’s TLS/security posture (no
+<code>InsecureSkipVerify</code>, <code>helixLLMTLSConfig()</code> in
+<code>startup.go</code> lines 49-90 implements this).</p>
+<p><a href="https://github.com/HelixDevelopment/helix_agent/blob/main/CLAUDE.md"><sup>None</sup></a></p>
+<hr />
+<h2 id="llmsverifier-integration-code">4. LLMsVerifier Integration
+Code</h2>
+<h3 id="architecture-overview">4.1 Architecture Overview</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    HelixAgent Main Process                    │
+├─────────────────────────────────────────────────────────────┤
+│  internal/verifier/                                           │
+│  ├─ VerificationService   → service.go (1097 lines)             │
+│  ├─ ModelDiscoveryService → discovery.go (526 lines)          │
+│  ├─ ScoringService        → scoring.go (754 lines)            │
+│  ├─ EnhancedScoringService → enhanced_scoring.go (730 lines) │
+│  ├─ StartupVerifier       → startup.go (1873 lines)           │
+│  ├─ HealthService         → health.go (486 lines)             │
+│  └─ EventPublisher        → events.go (337 lines)             │
+├─────────────────────────────────────────────────────────────┤
+│  internal/services/                                           │
+│  └─ LLMsVerifierScoreAdapter → llmsverifier_score_adapter.go│
+├─────────────────────────────────────────────────────────────┤
+│  pkg/sdk/go/verifier/                                         │
+│  └─ Client                → client.go (385 lines)             │
+├─────────────────────────────────────────────────────────────┤
+│  LLMsVerifier/ (Submodule)                                  │
+│  └─ Points to vasic-digital/LLMsVerifier.git                │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="core-service-verificationservice">4.2 Core Service:
+VerificationService</h3>
+<p><strong>File:</strong>
+<code>internal/verifier/service.go</code><br />
+<strong>Struct:</strong> <code>VerificationService</code> (lines
+95-115)</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerificationService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    config       <span class="op">*</span>Config</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    providerFunc <span class="kw">func</span><span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> modelID<span class="op">,</span> provider<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    mu           sync<span class="op">.</span>RWMutex</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    testMode     <span class="dt">bool</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    verificationCache <span class="op">*</span>safe<span class="op">.</span>Store<span class="op">[</span><span class="dt">string</span><span class="op">,</span> <span class="op">*</span>VerificationStatus<span class="op">]</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    stats             <span class="op">*</span>VerificationStats</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    statsMu           sync<span class="op">.</span>RWMutex</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Key methods: -
+<code>NewVerificationService(cfg *Config) *VerificationService</code> —
+constructor - <code>SetProviderFunc(fn ...)</code> — injects the LLM
+call function - <code>SetTestMode(enabled bool)</code> — disables
+quality validation for testing -
+<code>ValidateResponseQualityWithLatency(content string, latency time.Duration) error</code>
+— anti-bluff validation (lines 75-95) -
+<code>IsCannedErrorResponse(content string) (bool, string)</code> —
+detects fake error responses (lines 47-67)</p>
+<h3 id="score-adapter-llmsverifierscoreadapter">4.3 Score Adapter:
+LLMsVerifierScoreAdapter</h3>
+<p><strong>File:</strong>
+<code>internal/services/llmsverifier_score_adapter.go</code><br />
+<strong>Struct:</strong> <code>LLMsVerifierScoreAdapter</code> (lines
+30-60)</p>
+<p>This is the <strong>critical bridge</strong> between HelixAgent’s
+<code>ProviderDiscovery</code> system and LLMsVerifier’s scoring:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMsVerifierScoreAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    scoringService  <span class="op">*</span>verifier<span class="op">.</span>ScoringService</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    verificationSvc <span class="op">*</span>verifier<span class="op">.</span>VerificationService</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    providerScores  <span class="op">*</span>safe<span class="op">.</span>Store<span class="op">[</span><span class="dt">string</span><span class="op">,</span> <span class="dt">float64</span><span class="op">]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    modelScores     <span class="op">*</span>safe<span class="op">.</span>Store<span class="op">[</span><span class="dt">string</span><span class="op">,</span> <span class="dt">float64</span><span class="op">]</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    refreshMu       sync<span class="op">.</span>Mutex</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    log             <span class="op">*</span>logrus<span class="op">.</span>Logger</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    lastRefresh     time<span class="op">.</span>Time</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    refreshInterval time<span class="op">.</span>Duration</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Key methods: -
+<code>NewLLMsVerifierScoreAdapter(scoringService, verificationSvc, log)</code>
+— constructor with cache initialization from verification results -
+<code>GetProviderScore(providerType string) (float64, bool)</code> —
+returns score 0-10 (normalizes from 0-100) -
+<code>GetModelScore(modelID string) (float64, bool)</code> — returns
+per-model score -
+<code>putMaxProviderScore(provider string, score float64)</code> —
+atomic max-score update using <code>safe.Store.Update</code> -
+<code>initializeFromVerificationCache()</code> — loads scores from
+existing verification cache on startup</p>
+<p><strong>How HelixCode should replicate it:</strong><br />
+→ HelixCode needs an equivalent <code>LLMsVerifierScoreAdapter</code>
+that wraps the verifier’s <code>ScoringService</code> and exposes
+<code>GetProviderScore()</code> / <code>GetModelScore()</code> to its
+own provider selection logic.</p>
+<h3 id="go-sdk-client">4.4 Go SDK Client</h3>
+<p><strong>File:</strong> <code>pkg/sdk/go/verifier/client.go</code></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Client <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    baseURL    <span class="dt">string</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    apiKey     <span class="dt">string</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    httpClient <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ClientConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    BaseURL    <span class="dt">string</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    APIKey     <span class="dt">string</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    Timeout    time<span class="op">.</span>Duration</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    HTTPClient <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">// Default base URL: http://localhost:8081</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Default timeout: 30s</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> VerifyModel<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req VerificationRequest<span class="op">)</span> <span class="op">(*</span>VerificationResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> BatchVerify<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req BatchVerifyRequest<span class="op">)</span> <span class="op">(*</span>BatchVerifyResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> GetProviderScores<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">float64</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> GetModelScores<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">float64</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h3 id="python-sdk-client">4.5 Python SDK Client</h3>
+<p><strong>File:</strong>
+<code>pkg/sdk/python/helixagent_verifier/client.py</code> (462
+lines)</p>
+<p>Implements async/await Python client with: -
+<code>HelixAgentVerifierClient</code> class - Methods:
+<code>verify_model()</code>, <code>batch_verify()</code>,
+<code>get_provider_scores()</code>, <code>get_model_scores()</code> -
+Type hints and Pydantic-style models</p>
+<hr />
+<h2 id="configuration-system">5. Configuration System</h2>
+<h3 id="config-struct-hierarchy">5.1 Config Struct Hierarchy</h3>
+<p><strong>File:</strong> <code>internal/verifier/config.go</code> (398
+lines)</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Enabled      <span class="dt">bool</span>               <span class="st">`yaml:&quot;enabled&quot;`</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Database     DatabaseConfig     <span class="st">`yaml:&quot;database&quot;`</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    Verification VerificationConfig <span class="st">`yaml:&quot;verification&quot;`</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    Scoring      ScoringConfig      <span class="st">`yaml:&quot;scoring&quot;`</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    Health       HealthConfig       <span class="st">`yaml:&quot;health&quot;`</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    API          APIConfig          <span class="st">`yaml:&quot;api&quot;`</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    Events       EventsConfig       <span class="st">`yaml:&quot;events&quot;`</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    Monitoring   MonitoringConfig   <span class="st">`yaml:&quot;monitoring&quot;`</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    Brotli       BrotliConfig       <span class="st">`yaml:&quot;brotli&quot;`</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    Challenges   ChallengesConfig   <span class="st">`yaml:&quot;challenges&quot;`</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    Scheduling   SchedulingConfig   <span class="st">`yaml:&quot;scheduling&quot;`</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="yaml-config-schema-full">5.2 YAML Config Schema (Full)</h3>
+<p><strong>File:</strong> <code>configs/verifier.yaml</code> (257
+lines)</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">verifier</span><span class="kw">:</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./data/llm-verifier.db&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">encryption_enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">encryption_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${VERIFIER_ENCRYPTION_KEY}&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">verification</span><span class="kw">:</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">mandatory_code_check</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">code_visibility_prompt</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Do you see my code?&quot;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">verification_timeout</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_count</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_delay</span><span class="kw">:</span><span class="at"> 5s</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tests</span><span class="kw">:</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> existence</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> responsiveness</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> latency</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> streaming</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> function_calling</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> coding_capability</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> error_detection</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> code_visibility</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scoring</span><span class="kw">:</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weights</span><span class="kw">:</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">response_speed</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model_efficiency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">cost_effectiveness</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">capability</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.20</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">recency</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.10</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">models_dev_enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">models_dev_endpoint</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.models.dev&quot;</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">cache_ttl</span><span class="kw">:</span><span class="at"> 24h</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">health</span><span class="kw">:</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">check_interval</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 10s</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">failure_threshold</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">recovery_threshold</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">circuit_breaker</span><span class="kw">:</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">half_open_timeout</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">api</span><span class="kw">:</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;8081&quot;</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">base_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/api/v1/verifier&quot;</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">jwt_secret</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${VERIFIER_JWT_SECRET}&quot;</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">rate_limit</span><span class="kw">:</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">requests_per_minute</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">events</span><span class="kw">:</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">slack</span><span class="kw">:</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">webhook_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${SLACK_WEBHOOK_URL}&quot;</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">email</span><span class="kw">:</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">smtp_host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;smtp.gmail.com&quot;</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">smtp_port</span><span class="kw">:</span><span class="at"> </span><span class="dv">587</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">telegram</span><span class="kw">:</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">bot_token</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${TELEGRAM_BOT_TOKEN}&quot;</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">chat_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${TELEGRAM_CHAT_ID}&quot;</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">websocket</span><span class="kw">:</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/ws/verifier/events&quot;</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">monitoring</span><span class="kw">:</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">prometheus</span><span class="kw">:</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/metrics/verifier&quot;</span></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">grafana</span><span class="kw">:</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dashboard_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;./dashboards/verifier&quot;</span></span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">brotli</span><span class="kw">:</span></span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">http3_support</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">compression_level</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span></span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">challenges</span><span class="kw">:</span></span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">provider_discovery</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model_verification</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">config_generation</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">scheduling</span><span class="kw">:</span></span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">re_verification</span><span class="kw">:</span></span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 24h</span></span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">score_recalculation</span><span class="kw">:</span></span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 12h</span></span></code></pre></div>
+<h3 id="provider-specific-config-embedded-in-same-yaml">5.3
+Provider-Specific Config (Embedded in Same YAML)</h3>
+<p>The same <code>configs/verifier.yaml</code> contains
+provider-specific sections:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">openai</span><span class="kw">:</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${OPENAI_API_KEY}&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">base_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.openai.com/v1&quot;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">models</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">gpt</span><span class="dv">-4</span><span class="kw">,</span><span class="at"> gpt-4-turbo</span><span class="kw">,</span><span class="at"> gpt-4o</span><span class="kw">,</span><span class="at"> gpt-3.5-turbo</span><span class="kw">]</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">anthropic</span><span class="kw">:</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${ANTHROPIC_API_KEY}&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">base_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.anthropic.com/v1&quot;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">models</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">claude-3-5-sonnet</span><span class="dv">-20241022</span><span class="kw">,</span><span class="at"> ...</span><span class="kw">]</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">  # ... (google, groq, together, mistral, deepseek, xai, cerebras, cloudflare, siliconflow, replicate, ollama, openrouter)</span></span></code></pre></div>
+<p><strong>Key insight:</strong> Each provider has
+<code>enabled: true/false</code> — this is the provider-level
+enable/disable flag.</p>
+<h3 id="environment-variables">5.4 Environment Variables</h3>
+<p><strong>File:</strong> <code>.env.example</code> (286 lines)</p>
+<p>Key verifier-related env vars:</p>
+<pre><code>VERIFIER_ENCRYPTION_KEY=
+VERIFIER_JWT_SECRET=
+SLACK_WEBHOOK_URL=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+DEEPSEEK_API_KEY=
+GROQ_API_KEY=
+MISTRAL_API_KEY=
+TOGETHER_API_KEY=
+OPENROUTER_API_KEY=
+XAI_API_KEY=
+CEREBRAS_API_KEY=
+CLOUDFLARE_API_KEY=
+CLOUDFLARE_ACCOUNT_ID=
+SILICONFLOW_API_KEY=
+REPLICATE_API_TOKEN=</code></pre>
+<hr />
+<h2 id="model-management-via-llmsverifier">6. Model Management via
+LLMsVerifier</h2>
+<h3 id="discovery-system">6.1 Discovery System</h3>
+<p><strong>File:</strong> <code>internal/verifier/discovery.go</code>
+(526 lines)<br />
+<strong>Struct:</strong> <code>ModelDiscoveryService</code></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelDiscoveryService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    verificationService <span class="op">*</span>VerificationService</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    scoringService      <span class="op">*</span>ScoringService</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    healthService       <span class="op">*</span>HealthService</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    config              <span class="op">*</span>DiscoveryConfig</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    discoveredModels    <span class="op">*</span>safe<span class="op">.</span>Store<span class="op">[</span><span class="dt">string</span><span class="op">,</span> <span class="op">*</span>DiscoveredModel<span class="op">]</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    selectedModels      <span class="op">*</span>safe<span class="op">.</span>Slice<span class="op">[*</span>SelectedModel<span class="op">]</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    httpClient          <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    stopCh              <span class="kw">chan</span> <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    wg                  sync<span class="op">.</span>WaitGroup</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    stopped             atomic<span class="op">.</span>Bool</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>DiscoveryConfig:</strong></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DiscoveryConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    Enabled               <span class="dt">bool</span>          <span class="st">`yaml:&quot;enabled&quot;`</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    DiscoveryInterval     time<span class="op">.</span>Duration <span class="st">`yaml:&quot;discovery_interval&quot;`</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    MaxModelsForEnsemble  <span class="dt">int</span>           <span class="st">`yaml:&quot;max_models_for_ensemble&quot;`</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    MinScore              <span class="dt">float64</span>       <span class="st">`yaml:&quot;min_score&quot;`</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    RequireVerification   <span class="dt">bool</span>          <span class="st">`yaml:&quot;require_verification&quot;`</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    RequireCodeVisibility <span class="dt">bool</span>          <span class="st">`yaml:&quot;require_code_visibility&quot;`</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    RequireDiversity      <span class="dt">bool</span>          <span class="st">`yaml:&quot;require_diversity&quot;`</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    ProviderPriority      <span class="op">[]</span><span class="dt">string</span>      <span class="st">`yaml:&quot;provider_priority&quot;`</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="startupverifier-the-master-orchestrator">6.2 StartupVerifier —
+The Master Orchestrator</h3>
+<p><strong>File:</strong> <code>internal/verifier/startup.go</code>
+(1873 lines)<br />
+<strong>Struct:</strong> <code>StartupVerifier</code></p>
+<p>This is the <strong>heart of the integration</strong>. It runs a
+5-phase pipeline:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StartupVerifier <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    config          <span class="op">*</span>StartupConfig</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    verifierSvc     <span class="op">*</span>VerificationService</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    scoringSvc      <span class="op">*</span>ScoringService</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    enhancedScoring <span class="op">*</span>EnhancedScoringService</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    subscriptionDetector <span class="op">*</span>SubscriptionDetector</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    providerFactory ProviderFactory</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    instanceCreator <span class="kw">func</span><span class="op">(</span>providerType<span class="op">,</span> modelID <span class="dt">string</span><span class="op">)</span> llm<span class="op">.</span>LLMProvider</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    oauthReader     <span class="op">*</span>oauth_credentials<span class="op">.</span>OAuthCredentialReader</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    onVerificationComplete <span class="kw">func</span><span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> result <span class="op">*</span>StartupResult<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    providers       <span class="op">*</span>safe<span class="op">.</span>Store<span class="op">[</span><span class="dt">string</span><span class="op">,</span> <span class="op">*</span>UnifiedProvider<span class="op">]</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    rankedProviders <span class="op">*</span>safe<span class="op">.</span>Slice<span class="op">[*</span>UnifiedProvider<span class="op">]</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    debateTeam      <span class="op">*</span>DebateTeamResult</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    mu              sync<span class="op">.</span>Mutex  <span class="co">// Pattern Zeta for publish barrier</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>VerifyAllProviders() pipeline (lines 218-260+):</strong> 1.
+<strong>Phase 1</strong>: Discover all providers
+(<code>discoverProviders()</code>) 2. <strong>Phase 2</strong>: Verify
+all providers in parallel (<code>verifyProviders()</code>) 3.
+<strong>Phase 2.5</strong>: Detect subscriptions
+(<code>detectSubscriptions()</code>) 4. <strong>Phase 3</strong>: Score
+all verified providers (<code>scoreProviders()</code>) 5. <strong>Phase
+4</strong>: Rank providers by score (<code>rankProviders()</code>) 6.
+<strong>Phase 5</strong>: Select debate team
+(<code>selectDebateTeam()</code>)</p>
+<h3 id="unified-data-models">6.3 Unified Data Models</h3>
+<p><strong>File:</strong>
+<code>internal/verifier/provider_types.go</code></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UnifiedProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    DisplayName <span class="dt">string</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    Type        <span class="dt">string</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    AuthType    ProviderAuthType  <span class="co">// api_key, oauth, free, anonymous, local</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    Verified    <span class="dt">bool</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    Score       <span class="dt">float64</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    ScoreSuffix <span class="dt">string</span>            <span class="co">// e.g., &quot;SC:8.5&quot;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    TestResults <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    CodeVisible <span class="dt">bool</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    Models      <span class="op">[]</span>UnifiedModel</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    DefaultModel <span class="dt">string</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    Status      ProviderStatus    <span class="co">// unknown, healthy, degraded, unhealthy, offline</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    BaseURL     <span class="dt">string</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    APIKey      <span class="dt">string</span>            <span class="co">// `json:&quot;-&quot;` — not serialized</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    Tier        <span class="dt">int</span>               <span class="co">// 1=Premium, 2=High-quality, 3=Fast, 4=Aggregator, 5=Free</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    Priority    <span class="dt">int</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    Subscription <span class="op">*</span>SubscriptionInfo</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    AccessConfig <span class="op">*</span>ProviderAccessConfig</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UnifiedModel <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    DisplayName <span class="dt">string</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    Provider    <span class="dt">string</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    Score       <span class="dt">float64</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    Verified    <span class="dt">bool</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    Latency     time<span class="op">.</span>Duration</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    ContextWindow     <span class="dt">int</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    MaxOutputTokens   <span class="dt">int</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    SupportsStreaming <span class="dt">bool</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    SupportsTools     <span class="dt">bool</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    SupportsFunctions <span class="dt">bool</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    SupportsVision    <span class="dt">bool</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    Capabilities      <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    CostPerInputToken  <span class="dt">float64</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    CostPerOutputToken <span class="dt">float64</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="supported-providers-registry">6.4 Supported Providers
+Registry</h3>
+<p><strong>File:</strong>
+<code>internal/verifier/provider_types.go</code> (lines ~300+)</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> SupportedProviders <span class="op">=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>ProviderTypeInfo<span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;claude&quot;</span><span class="op">:</span> <span class="op">{</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        Type<span class="op">:</span> <span class="st">&quot;claude&quot;</span><span class="op">,</span> DisplayName<span class="op">:</span> <span class="st">&quot;Claude (Anthropic)&quot;</span><span class="op">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        AuthType<span class="op">:</span> AuthTypeOAuth<span class="op">,</span> Tier<span class="op">:</span> <span class="dv">1</span><span class="op">,</span> Priority<span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        EnvVars<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;ANTHROPIC_API_KEY&quot;</span><span class="op">,</span> <span class="st">&quot;CLAUDE_API_KEY&quot;</span><span class="op">},</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        BaseURL<span class="op">:</span> <span class="st">&quot;https://api.anthropic.com/v1/messages&quot;</span><span class="op">,</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        Models<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;claude-opus-4-6&quot;</span><span class="op">,</span> <span class="st">&quot;claude-sonnet-4-6&quot;</span><span class="op">,</span> <span class="op">...},</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;gemini&quot;</span><span class="op">:</span> <span class="op">{</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        Type<span class="op">:</span> <span class="st">&quot;gemini&quot;</span><span class="op">,</span> DisplayName<span class="op">:</span> <span class="st">&quot;Gemini (Google)&quot;</span><span class="op">,</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        AuthType<span class="op">:</span> AuthTypeAPIKey<span class="op">,</span> Tier<span class="op">:</span> <span class="dv">2</span><span class="op">,</span> Priority<span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        EnvVars<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;GEMINI_API_KEY&quot;</span><span class="op">,</span> <span class="st">&quot;GOOGLE_API_KEY&quot;</span><span class="op">,</span> <span class="st">&quot;ApiKey_Gemini&quot;</span><span class="op">},</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        BaseURL<span class="op">:</span> <span class="st">&quot;https://generativelanguage.googleapis.com/v1beta&quot;</span><span class="op">,</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        Models<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;gemini-2.5-pro&quot;</span><span class="op">,</span> <span class="st">&quot;gemini-2.5-flash&quot;</span><span class="op">,</span> <span class="op">...},</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;deepseek&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="op">...</span> <span class="op">},</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;groq&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="op">...</span> <span class="op">},</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;openrouter&quot;</span><span class="op">:</span> <span class="op">{</span> AuthType<span class="op">:</span> AuthTypeAPIKey<span class="op">,</span> Tier<span class="op">:</span> <span class="dv">4</span><span class="op">,</span> Free<span class="op">:</span> <span class="ot">true</span> <span class="op">},</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;zen&quot;</span><span class="op">:</span> <span class="op">{</span> AuthType<span class="op">:</span> AuthTypeFree<span class="op">,</span> Tier<span class="op">:</span> <span class="dv">5</span><span class="op">,</span> <span class="op">...</span> <span class="op">},</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... (15+ total providers)</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="model-display-ux">7. Model Display UX</h2>
+<h3 id="score-suffix-format">7.1 Score Suffix Format</h3>
+<p>From <code>provider_types.go</code> and scoring system:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ScoreSuffix <span class="dt">string</span> <span class="st">`json:&quot;score_suffix,omitempty&quot;`</span>  <span class="co">// e.g., &quot;SC:8.5&quot;</span></span></code></pre></div>
+<p>The <code>SC:X.X</code> suffix is appended to model display names in
+CLI output and web UI. This is generated by the scoring engine.</p>
+<h3 id="model-display-format-inferred">7.2 Model Display Format
+(Inferred)</h3>
+<p>From <code>UnifiedModel</code> and <code>UnifiedProvider</code>
+structs, the display format includes: - <strong>Name</strong>:
+<code>DisplayName</code> or <code>Name</code> - <strong>Score
+suffix</strong>: <code>SC:X.X</code> - <strong>Verification
+badge</strong>: ✓ if <code>Verified == true</code> - <strong>Code
+visibility badge</strong>: 🔒 if <code>CodeVisible == true</code> -
+<strong>Latency indicator</strong>: derived from <code>Latency</code>
+field - <strong>Tier indicator</strong>: 1-5 stars based on
+<code>Tier</code> - <strong>Cost indicator</strong>: derived from
+<code>CostPerInputToken</code> / <code>CostPerOutputToken</code></p>
+<h3 id="real-time-updates-via-websocket">7.3 Real-Time Updates via
+WebSocket</h3>
+<p>From <code>configs/verifier.yaml</code>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">events</span><span class="kw">:</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">websocket</span><span class="kw">:</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/ws/verifier/events&quot;</span></span></code></pre></div>
+<p>The event system publishes verification pipeline events to WebSocket
+subscribers.</p>
+<hr />
+<h2 id="provider-management">8. Provider Management</h2>
+<h3 id="auth-type-system">8.1 Auth Type System</h3>
+<p><strong>File:</strong>
+<code>internal/verifier/provider_types.go</code> (lines 12-35)</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderAuthType <span class="dt">string</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    AuthTypeAPIKey    ProviderAuthType <span class="op">=</span> <span class="st">&quot;api_key&quot;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    AuthTypeOAuth     ProviderAuthType <span class="op">=</span> <span class="st">&quot;oauth&quot;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    AuthTypeFree      ProviderAuthType <span class="op">=</span> <span class="st">&quot;free&quot;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    AuthTypeAnonymous ProviderAuthType <span class="op">=</span> <span class="st">&quot;anonymous&quot;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    AuthTypeLocal     ProviderAuthType <span class="op">=</span> <span class="st">&quot;local&quot;</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="provider-adapters">8.2 Provider Adapters</h3>
+<p><strong>Directory:</strong>
+<code>internal/verifier/adapters/</code></p>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 25%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Adapter</th>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provider Adapter</td>
+<td><code>provider_adapter.go</code> (592 lines)</td>
+<td>Base adapter interface</td>
+</tr>
+<tr>
+<td>Extended Registry</td>
+<td><code>extended_registry.go</code> (564 lines)</td>
+<td>Extended provider registry</td>
+</tr>
+<tr>
+<td>Extended Providers</td>
+<td><code>extended_providers_adapter.go</code> (780 lines)</td>
+<td>Extended provider capabilities</td>
+</tr>
+<tr>
+<td>Free Adapter</td>
+<td><code>free_adapter.go</code> (1183 lines)</td>
+<td>Free-tier provider handling</td>
+</tr>
+<tr>
+<td>OAuth Adapter</td>
+<td><code>oauth_adapter.go</code> (433 lines)</td>
+<td>OAuth2 token management</td>
+</tr>
+</tbody>
+</table>
+<h3 id="provider-discovery-flow">8.3 Provider Discovery Flow</h3>
+<p><strong>File:</strong> <code>internal/verifier/startup.go</code>
+(lines 338-400+)</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sv <span class="op">*</span>StartupVerifier<span class="op">)</span> discoverProviders<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">([]*</span>ProviderDiscoveryResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Read faulty API keys (to deprioritize)</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    faultyKeys<span class="op">,</span> err <span class="op">:=</span> api_keys<span class="op">.</span>ReadFaultyAPIKeys<span class="op">()</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Scan for unsupported API keys in environment</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    unsupportedKeys<span class="op">,</span> err <span class="op">:=</span> api_keys<span class="op">.</span>NewEnvVarScanner<span class="op">().</span>ScanEnvForUnsupportedKeys<span class="op">()</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Sort providers: non-faulty first, then by priority</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    providerTypes <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{...}</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    sort<span class="op">.</span>Slice<span class="op">(</span>providerTypes<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>i<span class="op">,</span> j <span class="dt">int</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Faulty keys go last</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> getPriority<span class="op">(</span>providerTypes<span class="op">[</span>i<span class="op">])</span> <span class="op">&lt;</span> getPriority<span class="op">(</span>providerTypes<span class="op">[</span>j<span class="op">])</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. For each provider type, discover via env vars / OAuth / auto-detection</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">//    - API key providers: check env vars</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">//    - OAuth providers: check token files</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">//    - Free providers: always discover</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">//    - Local providers: check localhost endpoints</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="enable-disable-mechanism">9. Enable / Disable Mechanism</h2>
+<h3 id="global-enabledisable">9.1 Global Enable/Disable</h3>
+<p><strong>File:</strong> <code>internal/verifier/config.go</code> (line
+15)</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    Enabled <span class="dt">bool</span> <span class="st">`yaml:&quot;enabled&quot;`</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>File:</strong> <code>configs/verifier.yaml</code> (line
+4)</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">verifier</span><span class="kw">:</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
+<p>When <code>enabled: false</code>, the entire verifier subsystem is
+bypassed.</p>
+<h3 id="per-provider-enabledisable">9.2 Per-Provider Enable/Disable</h3>
+<p><strong>File:</strong> <code>configs/verifier.yaml</code> (provider
+sections)</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">openai</span><span class="kw">:</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="at">    ...</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">xai</span><span class="kw">:</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="at">    ...</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cerebras</span><span class="kw">:</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="at">    ...</span></span></code></pre></div>
+<p>Each provider in the <code>SupportedProviders</code> map has an
+<code>enabled</code> flag in the YAML config.</p>
+<h3 id="discoveryconfig-enabledisable">9.3 DiscoveryConfig
+Enable/Disable</h3>
+<p><strong>File:</strong> <code>internal/verifier/discovery.go</code>
+(line 39)</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DiscoveryConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    Enabled <span class="dt">bool</span> <span class="st">`yaml:&quot;enabled&quot;`</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="health-circuit-breaker">9.4 Health Circuit Breaker</h3>
+<p><strong>File:</strong> <code>internal/verifier/config.go</code>
+(lines 60-68)</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CircuitBreakerConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    Enabled         <span class="dt">bool</span>          <span class="st">`yaml:&quot;enabled&quot;`</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    HalfOpenTimeout time<span class="op">.</span>Duration <span class="st">`yaml:&quot;half_open_timeout&quot;`</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>When a provider fails <code>failure_threshold</code> times (default:
+5), the circuit breaker trips and the provider is marked as
+<code>unhealthy</code>. It recovers after
+<code>recovery_threshold</code> successes (default: 3).</p>
+<hr />
+<h2 id="real-time-updates-handling">10. Real-Time Updates Handling</h2>
+<h3 id="event-bus-integration">10.1 Event Bus Integration</h3>
+<p><strong>File:</strong> <code>internal/verifier/events.go</code> (337
+lines)</p>
+<p>Event topics:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    TopicVerificationEvents   <span class="op">=</span> <span class="st">&quot;helixagent.events.verification&quot;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    TopicProviderDiscovered   <span class="op">=</span> <span class="st">&quot;helixagent.events.verification.discovered&quot;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    TopicProviderVerified     <span class="op">=</span> <span class="st">&quot;helixagent.events.verification.verified&quot;</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    TopicProviderScored       <span class="op">=</span> <span class="st">&quot;helixagent.events.verification.scored&quot;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    TopicProviderHealthCheck  <span class="op">=</span> <span class="st">&quot;helixagent.events.verification.health&quot;</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    TopicDebateTeamSelected   <span class="op">=</span> <span class="st">&quot;helixagent.events.verification.debate_team&quot;</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    TopicVerificationComplete <span class="op">=</span> <span class="st">&quot;helixagent.events.verification.complete&quot;</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>Event types:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    VerificationEventStarted      VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.started&quot;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    VerificationEventDiscovered   VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.provider.discovered&quot;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    VerificationEventVerified     VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.provider.verified&quot;</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    VerificationEventFailed       VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.provider.failed&quot;</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    VerificationEventScored       VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.provider.scored&quot;</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    VerificationEventRanked       VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.provider.ranked&quot;</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    VerificationEventHealthCheck  VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.provider.health&quot;</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    VerificationEventTeamSelected VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.debate_team.selected&quot;</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    VerificationEventCompleted    VerificationEventType <span class="op">=</span> <span class="st">&quot;verification.completed&quot;</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="websocket-events">10.2 WebSocket Events</h3>
+<p><strong>Config:</strong> <code>configs/verifier.yaml</code></p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">events</span><span class="kw">:</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">websocket</span><span class="kw">:</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/ws/verifier/events&quot;</span></span></code></pre></div>
+<p>The WebSocket endpoint pushes real-time verification events to
+connected clients.</p>
+<h3 id="scheduling-re-verification">10.3 Scheduling
+(Re-verification)</h3>
+<p><strong>File:</strong> <code>configs/verifier.yaml</code></p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scheduling</span><span class="kw">:</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">re_verification</span><span class="kw">:</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 24h</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">score_recalculation</span><span class="kw">:</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 12h</span></span></code></pre></div>
+<p><strong>Polling-based</strong>, not event-driven from the verifier
+service. HelixAgent polls/re-verifies on a schedule.</p>
+<h3 id="slack-telegram-email-notifications">10.4 Slack / Telegram /
+Email Notifications</h3>
+<p><strong>Config:</strong> <code>configs/verifier.yaml</code></p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">events</span><span class="kw">:</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">slack</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span><span class="kw">,</span><span class="at"> </span><span class="fu">webhook_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${SLACK_WEBHOOK_URL}&quot;</span><span class="at"> </span><span class="kw">}</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">email</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span><span class="kw">,</span><span class="at"> </span><span class="fu">smtp_host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;smtp.gmail.com&quot;</span><span class="kw">,</span><span class="at"> </span><span class="fu">smtp_port</span><span class="kw">:</span><span class="at"> </span><span class="dv">587</span><span class="at"> </span><span class="kw">}</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">telegram</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="at"> </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span><span class="kw">,</span><span class="at"> </span><span class="fu">bot_token</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${TELEGRAM_BOT_TOKEN}&quot;</span><span class="kw">,</span><span class="at"> </span><span class="fu">chat_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${TELEGRAM_CHAT_ID}&quot;</span><span class="at"> </span><span class="kw">}</span></span></code></pre></div>
+<hr />
+<h2 id="error-handling-fallbacks">11. Error Handling &amp;
+Fallbacks</h2>
+<h3 id="canned-error-detection">11.1 Canned Error Detection</h3>
+<p><strong>File:</strong> <code>internal/verifier/service.go</code>
+(lines 18-42)</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> CannedErrorPatterns <span class="op">=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;unable to provide&quot;</span><span class="op">,</span> <span class="st">&quot;unable to analyze&quot;</span><span class="op">,</span> <span class="st">&quot;unable to process&quot;</span><span class="op">,</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;cannot provide&quot;</span><span class="op">,</span> <span class="st">&quot;cannot analyze&quot;</span><span class="op">,</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;i apologize, but i cannot&quot;</span><span class="op">,</span> <span class="st">&quot;i&#39;m sorry, but i cannot&quot;</span><span class="op">,</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;error occurred&quot;</span><span class="op">,</span> <span class="st">&quot;service unavailable&quot;</span><span class="op">,</span> <span class="st">&quot;rate limit&quot;</span><span class="op">,</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;temporarily unavailable&quot;</span><span class="op">,</span> <span class="st">&quot;model not available&quot;</span><span class="op">,</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;failed to generate&quot;</span><span class="op">,</span> <span class="st">&quot;no response generated&quot;</span><span class="op">,</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;internal error&quot;</span><span class="op">,</span> <span class="st">&quot;request failed&quot;</span><span class="op">,</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;at this time&quot;</span><span class="op">,</span> <span class="st">&quot;currently unable&quot;</span><span class="op">,</span> <span class="st">&quot;not able to&quot;</span><span class="op">,</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Models returning these patterns are marked as <strong>NOT
+verified</strong>.</p>
+<h3 id="suspiciously-fast-response-detection">11.2 Suspiciously Fast
+Response Detection</h3>
+<p><strong>File:</strong> <code>internal/verifier/service.go</code>
+(lines 70-73)</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> IsSuspiciouslyFastResponse<span class="op">(</span>latency time<span class="op">.</span>Duration<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> latency <span class="op">&lt;</span> <span class="dv">100</span><span class="op">*</span>time<span class="op">.</span>Millisecond</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Responses under 100ms with &lt;50 chars are flagged as
+suspicious.</p>
+<h3 id="circuit-breaker">11.3 Circuit Breaker</h3>
+<p><strong>File:</strong> <code>internal/verifier/config.go</code>
+(lines 60-68)</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CircuitBreakerConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    Enabled         <span class="dt">bool</span>          <span class="st">`yaml:&quot;enabled&quot;`</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    HalfOpenTimeout time<span class="op">.</span>Duration <span class="st">`yaml:&quot;half_open_timeout&quot;`</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><code>failure_threshold</code>: 5 consecutive failures → open
+circuit</li>
+<li><code>recovery_threshold</code>: 3 consecutive successes → close
+circuit</li>
+<li><code>half_open_timeout</code>: 60s before attempting recovery</li>
+</ul>
+<h3 id="fallback-strategy">11.4 Fallback Strategy</h3>
+<p><strong>File:</strong>
+<code>internal/verifier/provider_types.go</code> (StartupConfig
+lines)</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StartupConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    OAuthPrimaryNonOAuthFallback <span class="dt">bool</span> <span class="st">`yaml:&quot;oauth_primary_non_oauth_fallback&quot;`</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    TrustOAuthOnFailure          <span class="dt">bool</span> <span class="st">`yaml:&quot;trust_oauth_on_failure&quot;`</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>When an OAuth provider fails, the system can fall back to non-OAuth
+providers. The debate team selection always includes fallback LLMs per
+position.</p>
+<h3 id="faulty-api-key-tracking">11.5 Faulty API Key Tracking</h3>
+<p><strong>File:</strong> <code>internal/verifier/startup.go</code>
+(discovery phase)</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>faultyKeys<span class="op">,</span> err <span class="op">:=</span> api_keys<span class="op">.</span>ReadFaultyAPIKeys<span class="op">()</span></span></code></pre></div>
+<p>Providers with faulty API keys are deprioritized in discovery
+order.</p>
+<hr />
+<h2 id="api-key-provisioning">12. API Key Provisioning</h2>
+<h3 id="environment-variable-scanning">12.1 Environment Variable
+Scanning</h3>
+<p><strong>File:</strong> <code>internal/verifier/startup.go</code>
+(discovery phase)</p>
+<p>The <code>api_keys</code> package (from
+<code>digital.vasic.llmsverifier/api_keys</code>) provides:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Scan environment for API keys by provider</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EnvVarScanner <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>EnvVarScanner<span class="op">)</span> ScanEnvForUnsupportedKeys<span class="op">()</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Read/write faulty API keys</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ReadFaultyAPIKeys<span class="op">()</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> WriteFaultyAPIKey<span class="op">(</span>keyName<span class="op">,</span> reason <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Get expected env var name for a provider</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> GetProviderAPIKeyName<span class="op">(</span>providerType <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span></code></pre></div>
+<h3 id="oauth-credential-reader">12.2 OAuth Credential Reader</h3>
+<p><strong>File:</strong> <code>internal/verifier/startup.go</code></p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>oauthReader <span class="op">*</span>oauth_credentials<span class="op">.</span>OAuthCredentialReader</span></code></pre></div>
+<p>Reads OAuth tokens from secure storage (keychain/filesystem) for
+Claude and Qwen providers.</p>
+<h3 id="api-key-redaction">12.3 API Key Redaction</h3>
+<p><strong>File:</strong>
+<code>internal/verifier/provider_types.go</code> (UnifiedProvider)</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>APIKey <span class="dt">string</span> <span class="st">`json:&quot;-&quot;`</span> <span class="co">// Not serialized for security</span></span></code></pre></div>
+<p>API keys are never serialized to JSON.</p>
+<h3 id="encryption">12.4 Encryption</h3>
+<p><strong>File:</strong> <code>configs/verifier.yaml</code></p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">encryption_enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">encryption_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${VERIFIER_ENCRYPTION_KEY}&quot;</span></span></code></pre></div>
+<p>SQLite database supports SQL Cipher encryption when enabled.</p>
+<hr />
+<h2 id="testing-framework">13. Testing Framework</h2>
+<h3 id="test-file-inventory">13.1 Test File Inventory</h3>
+<table>
+<thead>
+<tr>
+<th>Test File</th>
+<th>Lines</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/verifier/service_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/config_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/discovery_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/startup_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/startup_comprehensive_test.go</code></td>
+<td>?</td>
+<td>Integration</td>
+</tr>
+<tr>
+<td><code>internal/verifier/scoring_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/enhanced_scoring_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/health_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/events_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/provider_access_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/subscription_detector_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/subscription_types_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/rate_limit_headers_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/database_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/verifier/adapters/*_test.go</code></td>
+<td>?</td>
+<td>Unit/Integration</td>
+</tr>
+<tr>
+<td><code>internal/services/llmsverifier_score_adapter_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>internal/handlers/verifier_types_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>pkg/sdk/go/verifier/client_test.go</code></td>
+<td>?</td>
+<td>Unit</td>
+</tr>
+<tr>
+<td><code>tests/helixllm/llmsverifier_test_suite.sh</code></td>
+<td>531</td>
+<td>Shell / E2E</td>
+</tr>
+</tbody>
+</table>
+<h3 id="challenge-scripts">13.2 Challenge Scripts</h3>
+<p><strong>Directory:</strong> <code>challenges/scripts/</code></p>
+<table>
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th>Script</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>llmsverifier_cliagents_challenge.sh</code> (304 lines)</td>
+<td>Validates CLI agent integration</td>
+</tr>
+<tr>
+<td><code>llmsverifier_startup_verification_challenge.sh</code> (138
+lines)</td>
+<td>Validates startup verification pipeline</td>
+</tr>
+<tr>
+<td><code>llmsverifier_submodule_smoke_challenge.sh</code> (126
+lines)</td>
+<td>Validates LLMsVerifier submodule health</td>
+</tr>
+</tbody>
+</table>
+<h3 id="challenge-results">13.3 Challenge Results</h3>
+<p><strong>Directory:</strong> <code>challenge-results/</code></p>
+<p>Stored JSON results from challenge executions: -
+<code>llmsverifier-cliagents-challenge/result.json</code> -
+<code>llmsverifier_startup_verification_challenge</code> results</p>
+<hr />
+<h2 id="architecture-comparison-helixagent-helixcode">14. Architecture
+Comparison: HelixAgent → HelixCode</h2>
+<h3 id="what-helixagent-has-that-helixcode-needs">14.1 What HelixAgent
+Has That HelixCode Needs</h3>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 31%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>HelixAgent Location</th>
+<th>How HelixCode Should Replicate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Verifier Service</strong></td>
+<td><code>internal/verifier/service.go</code></td>
+<td>Create <code>internal/verifier/service.go</code> with
+<code>VerificationService</code> struct</td>
+</tr>
+<tr>
+<td><strong>Score Adapter</strong></td>
+<td><code>internal/services/llmsverifier_score_adapter.go</code></td>
+<td>Create equivalent adapter bridging to HelixCode’s provider
+system</td>
+</tr>
+<tr>
+<td><strong>Config Schema</strong></td>
+<td><code>configs/verifier.yaml</code> +
+<code>internal/verifier/config.go</code></td>
+<td>Copy <code>Config</code> struct and YAML schema</td>
+</tr>
+<tr>
+<td><strong>Provider Registry</strong></td>
+<td><code>internal/verifier/provider_types.go</code> +
+<code>startup.go</code></td>
+<td>Copy <code>SupportedProviders</code> map and discovery logic</td>
+</tr>
+<tr>
+<td><strong>Startup Pipeline</strong></td>
+<td><code>internal/verifier/startup.go</code></td>
+<td>Implement <code>StartupVerifier</code> with 5-phase pipeline</td>
+</tr>
+<tr>
+<td><strong>Event Bus</strong></td>
+<td><code>internal/verifier/events.go</code></td>
+<td>Integrate with HelixCode’s messaging system</td>
+</tr>
+<tr>
+<td><strong>Go SDK Client</strong></td>
+<td><code>pkg/sdk/go/verifier/client.go</code></td>
+<td>Embed or import the SDK client</td>
+</tr>
+<tr>
+<td><strong>Health Monitor</strong></td>
+<td><code>internal/verifier/health.go</code></td>
+<td>Copy <code>HealthService</code> with circuit breaker</td>
+</tr>
+<tr>
+<td><strong>Scoring Engine</strong></td>
+<td><code>internal/verifier/scoring.go</code></td>
+<td>Copy <code>ScoringService</code> with 5-component weights</td>
+</tr>
+<tr>
+<td><strong>Model Discovery</strong></td>
+<td><code>internal/verifier/discovery.go</code></td>
+<td>Copy <code>ModelDiscoveryService</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-replication-steps">14.2 Key Replication Steps</h3>
+<ol type="1">
+<li><strong>Add LLMsVerifier submodule</strong> to HelixCode repo</li>
+<li><strong>Copy <code>internal/verifier/</code></strong> package
+structure from HelixAgent</li>
+<li><strong>Copy <code>configs/verifier.yaml</code></strong> and adapt
+provider list</li>
+<li><strong>Implement <code>LLMsVerifierScoreAdapter</code></strong> to
+bridge with HelixCode’s provider discovery</li>
+<li><strong>Wire startup pipeline</strong> into HelixCode’s
+initialization flow</li>
+<li><strong>Add event topics</strong> to HelixCode’s messaging
+system</li>
+<li><strong>Copy challenge scripts</strong> and adapt for HelixCode’s
+CLI</li>
+<li><strong>Add env vars</strong> to HelixCode’s
+<code>.env.example</code></li>
+</ol>
+<h3 id="critical-differences-to-handle">14.3 Critical Differences to
+Handle</h3>
+<ul>
+<li>HelixAgent uses <code>digital.vasic.concurrency/pkg/safe</code> for
+thread-safe containers — HelixCode needs equivalent concurrency
+primitives</li>
+<li>HelixAgent uses <code>logrus</code> for structured logging —
+HelixCode may use a different logger</li>
+<li>HelixAgent’s <code>StartupVerifier</code> integrates with
+<code>llm.LLMProvider</code> interface — HelixCode needs to map this to
+its own provider interface</li>
+<li>HelixAgent has OAuth credential reader for Claude/Qwen — HelixCode
+needs equivalent OAuth support</li>
+</ul>
+<hr />
+<h2 id="all-documentation-files">15. All Documentation Files</h2>
+<h3 id="root-level-docs">15.1 Root-Level Docs</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>README.md</code></td>
+<td>687</td>
+<td>Main project documentation</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>680</td>
+<td>Developer guide for Claude AI</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>616</td>
+<td>Authoritative guide for AI coding agents</td>
+</tr>
+<tr>
+<td><code>CONSTITUTION.md</code></td>
+<td>494</td>
+<td>33 mandatory rules</td>
+</tr>
+<tr>
+<td><code>CONSTITUTION.json</code></td>
+<td>?</td>
+<td>Machine-readable constitution</td>
+</tr>
+<tr>
+<td><code>CONTRIBUTING.md</code></td>
+<td>?</td>
+<td>Contribution guidelines</td>
+</tr>
+<tr>
+<td><code>SECURITY.md</code></td>
+<td>?</td>
+<td>Security policy</td>
+</tr>
+<tr>
+<td><code>CHANGELOG.md</code></td>
+<td>?</td>
+<td>Version changelog</td>
+</tr>
+<tr>
+<td><code>HELIXLLM_INTEGRATION_SUMMARY.md</code></td>
+<td>?</td>
+<td>HelixLLM integration notes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="verifier-specific-docs">15.2 Verifier-Specific Docs</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 31%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/guides/llms-verifier.md</code></td>
+<td>328</td>
+<td>Integration guide</td>
+</tr>
+<tr>
+<td><code>docs/integration/LLMSVERIFIER_INTEGRATION_PLAN.md</code></td>
+<td>2423</td>
+<td><strong>Nano-level 10-phase integration plan</strong></td>
+</tr>
+<tr>
+<td><code>docs/verifier/README.md</code></td>
+<td>292</td>
+<td>Verifier module overview</td>
+</tr>
+<tr>
+<td><code>docs/verifier/API.md</code></td>
+<td>42</td>
+<td>API reference</td>
+</tr>
+<tr>
+<td><code>docs/verifier/USER_GUIDE.md</code></td>
+<td>440</td>
+<td>End-user guide</td>
+</tr>
+<tr>
+<td><code>docs/verifier/LLMSVERIFIER_POWER_FEATURES.md</code></td>
+<td>661</td>
+<td>Power features documentation</td>
+</tr>
+<tr>
+<td><code>docs/archive/status-history/LLMS_VERIFIER_GUIDE.md</code></td>
+<td>?</td>
+<td>Historical guide</td>
+</tr>
+<tr>
+<td><code>internal/verifier/README.md</code></td>
+<td>274</td>
+<td>Internal module README</td>
+</tr>
+<tr>
+<td><code>internal/verifier/adapters/README.md</code></td>
+<td>170</td>
+<td>Adapters documentation</td>
+</tr>
+<tr>
+<td><code>reports/HELIXLLM_LLMSVERIFIER_SCORING_REPORT.md</code></td>
+<td>?</td>
+<td>Scoring analysis report</td>
+</tr>
+<tr>
+<td><code>docs/reports/llms_verifier/2026-04-03/report.md</code></td>
+<td>?</td>
+<td>Periodic report</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cli-agent-analysis-docs">15.3 CLI Agent Analysis Docs</h3>
+<p><strong>Directory:</strong> <code>cli_agents/</code></p>
+<p>Contains analysis markdown files for 20+ CLI agents: -
+<code>helix_code/</code> — <strong>Submodule</strong> pointing to
+<code>HelixDevelopment/HelixCode</code> -
+<code>AGENT_DECK_ANALYSIS.md</code>, <code>AIDER_ANALYSIS.md</code>,
+<code>CLINE_ANALYSIS.md</code>, <code>CODEX_ANALYSIS.md</code>, etc. -
+<code>MASTER_INTEGRATION_PLAN.md</code> — Master plan for all CLI agents
+- <code>TIER_1_SUMMARY.md</code>, <code>TIER_3_4_5_ANALYSIS.md</code> —
+Tiered analysis summaries</p>
+<hr />
+<h2 id="appendix-a-exact-code-excerpts-for-replication">Appendix A:
+Exact Code Excerpts for Replication</h2>
+<h3 id="a.1-config-loading-pattern">A.1 Config Loading Pattern</h3>
+<p><strong>File:</strong> <code>internal/verifier/config.go</code></p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadConfig<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Config<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to read config: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> cfg Config</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> yaml<span class="op">.</span>Unmarshal<span class="op">(</span>data<span class="op">,</span> <span class="op">&amp;</span>cfg<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to parse config: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>cfg<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="a.2-score-adapter-getpattern">A.2 Score Adapter GetPattern</h3>
+<p><strong>File:</strong>
+<code>internal/services/llmsverifier_score_adapter.go</code></p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>LLMsVerifierScoreAdapter<span class="op">)</span> GetProviderScore<span class="op">(</span>providerType <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">float64</span><span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    score<span class="op">,</span> found <span class="op">:=</span> a<span class="op">.</span>providerScores<span class="op">.</span>Get<span class="op">(</span>providerType<span class="op">)</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> found <span class="op">{</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> score <span class="op">&gt;</span> <span class="dv">10</span> <span class="op">{</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>            score <span class="op">=</span> score <span class="op">/</span> <span class="fl">10.0</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> score<span class="op">,</span> <span class="ot">true</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">,</span> <span class="ot">false</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="a.3-event-publishing-pattern">A.3 Event Publishing Pattern</h3>
+<p><strong>File:</strong> <code>internal/verifier/events.go</code></p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> PublishVerificationEvent<span class="op">(</span>pub messaging<span class="op">.</span>Publisher<span class="op">,</span> event <span class="op">*</span>VerificationEvent<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> json<span class="op">.</span>Marshal<span class="op">(</span>event<span class="op">)</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> err</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pub<span class="op">.</span>Publish<span class="op">(</span>event<span class="op">.</span>Type<span class="op">.</span>Topic<span class="op">(),</span> data<span class="op">)</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="a.4-provider-discovery-order-faulty-key-deprioritization">A.4
+Provider Discovery Order (Faulty Key Deprioritization)</h3>
+<p><strong>File:</strong> <code>internal/verifier/startup.go</code></p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>sort<span class="op">.</span>Slice<span class="op">(</span>providerTypes<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>i<span class="op">,</span> j <span class="dt">int</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    prioI <span class="op">:=</span> getPriority<span class="op">(</span>providerTypes<span class="op">[</span>i<span class="op">])</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    prioJ <span class="op">:=</span> getPriority<span class="op">(</span>providerTypes<span class="op">[</span>j<span class="op">])</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> prioI <span class="op">!=</span> prioJ <span class="op">{</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> prioI <span class="op">&lt;</span> prioJ</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> providerTypes<span class="op">[</span>i<span class="op">]</span> <span class="op">&lt;</span> providerTypes<span class="op">[</span>j<span class="op">]</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
+<hr />
+<h2 id="appendix-b-gaps-and-todos-identified">Appendix B: Gaps and TODOs
+Identified</h2>
+<ol type="1">
+<li><strong>AGENTS.md download intermittent</strong> — Some raw files
+timeout via GitHub CDN; API access is more reliable</li>
+<li><strong>HelixCode submodule</strong> — Is a separate repo; cannot
+analyze its internal structure from HelixAgent alone</li>
+<li><strong>LLMsVerifier submodule</strong> — Is a separate repo; actual
+verifier service code lives in
+<code>vasic-digital/LLMsVerifier</code></li>
+<li><strong>Test execution</strong> — Challenge scripts reference Docker
+Compose stacks that may not be available in all environments</li>
+<li><strong>Models submodule</strong> — Points to external repo; model
+definitions may differ from <code>SupportedProviders</code> map</li>
+</ol>
+<hr />
+<h2 id="citations">Citations</h2>
+<ul>
+<li><a href="https://github.com/HelixDevelopment/HelixAgent"><sup>33</sup></a>
+— Main repository page</li>
+<li><a href="https://github.com/HelixDevelopment/helix_agent/blob/main/README.md"><sup>6</sup></a>
+— README.md</li>
+<li><a href="https://github.com/HelixDevelopment/helix_agent/blob/main/CONSTITUTION.md"><sup>36</sup></a>
+— CONSTITUTION.md</li>
+<li><a href="https://github.com/HelixDevelopment/helix_agent/blob/main/AGENTS.md"><sup>42</sup></a>
+— AGENTS.md</li>
+<li><a href="https://github.com/HelixDevelopment/helix_agent/blob/main/CLAUDE.md"><sup>None</sup></a>
+— CLAUDE.md</li>
+<li>All code excerpts verified against raw files via GitHub Contents API
+at commit <code>fe3f69e</code></li>
+</ul>
+<hr />
+<p><em>End of Analysis</em></p>
+</body>
+</html>

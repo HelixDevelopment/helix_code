@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="helixcode-deployment-guide-zero-bluff-phase-5">HelixCode
+Deployment Guide — Zero-Bluff Phase 5</h1>
+<p><strong>Audience</strong>: Operators deploying HelixCode in
+production. <strong>Companion</strong>: Comprehensive references at <a href="../COMPLETE_DEPLOYMENT_GUIDE.md"><code>docs/COMPLETE_DEPLOYMENT_GUIDE.md</code></a>
+and <a href="../DEPLOYMENT_GUIDE.md"><code>docs/DEPLOYMENT_GUIDE.md</code></a>.
+<strong>Mandate</strong>: CONST-033 (no host power management),
+CONST-042 (no secret leak), CONST-043 (no force push), CONST-045 (no
+hardcoded distribution hosts). <strong>Last updated</strong>:
+2026-05-12</p>
+<hr />
+<h2 id="containers-submodule">1. containers Submodule</h2>
+<p>HelixCode ships an orchestration layer in the
+<code>containers/</code> submodule. All container artefacts live there —
+<code>Dockerfile</code>s,
+<code>compose</code>/<code>podman-compose</code> files, environment
+templates.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> Containers</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> Containers</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/orchestrator</span> up       <span class="co"># bring up the platform stack</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/orchestrator</span> down</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/orchestrator</span> status</span></code></pre></div>
+<p>The <code>./helix</code> facade in the repo root delegates to the
+orchestrator:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./helix</span> start</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./helix</span> stop</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./helix</span> logs</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./helix</span> shell</span></code></pre></div>
+<p><strong>Rule 4 (Constitution)</strong>: never invoke
+<code>docker</code> / <code>docker-compose</code> directly. The
+orchestrator binary is the only supported workflow.</p>
+<hr />
+<h2 id="configuration">2. Configuration</h2>
+<h3 id="env-var-precedence">2.1 Env-var precedence</h3>
+<ol type="1">
+<li>CLI flag</li>
+<li>Process environment</li>
+<li><code>~/.config/helixcode/config.yaml</code></li>
+<li>Repo-local <code>.helixcode.yaml</code></li>
+<li>Built-in defaults</li>
+</ol>
+<h3 id="api-keys">2.2 API keys</h3>
+<p>API keys live ONLY in <code>~/.config/helixcode/api_keys.sh</code>
+(mode 0600). Load:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.config/helixcode/api_keys.sh</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span></span></code></pre></div>
+<p>Per CONST-042, secrets MUST NOT appear in any repository, image, or
+log.</p>
+<h3 id="distribution-hosts-const-045">2.3 Distribution hosts
+(CONST-045)</h3>
+<p>Container distribution targets are configured
+<strong>exclusively</strong> through
+<code>CONTAINERS_REMOTE_HOST_N_*</code> env vars in
+<code>containers/.env</code> (mode 0600, gitignored).</p>
+<p>Adding / removing a host is an edit to <code>containers/.env</code> —
+never a code change. Tests read <code>.env</code> at runtime and skip
+with <code>SKIP-OK:</code> when
+<code>CONTAINERS_REMOTE_ENABLED=false</code>.</p>
+<h3 id="reference-config.yaml">2.4 Reference
+<code>config.yaml</code></h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">approval</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mode</span><span class="kw">:</span><span class="at"> auto-edit</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">config_file</span><span class="kw">:</span><span class="at"> ~/.config/helixcode/approval.yaml</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sandbox</span><span class="kw">:</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">profile</span><span class="kw">:</span><span class="at"> workspace-write</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">default</span><span class="kw">:</span><span class="at"> anthropic</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">anthropic</span><span class="kw">:</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> claude-3-5-sonnet</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">session</span><span class="kw">:</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">retention_days</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">memory</span><span class="kw">:</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> .helixcode/memory.md</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">telemetry</span><span class="kw">:</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> http://localhost:4317</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">service_name</span><span class="kw">:</span><span class="at"> helixcode</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="fu">quality</span><span class="kw">:</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">gate</span><span class="kw">:</span><span class="at"> strict</span></span></code></pre></div>
+<p>Full field reference: <a href="../COMPLETE_CONFIGURATION_DOCUMENTATION.md"><code>docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md</code></a>.</p>
+<hr />
+<h2 id="production-hardening">3. Production Hardening</h2>
+<h3 id="mandatory-settings">3.1 Mandatory settings</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Production value</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>approval.mode</code></td>
+<td><code>auto-edit</code> (interactive) or <code>full-auto</code>
+(CI-style)</td>
+<td>Never <code>dangerously-bypass</code></td>
+</tr>
+<tr>
+<td><code>sandbox.profile</code></td>
+<td><code>workspace-write</code> minimum</td>
+<td><code>full-auto</code> REFUSES without sandbox</td>
+</tr>
+<tr>
+<td><code>telemetry.enabled</code></td>
+<td><code>true</code></td>
+<td>Visibility into approval/sandbox denials</td>
+</tr>
+<tr>
+<td><code>quality.gate</code></td>
+<td><code>strict</code></td>
+<td>Reject low-confidence LLM outputs</td>
+</tr>
+<tr>
+<td>File mode for <code>api_keys.sh</code></td>
+<td><code>0600</code></td>
+<td>CONST-042</td>
+</tr>
+<tr>
+<td>File mode for <code>containers/.env</code></td>
+<td><code>0600</code></td>
+<td>CONST-045</td>
+</tr>
+</tbody>
+</table>
+<h3 id="approval-matrix-in-production">3.2 Approval matrix in
+production</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Use case</th>
+<th>Required guardrails</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>suggest</code></td>
+<td>Pair-programming session</td>
+<td>Operator at keyboard</td>
+</tr>
+<tr>
+<td><code>auto-edit</code></td>
+<td>Background agent edits</td>
+<td>Sandbox + telemetry</td>
+</tr>
+<tr>
+<td><code>full-auto</code></td>
+<td>Unattended CI-style runs</td>
+<td>Sandbox MANDATORY, broker-mediated approval ack</td>
+</tr>
+<tr>
+<td><code>dangerously-bypass</code></td>
+<td>Forbidden in prod</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>The executor enforces <code>ErrSandboxRequired</code> when
+<code>full-auto</code> + no sandbox.</p>
+<h3 id="logging">3.3 Logging</h3>
+<p><code>internal/logging</code> writes JSON-lines logs to stderr by
+default. Redirect to a log shipper (e.g. Vector, Fluent Bit). Never log
+raw memory file contents (CONST-042); the loader logs only path + byte
+counts.</p>
+<hr />
+<h2 id="observability">4. Observability</h2>
+<h3 id="opentelemetry-endpoint">4.1 OpenTelemetry endpoint</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">HELIXCODE_OTEL_ENDPOINT</span><span class="op">=</span>http://otel-collector:4317 <span class="dt">\</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">HELIXCODE_OTEL_SERVICE_NAME</span><span class="op">=</span>helixcode-prod <span class="dt">\</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span></span></code></pre></div>
+<p>Default transport: gRPC. Use
+<code>HELIXCODE_OTEL_PROTOCOL=http/protobuf</code> for HTTP.</p>
+<h3 id="metrics-catalogue">4.2 Metrics catalogue</h3>
+<ul>
+<li><code>helixcode.llm.tokens_in</code> / <code>tokens_out</code>
+(counter, attrs: provider, model)</li>
+<li><code>helixcode.llm.request_duration_ms</code> (histogram)</li>
+<li><code>helixcode.approval.denials_total</code> (counter, attrs: mode,
+level, reason)</li>
+<li><code>helixcode.sandbox.violations_total</code> (counter)</li>
+<li><code>helixcode.tools.execute_duration_ms</code> (histogram, attrs:
+tool_name)</li>
+<li><code>helixcode.session.active_sessions</code> (gauge)</li>
+<li><code>helixcode.task.checkpoints_total</code> (counter)</li>
+</ul>
+<h3 id="dashboards">4.3 Dashboards</h3>
+<p>Reference dashboard at
+<code>containers/dashboards/grafana-helixcode.json</code> (when
+present). Key panels:</p>
+<ul>
+<li>Approval denials by mode/level (24h)</li>
+<li>Sandbox violation rate (1h sliding)</li>
+<li>LLM token consumption per provider</li>
+<li>p50 / p95 / p99 request latency per model</li>
+</ul>
+<h3 id="slash-command-for-runtime-inspection">4.4 Slash command for
+runtime inspection</h3>
+<pre><code>/telemetry status        # current span ID, exporter health, queue depth
+/telemetry flush         # force flush before shutdown</code></pre>
+<hr />
+<h2 id="cicd-manual-workflow-only">5. CI/CD — Manual Workflow Only</h2>
+<p><strong>Rule 1 (Constitution)</strong>: no CI/CD pipelines. No
+<code>.github/workflows/</code>, no <code>.gitlab-ci.yml</code>, no
+Jenkinsfile. All builds and tests run manually or via
+<code>Makefile</code> / script targets.</p>
+<h3 id="build-target-chain">5.1 Build target chain</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Compile-only smoke</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Unit tests (mocks allowed only here)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./...</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Anti-bluff scan</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  helix_code/internal helix_code/cmd <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;BLUFF FOUND&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Real LLM end-to-end (requires `make test-infra-up` first)</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-up</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-full</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-down</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Governance cascade</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/verify-governance-cascade.sh</span></span></code></pre></div>
+<h3 id="release-build">5.2 Release build</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> prod</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># → bin/helixcode-linux-amd64</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   bin/helixcode-darwin-amd64</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   bin/helixcode-darwin-arm64</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   bin/helixcode-windows-amd64.exe</span></span></code></pre></div>
+<p>For containerised builds without host Go:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> container-builder-image    <span class="co"># once</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> container-build</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> container-test</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> container-release</span></code></pre></div>
+<h3 id="manual-deployment-cadence">5.3 Manual deployment cadence</h3>
+<ol type="1">
+<li><p><code>git pull --ff-only</code> on every remote (origin / github
+/ gitlab / upstream).</p></li>
+<li><p><code>make test-full</code> against staging stack.</p></li>
+<li><p>Tag release:
+<code>git tag -s v&lt;x.y.z&gt; -m &quot;...&quot;</code>.</p></li>
+<li><p>Push to four remotes per CONST-043:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> R <span class="kw">in</span> origin github gitlab upstream<span class="kw">;</span> <span class="cf">do</span> <span class="fu">git</span> push <span class="st">&quot;</span><span class="va">$R</span><span class="st">&quot;</span> main<span class="kw">;</span> <span class="fu">git</span> push <span class="st">&quot;</span><span class="va">$R</span><span class="st">&quot;</span> <span class="at">--tags</span><span class="kw">;</span> <span class="cf">done</span></span></code></pre></div></li>
+<li><p><code>./helix stop &amp;&amp; ./helix start</code> on each
+host.</p></li>
+</ol>
+<hr />
+<h2 id="backup-restore">6. Backup &amp; Restore</h2>
+<h3 id="session-transcripts-f11">6.1 Session transcripts (F11)</h3>
+<p>Location: <code>~/.local/share/helixcode/sessions/&lt;id&gt;/</code>.
+Each session contains <code>transcript.jsonl</code>,
+<code>tool_results.jsonl</code>, <code>metadata.json</code>.</p>
+<p>Backup:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> czf helixcode-sessions-<span class="va">$(</span><span class="fu">date</span> +%Y%m%d<span class="va">)</span>.tar.gz <span class="dt">\</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  ~/.local/share/helixcode/sessions/</span></code></pre></div>
+<p>Restore: untar into the same location; <code>cli sessions list</code>
+immediately picks up restored sessions.</p>
+<h3 id="project-memory-f24">6.2 Project memory (F24)</h3>
+<p>Project-root files (<code>helixcode.md</code> / <code>codex.md</code>
+/ <code>AGENTS.md</code>) live in the repo and follow git’s backup
+semantics.</p>
+<p>User overlay at <code>~/.config/helixcode/memory.md</code> should be
+backed up separately (mode 0644, no secrets per CONST-042).</p>
+<h3 id="database-multi-user-mode">6.3 Database (multi-user mode)</h3>
+<p>PostgreSQL backup (per cluster pg conventions):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pg_dump</span> <span class="at">-Fc</span> <span class="at">-d</span> helixcode <span class="op">&gt;</span> helixcode-<span class="va">$(</span><span class="fu">date</span> +%Y%m%d<span class="va">)</span>.dump</span></code></pre></div>
+<p>Restore:
+<code>pg_restore -d helixcode helixcode-&lt;date&gt;.dump</code>.
+Schemas live in
+<code>helix_code/internal/database/migrations/</code>.</p>
+<hr />
+<h2 id="security">7. Security</h2>
+<h3 id="secret-rotation">7.1 Secret rotation</h3>
+<p>API keys in <code>api_keys.sh</code>:</p>
+<ol type="1">
+<li>Generate new key with provider.</li>
+<li>Edit <code>api_keys.sh</code> in place (mode stays 0600).</li>
+<li><code>kill -HUP $(pgrep helixcode)</code> — process re-reads on
+signal.</li>
+<li>Revoke old key with provider.</li>
+</ol>
+<h3 id="governance-cascade-verification">7.2 Governance cascade
+verification</h3>
+<p>Every owned-by-us repo MUST carry <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.md</code> with the anti-bluff
+anchor.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/verify-governance-cascade.sh</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Phase 4 close-out verified 39/39 governance files.</span></span></code></pre></div>
+<h3 id="anti-bluff-smoke-always-run-before-release">7.3 Anti-bluff smoke
+(always run before release)</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  helix_code/internal helix_code/cmd <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;BLUFF FOUND&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>A <code>BLUFF FOUND</code> is a release blocker per Article XI
+§11.9.</p>
+<h3 id="host-power-management">7.4 Host power management</h3>
+<p>CONST-033: no suspend, hibernate, poweroff, reboot, halt, or any
+power-state transition in any script, image, systemd unit, or test. Hard
+ban.</p>
+<hr />
+<h2 id="troubleshooting-production">8. Troubleshooting Production</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Diagnosis</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>approval: full-auto mode requires sandbox</code></td>
+<td><code>--no-sandbox</code> while mode is <code>full-auto</code></td>
+<td>Remove flag or change mode</td>
+</tr>
+<tr>
+<td><code>secret_filter: matched AKIA pattern</code></td>
+<td>LLM-generated commit subject contained a secret</td>
+<td>Subject was scrubbed; investigate source diff</td>
+</tr>
+<tr>
+<td><code>verifier: model not in catalogue</code></td>
+<td>Provider/model not registered in LLMsVerifier</td>
+<td>Add via verifier CLI; never hardcode</td>
+</tr>
+<tr>
+<td><code>otel: exporter failed: connection refused</code></td>
+<td>Collector down</td>
+<td>Restart collector; <code>/telemetry flush</code></td>
+</tr>
+<tr>
+<td><code>task: deps not satisfied</code></td>
+<td>Dependency chain has a failed task</td>
+<td><code>cli task show &lt;id&gt;</code> to inspect chain</td>
+</tr>
+<tr>
+<td><code>git_auto_commit: skipped (clean tree)</code></td>
+<td>No mutations to commit</td>
+<td>Expected no-op</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="submodule-map-operator-view">9. Submodule Map (Operator
+View)</h2>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Purpose</th>
+<th>Required in prod?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/</code></td>
+<td>Core Go application</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>helix_qa/</code></td>
+<td>QA + challenge orchestration</td>
+<td>recommended</td>
+</tr>
+<tr>
+<td><code>challenges/</code></td>
+<td>Challenge bank</td>
+<td>recommended for verification</td>
+</tr>
+<tr>
+<td><code>containers/</code></td>
+<td>Docker/container artefacts</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>security/</code></td>
+<td>Security tooling</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>assets/</code></td>
+<td>Logos, themes, brand</td>
+<td>optional</td>
+</tr>
+<tr>
+<td><code>github_pages_website/</code></td>
+<td>Marketing site</td>
+<td>optional</td>
+</tr>
+<tr>
+<td><code>dependencies/</code></td>
+<td>LLama_CPP, Ollama, HuggingFace_Hub</td>
+<td>as needed</td>
+</tr>
+</tbody>
+</table>
+<p>Update all submodules deepest-first when releasing; never force-push
+(CONST-043).</p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go
+1.26 GA, latest patch go1.26.3 — matches project module authority
+CLAUDE.md §3.1), https://endoflife.date/postgresql (PostgreSQL 15
+supported through 2027-11 — confirms the backup/restore guidance targets
+a still-supported major), https://endoflife.date/redis (Redis 7.4 still
+receives maintenance patches). Confirmed: OpenTelemetry OTLP default
+transport is gRPC with <code>http/protobuf</code> as the HTTP
+alternative (matches <code>HELIXCODE_OTEL_PROTOCOL</code> guidance);
+Rule-4 orchestrator-only container workflow (no direct
+<code>docker</code>/<code>docker-compose</code>) matches CLAUDE.md §3.4.
+Negative finding: OTEL endpoints shown
+(<code>http://localhost:4317</code>,
+<code>http://otel-collector:4317</code>) are operator-local / in-cluster
+addresses, not public service endpoints — nothing external to verify
+against.</p>
+</body>
+</html>

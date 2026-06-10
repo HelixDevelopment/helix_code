@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="helixcode-docsqa-end-user-evidence-tree">HelixCode —
+<code>docs/qa/</code> End-User Evidence Tree</h1>
+<p><strong>Revision:</strong> 2 <strong>Last modified:</strong>
+2026-05-28T00:00:00Z</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-28</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-28</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active (convention established — BLOCKING release gate
+enforced)</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>Establishes the §11.4.83 per-feature end-user evidence convention +
+seed worked example (HXC-016).
+<code>scripts/verify_qa_evidence.sh</code> runs ADVISORY (warn-mode) by
+default and ENFORCING (blocking, exit 1) under
+<code>--enforce --since &lt;baseline&gt;</code>; the operator authorised
+promotion to a blocking release gate on 2026-05-28 (HXC-019), wired into
+<code>scripts/release-gate-test.sh</code> via
+<code>scripts/gates/qa_evidence_gate.sh</code>. Release-gate ONLY — not
+wired into pre-commit / pre-push hooks.</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>constitution submodule <code>Constitution.md</code> §11.4.83
+(docs/qa/ end-user evidence mandate)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#what-this-tree-is">What this tree is</a></li>
+<li><a href="#run-id-format">Run-id format</a></li>
+<li><a href="#what-a-transcript-must-contain">What a transcript must
+contain</a></li>
+<li><a href="#materials-are-committed-in-repo">Materials are committed
+in-repo</a></li>
+<li><a href="#bot--agent-driven-qa">Bot / agent-driven QA</a></li>
+<li><a href="#directory-layout">Directory layout</a></li>
+<li><a href="#enforcement-gate">Enforcement gate</a></li>
+<li><a href="#worked-example">Worked example</a></li>
+</ul>
+<h2 id="what-this-tree-is">What this tree is</h2>
+<p>Per constitution submodule <code>Constitution.md</code> §11.4.83
+(docs/qa/ end-user evidence mandate), <strong>every feature that ships
+MUST carry a recorded end-to-end communication transcript plus any
+attached materials</strong> (screenshots, request/response payloads,
+audio, file uploads) committed under
+<code>docs/qa/&lt;run-id&gt;/</code> — one directory per feature
+run.</p>
+<p>The forensic anchor (verbatim 2026-05-22 operator mandate, quoted
+from §11.4.83):</p>
+<blockquote>
+<p>“every feature that ships MUST carry a recorded e2e communication
+transcript + any attached materials under
+<code>docs/qa/&lt;run-id&gt;/</code> (per-feature subdirectories). A
+feature with no QA transcript is itself a §107 PASS-bluff — it claims to
+work but has no auditable runtime evidence. Bot-driven automation MUST
+preserve full bidirectional communication threads as proof.”</p>
+</blockquote>
+<p>A feature with no QA transcript is itself a §11.4 / §107 PASS-bluff:
+it claims to work but carries no auditable runtime evidence that an end
+user actually exercised it through the same interface they will use in
+production.</p>
+<h2 id="run-id-format">Run-id format</h2>
+<p><code>&lt;run-id&gt;</code> MUST be monotonic + greppable. Use one
+of:</p>
+<ul>
+<li><strong>The workable-item ticket id</strong> — HelixCode’s
+per-project prefix convention (<code>docs/Issues.md</code> “Prefix
+convention” section). For meta-repo / project-wide / governance /
+infrastructure work the prefix is <code>HXC</code>
+(e.g. <code>HXC-016</code>, <code>HXC-019</code>); submodule-scoped work
+uses its own prefix (<code>HXA</code>, etc.). This is the
+<strong>preferred</strong> form because it binds the QA evidence to the
+tracker entry in <code>docs/Issues.md</code> /
+<code>docs/Fixed.md</code>.</li>
+<li><strong>An ISO-8601 UTC timestamp</strong> —
+<code>YYYY-MM-DDTHHMMSSZ</code> (e.g. <code>2026-05-28T143000Z</code>)
+when a run is not tied to a single ticket.</li>
+</ul>
+<p>Once chosen, a <code>&lt;run-id&gt;</code> directory is append-only —
+never renamed, never reused for a different feature.</p>
+<h2 id="what-a-transcript-must-contain">What a transcript must
+contain</h2>
+<p>Per §11.4.83 operative rule (2):</p>
+<ol type="1">
+<li><strong>Full bidirectional thread.</strong> Every prompt/command
+sent <strong>and</strong> every response received <strong>and</strong>
+every error message <strong>and</strong> every state change observed. A
+one-sided record (“we sent X”) is NOT a transcript; both halves are
+required.</li>
+<li>The interface exercised MUST be the <strong>same interface the end
+user will use in production</strong> (CLI invocation, HTTP request, GUI
+action, etc.) — not an internal shortcut that bypasses the user-visible
+path.</li>
+<li>Where the feature produces sink-side / downstream output (audio,
+video, network, rendered UI), the transcript MUST cite positive
+sink-side captured evidence per §11.4.68 / §11.4.69 — never config-only,
+never metadata-only.</li>
+</ol>
+<p>The canonical transcript file is
+<code>docs/qa/&lt;run-id&gt;/transcript.md</code>.</p>
+<h2 id="materials-are-committed-in-repo">Materials are committed
+in-repo</h2>
+<p>Per §11.4.83 operative rule (3): attached materials MUST be committed
+<strong>alongside the transcript, in-repo</strong> — screenshots in
+<code>.png</code>, payloads in <code>.json</code> / <code>.txt</code>,
+audio in <code>.wav</code> / <code>.mp3</code>, etc. External-only links
+(Slack URL, Drive URL) are a §11.4.13 sink-side violation; the evidence
+MUST live in the repository so the audit replay works offline from a
+fresh clone.</p>
+<h2 id="bot-agent-driven-qa">Bot / agent-driven QA</h2>
+<p>Per §11.4.83 operative rule (4): bot-driven / agent-driven QA
+automation MUST preserve the <strong>full conversation thread</strong>
+as the proof artefact. A bot that runs the round-trip but stores only
+the final PASS/FAIL line is itself a §107 bluff at the QA-automation
+layer. The bot writes the same <code>transcript.md</code> shape a human
+would — both halves of every exchange.</p>
+<h2 id="directory-layout">Directory layout</h2>
+<pre><code>docs/qa/
+├── README.md                  # this file (the convention)
+├── &lt;run-id&gt;/                  # one directory per feature run
+│   ├── transcript.md          # full bidirectional thread (required)
+│   └── &lt;materials...&gt;         # screenshots / payloads / audio (as produced)
+└── ...</code></pre>
+<h2 id="enforcement-gate">Enforcement gate</h2>
+<p><code>scripts/verify_qa_evidence.sh</code> scans feature-shipping
+commits (those touching non-test code under
+<code>helix_code/internal/**</code>, <code>helix_code/cmd/**</code>, or
+<code>helix_code/applications/**</code>, excluding
+<code>*_test.go</code>) and reports when a feature commit has no
+matching <code>docs/qa/&lt;run-id&gt;/</code> directory. It has two
+modes:</p>
+<ul>
+<li><strong>Advisory (default)</strong> —
+<code>scripts/verify_qa_evidence.sh [N]</code>. Scans the last
+<code>N</code> commits (default 20), <strong>WARNs</strong>, and ALWAYS
+exits 0. For ad-hoc visibility; not wired into any git hook.</li>
+<li><strong>Enforcing</strong> —
+<code>scripts/verify_qa_evidence.sh --enforce --since &lt;ref&gt;</code>.
+Exits <strong>1</strong> if any in-scope feature-shipping commit lacks
+its <code>docs/qa/&lt;run-id&gt;/</code> directory, <strong>0</strong>
+when clean. This is the §11.4.83 operative-rule-(5) release gate. The
+operator <strong>authorised</strong> promotion to a blocking release
+gate on <strong>2026-05-28 (HXC-019)</strong>.</li>
+</ul>
+<h3 id="baseline-scoping---since-is-mandatory-in---enforce">Baseline
+scoping (<code>--since</code> is mandatory in
+<code>--enforce</code>)</h3>
+<p>The <code>docs/qa/</code> convention did not exist before it was
+introduced, so commits predating it cannot be expected to carry
+evidence. The baseline is the commit that <strong>added
+<code>docs/qa/README.md</code></strong> — <code>ed84f90e</code>
+(2026-05-28). Find it with:</p>
+<pre><code>git log --diff-filter=A --format=&#39;%H %cI %s&#39; -- docs/qa/README.md</code></pre>
+<p><code>--enforce</code> evaluates only the range
+<code>&lt;baseline&gt;..HEAD</code> (descendants of the baseline, by
+merge-ancestry — not author-date sorting), so all pre-convention legacy
+history is exempt. <code>--since</code> is <strong>mandatory</strong> in
+enforcing mode; running <code>--enforce</code> without it is a misuse
+error (exit 2) — enforcing over the whole history would block on
+thousands of legacy commits and make <code>HEAD</code>
+un-releasable.</p>
+<h3 id="per-commit-opt-out-no-qa-evidence">Per-commit opt-out:
+<code>[no-qa-evidence]</code></h3>
+<p>A commit whose message (subject <strong>or</strong> body) contains
+the literal token <code>[no-qa-evidence]</code> is
+<strong>exempt</strong> from the gate. Use it for a change that trips
+the feature-shipping heuristic but ships no user-facing feature — a pure
+refactor, a governance-only edit, or a doc-only change. The token is the
+single documented escape hatch; an untagged feature commit with no
+<code>docs/qa/&lt;run-id&gt;/</code> directory always fails the
+enforcing gate.</p>
+<h3 id="release-gate-wiring-release-gate-only">Release-gate wiring
+(release-gate ONLY)</h3>
+<p><code>scripts/release-gate-test.sh</code> invokes
+<code>scripts/gates/qa_evidence_gate.sh</code>, which runs the scanner
+with <code>--enforce --since &lt;baseline&gt;</code> and makes the whole
+release gate FAIL on any violation. Per the §11.4.83 mandate wording
+(“release gates”), the enforcing gate is deliberately
+<strong>NOT</strong> wired into pre-commit / pre-push git hooks — only
+into the release gate.</p>
+<p>The paired-mutation meta-test
+<code>scripts/tests/verify_qa_evidence_meta_test.sh</code> (§1.1
+anti-bluff) proves the gate fails when evidence is missing and passes
+when present.</p>
+<p>See <code>docs/scripts/verify_qa_evidence.md</code> for the companion
+guide.</p>
+<h2 id="worked-example">Worked example</h2>
+<p><code>docs/qa/HXC-016/</code> is a seed worked example: it records
+the §11.4.69–97 governance-cascade verification (HXC-016, closed
+<code>Completed (→ Fixed.md)</code> in <code>docs/Fixed.md</code>) in
+the transcript format above, demonstrating the full bidirectional thread
++ captured command output for a real, already-completed feature.</p>
+</body>
+</html>

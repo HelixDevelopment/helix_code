@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ledger</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ledger</h1>
+</header>
+<h1 id="hxc-029-11.4.98-integration-test-manual-dependency-classification-ledger">HXC-029
+§11.4.98 — Integration-Test Manual-Dependency Classification Ledger</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metadata</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Ticket</td>
+<td>HXC-029 (§11.4.98(F) full-automation anti-bluff — integration-test
+half)</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td><code>helix_code/tests/integration/**</code> (31
+<code>*_test.go</code> files)</td>
+</tr>
+<tr>
+<td>Live infra</td>
+<td>http://localhost:8080 (health=200, register reachable), PostgreSQL
+:5432, Redis :6379 — all confirmed listening</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>go1.26.2 (inner module <code>dev.helix.code</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="summary">Summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Classification</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Self-driving</strong> (no human action during
+execution)</td>
+<td><strong>31 / 31 files</strong></td>
+</tr>
+<tr>
+<td>Converted (manual → programmatic)</td>
+<td>0 (none needed)</td>
+</tr>
+<tr>
+<td>Obsolete-candidate (genuinely undriveable headless)</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Headline result:</strong> ZERO of the 31 integration test
+files require any human action during execution. Every file was
+previously flagged NEEDS-MANUAL-REVIEW but on inspection none meets a
+§11.4.98(C) manual-dependency criterion (typing, clicking,
+hand-triggered webhook, manual file attach, hard-coded session UUID, 60
+s human-response window). They are all already self-driving — gated only
+by build tags / <code>testing.Short</code> / env-var infra presence.</p>
+<h2 id="test-execution-evidence-real-captured-runs">Test-execution
+evidence (real captured runs)</h2>
+<p>Real commands run from <code>helix_code/</code>:</p>
+<pre><code>go vet -tags=integration ./tests/integration/                          # EXIT 0 (compiles clean)
+go test -tags=integration -count=1 -v ./tests/integration/             # 110 PASS, 20 SKIP, 3 FAIL
+go test -tags=&#39;integration testing_export&#39; -count=1 -run Telemetry ... # 6 PASS, 2 SKIP</code></pre>
+<p>Captured logs (in this directory): -
+<code>full_integration_run.log</code> — full <code>-v</code> run (110
+PASS / 20 SKIP / 3 FAIL) - <code>telemetry_run.log</code> —
+double-tagged telemetry suite (6 PASS / 2 SKIP) -
+<code>askuser_run.log</code>, <code>approval_run.log</code> — focused
+FAIL captures - <code>i18n-regression-evidence.txt</code> — the 3 real
+FAILs (NOT manual-dependency; see below)</p>
+<h3 id="the-3-fails-are-a-real-i18n-render-regression-not-a-manual-dependency">The
+3 FAILs are a real i18n-render regression, NOT a manual dependency</h3>
+<p>All 3 failing tests are fully self-driving (deterministic
+<code>bytes.Buffer</code> I/O, no human action). They FAIL because the
+prompter render path now emits <strong>raw i18n translation
+keys</strong> instead of resolved+interpolated user-facing text:</p>
+<ul>
+<li><code>TestAskUser_PreviewVisibleInOutput</code> — output contains
+<code>askuser_prompt_choice_preview_label</code> but NOT the actual
+preview value <code>RGB(255,0,0) — bright crimson</code>.</li>
+<li><code>TestAskUser_InvalidInputThenValid</code> — output contains
+<code>askuser_prompt_invalid_choice_hint</code> but NOT the valid-range
+hint <code>1-3</code>.</li>
+<li><code>TestApproval_AutoEdit_PromptsRun_UserAllows</code> — output is
+<code>internal_approval_prompt_allow_toolinternal_approval_prompt_args_suffix</code>
+instead of containing the tool name
+<code>stub_run_for_approval</code>.</li>
+</ul>
+<p>This is a genuine §11.9 usability defect (the user is shown raw i18n
+keys instead of text) that the self-driving tests correctly catch. Per
+§11.4.6 (no-guessing) it is reported honestly here, NOT papered over
+with a PASS. <strong>Fix is OUT of this task’s scope</strong>
+(production i18n render path in <code>internal/tools/askuser</code> +
+approval prompter, not a manual-dependency conversion). Flagged for the
+main stream as a §11.4.15 Bug.</p>
+<h3 id="the-20-skips-are-honest-infracredential-unavailable-skips-not-manual-deps">The
+20 SKIPs are honest infra/credential-unavailable skips (not manual
+deps)</h3>
+<p>All cite concrete infra reasons — Anthropic key absent, gopls not on
+PATH, cloud creds absent, Ollama/VLLM/LocalAI/Cognee not running, test
+admin user not configured, OTLP exporter not running,
+<code>RUN_CONVERSION_TESTS</code> unset. These are legitimate §11.4.3
+SKIP-with-reason, NOT human-in-the-loop dependencies.</p>
+<h2 id="per-file-classification">Per-file classification</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Build gate</th>
+<th>Classification</th>
+<th>Driving mechanism</th>
+<th>Run result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api_integration_test.go</td>
+<td><code>testing.Short</code></td>
+<td>self-driving</td>
+<td>real HTTP to :8080 + httptest</td>
+<td>PASS (TestHealthEndpoint, TestAuthenticationFlow); SKIP task/worker
+(no admin user)</td>
+</tr>
+<tr>
+<td>approval_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>in-memory approval engine, deterministic</td>
+<td>7 PASS / 1 FAIL (i18n regression)</td>
+</tr>
+<tr>
+<td>askuser_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td><code>bytes.Buffer</code> Reader/Writer (NOT os.Stdin),
+<code>IsTTY</code> closure</td>
+<td>4 PASS / 2 FAIL (i18n regression)</td>
+</tr>
+<tr>
+<td>autocommit_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real <code>git</code> in <code>t.TempDir()</code></td>
+<td>5 PASS</td>
+</tr>
+<tr>
+<td>auto_compaction_integration_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real Anthropic (SKIP w/o key)</td>
+<td>SKIP-OK (no key)</td>
+</tr>
+<tr>
+<td>background_shell_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real <code>os/exec</code> shell, POSIX-gated</td>
+<td>3 PASS</td>
+</tr>
+<tr>
+<td>browser_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td><strong>chromedp programmatic</strong> click/type/screenshot vs
+<code>httptest.Server</code> fixture (the “click” is a chromedp DOM
+action, NOT human)</td>
+<td>7 PASS</td>
+</tr>
+<tr>
+<td>cognee_integration_test.go</td>
+<td>none (default-skip)</td>
+<td>self-driving</td>
+<td>real Cognee HTTP (env URL, SKIP if down)</td>
+<td>6 SKIP (Cognee not running)</td>
+</tr>
+<tr>
+<td>cognee_real_llm_test.go</td>
+<td>none (suite, SKIP guard)</td>
+<td>self-driving</td>
+<td>real LLM (SKIP w/o config)</td>
+<td>SKIP (config invalid)</td>
+</tr>
+<tr>
+<td>integration_test.go</td>
+<td><code>testing.Short</code></td>
+<td>self-driving</td>
+<td>real HTTP to :8080</td>
+<td>2 PASS / 4 SKIP (no admin user)</td>
+</tr>
+<tr>
+<td>lsp_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real LSP subprocess + fake-server fixture; gopls-gated</td>
+<td>3 PASS / 1 SKIP (no gopls)</td>
+</tr>
+<tr>
+<td>markdown_commands_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real FS + fsnotify watcher</td>
+<td>3 PASS</td>
+</tr>
+<tr>
+<td>mcp_stdio_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real MCP stdio subprocess handshake</td>
+<td>2 PASS</td>
+</tr>
+<tr>
+<td>memory_providers_integration_test.go</td>
+<td>none</td>
+<td>self-driving</td>
+<td>real provider constructors</td>
+<td>4 PASS</td>
+</tr>
+<tr>
+<td>memory_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real FS + hot-reload</td>
+<td>3 PASS</td>
+</tr>
+<tr>
+<td>multi_provider_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>config/env/flag resolution; cloud-call SKIP w/o creds</td>
+<td>7 PASS / 1 SKIP</td>
+</tr>
+<tr>
+<td>planmode_gating_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>in-memory plan-mode gate, POSIX-gated</td>
+<td>3 PASS</td>
+</tr>
+<tr>
+<td>provider_integration_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real provider HTTP (SKIP if backend down);
+<code>testTimeout=60s</code> is an HTTP-client deadline, NOT a
+human-response window</td>
+<td>2 PASS / several SKIP (no Ollama/VLLM/LocalAI)</td>
+</tr>
+<tr>
+<td>sandbox_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real bubblewrap (gated), CONST-033 reject</td>
+<td>6 PASS</td>
+</tr>
+<tr>
+<td>sessions_resume_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real session persistence across restart</td>
+<td>2 PASS</td>
+</tr>
+<tr>
+<td>simple_test.go</td>
+<td><code>testing.Short</code></td>
+<td>self-driving</td>
+<td>real <code>os/exec</code> + FS + net dial</td>
+<td>6 PASS</td>
+</tr>
+<tr>
+<td>skills_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real FS + watcher</td>
+<td>3 PASS</td>
+</tr>
+<tr>
+<td>smartedit_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real FS edits + git commit</td>
+<td>PASS (all)</td>
+</tr>
+<tr>
+<td>subagent_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real subagent subprocess via testhelper</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>telemetry_test.go</td>
+<td><code>//go:build integration &amp;&amp; testing_export</code></td>
+<td>self-driving</td>
+<td>OTel stdout/in-memory exporter; OTLP SKIP if no collector</td>
+<td>6 PASS / 2 SKIP</td>
+</tr>
+<tr>
+<td>theme_test.go</td>
+<td><code>//go:build integration</code></td>
+<td>self-driving</td>
+<td>real theme load/render</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>workflow_tools_integration_test.go</td>
+<td><code>testing.Short</code></td>
+<td>self-driving</td>
+<td>real workflow tools</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>(cmd/, hooks/, permissions/, persistence/, worktree/ subdirs)</td>
+<td>challenge runners / sub-suites</td>
+<td>self-driving</td>
+<td>httptest fixtures, generated <code>uuid.NewString()</code> (NOT
+hard-coded), real FS/git</td>
+<td>covered by suite run</td>
+</tr>
+</tbody>
+</table>
+<h2 id="c-criterion-by-criterion-negative-findings">§11.4.98(C)
+criterion-by-criterion negative findings</h2>
+<ul>
+<li><strong>Typing during execution</strong>: NONE —
+<code>askuser_test.go</code> feeds input via
+<code>bytes.NewBufferString(&quot;1\n&quot;)</code>, never
+<code>os.Stdin</code>.</li>
+<li><strong>Clicking</strong>: the only “click” is
+<code>browser_test.go</code> / <code>cmd/p2f23</code> chromedp
+programmatic <code>click.Execute({selector:&quot;#b&quot;})</code> against a
+fixture — machine-driven, asserts
+<code>UNCLICKED→CLICKED_42</code>.</li>
+<li><strong>Hand-triggered webhook</strong>: NONE.</li>
+<li><strong>Manual file attach</strong>: NONE — all file ops use
+<code>t.TempDir()</code> + <code>os.WriteFile</code>.</li>
+<li><strong>Hard-coded session UUID</strong> (Herald lesson): NONE —
+<code>cmd/p1f11_challenge</code> uses <code>uuid.NewString()</code>
+(freshly generated); no <code>claude --resume</code> collision
+risk.</li>
+<li><strong>60 s human-response window</strong>: NONE — the only
+<code>60 * time.Second</code> literals are HTTP-client timeouts
+(<code>provider_integration_test.go:25</code>,
+<code>cognee_integration_test.go:31</code>), not human-input
+deadlines.</li>
+</ul>
+<h2 id="anti-bluff-statement-11.4-11.4.98-11.9">Anti-bluff statement
+(§11.4 / §11.4.98 / §11.9)</h2>
+<p>Every “self-driving + PASS” claim above is backed by a real captured
+<code>go test</code> invocation in <code>full_integration_run.log</code>
+/ <code>telemetry_run.log</code> — not “looks self-driving”. The 3 FAILs
+and 20 SKIPs are reported honestly (no fabricated PASS). No test file
+was modified. No file changes were staged or committed by this task.</p>
+</body>
+</html>

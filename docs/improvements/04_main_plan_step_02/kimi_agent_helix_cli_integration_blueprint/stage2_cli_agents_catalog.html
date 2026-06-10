@@ -1,0 +1,2370 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage2_cli_agents_catalog</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage2_cli_agents_catalog</h1>
+</header>
+<h1 id="helixagent-cli-agents-master-catalog">HelixAgent CLI Agents
+Master Catalog</h1>
+<blockquote>
+<p><strong>Generated from</strong>: HelixDevelopment/HelixAgent
+<code>cli_agents/</code> directory <strong>Total Markdown Analysis
+Files</strong>: 22 <strong>Total Git Submodule Agents</strong>: 62
+<strong>Total Agents Cataloged</strong>: 60+ unique CLI agents
+<strong>Analysis Date</strong>: 2026-04-04</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-project-overview">Project Overview</a></li>
+<li><a href="#2-complete-agent-inventory">Complete Agent
+Inventory</a></li>
+<li><a href="#3-tier-1-agent-deep-dives">Tier 1 Agent Deep
+Dives</a></li>
+<li><a href="#4-tier-2-agent-deep-dives">Tier 2 Agent Deep
+Dives</a></li>
+<li><a href="#5-tier-3-5-agent-summaries">Tier 3-5 Agent
+Summaries</a></li>
+<li><a href="#6-feature-matrix">Feature Matrix</a></li>
+<li><a href="#7-master-integration-plan">Master Integration
+Plan</a></li>
+<li><a href="#8-porting-priorities">Porting Priorities</a></li>
+<li><a href="#9-key-innovations--genial-hacks">Key Innovations &amp;
+Genial Hacks</a></li>
+<li><a href="#10-submodule-repository-map">Submodule Repository
+Map</a></li>
+</ol>
+<hr />
+<h2 id="project-overview">1. Project Overview</h2>
+<p>HelixAgent’s <code>cli_agents/</code> directory contains a
+comprehensive competitive analysis of 60+ CLI coding agents. Each agent
+is represented as either: - <strong>Git submodule</strong> (actual
+source code cloned for deep analysis) - <strong>Markdown analysis
+document</strong> (feature extraction and porting recommendations)</p>
+<h3 id="analysis-methodology">Analysis Methodology</h3>
+<ul>
+<li>Every agent was cloned via <code>git submodule</code> for
+line-of-code analysis</li>
+<li>Key files were measured and documented</li>
+<li>Feature matrices were created for cross-agent comparison</li>
+<li>Porting recommendations were assigned priority levels</li>
+</ul>
+<h3 id="source-repository">Source Repository</h3>
+<ul>
+<li><strong>URL</strong>:
+https://github.com/HelixDevelopment/HelixAgent</li>
+<li><strong>Directory</strong>: <code>cli_agents/</code></li>
+<li><strong>License</strong>: Mixed (varies by submodule)</li>
+</ul>
+<hr />
+<h2 id="complete-agent-inventory">2. Complete Agent Inventory</h2>
+<h3 id="tier-1-production-ready-10-agents">Tier 1: Production-Ready (10
+agents)</h3>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 12%" />
+<col style="width: 14%" />
+<col style="width: 17%" />
+<col style="width: 8%" />
+<col style="width: 15%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Agent</th>
+<th>Source</th>
+<th>Language</th>
+<th>LOC</th>
+<th>License</th>
+<th>Analysis File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>claude-code-source</strong></td>
+<td>Anthropic internal</td>
+<td>TypeScript</td>
+<td>513K</td>
+<td>Proprietary</td>
+<td>TIER_1_SUMMARY.md</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>aider</strong></td>
+<td>Aider-AI/aider</td>
+<td>Python</td>
+<td>~20K</td>
+<td>Apache 2.0</td>
+<td>AIDER_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>codex</strong></td>
+<td>openai/codex</td>
+<td>TS/Rust</td>
+<td>~10K</td>
+<td>Apache 2.0</td>
+<td>CODEX_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>openhands</strong></td>
+<td>All-Hands-AI/OpenHands</td>
+<td>Python</td>
+<td>~50K</td>
+<td>MIT</td>
+<td>OPENHANDS_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>cline</strong></td>
+<td>cline/cline</td>
+<td>TypeScript</td>
+<td>~15K</td>
+<td>Apache 2.0</td>
+<td>CLINE_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>continue</strong></td>
+<td>continuedev/continue</td>
+<td>TypeScript</td>
+<td>~30K</td>
+<td>Apache 2.0</td>
+<td>CONTINUE_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>gemini-cli</strong></td>
+<td>google-gemini/gemini-cli</td>
+<td>TypeScript</td>
+<td>~5K</td>
+<td>Apache 2.0</td>
+<td>GEMINI_CLI_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>roo-code</strong></td>
+<td>RooVetGit/Roo-Code</td>
+<td>TypeScript</td>
+<td>~15K</td>
+<td>Apache 2.0</td>
+<td>ROO_CODE_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>swe-agent</strong></td>
+<td>princeton-nlp/SWE-agent</td>
+<td>Python</td>
+<td>~10K</td>
+<td>MIT</td>
+<td>SWE_AGENT_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>vtcode</strong></td>
+<td>vinhnx/vtcode</td>
+<td>Swift</td>
+<td>~2K</td>
+<td>MIT</td>
+<td>VTCODE_ANALYSIS.md</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-2-emergingnotable-9-agents">Tier 2: Emerging/Notable (9
+agents)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 13%" />
+<col style="width: 15%" />
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Agent</th>
+<th>Source</th>
+<th>Language</th>
+<th>License</th>
+<th>Analysis File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11</td>
+<td><strong>gptme</strong></td>
+<td>ErikBjare/gptme</td>
+<td>Python</td>
+<td>MIT</td>
+<td>GPTME_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>gpt-engineer</strong></td>
+<td>AntonOsika/gpt-engineer</td>
+<td>Python</td>
+<td>MIT</td>
+<td>GPT_ENGINEER_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>kilo-code</strong></td>
+<td>Kilo-Org/kilocode</td>
+<td>TypeScript</td>
+<td>Apache 2.0</td>
+<td>KILO_CODE_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>junie</strong></td>
+<td>JetBrains/junie</td>
+<td>Kotlin/Java</td>
+<td>Proprietary</td>
+<td>JUNIE_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>forge</strong></td>
+<td>antinomyhq/forge</td>
+<td>Rust</td>
+<td>Apache 2.0</td>
+<td>FORGE_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>16</td>
+<td><strong>deepseek-cli</strong></td>
+<td>holasoymalva/deepseek-cli</td>
+<td>Python</td>
+<td>MIT</td>
+<td>DEEPSEEK_CLI_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>17</td>
+<td><strong>agent-deck</strong></td>
+<td>asheshgoplani/agent-deck</td>
+<td>TypeScript</td>
+<td>MIT</td>
+<td>AGENT_DECK_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>18</td>
+<td><strong>zeroshot</strong></td>
+<td>supercrafter100/zeroshot</td>
+<td>TypeScript</td>
+<td>MIT</td>
+<td>ZEROSHOT_ANALYSIS.md</td>
+</tr>
+<tr>
+<td>19</td>
+<td><strong>spec-kit</strong></td>
+<td>github/spec-kit</td>
+<td>Ruby</td>
+<td>MIT</td>
+<td>SPEC_KIT_ANALYSIS.md</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-3-notableniche-10-agents">Tier 3: Notable/Niche (10
+agents)</h3>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 17%" />
+<col style="width: 19%" />
+<col style="width: 24%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Agent</th>
+<th>Source</th>
+<th>Language</th>
+<th>Key Feature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20</td>
+<td><strong>amazon-q</strong></td>
+<td>aws/amazon-q-developer-cli</td>
+<td>Rust</td>
+<td>AWS integration, cloud-native</td>
+</tr>
+<tr>
+<td>21</td>
+<td><strong>claude-plugins</strong></td>
+<td>(plugin system)</td>
+<td>TypeScript</td>
+<td>Plugin architecture</td>
+</tr>
+<tr>
+<td>22</td>
+<td><strong>claude-squad</strong></td>
+<td>(multi-agent)</td>
+<td>TypeScript</td>
+<td>Agent swarms</td>
+</tr>
+<tr>
+<td>23</td>
+<td><strong>open-interpreter</strong></td>
+<td>KillianLucas/open-interpreter</td>
+<td>Python</td>
+<td>Code execution, data analysis</td>
+</tr>
+<tr>
+<td>24</td>
+<td><strong>plandex</strong></td>
+<td>plandex-ai/plandex</td>
+<td>Go</td>
+<td>Task decomposition, planning</td>
+</tr>
+<tr>
+<td>25</td>
+<td><strong>ollama-code</strong></td>
+<td>tcsenpai/ollama-code</td>
+<td>Python</td>
+<td>Local model support</td>
+</tr>
+<tr>
+<td>26</td>
+<td><strong>qwen-code</strong></td>
+<td>QwenLM/qwen-code</td>
+<td>Python</td>
+<td>Qwen model support</td>
+</tr>
+<tr>
+<td>27</td>
+<td><strong>codai</strong></td>
+<td>meysamhadeli/codai</td>
+<td>Python</td>
+<td>AI coding assistant</td>
+</tr>
+<tr>
+<td>28</td>
+<td><strong>codename-goose</strong></td>
+<td>jgenerali/codename-goose</td>
+<td>Python</td>
+<td>Agent framework</td>
+</tr>
+<tr>
+<td>29</td>
+<td><strong>codex-skills</strong></td>
+<td>openai/codex-skills</td>
+<td>TypeScript</td>
+<td>Skill system</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-4-specialized-10-agents">Tier 4: Specialized (10
+agents)</h3>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 17%" />
+<col style="width: 19%" />
+<col style="width: 24%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Agent</th>
+<th>Source</th>
+<th>Language</th>
+<th>Key Feature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30</td>
+<td><strong>git-mcp</strong></td>
+<td>(MCP server)</td>
+<td>TypeScript</td>
+<td>Git via Model Context Protocol</td>
+</tr>
+<tr>
+<td>31</td>
+<td><strong>postgres-mcp</strong></td>
+<td>(MCP server)</td>
+<td>TypeScript</td>
+<td>PostgreSQL MCP operations</td>
+</tr>
+<tr>
+<td>32</td>
+<td><strong>mistral-code</strong></td>
+<td>(Mistral AI)</td>
+<td>Python</td>
+<td>Mistral model support</td>
+</tr>
+<tr>
+<td>33</td>
+<td><strong>octogen</strong></td>
+<td>(code gen)</td>
+<td>Python</td>
+<td>Multi-agent code generation</td>
+</tr>
+<tr>
+<td>34</td>
+<td><strong>nanocoder</strong></td>
+<td>(lightweight)</td>
+<td>TypeScript</td>
+<td>Lightweight coding</td>
+</tr>
+<tr>
+<td>35</td>
+<td><strong>taskweaver</strong></td>
+<td>microsoft/TaskWeaver</td>
+<td>Python</td>
+<td>Data analytics focus</td>
+</tr>
+<tr>
+<td>36</td>
+<td><strong>opencode-cli</strong></td>
+<td>opencode-ai/opencode</td>
+<td>TypeScript</td>
+<td>VS Code extension + CLI</td>
+</tr>
+<tr>
+<td>37</td>
+<td><strong>fauxpilot</strong></td>
+<td>(Copilot alt)</td>
+<td>Python</td>
+<td>Self-hosted completion</td>
+</tr>
+<tr>
+<td>38</td>
+<td><strong>kiro-cli</strong></td>
+<td>(broken remote)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+<tr>
+<td>39</td>
+<td><strong>conduit</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Workflow tool</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-5-experimentalminimal-15-agents">Tier 5:
+Experimental/Minimal (15+ agents)</h3>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 20%" />
+<col style="width: 22%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Agent</th>
+<th>Source</th>
+<th>Language</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>40</td>
+<td><strong>aichat</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Chat agent</td>
+</tr>
+<tr>
+<td>41</td>
+<td><strong>aiagent</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Generic agent</td>
+</tr>
+<tr>
+<td>42</td>
+<td><strong>aichat-llm-functions</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>LLM functions</td>
+</tr>
+<tr>
+<td>43</td>
+<td><strong>copilot-cli</strong></td>
+<td>github/copilot-cli</td>
+<td>Unknown</td>
+<td>GitHub Copilot CLI</td>
+</tr>
+<tr>
+<td>44</td>
+<td><strong>crush</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+<tr>
+<td>45</td>
+<td><strong>deepseek-cli-youkpan</strong></td>
+<td>(alt impl)</td>
+<td>Python</td>
+<td>Alternative DeepSeek CLI</td>
+</tr>
+<tr>
+<td>46</td>
+<td><strong>get-shit-done</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Productivity tool</td>
+</tr>
+<tr>
+<td>47</td>
+<td><strong>mobile-agent</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Mobile-focused</td>
+</tr>
+<tr>
+<td>48</td>
+<td><strong>multiagent-coding</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Multi-agent</td>
+</tr>
+<tr>
+<td>49</td>
+<td><strong>noi</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+<tr>
+<td>50</td>
+<td><strong>shai</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+<tr>
+<td>51</td>
+<td><strong>snow-cli</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+<tr>
+<td>52</td>
+<td><strong>superset</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+<tr>
+<td>53</td>
+<td><strong>ui-ux-pro-max</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>UI/UX focused</td>
+</tr>
+<tr>
+<td>54</td>
+<td><strong>warp</strong></td>
+<td>(terminal)</td>
+<td>Unknown</td>
+<td>Terminal integration</td>
+</tr>
+<tr>
+<td>55</td>
+<td><strong>x-cmd</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Command tool</td>
+</tr>
+<tr>
+<td>56</td>
+<td><strong>xela-cli</strong></td>
+<td>(unknown)</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tier-1-agent-deep-dives">3. Tier 1 Agent Deep Dives</h2>
+<h3 id="aider-aider-aiaider---git-native-pair-programming">3.1 AIDER
+(Aider-AI/aider) - Git-Native Pair Programming</h3>
+<p><strong>Stats</strong>: 5.7M+ PyPI installs, 15B+ tokens/week, 88%
+self-written code</p>
+<h4 id="feature-inventory">Feature Inventory</h4>
+<p><strong>Commands (Slash Commands)</strong> - <code>commands.py</code>
+(1712 lines): | Command | Purpose | |———|———| | <code>/add</code> | Add
+files to context | | <code>/drop</code> | Remove files from context | |
+<code>/commit</code> | Commit changes | | <code>/diff</code> | Show
+diffs | | <code>/undo</code> | Undo last change | | <code>/lint</code> |
+Run linters | | <code>/test</code> | Run tests | | <code>/help</code> |
+Show help | | <code>/voice</code> | Voice input | | <code>/model</code>
+| Switch models | | <code>/settings</code> | Configure settings |</p>
+<p><strong>Core Architecture</strong>: - <code>main.py</code> (1274
+lines) - Entry point - <code>models.py</code> (1323 lines) - LLM
+abstraction layer (Claude, GPT-4o, o1, o3-mini, DeepSeek, Ollama, 100+
+via OpenRouter) - <code>repo.py</code> (622 lines) - Git integration
+(auto-commit, branch management, diff, conflict resolution) -
+<code>repomap.py</code> (867 lines) - Repository mapping with
+tree-sitter (100+ languages) - <code>io.py</code> (1191 lines) - I/O
+handling - <code>linter.py</code> (304 lines) - Linting &amp; testing
+with error-fix loops - <code>voice.py</code> (187 lines) -
+Speech-to-code - <code>scrape.py</code> (284 lines) - URL/web content
+extraction - <code>watch.py</code> (318 lines) - File watching &amp; IDE
+integration</p>
+<p><strong>Coder Modes</strong> (<code>coders/</code> ~3000 lines): -
+<strong>EditBlock Coder</strong>: Surgical code edits -
+<strong>Architect Coder</strong>: High-level design - <strong>Ask
+Coder</strong>: Q&amp;A mode - <strong>Context Coder</strong>:
+Context-aware coding - <strong>Patch Coder</strong>: Diff-based editing
+- <strong>Search/Replace</strong>: Direct text replacement</p>
+<h4 id="power-features-innovations">Power Features &amp;
+Innovations</h4>
+<ol type="1">
+<li><strong>Repository Mapping</strong> - Tree-sitter based codebase
+analysis with intelligent context selection</li>
+<li><strong>Edit Block Format</strong> - Surgical search/replace code
+modifications with minimal diff generation</li>
+<li><strong>Git-Native Workflow</strong> - Automatic commits with
+sensible messages, branch-aware operations</li>
+<li><strong>Voice-to-Code</strong> - Full speech recognition integration
+for hands-free coding</li>
+<li><strong>Lint/Test Auto-Fix Loops</strong> - Automatic quality checks
+with iterative error fixing</li>
+<li><strong>Web Scraping</strong> - URL content extraction for
+documentation context</li>
+<li><strong>File Watching</strong> - IDE integration with comment-driven
+development</li>
+</ol>
+<h4 id="apis-integration-points">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>Aider Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repository Map</td>
+<td>Extend ToolSchema with TreeView, Symbols</td>
+</tr>
+<tr>
+<td>Edit Blocks</td>
+<td>ToolEdit with search/replace</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>ToolGit with auto-commit</td>
+</tr>
+<tr>
+<td>Voice Commands</td>
+<td>KAIROS voice mode extension</td>
+</tr>
+<tr>
+<td>Lint/Test</td>
+<td>ToolLint, ToolTest integration</td>
+</tr>
+<tr>
+<td>Slash Commands</td>
+<td>CLI command system</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: HIGH</p>
+<hr />
+<h3 id="codex-openaicodex---openai-official-sandboxed">3.2 CODEX
+(openai/codex) - OpenAI Official, Sandboxed</h3>
+<p><strong>Architecture</strong>: TypeScript CLI frontend + Rust core
+implementation</p>
+<h4 id="feature-inventory-1">Feature Inventory</h4>
+<p><strong>Core Components</strong>: - <code>codex-cli/</code> -
+TypeScript CLI frontend (~2000 lines) - <code>codex-rs/core</code> -
+Core Rust implementation (~5000 lines) - <code>codex-rs/tui</code> -
+Terminal UI with ratatui (~3000 lines) -
+<code>app-server-protocol/</code> - Protocol definitions -
+<code>sdk/</code> - SDK for integrations</p>
+<p><strong>Key Features</strong>: 1. <strong>Sandboxed
+Execution</strong> - macOS Seatbelt
+(<code>/usr/bin/sandbox-exec</code>), network-disabled by default 2.
+<strong>Multi-Modal Input</strong> - Natural language, file attachments,
+image context 3. <strong>Approval System</strong> - Configurable
+approval policies (command execution, patch application) 4. <strong>Git
+Integration</strong> - Automatic commits, branch management, diff
+viewing 5. <strong>Collaboration Modes</strong> - Full autonomy,
+interactive, approval-required 6. <strong>TUI (Terminal UI)</strong> -
+ratatui-based rich interactive interface with chat-style interaction 7.
+<strong>Protocol-Based Communication</strong> - JSON-RPC Lite protocol,
+structured request/response, thread history, conversation summaries</p>
+<h4 id="security-features">Security Features</h4>
+<ol type="1">
+<li>Sandboxing: All commands run in sandbox</li>
+<li>Network Control: Can disable network access</li>
+<li>Approval Gates: Multi-level approval system</li>
+<li>Audit Logging: Complete operation logs</li>
+</ol>
+<h4 id="apis-integration-points-1">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>Codex Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sandboxed Execution</td>
+<td>ToolExecutor with permission modes</td>
+</tr>
+<tr>
+<td>Approval System</td>
+<td>PermissionMode + rules</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td>Web UI + Terminal UI</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>ToolGit with auto-commit</td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td>API endpoints</td>
+</tr>
+<tr>
+<td>Sandboxing</td>
+<td>Container-based isolation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: HIGH</p>
+<hr />
+<h3 id="cline-clinecline---browser-automation-vs-code">3.3 CLINE
+(cline/cline) - Browser Automation, VS Code</h3>
+<p><strong>Type</strong>: VS Code extension + CLI capabilities</p>
+<h4 id="feature-inventory-2">Feature Inventory</h4>
+<ol type="1">
+<li><strong>Autonomous Task Execution</strong> - Plans complex tasks,
+executes multi-step workflows, self-corrects</li>
+<li><strong>Browser Automation</strong> - Headless browser, web
+navigation, screenshot analysis, API documentation reading</li>
+<li><strong>Multi-Provider Support</strong> - OpenAI, Anthropic, Google
+Gemini, Ollama local models</li>
+<li><strong>File Context Management</strong> - Add/remove files,
+intelligent selection, gitignore-aware</li>
+<li><strong>Terminal Integration</strong> - Shell command execution,
+output reading, monitoring</li>
+<li><strong>Diff-Based Editing</strong> - Precise code modifications,
+search/replace blocks, minimal change principle</li>
+</ol>
+<h4 id="architecture">Architecture</h4>
+<pre><code>cline/
+├── src/
+│   ├── core/           # Core agent logic
+│   ├── services/       # LLM services
+│   ├── integrations/   # Browser, terminal
+│   └── shared/         # Shared utilities
+└── extension.ts        # VS Code extension entry</code></pre>
+<h4 id="apis-integration-points-2">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>Cline Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Autonomous Execution</td>
+<td>SubAgent system</td>
+</tr>
+<tr>
+<td>Browser</td>
+<td>Browser automation tools</td>
+</tr>
+<tr>
+<td>Terminal</td>
+<td>ToolBash integration</td>
+</tr>
+<tr>
+<td>Diff Editing</td>
+<td>ToolEdit with blocks</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>File management</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: HIGH</p>
+<hr />
+<h3 id="openhands-all-hands-aiopenhands---autonomous-swe">3.4 OPENHANDS
+(All-Hands-AI/OpenHands) - Autonomous SWE</h3>
+<p><strong>Stats</strong>: SWE-bench score 77.6%, multi-language
+support</p>
+<h4 id="feature-inventory-3">Feature Inventory</h4>
+<p><strong>Product Editions</strong>: 1. <strong>OpenHands SDK</strong>
+- Composable Python library, scalable from local to cloud 2.
+<strong>OpenHands CLI</strong> - Familiar CLI (like Claude Code/Codex)
+3. <strong>OpenHands Local GUI</strong> - REST API + React SPA,
+Devin/Jules-like experience 4. <strong>OpenHands Cloud</strong> - Hosted
+infrastructure, free tier with Minimax model 5. <strong>OpenHands
+Enterprise</strong> - Self-hosted VPC, Kubernetes, RBAC,
+Slack/Jira/Linear integrations</p>
+<p><strong>Core Architecture</strong>:</p>
+<pre><code>openhands/
+├── openhands/           # Core Python package
+│   ├── agenthub/        # Agent implementations
+│   ├── controller/      # Agent controller
+│   ├── events/          # Event system
+│   ├── runtime/         # Runtime environment
+│   └── server/          # REST API server
+├── frontend/            # React frontend
+├── evaluation/          # Evaluation framework
+└── enterprise/          # Enterprise features</code></pre>
+<p><strong>Key Features</strong>: 1. <strong>Agent System</strong> -
+Multiple implementations, AgentHub for management 2. <strong>Runtime
+Environment</strong> - Docker-based sandboxing, local/remote/E2B support
+3. <strong>Event-Driven Architecture</strong> - Event system for
+actions, streamable observations, action-observation loop 4.
+<strong>Evaluation Framework</strong> - SWE-bench integration, custom
+metrics, benchmark infrastructure 5. <strong>Multi-Modal
+Support</strong> - Browser automation, image understanding, screenshots
+6. <strong>Theory of Mind Module</strong> - Research project for agent
+cognition</p>
+<p><strong>Enterprise Features</strong>: - Slack, Jira, Linear
+integrations - Team collaboration - RBAC (Role-based access control) -
+Kubernetes deployment - Source-available licensing</p>
+<h4 id="apis-integration-points-3">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>OpenHands Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent System</td>
+<td>SubAgent system</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td>Container adapter</td>
+</tr>
+<tr>
+<td>Event System</td>
+<td>EventBus module</td>
+</tr>
+<tr>
+<td>Evaluation</td>
+<td>Benchmark module</td>
+</tr>
+<tr>
+<td>Browser</td>
+<td>Browser automation tools</td>
+</tr>
+<tr>
+<td>Multi-user</td>
+<td>Team management</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: HIGH</p>
+<hr />
+<h3 id="continue-continuedevcontinue---universal-ide">3.5 CONTINUE
+(continuedev/continue) - Universal IDE</h3>
+<p><strong>Type</strong>: VS Code extension + JetBrains plugin + any IDE
+with LSP</p>
+<h4 id="feature-inventory-4">Feature Inventory</h4>
+<ol type="1">
+<li><strong>Universal IDE Support</strong> - VS Code, JetBrains, any IDE
+with LSP</li>
+<li><strong>Code Completion</strong> - Tab-based, multi-line,
+context-aware</li>
+<li><strong>Chat Interface</strong> - Inline chat, sidebar chat, code
+explanations</li>
+<li><strong>Multi-Provider Support</strong> - OpenAI, Anthropic, Ollama,
+Custom APIs</li>
+<li><strong>Custom Context Providers</strong>:
+<ul>
+<li><code>@file</code> - File context</li>
+<li><code>@url</code> - Web page context</li>
+<li><code>@docs</code> - Documentation</li>
+<li><code>@codebase</code> - Codebase search</li>
+</ul></li>
+<li><strong>Actions (Slash Commands)</strong>:
+<ul>
+<li><code>/edit</code> - Edit code</li>
+<li><code>/comment</code> - Add comments</li>
+<li><code>/doc</code> - Generate documentation</li>
+<li><code>/test</code> - Generate tests</li>
+</ul></li>
+</ol>
+<h4 id="architecture-1">Architecture</h4>
+<pre><code>continue/
+├── core/               # Core logic
+├── extensions/         # IDE extensions
+│   ├── vscode/
+│   └── intellij/
+├── gui/                # Chat interface
+└── binary/             # CLI binary</code></pre>
+<h4 id="apis-integration-points-4">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>Continue Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context Providers</td>
+<td>Tool system</td>
+</tr>
+<tr>
+<td>Actions</td>
+<td>CLI commands</td>
+</tr>
+<tr>
+<td>Chat</td>
+<td>Conversation context</td>
+</tr>
+<tr>
+<td>Completion</td>
+<td>Code completion API</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: HIGH</p>
+<hr />
+<h3 id="roo-code-roovetgitroo-code---multi-file-editing">3.6 ROO CODE
+(RooVetGit/Roo-Code) - Multi-File Editing</h3>
+<p><strong>Formerly</strong>: Roo Cline (fork with advanced
+capabilities)</p>
+<h4 id="feature-inventory-5">Feature Inventory</h4>
+<ol type="1">
+<li><strong>Multi-File Editing</strong> - Edit multiple files
+simultaneously, cross-file refactoring, consistent codebase changes</li>
+<li><strong>Context Management</strong> - Smart context window,
+automatic compression, token optimization</li>
+<li><strong>Agent Modes</strong>:
+<ul>
+<li>Code mode</li>
+<li>Architect mode</li>
+<li>Ask mode</li>
+<li>Debug mode</li>
+</ul></li>
+<li><strong>Tool Use</strong> - File read/write, terminal execution, web
+search, code search</li>
+<li><strong>Multi-Provider Support</strong> - OpenAI, Anthropic, Google,
+Local models</li>
+</ol>
+<h4 id="apis-integration-points-5">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>Roo Code Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-file edits</td>
+<td>Batch edit operations</td>
+</tr>
+<tr>
+<td>Context mgmt</td>
+<td>Context window optimization</td>
+</tr>
+<tr>
+<td>Agent modes</td>
+<td>Agent type system</td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>ToolExecutor</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: HIGH</p>
+<hr />
+<h3 id="gemini-cli-google-geminigemini-cli---google-official">3.7 GEMINI
+CLI (google-gemini/gemini-cli) - Google Official</h3>
+<p><strong>Type</strong>: Official Google CLI for Gemini models</p>
+<h4 id="feature-inventory-6">Feature Inventory</h4>
+<ol type="1">
+<li><strong>Interactive Chat</strong> - Conversational, multi-turn,
+context preservation</li>
+<li><strong>File Operations</strong> - Read, write, file context in
+chat</li>
+<li><strong>Gemini Model Access</strong> - Direct access, official API,
+latest updates</li>
+<li><strong>Streaming Responses</strong> - Real-time output, streaming
+tokens, progress indication</li>
+<li><strong>Command Integration</strong> - Execute shell commands,
+command output as context, tool use</li>
+</ol>
+<h4 id="apis-integration-points-6">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>Gemini CLI Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chat</td>
+<td>Conversation handlers</td>
+</tr>
+<tr>
+<td>Files</td>
+<td>ToolRead/ToolWrite</td>
+</tr>
+<tr>
+<td>Commands</td>
+<td>ToolBash</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>SSE/streaming endpoints</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: MEDIUM</p>
+<hr />
+<h3 id="swe-agent-princeton-nlpswe-agent---swe-bench-focused">3.8
+SWE-AGENT (princeton-nlp/SWE-agent) - SWE-bench Focused</h3>
+<p><strong>Stats</strong>: Princeton NLP research project</p>
+<h4 id="feature-inventory-7">Feature Inventory</h4>
+<ol type="1">
+<li><strong>SWE-bench Integration</strong> - Evaluated on benchmark,
+real GitHub issue resolution, bug fixing</li>
+<li><strong>Computer Interface</strong> - Filesystem navigation, file
+viewing, file editing, command execution</li>
+<li><strong>Thought-Action Loop</strong> - Reasoning before action,
+execution, observation feedback, iterative improvement</li>
+<li><strong>Demonstration Trajectories</strong> - Training on
+demonstrations, few-shot learning, trajectory replay</li>
+<li><strong>Multi-Model Support</strong> - GPT-4, Claude, Open-source
+models</li>
+</ol>
+<h4 id="apis-integration-points-7">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>SWE-agent Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Thought-Action</td>
+<td>Agent workflow</td>
+</tr>
+<tr>
+<td>Computer Interface</td>
+<td>Tool system</td>
+</tr>
+<tr>
+<td>Environment</td>
+<td>Container runtime</td>
+</tr>
+<tr>
+<td>Evaluation</td>
+<td>Benchmark system</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: HIGH</p>
+<hr />
+<h3 id="vtcode-vinhnxvtcode---minimal-swift">3.9 VTCODE (vinhnx/vtcode)
+- Minimal Swift</h3>
+<p><strong>Type</strong>: Lightweight CLI coding assistant</p>
+<h4 id="feature-inventory-8">Feature Inventory</h4>
+<ol type="1">
+<li><strong>File Operations</strong> - Read, write, list
+directories</li>
+<li><strong>Chat Interface</strong> - Natural language queries, code
+explanations, simple modifications</li>
+<li><strong>Swift Implementation</strong> - Native Swift, macOS
+optimized, fast execution</li>
+</ol>
+<h4 id="apis-integration-points-8">APIs &amp; Integration Points</h4>
+<table>
+<thead>
+<tr>
+<th>VTCode Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File ops</td>
+<td>Tool system</td>
+</tr>
+<tr>
+<td>Chat</td>
+<td>Conversation handlers</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Porting Priority</strong>: LOW</p>
+<hr />
+<h2 id="tier-2-agent-deep-dives">4. Tier 2 Agent Deep Dives</h2>
+<h3 id="gptme-erikbjaregptme---personal-ai-assistant">4.1 GPTME
+(ErikBjare/gptme) - Personal AI Assistant</h3>
+<p><strong>Language</strong>: Python | <strong>License</strong>: MIT</p>
+<p><strong>Key Features</strong>: - Local-first approach - Privacy
+focused - Python tool ecosystem - Jupyter notebook integration -
+Self-improvement capabilities</p>
+<p><strong>Porting Priority</strong>: MEDIUM</p>
+<hr />
+<h3 id="gpt-engineer-antonosikagpt-engineer---prompt-to-code">4.2
+GPT-ENGINEER (AntonOsika/gpt-engineer) - Prompt-to-Code</h3>
+<p><strong>Language</strong>: Python | <strong>License</strong>: MIT</p>
+<p><strong>Key Features</strong>: - Prompt-to-code generation -
+Iterative refinement - Identity selection (coding styles) - Multi-file
+code generation</p>
+<p><strong>Porting Priority</strong>: MEDIUM</p>
+<hr />
+<h3 id="kilo-code-kilo-orgkilocode---cline-fork">4.3 KILO CODE
+(Kilo-Org/kilocode) - Cline Fork</h3>
+<p><strong>Language</strong>: TypeScript | <strong>License</strong>:
+Apache 2.0</p>
+<p><strong>Key Features</strong>: - Based on Cline - VS Code extension -
+Additional model support - Enhanced UI</p>
+<p><strong>Porting Priority</strong>: MEDIUM (features overlap with
+Cline)</p>
+<hr />
+<h3 id="junie-jetbrainsjunie---jetbrains-ide-assistant">4.4 JUNIE
+(JetBrains/junie) - JetBrains IDE Assistant</h3>
+<p><strong>Language</strong>: Kotlin/Java | <strong>License</strong>:
+Proprietary</p>
+<p><strong>Key Features</strong>: - JetBrains IDE integration - Code
+completion - Chat interface - Multi-language support</p>
+<p><strong>Porting Priority</strong>: LOW (proprietary,
+IDE-specific)</p>
+<hr />
+<h3 id="forge-antinomyhqforge---next-gen-rust-agent">4.5 FORGE
+(antinomyhq/forge) - Next-Gen Rust Agent</h3>
+<p><strong>Language</strong>: Rust | <strong>License</strong>: Apache
+2.0</p>
+<p><strong>Key Features</strong>: - Rust implementation - High
+performance - CLI-first design - Modern architecture</p>
+<p><strong>Porting Priority</strong>: MEDIUM</p>
+<hr />
+<h3 id="deepseek-cli-holasoymalvadeepseek-cli---deepseek-access">4.6
+DEEPSEEK CLI (holasoymalva/deepseek-cli) - DeepSeek Access</h3>
+<p><strong>Language</strong>: Python | <strong>License</strong>: MIT</p>
+<p><strong>Key Features</strong>: - DeepSeek model access - Simple CLI
+interface - Chat mode - Code generation</p>
+<p><strong>Porting Priority</strong>: LOW (HelixAgent already supports
+DeepSeek)</p>
+<hr />
+<h3 id="agent-deck-asheshgoplaniagent-deck---agent-framework">4.7 AGENT
+DECK (asheshgoplani/agent-deck) - Agent Framework</h3>
+<p><strong>Language</strong>: TypeScript | <strong>License</strong>:
+MIT</p>
+<p><strong>Key Features</strong>: - Agent orchestration - Workflow
+management - Multi-agent support</p>
+<p><strong>Porting Priority</strong>: MEDIUM</p>
+<hr />
+<h3 id="zeroshot-supercrafter100zeroshot---zero-shot-coding">4.8
+ZEROSHOT (supercrafter100/zeroshot) - Zero-Shot Coding</h3>
+<p><strong>Language</strong>: TypeScript | <strong>License</strong>:
+MIT</p>
+<p><strong>Key Features</strong>: - Zero-shot generation - Task
+automation - CLI interface</p>
+<p><strong>Porting Priority</strong>: LOW</p>
+<hr />
+<h3 id="spec-kit-githubspec-kit---github-specification-toolkit">4.9 SPEC
+KIT (github/spec-kit) - GitHub Specification Toolkit</h3>
+<p><strong>Language</strong>: Ruby | <strong>License</strong>: MIT</p>
+<p><strong>Key Features</strong>: - Specification management - GitHub
+integration - Structured data handling</p>
+<p><strong>Porting Priority</strong>: LOW</p>
+<hr />
+<h2 id="tier-3-5-agent-summaries">5. Tier 3-5 Agent Summaries</h2>
+<h3 id="tier-3-notableniche-10-agents-1">Tier 3: Notable/Niche (10
+agents)</h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Language</th>
+<th>Key Differentiator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amazon-q</td>
+<td>Rust</td>
+<td>AWS integration, cloud-native</td>
+</tr>
+<tr>
+<td>claude-plugins</td>
+<td>TypeScript</td>
+<td>Plugin architecture, extensibility</td>
+</tr>
+<tr>
+<td>claude-squad</td>
+<td>TypeScript</td>
+<td>Agent swarms, team coordination</td>
+</tr>
+<tr>
+<td>open-interpreter</td>
+<td>Python</td>
+<td>Code execution, data analysis</td>
+</tr>
+<tr>
+<td>plandex</td>
+<td>Go</td>
+<td>Task decomposition, planning</td>
+</tr>
+<tr>
+<td>ollama-code</td>
+<td>Python</td>
+<td>Local model support</td>
+</tr>
+<tr>
+<td>qwen-code</td>
+<td>Python</td>
+<td>Qwen model support</td>
+</tr>
+<tr>
+<td>codai</td>
+<td>Python</td>
+<td>AI coding assistant</td>
+</tr>
+<tr>
+<td>codename-goose</td>
+<td>Python</td>
+<td>Agent framework</td>
+</tr>
+<tr>
+<td>codex-skills</td>
+<td>TypeScript</td>
+<td>Skill system</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-4-specialized-10-agents-1">Tier 4: Specialized (10
+agents)</h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Language</th>
+<th>Key Differentiator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>git-mcp</td>
+<td>TypeScript</td>
+<td>Git via MCP</td>
+</tr>
+<tr>
+<td>postgres-mcp</td>
+<td>TypeScript</td>
+<td>PostgreSQL via MCP</td>
+</tr>
+<tr>
+<td>mistral-code</td>
+<td>Python</td>
+<td>Mistral model support</td>
+</tr>
+<tr>
+<td>octogen</td>
+<td>Python</td>
+<td>Multi-agent code generation</td>
+</tr>
+<tr>
+<td>nanocoder</td>
+<td>TypeScript</td>
+<td>Lightweight coding</td>
+</tr>
+<tr>
+<td>taskweaver</td>
+<td>Python</td>
+<td>Data analytics focus</td>
+</tr>
+<tr>
+<td>opencode-cli</td>
+<td>TypeScript</td>
+<td>VS Code + CLI</td>
+</tr>
+<tr>
+<td>fauxpilot</td>
+<td>Python</td>
+<td>Self-hosted completion</td>
+</tr>
+<tr>
+<td>kiro-cli</td>
+<td>Unknown</td>
+<td>Broken remote</td>
+</tr>
+<tr>
+<td>conduit</td>
+<td>Unknown</td>
+<td>Workflow tool</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-5-experimentalminimal-15-agents-1">Tier 5:
+Experimental/Minimal (15+ agents)</h3>
+<ul>
+<li>AIChat, AIAgent, AIChat LLM Functions</li>
+<li>Copilot CLI, Crush, DeepSeek CLI Youkpan</li>
+<li>Get Shit Done, Mobile Agent, Multiagent Coding</li>
+<li>Noi, Shai, Snow CLI, Superset</li>
+<li>UI/UX Pro Max, Warp, X-CMD, Xela CLI</li>
+</ul>
+<hr />
+<h2 id="feature-matrix">6. Feature Matrix</h2>
+<h3 id="tier-1-feature-comparison">Tier 1 Feature Comparison</h3>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 9%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 12%" />
+<col style="width: 8%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 5%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>claude</th>
+<th>aider</th>
+<th>codex</th>
+<th>openhands</th>
+<th>cline</th>
+<th>continue</th>
+<th>gemini</th>
+<th>roo</th>
+<th>swe</th>
+<th>vtcode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Git Integration</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Browser Automation</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Sandbox/Security</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Voice Commands</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Multi-file Edit</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Repository Mapping</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Evaluation Framework</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Team/Swarm</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Plan Mode</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Auto-commit</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="feature-count-by-agent">Feature Count by Agent</h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Total Features</th>
+<th>Unique Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code-source</td>
+<td>25</td>
+<td>8 (KAIROS, Dream, Teams, etc.)</td>
+</tr>
+<tr>
+<td>aider</td>
+<td>18</td>
+<td>4 (Voice, Repomap, etc.)</td>
+</tr>
+<tr>
+<td>codex</td>
+<td>12</td>
+<td>3 (Sandbox, Protocol)</td>
+</tr>
+<tr>
+<td>openhands</td>
+<td>20</td>
+<td>5 (Evaluation, Event system)</td>
+</tr>
+<tr>
+<td>cline</td>
+<td>14</td>
+<td>2 (Browser automation)</td>
+</tr>
+<tr>
+<td>continue</td>
+<td>15</td>
+<td>3 (Context providers)</td>
+</tr>
+<tr>
+<td>roo-code</td>
+<td>12</td>
+<td>2 (Multi-file edit)</td>
+</tr>
+<tr>
+<td>swe-agent</td>
+<td>10</td>
+<td>2 (SWE-bench)</td>
+</tr>
+<tr>
+<td>gemini-cli</td>
+<td>6</td>
+<td>0</td>
+</tr>
+<tr>
+<td>vtcode</td>
+<td>4</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="master-integration-plan">7. Master Integration Plan</h2>
+<h3 id="phase-1-foundation-complete">Phase 1: Foundation (COMPLETE
+✅)</h3>
+<p>Already implemented in HelixAgent: 1. ✅ <strong>Tool System</strong>
+- 30+ tools from CLI agents 2. ✅ <strong>Permission System</strong> -
+4-layer architecture 3. ✅ <strong>Plan Mode</strong> - Multi-step
+planning with verification 4. ✅ <strong>Team Management</strong> -
+Agent swarms with consensus 5. ✅ <strong>KAIROS Service</strong> -
+Always-on background assistant 6. ✅ <strong>Dream System</strong> -
+Memory consolidation with 3-gate triggers 7. ✅ <strong>SubAgent
+System</strong> - Full lifecycle management 8. ✅ <strong>Comprehensive
+Tests</strong> - All passing</p>
+<h3 id="phase-2-advanced-features-next-2-4-weeks">Phase 2: Advanced
+Features (Next 2-4 weeks)</h3>
+<h4 id="repository-mapping-from-aider---critical">2.1 Repository Mapping
+(From Aider) - CRITICAL</h4>
+<ul>
+<li>Tree-sitter integration for code parsing</li>
+<li>Repository structure analysis</li>
+<li>Intelligent file context selection</li>
+<li>Language detection (100+ languages)</li>
+<li><strong>Files</strong>:
+<code>internal/tools/repomap/repomap.go</code>, <code>parser.go</code>,
+<code>symbols.go</code></li>
+</ul>
+<h4 id="sandboxed-execution-from-codex---critical">2.2 Sandboxed
+Execution (From Codex) - CRITICAL</h4>
+<ul>
+<li>Container-based sandboxing</li>
+<li>Seatbelt integration (macOS)</li>
+<li>Network isolation</li>
+<li>Resource limits</li>
+<li>Audit logging</li>
+<li><strong>Files</strong>:
+<code>internal/tools/sandbox/sandbox.go</code>, <code>docker.go</code>,
+<code>seatbelt.go</code></li>
+</ul>
+<h4 id="browser-automation-from-clineopenhands---high">2.3 Browser
+Automation (From Cline/OpenHands) - HIGH</h4>
+<ul>
+<li>Headless browser control</li>
+<li>Screenshot capture</li>
+<li>DOM interaction</li>
+<li>Web navigation</li>
+<li>Content extraction</li>
+<li><strong>Files</strong>:
+<code>internal/tools/browser/browser.go</code>,
+<code>actions.go</code></li>
+</ul>
+<h4 id="edit-block-format-from-aidercodex---high">2.4 Edit Block Format
+(From Aider/Codex) - HIGH</h4>
+<ul>
+<li>Search/replace blocks</li>
+<li>Surgical code modifications</li>
+<li>Minimal diff generation</li>
+<li>Multi-file editing</li>
+<li><strong>Files</strong>:
+<code>internal/tools/editblock/editblock.go</code>,
+<code>parser.go</code></li>
+</ul>
+<h3 id="phase-3-enhanced-features-weeks-4-6">Phase 3: Enhanced Features
+(Weeks 4-6)</h3>
+<h4 id="voice-commands-from-aider---medium">3.1 Voice Commands (From
+Aider) - MEDIUM</h4>
+<ul>
+<li>Speech recognition</li>
+<li>Voice command mapping</li>
+<li>Hands-free coding</li>
+<li><strong>Files</strong>:
+<code>internal/agents/voice/voice.go</code></li>
+</ul>
+<h4 id="auto-commit-workflow-from-aidercodex---medium">3.2 Auto-Commit
+Workflow (From Aider/Codex) - MEDIUM</h4>
+<ul>
+<li>Automatic commit generation</li>
+<li>Commit message generation from diff</li>
+<li><strong>Files</strong>:
+<code>internal/tools/git/autocommit.go</code></li>
+</ul>
+<h4 id="evaluation-framework-from-openhandsswe-agent---medium">3.3
+Evaluation Framework (From OpenHands/SWE-agent) - MEDIUM</h4>
+<ul>
+<li>SWE-bench integration</li>
+<li>Custom benchmark metrics</li>
+<li>Performance evaluation pipeline</li>
+<li><strong>Files</strong>:
+<code>internal/benchmark/evaluator.go</code></li>
+</ul>
+<h4 id="context-providers-from-continue---medium">3.4 Context Providers
+(From Continue) - MEDIUM</h4>
+<ul>
+<li>Modular context system (<span class="citation" data-cites="file">@file</span>, <span class="citation" data-cites="url">@url</span>, <span class="citation" data-cites="docs">@docs</span>)</li>
+<li>Extensible provider interface</li>
+<li><strong>Files</strong>:
+<code>internal/context/providers/</code></li>
+</ul>
+<h3 id="phase-4-integration-weeks-6-8">Phase 4: Integration (Weeks
+6-8)</h3>
+<h4 id="multi-agent-swarm-from-claude-code---medium">4.1 Multi-Agent
+Swarm (From Claude Code) - MEDIUM</h4>
+<ul>
+<li>XML-based communication</li>
+<li>Shared scratchpad</li>
+<li>Color assignment</li>
+<li>Role-based agents</li>
+</ul>
+<h4 id="agent-modes-from-roo-code---low">4.2 Agent Modes (From Roo Code)
+- LOW</h4>
+<ul>
+<li>Code mode</li>
+<li>Architect mode</li>
+<li>Ask mode</li>
+<li>Debug mode</li>
+<li><strong>Files</strong>:
+<code>internal/agents/modes/modes.go</code></li>
+</ul>
+<h4 id="yolo-classifier-from-claude-code---low">4.3 YOLO Classifier
+(From Claude Code) - LOW</h4>
+<ul>
+<li>ML-based auto-approval system for tool execution</li>
+</ul>
+<h3 id="implementation-schedule">Implementation Schedule</h3>
+<table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Feature</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Repository Mapping</td>
+<td>CRITICAL</td>
+</tr>
+<tr>
+<td>1-2</td>
+<td>Sandboxed Execution</td>
+<td>CRITICAL</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Browser Automation</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>2-3</td>
+<td>Edit Block Format</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Voice Commands</td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Auto-Commit</td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Evaluation Framework</td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Context Providers</td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>Integration &amp; Polish</td>
+<td>LOW</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="porting-priorities">8. Porting Priorities</h2>
+<h3 id="critical-implement-first">CRITICAL (Implement First)</h3>
+<ol type="1">
+<li><strong>Repository Mapping</strong> (Aider) - Tree-sitter based
+codebase analysis</li>
+<li><strong>Sandboxed Execution</strong> (Codex) - Secure command
+isolation</li>
+</ol>
+<h3 id="high-next-priority">HIGH (Next Priority)</h3>
+<ol start="3" type="1">
+<li><strong>Browser Automation</strong> (Cline/OpenHands) - Headless
+browser for research</li>
+<li><strong>Edit Block Format</strong> (Aider/Codex) - Surgical code
+modifications</li>
+<li><strong>Multi-file Editing</strong> (Roo Code) - Simultaneous file
+changes</li>
+</ol>
+<h3 id="medium-future">MEDIUM (Future)</h3>
+<ol start="6" type="1">
+<li><strong>Voice Commands</strong> (Aider) - Speech-to-code</li>
+<li><strong>Auto-Commit Workflow</strong> (Aider/Codex) - Automatic git
+operations</li>
+<li><strong>Evaluation Framework</strong> (OpenHands/SWE-agent) -
+Benchmark integration</li>
+<li><strong>Context Providers</strong> (Continue) - Modular context
+system</li>
+<li><strong>Agent Modes</strong> (Roo Code) - Specialized behaviors</li>
+</ol>
+<h3 id="low-nice-to-have">LOW (Nice-to-Have)</h3>
+<ol start="11" type="1">
+<li><strong>YOLO Classifier</strong> (Claude Code) - ML
+auto-approval</li>
+<li><strong>Plugin Architecture</strong> (Claude Plugins) -
+Extensibility framework</li>
+<li><strong>IDE Integration</strong> (Continue/Junie) - Editor
+plugins</li>
+</ol>
+<hr />
+<h2 id="key-innovations-genial-hacks">9. Key Innovations &amp; Genial
+Hacks</h2>
+<h3 id="claude-code-source-internal---513k-loc">9.1 Claude Code Source
+(Internal - 513K LOC)</h3>
+<ul>
+<li><strong>KAIROS</strong>: Always-on background assistant that
+observes and helps without prompt</li>
+<li><strong>Dream System</strong>: Memory consolidation with 3-gate
+triggers (time, activity, memory pressure)</li>
+<li><strong>Team Management</strong>: Multi-agent swarms with consensus
+algorithms</li>
+<li><strong>Plan Mode</strong>: Multi-step planning with verification
+gates</li>
+<li><strong>YOLO Classifier</strong>: ML-based auto-approval for tool
+execution</li>
+<li><strong>Permission System</strong>: 4-layer permission architecture
+(deny, ask, yolo, full)</li>
+</ul>
+<h3 id="aider-20k-loc">9.2 Aider (20K LOC)</h3>
+<ul>
+<li><strong>Edit Block Format</strong>: Search/replace blocks for
+surgical modifications</li>
+<li><strong>Repository Mapping</strong>: Tree-sitter integration for
+100+ languages</li>
+<li><strong>Git-Native Workflow</strong>: Automatic commits with
+sensible messages</li>
+<li><strong>Voice-to-Code</strong>: Full speech recognition
+integration</li>
+<li><strong>Lint/Test Auto-Fix Loops</strong>: Iterative error
+fixing</li>
+<li><strong>88% Self-Written</strong>: The agent writes its own
+code</li>
+</ul>
+<h3 id="codex-tsrust">9.3 Codex (TS/Rust)</h3>
+<ul>
+<li><strong>macOS Seatbelt Sandboxing</strong>: Uses
+<code>/usr/bin/sandbox-exec</code> for native sandboxing</li>
+<li><strong>JSON-RPC Lite Protocol</strong>: Structured communication
+protocol</li>
+<li><strong>ratatui TUI</strong>: Rich terminal UI in Rust</li>
+<li><strong>Multi-Modal Approval</strong>: Different approval levels for
+different operations</li>
+</ul>
+<h3 id="openhands-50k-loc">9.4 OpenHands (50K LOC)</h3>
+<ul>
+<li><strong>Event-Driven Architecture</strong>: Action-observation loop
+with streamable events</li>
+<li><strong>Docker Runtime</strong>: Container-based sandboxing with E2B
+integration</li>
+<li><strong>SWE-bench 77.6%</strong>: State-of-the-art benchmark
+performance</li>
+<li><strong>Theory of Mind Module</strong>: Research-grade agent
+cognition</li>
+</ul>
+<h3 id="cline-15k-loc">9.5 Cline (15K LOC)</h3>
+<ul>
+<li><strong>Autonomous Browser Navigation</strong>: Self-directed web
+research</li>
+<li><strong>Context-Aware File Selection</strong>: Gitignore-aware
+intelligent selection</li>
+<li><strong>VS Code Extension + CLI</strong>: Dual interface
+architecture</li>
+</ul>
+<h3 id="continue-30k-loc">9.6 Continue (30K LOC)</h3>
+<ul>
+<li><strong><span class="citation" data-cites="Provider">@Provider</span> System</strong>: Modular context
+with <span class="citation" data-cites="file">@file</span>, <span class="citation" data-cites="url">@url</span>, <span class="citation" data-cites="docs">@docs</span>, <span class="citation" data-cites="codebase">@codebase</span></li>
+<li><strong>Universal IDE</strong>: Single codebase for VS Code,
+JetBrains, and LSP editors</li>
+<li><strong>Slash Action Framework</strong>: Extensible /command
+system</li>
+</ul>
+<h3 id="swe-agent-10k-loc">9.7 SWE-agent (10K LOC)</h3>
+<ul>
+<li><strong>Thought-Action Loop</strong>: Explicit reasoning before
+action execution</li>
+<li><strong>Demonstration Trajectories</strong>: Few-shot learning from
+human demonstrations</li>
+<li><strong>Computer Interface</strong>: Unified filesystem + terminal
+abstraction</li>
+</ul>
+<hr />
+<h2 id="submodule-repository-map">10. Submodule Repository Map</h2>
+<h3 id="tier-1-submodules">Tier 1 Submodules</h3>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code-source</td>
+<td>Anthropic internal</td>
+</tr>
+<tr>
+<td>aider</td>
+<td>https://github.com/Aider-AI/aider</td>
+</tr>
+<tr>
+<td>codex</td>
+<td>https://github.com/openai/codex</td>
+</tr>
+<tr>
+<td>openhands</td>
+<td>https://github.com/All-Hands-AI/OpenHands</td>
+</tr>
+<tr>
+<td>cline</td>
+<td>https://github.com/cline/cline</td>
+</tr>
+<tr>
+<td>continue</td>
+<td>https://github.com/continuedev/continue</td>
+</tr>
+<tr>
+<td>gemini-cli</td>
+<td>https://github.com/google-gemini/gemini-cli</td>
+</tr>
+<tr>
+<td>roo-code</td>
+<td>https://github.com/RooVetGit/Roo-Code</td>
+</tr>
+<tr>
+<td>swe-agent</td>
+<td>https://github.com/princeton-nlp/SWE-agent</td>
+</tr>
+<tr>
+<td>vtcode</td>
+<td>https://github.com/vinhnx/vtcode</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-2-submodules">Tier 2 Submodules</h3>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gptme</td>
+<td>https://github.com/ErikBjare/gptme</td>
+</tr>
+<tr>
+<td>gpt-engineer</td>
+<td>https://github.com/AntonOsika/gpt-engineer</td>
+</tr>
+<tr>
+<td>kilo-code</td>
+<td>https://github.com/Kilo-Org/kilocode</td>
+</tr>
+<tr>
+<td>junie</td>
+<td>https://github.com/JetBrains/junie</td>
+</tr>
+<tr>
+<td>forge</td>
+<td>https://github.com/antinomyhq/forge</td>
+</tr>
+<tr>
+<td>deepseek-cli</td>
+<td>https://github.com/holasoymalva/deepseek-cli</td>
+</tr>
+<tr>
+<td>agent-deck</td>
+<td>https://github.com/asheshgoplani/agent-deck</td>
+</tr>
+<tr>
+<td>zeroshot</td>
+<td>https://github.com/supercrafter100/zeroshot</td>
+</tr>
+<tr>
+<td>spec-kit</td>
+<td>https://github.com/github/spec-kit</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-3-submodules">Tier 3 Submodules</h3>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amazon-q</td>
+<td>https://github.com/aws/amazon-q-developer-cli</td>
+</tr>
+<tr>
+<td>claude-plugins</td>
+<td>(plugin system)</td>
+</tr>
+<tr>
+<td>claude-squad</td>
+<td>(multi-agent)</td>
+</tr>
+<tr>
+<td>open-interpreter</td>
+<td>https://github.com/KillianLucas/open-interpreter</td>
+</tr>
+<tr>
+<td>plandex</td>
+<td>https://github.com/plandex-ai/plandex</td>
+</tr>
+<tr>
+<td>ollama-code</td>
+<td>https://github.com/tcsenpai/ollama-code</td>
+</tr>
+<tr>
+<td>qwen-code</td>
+<td>https://github.com/QwenLM/qwen-code</td>
+</tr>
+<tr>
+<td>codai</td>
+<td>https://github.com/meysamhadeli/codai</td>
+</tr>
+<tr>
+<td>codename-goose</td>
+<td>https://github.com/jgenerali/codename-goose</td>
+</tr>
+<tr>
+<td>codex-skills</td>
+<td>https://github.com/openai/codex-skills</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-4-submodules">Tier 4 Submodules</h3>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>git-mcp</td>
+<td>(Git MCP server)</td>
+</tr>
+<tr>
+<td>postgres-mcp</td>
+<td>(PostgreSQL MCP)</td>
+</tr>
+<tr>
+<td>mistral-code</td>
+<td>(Mistral AI)</td>
+</tr>
+<tr>
+<td>octogen</td>
+<td>(code gen)</td>
+</tr>
+<tr>
+<td>nanocoder</td>
+<td>(lightweight)</td>
+</tr>
+<tr>
+<td>taskweaver</td>
+<td>https://github.com/microsoft/TaskWeaver</td>
+</tr>
+<tr>
+<td>opencode-cli</td>
+<td>https://github.com/opencode-ai/opencode</td>
+</tr>
+<tr>
+<td>fauxpilot</td>
+<td>(Copilot alternative)</td>
+</tr>
+<tr>
+<td>kiro-cli</td>
+<td>(broken remote)</td>
+</tr>
+<tr>
+<td>conduit</td>
+<td>(workflow)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-5-submodules">Tier 5 Submodules</h3>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aichat</td>
+<td>(chat agent)</td>
+</tr>
+<tr>
+<td>aiagent</td>
+<td>(generic agent)</td>
+</tr>
+<tr>
+<td>aichat-llm-functions</td>
+<td>(LLM functions)</td>
+</tr>
+<tr>
+<td>copilot-cli</td>
+<td>https://github.com/github/copilot-cli</td>
+</tr>
+<tr>
+<td>crush</td>
+<td>(unknown)</td>
+</tr>
+<tr>
+<td>deepseek-cli-youkpan</td>
+<td>(alt DeepSeek)</td>
+</tr>
+<tr>
+<td>get-shit-done</td>
+<td>(productivity)</td>
+</tr>
+<tr>
+<td>mobile-agent</td>
+<td>(mobile)</td>
+</tr>
+<tr>
+<td>multiagent-coding</td>
+<td>(multi-agent)</td>
+</tr>
+<tr>
+<td>noi</td>
+<td>(unknown)</td>
+</tr>
+<tr>
+<td>shai</td>
+<td>(unknown)</td>
+</tr>
+<tr>
+<td>snow-cli</td>
+<td>(unknown)</td>
+</tr>
+<tr>
+<td>superset</td>
+<td>(unknown)</td>
+</tr>
+<tr>
+<td>ui-ux-pro-max</td>
+<td>(UI/UX)</td>
+</tr>
+<tr>
+<td>warp</td>
+<td>(terminal)</td>
+</tr>
+<tr>
+<td>x-cmd</td>
+<td>(command)</td>
+</tr>
+<tr>
+<td>xela-cli</td>
+<td>(unknown)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="special-submodules">Special Submodules</h3>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixCode</td>
+<td>HelixAgent’s own code (0 bytes - submodule)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-a-analysis-document-index">Appendix A: Analysis
+Document Index</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Size</th>
+<th>Agent</th>
+<th>Tier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AIDER_ANALYSIS.md</td>
+<td>4,076 bytes</td>
+<td>aider</td>
+<td>1</td>
+</tr>
+<tr>
+<td>CLINE_ANALYSIS.md</td>
+<td>2,188 bytes</td>
+<td>cline</td>
+<td>1</td>
+</tr>
+<tr>
+<td>CODEX_ANALYSIS.md</td>
+<td>2,780 bytes</td>
+<td>codex</td>
+<td>1</td>
+</tr>
+<tr>
+<td>CONTINUE_ANALYSIS.md</td>
+<td>1,963 bytes</td>
+<td>continue</td>
+<td>1</td>
+</tr>
+<tr>
+<td>GEMINI_CLI_ANALYSIS.md</td>
+<td>1,763 bytes</td>
+<td>gemini-cli</td>
+<td>1</td>
+</tr>
+<tr>
+<td>OPENHANDS_ANALYSIS.md</td>
+<td>3,174 bytes</td>
+<td>openhands</td>
+<td>1</td>
+</tr>
+<tr>
+<td>ROO_CODE_ANALYSIS.md</td>
+<td>1,847 bytes</td>
+<td>roo-code</td>
+<td>1</td>
+</tr>
+<tr>
+<td>SWE_AGENT_ANALYSIS.md</td>
+<td>1,938 bytes</td>
+<td>swe-agent</td>
+<td>1</td>
+</tr>
+<tr>
+<td>VTCODE_ANALYSIS.md</td>
+<td>1,279 bytes</td>
+<td>vtcode</td>
+<td>1</td>
+</tr>
+<tr>
+<td>GPTME_ANALYSIS.md</td>
+<td>531 bytes</td>
+<td>gptme</td>
+<td>2</td>
+</tr>
+<tr>
+<td>GPT_ENGINEER_ANALYSIS.md</td>
+<td>525 bytes</td>
+<td>gpt-engineer</td>
+<td>2</td>
+</tr>
+<tr>
+<td>KILO_CODE_ANALYSIS.md</td>
+<td>530 bytes</td>
+<td>kilo-code</td>
+<td>2</td>
+</tr>
+<tr>
+<td>JUNIE_ANALYSIS.md</td>
+<td>509 bytes</td>
+<td>junie</td>
+<td>2</td>
+</tr>
+<tr>
+<td>FORGE_ANALYSIS.md</td>
+<td>470 bytes</td>
+<td>forge</td>
+<td>2</td>
+</tr>
+<tr>
+<td>DEEPSEEK_CLI_ANALYSIS.md</td>
+<td>492 bytes</td>
+<td>deepseek-cli</td>
+<td>2</td>
+</tr>
+<tr>
+<td>AGENT_DECK_ANALYSIS.md</td>
+<td>435 bytes</td>
+<td>agent-deck</td>
+<td>2</td>
+</tr>
+<tr>
+<td>ZEROSHOT_ANALYSIS.md</td>
+<td>438 bytes</td>
+<td>zeroshot</td>
+<td>2</td>
+</tr>
+<tr>
+<td>SPEC_KIT_ANALYSIS.md</td>
+<td>441 bytes</td>
+<td>spec-kit</td>
+<td>2</td>
+</tr>
+<tr>
+<td>MASTER_INTEGRATION_PLAN.md</td>
+<td>7,446 bytes</td>
+<td>ALL</td>
+<td>Meta</td>
+</tr>
+<tr>
+<td>TIER_1_SUMMARY.md</td>
+<td>5,282 bytes</td>
+<td>Tier 1</td>
+<td>Meta</td>
+</tr>
+<tr>
+<td>TIER_3_4_5_ANALYSIS.md</td>
+<td>3,110 bytes</td>
+<td>Tier 3-5</td>
+<td>Meta</td>
+</tr>
+<tr>
+<td>ANALYSIS_STATUS.md</td>
+<td>2,693 bytes</td>
+<td>ALL</td>
+<td>Meta</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-b-helixagent-internal-features-already-implemented">Appendix
+B: HelixAgent Internal Features (Already Implemented)</h2>
+<p>From the analysis, HelixAgent has already implemented Phase 1
+features that originate from Claude Code Source:</p>
+<ol type="1">
+<li><strong>Tool System</strong> - 30+ tools extracted from all analyzed
+agents</li>
+<li><strong>Permission System</strong> - 4-layer architecture
+(deny/ask/yolo/full)</li>
+<li><strong>Plan Mode</strong> - Multi-step planning with verification
+gates</li>
+<li><strong>Team Management</strong> - Multi-agent swarms with
+consensus</li>
+<li><strong>KAIROS Service</strong> - Always-on background
+assistant</li>
+<li><strong>Dream System</strong> - Memory consolidation with 3-gate
+triggers</li>
+<li><strong>SubAgent System</strong> - Full lifecycle management</li>
+</ol>
+<hr />
+<p><em>End of Master Catalog</em></p>
+</body>
+</html>

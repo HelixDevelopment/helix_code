@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP2-helixagent-exposure-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP2-helixagent-exposure-plan</h1>
+</header>
+<h1 id="sp2-helixagent-exposure-extension-implementation-plan">SP2 —
+HelixAgent Exposure Extension — Implementation Plan</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>PLANNING — TDD/anti-bluff plan; NOT approved for implementation
+(brainstorming HARD-GATE per master roadmap §0/§4)</td>
+</tr>
+<tr>
+<td>Sub-program</td>
+<td>SP2 (depends on SP1; feeds from analysis <code>…-C-…</code>)</td>
+</tr>
+<tr>
+<td>Source design</td>
+<td><code>docs/superpowers/specs/analysis/2026-06-10-C-helixagent-exposure.md</code></td>
+</tr>
+<tr>
+<td>Roadmap</td>
+<td><code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>
+§SP2</td>
+</tr>
+<tr>
+<td>Scope root</td>
+<td><code>/Volumes/T7/Projects/HelixCode/submodules/helix_agent</code>
+(module <code>dev.helix.agent</code>, <code>go 1.26</code>) +
+<code>helix_code/go.mod</code> (SDK currency only)</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>constitution/ + root CLAUDE.md/CONSTITUTION.md; anti-bluff §11.4
+family governs every closure</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4 / §11.4.123):</strong> This is a
+<em>plan</em>, not a claim of done work. No task below is “done” until
+it carries captured runtime evidence per §11.4.5 / §11.4.69 / §11.4.107.
+Every fix is RED-first (§11.4.115): reproduce the defect on the pre-fix
+artifact with a <code>RED_MODE</code> polarity switch BEFORE writing the
+fix. Code-review gate (§11.4.125/§11.4.134) runs before pre-build + main
+build. Regression guards (§11.4.135) registered in the same commit as
+each fix.</p>
+</blockquote>
+<hr />
+<h2 id="goal-restated-from-roadmap-sp2">0. Goal (restated from roadmap
+§SP2)</h2>
+<p>Under <strong>ONE root</strong>, expose as uniformly-named,
+individually-addressable selection targets: 1. the <strong>AI-debate
+ensemble</strong> (aggregate + named presets), 2.
+<strong>HelixLLM</strong> promoted to a first-class root entry (when
+<code>USE_HELIX_LLM=true</code>), 3. <strong>every discovered provider
+individually</strong>, and 4. <strong>each provider’s WORKING (verified)
+models</strong> (<code>DiscoveredModel.Verified == true</code>).</p>
+<p>Plus: update provider/API SDKs to latest (deep-web-research
+§11.4.99); resolve the gin <code>1.11.0 ↔︎ 1.12.0</code> module skew;
+ship docs/guides/graphs/SQL/website/video-course deliverables and the
+full test-type matrix.</p>
+<p>Naming scheme (analysis-C, confirmed against existing conventions):
+<code>ensemble</code> · <code>ensemble/&lt;preset&gt;</code> ·
+<code>helixllm</code> · <code>helixllm/&lt;model&gt;</code> ·
+<code>&lt;provider&gt;</code> ·
+<code>&lt;provider&gt;/&lt;model_id&gt;</code> (preserving
+already-namespaced ids like <code>openrouter/x-ai/grok-4</code>).</p>
+<hr />
+<h2 id="verified-architecture-grounding-re-confirmed-against-live-source-2026-06-10">1.
+Verified architecture grounding (re-confirmed against live source,
+2026-06-10)</h2>
+<p>All re-opened and confirmed this session; line numbers are current
+HEAD (a few drifted ±5 lines from the analysis doc — corrected
+here):</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Evidence (<code>file:line</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exposure surface = Gin routes, all under <code>/v1</code></td>
+<td><code>internal/router/router.go</code> (route block from ~:471)</td>
+</tr>
+<tr>
+<td><strong>Ensemble</strong> route (inline closure →
+<code>GetEnsembleService().RunEnsemble</code>)</td>
+<td><code>internal/router/router.go:676</code> (call at
+<code>:730-731</code>; object tag <code>&quot;ensemble.completion&quot;</code>
+<code>:740</code>; default
+<code>EnsembleConfig.Strategy=&quot;confidence_weighted&quot;</code>
+<code>:686</code>)</td>
+</tr>
+<tr>
+<td><strong>Providers</strong> list (reads live
+<code>GetCapabilities().SupportedModels</code>)</td>
+<td><code>internal/router/router.go:773</code> (GET <code>&quot;&quot;</code>
+closure <code>:773-797</code>, models field <code>:783</code>)</td>
+</tr>
+<tr>
+<td><strong>Discovery</strong> group
+(models/selected/stats/trigger/ensemble/debate-model)</td>
+<td><code>internal/router/router.go:1306-1313</code></td>
+</tr>
+<tr>
+<td><strong>Verification</strong> group (LLMsVerifier)</td>
+<td><code>internal/router/router.go:1378-1387</code>; bridge importing
+live providers <code>:1356-1379</code></td>
+</tr>
+<tr>
+<td>Runtime registry <code>services.ProviderRegistry</code></td>
+<td><code>internal/services/provider_registry.go:82</code></td>
+</tr>
+<tr>
+<td>HelixLLM = gated provider <code>&quot;helixllm&quot;</code> only (no
+root)</td>
+<td><code>internal/services/provider_registry.go:750-764</code>
+(<code>USE_HELIX_LLM</code> <code>:755</code>, model id
+<code>helixllm-default</code> <code>:757</code>)</td>
+</tr>
+<tr>
+<td><code>LLMProvider</code> interface — <strong>NO
+<code>GetModels()</code></strong></td>
+<td><code>internal/llm/provider.go:9-14</code> (only
+<code>Complete/CompleteStream/HealthCheck/GetCapabilities/ValidateConfig</code>)</td>
+</tr>
+<tr>
+<td>“Working model” flag (verifier authoritative)</td>
+<td><code>internal/verifier/discovery.go:56</code>
+(<code>DiscoveredModel.Verified</code>; <code>OverallScore</code>
+<code>:59</code>); ensemble member shape <code>SelectedModel</code>
+<code>:66-72</code></td>
+</tr>
+<tr>
+<td>Discovery service API</td>
+<td><code>internal/verifier/discovery.go:23</code>;
+<code>GetSelectedModels()</code> /
+<code>GetDiscoveredModels()</code></td>
+</tr>
+<tr>
+<td>models.dev reference catalog (distinct from runtime lists)</td>
+<td><code>internal/modelsdev/service.go:13-23</code>,
+<code>client.go:14</code></td>
+</tr>
+<tr>
+<td><strong>D-1 BLUFF: <code>/v1/completion/models</code> hardcoded
+3-model list</strong></td>
+<td><code>internal/handlers/completion.go:411</code>
+(<code>Models</code> func; literal maps <code>:413-436</code>:
+deepseek-coder, claude-3-sonnet-20240229, gemini-pro,
+<code>time.Now()</code> stamps)</td>
+</tr>
+<tr>
+<td>helix_agent has <strong>zero vendor SDKs</strong> (48 hand-rolled
+<code>net/http</code> providers)</td>
+<td><code>submodules/helix_agent/go.mod</code> (no
+aws/azure/openai/anthropic/genai)</td>
+</tr>
+<tr>
+<td>Cloud SDKs live in inner app</td>
+<td><code>helix_code/go.mod</code> (azcore v1.16.0 <code>:12</code>,
+azidentity v1.8.0 <code>:13</code>, aws-sdk-go-v2 v1.32.7
+<code>:15</code>, bedrockruntime v1.23.1 <code>:18</code>, zep-go/v3
+v3.10.0 <code>:26</code>, tree-sitter Aug-2024 pin <code>:39</code>, gin
+v1.11.0 <code>:27</code>, pgx v5.7.6, go-redis v9.17.2)</td>
+</tr>
+<tr>
+<td>gin module skew</td>
+<td><code>helix_code/go.mod</code> gin <strong>v1.11.0</strong> vs
+<code>submodules/helix_agent/go.mod</code> gin <strong>v1.12.0</strong>
+(line 5)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Design consequence:</strong> the unified-catalog work is a
+NEW handler + a join over three already-existing sources
+(<code>ProviderRegistry.ListProviders()</code> →
+<code>GetCapabilities().SupportedModels</code>, <code>verifier</code>
+discovery <code>Verified</code>/<code>OverallScore</code>, and the
+ensemble service). No source is removed (§11.4.122); all current
+endpoints stay intact (additive).</p>
+<hr />
+<h2 id="operator-input-decisions-flagged-resolve-before-implementation">2.
+Operator-input decisions (FLAGGED — resolve before implementation)</h2>
+<p>These are design forks the agent must NOT decide silently (§11.4.101
+— reversible/low-blast items defaulted; high-blast items blocked for
+operator):</p>
+<table>
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 13%" />
+<col style="width: 51%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Default proposed (if operator silent)</th>
+<th>Why it needs operator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OP-1</td>
+<td><strong>Root path for the unified catalog.</strong>
+<code>GET /v1/catalog</code> (analysis-C illustrative) vs
+<code>/v1/exposure</code> vs <code>/v1/targets</code>.</td>
+<td><code>GET /v1/catalog</code></td>
+<td>Public API surface naming; appears in docs/website/SDK; hard to
+rename later.</td>
+</tr>
+<tr>
+<td>OP-2</td>
+<td><strong>Add <code>GetModels(ctx) ([]Model, error)</code> to the
+<code>LLMProvider</code> interface</strong> (T2.2.2) vs keep reading
+<code>GetCapabilities().SupportedModels</code> + verifier join
+only.</td>
+<td>Keep interface unchanged for SP2; join via verifier (smaller blast
+radius — 48 providers would each need the new method).</td>
+<td>Interface change touches all 48 providers + tests; CONST-036
+single-source.</td>
+</tr>
+<tr>
+<td>OP-3</td>
+<td><strong>Ensemble preset enumeration source.</strong> Expose only
+<code>ensemble</code> + <code>ensemble/confidence_weighted</code>, or
+enumerate every <code>EnsembleConfig.Strategy</code> value as a
+preset.</td>
+<td>Expose <code>ensemble</code> (alias <code>ensemble/auto</code>) +
+presets derived from the strategies actually wired in code.</td>
+<td>Avoids advertising presets that aren’t implemented (would be a §11.4
+capability bluff).</td>
+</tr>
+<tr>
+<td>OP-4</td>
+<td><strong>SDK update blast radius (P2.3).</strong> Update ALL flagged
+SDKs to latest now, or only the high-value/security ones
+(bedrockruntime, azidentity) this cycle.</td>
+<td>Update security/auth + high-value (azidentity, azcore,
+bedrockruntime, aws-sdk-go-v2 core) this cycle; defer cosmetic minors
+with a tracked item.</td>
+<td>Major-version bumps can break build; §11.4.92 multi-pass + §11.4.108
+four-layer needed per bump.</td>
+</tr>
+<tr>
+<td>OP-5</td>
+<td><strong>gin skew resolution direction (P2.3).</strong> Bump
+<code>helix_code</code> 1.11.0 → 1.12.0 to match helix_agent, or pin
+both to a single researched-latest.</td>
+<td>Align both to the deep-web-researched latest gin v1.x (likely
+≥1.12.0).</td>
+<td>Touches both modules’ build + middleware; needs the §11.4.99
+latest-source check first.</td>
+</tr>
+<tr>
+<td>OP-6</td>
+<td><strong>Video-course + website production</strong> (P2.4) — full
+production vs scripted-outline + asset stubs this cycle.</td>
+<td>Author script/storyboard + doc-graph assets; flag full video render
+as operator-gated.</td>
+<td>Time/resource budget; may need external tooling/credentials.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phase-task-structure-each-task-red-impl-greenevidence-rollback">3.
+Phase / task structure (each task = RED → impl → GREEN+evidence →
+rollback)</h2>
+<p>Subagent-driven by default (§11.4.70/§11.4.103); ≥3 parallel
+non-contending streams. Phases ordered by dependency; P2.0 (D-1 bluff)
+lands FIRST as the highest-risk item (§11.4.132 risk-ordered).</p>
+<h3 id="p2.0-d-1-bluff-remediation-v1completionmodels-hardcoded-list">P2.0 —
+D-1 bluff remediation: <code>/v1/completion/models</code> hardcoded
+list</h3>
+<p>Highest-risk, highest-visibility; a live CONST-036 / BLUFF-002
+violation. Do first.</p>
+<ul>
+<li><strong>T2.0.1 RED — reproduce the bluff.</strong> New test
+<code>internal/handlers/completion_models_test.go</code> with
+<code>RED_MODE</code> polarity switch (§11.4.115).
+<code>RED_MODE=1</code>: assert the response body is EXACTLY the 3
+hardcoded ids (deepseek-coder / claude-3-sonnet-20240229 / gemini-pro)
+and that the set does NOT change when the registry/verifier is
+reconfigured → proves the list is static (the defect present on the
+pre-fix artifact). Capture output to
+<code>docs/qa/SP2-T2.0.1/</code>.</li>
+<li><strong>T2.0.2 IMPL — verifier-sourced list.</strong> Rewrite
+<code>CompletionHandler.Models</code>
+(<code>internal/handlers/completion.go:411</code>) to return the live
+list from the verifier (<code>GetDiscoveredModels()</code> filtered
+<code>Verified==true</code>) joined with
+<code>ProviderRegistry.ListProviders()</code> capabilities — never a
+literal map (CONST-036). Inject the registry/verifier into the handler
+(constructor wiring) rather than hardcode. Define cold/verifier-down
+behaviour: return the registry capabilities set with
+<code>verified:false</code> markers, never a fabricated “working” list
+(§11.4 PASS-bluff guard, mirrors SP1 P1.3.3).</li>
+<li><strong>T2.0.3 GREEN + evidence.</strong> Flip
+<code>RED_MODE=0</code>: the same test becomes the standing regression
+guard (§11.4.135) — asserts the list now reflects registry/verifier
+state and CHANGES when a provider is enabled/disabled. Live integration
+run against a real verifier (real key where available) captured to
+<code>docs/qa/SP2-T2.0.2/</code>. Register guard <code>ATM-SP2-D1</code>
+in the standing suite.</li>
+<li><strong>Rollback:</strong> revert <code>completion.go</code> to the
+literal-map version (single-commit, behind the test) if GREEN cannot be
+achieved; tracked item stays open. No data migration involved.</li>
+</ul>
+<h3 id="p2.1-unified-catalog-the-missing-join-layer">P2.1 — Unified
+catalog (the missing join layer)</h3>
+<ul>
+<li><strong>T2.1.1 RED — absence test.</strong> New test asserting there
+is currently NO single endpoint returning ensemble + helixllm + every
+provider + every verified model as uniformly-named entries
+(<code>RED_MODE=1</code> proves the 404 / absence). Evidence
+<code>docs/qa/SP2-T2.1.1/</code>.</li>
+<li><strong>T2.1.2 IMPL — catalog assembler.</strong> New
+<code>internal/catalog/catalog.go</code>:
+<code>type Entry struct { Name string; Kind string /*ensemble|provider|model*/; Provider string; Verified bool; OverallScore float64; Enabled bool }</code>
+and <code>BuildCatalog(reg, verifier, ensembleSvc) []Entry</code>. Join
+rules: (a) one <code>ensemble</code> entry (+ presets per OP-3); (b) one
+<code>helixllm</code> entry + <code>helixllm/&lt;model&gt;</code> when
+enabled (OP from §P2.2.4); (c) one entry per
+<code>ProviderRegistry.ListProviders()</code>; (d) one
+<code>&lt;provider&gt;/&lt;model_id&gt;</code> entry per
+<code>DiscoveredModel</code> with <code>Verified==true</code> (NEVER
+static <code>SupportedModels</code>, NEVER hardcoded).</li>
+<li><strong>T2.1.3 IMPL — handler + route.</strong> New
+<code>internal/handlers/catalog.go</code>
+<code>CatalogHandler.List</code>; register <code>GET /v1/catalog</code>
+(OP-1) inside the protected group near
+<code>internal/router/router.go:773</code> (alongside
+<code>/v1/providers</code>). Additive; no existing route changed.</li>
+<li><strong>T2.1.4 IMPL — selector resolution.</strong> Extend the
+existing free-text <code>model</code> field
+(<code>CompletionRequest.Model</code>,
+<code>internal/handlers/completion.go:28</code>; ensemble closure
+<code>router.go:702</code>) so any catalog <code>Name</code> resolves to
+the right target: <code>ensemble[/preset]</code> → ensemble service;
+<code>helixllm[/model]</code> → helixllm provider;
+<code>&lt;provider&gt;[/&lt;model&gt;]</code> → that provider. Unknown
+selector → 400 with the candidate list (no silent guess,
+§11.4.6/§11.4.105).</li>
+<li><strong>T2.1.5 GREEN + evidence.</strong> <code>RED_MODE=0</code>
+guard asserts the catalog lists all four classes and that each
+<code>Name</code> is selectable end-to-end (real proxied completion
+where a key exists). Liveness/captured evidence per §11.4.107 →
+<code>docs/qa/SP2-T2.1/</code>. Guard <code>ATM-SP2-CATALOG</code>.</li>
+<li><strong>Rollback:</strong> new package + route are isolated; remove
+the route registration line + revert selector-resolution shim. Existing
+endpoints unaffected.</li>
+</ul>
+<h3 id="p2.2-per-provider-individual-exposure-helixllm-promotion">P2.2 —
+Per-provider individual exposure + HelixLLM promotion</h3>
+<ul>
+<li><strong>T2.2.1 Provider catalog entry per discovered
+provider</strong> (verifier-sourced) — covered by the catalog join
+(T2.1.2 clause c). Test: every <code>ListProviders()</code> name appears
+as a <code>kind:provider</code> entry with correct <code>enabled</code>
+flag.</li>
+<li><strong>T2.2.2 Per-provider working-model list</strong>
+(<code>Verified==true</code>). Decision OP-2: default = derive from
+verifier join (no interface change). If operator chooses to add
+<code>GetModels(ctx)</code> to <code>LLMProvider</code>
+(<code>internal/llm/provider.go:9</code>), that becomes a SEPARATE
+sub-plan updating all 48 providers + their tests + the registry —
+RED-first per provider, evidence per provider.</li>
+<li><strong>T2.2.3 Naming scheme enforcement.</strong> Test the
+canonical grammar against fixtures: <code>ensemble</code>,
+<code>ensemble/confidence_weighted</code>, <code>helixllm</code>,
+<code>helixllm/helixllm-default</code>,
+<code>anthropic/claude-3-sonnet-20240229</code>,
+<code>openrouter/x-ai/grok-4</code>, <code>groq</code>,
+<code>deepseek/deepseek-coder</code>. Truth-table test + a cell-flip
+mutation (§1.1) forcing FAIL (e.g. an UpperCase provider name must be
+rejected/normalised). Reuse existing lowercase names + the
+<code>vendor/model</code> slash form already present at
+<code>provider_registry.go:791</code> (<code>x-ai/grok-4</code>).</li>
+<li><strong>T2.2.4 Promote HelixLLM to first-class root.</strong>
+Catalog emits a top-level <code>helixllm</code> entry (and
+<code>helixllm/&lt;model&gt;</code>) when
+<code>USE_HELIX_LLM=true</code> (<code>provider_registry.go:755</code>),
+NOT buried. Test: with the flag on, <code>helixllm</code> is a
+selectable root target; with it off, it is absent (no fabrication).
+Evidence <code>docs/qa/SP2-T2.2/</code>.</li>
+<li><strong>Rollback:</strong> entries are produced by the join in
+T2.1.2; reverting that function reverts these.</li>
+</ul>
+<h3 id="p2.3-sdk-api-currency-clearly-bounded-sub-plan">P2.3 — SDK / API
+currency (clearly-bounded sub-plan)</h3>
+<blockquote>
+<p><strong>Scope nuance (load-bearing):</strong>
+<code>submodules/helix_agent</code> has <strong>NO vendor SDKs</strong>
+— its 48 providers are hand-rolled <code>net/http</code>, so “update
+provider SDKs” there means <strong>API-drift review of the hand-written
+clients vs each vendor’s CURRENT API reference</strong>, not a
+<code>go.mod</code> bump. The cloud SDKs that CAN age out live in
+<strong><code>helix_code/go.mod</code></strong>. This sub-plan therefore
+spans both modules.</p>
+</blockquote>
+<ul>
+<li><strong>T2.3.1 Deep-web-research latest versions
+(§11.4.99).</strong> For each flagged dep determine the TRUE latest via
+authoritative source (Go module proxy / vendor release notes), capture
+URLs + date in a <code>## Sources verified &lt;date&gt;</code> footer.
+Targets: <code>azcore</code> (v1.16.0), <code>azidentity</code> (v1.8.0
+— auth/security, high priority), <code>aws-sdk-go-v2</code> core
+(v1.32.7), <code>aws-sdk-go-v2/config</code> (v1.28.7),
+<code>credentials</code> (v1.17.48), <code>bedrockruntime</code>
+(v1.23.1 — high value, new-model access), <code>getzep/zep-go/v3</code>
+(v3.10.0), <code>smacker/go-tree-sitter</code> (Aug-2024 pseudo-version
+— stale-likely; same pin in BOTH go.mods), <code>gin</code> (v1.11.0
+helix_code / v1.12.0 helix_agent), <code>pgx/v5</code> (v5.7.6 /
+v5.9.2), <code>go-redis/v9</code> (v9.17.2 / v9.18.0). Output:
+<code>docs/research/SP2-sdk-currency/</code>.</li>
+<li><strong>T2.3.2 Hand-rolled provider API-drift audit.</strong> For
+each of the 48 <code>internal/llm/providers/*</code>, diff the
+implemented request/response shape vs the vendor’s current API
+reference; open a tracked item per drift found (no silent assumption —
+§11.4.6). Prioritise providers with live keys for real-call
+verification.</li>
+<li><strong>T2.3.3 Bump cloud SDKs in
+<code>helix_code/go.mod</code></strong> per OP-4 decision. Per bump: RED
+(capture current build/behaviour) →
+<code>go get &lt;dep&gt;@&lt;latest&gt;</code> →
+<code>go mod tidy</code> → build + full unit/integration sweep →
+§11.4.92 multi-pass blast-radius → §11.4.108 four-layer
+(source/artifact/runtime/user-visible). Each bump is its OWN commit
+(revertible). Evidence: build logs + a real Bedrock/Azure call where
+credentials exist.</li>
+<li><strong>T2.3.4 Resolve gin skew (OP-5).</strong> Align
+<code>helix_code</code> (v1.11.0) and <code>helix_agent</code> (v1.12.0)
+to the researched latest gin v1.x. Run BOTH modules’ route + middleware
+tests post-bump; capture green output. RED: a test asserting the two
+go.mods currently disagree (<code>RED_MODE=1</code>), GREEN: they agree
+post-fix.</li>
+<li><strong>Rollback:</strong> every SDK bump is an isolated commit;
+<code>git revert</code> the specific bump + <code>go mod tidy</code>. No
+data migration. The hand-rolled-client audit produces tracked items only
+(no code change in this task).</li>
+</ul>
+<h3 id="p2.4-deliverables-docs-guides-graphs-sql-website-video-course">P2.4
+— Deliverables: docs / guides / graphs / SQL / website /
+video-course</h3>
+<p>All exported with <code>.html</code> + <code>.pdf</code> siblings via
+the Docs Chain engine (§11.4.106) + revision headers (§11.4.44).</p>
+<ul>
+<li><strong>T2.4.1 API reference + user guide</strong> for
+<code>GET /v1/catalog</code> + the selector grammar + HelixLLM-as-root +
+per-provider/per-model targeting. Cross-reference vendor API docs
+verified in T2.3.1 (§11.4.99 footer).</li>
+<li><strong>T2.4.2 Architecture graphs</strong> (mermaid/graphviz): the
+unified-catalog join (registry + verifier + ensemble → catalog →
+selector resolution); the four item-classes namespace tree.</li>
+<li><strong>T2.4.3 SQL</strong> — if the catalog is persisted/cached,
+schema + sample queries for the catalog/verified-model tables; otherwise
+an SQL view modelling the catalog join for the workable-items /
+reporting DB. (Confirm persistence need with OP-1 design.)</li>
+<li><strong>T2.4.4 Website</strong> — update
+<code>github_pages_website/</code> provider/model exposure pages to list
+the new namespace + examples (<code>ensemble</code>,
+<code>helixllm</code>,
+<code>&lt;provider&gt;/&lt;model&gt;</code>).</li>
+<li><strong>T2.4.5 Video-course</strong> — script/storyboard for
+“selecting an exposure target” (OP-6 gates full render). Assets under
+<code>docs/qa/SP2-T2.4/</code>.</li>
+</ul>
+<h3 id="p2.5-full-test-type-matrix-cross-cutting-binds-every-task">P2.5
+— Full test-type matrix (cross-cutting, binds every task)</h3>
+<p>Per §11.4.27 / §11.4.50 / §11.4.85 / §11.4.98 / SP7. Each row = real
+infra (no mocks beyond unit), captured evidence, paired §1.1 mutation,
+fully automated (§11.4.98).</p>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test type</th>
+<th>SP2 coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>unit</td>
+<td>catalog assembler join logic; selector grammar truth-table;
+Models-handler verifier-sourcing</td>
+</tr>
+<tr>
+<td>integration</td>
+<td><code>GET /v1/catalog</code> against real
+<code>ProviderRegistry</code> + real verifier (real keys where
+available); selector → real completion</td>
+</tr>
+<tr>
+<td>e2e</td>
+<td>full user path: discover catalog → pick <code>ensemble</code> /
+<code>helixllm</code> / <code>&lt;provider&gt;/&lt;model&gt;</code> →
+real completion result</td>
+</tr>
+<tr>
+<td>full-automation</td>
+<td>self-driving, re-runnable <code>-count=3</code>, no human step
+(§11.4.98)</td>
+</tr>
+<tr>
+<td>security</td>
+<td>authz on <code>/v1/catalog</code> (behind
+<code>auth.Middleware</code>); no key/secret leakage in catalog
+output</td>
+</tr>
+<tr>
+<td>ddos / scaling</td>
+<td>catalog endpoint under load (delegated to HelixQA/Challenges per SP7
+— evidence-backed, not config-only)</td>
+</tr>
+<tr>
+<td>chaos / stress</td>
+<td>verifier-down / registry-empty / partial-provider-failure → catalog
+degrades honestly (no fabricated “working” list); §11.4.85
+injection</td>
+</tr>
+<tr>
+<td>performance / benchmark</td>
+<td>catalog assembly latency with N providers × M models</td>
+</tr>
+<tr>
+<td>ui / ux</td>
+<td>website exposure pages render the namespace correctly (CV/OCR per
+§11.4.117 if needed)</td>
+</tr>
+<tr>
+<td>Challenges</td>
+<td><code>challenges/</code> bank entry exercising the unified catalog
+end-to-end</td>
+</tr>
+<tr>
+<td>HelixQA</td>
+<td>autonomous QA session over the new endpoints with captured wire
+evidence (SP7 P7.3)</td>
+</tr>
+<tr>
+<td>regression-guards</td>
+<td><code>ATM-SP2-D1</code>, <code>ATM-SP2-CATALOG</code>,
+naming-grammar guard registered in standing suite (§11.4.135)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="p2.6-code-review-release-gating-11.4.125-11.4.134">P2.6 —
+Code-review + release gating (§11.4.125 / §11.4.134)</h3>
+<ul>
+<li><strong>T2.6.1</strong> Dispatch code-review agent(s) over the full
+SP2 batch BEFORE pre-build + main build. Iterate until clean GO with
+ZERO findings AND ZERO warnings (§11.4.134), each round carrying
+captured physical evidence.</li>
+<li><strong>T2.6.2</strong> Pre-build readiness verdict (§11.4.110) +
+clash detection (new handler ⇄ route registration ⇄ DI wiring).
+Coverage-completeness gate: every changed file → ≥1 gate + ≥1 test + ≥1
+§1.1 mutation.</li>
+<li><strong>T2.6.3</strong> Update <code>docs/CONTINUATION.md</code> +
+the session-resumption file (§11.4.131 / CONST-044) in the same commit
+as each state-advancing change.</li>
+</ul>
+<hr />
+<h2 id="files-to-create-modify">4. Files to create / modify</h2>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Action</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submodules/helix_agent/internal/handlers/completion.go</code>
+(:411 <code>Models</code>)</td>
+<td>MODIFY</td>
+<td>Replace hardcoded 3-model list (D-1) with verifier/registry-sourced
+list (CONST-036)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/handlers/completion_models_test.go</code></td>
+<td>CREATE</td>
+<td>RED→GREEN polarity test for D-1 (§11.4.115)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/catalog/catalog.go</code></td>
+<td>CREATE</td>
+<td><code>Entry</code> type + <code>BuildCatalog()</code> join
+(ensemble+helixllm+providers+verified models)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/catalog/catalog_test.go</code></td>
+<td>CREATE</td>
+<td>Join logic + naming-grammar truth-table + §1.1 mutation</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/handlers/catalog.go</code></td>
+<td>CREATE</td>
+<td><code>CatalogHandler.List</code> for
+<code>GET /v1/catalog</code></td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/handlers/catalog_test.go</code></td>
+<td>CREATE</td>
+<td>Handler integration test (real registry+verifier)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/router/router.go</code> (near
+:773)</td>
+<td>MODIFY</td>
+<td>Register <code>GET /v1/catalog</code> (additive); wire selector
+resolution into ensemble/completion closures (:676/:702)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/handlers/completion.go</code>
+(:28 selector)</td>
+<td>MODIFY</td>
+<td>Selector resolution for catalog <code>Name</code> → target</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/services/provider_registry.go</code>
+(:750-764)</td>
+<td>MODIFY (minimal)</td>
+<td>Surface helixllm enabled-state for catalog promotion (read-only; no
+removal §11.4.122)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/llm/provider.go</code>
+(:9)</td>
+<td>MODIFY <em>(OP-2 only)</em></td>
+<td>Add <code>GetModels(ctx)</code> to interface — gated on OP-2; then
+48 provider impls + tests</td>
+</tr>
+<tr>
+<td><code>helix_code/go.mod</code> / <code>go.sum</code></td>
+<td>MODIFY</td>
+<td>SDK bumps
+(azidentity/azcore/bedrockruntime/aws-sdk-go-v2/zep/tree-sitter/pgx/go-redis)
+per OP-4; gin align per OP-5</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/go.mod</code> /
+<code>go.sum</code></td>
+<td>MODIFY</td>
+<td>gin align per OP-5; tree-sitter pin per T2.3.1</td>
+</tr>
+<tr>
+<td><code>docs/research/SP2-sdk-currency/*.md</code></td>
+<td>CREATE</td>
+<td>§11.4.99 latest-source research + <code>Sources verified</code>
+footers</td>
+</tr>
+<tr>
+<td><code>docs/guides/SP2-exposure-catalog.md</code> (+
+<code>.html</code>/<code>.pdf</code>)</td>
+<td>CREATE</td>
+<td>API reference + selector grammar + user guide</td>
+</tr>
+<tr>
+<td><code>docs/diagrams/SP2-catalog-join.*</code></td>
+<td>CREATE</td>
+<td>Architecture graphs</td>
+</tr>
+<tr>
+<td><code>docs/sql/SP2-catalog-view.sql</code></td>
+<td>CREATE</td>
+<td>Catalog view / cache schema (if persisted — confirm OP-1)</td>
+</tr>
+<tr>
+<td><code>github_pages_website/...</code></td>
+<td>MODIFY</td>
+<td>Exposure-namespace pages</td>
+</tr>
+<tr>
+<td><code>challenges/...</code></td>
+<td>CREATE</td>
+<td>End-to-end Challenge for the unified catalog</td>
+</tr>
+<tr>
+<td><code>docs/qa/SP2-*/</code></td>
+<td>CREATE</td>
+<td>Captured runtime evidence per task</td>
+</tr>
+<tr>
+<td><code>docs/CONTINUATION.md</code> + session-resumption file</td>
+<td>MODIFY</td>
+<td>CONST-044 / §11.4.131 sync per state-advancing commit</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="ordered-fine-grained-task-list">5. Ordered fine-grained task
+list</h2>
+<ol type="1">
+<li><strong>T2.0.1</strong> RED: reproduce D-1 hardcoded-list bluff
+(polarity <code>RED_MODE=1</code>), capture evidence.</li>
+<li><strong>T2.0.2</strong> IMPL: verifier/registry-source
+<code>CompletionHandler.Models</code>; define verifier-down honest
+behaviour.</li>
+<li><strong>T2.0.3</strong> GREEN: flip guard, live run, register
+<code>ATM-SP2-D1</code> in standing suite.</li>
+<li><strong>T2.1.1</strong> RED: catalog-absence test.</li>
+<li><strong>T2.1.2</strong> IMPL: <code>catalog.BuildCatalog()</code>
+join (4 item classes; <code>Verified==true</code> only).</li>
+<li><strong>T2.1.3</strong> IMPL: <code>CatalogHandler.List</code> +
+register <code>GET /v1/catalog</code> (OP-1).</li>
+<li><strong>T2.1.4</strong> IMPL: selector resolution for catalog
+<code>Name</code> into ensemble/helixllm/provider targets.</li>
+<li><strong>T2.1.5</strong> GREEN: end-to-end selectability, evidence,
+guard <code>ATM-SP2-CATALOG</code>.</li>
+<li><strong>T2.2.1</strong> Provider-entry-per-provider test.</li>
+<li><strong>T2.2.4</strong> HelixLLM first-class root promotion
+(flag-on/flag-off honesty test).</li>
+<li><strong>T2.2.3</strong> Naming-grammar truth-table + §1.1
+mutation.</li>
+<li><strong>T2.2.2</strong> <em>(OP-2 gated)</em> per-provider
+working-model list; if interface change chosen, spawn the 48-provider
+<code>GetModels</code> sub-plan.</li>
+<li><strong>T2.3.1</strong> Deep-web-research latest SDK/API versions
+(§11.4.99); capture sources.</li>
+<li><strong>T2.3.2</strong> Hand-rolled 48-provider API-drift audit →
+tracked items.</li>
+<li><strong>T2.3.4</strong> Resolve gin 1.11.0↔︎1.12.0 skew (OP-5), both
+modules’ tests green.</li>
+<li><strong>T2.3.3</strong> Bump cloud SDKs in
+<code>helix_code/go.mod</code> per OP-4 (each bump = own commit +
+four-layer verify).</li>
+<li><strong>T2.4.1–T2.4.5</strong> Docs / graphs / SQL / website /
+video-course deliverables (OP-6 gates render).</li>
+<li><strong>P2.5</strong> Full test-type matrix execution (real infra,
+captured evidence, automated <code>-count=3</code>).</li>
+<li><strong>T2.6.1</strong> Code-review iterate-until-GO
+(§11.4.134).</li>
+<li><strong>T2.6.2</strong> Pre-build readiness verdict + clash +
+coverage-completeness gates.</li>
+<li><strong>T2.6.3</strong> CONTINUATION + resumption-file sync;
+commit/push merge-onto-latest-main (§11.4.113, no force).</li>
+</ol>
+<hr />
+<h2 id="rollback-summary-per-phase">6. Rollback summary (per phase)</h2>
+<ul>
+<li><strong>P2.0:</strong> revert <code>completion.go:411</code> to
+literal-map (single commit behind the RED test).</li>
+<li><strong>P2.1/P2.2:</strong> new isolated package
+<code>internal/catalog/</code> + one route registration + one selector
+shim — remove the route line + revert the shim; all existing endpoints
+untouched (additive design).</li>
+<li><strong>P2.3:</strong> each SDK bump is its own revertible commit
+(<code>git revert</code> + <code>go mod tidy</code>); the API-drift
+audit emits tracked items only.</li>
+<li><strong>P2.4:</strong> docs/website are additive; revert the doc
+commits.</li>
+<li>No destructive DB/data ops anywhere in SP2; no capability removed
+(§11.4.122).</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-constitutional-binding">7. Anti-bluff /
+constitutional binding</h2>
+<ul>
+<li><strong>CONST-036 / BLUFF-002:</strong> D-1 fix + all catalog model
+sources are verifier/registry-derived; zero hardcoded model lists.
+“Working” = <code>DiscoveredModel.Verified==true</code> ONLY.</li>
+<li><strong>§11.4.115:</strong> every fix RED-on-broken-artifact first
+with <code>RED_MODE</code> polarity switch.</li>
+<li><strong>§11.4.135:</strong> every closed defect registers a
+permanent regression guard in the same commit.</li>
+<li><strong>§11.4.107:</strong> PASS requires captured liveness
+evidence, never a single screenshot / metadata-only.</li>
+<li><strong>§11.4.99:</strong> SDK/API currency uses latest-source web
+research with cited <code>Sources verified</code> footers.</li>
+<li><strong>§11.4.122:</strong> HelixLLM is PROMOTED, never removed; all
+existing routes preserved.</li>
+<li><strong>§11.4.125/§11.4.134:</strong> code-review iterate-until-GO
+before pre-build + main build.</li>
+<li><strong>§11.4.113:</strong> merge-onto-latest-main; no force-push on
+any repo/submodule.</li>
+<li><strong>CONST-044 / §11.4.131:</strong> CONTINUATION + resumption
+file synced each state-advancing commit.</li>
+</ul>
+<hr />
+<h2 id="summary-10-lines">8. Summary (10 lines)</h2>
+<ol type="1">
+<li>SP2 adds ONE unified-catalog root joining ensemble + HelixLLM +
+every provider + every VERIFIED model as uniformly-named selectable
+targets — the only missing layer; all building blocks exist.</li>
+<li>Exposure surface confirmed =
+<code>submodules/helix_agent/internal/router/router.go</code> (Gin
+<code>/v1</code>); ensemble <code>:676</code>, providers
+<code>:773</code>, discovery <code>:1306-1313</code>, verification
+<code>:1378-1387</code>.</li>
+<li>Highest-risk first: P2.0 fixes the D-1 hardcoded 3-model bluff at
+<code>internal/handlers/completion.go:411</code> (CONST-036/BLUFF-002),
+RED-first + standing guard.</li>
+<li>New code is additive + isolated (<code>internal/catalog/</code> +
+<code>CatalogHandler</code> + <code>GET /v1/catalog</code> per OP-1); no
+existing route or capability removed (§11.4.122).</li>
+<li>Naming scheme reuses existing lowercase provider names + the
+<code>vendor/model</code> slash form
+(<code>openrouter/x-ai/grok-4</code>); “working” =
+<code>DiscoveredModel.Verified==true</code>.</li>
+<li>HelixLLM is promoted to a first-class root
+(<code>helixllm[/model]</code>) when <code>USE_HELIX_LLM=true</code>,
+flag-honest (no fabrication when off).</li>
+<li>SDK currency is a bounded sub-plan: helix_agent has ZERO vendor SDKs
+(hand-rolled HTTP → API-drift audit), cloud SDKs bumped in
+<code>helix_code/go.mod</code>; gin 1.11.0↔︎1.12.0 skew resolved
+(OP-5).</li>
+<li>Six operator-input decisions flagged (OP-1 root path, OP-2 interface
+<code>GetModels</code>, OP-3 presets, OP-4 SDK blast radius, OP-5 gin
+direction, OP-6 video/website production).</li>
+<li>Full deliverable set: docs/guides/graphs/SQL/website/video-course +
+the complete test-type matrix with captured evidence, paired §1.1
+mutations, and fully-automated re-runnable tests.</li>
+<li>Every closure is RED-first (§11.4.115) + regression-guarded
+(§11.4.135) + code-reviewed-until-GO (§11.4.134) + evidence-backed
+(§11.4.107); merge-onto-latest-main, no force-push (§11.4.113).</li>
+</ol>
+<p><strong>Task count:</strong> 21 ordered fine-grained tasks across 7
+phases (P2.0–P2.6); 6 flagged operator-input decisions; ~18 file
+create/modify targets.</p>
+</body>
+</html>

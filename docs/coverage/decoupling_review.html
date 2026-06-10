@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>decoupling_review</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">decoupling_review</h1>
+</header>
+<h1 id="const-051b-decoupling-review-per-file-decisions">CONST-051(B)
+Decoupling Review — per-file decisions</h1>
+<p><strong>Round 41 close-out¹⁶ — Task #255 first pass.</strong></p>
+<p>Per CONST-051(B), every owned-by-us submodule MUST remain fully
+decoupled from any specific consuming project. The Task #250 audit
+surfaced 7 owned submodules with <code>HelixCode</code> references in
+non- governance files. This document records the per-file analysis +
+remediation decision per the operator’s “per-file review needed”
+mandate.</p>
+<h2 id="decision-taxonomy">Decision taxonomy</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Class</th>
+<th>Definition</th>
+<th>Remediation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>legitimate-cross-project</strong></td>
+<td>The reference is intentional cross-project context (e.g. a
+per-target generator file named after the target; a shared utility’s
+namespace prefix). The submodule is genuinely reusable; the reference is
+descriptive, not a hardcoded dependency.</td>
+<td>Document and pass.</td>
+</tr>
+<tr>
+<td><strong>cosmetic-only</strong></td>
+<td>The reference is in a comment / docstring / description string that
+names the originating project. Behavior is generic; only the labelling
+is project-specific.</td>
+<td>Genericise the comment in a follow-up.</td>
+</tr>
+<tr>
+<td><strong>genuine-violation</strong></td>
+<td>The reference is a hardcoded filesystem path, hostname, or asset
+name that makes the submodule unusable by a different consumer without
+source edits.</td>
+<td>Refactor to config-injection (env var / config file / constructor
+parameter). Track as fine-grained task.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="per-submodule-per-file-findings">Per-submodule × per-file
+findings</h2>
+<h3 id="challenges-21-files">Challenges (21 files)</h3>
+<p>The 21 files are all <code>challenges/p1-fNN-*/run.sh</code> and
+<code>challenges/p2-fNN-*/run.sh</code> phase-runner scripts. Each
+script names HelixCode-specific phase IDs (F01-F30) and exercises
+HelixCode-specific features.</p>
+<p><strong>Classification:</strong> legitimate-cross-project. The
+Challenges submodule is HelixCode’s Challenge bank by design;
+per-Challenge run.sh scripts are HelixCode-specific artefacts in a
+Challenge bank that also hosts other projects’ Challenges (under
+separate prefixes). The Challenge bank’s structure is: one directory per
+(project, phase, feature) triple — “p1-f20-theme-system” means “project
+1 (HelixCode), phase 1, feature 20 (theme system)”. Other consuming
+projects add their own <code>pX-fYY-*</code> directories. CONST-051(B)
+is honoured at the per-Challenge-script level: a Challenge script that
+operates ON HelixCode is naturally named after HelixCode. The Challenges
+submodule as a whole IS reusable — by adding a new project’s Challenge
+directory tree.</p>
+<p><strong>Action:</strong> none.</p>
+<h3 id="containers-2-files">containers (2 files)</h3>
+<p><strong><code>containers/scripts/load_api_keys.sh</code></strong> (1
+file)</p>
+<p>Two <code>HelixCode</code> references in comments: - Line 3:
+<code># HelixCode API-key loader: prefers $HOME/api_keys.sh ...</code> -
+Line 70:
+<code># ... ApiKey_OpenAI, etc., but the HelixCode providers would not find them</code></p>
+<p>The script logic itself is generic. Function names use
+<code>helixcode_*</code> prefix as a namespace.</p>
+<p><strong>Classification:</strong> cosmetic-only (comments + function
+namespace).</p>
+<p><strong>Action:</strong> genericise the two comments in a future
+round (replace “HelixCode” with “downstream”/“generic”). Function names
+keep their <code>helixcode_*</code> prefix as a namespace — they’re a
+discoverable rename target for forkers but aren’t an impediment to reuse
+(forkers override or alias). Tracked as Task #262.</p>
+<p><strong><code>containers/scripts/resource-policy/apply_caps.py</code></strong></p>
+<p>Lines 67, 82, 85, 87, 89 reference HelixCode-internal paths:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Third-party cli_agents (only HelixCode is ours)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">&quot;/cli_agents/helix_code/helix_code/&quot;</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Third-party MCP servers shipped beside HelixCode</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">&quot;/helix_code/mcp-servers/&quot;</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">&quot;/HelixLLM/docs/&quot;</span>,</span></code></pre></div>
+<p>These are filesystem paths under HelixCode’s directory tree hardcoded
+into a Containers-submodule resource-cap policy script.</p>
+<p><strong>Classification:</strong> genuine-violation. The containers
+submodule should not enumerate consuming-project-internal paths.</p>
+<p><strong>Action complete (close-out¹⁹, Task #263):</strong>
+refactored. New <code>SKIP_PATH_FRAGMENTS_DEFAULT</code> is
+universal-only; new <code>--skip-paths-file</code> flag (+
+<code>RESOURCE_POLICY_SKIP_PATHS_FILE</code> env var) loads
+project-specific fragments from a one-per-line file supplied by the
+consuming project. containers commit <code>400ccbb</code>.
+HelixCode-side concrete list at
+<code>scripts/containers/resource- policy-skip-paths.list</code>.</p>
+<h3 id="submodulesllms_verifier-6-files">submodules/llms_verifier (6
+files)</h3>
+<ul>
+<li><p><code>scripts/load_api_keys.sh</code> — same shared utility as
+containers above. Classification: cosmetic-only. Tracked under Task
+#262.</p></li>
+<li><p><code>llm-verifier/capabilities/config_generator.go</code></p></li>
+<li><p><code>llm-verifier/pkg/cliagents/generator.go</code></p></li>
+<li><p><code>llm-verifier/pkg/cliagents/generator_test.go</code></p></li>
+<li><p><code>llm-verifier/pkg/cliagents/helixcode.go</code></p></li>
+<li><p><code>llm-verifier/pkg/cliagents/&lt;sibling&gt;.go</code></p></li>
+</ul>
+<p>The <code>pkg/cliagents/</code> directory is a per-CLI-agent
+generator system. <code>helixcode.go</code> is the generator FOR
+HelixCode (siblings would be <code>claude.go</code>,
+<code>aider.go</code>, etc.). LLMsVerifier is generic in design; this
+file is the per-target adapter, named after its target.</p>
+<p><strong>Classification:</strong> legitimate-cross-project. A
+per-target generator file is properly named after its target — this is
+the same pattern as <code>internal/llm/groq_provider.go</code> being
+named after Groq.</p>
+<p><strong>Action:</strong> none.</p>
+<h3 id="github_pages_website-12-files">github_pages_website (12
+files)</h3>
+<p>Sub-audit (Task #264) results:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Refs</th>
+<th>Classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>github_pages_website/scripts/load_api_keys.sh</code></td>
+<td>2 (header + docstring)</td>
+<td>cosmetic-only → genericised in close-out¹⁷ (commit
+<code>c54fff7</code>).</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/package.json</code></td>
+<td>2 (description + author)</td>
+<td>legitimate-cross-project — npm metadata describes the site, which IS
+HelixCode’s GitHub Pages site.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/start-website.sh</code></td>
+<td>4 (header + log messages)</td>
+<td>legitimate-cross-project — bash script that builds + starts
+HelixCode’s docker stack for the website preview. Naming the site in
+headers + status logs is correct.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/stop-website.sh</code></td>
+<td>1 (header)</td>
+<td>legitimate-cross-project — same reasoning.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/test-local.sh</code></td>
+<td>1 (header)</td>
+<td>legitimate-cross-project — performance test script for THIS
+site.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/test-performance.sh</code></td>
+<td>1 (header)</td>
+<td>legitimate-cross-project — same.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/test-website.sh</code></td>
+<td>1 (header)</td>
+<td>legitimate-cross-project — same.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/js/main.js</code></td>
+<td>2 (header comment + init log)</td>
+<td>legitimate-cross-project — site JS describes the site.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/courses/player.js</code></td>
+<td>refs in content</td>
+<td>legitimate-cross-project — course content for HelixCode.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/courses/course-data.js</code></td>
+<td>refs in content</td>
+<td>legitimate-cross-project — course data.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/manual/.sync-metadata.json</code></td>
+<td>refs in metadata</td>
+<td>legitimate-cross-project — sync metadata referencing the parent
+project.</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/mobile/js/mobile.js</code></td>
+<td>refs in content</td>
+<td>legitimate-cross-project — mobile site JS.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Classification:</strong> content vs build tooling
+distinction: - <strong>Build tooling that operates on THIS site</strong>
+(start-website.sh etc.) is legitimately HelixCode-specific. It’s not
+generic-website tooling; it’s THIS site’s tooling. Replacing “HelixCode
+Website Startup Script” with “Site Startup Script” would lose meaning. -
+<strong>JS/content</strong> describes HelixCode (the subject of the
+site). Legitimate. - <strong><code>load_api_keys.sh</code></strong> was
+a cascaded copy of the shared utility — same cosmetic-only treatment as
+the 3 other copies (Task #262 carried over here in #264).</p>
+<p><strong>Action complete.</strong> No genuine-violation refactors
+needed in github_pages_website beyond the load_api_keys.sh fix already
+landed.</p>
+<h3 id="helixagent-105-files">HelixAgent (105 files)</h3>
+<p>Largest count. HelixAgent is its own meta-project; many of its files
+cross-reference HelixCode by name. This intersects with Task #254
+(HelixAgent’s 46 nested own-org submodules — large CONST-051(C)
+remediation). Per-file review of HelixAgent is properly scoped WITH Task
+#254, not separately.</p>
+<p><strong>Classification:</strong> mixed; per-file review deferred
+until Task #254 underway.</p>
+<p><strong>Action:</strong> roll into Task #254. No separate work needed
+here.</p>
+<h3 id="helix_qa-1-file">helix_qa (1 file)</h3>
+<p><strong><code>helix_qa/scripts/load_api_keys.sh</code></strong> —
+same shared utility.</p>
+<p><strong>Classification:</strong> cosmetic-only. Tracked under Task
+#262.</p>
+<h3 id="security-1-file">Security (1 file)</h3>
+<p><strong><code>security/scripts/load_api_keys.sh</code></strong> —
+same shared utility.</p>
+<p><strong>Classification:</strong> cosmetic-only. Tracked under Task
+#262.</p>
+<h2 id="summary-tally">Summary tally</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Class</th>
+<th>Files</th>
+<th>Submodules</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>legitimate-cross-project</td>
+<td>21 (Challenges) + 5 (LLMsVerifier cliagents) + 12
+(github_pages_website content) = 38</td>
+<td>Challenges, LLMsVerifier, github_pages_website</td>
+<td>None.</td>
+</tr>
+<tr>
+<td>cosmetic-only</td>
+<td>4 × <code>load_api_keys.sh</code> (HelixQA, Security, Containers,
+LLMsVerifier)</td>
+<td>4 submodules</td>
+<td>Task #262 — genericise comments.</td>
+</tr>
+<tr>
+<td>genuine-violation</td>
+<td>1 × <code>apply_caps.py</code> paths-list</td>
+<td>containers</td>
+<td>Task #263 — refactor to config-file input.</td>
+</tr>
+<tr>
+<td>deferred-to-#254</td>
+<td>105 (HelixAgent)</td>
+<td>HelixAgent</td>
+<td>Roll into Task #254 (the larger HelixAgent remediation).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total decoupling-violation count after this audit:</strong> 1
+genuine violation (containers/apply_caps.py) + 1 cosmetic batch (4 ×
+load_api_keys.sh) + 1 audit-pending (github_pages_website build
+scripts).</p>
+<h2 id="audit-trail">Audit trail</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Date</th>
+<th>Reviewer</th>
+<th>Round</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-05-15</td>
+<td>Claude Opus 4.7</td>
+<td>round 41 close-out¹⁶</td>
+<td>First pass. Per-file decisions documented. Inline edits deferred to
+Tasks #262/#263/#264.</td>
+</tr>
+<tr>
+<td>2026-05-15</td>
+<td>Claude Opus 4.7</td>
+<td>round 41 close-out¹⁷</td>
+<td>Task #262 cosmetic-only fix landed (root + helix_qa + Security +
+Containers). Task #264 sub-audit complete: 1 carry-over load_api_keys.sh
+cosmetic fix in github_pages_website, 11 other files classified
+legitimate-cross-project (THIS site’s content + tooling).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sources-verified-2026-05-29-internal-governance-doc-no-third-party-service-operator-instructions-to-cross-reference.-this-is-a-per-file-const-051b-decoupling-audit-of-helixcode-owned-submodules-every-reference-is-to-internal-paths-scripts-load_api_keys.sh-apply_caps.py-and-helixcodes-own-submodules.-no-external-service-library-or-version-pin-appears-so-there-is-nothing-to-webfetch-against-vendor-docs.-version-authority-per-claude.md-3.1-confirmed-in-tree-inner-module-go-1.26-root-go-1.25.2.-reviewed-against-the-live-tree-on-this-date-no-corrections-required.">Sources
+verified 2026-05-29: internal-governance doc — no third-party-service
+operator instructions to cross-reference. This is a per-file
+CONST-051(B) decoupling audit of HelixCode-owned submodules; every
+reference is to internal paths, scripts (<code>load_api_keys.sh</code>,
+<code>apply_caps.py</code>), and HelixCode’s own submodules. No external
+service, library, or version pin appears, so there is nothing to
+WebFetch against vendor docs. Version authority per CLAUDE.md §3.1
+(confirmed in-tree): inner module <code>go 1.26</code>, root
+<code>go 1.25.2</code>. Reviewed against the live tree on this date; no
+corrections required.</h2>
+</body>
+</html>

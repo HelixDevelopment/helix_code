@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f26-openhands-workspace</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f26-openhands-workspace</h1>
+</header>
+<h1 id="p2-f26-openhands-workspace-task-planner-step-executor">P2-F26 —
+Openhands Workspace + Task Planner + Step Executor</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> Use
+superpowers:subagent-driven-development.</p>
+</blockquote>
+<blockquote>
+<p><strong>Programme position:</strong> F26 is the
+<strong>sixth</strong> Phase 2 feature (after F21-F25).</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship container-based workspace management, a
+plan-tree-aware task planner, and a sequential step executor. Three new
+packages: <code>internal/workspace/</code>,
+<code>internal/planner/</code>. Reuses F25 plan trees and the containers
+submodule.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-07-p2-f26-openhands-workspace-design.md</code>
+<strong>Q1-Q5:</strong> Openhands / Core / Container-based / F25 plan
+tree + executor / Tools+slash+cobra</p>
+<p><strong>Zero new external deps</strong> —
+<code>digital.vasic.containers</code> already a submodule,
+<code>google/uuid</code> already direct.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>P2-F26-T01 — bootstrap F26 evidence
++ advance PROGRESS + CONTINUATION</label></li>
+<li><label><input type="checkbox"></input>P2-F26-T02 —
+<code>internal/workspace/types.go</code> + <code>manager.go</code>:
+Workspace, WorkspaceStatus, Manager (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F26-T03 —
+<code>internal/workspace/workspace_tools.go</code>:
+workspace_create/list/cleanup (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F26-T04 —
+<code>internal/planner/types.go</code> + <code>executor.go</code>:
+TaskStep, TaskPlan, StepExecutor (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F26-T05 —
+<code>internal/planner/planner_tools.go</code>: task_plan, task_step
+(TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F26-T06 — <code>/openhands</code>
+slash + cobra subcommands (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F26-T07 — main.go wiring +
+integration tests</label></li>
+<li><label><input type="checkbox"></input>P2-F26-T08 — Challenge harness 5
+phases + close-out + push 4 remotes</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap-f26">Task 1: Bootstrap F26</h2>
+<p>Append F26 header to <code>07_phase_2_evidence.md</code>. Update
+PROGRESS.md: “F25 COMPLETE; F26 in flight”. Update CONTINUATION.md: F26
+mid-flight section.</p>
+<hr />
+<h2 id="task-2-workspacetypes.go-manager.go">Task 2: workspace/types.go
++ manager.go</h2>
+<p><code>internal/workspace/types.go</code>: - <code>Workspace</code>
+struct (ID, Name, ContainerID, Image, ProjectDir, Status, CreatedAt,
+TTL) - <code>WorkspaceStatus</code> enum (Creating, Running, Stopped,
+Error) - Sentinels: <code>ErrContainerRuntimeNotFound</code>,
+<code>ErrWorkspaceNotFound</code>, <code>ErrImagePullFailed</code> -
+Constants: <code>DefaultImage = &quot;alpine:latest&quot;</code>,
+<code>DefaultTTL = 30 * time.Minute</code></p>
+<p><code>internal/workspace/manager.go</code>: -
+<code>WorkspaceManager</code> with <code>ContainersOrchestrator</code>
+interface for testability - Methods:
+<code>CreateWorkspace(ctx, name, image, projectDir) (Workspace, error)</code>,
+<code>ListWorkspaces() ([]Workspace, error)</code>,
+<code>GetWorkspace(id string) (Workspace, error)</code>,
+<code>CleanupWorkspace(ctx, id string) error</code> - Container
+lifecycle: pull image → create container → start container - In-memory
+state tracking with <code>sync.RWMutex</code> - Container runtime
+detection: docker → podman → fallback error</p>
+<p>Tests: real Docker/Podman gated (SKIP-OK if neither available); mock
+orchestrator for unit tests.</p>
+<hr />
+<h2 id="task-3-workspace_tools.go">Task 3: workspace_tools.go</h2>
+<p>Three tools: <code>workspace_create</code>,
+<code>workspace_list</code>, <code>workspace_cleanup</code>. All
+implement <code>tools.Tool</code>. Category: <code>workspace</code>.
+RequiresApproval: create/cleanup → <code>LevelEdit</code>; list →
+<code>LevelReadOnly</code>.</p>
+<hr />
+<h2 id="task-4-plannertypes.go-executor.go">Task 4: planner/types.go +
+executor.go</h2>
+<p><code>internal/planner/types.go</code>: - <code>TaskStep</code> with
+StepType, Command, Prompt, Timeout, MaxRetries, Status, Output, Error -
+<code>TaskPlan</code> with ID, Name, WorkspaceID, Steps, Status -
+<code>StepExecutor</code> interface:
+<code>ExecuteStep(ctx, step, workspace) error</code></p>
+<p><code>internal/planner/executor.go</code>: -
+<code>SequentialExecutor</code> implementing StepExecutor - ShellStep
+dispatch via <code>exec.CommandContext</code> in workspace container -
+LLMStep dispatch via <code>llm.Provider.Generate</code> - Retry logic:
+max retries with exponential backoff - Status tracking: Pending →
+Running → Completed/Failed</p>
+<p>Tests with mock executor and real shell executor.</p>
+<hr />
+<h2 id="task-5-planner_tools.go">Task 5: planner_tools.go</h2>
+<p>Two tools: <code>task_plan</code> (creates a TaskPlan from an F25
+PlanTree), <code>task_step</code> (executes a single step). Category:
+<code>planner</code>. RequiresApproval: both <code>LevelEdit</code>.</p>
+<hr />
+<h2 id="task-6-openhands-slash-cobra">Task 6: /openhands slash +
+cobra</h2>
+<p><code>/openhands</code> slash: status (list workspaces), create
+<name>, cleanup <id>
+<code>helixcode workspace {create,list,cleanup}</code> cobra
+subcommands</p>
+<hr />
+<h2 id="task-7-main.go-wiring">Task 7: main.go wiring</h2>
+<p>Construct WorkspaceManager → Planner → Register tools → Register
+slash → Register cobra subcommands.</p>
+<hr />
+<h2 id="task-8-challenge-harness">Task 8: Challenge harness</h2>
+<p>5 phases: - A: Create workspace → verify container running → cleanup
+→ verify stopped - B: Create plan with F25 tree → execute shell step →
+verify output - C: Step retry on failure → verify retry count + eventual
+success - D: LLM step execution → verify response non-empty - E:
+Workspace list → verify count after create/cleanup</p>
+<hr />
+<p><em>Plan written. Execute via TDD starting with T01.</em></p>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>OPENHANDS_ANALYSIS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">OPENHANDS_ANALYSIS</h1>
+</header>
+<h1 id="openhands-cli-agent-analysis">OpenHands CLI Agent Analysis</h1>
+<blockquote>
+<p><strong>Tier 1 Agent</strong> - Open source autonomous software
+engineer <strong>Source</strong>:
+https://github.com/All-Hands-AI/OpenHands <strong>Language</strong>:
+Python <strong>License</strong>: MIT</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>OpenHands is a community-driven AI-powered software development
+platform. It provides multiple interfaces including SDK, CLI, GUI,
+Cloud, and Enterprise editions.</p>
+<p><strong>Key Stats:</strong> - SWE-bench score: 77.6% - Multi-language
+support - Active open source community</p>
+<h2 id="product-editions">Product Editions</h2>
+<h3 id="openhands-sdk">1. OpenHands SDK</h3>
+<ul>
+<li>Composable Python library</li>
+<li>Core agentic technology</li>
+<li>Scalable from local to cloud</li>
+</ul>
+<h3 id="openhands-cli">2. OpenHands CLI</h3>
+<ul>
+<li>Familiar CLI experience (like Claude Code/Codex)</li>
+<li>Works with Claude, GPT, and other LLMs</li>
+</ul>
+<h3 id="openhands-local-gui">3. OpenHands Local GUI</h3>
+<ul>
+<li>REST API + React SPA</li>
+<li>Devin/Jules-like experience</li>
+<li>Runs locally</li>
+</ul>
+<h3 id="openhands-cloud">4. OpenHands Cloud</h3>
+<ul>
+<li>Hosted infrastructure</li>
+<li>Free tier with Minimax model</li>
+<li>GitHub/GitLab integration</li>
+</ul>
+<h3 id="openhands-enterprise">5. OpenHands Enterprise</h3>
+<ul>
+<li>Self-hosted in VPC</li>
+<li>Kubernetes deployment</li>
+<li>RBAC and permissions</li>
+<li>Slack/Jira/Linear integrations</li>
+</ul>
+<h2 id="core-architecture">Core Architecture</h2>
+<pre><code>openhands/
+├── openhands/           # Core Python package
+│   ├── agenthub/        # Agent implementations
+│   ├── controller/      # Agent controller
+│   ├── events/          # Event system
+│   ├── runtime/         # Runtime environment
+│   ├── server/          # REST API server
+│   └── ...
+├── frontend/            # React frontend
+├── evaluation/          # Evaluation framework
+└── enterprise/          # Enterprise features</code></pre>
+<h2 id="key-features">Key Features</h2>
+<h3 id="agent-system">1. Agent System</h3>
+<ul>
+<li>Multiple agent implementations</li>
+<li>AgentHub for agent management</li>
+<li>Configurable agent behaviors</li>
+</ul>
+<h3 id="runtime-environment">2. Runtime Environment</h3>
+<ul>
+<li>Docker-based sandboxing</li>
+<li>Local runtime support</li>
+<li>Remote runtime support</li>
+<li>E2B integration</li>
+</ul>
+<h3 id="event-driven-architecture">3. Event-Driven Architecture</h3>
+<ul>
+<li>Event system for actions</li>
+<li>Streamable observation system</li>
+<li>Action-observation loop</li>
+</ul>
+<h3 id="evaluation-framework">4. Evaluation Framework</h3>
+<ul>
+<li>SWE-bench integration</li>
+<li>Custom evaluation metrics</li>
+<li>Benchmark infrastructure</li>
+</ul>
+<h3 id="multi-modal-support">5. Multi-Modal Support</h3>
+<ul>
+<li>Browser automation (headless)</li>
+<li>Image understanding</li>
+<li>Screenshot capabilities</li>
+</ul>
+<h3 id="theory-of-mind-module">6. Theory of Mind Module</h3>
+<ul>
+<li>Research project for agent cognition</li>
+<li>Available separately</li>
+</ul>
+<h2 id="enterprise-features">Enterprise Features</h2>
+<ul>
+<li><strong>Integrations</strong>: Slack, Jira, Linear</li>
+<li><strong>Multi-user</strong>: Team collaboration</li>
+<li><strong>RBAC</strong>: Role-based access control</li>
+<li><strong>Kubernetes</strong>: Enterprise deployment</li>
+<li><strong>Source-available</strong>: Code visible, license
+required</li>
+</ul>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li>Docs: https://docs.openhands.dev</li>
+<li>SDK: https://docs.openhands.dev/sdk</li>
+<li>CLI:
+https://docs.openhands.dev/openhands/usage/run-openhands/cli-mode</li>
+<li>Paper: https://arxiv.org/abs/2511.03690</li>
+</ul>
+<h2 id="helixagent-integration-points">HelixAgent Integration
+Points</h2>
+<table>
+<thead>
+<tr>
+<th>OpenHands Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent System</td>
+<td>SubAgent system</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td>Container adapter</td>
+</tr>
+<tr>
+<td>Event System</td>
+<td>EventBus module</td>
+</tr>
+<tr>
+<td>Evaluation</td>
+<td>Benchmark module</td>
+</tr>
+<tr>
+<td>Browser</td>
+<td>Browser automation tools</td>
+</tr>
+<tr>
+<td>Multi-user</td>
+<td>Team management</td>
+</tr>
+</tbody>
+</table>
+<h2 id="porting-priority-high">Porting Priority: HIGH</h2>
+<p>OpenHands’ agent system, evaluation framework, and event-driven
+architecture are valuable for HelixAgent.</p>
+</body>
+</html>

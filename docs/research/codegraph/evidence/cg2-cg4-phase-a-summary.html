@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>cg2-cg4-phase-a-summary</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">cg2-cg4-phase-a-summary</h1>
+</header>
+<h1 id="codegraph-phase-a-captured-evidence-summary-cg2-cg4">CodeGraph
+Phase A — captured evidence summary (CG2-CG4)</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#cg2--scaffold">CG2 — scaffold</a></li>
+<li><a href="#cg3--installsh">CG3 — install.sh</a></li>
+<li><a href="#cg4--initialize--scan">CG4 — initialize + scan</a></li>
+<li><a href="#anti-bluff-verdict">Anti-bluff verdict</a></li>
+</ul>
+<h2 id="cg2-scaffold">CG2 — scaffold</h2>
+<p>Created <code>tools/codegraph/</code>: <code>README.md</code>,
+<code>codegraph.version</code>, <code>install.sh</code>,
+<code>verify.sh</code> (honest non-zero stub — Phase C / CG10 fills it),
+<code>agents/</code> (with <code>.gitkeep</code>). Added CONST-053
+<code>.gitignore</code> rules at the repo root for
+<code>tools/codegraph/node_modules/</code>,
+<code>tools/codegraph/package*.json</code>, and <code>.codegraph/</code>
+(build/generated artefacts — never versioned).</p>
+<p>All shell scripts: honest shebang (<code>#!/usr/bin/env bash</code>),
+<code>sh -n</code> + <code>bash -n</code> clean, in-source doc block
+(CONST-§11.4.18 / CONST-068).</p>
+<h2 id="cg3-install.sh">CG3 — install.sh</h2>
+<p><code>install.sh</code> is idempotent: reads the pinned version from
+<code>codegraph.version</code>, prechecks Node.js (&gt;=18 &lt;25) +
+npm, runs <code>npm install --prefix tools/codegraph</code>, resolves
+the binary to an absolute path, runs a <code>codegraph --version</code>
+self-check.</p>
+<p><strong>Version pin correction.</strong> The plan pinned
+<code>0.7.11</code>, but that version does not exist on npm
+(<code>npm error code ETARGET — No matching version found for @colbymchenry/codegraph@0.7.11</code>).
+See <code>cg3-install-attempt1-fail.txt</code>. npm <code>view</code>
+reports the available set ends at <code>0.7.12</code>;
+<code>0.7.11</code> was never published / was unpublished. Per
+incorporation-plan §8.4 (version drift is an expected, reviewed change)
+the pin was bumped to <strong><code>0.7.12</code></strong> — the current
+latest, still inside the supported Node window
+(<code>engines: node &gt;=18 &lt;25</code>).</p>
+<p>Successful install (<code>cg3-install-success.txt</code>):</p>
+<pre><code>==&gt; npm install --prefix .../tools/codegraph @colbymchenry/codegraph@0.7.12
+added 51 packages in 6s
+==&gt; Resolved binary : .../tools/codegraph/node_modules/.bin/codegraph
+==&gt; Binary self-check: codegraph --version
+0.7.12
+==&gt; CodeGraph 0.7.12 installed OK.</code></pre>
+<h2 id="cg4-initialize-scan">CG4 — initialize + scan</h2>
+<p>Per incorporation-plan §3.4, BOTH the meta-repo root and the inner
+<code>helix_code/</code> Go module were initialized
+(<code>codegraph init</code>) and scanned
+(<code>codegraph index</code>). <code>config.json</code>
+<code>exclude</code> lists were tuned to skip vendored / reference trees
+(<code>cli_agents/</code>, <code>cli_agents_resources/</code>,
+<code>Example_Projects/</code>, <code>dependencies/</code>,
+<code>github_pages_website/</code>, <code>external/</code>,
+<code>.codegraph/</code>).</p>
+<h3 id="meta-repo-root-graph-cg4-status-root.json">Meta-repo root graph
+(<code>cg4-status-root.json</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>files</td>
+<td>39,022</td>
+</tr>
+<tr>
+<td>nodes</td>
+<td>624,092</td>
+</tr>
+<tr>
+<td>edges</td>
+<td>1,644,454</td>
+</tr>
+<tr>
+<td>backend</td>
+<td>native</td>
+</tr>
+</tbody>
+</table>
+<p>Languages: c, cpp, csharp, go, java, javascript, jsx, kotlin, python,
+ruby, rust, scala, swift, tsx, typescript. Node kinds include 117,940
+functions, 132,834 methods, 14,905 interfaces, 15,698 structs, 1,137
+routes.</p>
+<h3 id="inner-go-module-graph-cg4-status-inner-helix_code.json">Inner Go
+module graph (<code>cg4-status-inner-helix_code.json</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>files</td>
+<td>1,541</td>
+</tr>
+<tr>
+<td>nodes</td>
+<td>32,959</td>
+</tr>
+<tr>
+<td>edges</td>
+<td>105,037</td>
+</tr>
+<tr>
+<td>backend</td>
+<td>native</td>
+</tr>
+</tbody>
+</table>
+<p>The inner module is the real HelixCode Go domain code: 10,849 Go
+functions, 7,397 methods, 194 interfaces, 2,328 structs, 121 routes.</p>
+<h3 id="sample-query-cg4-query-provider-root.json">Sample query
+(<code>cg4-query-provider-root.json</code>)</h3>
+<p><code>codegraph query Provider</code> against the root graph returns
+real HelixCode Go symbols — the <code>Provider</code> interface in
+multiple files under the actual repo tree
+(e.g. <code>helix_agent/MCP/submodules/.../provider.go</code>).</p>
+<h2 id="anti-bluff-verdict">Anti-bluff verdict</h2>
+<p><strong>PASS.</strong> CodeGraph genuinely installed
+(<code>0.7.12</code>, 51 packages) AND scanned the real HelixCode
+repository, producing two non-empty graphs:</p>
+<ul>
+<li>root: 624,092 nodes / 1,644,454 edges over 39,022 files;</li>
+<li>inner <code>helix_code/</code>: 32,959 nodes / 105,037 edges over
+1,541 files.</li>
+</ul>
+<p>No zero counts. <code>codegraph query</code> returns real symbols.
+This satisfies CONST-035 / Article XI §11.9 — the scan produced a
+genuine code-graph, not an empty / metadata-only artefact.</p>
+</body>
+</html>

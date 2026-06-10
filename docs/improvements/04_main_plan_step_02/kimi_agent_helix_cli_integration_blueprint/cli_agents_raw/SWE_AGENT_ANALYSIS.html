@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SWE_AGENT_ANALYSIS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">SWE_AGENT_ANALYSIS</h1>
+</header>
+<h1 id="swe-agent-analysis">SWE-agent Analysis</h1>
+<blockquote>
+<p><strong>Tier 1 Agent</strong> - Agent for software engineering tasks
+<strong>Source</strong>: https://github.com/princeton-nlp/SWE-agent
+<strong>Language</strong>: Python <strong>License</strong>: MIT</p>
+</blockquote>
+<h2 id="overview">Overview</h2>
+<p>SWE-agent is an open-source agent developed at Princeton NLP that
+performs software engineering tasks, particularly focused on GitHub
+issue resolution and bug fixing.</p>
+<h2 id="core-features">Core Features</h2>
+<h3 id="swe-bench-integration">1. SWE-bench Integration</h3>
+<ul>
+<li>Evaluated on SWE-bench benchmark</li>
+<li>Real GitHub issue resolution</li>
+<li>Bug fixing capabilities</li>
+</ul>
+<h3 id="computer-interface">2. Computer Interface</h3>
+<ul>
+<li>Filesystem navigation</li>
+<li>File viewing</li>
+<li>File editing</li>
+<li>Command execution</li>
+</ul>
+<h3 id="thought-action-loop">3. Thought-Action Loop</h3>
+<ul>
+<li>Reasoning before action</li>
+<li>Action execution</li>
+<li>Observation feedback</li>
+<li>Iterative improvement</li>
+</ul>
+<h3 id="demonstration-trajectories">4. Demonstration Trajectories</h3>
+<ul>
+<li>Training on demonstrations</li>
+<li>Few-shot learning</li>
+<li>Trajectory replay</li>
+</ul>
+<h3 id="multi-model-support">5. Multi-Model Support</h3>
+<ul>
+<li>GPT-4</li>
+<li>Claude</li>
+<li>Open-source models</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<pre><code>swe-agent/
+├── sweagent/
+│   ├── agent/          # Agent implementations
+│   ├── environment/    # Execution environment
+│   ├── models/         # LLM interfaces
+│   └── utils/          # Utilities
+└── config/             # Configuration files</code></pre>
+<h2 id="key-capabilities">Key Capabilities</h2>
+<ol type="1">
+<li><strong>Issue Resolution</strong>: Fixes GitHub issues</li>
+<li><strong>Code Navigation</strong>: Navigates large codebases</li>
+<li><strong>Bug Fixing</strong>: Identifies and fixes bugs</li>
+<li><strong>Evaluation</strong>: SWE-bench performance</li>
+</ol>
+<h2 id="helixagent-integration-points">HelixAgent Integration
+Points</h2>
+<table>
+<thead>
+<tr>
+<th>SWE-agent Feature</th>
+<th>HelixAgent Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Thought-Action</td>
+<td>Agent workflow</td>
+</tr>
+<tr>
+<td>Computer Interface</td>
+<td>Tool system</td>
+</tr>
+<tr>
+<td>Environment</td>
+<td>Container runtime</td>
+</tr>
+<tr>
+<td>Evaluation</td>
+<td>Benchmark system</td>
+</tr>
+</tbody>
+</table>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li>Website: https://swe-agent.com</li>
+<li>Paper: https://arxiv.org/abs/2405.15793</li>
+<li>GitHub: https://github.com/princeton-nlp/SWE-agent</li>
+</ul>
+<h2 id="porting-priority-high">Porting Priority: HIGH</h2>
+<p>SWE-agent’s issue resolution and evaluation framework are valuable
+additions.</p>
+</body>
+</html>

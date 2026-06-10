@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>05_phase_0_evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">05_phase_0_evidence</h1>
+</header>
+<h1 id="phase-0-evidence-log">Phase 0 Evidence Log</h1>
+<p>Each task’s acceptance check output is pasted below with a timestamp.
+This file is the rolled-up forensic record per synthesis spec §3.2 /
+Article XI §11.9.</p>
+<h2 id="p0-03-helixagent-submodule-integration">P0-03 — HelixAgent
+submodule integration</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T20:56+03:00 <strong>HelixAgent
+SHA committed:</strong>
+<code>fe3f69e766077360d730da934e292f86646dadfd</code> <strong>Total disk
+size:</strong> 777 MB (under 1 GB threshold — no shallow-init follow-up
+needed)</p>
+<h3 id="core-libraries-all-populated">Core libraries (all
+populated)</h3>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Files/dirs</th>
+<th>SHA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixLLM</td>
+<td>25</td>
+<td><code>a385d9e3d1b74d8064c2b112ff773052a791eb20</code></td>
+</tr>
+<tr>
+<td>HelixMemory</td>
+<td>15</td>
+<td><code>f1d55ea6cb297160790e4e21c472cf3a1626c42a</code></td>
+</tr>
+<tr>
+<td>HelixSpecifier</td>
+<td>13</td>
+<td><code>8f83107842f50010c09f63064b649bcf21330bc3</code></td>
+</tr>
+<tr>
+<td>LLMsVerifier</td>
+<td>266</td>
+<td><code>1d53ae3b72c77c1f27171c0677431c48d2d02bdd</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="cli_agents">cli_agents</h3>
+<ul>
+<li><strong>Total directory entries:</strong> 60</li>
+<li><strong>Populated (≥2 files):</strong> 47 (78%)</li>
+<li><strong>Phase 1 priority <code>claude-code</code>:</strong> ✓
+populated (<code>helix_agent/cli_agents/claude-code/</code>)</li>
+<li><strong>Empty (need Phase 2 sub-spec attention to fix HelixAgent’s
+pin first):</strong> 13
+<ul>
+<li><code>aider, conduit, continue, HelixCode (recursive ref), kilo-code, kiro-cli (no upstream access), mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset</code></li>
+</ul></li>
+</ul>
+<p><strong>Why empty:</strong> HelixAgent’s recorded submodule pointers
+reference SHAs that no longer exist on the corresponding upstream
+remotes (e.g. force-push or branch deletion upstream). Examples: -
+<code>cli_agents/aider</code>: <code>5c536a29...</code> not found on
+aider’s upstream - <code>cli_agents/plandex</code>:
+<code>9825d8d5...</code> not found on plandex’s upstream -
+<code>cli_agents/kiro-cli</code>: repo
+<code>git@github.com:stark1tty/kiro-cli.git</code> inaccessible (no
+rights)</p>
+<p>This is a <strong>pre-existing HelixAgent issue</strong>, not caused
+by this Phase 0 work. Per spec §1.3 N2 (HelixAgent rewrite is out of
+scope for this programme), the fix lives in HelixAgent’s own governance:
+each affected agent’s Phase 2 sub-spec will bump HelixAgent’s submodule
+pointer to a SHA that exists upstream.</p>
+<h3 id="gitmodules-entry-verified">.gitmodules entry verified</h3>
+<pre><code>[submodule &quot;HelixAgent&quot;]
+    path = HelixAgent
+    url = git@github.com:HelixDevelopment/HelixAgent.git</code></pre>
+<p>SSH URL per Constitution Rule 3.</p>
+<h3 id="pre-commit-secret-scan">Pre-commit secret scan</h3>
+<p><code>git diff --cached</code> produced only <code>.gitmodules</code>
++ <code>HelixAgent</code> gitlink +
+<code>docs/improvements/05_phase_0_evidence.md</code> +
+<code>docs/improvements/PROGRESS.md</code>. Token-pattern grep returned
+zero matches.</p>
+<h3 id="acceptance-check-status">Acceptance check status</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Plan acceptance criterion</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.gitmodules</code> has <code>[submodule &quot;HelixAgent&quot;]</code>
+SSH</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>helix_agent/{HelixLLM,HelixMemory,HelixSpecifier,LLMsVerifier}</code>
+exist + populated</td>
+<td>✓ all four</td>
+</tr>
+<tr>
+<td><code>helix_agent/cli_agents/</code> count ≥35</td>
+<td>✓ 60 entries (47 fully populated)</td>
+</tr>
+<tr>
+<td><code>helix_agent/cli_agents/claude-code</code> populated (Phase 1
+priority)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Pre-commit secret scan clean</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>No third-party submodule modifications</td>
+<td>✓ verified — no commits made inside any submodule</td>
+</tr>
+<tr>
+<td>HelixAgent total size measured</td>
+<td>✓ 777 MB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Outcome:</strong> Phase 1 (claude-code porting) is unblocked.
+The 13 unpopulated cli_agents are documented as deferred to Phase 2
+sub-spec time when each affected agent’s pin can be bumped in
+HelixAgent.</p>
+<h2 id="p0-04-verify-llmsverifier-pin-parity.sh">P0-04 —
+verify-llmsverifier-pin-parity.sh</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T21:30+03:00</p>
+<h3 id="live-pass-path-output-step-4.2">Live pass-path output (Step
+4.2)</h3>
+<pre><code>FAIL: LLMsVerifier pin divergence
+  submodules/llms_verifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+exit=1</code></pre>
+<h3 id="synthetic-divergence-test-step-4.4">Synthetic-divergence test
+(Step 4.4)</h3>
+<p>Because the live state was already divergent (exit=1), we used the
+canonical submodule’s <code>HEAD^</code> (<code>1d53ae3b...</code> —
+which equals the transitive SHA) to temporarily bring the two into
+parity, proving the script correctly reports exit=0 on parity:</p>
+<p>After checking out <code>PARENT_PARENT_SHA</code>
+(canonical→<code>1d53ae3b</code>, transitive→<code>1d53ae3b</code>):</p>
+<pre><code>OK: LLMsVerifier pin parity — both at 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+exit=0 (expected — script correctly detects parity)</code></pre>
+<p>After restoring canonical to <code>PARENT_SHA</code>
+(<code>629c5bd5</code>):</p>
+<pre><code>FAIL: LLMsVerifier pin divergence
+  submodules/llms_verifier  → 629c5bd5d141351270e72b6fb7359fa4b7881d7c
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+exit=1  (matches Step 4.2 — back to original live state)</code></pre>
+<p>Restore verified:
+<code>git -C submodules/llms_verifier rev-parse HEAD</code> returns
+<code>629c5bd5d141351270e72b6fb7359fa4b7881d7c</code> — correct.</p>
+<h3 id="live-divergence-status">Live divergence status</h3>
+<p>Pins diverge — see PROGRESS.md parking lot for resolution.</p>
+<ul>
+<li><code>submodules/llms_verifier</code> →
+<code>629c5bd5d141351270e72b6fb7359fa4b7881d7c</code></li>
+<li><code>helix_agent/LLMsVerifier</code> →
+<code>1d53ae3b72c77c1f27171c0677431c48d2d02bdd</code></li>
+</ul>
+<p>The canonical pin is one commit ahead of the transitive (HelixAgent)
+pin. Resolution deferred per spec §1.3 N2.</p>
+<h2 id="p0-05-api-key-migration-from-..helix_agent.env">P0-05 — API-key
+migration from ../helix_agent/.env</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T21:15:12+03:00</p>
+<p><strong>Source:</strong>
+<code>-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/helix_agent/.env</code></p>
+<p><strong>Destination:</strong>
+<code>-rw------- milosvasic milosvasic 7603 /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/.env</code></p>
+<p><strong>Key count:</strong> 109</p>
+<p><strong>Key set diff (source vs destination):</strong></p>
+<pre><code></code></pre>
+<p>(empty diff = identical key set)</p>
+<p><strong>In git index — precise exact-match check:</strong>
+<code>helix_code/helix_code/.env</code> is <strong>NOT</strong> tracked
+by git
+(<code>git ls-files --error-unmatch helix_code/helix_code/.env</code>
+exits 1). The earlier substring-grep count of 2 reflected unrelated
+tracked files (<code>helix_code/helix_code/.env.example</code> and
+<code>helix_code/helix_code/.env.full-test</code>), not the
+secret-bearing file.</p>
+<h2 id="p0-06-.gitignore-hardening">P0-06 — .gitignore hardening</h2>
+<p>Timestamp: 2026-05-04T21:22:51+03:00</p>
+<p>Root .gitignore tail:</p>
+<pre><code># Allow the e2e challenge testing framework but ignore test results
+!helix_code/tests/e2e/challenges/
+helix_code/tests/e2e/challenges/test-results/
+helix_code/tests/e2e/challenges/.DS_Store
+
+
+reports/demos/
+
+# === Secret hygiene (CONST-042) — added P0-06 ===
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+helix.security.json
+# === END Secret hygiene ===</code></pre>
+<p>Inner .gitignore tail:</p>
+<pre><code>
+# nyc test coverage
+.nyc_output
+
+# Dependency directories (if using Go modules, comment out vendor/ above)
+# vendor/
+
+# End of https://www.toptal.com/developers/gitignore/api/go,vim,emacs,visualstudiocode
+cli
+
+# === Secret hygiene (CONST-042) — added P0-06 ===
+.env
+.env.*
+!.env.example
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+helix.security.json
+# === END Secret hygiene ===</code></pre>
+<p>Verifications: - helix_code/.env is ignored: YES -
+helix_code/.env.example is NOT ignored: YES (good) - Tracked credential
+files (pre-existing CONST-042 violations, all committed before this
+task): <strong>three files</strong> are in the git index: -
+<code>helix_code/test/workers/ssh_keys/id_rsa</code> — SSH private key
+labelled <code>helixcode-test</code> -
+<code>helix_code/test/workers/ssh_keys/id_rsa.pub</code> — corresponding
+public key - <code>helix.security.json</code> — root-level security
+credential file (5929 bytes, executable)</p>
+<p>All three were committed before this programme began. The CONST-042
+<code>.gitignore</code> blocks prevent any NEW untracked instances of
+these patterns from being accidentally added. Proper remediation —
+key/credential rotation, <code>git rm --cached</code> to remove from
+index, regeneration of any derived secrets, and historical-leak
+documentation — is deferred to <strong>T08</strong>
+(<code>scripts/scan-secrets.sh</code>). The planted-secret test in T08
+will fail on the live tree due to these three files, triggering tracked
+remediation through the standard scan-secrets workflow.</p>
+<ul>
+<li><strong>Asymmetric coverage between root and inner
+<code>.gitignore</code> CONST-042 blocks</strong> is intentional and
+correct:
+<ul>
+<li>The <strong>root block</strong> adds 10 patterns: omits
+<code>.env.local</code> (pre-existing at root <code>.gitignore</code>
+line 5) and omits <code>.env</code> at block level (pre-existing at line
+4; P0-06 polish adds it back into the block to make the block
+self-contained).</li>
+<li>The <strong>inner block</strong> adds 8 patterns: omits
+<code>*.pem</code>, <code>*.key</code>, <code>*.crt</code> (pre-existing
+at inner <code>.gitignore</code> lines 85–87); omits
+<code>.env.local</code> (pre-existing at inner <code>.gitignore</code>
+line 44).</li>
+<li><strong>Effective combined coverage</strong>: all 12 canonical
+secret-file patterns are protected at both the root and inner levels —
+the asymmetry reflects de-duplication of already-existing lines, not a
+coverage gap.</li>
+</ul></li>
+</ul>
+<h2 id="p0-07-.env.example-refresh">P0-07 — .env.example refresh</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T21:36:23+03:00</p>
+<p><strong>Key parity vs ../helix_agent/.env:</strong> OK
+(identical)</p>
+<p><strong>Real values present:</strong> 0 (must be 0)</p>
+<p><strong>Total keys:</strong> 109</p>
+<p><strong>Verification commands and output:</strong></p>
+<pre><code>$ grep -oE &#39;^[A-Z_]+=&#39; ../helix_agent/.env | sort -u &gt; /tmp/p0-07-canonical-keys.txt
+$ wc -l /tmp/p0-07-canonical-keys.txt
+109 /tmp/p0-07-canonical-keys.txt
+
+$ diff &lt;(grep -oE &#39;^[A-Z_]+=&#39; ../helix_agent/.env | sort -u) \
+       &lt;(grep -oE &#39;^[A-Z_]+=&#39; helix_code/.env.example | sort -u)
+key-diff-exit=0
+
+$ result=$(grep -E &#39;^[A-Z_]+=[^&lt;]&#39; helix_code/.env.example | grep -vE &#39;=$&#39;)
+$ [ -z &quot;$result&quot; ] &amp;&amp; echo &quot;VERIFIED: zero real values present in .env.example&quot;
+VERIFIED: zero real values present in .env.example
+real-value-count=0</code></pre>
+<p><strong>CONST-042 status:</strong> COMPLIANT — every entry in
+<code>.env.example</code> is either a comment, blank line, or
+<code>KEY=&lt;REDACTED&gt;</code>.</p>
+<p><strong>File format:</strong> 7-line header block + 1 blank line +
+109 <code>KEY=&lt;REDACTED&gt;</code> lines = 117 lines total.</p>
+<h2 id="p0-08-scan-secrets.sh-planted-secret-test">P0-08 —
+scan-secrets.sh + planted-secret test</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T22:15+03:00</p>
+<h3 id="test-harness-output-step-8.4">Test harness output (Step
+8.4)</h3>
+<pre><code>TEST 1: clean directory → expect exit 0
+  PASS
+TEST 2: planted secret → expect non-zero exit
+  PASS — scanner detected the planted secret
+
+Results: 2 passed, 0 failed
+exit=0</code></pre>
+<h3 id="live-tree-run-step-8.5">Live-tree run (Step 8.5)</h3>
+<p>Live exit code: <strong>1</strong> (expected — known credential files
+in tracked tree per T06 polish evidence; NOT a script defect)</p>
+<p>Filenames flagged by the scanner (file:line only — values redacted
+per CONST-042):</p>
+<pre><code>./challenges/panoptic/docs/SECURITY.md:462:
+./challenges/panoptic/tests/security/panoptic_test.go:422:
+./challenges/panoptic/tests/security/panoptic_test.go:423:
+./challenges/panoptic/tests/security/panoptic_test.go:454:
+./challenges/pkg/env/redact_test.go:37:
+./challenges/pkg/env/redact_test.go:48:
+./challenges/pkg/logging/redacting_logger_test.go:55:
+./docs/COMPLETE_CLI_REFERENCE.md:908:
+./docs/superpowers/plans/2026-05-04-phase-0-foundation-cleanup.md:833:
+./docs/troubleshooting/guide.md:649:
+./.env:188:
+./.env:20:
+./.env:4:
+./.env:6:
+./.env:9:
+./helix_code/.env:118:
+./helix_code/.env:119:
+./helix_code/.env:186:
+./helix_code/.env:29:
+./helix_code/.env:41:
+./helix_code/.env:43:
+./helix_code/.env:46:
+./helix_code/.env:47:
+./helix_code/.env:53:
+./helix_code/internal/llm/vertexai_provider_test.go:25:
+./helix_code/internal/worker/ssh_pool_test.go:569:
+./helix_code/tests/e2e/test_bank/performance_security_tests.go:1073:
+./helix_code/test/workers/ssh_keys/id_rsa:1:
+./helix_qa/pkg/llm/google_test.go:334:
+./security/pkg/securestorage/securestorage_test.go:129:</code></pre>
+<h3 id="findings">Findings</h3>
+<p><strong>Tracked files with matches:</strong> | File | Tracked |
+Nature | |—|—|—| | <code>helix_code/test/workers/ssh_keys/id_rsa</code>
+| YES | Pre-existing tracked SSH private key (T06 known credential #1) |
+| <code>helix.security.json</code> | YES | Pre-existing tracked
+credential file (T06 known credential #2) | |
+<code>helix_code/test/workers/ssh_keys/id_rsa.pub</code> | YES (no
+match) | Public key — does not match any pattern | |
+<code>docs/COMPLETE_CLI_REFERENCE.md:908</code> | YES | Example/doc
+text: <code>sk-ant-your-anthropic-key</code> (placeholder, not a real
+key) | |
+<code>docs/superpowers/plans/...foundation-cleanup.md:833</code> | YES |
+Planted-secret TDD test example: <code>sk-FAKE0123456789...</code>
+(fake) | | <code>docs/troubleshooting/guide.md:649</code> | YES |
+Documentation snippet: <code>-----BEGIN OPENSSH PRIVATE KEY-----</code>
+(illustrative, incomplete) | |
+<code>helix_code/internal/llm/vertexai_provider_test.go:25</code> | YES
+| Unit-test fixture: embedded fake RSA key block (test data, not
+rotatable) | |
+<code>helix_code/internal/worker/ssh_pool_test.go:569</code> | YES |
+Unit-test stub: partial <code>-----BEGIN OPENSSH PRIVATE KEY-----</code>
+header only | |
+<code>helix_code/tests/e2e/test_bank/performance_security_tests.go:1073</code>
+| YES | Test fixture: <code>sk-1234567890abcdef</code> (clearly fake)
+|</p>
+<p><strong>Not-tracked files flagged</strong> (untracked working-tree
+files — not a commit risk): - <code>.env</code>,
+<code>helix_code/.env</code>: the real secret-bearing env files
+(correctly untracked per P0-06 gitignore) -
+<code>challenges/panoptic/...</code>, <code>helix_qa/...</code>,
+<code>security/...</code>: submodule working-tree files, not tracked at
+root</p>
+<p><strong>The 3 pre-existing tracked credentials from T06
+polish:</strong> - <code>helix_code/test/workers/ssh_keys/id_rsa</code>
+— correctly detected by scanner (pattern:
+<code>-----BEGIN ... PRIVATE KEY-----</code>) -
+<code>helix_code/test/workers/ssh_keys/id_rsa.pub</code> — public key,
+no secret pattern matches (expected) - <code>helix.security.json</code>
+— NOT detected in this run (see note below)</p>
+<p><strong>Note on <code>helix.security.json</code>:</strong> The
+scanner’s <code>SCAN_TARGET=&quot;.&quot;</code> run did not flag
+<code>helix.security.json</code> in the output above. The file’s content
+does not match any of the scanner’s current patterns (it’s a JSON
+credential file that likely uses JWTs or other formats not in the regex
+set). The file IS blocked from future commits via
+<code>.gitignore</code> (P0-06) and will be addressed in P0-T08.5
+remediation. The scanner’s pattern set can be extended in P0-T08.5 to
+cover JWT/JSON credential formats.</p>
+<p><strong>Additional tracked files with fake/doc patterns</strong>
+(<code>docs/*.md</code> and test fixtures): these are
+false-positive-in-intent — the patterns are doc examples and test
+fixtures, not real rotatable secrets. They will be reviewed during
+P0-T08.5 to determine whether to add per-file exclusions or restructure
+test data. No immediate action required.</p>
+<hr />
+<h2 id="p0-08.7-port-sonarqube-snyk-security-scan-integration-through-containers">P0-08.7
+— Port SonarQube + Snyk security scan integration (through
+Containers)</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T22:30+03:00
+<strong>Commits:</strong> <code>1d728de</code> + <code>2494bc8</code> +
+<code>e29e2f6</code> + <code>16a4490</code> + (this commit)
+<strong>Branch:</strong> main</p>
+<h3 id="sub-commit-1-compose-files-configs-1d728de">Sub-commit 1 —
+Compose files + configs (<code>1d728de</code>)</h3>
+<p>Files created: -
+<code>helix_code/docker/security/sonarqube/docker-compose.yml</code> —
+adapted from HelixAgent; container names changed from
+<code>helixagent-*</code> to <code>helixcode-*</code>; subnet changed to
+<code>172.21.0.0/16</code> -
+<code>helix_code/docker/security/sonarqube/sonar-project.properties</code>
+— project key/name/version use <code>${SONARQUBE_PROJECT_KEY}</code>
+etc. - <code>helix_code/docker/security/snyk/docker-compose.yml</code> —
+adapted; uses <code>${SNYK_TOKEN:-}</code> -
+<code>helix_code/docker/security/snyk/Dockerfile</code> — adapted;
+references HelixCode project -
+<code>helix_code/sonar-project.properties</code> — root-level; uses
+<code>${SONARQUBE_PROJECT_KEY}</code> env-var -
+<code>helix_code/.snyk</code> — root-level Snyk policy (v1.25.0)</p>
+<p>Credential scan result: <code>No credentials found - OK</code></p>
+<h3 id="sub-commit-2-master-orchestrator-script-2494bc8">Sub-commit 2 —
+Master orchestrator script (<code>2494bc8</code>)</h3>
+<ul>
+<li><code>helix_code/scripts/security-scan.sh</code> — supports
+<code>snyk|sonarqube|trivy|gosec|grype|kics|semgrep|all</code></li>
+<li>Loads credentials from <code>helix_code/.env</code>
+(gitignored)</li>
+<li>Reports to
+<code>reports/security/&lt;scanner&gt;-&lt;timestamp&gt;.&lt;ext&gt;</code></li>
+<li><code>--help</code> dry run verified:</li>
+</ul>
+<pre><code>$ ./scripts/security-scan.sh --help
+Usage:
+  ./scripts/security-scan.sh [scanner] [options]
+
+Scanners:
+  snyk        - Snyk vulnerability scanner (requires SNYK_TOKEN)
+  sonarqube   - SonarQube code quality and security analysis
+  ...
+exit 0</code></pre>
+<h3 id="sub-commit-3-makefile-targets-e29e2f6">Sub-commit 3 — Makefile
+targets (<code>e29e2f6</code>)</h3>
+<p>Inner Makefile (<code>helix_code/Makefile</code>) targets added:
+<code>security-scan</code>, <code>security-scan-snyk</code>,
+<code>security-scan-sonarqube</code>, <code>security-scan-trivy</code>,
+<code>security-scan-gosec</code>, <code>security-scan-grype</code>,
+<code>security-scan-kics</code>, <code>security-scan-semgrep</code>,
+<code>security-scan-all</code>, <code>deps-scan</code>,
+<code>secrets-scan</code>, <code>scan-start-sonar</code>,
+<code>scan-stop</code></p>
+<p>Root Makefile targets added: <code>scan-sonarqube</code>,
+<code>scan-snyk</code>, <code>scan-all</code>, <code>scan-gosec</code>,
+<code>scan-trivy</code>, <code>scan-secrets</code></p>
+<p>Dry-run verification:</p>
+<pre><code>$ make -n scan-sonarqube
+make -C HelixCode security-scan-sonarqube
+./scripts/security-scan.sh sonarqube</code></pre>
+<h3 id="sub-commit-4-containers-bootmanager-wiring-16a4490">Sub-commit 4
+— containers BootManager wiring (<code>16a4490</code>)</h3>
+<ul>
+<li><code>helix_code/cmd/security_scan/main.go</code> (~170 lines)
+wires:
+<ul>
+<li><code>digital.vasic.containers/pkg/runtime.AutoDetect(ctx)</code>
+for runtime detection</li>
+<li><code>digital.vasic.containers/pkg/endpoint.NewEndpoint()</code>
+builder for SonarQube + Snyk endpoints</li>
+<li><code>digital.vasic.containers/pkg/health.NewDefaultChecker()</code>
+with HTTP health on <code>:9000/api/system/status</code></li>
+<li><code>digital.vasic.containers/pkg/boot.NewBootManager().BootAll(ctx)</code>
+for lifecycle management</li>
+<li>Supports <code>-action=start|stop|status</code></li>
+</ul></li>
+</ul>
+<p>Build verification:</p>
+<pre><code>$ go build ./cmd/security_scan/...
+# exit 0 — binary compiles</code></pre>
+<p><code>scripts/security-scan.sh start_sonarqube()</code> updated to
+call <code>go run ./cmd/security_scan</code> when Go is available; falls
+back to direct compose otherwise.</p>
+<h3 id="sub-commit-5-challenges-evidence-this-commit">Sub-commit 5 —
+Challenges + evidence (this commit)</h3>
+<p>Challenges created: -
+<code>helix_code/tests/e2e/challenges/sonarqube/run.sh</code> — 8
+sections, 33 tests (config-correctness only) -
+<code>helix_code/tests/e2e/challenges/sonarqube/expected.json</code> -
+<code>helix_code/tests/e2e/challenges/snyk/run.sh</code> — 7 sections,
+26 tests (config-correctness only) -
+<code>helix_code/tests/e2e/challenges/snyk/expected.json</code></p>
+<p>Challenge run output (both 100% PASS):</p>
+<pre><code>===========================================
+  SonarQube Security Scanning Challenge
+===========================================
+[PASS] Root sonar-project.properties exists
+[PASS] SonarQube docker-compose.yml exists
+[PASS] SONAR_TOKEN uses env-var reference (not hardcoded)
+[PASS] sonar.projectKey uses env-var reference in root properties
+[PASS] No HelixAgent-specific references in HelixCode configs
+[PASS] SonarQube service defined
+[PASS] PostgreSQL service defined
+[PASS] SonarQube uses pinned community edition image
+[PASS] Memory limits configured
+[PASS] SonarQube health check uses /api/system/status
+[PASS] Security network defined
+[PASS] security-scan.sh --help shows sonarqube mode
+[PASS] cmd/security_scan imports containers BootManager
+[PASS] cmd/security_scan uses runtime.AutoDetect
+Results: 33/33 passed, 0 failed
+
+===========================================
+  Snyk Security Scanning Challenge
+===========================================
+[PASS] Snyk docker-compose.yml exists
+[PASS] SNYK_TOKEN uses env-var reference (not hardcoded)
+[PASS] No HelixAgent-specific container names
+[PASS] snyk-deps service defined
+[PASS] snyk-full service defined
+[PASS] Dockerfile uses official snyk/snyk-cli base image
+[PASS] .snyk has policy version
+[PASS] security-scan.sh reads SNYK_TOKEN from env
+[PASS] cmd/security_scan imports containers BootManager
+[PASS] cmd/security_scan handles snyk scanner
+Results: 26/26 passed, 0 failed</code></pre>
+<h3 id="credential-rotation-note-mandatory-before-live-scans">CREDENTIAL
+ROTATION NOTE — MANDATORY before live scans</h3>
+<p>This task does NOT run live scans. The original
+<code>helix.security.json</code> credentials (SonarQube token, Snyk
+token, project_key, organization) were committed and are considered
+compromised (see P0-T08.5). The user MUST rotate these before any live
+scan can succeed:</p>
+<ol type="1">
+<li><strong>SonarQube token</strong>: generate a new API token in
+SonarQube UI → set <code>SONAR_TOKEN=&lt;new&gt;</code> in
+<code>helix_code/.env</code></li>
+<li><strong>SonarQube project key</strong>: choose a new key → set
+<code>SONARQUBE_PROJECT_KEY=&lt;new&gt;</code> in
+<code>helix_code/.env</code></li>
+<li><strong>Snyk token</strong>: generate a new token at snyk.io → set
+<code>SNYK_TOKEN=&lt;new&gt;</code> in <code>helix_code/.env</code></li>
+<li><strong>Snyk organization</strong>: set
+<code>SNYK_ORG=&lt;new_org_id&gt;</code> in
+<code>helix_code/.env</code></li>
+</ol>
+<p>After rotation, live scan can be invoked with:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> scan-sonarqube    <span class="co"># from root</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> scan-snyk         <span class="co"># from root</span></span></code></pre></div>
+<h3 id="scan-secrets.sh-verification">scan-secrets.sh verification</h3>
+<pre><code>$ bash scripts/scan-secrets.sh helix_code/docker/security helix_code/sonar-project.properties helix_code/.snyk ...
+OK: no credential patterns found
+exit code: 0</code></pre>
+<h3 id="remote-convergence-all-5-commits">Remote convergence (all 5
+commits)</h3>
+<p>All 3 distinct remotes (github, gitlab, upstream) converged on each
+sub-commit SHA. Final HEAD after sub-commit 5 (this evidence): see
+PROGRESS.md.</p>
+<p><strong>Script correctness verdict:</strong> The scanner is operating
+correctly on real data. It detects the known tracked private key
+(<code>id_rsa</code>) and real api-key patterns in the live
+<code>.env</code> files. Live-run exit=1 is correct given the presence
+of pre-existing tracked credentials.</p>
+<h2 id="p0-t08.7-fix-it-t08.7-code-quality-review-findings">P0-T08.7
+(fix-it) — T08.7 code-quality review findings</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T22:40+03:00 <strong>Fixes
+applied:</strong> Critical 1, Critical 2, Important 3, Important 4,
+Important 5, Important 6 (TODO), Important 7</p>
+<h3 id="critical-1-hardcoded-db-credentials">Critical 1 — Hardcoded DB
+credentials</h3>
+<p><code>helix_code/docker/security/sonarqube/docker-compose.yml</code>
+— replaced hardcoded <code>sonar</code> values:</p>
+<pre><code># Before:
+SONAR_JDBC_USERNAME: sonar
+SONAR_JDBC_PASSWORD: sonar
+POSTGRES_USER: sonar
+POSTGRES_PASSWORD: sonar
+
+# After:
+SONAR_JDBC_USERNAME: ${SONARQUBE_DB_USER:-sonar}
+SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}
+POSTGRES_USER: ${SONARQUBE_DB_USER:-sonar}
+POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}</code></pre>
+<p>Verification:</p>
+<pre><code>$ grep -nE &quot;PASSWORD: sonar$|PASSWORD: \&quot;sonar\&quot;$&quot; helix_code/docker/security/sonarqube/docker-compose.yml
+# (empty — PASS)
+
+$ grep -nE &quot;PASSWORD:.*sonar&quot; helix_code/docker/security/sonarqube/docker-compose.yml
+21:      SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}
+56:      POSTGRES_PASSWORD: ${SONARQUBE_DB_PASSWORD:-sonar}
+# env-var form — PASS</code></pre>
+<h3 id="critical-2-stale-todo-removed">Critical 2 — Stale TODO
+removed</h3>
+<p><code>helix_code/scripts/security-scan.sh</code> lines 31-34 removed.
+Original stale text:</p>
+<pre><code># TODO(P0-T08.7/4): replace docker-compose invocations below with containers BootManager call:
+#   go run ./cmd/security_scan -scanner=sonarqube
+# For now, direct compose calls are used as an MVP; the containers BootManager wiring
+# is deferred to Sub-commit 4 / Phase 3.</code></pre>
+<p>Replaced with single-line accurate status note. Sub-commit 4
+(<code>16a4490</code>) had already landed.</p>
+<p>Verification:</p>
+<pre><code>$ grep -nE &quot;deferred to Sub-commit 4|For now, direct compose calls&quot; helix_code/scripts/security-scan.sh
+# (empty — PASS)</code></pre>
+<h3 id="important-3-set--euo-pipefail">Important 3 — set -euo
+pipefail</h3>
+<pre><code>$ head -40 helix_code/scripts/security-scan.sh | grep -nE &quot;^set -&quot;
+36:set -euo pipefail
+# PASS
+
+$ helix_code/scripts/security-scan.sh --help &gt; /dev/null 2&gt;&amp;1; echo &quot;exit=$?&quot;
+exit=0
+# PASS — no unbound variable errors on --help path</code></pre>
+<h3 id="important-4-stop-action-returns-explicit-error">Important 4 —
+stop action returns explicit error</h3>
+<p><code>helix_code/cmd/security_scan/main.go</code> — both
+<code>handleSonarQube</code> and <code>handleSnyk</code> stop cases now
+return <code>fmt.Errorf(...)</code>. Flag description updated to
+<code>&quot;start|status (stop is not yet implemented)&quot;</code>.</p>
+<p>Verification:</p>
+<pre><code>$ go build ./cmd/security_scan/...
+# exit=0 — PASS
+
+$ go run ./cmd/security_scan/main.go -action=stop -scanner=sonarqube 2&gt;&amp;1 | head -3
+2026/05/04 22:38:15 security-scan: detected runtime: podman
+2026/05/04 22:38:15 security-scan: sonarqube stop failed: stop action not yet implemented; use &#39;make scan-stop&#39; or &#39;docker-compose -f &lt;file&gt; down&#39; (TODO: wire ComposeOrchestrator.Down())
+exit status 1
+# exits non-zero with explicit message — PASS</code></pre>
+<h3 id="important-5-latest-image-tags-pinned">Important 5 — :latest
+image tags pinned</h3>
+<p>All 5 container-fallback image tags in
+<code>helix_code/scripts/security-scan.sh</code> pinned: -
+<code>securego/gosec:latest</code> → <code>securego/gosec:2.21.4</code>
+- <code>aquasec/trivy:latest</code> → <code>aquasec/trivy:0.55.2</code>
+- <code>anchore/grype:latest</code> → <code>anchore/grype:v0.86.0</code>
+- <code>checkmarx/kics:latest</code> →
+<code>checkmarx/kics:v2.1.4</code> -
+<code>returntocorp/semgrep:latest</code> →
+<code>returntocorp/semgrep:1.93.0</code></p>
+<p>Verification:</p>
+<pre><code>$ grep -nE &quot;:latest&quot; helix_code/scripts/security-scan.sh
+# (empty — PASS)</code></pre>
+<h3 id="important-6-refactor-deferred-with-todo">Important 6 — Refactor
+deferred with TODO</h3>
+<p>Added TODO comment at top of <code>security-scan.sh</code> (line
+6):</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">(P3-refactor): this file handles 7+ scanners in ~580 lines; split into</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># per-scanner sourced modules under scripts/scanners/ in a future Phase 3 task.</span></span></code></pre></div>
+<h3 id="important-7-reportssecurity-gitignored">Important 7 —
+reports/security/ gitignored</h3>
+<p>Added to <code>helix_code/.gitignore</code>:</p>
+<pre><code># === Security reports (never commit scanner output) ===
+reports/security/
+reports/security-cache/
+# === END Security reports ===</code></pre>
+<p>Verification:</p>
+<pre><code>$ git check-ignore helix_code/reports/security/test.json; echo &quot;exit=$?&quot;
+helix_code/reports/security/test.json
+exit=0
+# PASS</code></pre>
+<h3 id="scan-secrets-clean">scan-secrets clean</h3>
+<pre><code>$ ./scripts/scan-secrets.sh
+OK: no credential patterns found in .
+exit=0</code></pre>
+<hr />
+<h2 id="p0-09-pre-push-hook-installer-setup.sh-wiring">P0-09 — pre-push
+hook + installer + setup.sh wiring</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T22:43:12+03:00</p>
+<p><strong>Hook source:</strong>
+<code>-rwxr-xr-x scripts/git_hooks/pre-push</code></p>
+<p><strong>Hook installed:</strong>
+<code>-rwxr-xr-x .git/hooks/pre-push</code></p>
+<p><strong>Installer output (first run — 1 hook installed):</strong></p>
+<pre><code>  installed: .git/hooks/pre-push
+OK: 1 hook(s) installed/updated under .git/hooks</code></pre>
+<p><strong>Installer output (second run — idempotency
+verified):</strong></p>
+<pre><code>OK: 0 hook(s) installed/updated under .git/hooks</code></pre>
+<p><strong>setup.sh hook-install line:</strong></p>
+<pre><code>./scripts/install-git-hooks.sh</code></pre>
+<p><strong>Force-block logic verified by inspection (10/10 cases
+PASS):</strong></p>
+<p>All three force-flag variants match correctly in the hook’s case
+statement:</p>
+<table>
+<thead>
+<tr>
+<th>Test cmdline</th>
+<th>Expected is_force</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git push origin main --force</code></td>
+<td>1</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push origin main --force</code></td>
+<td>1</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push --force origin main</code></td>
+<td>1</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push -f origin main</code></td>
+<td>1</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push origin main -f</code></td>
+<td>1</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push --force-with-lease origin main</code></td>
+<td>1</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push --force-with-lease</code></td>
+<td>1</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push origin main</code></td>
+<td>0</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push origin main --no-force</code></td>
+<td>0</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td><code>git push upstream main</code></td>
+<td>0</td>
+<td>PASS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>HELIX_FORCE_PUSH_APPROVED=1 bypass verified:</strong> - Force
+push WITHOUT approval → BLOCKED (exit 1) - Force push WITH
+<code>HELIX_FORCE_PUSH_APPROVED=1</code> → ALLOWED (exit 0)</p>
+<p><strong>Non-force direct invocation:</strong></p>
+<pre><code>$ bash scripts/git_hooks/pre-push origin git@github.com:HelixDevelopment/HelixCode.git
+exit=0</code></pre>
+<p><strong>Platform degradation:</strong> When
+<code>/proc/$PPID/cmdline</code> is not readable (macOS/BSD), the hook
+warns but exits 0 — it does not block. CONST-043 constitutional clause
+is the actual contract.</p>
+<p><strong>scan-secrets post-install verification:</strong></p>
+<pre><code>$ ./scripts/scan-secrets.sh
+OK: no credential patterns found in .
+exit=0</code></pre>
+<p><strong>Real push (this commit) succeeds:</strong> indicates
+non-force pushes are not blocked by the installed hook.</p>
+<p><strong>CONST-042 compliance:</strong> scan-secrets clean (above).
+<strong>CONST-043 compliance:</strong> pre-push hook is installed and
+blocks –force / -f / –force-with-lease without
+HELIX_FORCE_PUSH_APPROVED=1.</p>
+<hr />
+<h2 id="p0-10-helix_code-inner-go-app-governance-triplet">P0-10 —
+helix_code/ inner Go-app governance triplet</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T22:55+03:00
+<strong>Branch:</strong> main</p>
+<h3 id="files-created">Files created</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Size</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CONSTITUTION.md</code></td>
+<td>5622 bytes</td>
+<td><code>helix_code/helix_code/CONSTITUTION.md</code></td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>6204 bytes</td>
+<td><code>helix_code/helix_code/CLAUDE.md</code></td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>4787 bytes</td>
+<td><code>helix_code/helix_code/AGENTS.md</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="anchor-verification">Anchor verification</h3>
+<p>Each file was verified to contain all three constitutional
+anchors:</p>
+<pre><code>$ grep -c &quot;11\.9\|tests do execute&quot; helix_code/CONSTITUTION.md helix_code/CLAUDE.md helix_code/AGENTS.md
+helix_code/CONSTITUTION.md:3
+helix_code/CLAUDE.md:2
+helix_code/AGENTS.md:2
+
+$ grep -c &quot;CONST-042\|CONST-043&quot; helix_code/CONSTITUTION.md helix_code/CLAUDE.md helix_code/AGENTS.md
+helix_code/CONSTITUTION.md:2
+helix_code/CLAUDE.md:3
+helix_code/AGENTS.md:4</code></pre>
+<p>All files contain: - Article XI §11.9 anti-bluff anchor (verbatim
+user mandate + operative rule) ✓ - CONST-042 (No-Secret-Leak) ✓ -
+CONST-043 (No-Force-Push) ✓</p>
+<h3 id="addenda-markers-verified">ADDENDA markers verified</h3>
+<pre><code>$ grep -c &quot;BEGIN: REPO-SPECIFIC ADDENDA\|END: REPO-SPECIFIC ADDENDA&quot; \
+    helix_code/CONSTITUTION.md helix_code/CLAUDE.md helix_code/AGENTS.md
+helix_code/CONSTITUTION.md:2
+helix_code/CLAUDE.md:2
+helix_code/AGENTS.md:2</code></pre>
+<p>All three files have
+<code>&lt;!-- BEGIN: REPO-SPECIFIC ADDENDA --&gt;</code> /
+<code>&lt;!-- END: REPO-SPECIFIC ADDENDA --&gt;</code> delimiters. ✓</p>
+<h3 id="synthesis-spec-references-verified">Synthesis spec references
+verified</h3>
+<pre><code>$ grep -c &quot;2026-05-04-cli-agent-fusion-synthesis-design&quot; \
+    helix_code/CONSTITUTION.md helix_code/CLAUDE.md helix_code/AGENTS.md
+helix_code/CONSTITUTION.md:1
+helix_code/CLAUDE.md:2
+helix_code/AGENTS.md:2</code></pre>
+<p>All three reference
+<code>../docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>.
+✓</p>
+<h3 id="secret-scan">Secret scan</h3>
+<pre><code>$ for f in helix_code/CLAUDE.md helix_code/AGENTS.md helix_code/CONSTITUTION.md; do
+    bash scripts/scan-secrets.sh &quot;$f&quot;; echo &quot;[$f] exit=$?&quot;
+  done
+OK: no credential patterns found in helix_code/CLAUDE.md
+[helix_code/CLAUDE.md] exit=0
+OK: no credential patterns found in helix_code/AGENTS.md
+[helix_code/AGENTS.md] exit=0
+OK: no credential patterns found in helix_code/CONSTITUTION.md
+[helix_code/CONSTITUTION.md] exit=0</code></pre>
+<p>CONST-042 compliance: ✓ clean</p>
+<h3 id="acceptance-checklist">Acceptance checklist</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All three files exist at
+<code>helix_code/{CLAUDE,AGENTS,CONSTITUTION}.md</code></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Each file contains Article XI §11.9 verbatim</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Each file contains CONST-042 (No-Secret-Leak)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Each file contains CONST-043 (No-Force-Push)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Each file has REPO-SPECIFIC ADDENDA delimiters</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Each file references synthesis spec</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>No secrets present (scan-secrets clean)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>No third-party submodule modifications</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<h2 id="p0-11-article-xii-added-to-root-constitution.md">P0-11 — Article
+XII added to root CONSTITUTION.md</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T21:30:00+03:00</p>
+<p><strong>Anchors added:</strong> - Article XII §12.1 (CONST-042) —
+No-Secret-Leak - Article XII §12.2 (CONST-043) — No-Force-Push</p>
+<p><strong>Verification:</strong></p>
+<pre><code>464:## Article XII — Repository Safety
+466:### §12.1 (CONST-042) — No-Secret-Leak
+477:### §12.2 (CONST-043) — No-Force-Push
+486:**Cascade requirement:** Same as §12.1 — verbatim, every owned-by-us repo&#39;s three governance files.</code></pre>
+<p><strong>Existing CONST-041 (MCP) intact:</strong></p>
+<pre><code>436:## CONST-041: MCP / LSP / ACP / Embedding / RAG / Skills / Plugins Integration Mandate</code></pre>
+<p><strong>Total CONST-NNN entries (CONST-001 through
+CONST-041):</strong> 41 (unchanged)</p>
+<p><strong>Insertion point:</strong> Between line 462 (<code>---</code>
+separator after CONST-041) and <code>## Amendment Process</code>
+section, at line 464.</p>
+<hr />
+<h2 id="p0-12-root-sister-file-cascade-claudeagentscrushqwen">P0-12 —
+root sister-file cascade (CLAUDE/AGENTS/CRUSH/QWEN)</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T23:15:00+03:00</p>
+<p><strong>Anchor presence after cascade:</strong></p>
+<pre><code>  CLAUDE.md    anti-bluff=3  CONST-042=1  CONST-043=1
+  AGENTS.md    anti-bluff=2  CONST-042=1  CONST-043=1
+  CRUSH.md     anti-bluff=2  CONST-042=1  CONST-043=1
+  QWEN.md      anti-bluff=2  CONST-042=1  CONST-043=1</code></pre>
+<p><strong>Legitimate CONST-041 cross-reference preserved in
+AGENTS.md:</strong></p>
+<pre><code>425:**Constitutional Impact**: Violates CONST-041 (MCP/LSP/ACP/Embedding/RAG/Skills/Plugins Integration Mandate).</code></pre>
+<p><strong>Secret scan (four files):</strong></p>
+<pre><code>OK: no credential patterns found in CLAUDE.md
+OK: no credential patterns found in AGENTS.md
+OK: no credential patterns found in CRUSH.md
+OK: no credential patterns found in QWEN.md
+all-exit=0</code></pre>
+<p><strong>Submodule audit:</strong> No third-party submodule
+modifications — HelixAgent, Containers, Challenges, HelixQA, Security,
+LLMsVerifier all had zero commits in last 30 minutes.</p>
+<p><strong>Edit strategy:</strong> - <code>CLAUDE.md</code> +
+<code>AGENTS.md</code>: existing anti-bluff section replaced with
+canonical <code>## Constitutional anchors</code> block (which includes
+§11.9 + CONST-042 + CONST-043). Non-canonical ⚠️ inline format
+superseded by structured heading block. - <code>CRUSH.md</code> +
+<code>QWEN.md</code>: full canonical anchor block inserted after
+title/intro paragraph (previously missing all anchors).</p>
+<p><strong>Acceptance checklist:</strong> | Criterion | Result | |—|—| |
+CLAUDE.md has anti-bluff §11.9 (count ≥1) | ✓ count=3 | | CLAUDE.md has
+CONST-042 (count ≥1) | ✓ count=1 | | CLAUDE.md has CONST-043 (count ≥1)
+| ✓ count=1 | | AGENTS.md has anti-bluff §11.9 (count ≥1) | ✓ count=2 |
+| AGENTS.md has CONST-042 (count ≥1) | ✓ count=1 | | AGENTS.md has
+CONST-043 (count ≥1) | ✓ count=1 | | CRUSH.md has anti-bluff §11.9
+(count ≥1) | ✓ count=2 | | CRUSH.md has CONST-042 (count ≥1) | ✓ count=1
+| | CRUSH.md has CONST-043 (count ≥1) | ✓ count=1 | | QWEN.md has
+anti-bluff §11.9 (count ≥1) | ✓ count=2 | | QWEN.md has CONST-042 (count
+≥1) | ✓ count=1 | | QWEN.md has CONST-043 (count ≥1) | ✓ count=1 | |
+AGENTS.md CONST-041 (MCP) cross-ref preserved | ✓ line 425 | | Secret
+scan clean (4 files) | ✓ all exit=0 | | No third-party submodule
+modifications | ✓ |</p>
+<h2 id="p0-13-root-claude.md-3.2-bluff-fix">P0-13 — root CLAUDE.md §3.2
+bluff fix</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T23:20:29+03:00</p>
+<p><strong>Corrected line (CLAUDE.md:112):</strong></p>
+<pre><code>├── helix_code/      ← TRACKED SUBDIRECTORY (NOT a submodule — meta-repo&#39;s primary inner directory; circular reference if promoted; see §3.2.1)</code></pre>
+<p><strong>No remaining mislabel:</strong>
+<code>grep -nE &quot;HelixCode.*SUBMODULE&quot; CLAUDE.md</code> returns only this
+corrected line (with “NOT a submodule” qualifier present).</p>
+<h2 id="p0-14-governance-cascade-across-owned-by-us-submodules">P0-14 —
+governance cascade across owned-by-us submodules</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T23:50:00+03:00</p>
+<p><strong>Verifier extended patterns:</strong> CONST-042, CONST-043
+added to MANDATORY_PATTERNS in
+<code>scripts/verify-governance-cascade.sh</code>.</p>
+<p><strong>Root files fixed:</strong> Added “The bar for shipping is
+not…” to root CLAUDE.md and AGENTS.md (§11.9 operative rule), which then
+cascaded to all submodules.</p>
+<p><strong>Cascade verifier output (final):</strong></p>
+<pre><code>GOVERNANCE_CASCADE: PASSED
+exit=0</code></pre>
+<p><strong>Owned-by-us submodule SHAs after cascade:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>SHA</th>
+<th>Branch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>helix_qa</td>
+<td>ecebe9a</td>
+<td>main</td>
+</tr>
+<tr>
+<td>Challenges</td>
+<td>53d47c8</td>
+<td>main</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>6736040</td>
+<td>main</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>e7c09c1</td>
+<td>main</td>
+</tr>
+<tr>
+<td>submodules/llms_verifier</td>
+<td>d473231d</td>
+<td>main</td>
+</tr>
+<tr>
+<td>submodules/doc_processor</td>
+<td>764a9a9</td>
+<td>master</td>
+</tr>
+<tr>
+<td>submodules/llm_orchestrator</td>
+<td>c2b04ad</td>
+<td>master</td>
+</tr>
+<tr>
+<td>submodules/llm_provider</td>
+<td>afe0ac5</td>
+<td>master</td>
+</tr>
+<tr>
+<td>submodules/vision_engine</td>
+<td>9a35a9f</td>
+<td>master</td>
+</tr>
+<tr>
+<td>HelixAgent</td>
+<td>9a19ac12</td>
+<td>main</td>
+</tr>
+<tr>
+<td>helix_agent/HelixLLM</td>
+<td>4a412c7</td>
+<td>main</td>
+</tr>
+<tr>
+<td>helix_agent/HelixMemory</td>
+<td>e464257</td>
+<td>main</td>
+</tr>
+<tr>
+<td>helix_agent/HelixSpecifier</td>
+<td>f1f9927</td>
+<td>main</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Excluded from cascade (third-party):</strong>
+<code>helix_agent/cli_agents/*</code>, <code>Example_Projects/*</code>,
+<code>dependencies/{Ollama,LLama_CPP,HuggingFace_Hub}</code>,
+<code>awesome-ai-memory</code>, <code>github_pages_website</code>,
+<code>Assets</code>.</p>
+<p><strong>Scripts modified:</strong> -
+<code>scripts/verify-governance-cascade.sh</code>: Added CONST-042,
+CONST-043 to MANDATORY_PATTERNS; excluded assets/github_pages_website
+from <code>is_helixcode_owned</code>; added HelixAgent nested submodules
+to ownership list. - <code>scripts/propagate-governance.sh</code>: Added
+<code>is_owned()</code> guard to prevent cascading into third-party
+submodules; added explicit branch-aware push with detached-HEAD
+protection.</p>
+<hr />
+<h2 id="p0-15-makefile-verify-foundation-gate">P0-15 — Makefile
+verify-foundation gate</h2>
+<p><strong>Timestamp:</strong> 2026-05-04T00:00+03:00</p>
+<h3 id="targets-added-to-root-makefile">Targets added to root
+Makefile</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Target</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>verify-llmsverifier-pin-parity</code></td>
+<td>Wraps <code>scripts/verify-llmsverifier-pin-parity.sh</code></td>
+</tr>
+<tr>
+<td><code>verify-governance-cascade</code></td>
+<td>Wraps <code>scripts/verify-governance-cascade.sh</code></td>
+</tr>
+<tr>
+<td><code>bluff-detector</code></td>
+<td>Stub-tolerant: runs <code>scripts/bluff-detector.sh</code> if
+present; otherwise prints skip message and exits 0. Phase 4
+deliverable.</td>
+</tr>
+<tr>
+<td><code>scan-secrets-root</code></td>
+<td>Wraps root-level <code>scripts/scan-secrets.sh</code> (whole-repo
+scan, as distinct from <code>scan-secrets</code> which delegates to
+inner HelixCode scanner)</td>
+</tr>
+<tr>
+<td><code>verify-foundation</code></td>
+<td>Composite gate:
+<code>no-silent-skips-warn scan-secrets-root verify-llmsverifier-pin-parity verify-governance-cascade bluff-detector</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>ci-validate-all</code> updated:</strong> now depends on
+<code>verify-foundation</code> in addition to
+<code>no-silent-skips-warn</code> and <code>demo-all-warn</code>.</p>
+<p><strong>Note on <code>scan-secrets</code>:</strong> already existed
+(added by P0-T08.7), delegating to
+<code>helix_code/scripts/scan-secrets.sh</code>. Not redeclared.
+<code>verify-foundation</code> uses <code>scan-secrets-root</code>
+instead to invoke the whole-repo root scanner.</p>
+<h3 id="individual-gate-verification">Individual gate verification</h3>
+<pre><code>$ make verify-llmsverifier-pin-parity 2&gt;&amp;1 | tail -5; echo &quot;exit=$?&quot;
+FAIL: LLMsVerifier pin divergence
+  submodules/llms_verifier  → d473231d27196e2151405f37936151a386b590e3
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+exit=1    ← expected (known divergence, parking-lot item)
+
+$ make verify-governance-cascade 2&gt;&amp;1 | tail -2; echo &quot;exit=$?&quot;
+GOVERNANCE_CASCADE: PASSED
+exit=0    ← expected
+
+$ make scan-secrets-root 2&gt;&amp;1 | tail -2; echo &quot;exit=$?&quot;
+OK: no credential patterns found in .
+exit=0    ← expected
+
+$ make bluff-detector 2&gt;&amp;1; echo &quot;exit=$?&quot;
+bluff-detector.sh not yet implemented (Phase 4 deliverable); skipping
+exit=0    ← expected</code></pre>
+<h3 id="make-verify-foundation-output-last-15-lines"><code>make verify-foundation</code>
+output (last 15 lines)</h3>
+<pre><code>(warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
+OK: no credential patterns found in .
+FAIL: LLMsVerifier pin divergence
+  submodules/llms_verifier  → d473231d27196e2151405f37936151a386b590e3
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1
+make-exit=2</code></pre>
+<p><strong>Expected behaviour:</strong> exits 2 (make error propagation
+from prerequisite exit 1). The divergence is the documented LLMsVerifier
+dual-pin parking-lot item. This is NOT a defect in P0-15; P0-16
+close-out depends on resolution.</p>
+<h3 id="acceptance-checklist-1">Acceptance checklist</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>verify-llmsverifier-pin-parity</code> target wired</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>verify-governance-cascade</code> target wired</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>bluff-detector</code> target wired (stub-tolerant)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>scan-secrets-root</code> target wired (root scanner)</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>verify-foundation</code> composite target wired</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>.PHONY</code> includes all new targets</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><code>scan-secrets</code> NOT redeclared (pre-existing)</td>
+<td>✓ — already present from P0-T08.7</td>
+</tr>
+<tr>
+<td><code>ci-validate-all</code> updated to depend on
+<code>verify-foundation</code></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Each individual gate runs correctly</td>
+<td>✓ (see above)</td>
+</tr>
+<tr>
+<td><code>verify-foundation</code> exits non-zero on known parity
+divergence</td>
+<td>✓ exit=2</td>
+</tr>
+</tbody>
+</table>
+<h2 id="p0-16-phase-0-close-out">P0-16 — Phase 0 close-out</h2>
+<p><strong>Timestamp:</strong> 2026-05-05T00:05+03:00</p>
+<p><strong>Diagrams regenerated to
+<code>docs/improvements/06_diagrams_real/</code>:</strong></p>
+<pre><code>total 348
+-rw-r--r-- 1 milosvasic milosvasic 105650 May  4 23:59 dependency_graph.png
+-rw-r--r-- 1 milosvasic milosvasic 129320 May  4 23:59 feature_gap_matrix.png
+-rw-r--r-- 1 milosvasic milosvasic  45270 May  4 23:59 integration_phases.png
+-rw-r--r-- 1 milosvasic milosvasic  67426 May  4 23:59 overall_architecture.png</code></pre>
+<p><strong>Canonical topology source:</strong>
+<code>docs/improvements/canonical/topology.yaml</code></p>
+<p><strong>Regenerator script:</strong>
+<code>scripts/regenerate-diagrams.py</code> (executable; uses Agg
+backend for headless operation)</p>
+<p><strong>DEPRECATED.md pointers placed:</strong> -
+<code>docs/improvements/01_analysis_step_01/DEPRECATED.md</code> -
+<code>docs/improvements/02_analysis_step_02/DEPRECATED.md</code></p>
+<p><strong>Final <code>make verify-foundation</code> output (last 25
+lines):</strong></p>
+<pre><code>./dependencies/HuggingFace_Hub/tests/test_hf_api.py:4187:    @pytest.mark.skip(&quot;Creating duplicated collections work on staging&quot;)
+./dependencies/HuggingFace_Hub/tests/test_hf_file_system.py:439:    @unittest.skip(&quot;Not implemented yet&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:64:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:73:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:91:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:105:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:112:@pytest.mark.skip(&quot;skipping this test, as InferenceAPI seems to not throw an error when sending unsupported params&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:132:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:147:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:165:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:191:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+./dependencies/HuggingFace_Hub/tests/test_inference_async_client.py:217:@pytest.mark.skip(&quot;Temporary skipping this test&quot;)
+... (3800 more — re-run &#39;scripts/no-silent-skips.sh&#39; without head)
+
+Annotate each with a trailing &#39;// SKIP-OK: #&lt;ticket&gt;&#39; (or &#39;# SKIP-OK: #&lt;ticket&gt;&#39;)
+comment so the skip is tracked, or remove the skip if it is no longer needed.
+
+(warn-only mode — set NO_SILENT_SKIPS_WARN_ONLY=0 to fail the build)
+OK: no credential patterns found in .
+FAIL: LLMsVerifier pin divergence
+  submodules/llms_verifier  → d473231d27196e2151405f37936151a386b590e3
+  helix_agent/LLMsVerifier → 1d53ae3b72c77c1f27171c0677431c48d2d02bdd
+
+Resolution: pick the canonical SHA, bump the other to match, commit, push.
+make: *** [Makefile:54: verify-llmsverifier-pin-parity] Error 1</code></pre>
+<p><strong>verify-foundation exit code:</strong> 2 — LLMsVerifier
+dual-pin divergence (out-of-scope per spec §1.3 N2; documented as the
+carry-forward open item to Phase 1).</p>
+<h2 id="phase-0-closed">Phase 0 — CLOSED</h2>
+<p><strong>Tasks completed:</strong> 16 plan tasks + 2 added during
+execution (T08.5, T08.7) + 1 deferred (T02 cosmetic) = 17 closed + 1
+deferred + 1 polish-fix-it.</p>
+<p><strong>Final SHA on all 4 remotes:</strong>
+<code>3676f411073f1fa9ac4841eb184d3a6734231fd3</code> — all 4 remotes
+(github, gitlab, origin, upstream) converge at this SHA.</p>
+<p><strong>Open carry-forward items (Phase 1+):</strong> 1.
+<strong>LLMsVerifier dual-pin divergence</strong> —
+<code>submodules/llms_verifier</code> ahead of
+<code>helix_agent/LLMsVerifier</code>. Resolution requires
+HelixAgent-internal commit (out of scope per spec §1.3 N2). Phase 1
+sub-spec for any feature that depends on LLMsVerifier behaviour must
+include the pin coordination. &gt; <strong>Resolution annotation
+(close-out⁴⁵, 2026-05-15):</strong> RESOLVED in P1.5-WP2. Transitive
+duplicate eliminated; HelixAgent now consumes the canonical pin via
+<code>go.mod</code> replace at
+<code>../submodules/llms_verifier/llm-verifier</code>.
+<code>make verify-foundation</code> exits 0. Original divergence text
+preserved above as historical record per evidence-doc convention. 2.
+<strong>3 historical credential leaks</strong> — already remediated in
+P0-T08.5 (files removed from index, replaced with .example templates,
+ephemeral generation script for SSH keys). Required operator action
+(separate from this programme): rotate the SonarQube + Snyk tokens;
+reject the leaked SSH public key wherever trusted. 3. <strong>13
+cli_agents with stale HelixAgent pins</strong> —
+<code>aider, conduit, continue, HelixCode, kilo-code, kiro-cli, mobile-agent, ollama-code, opencode-cli, openhands, plandex, roo-code, superset</code>
+will need their HelixAgent pin bumped before Phase 2 sub-specs touch
+them. 4. <strong>Submodule recursion cosmetic error</strong> —
+<code>Example_Projects/{Agent-Deck,Bridle,Claude-Code-Plugins-And-Skills}</code>
+cause <code>git submodule foreach --recursive</code> to fatal-out;
+modifying third-party submodules is forbidden. Scripts wrap with
+<code>|| true</code>.</p>
+<p><strong>Phase 1 unblocked:</strong> claude-code-source porting can
+proceed. The helix_agent/cli_agents/claude-code/ source is fully
+populated; the inner Go app (helix_code/) has its governance triplet;
+secret hygiene is in place; pre-push hook is installed; scan-secrets
+gates pre-push; SonarQube + Snyk infrastructure is wired (live scans
+pending operator credential rotation). | No third-party submodule
+modifications | ✓ |</p>
+</body>
+</html>

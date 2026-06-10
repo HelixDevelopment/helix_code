@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f05-hook-based-extensibility-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f05-hook-based-extensibility-design</h1>
+</header>
+<h1 id="p1-f05-hook-based-extensibility-design-spec">P1-F05 — Hook-Based
+Extensibility — Design Spec</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Author:</strong> Claude
+Opus 4.7 (1M context) + user (milos85vasic.2nd@gmail.com) <strong>Phase
+/ Feature:</strong> Phase 1, Feature 5 of
+<code>docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>
+<strong>Status:</strong> APPROVED in brainstorming, awaiting user review
+of written spec <strong>Successor:</strong> to be handed to
+<code>superpowers:writing-plans</code> for executable plan
+<strong>Predecessor:</strong> Feature 4 (Git Worktree Agent Isolation) —
+closed 2026-05-05 (commits
+<code>7ba8907</code>…<code>8548524</code>)</p>
+<hr />
+<h2 id="goals-non-goals-success-criteria">1. Goals, non-goals, success
+criteria</h2>
+<h3 id="what-were-building">1.1 What we’re building</h3>
+<p>A claude-code-style hook system that lets users extend HelixCode’s
+lifecycle behaviour by writing shell scripts. Users author
+<code>~/.helixcode/hooks.yaml</code> (and optionally
+<code>&lt;project&gt;/.helixcode/hooks.yaml</code>) listing event-type →
+shell-script mappings; HelixCode loads them at startup and fires them at
+documented runtime points.</p>
+<p>The 9 lifecycle events:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Event</th>
+<th>Fired at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>before_tool_call</code></td>
+<td>every tool execution, BEFORE the tool’s <code>Execute</code>
+runs</td>
+</tr>
+<tr>
+<td><code>after_tool_call</code></td>
+<td>every tool execution, AFTER (success or error)</td>
+</tr>
+<tr>
+<td><code>before_edit</code></td>
+<td>tool execution where
+<code>toolName ∈ {Edit, Write, MultiEdit}</code>, before</td>
+</tr>
+<tr>
+<td><code>after_edit</code></td>
+<td>same, after</td>
+</tr>
+<tr>
+<td><code>before_bash</code></td>
+<td>tool execution where <code>toolName == Bash</code>, before</td>
+</tr>
+<tr>
+<td><code>after_bash</code></td>
+<td>same, after</td>
+</tr>
+<tr>
+<td><code>on_error</code></td>
+<td>any tool error or LLM error in the agent’s message loop</td>
+</tr>
+<tr>
+<td><code>on_compaction</code></td>
+<td>a successful auto-compaction event (F01’s
+<code>AutoCompactor</code>)</td>
+</tr>
+<tr>
+<td><code>on_plan_approval</code></td>
+<td>F08 Plan Mode approval gate (F05 ships the stub; F08 wires
+production caller)</td>
+</tr>
+</tbody>
+</table>
+<p>A hook handler that exits non-zero <strong>blocks</strong> the
+originating operation. Stdout JSON modify-payload is parsed into the
+event’s <code>Data</code> map for downstream handlers (propagation back
+to the operation’s params is deferred per N1).</p>
+<h3 id="goals-priority-order">1.2 Goals (priority order)</h3>
+<ul>
+<li><strong>G1 — No bluff.</strong> Per Constitution Article XI §11.9,
+every PASS in this feature carries positive runtime evidence. The
+Challenge proves a real <code>before_bash</code> hook with a real shell
+script blocks a real <code>rm -rf</code> and the marker file is
+preserved.</li>
+<li><strong>G2 — Extend, don’t parallelise.</strong> Same lesson as
+F01–F04. The existing <code>internal/hooks/</code> package is fully
+functional (Manager, Trigger* methods, Hook struct, Event struct,
+Executor with sync/async/wait). F05 adds 6 new <code>HookType</code>
+constants, a YAML loader, a generic shell-runner <code>HookFunc</code>,
+and a <code>Blockers</code> helper. The package’s existing
+<code>HookFunc(ctx, *Event) error</code> signature already supports both
+block (non-nil error) and modify (mutate <code>event.Data</code>).</li>
+<li><strong>G3 — Wiring is the load-bearing piece.</strong> The existing
+<code>internal/hooks/</code> package was unwired (zero
+<code>Trigger</code> calls in production code). F05’s value comes from
+actually firing events at the documented lifecycle points:
+<code>internal/tools/registry.Execute</code> (6 of 9 events:
+BeforeToolCall, AfterToolCall, plus conditionally
+BeforeBash/AfterBash/BeforeEdit/AfterEdit),
+<code>internal/llm/compression/auto_compactor.go</code> (OnCompaction),
+<code>internal/agent/agent.go</code> (OnError + the OnPlanApproval stub
+via <code>RequestPlanApproval</code>).</li>
+<li><strong>G4 — Config-driven, not Go-plugin-based.</strong> Users
+author shell scripts referenced from YAML; HelixCode <code>exec</code>’s
+them with the event payload on stdin. Matches claude-code’s actual
+user-facing hook system. No new dependency, no <code>plugin.Open</code>
+minefield.</li>
+<li><strong>G5 — Full surface.</strong> 5 Cobra subcommands
+(<code>list</code>, <code>test</code>, <code>enable</code>,
+<code>disable</code>, <code>validate</code>) + <code>/hooks</code> slash
+command. Mirrors F02/F04 polish.</li>
+</ul>
+<h3 id="non-goals-explicit-out-of-scope-for-f05">1.3 Non-goals (explicit
+out-of-scope for F05)</h3>
+<ul>
+<li><strong>N1.</strong> Modify-payload propagation. Scripts can write
+JSON to stdout that mutates the event’s <code>Data</code> map for
+downstream handlers — but F05 does NOT yet propagate that modified data
+back into the originating operation’s params. The reader path exists;
+the writer path defers.</li>
+<li><strong>N2.</strong> Production caller for
+<code>RequestPlanApproval</code>. F05 ships the stub function (which
+dispatches <code>on_plan_approval</code>); F08 (Plan Mode) wires it into
+the actual plan-mode flow. F05 has no production caller in the agent
+message loop.</li>
+<li><strong>N3.</strong> Hook UI / visualisation (a “what hooks fired
+and when” timeline). YAGNI.</li>
+<li><strong>N4.</strong> Per-event payload schema validation. F05
+documents schemas in code comments; runtime validation defers.</li>
+<li><strong>N5.</strong> Worktree-aware hook discovery. Hooks always
+come from <code>~/.helixcode</code> +
+<code>&lt;repoRoot&gt;/.helixcode</code>, regardless of active worktree
+(from F04).</li>
+<li><strong>N6.</strong> Built-in hooks shipped with HelixCode (e.g., a
+default audit hook). User’s responsibility to author their own.</li>
+<li><strong>N7.</strong> Hot-reload of <code>hooks.yaml</code>. Hooks
+are loaded once at CLI startup; changes require restart.</li>
+</ul>
+<h3 id="success-criteria">1.4 Success criteria</h3>
+<ul>
+<li><strong>S1.</strong> <code>make verify-compile</code> exits 0 with
+the new files + extended types + 5 wiring points.</li>
+<li><strong>S2.</strong> Unit tests for
+<code>internal/hooks/yaml_loader.go</code>,
+<code>shell_runner.go</code>, <code>blockers.go</code>, and the 5 wiring
+points pass with <code>-race</code>. Most tests use REAL
+<code>bash</code> against <code>t.TempDir()</code> ephemeral
+scripts.</li>
+<li><strong>S3.</strong> Integration test
+(<code>-tags=integration</code>, no mocks) demonstrates: a real
+<code>before_bash</code> shell script that exits 1 prevents the tool’s
+Execute from running; an <code>after_tool_call</code> shell script that
+writes to a JSONL log captures all 3 of 3 tool calls.</li>
+<li><strong>S4.</strong> Challenge under
+<code>tests/e2e/challenges/hooks/</code> runs 3 scenarios with runtime
+evidence pasted into the close-out commit body. Mutation test
+(commenting out the <code>Blockers</code> check in
+<code>tools.registry.Execute</code>) makes S1 fail.</li>
+<li><strong>S5.</strong> Anti-bluff smoke
+(<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/hooks/ ...</code>)
+returns clean.</li>
+<li><strong>S6.</strong> All 5 Cobra subcommands work end-to-end:
+<code>helixcode hooks list</code> + <code>validate</code> +
+<code>test</code> + <code>enable</code> + <code>disable</code>. The
+<code>/hooks</code> slash command is discoverable via the registry.</li>
+<li><strong>S7.</strong> YAML schema enforced:
+<code>apiVersion: helixcode.hooks/v1</code> mandatory; project-over-user
+precedence on identical <code>id</code>; disabled hooks loaded but not
+registered.</li>
+</ul>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<h3 id="topology">2.1 Topology</h3>
+<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+│ Agent / tools registry / autocompactor / plan approval gate          │
+│   each call hooksManager.TriggerEventAndWait(event)                  │
+│   then check blockers via hooks.Blockers(results)                    │
+└──────────────────────────────┬───────────────────────────────────────┘
+                               │
+                ┌──────────────▼──────────────────────────────────────┐
+                │ internal/hooks/ (existing — EXTENDED)               │
+                │   hook.go (existing)        — add 6 HookType consts │
+                │   manager.go (existing)     — Register/Trigger      │
+                │   executor.go (existing)    — sync/async/wait       │
+                │   yaml_loader.go (NEW)      — load hooks.yaml       │
+                │   shell_runner.go (NEW)     — generic HookFunc that │
+                │                                exec&#39;s shell scripts │
+                │   blockers.go (NEW)         — Blockers([]Result)    │
+                └──────────────┬──────────────────────────────────────┘
+                               │
+                ┌──────────────▼─────────────────────────────────────┐
+                │ ~/.helixcode/hooks.yaml                            │
+                │ &lt;project&gt;/.helixcode/hooks.yaml                    │
+                │   user-defined event → shell-script mappings       │
+                └────────────────────────────────────────────────────┘</code></pre>
+<p>User writes YAML at <code>~/.helixcode/hooks.yaml</code> listing
+event-type → shell-script. At startup, <code>cmd/cli/main.go</code>
+loads the YAML, wraps each entry in a <code>shellRunner</code> HookFunc,
+and calls <code>manager.Register</code>. The 5 wiring points dispatch
+events; if any registered handler returns non-nil error,
+<code>hooks.Blockers(results)</code> flags it as a block.</p>
+<h3 id="why-this-shape">2.2 Why this shape</h3>
+<ul>
+<li><strong>One existing package extended.</strong> Mirrors F01–F04. The
+existing <code>internal/hooks/</code> package’s API
+(<code>HookFunc</code>, <code>Manager.Trigger*</code>,
+<code>Hook</code>/<code>Event</code> structs) is sufficient — only
+adding event-type enum entries and supplementary wrappers.</li>
+<li><strong>Shell-script hooks</strong>, not Go plugins. Matches
+claude-code’s user-facing model. Zero new dependencies. End users have
+no compile step.</li>
+<li><strong>Five wiring points, all using the existing
+<code>hooks.Manager</code> from <code>session.Manager</code>.</strong>
+The session manager already has a
+<code>hooksManager *hooks.Manager</code> field (F02-era introduction).
+F05 reuses it; doesn’t introduce a parallel registry.</li>
+</ul>
+<h3 id="component-responsibilities">2.3 Component responsibilities</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/hooks/hook.go</code> (extended)</td>
+<td>6 new <code>HookType</code> constants:
+<code>HookTypeBeforeToolCall</code>, <code>HookTypeAfterToolCall</code>,
+<code>HookTypeBeforeBash</code>, <code>HookTypeAfterBash</code>,
+<code>HookTypeOnCompaction</code>, <code>HookTypeOnPlanApproval</code>.
+The existing <code>HookTypeBeforeEdit</code>,
+<code>HookTypeAfterEdit</code>, <code>HookTypeOnError</code> are
+reused.</td>
+</tr>
+<tr>
+<td><code>internal/hooks/yaml_loader.go</code> (NEW)</td>
+<td><code>FileLoader</code> struct (<code>UserPath</code>,
+<code>ProjectPath</code> fields).
+<code>Load(ctx) ([]*Hook, []string, error)</code> returns the registered
+hooks + source-path list. Validates
+<code>apiVersion: helixcode.hooks/v1</code>; rejects unknown event types
+at load with a logged warning (other hooks continue). Project-file
+entries override user-file entries with the same <code>id</code>.</td>
+</tr>
+<tr>
+<td><code>internal/hooks/shell_runner.go</code> (NEW)</td>
+<td><code>NewShellRunner(scriptPath string, timeout time.Duration) HookFunc</code>
+returns a closure. The closure: serialises event payload to JSON,
+<code>exec</code>’s the script with stdin, applies the timeout via
+<code>exec.CommandContext</code>, captures stdout+stderr, parses stdout
+as JSON for the modify-payload (read-only in F05), returns error
+wrapping stderr on non-zero exit. Missing script at fire time →
+fail-closed (return error).</td>
+</tr>
+<tr>
+<td><code>internal/hooks/blockers.go</code> (NEW)</td>
+<td><code>Blockers(results []*ExecutionResult) []error</code> collects
+non-nil errors from sync results. Helper for callers to check “did any
+hook block?”</td>
+</tr>
+<tr>
+<td><code>internal/tools/registry.go</code> (extended)</td>
+<td><code>Execute</code> dispatches <code>BeforeToolCall</code> first;
+if blocked, return
+<code>fmt.Errorf(&quot;operation blocked by hook %s: %s&quot;, hookID, stderr)</code>.
+Then conditionally dispatches <code>BeforeBash</code> (if
+<code>toolName == &quot;Bash&quot;</code>) or <code>BeforeEdit</code> (if
+<code>toolName ∈ {Edit, Write, MultiEdit}</code>) — block here also
+aborts. After the tool runs (success or error), dispatches
+<code>AfterToolCall</code> + conditional
+<code>AfterBash</code>/<code>AfterEdit</code>. After-event blocks are
+LOGGED but do not undo the operation.</td>
+</tr>
+<tr>
+<td><code>internal/llm/compression/auto_compactor.go</code>
+(extended)</td>
+<td>After a successful compaction, dispatch <code>OnCompaction</code>
+synchronously with payload
+<code>{before_size, after_size, messages_compacted}</code>. Block here
+aborts the next message-loop iteration (returns error from
+compaction).</td>
+</tr>
+<tr>
+<td><code>internal/agent/agent.go</code> (extended)</td>
+<td>On any tool error or LLM error in the message loop, dispatch
+<code>OnError</code> with <code>{error_message, error_type}</code> async
+(fire-and-forget; the error already happened). Add
+<code>(c *agent) RequestPlanApproval(ctx, plan)</code> method that
+dispatches <code>OnPlanApproval</code> synchronously and returns the
+aggregated blocker — no production caller wires it in F05; F08
+will.</td>
+</tr>
+<tr>
+<td><code>cmd/cli/hooks_cmd.go</code> (NEW)</td>
+<td>Cobra
+<code>helixcode hooks {list,test,enable,disable,validate}</code> group.
+<code>list</code> shows tabwriter
+<code>ID/EVENT/SCRIPT/PRIORITY/ENABLED/SOURCE</code>.
+<code>test &lt;event&gt;</code> simulates event + runs handlers, prints
+results. <code>validate</code> parses YAML without side effects.
+<code>enable</code>/<code>disable</code> mutate the <code>enabled</code>
+flag in user’s hooks.yaml in place.</td>
+</tr>
+<tr>
+<td><code>internal/commands/hooks_command.go</code> (NEW)</td>
+<td><code>/hooks</code> slash command. Subactions: bare/list,
+<code>test &lt;event&gt;</code>. Aliased to <code>/hk</code>.</td>
+</tr>
+<tr>
+<td><code>internal/commands/builtin/register.go</code> (extended)</td>
+<td><code>RegisterBuiltinCommandsWithHooks(registry, hooksMgr) error</code>.
+Original <code>RegisterBuiltinCommands</code> signature unchanged.</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code> (extended)</td>
+<td>New <code>initHooks(ctx)</code> method that constructs a
+<code>FileLoader</code>, loads YAML, registers each enabled hook into
+the existing <code>session.Manager.hooksManager</code>. Called from
+<code>Run()</code> after <code>initWorktree(ctx)</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-shapes">3. Data shapes</h2>
+<h3 id="yaml-schema">3.1 YAML schema</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apiVersion</span><span class="kw">:</span><span class="at"> helixcode.hooks/v1</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hooks</span><span class="kw">:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> audit-tool-calls</span><span class="co">               # required, unique within file scope</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">event</span><span class="kw">:</span><span class="at"> before_tool_call</span><span class="co">             # required, must match a known HookType value</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">script</span><span class="kw">:</span><span class="at"> ~/.helixcode/scripts/audit.sh</span><span class="co">   # required, ~ expansion supported</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">                        # optional, default 0; higher runs first</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">async</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span><span class="co">                         # optional, default false</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 5s</span><span class="co">                          # optional, default 0 = no timeout (Go duration string)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="co">                        # optional, default true</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;log every tool call to a JSONL audit file&quot;</span></span></code></pre></div>
+<h3 id="event-payload-contract-scripts-stdin">3.2 Event payload contract
+(script’s stdin)</h3>
+<p>A JSON document is written to the script’s stdin:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;before_tool_call&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-05-05T10:23:45Z&quot;</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;session_id&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;uuid or empty&gt;&quot;</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;source&quot;</span><span class="fu">:</span> <span class="st">&quot;tool_registry&quot;</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;toolName&quot;</span><span class="fu">:</span> <span class="st">&quot;Bash&quot;</span><span class="fu">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;params&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;rm -rf /tmp/x&quot;</span> <span class="fu">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="modify-payload-contract-scripts-stdout-optional">3.3
+Modify-payload contract (script’s stdout, OPTIONAL)</h3>
+<p>A script may print a JSON document to stdout:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;toolName&quot;</span><span class="fu">:</span> <span class="st">&quot;Bash&quot;</span><span class="fu">,</span> <span class="dt">&quot;params&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;echo hi&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">}</span></span></code></pre></div>
+<p><code>shellRunner</code> parses this and merges <code>data</code>
+into <code>event.Data</code> for downstream handlers. <strong>In F05,
+this modified data is NOT propagated back into the originating
+operation’s params</strong> (per N1) — only block semantics are
+honoured. Documented in code comments + the close-out evidence file.</p>
+<h3 id="resolution-order">3.4 Resolution order</h3>
+<p>Layer order (earliest layer wins on identical <code>id</code>): 1.
+Project file (<code>&lt;repoRoot&gt;/.helixcode/hooks.yaml</code>) 2.
+User file (<code>~/.helixcode/hooks.yaml</code>) 3. Anything
+programmatically registered by HelixCode itself (built-ins; F05 ships
+none — N6)</p>
+<p>Disabled hooks are loaded but not registered with the manager.</p>
+<hr />
+<h2 id="wiring-points">4. Wiring points</h2>
+<h3 id="internaltoolsregistry.execute">4.1
+<code>internal/tools/registry.Execute</code></h3>
+<pre><code>Execute(ctx, name, params):
+    event_before := NewEventWithContext(ctx, HookTypeBeforeToolCall)
+    event_before.Source = &quot;tool_registry&quot;
+    event_before.SetData(&quot;toolName&quot;, name)
+    event_before.SetData(&quot;params&quot;, params)
+    results := hooksMgr.TriggerEventAndWait(event_before)
+    if blockers := hooks.Blockers(results); len(blockers) &gt; 0:
+        return nil, wrap_blockers(blockers)
+
+    if name == &quot;Bash&quot;:
+        # fire HookTypeBeforeBash with same payload, same blocker logic
+    elif name in {Edit, Write, MultiEdit}:
+        # fire HookTypeBeforeEdit similarly
+
+    result, execErr := tool.Execute(ctx, params)
+
+    # Always fire after-events (success OR error) for observability.
+    event_after := NewEventWithContext(ctx, HookTypeAfterToolCall)
+    event_after.Source = &quot;tool_registry&quot;
+    event_after.SetData(&quot;toolName&quot;, name)
+    event_after.SetData(&quot;params&quot;, params)
+    event_after.SetData(&quot;result&quot;, result)
+    event_after.SetData(&quot;error&quot;, execErr)
+    afterResults := hooksMgr.TriggerEventAndWait(event_after)
+    # blockers on after-events: logged at WARN, not propagated (op already happened)
+
+    if name == &quot;Bash&quot;:
+        # fire HookTypeAfterBash similarly
+    elif name in {Edit, Write, MultiEdit}:
+        # fire HookTypeAfterEdit similarly
+
+    return result, execErr</code></pre>
+<h3 id="internalllmcompressionauto_compactor.go">4.2
+<code>internal/llm/compression/auto_compactor.go</code></h3>
+<p>After F01’s <code>AutoCompactor</code> produces a compacted message
+window, dispatch <code>OnCompaction</code> synchronously. A block here
+returns an error from the compaction; the next message-loop iteration
+handles the error.</p>
+<h3 id="internalagentagent.go">4.3
+<code>internal/agent/agent.go</code></h3>
+<ul>
+<li>On any tool error or LLM error in the message loop, fire
+<code>OnError</code> async (fire-and-forget).</li>
+<li>Add
+<code>RequestPlanApproval(ctx context.Context, plan string) error</code>
+method. It dispatches <code>OnPlanApproval</code> synchronously with
+payload <code>{plan_text}</code>, returns the aggregated blocker as an
+error (or nil if all hooks allow). <strong>No production code calls this
+in F05</strong>; F08 (Plan Mode) will wire it into the plan-approval
+gate.</li>
+</ul>
+<hr />
+<h2 id="cli-surface">5. CLI surface</h2>
+<pre><code>helixcode hooks list                          # tabwriter rows
+helixcode hooks test &lt;event-name&gt;             # simulate event, print per-handler results
+helixcode hooks validate                      # parse YAML, report errors without side-effects
+helixcode hooks enable &lt;id&gt;                   # set enabled=true in user&#39;s hooks.yaml
+helixcode hooks disable &lt;id&gt;                  # set enabled=false</code></pre>
+<p>Slash command:</p>
+<pre><code>/hooks                                        # = list
+/hooks list                                   # explicit
+/hooks test &lt;event&gt;                           # simulate</code></pre>
+<p><code>/hooks</code> aliased to <code>/hk</code>. Mutations
+(enable/disable) deliberately not exposed via slash command — they touch
+the user’s filesystem and should go through Cobra (consistent with F02
+<code>/permissions</code> not exposing
+<code>add</code>/<code>remove</code> mutations to the slash
+command).</p>
+<h2 id="error-handling">6. Error handling</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Case</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Malformed YAML</td>
+<td><code>Load</code> returns error wrapping yaml’s line:col; CLI
+startup fails fast</td>
+</tr>
+<tr>
+<td>Missing or wrong <code>apiVersion</code></td>
+<td><code>Load</code> returns error:
+<code>&quot;unsupported apiVersion %q (expected helixcode.hooks/v1)&quot;</code></td>
+</tr>
+<tr>
+<td>Unknown event type in YAML</td>
+<td>hook entry is rejected; logged at WARN; other entries continue to
+register</td>
+</tr>
+<tr>
+<td>Script not found at fire time</td>
+<td>hook returns error wrapping <code>os.ErrNotExist</code>; treated as
+block (fail-closed)</td>
+</tr>
+<tr>
+<td>Script timeout</td>
+<td><code>context.DeadlineExceeded</code> returned; treated as
+block</td>
+</tr>
+<tr>
+<td>Async hook error</td>
+<td>logged at WARN; does NOT affect originating operation</td>
+</tr>
+<tr>
+<td><code>Blockers</code> finds blockers on a before-event</td>
+<td>caller wraps them:
+<code>&quot;operation blocked by N hook(s): &lt;hook-id&gt;: &lt;stderr&gt;&quot;</code>;
+aborts</td>
+</tr>
+<tr>
+<td><code>Blockers</code> finds blockers on an after-event</td>
+<td>logged at WARN; not propagated (op already happened)</td>
+</tr>
+<tr>
+<td>Modify-payload JSON malformed</td>
+<td>logged at WARN; original payload preserved; not treated as
+block</td>
+</tr>
+<tr>
+<td><code>RequestPlanApproval</code> blocker</td>
+<td>wrapped error returned; F08’s caller decides how to surface</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="testing-strategy-const-035-article-xi-11.9">7. Testing strategy
+(CONST-035 / Article XI §11.9)</h2>
+<h3 id="unit-internalhooks_test.go">7.1 Unit
+(<code>internal/hooks/*_test.go</code>)</h3>
+<ul>
+<li>Hook-type enum: every new <code>HookType</code> constant has a
+string round-trip test.</li>
+<li><code>yaml_loader.go</code>: malformed YAML, missing apiVersion,
+project-overrides-user identical id, disabled hooks
+loaded-not-registered, unknown event type rejected at load with
+WARN.</li>
+<li><code>shell_runner.go</code>: real shell script
+<code>#!/bin/sh\nexit 0</code> → no error; non-zero exit → error
+wrapping stderr; timeout → context.DeadlineExceeded; missing script →
+fail-closed; stdout JSON modify-payload parsed into event.Data;
+malformed stdout JSON logged + ignored.</li>
+<li><code>blockers.go</code>: nil results → nil; results with non-nil
+errors → returned in order; results with nil errors → not returned.</li>
+</ul>
+<p>Mocks ALLOWED at unit layer per CLAUDE.md, but most tests use REAL
+<code>bash</code> against <code>t.TempDir()</code> scripts.</p>
+<h3 id="integration-testsintegrationhookshooks_integration_test.go--tagsintegration">7.2
+Integration
+(<code>tests/integration/hooks/hooks_integration_test.go</code>,
+<code>-tags=integration</code>)</h3>
+<ul>
+<li>Real ephemeral shell scripts in <code>t.TempDir()</code>, real
+<code>tools.ToolRegistry</code> + <code>hooks.Manager</code>, real fake
+Tool that records its invocation count.</li>
+<li>Asserts: <code>before_tool_call</code> block prevents Tool.Execute
+(invocation count stays at 0).</li>
+<li>Asserts: <code>after_tool_call</code> fires even when Tool.Execute
+returns error (invocation count = 1, after-script ran).</li>
+<li>Asserts: async hook doesn’t block synchronous critical path (measure
+dispatcher latency).</li>
+</ul>
+<p><strong>No mocks at this layer</strong> (per CLAUDE.md / Constitution
+Rule 5).</p>
+<h3 id="challenge-testse2echallengeshooks">7.3 Challenge
+(<code>tests/e2e/challenges/hooks/</code>)</h3>
+<p>End-to-end via Go-built driver: - <strong>S1 —
+block-bash-rm</strong>: hooks.yaml registers a <code>before_bash</code>
+hook pointing to a shell script that exits 1 if the bash command
+contains <code>rm -rf</code>. Driver attempts a
+<code>Bash(rm -rf /tmp/marker)</code> call via the real registry. The
+marker file must be <strong>preserved</strong> (Tool.Execute never ran).
+- <strong>S2 — audit-after-tool</strong>: <code>after_tool_call</code>
+hook writes a JSONL line per call to a log file. Driver makes 3 distinct
+tool calls. Log must have exactly 3 lines. - <strong>S3 —
+yaml-validate</strong>: write a malformed <code>hooks.yaml</code> to a
+temp project.
+<code>helixcode hooks validate --config &lt;path&gt;</code> exits
+non-zero with a clear error pointing at the offending line.</p>
+<p>Runtime evidence: per-scenario stdout + filesystem inspection (marker
+presence, log line count) pasted in close-out commit body.</p>
+<h3 id="anti-bluff-smoke">7.4 Anti-bluff smoke</h3>
+<p><code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/hooks/ cmd/cli/hooks_cmd.go internal/commands/hooks_command.go tests/integration/hooks/ tests/e2e/challenges/hooks/</code>
+returns clean.</p>
+<h3 id="mutation-test-const-039">7.5 Mutation test (CONST-039)</h3>
+<p>Comment out
+<code>if blockers := hooks.Blockers(results); len(blockers) &gt; 0 { return ...err... }</code>
+in <code>tools.registry.Execute</code>. Re-run Challenge: S1 MUST fail
+(rm runs because the hook block is no longer honoured). Revert and
+confirm PASS.</p>
+<hr />
+<h2 id="sub-task-plan">8. Sub-task plan</h2>
+<p>13 tasks (largest in the programme so far — wiring spans 4
+packages):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>Bootstrap evidence + advance PROGRESS</td>
+<td>docs only</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>Add 6 new <code>HookType</code> constants to
+<code>internal/hooks/hook.go</code> (TDD round-trip tests)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T03</td>
+<td><code>yaml_loader.go</code> — FileLoader with apiVersion validation
++ project-over-user override (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T04</td>
+<td><code>shell_runner.go</code> — generic shell-runner HookFunc with
+timeout + missing-script handling (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T05</td>
+<td><code>blockers.go</code> —
+<code>Blockers([]ExecutionResult) []error</code> helper (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>Wire <code>BeforeToolCall</code>/<code>AfterToolCall</code> +
+specialised
+<code>BeforeEdit</code>/<code>AfterEdit</code>/<code>BeforeBash</code>/<code>AfterBash</code>
+into <code>internal/tools/registry.Execute</code> (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>Wire <code>OnCompaction</code> into
+<code>internal/llm/compression/auto_compactor.go</code> (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>Wire <code>OnError</code> into <code>internal/agent/agent.go</code>
+message loop + add <code>RequestPlanApproval(ctx, plan)</code> stub
+method dispatching <code>OnPlanApproval</code> (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T09</td>
+<td><code>cmd/cli/hooks_cmd.go</code> Cobra
+<code>helixcode hooks {list,test,enable,disable,validate}</code> +
+dispatcher in main.go</td>
+<td>unit + smoke</td>
+</tr>
+<tr>
+<td>T10</td>
+<td><code>internal/commands/hooks_command.go</code> slash command +
+<code>RegisterBuiltinCommandsWithHooks</code> extension in
+<code>builtin/register.go</code> (TDD)</td>
+<td>unit + builtin-registry test</td>
+</tr>
+<tr>
+<td>T11</td>
+<td><code>cmd/cli/main.go</code> startup wiring: construct FileLoader,
+load YAML, register enabled hooks into session.Manager.hooksManager.
+Integration tests (no mocks, real ephemeral shell scripts)</td>
+<td><code>-tags=integration</code> test passes</td>
+</tr>
+<tr>
+<td>T12</td>
+<td>Challenge: 3 scenarios from §7.3 with runtime evidence</td>
+<td>Challenge PASS</td>
+</tr>
+<tr>
+<td>T13</td>
+<td>Feature 5 close-out: anti-bluff scan, verify-foundation, push to all
+4 remotes (no force)</td>
+<td>PROGRESS flipped to F06</td>
+</tr>
+</tbody>
+</table>
+<p>13 sub-commits expected. F06 (MCP Full Lifecycle) unblocked when T13
+lands.</p>
+<hr />
+<h2 id="out-of-scope-for-f05">9. Out of scope for F05</h2>
+<p>Listed in §1.3 (N1–N7). Summarised: modify-payload propagation back
+to operation params, production caller for plan-approval, hook UI,
+payload schema validation, worktree-aware hook discovery, built-in
+hooks, YAML hot-reload.</p>
+<hr />
+<h2 id="risks-and-mitigations">10. Risks and mitigations</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Existing <code>hooks.Manager</code> API may be insufficient (e.g.,
+no way to wait for sync handlers in error path)</td>
+<td>Audit at T02; <code>Manager.TriggerEventAndWait</code> already
+exists per project exploration. If gaps emerge, add minimal helpers;
+don’t rebuild.</td>
+</tr>
+<tr>
+<td>Wiring touches 4 packages — reviews may find pre-existing bluffs in
+adjacent code</td>
+<td>Anti-bluff smoke is scoped to NEW files + the lines added by F05;
+pre-existing hits in <code>cmd/cli/main.go</code> are already documented
+as F02/F03 follow-ups, not F05’s responsibility.</td>
+</tr>
+<tr>
+<td>F08’s <code>RequestPlanApproval</code> integration may need a
+different signature later</td>
+<td>Document the signature in a <code>// F08 wires this</code> comment;
+F08’s plan-approval task can refactor if needed. The stub fires a real
+event via the dispatcher, so even without F08, the event surface is
+testable via <code>helixcode hooks test on_plan_approval</code>.</td>
+</tr>
+<tr>
+<td>Shell scripts may have different shebangs across hosts
+(<code>bash</code> vs <code>sh</code> vs <code>python</code>)</td>
+<td><code>shell_runner</code> uses <code>exec.CommandContext</code> with
+the script path directly — the kernel honours the script’s own shebang.
+No assumption about which interpreter.</td>
+</tr>
+<tr>
+<td>Script timeouts under load</td>
+<td>Default timeout is 0 (no timeout), per existing Hook struct. Users
+opt in via YAML.</td>
+</tr>
+<tr>
+<td>Async hook race with after-event ordering</td>
+<td>F05 documents that async hooks fire-and-forget; their relative
+ordering vs after-events is undefined. Users wanting ordering use sync
+hooks.</td>
+</tr>
+<tr>
+<td><code>helixcode hooks enable/disable</code> mutating user’s YAML may
+corrupt comments</td>
+<td>Use <code>gopkg.in/yaml.v3</code> Node-based round-trip for the
+mutation path; preserves comments. (T09 has this.)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="references">11. References</h2>
+<ul>
+<li>Synthesis spec:
+<code>docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>
+§4.1 (Phase 1 charter)</li>
+<li>Porting doc:
+<code>docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/porting_claude_code.md</code>
+§Feature 5</li>
+<li>Predecessor spec:
+<code>docs/superpowers/specs/2026-05-05-p1-f04-git-worktree-agent-isolation-design.md</code>
+(commit <code>7ba8907</code>)</li>
+<li>Predecessor plan:
+<code>docs/superpowers/plans/2026-05-05-p1-f04-git-worktree-agent-isolation.md</code>
+(commit <code>7abf0c7</code>)</li>
+<li>Evidence file (live):
+<code>docs/improvements/06_phase_1_evidence.md</code></li>
+<li>Existing infrastructure being extended (NOT replaced):
+<ul>
+<li><code>helix_code/internal/hooks/</code> — existing Manager + Hook +
+Event + Executor; F05 adds 6 HookType consts + 3 new files
+(<code>yaml_loader.go</code>, <code>shell_runner.go</code>,
+<code>blockers.go</code>)</li>
+<li><code>helix_code/internal/session/manager.go</code> — already has
+<code>hooksManager *hooks.Manager</code> field; F05 reuses it</li>
+<li><code>helix_code/internal/tools/registry.go</code> — extended with 6
+dispatch points in <code>Execute</code></li>
+<li><code>helix_code/internal/llm/compression/auto_compactor.go</code> —
+extended with <code>OnCompaction</code> dispatch</li>
+<li><code>helix_code/internal/agent/agent.go</code> — extended with
+<code>OnError</code> dispatch + <code>RequestPlanApproval</code>
+stub</li>
+<li><code>helix_code/internal/commands/builtin/register.go</code> —
+extended with <code>RegisterBuiltinCommandsWithHooks</code></li>
+</ul></li>
+<li>Constitutional anchors:
+<ul>
+<li>Article XI §11.9 — Anti-Bluff Forensic Anchor</li>
+<li>CONST-035 — Zero-Bluff Mandate</li>
+<li>CONST-039 — Challenge System Integrity (mutation testing
+mandatory)</li>
+<li>CONST-042 — No-Secret-Leak (script paths in YAML may reveal local
+paths but no credentials)</li>
+<li>CONST-043 — No-Force-Push (close-out commit T13 pushes without
+force)</li>
+</ul></li>
+</ul>
+<hr />
+<p><em>End of P1-F05 Hook-Based Extensibility design spec.</em></p>
+</body>
+</html>

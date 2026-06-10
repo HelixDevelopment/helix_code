@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixcode_architecture</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixcode_architecture</h1>
+</header>
+<h1 id="helixcode-deep-architecture-analysis">HelixCode Deep
+Architecture Analysis</h1>
+<p><strong>Repository</strong>:
+https://github.com/HelixDevelopment/HelixCode<br />
+<strong>Branch</strong>: main<br />
+<strong>License</strong>: MIT<br />
+<strong>Primary Language</strong>: Go (95.1%)<br />
+<strong>Analysis Date</strong>: 2026-01-18<br />
+<strong>Analyst</strong>: AI Architecture Analysis Agent</p>
+<hr />
+<h2 id="repository-structure-map">1. Repository Structure Map</h2>
+<h3 id="top-level-organization">1.1 Top-Level Organization</h3>
+<p>The repository uses a <strong>dual-root pattern</strong>: the actual
+application code lives inside a nested <code>HelixCode/</code>
+directory, while the repository root contains meta-documentation, build
+orchestration, and Docker/deployment configuration.</p>
+<pre><code>HelixCode/                          # Main application source (nested root)
+├── .github/workflows/              # CI/CD (latest: Dec 2025)
+├── api/                            # OpenAPI specification
+│   └── openapi.yaml                # 67KB REST API spec
+├── applications/                   # Client applications
+│   ├── android/                    # Android (gomobile bindings)
+│   ├── aurora-os/                  # Aurora OS (Fyne)
+│   ├── desktop/                    # Desktop GUI (Fyne v2)
+│   ├── harmony-os/                 # Harmony OS (Fyne)
+│   ├── ios/                        # iOS (gomobile bindings)
+│   ├── terminal-ui/                # TUI (tview/tcell)
+│   └── README.md                   # Client app build instructions
+├── assets/                         # Static assets
+├── benchmarks/                     # Performance benchmarks
+├── bin/                            # Compiled binaries
+├── cmd/                            # Entry points
+│   ├── cli/                        # CLI client main
+│   ├── server/                     # Server daemon main
+│   ├── config-test/                # Config validation tool
+│   ├── helix-config/               # Configuration wizard
+│   ├── local-llm.go               # Local LLM standalone
+│   ├── local-llm-advanced.go      # Advanced local LLM
+│   ├── main_commands.go            # CLI command definitions
+│   ├── other_commands.go           # Auxiliary commands
+│   └── root.go                     # Cobra root command
+├── config/                         # Runtime configuration schemas
+├── docker/                         # Docker configurations
+├── examples/                       # Example usage projects
+├── internal/                       # Private implementation (34+ packages)
+│   ├── agent/                      # AI agent orchestration
+│   ├── auth/                       # Authentication/authorization
+│   ├── commands/                   # Command execution engine
+│   ├── config/                     # Configuration management
+│   ├── context/                    # Context management
+│   ├── database/                   # Database abstraction
+│   ├── deployment/                 # Deployment logic
+│   ├── discovery/                  # Service discovery
+│   ├── editor/                     # Code editor integration
+│   ├── event/                      # Event bus
+│   ├── fix/                        # Auto-fix engine
+│   ├── focus/                      # Focus/task management
+│   ├── hardware/                   # Hardware detection
+│   ├── hooks/                      # Hook system
+│   ├── llm/                        # LLM provider abstraction
+│   ├── logging/                    # Structured logging
+│   ├── logo/                       # Logo/branding
+│   ├── mcp/                        # Model Context Protocol
+│   ├── memory/                     # Memory system (Zep)
+│   ├── mocks/                      # Test mocks
+│   ├── monitoring/                 # Metrics/monitoring
+│   ├── notification/               # Notifications
+│   ├── performance/              # Performance optimization
+│   ├── persistence/               # State persistence
+│   ├── project/                    # Project management
+│   ├── provider/                   # Generic provider interface
+│   ├── providers/                  # Provider implementations
+│   ├── redis/                      # Redis client
+│   ├── repomap/                    # Repository mapping
+│   ├── rules/                      # Business rules engine
+│   ├── security/                   # Security layer
+│   ├── server/                     # HTTP/WebSocket server
+│   ├── session/                    # Session management
+│   ├── task/                       # Task queue
+│   ├── template/                   # Template engine
+│   ├── testutil/                   # Test utilities
+│   ├── tools/                      # Tool registry
+│   ├── verifier/                   # LLMsVerifier integration
+│   ├── version/                    # Version info
+│   ├── worker/                     # Background workers
+│   └── workflow/                   # Workflow engine
+├── reports/                        # Generated reports
+├── scripts/                        # Build/utility scripts
+├── security/                       # Security tooling
+├── standalone_tests/               # Standalone test programs
+├── test-programs/                  # Test harness programs
+├── tests/                          # Test suite (in HelixCode/tests/)
+├── main.go                         # Main entry point
+├── Makefile                        # Build orchestration
+├── go.mod                          # Module definition
+└── .env.example                    # Environment template
+
+cmd/                                # Root-level entry points (minimal)
+├── security-test/                  # Security testing harness
+
+configs/                            # Configuration templates
+├── config.yaml                     # Main config template
+└── helix.yaml                      # Helix-specific config
+
+docs/                               # User-facing documentation
+├── AGENTS.md                       # Agent governance
+├── CONSTITUTION.md                 # Project constitution
+├── CLAUDE.md                       # Claude AI guidelines
+└── ... (100+ .md files)
+
+Documentation/                      # Detailed documentation
+├── Architecture/
+├── API/
+├── Deployment/
+├── Security/
+└── ...
+
+Specification/                      # Technical specifications
+├── API_SPEC.md
+├── ARCHITECTURE.md
+└── ...
+
+Implementation_Guide/             # Implementation guides
+├── GETTING_STARTED.md
+├── ADVANCED.md
+└── ...
+
+challenges/                         # Challenge/test scripts
+├── scripts/                        # 7-phase challenge runner
+
+Dockerfile                          # Main container image
+Dockerfile.test                     # Test container
+Dockerfile.worker                   # Worker container
+docker-compose.yml                  # Compose stack
+
+Website/                            # Marketing website
+Github-Pages-Website/              # GitHub Pages (submodule)
+awesome-ai-memory/                  # AI memory resources (submodule)
+cli_agents/                        # Reference CLI agent submodules (formerly Example_Projects/)
+cli_agents_resources/              # Reference resource submodules (formerly Example_Resources/)
+Upstreams/                         # Upstream sync scripts
+assets/                            # Repository assets
+Dependencies/                      # Dependency documentation</code></pre>
+<h3 id="nested-directory-helixcode">1.2 Nested Directory:
+<code>HelixCode/</code></h3>
+<p>This is the <strong>actual application root</strong>. The repository
+root contains meta-files while all Go source code, builds, and runtime
+artifacts live here. This pattern allows versioned governance files at
+the top while keeping the application modular.</p>
+<p><strong>Key nested directories</strong>: -
+<code>HelixCode/internal/</code> - 34+ Go packages (all private) -
+<code>HelixCode/cmd/</code> - Multiple entry points (cli, server,
+standalone tools) - <code>HelixCode/applications/</code> - All client
+apps (6 platforms) - <code>HelixCode/api/</code> - OpenAPI specification
+only - <code>HelixCode/tests/</code> - e2e tests</p>
+<hr />
+<h2 id="client-application-architecture">2. Client Application
+Architecture</h2>
+<h3 id="cli-client">2.1 CLI Client</h3>
+<p><strong>Location</strong>: <code>HelixCode/cmd/cli/</code>,
+<code>HelixCode/cmd/root.go</code>,
+<code>HelixCode/cmd/main_commands.go</code></p>
+<p><strong>Entry Point</strong>:
+<code>HelixCode/cmd/cli/main.go</code></p>
+<p><strong>Framework</strong>: Cobra (spf13/cobra) + Viper for
+configuration</p>
+<p><strong>Key Files</strong>: - <code>HelixCode/cmd/cli/main.go</code>
+(12,678 chars) - CLI main entry, registers all subcommands -
+<code>HelixCode/cmd/root.go</code> (2,075 chars) - Root command
+definition with global flags -
+<code>HelixCode/cmd/main_commands.go</code> - Primary command
+implementations - <code>HelixCode/cmd/other_commands.go</code> -
+Auxiliary commands - <code>HelixCode/cmd/local_llm.go</code> -
+Standalone local LLM command -
+<code>HelixCode/cmd/local_llm_advanced.go</code> - Advanced local LLM
+options</p>
+<p><strong>Communication with APIs</strong>: - Uses
+<code>internal/server/client.go</code> to communicate with the REST API
+- Direct in-process communication when running in single-binary mode -
+WebSocket connection for real-time updates via
+<code>internal/server/ws.go</code> - MCP protocol for external tool
+integration</p>
+<p><strong>Build Command</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-cli</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> bin/helix ./cmd/cli</span></code></pre></div>
+<p><strong>Integration Implications for HelixQA</strong>: - CLI is the
+primary interface for testing agent workflows end-to-end - Commands
+exposed: <code>helix run</code>, <code>helix chat</code>,
+<code>helix config</code>, <code>helix server</code>,
+<code>helix verify</code> - CLI reads from stdin and writes to
+stdout/stderr — easy to script for automated testing - Exit codes need
+validation for each command path</p>
+<hr />
+<h3 id="tui-terminal-ui">2.2 TUI (Terminal UI)</h3>
+<p><strong>Location</strong>:
+<code>HelixCode/applications/terminal_ui/</code></p>
+<p><strong>Framework</strong>: rivo/tview + gdamore/tcell/v2</p>
+<p><strong>Entry Point</strong>:
+<code>HelixCode/applications/terminal_ui/main.go</code> (59,087
+chars)</p>
+<p><strong>Key Files</strong>: - <code>main.go</code> - Full TUI
+application with multiple screens - Uses tview for widgets (lists,
+forms, text views) - Uses tcell for low-level terminal control</p>
+<p><strong>Communication</strong>: - REST API client to internal/server
+- WebSocket for real-time streaming responses - In-memory event bus for
+UI updates</p>
+<p><strong>Build Command</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-terminal-ui</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> bin/helix-tui ./applications/terminal_ui</span></code></pre></div>
+<p><strong>Integration Implications for HelixQA</strong>: - TUI is the
+richest interactive client for testing UX flows - Screens include: chat,
+config, model selection, task view, log viewer - Terminal-based
+screenshots can be captured for visual regression testing - Keyboard
+shortcuts and navigation flows need automated testing</p>
+<hr />
+<h3 id="desktop-client">2.3 Desktop Client</h3>
+<p><strong>Location</strong>:
+<code>HelixCode/applications/desktop/</code></p>
+<p><strong>Framework</strong>: Fyne v2 (fyne.io/fyne/v2)</p>
+<p><strong>Entry Point</strong>:
+<code>HelixCode/applications/desktop/main.go</code> (33,968 chars)</p>
+<p><strong>Key Features</strong>: - Cross-platform GUI (Linux, macOS,
+Windows) - OpenGL-based rendering - System tray integration
+(systray)</p>
+<p><strong>Build Command</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-desktop</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> bin/helix-desktop ./applications/desktop</span></code></pre></div>
+<p><strong>Dependencies</strong>: OpenGL, X11 dev headers (Linux), CGO
+enabled</p>
+<p><strong>Integration Implications for HelixQA</strong>: - Desktop app
+needs GUI automation testing (Selenium/Appium-style) - Fyne apps can be
+tested with go test + fyne test infrastructure - Visual screenshot
+comparison important for desktop UI validation</p>
+<hr />
+<h3 id="mobile-frameworks">2.4 Mobile Frameworks</h3>
+<h4 id="android">Android</h4>
+<p><strong>Location</strong>:
+<code>HelixCode/applications/android/</code> <strong>Framework</strong>:
+gomobile for AAR generation <strong>Entry</strong>:
+<code>app/src/main/</code> (Java/Kotlin bindings wrapping Go
+library)</p>
+<h4 id="ios">iOS</h4>
+<p><strong>Location</strong>:
+<code>HelixCode/applications/ios/HelixCode/</code>
+<strong>Framework</strong>: gomobile for framework generation
+<strong>Entry</strong>: <code>HelixCode/</code> Xcode project</p>
+<p><strong>Build Commands</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-android  <span class="co"># gomobile bind -target android</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-ios      <span class="co"># gomobile bind -target ios</span></span></code></pre></div>
+<p><strong>Integration Implications for HelixQA</strong>: - Mobile
+clients require platform-specific test harnesses - API contract testing
+critical (mobile ↔︎ server communication) - Screenshot testing on
+Android/iOS emulators needed</p>
+<hr />
+<h3 id="aurora-os-harmony-os-clients">2.5 Aurora OS &amp; Harmony OS
+Clients</h3>
+<p><strong>Locations</strong>: -
+<code>HelixCode/applications/aurora_os/</code> -
+<code>HelixCode/applications/harmony_os/</code></p>
+<p><strong>Framework</strong>: Fyne v2 (same as desktop,
+platform-specific tweaks)</p>
+<p><strong>Integration Implications for HelixQA</strong>: - Specialized
+platforms may have limited emulator availability - Build verification
+and smoke tests are primary targets</p>
+<hr />
+<h3 id="websocket-web-client">2.6 WebSocket / Web Client</h3>
+<p><strong>Location</strong>: WebSocket handlers in
+<code>HelixCode/internal/server/</code></p>
+<p>The server exposes WebSocket endpoints for real-time streaming: -
+Chat message streaming - Task progress updates - Agent thought process
+visibility - Log streaming</p>
+<p><strong>Integration Implications for HelixQA</strong>: - WebSocket
+connection resilience testing - Message ordering and deduplication
+validation - Reconnection handling verification</p>
+<hr />
+<h2 id="apiservices-layer">3. API/Services Layer</h2>
+<h3 id="rest-api">3.1 REST API</h3>
+<p><strong>Location</strong>: <code>HelixCode/api/openapi.yaml</code>
+(67,471 chars)</p>
+<p>The API is fully specified in OpenAPI 3.0 format. Key endpoint
+categories:</p>
+<p><strong>Authentication</strong>: -
+<code>POST /api/v1/auth/login</code> -
+<code>POST /api/v1/auth/register</code> -
+<code>POST /api/v1/auth/refresh</code> -
+<code>POST /api/v1/auth/logout</code></p>
+<p><strong>Agents</strong>: - <code>GET /api/v1/agents</code> - List
+agents - <code>POST /api/v1/agents</code> - Create agent -
+<code>GET /api/v1/agents/{id}</code> - Get agent -
+<code>PUT /api/v1/agents/{id}</code> - Update agent -
+<code>DELETE /api/v1/agents/{id}</code> - Delete agent -
+<code>POST /api/v1/agents/{id}/run</code> - Execute agent</p>
+<p><strong>Chat</strong>: - <code>POST /api/v1/chat</code> - Send
+message - <code>GET /api/v1/chat/{id}/history</code> - Get history -
+<code>DELETE /api/v1/chat/{id}</code> - Clear chat</p>
+<p><strong>Tasks</strong>: - <code>GET /api/v1/tasks</code> - List tasks
+- <code>POST /api/v1/tasks</code> - Create task -
+<code>GET /api/v1/tasks/{id}</code> - Get task status -
+<code>DELETE /api/v1/tasks/{id}</code> - Cancel task</p>
+<p><strong>Configuration</strong>: - <code>GET /api/v1/config</code> -
+Get configuration - <code>PUT /api/v1/config</code> - Update
+configuration</p>
+<p><strong>LLM</strong>: - <code>GET /api/v1/llm/providers</code> - List
+providers - <code>GET /api/v1/llm/models</code> - List models -
+<code>POST /api/v1/llm/generate</code> - Generate text -
+<code>POST /api/v1/llm/chat</code> - Chat completion</p>
+<p><strong>Verification</strong>: -
+<code>GET /api/v1/verifier/status</code> - Verifier health -
+<code>GET /api/v1/verifier/models</code> - Verified models</p>
+<p><strong>Server Implementation</strong>:
+<code>HelixCode/internal/server/server.go</code> (11,002 chars)</p>
+<p>The server uses <strong>Gin</strong> (gin-gonic/gin) as the HTTP
+router with middleware for: - JWT authentication - Rate limiting -
+Request logging - CORS - Recovery (panic handling)</p>
+<p><strong>Integration Implications for HelixQA</strong>: - All OpenAPI
+endpoints must be tested for contract compliance - Authentication flow
+(login → token → refresh → logout) is critical path - Agent execution
+endpoints are the core value proposition - LLM endpoints need
+provider-fallback testing</p>
+<hr />
+<h3 id="websocket-layer">3.2 WebSocket Layer</h3>
+<p><strong>Location</strong>:
+<code>HelixCode/internal/server/</code></p>
+<p><strong>Framework</strong>: gorilla/websocket</p>
+<p><strong>Key Handlers</strong>: - <code>/ws/v1/chat</code> - Chat
+streaming - <code>/ws/v1/tasks/{id}/stream</code> - Task progress -
+<code>/ws/v1/agents/{id}/thoughts</code> - Agent reasoning
+visibility</p>
+<p><strong>Integration Implications for HelixQA</strong>: - WebSocket
+connections must survive network interruption - Message ordering must be
+preserved - Binary/text message framing must be validated</p>
+<hr />
+<h3 id="mcp-model-context-protocol-implementation">3.3 MCP (Model
+Context Protocol) Implementation</h3>
+<p><strong>Location</strong>: <code>HelixCode/internal/mcp/</code></p>
+<p><strong>Key Files</strong>: - <code>server.go</code> (9,855 chars) -
+MCP server core - <code>mock_conn.go</code> - Test mock connections -
+<code>server_test.go</code> - Unit tests - <code>doc.go</code> - Package
+documentation</p>
+<p><strong>Architecture</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Server <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    transport Transport</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    tools     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Tool</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    resources <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Resource</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    prompts   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Prompt</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Transport <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    Start<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    Stop<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    Send<span class="op">(</span>msg <span class="op">*</span>Message<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    Receive<span class="op">()</span> <span class="op">&lt;-</span><span class="kw">chan</span> <span class="op">*</span>Message</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Transports Supported</strong>: - stdio (subprocess
+communication) - SSE (Server-Sent Events)</p>
+<p><strong>Integration Implications for HelixQA</strong>: - MCP tool
+registration/execution must be tested - Transport layer resilience
+(stdio, SSE) - Message serialization/deserialization correctness - Tool
+schema validation</p>
+<hr />
+<h2 id="llm-integration">4. LLM Integration</h2>
+<h3 id="provider-architecture">4.1 Provider Architecture</h3>
+<p><strong>Location</strong>: <code>HelixCode/internal/llm/</code></p>
+<p>The LLM layer uses a <strong>factory pattern</strong> with a unified
+<code>Provider</code> interface. All providers implement the same
+contract.</p>
+<p><strong>Key Files</strong>: - <code>factory.go</code> - Provider
+factory (creates provider instances) - <code>aliases.go</code> - Model
+alias resolution - <code>auto_llm_manager.go</code> - Automatic provider
+selection - <code>cross_provider_registry.go</code> - Multi-provider
+registry - <code>health_monitor.go</code> - Provider health monitoring -
+<code>load_balancer.go</code> - Request distribution -
+<code>integrated_model_manager.go</code> - Model lifecycle
+management</p>
+<h3 id="supported-providers-from-factory.go">4.2 Supported Providers
+(from factory.go)</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>File</th>
+<th>Type</th>
+<th>Cloud/Local</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td><code>openai_provider.go</code></td>
+<td>ProviderTypeOpenAI</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td><code>anthropic_provider.go</code></td>
+<td>ProviderTypeAnthropic</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>Google Gemini</td>
+<td><code>gemini_provider.go</code></td>
+<td>ProviderTypeGemini</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td><code>ollama_provider.go</code></td>
+<td>ProviderTypeOllama</td>
+<td>Local</td>
+</tr>
+<tr>
+<td>LlamaCPP</td>
+<td><code>llamacpp_provider.go</code></td>
+<td>ProviderTypeLlamaCpp</td>
+<td>Local</td>
+</tr>
+<tr>
+<td>Qwen</td>
+<td><code>qwen_provider.go</code></td>
+<td>ProviderTypeQwen</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>XAI (Grok)</td>
+<td><code>xai_provider.go</code></td>
+<td>ProviderTypeXAI</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td><code>openrouter_provider.go</code></td>
+<td>ProviderTypeOpenRouter</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>GitHub Copilot</td>
+<td><code>copilot_provider.go</code></td>
+<td>ProviderTypeCopilot</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>Azure OpenAI</td>
+<td><code>azure_provider.go</code></td>
+<td>ProviderTypeAzure</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>AWS Bedrock</td>
+<td><code>bedrock_provider.go</code></td>
+<td>ProviderTypeBedrock</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>Vertex AI</td>
+<td><code>vertex_provider.go</code></td>
+<td>ProviderTypeVertexAI</td>
+<td>Cloud</td>
+</tr>
+<tr>
+<td>Local (Generic)</td>
+<td><code>local_provider.go</code></td>
+<td>ProviderTypeLocal</td>
+<td>Local</td>
+</tr>
+<tr>
+<td>KoboldAI</td>
+<td><code>koboldai_provider.go</code></td>
+<td>ProviderTypeKoboldAI</td>
+<td>Local</td>
+</tr>
+</tbody>
+</table>
+<h3 id="llmsverifier-integration">4.3 LLMsVerifier Integration</h3>
+<p><strong>Location</strong>:
+<code>HelixCode/internal/verifier/</code></p>
+<p><strong>Purpose</strong>: Integrates LLMsVerifier as the single
+source of truth for model metadata, provider health, verification
+status, and scoring.</p>
+<p><strong>Key Files</strong>: - <code>client.go</code> (6,818 chars) -
+HTTP client to LLMsVerifier REST API - <code>types.go</code> (151 lines)
+- VerifiedModel struct with capabilities - <code>bootstrap.go</code>
+(3,475 chars) - Verifier initialization - <code>adapter.go</code> -
+Adapter between LLMsVerifier and internal provider interfaces -
+<code>cache.go</code> - Caching layer for verifier responses -
+<code>health.go</code> - Health check integration -
+<code>poller.go</code> - Background polling for updates -
+<code>fallback_models.go</code> - Fallback when verifier unavailable</p>
+<p><strong>VerifiedModel Structure</strong> (from types.go):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifiedModel <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    ID                   <span class="dt">string</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    Name                 <span class="dt">string</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    Provider             <span class="dt">string</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    ProviderType         <span class="dt">string</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    Score                <span class="dt">float64</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    Verified             <span class="dt">bool</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    ContextSize          <span class="dt">int</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    SupportsStreaming    <span class="dt">bool</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    SupportsTools        <span class="dt">bool</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    SupportsFunctions    <span class="dt">bool</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    SupportsCode         <span class="dt">bool</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    SupportsVision       <span class="dt">bool</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    SupportsAudio        <span class="dt">bool</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    SupportsVideo        <span class="dt">bool</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    SupportsReasoning    <span class="dt">bool</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    SupportsEmbeddings   <span class="dt">bool</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    SupportsJSONMode     <span class="dt">bool</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    Latency              time<span class="op">.</span>Duration</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    CostPerInputToken    <span class="dt">float64</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    CostPerOutputToken   <span class="dt">float64</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    OverallScore         <span class="dt">float64</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    CodeCapabilityScore  <span class="dt">float64</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    ResponsivenessScore  <span class="dt">float64</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    ReliabilityScore     <span class="dt">float64</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    Tier                 <span class="dt">int</span>  <span class="co">// 1=Premium, 2=High-quality, 3=Fast, 4=Aggregator, 5=Free</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    Capabilities         <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    Tags                 <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Integration Pattern</strong>: - Verifier communicates via
+REST API (not Go module import) - Avoids circular dependency with
+<code>digital.vasic.llmprovider</code> - Bootstrapped during server/CLI
+startup - Cached locally with TTL - Fallback to static model list when
+verifier unavailable</p>
+<p><strong>Integration Implications for HelixQA</strong>: - LLMsVerifier
+integration is a critical dependency - Provider fallback chains need
+testing (primary → secondary → local) - Model capability detection
+affects agent behavior - Health scoring impacts load balancer decisions
+- When verifier is down, system must gracefully degrade</p>
+<hr />
+<h2 id="build-system-configuration">5. Build System &amp;
+Configuration</h2>
+<h3 id="build-system">5.1 Build System</h3>
+<p><strong>Primary Build Tool</strong>: <code>HelixCode/Makefile</code>
+(15,341 chars)</p>
+<p><strong>Key Make Targets</strong>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build                  <span class="co"># Build all binaries</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-cli             <span class="co"># Build CLI only</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-server          <span class="co"># Build server daemon</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-tui             <span class="co"># Build terminal UI</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-desktop         <span class="co"># Build desktop GUI</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-android         <span class="co"># Build Android AAR</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-ios             <span class="co"># Build iOS framework</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-aurora          <span class="co"># Build Aurora OS client</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build-harmony         <span class="co"># Build Harmony OS client</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test                  <span class="co"># Run unit tests</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-integration       <span class="co"># Run integration tests</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-e2e              <span class="co"># Run end-to-end tests</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-challenges       <span class="co"># Run challenge suite</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docker-build          <span class="co"># Build Docker images</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docker-compose-up     <span class="co"># Start Docker stack</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> lint                  <span class="co"># Run linters</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> security-test         <span class="co"># Run security tests</span></span></code></pre></div>
+<h3 id="go-module">5.2 Go Module</h3>
+<p><strong>Module</strong>: <code>dev.helix.code</code></p>
+<p><strong>Go Version</strong>: 1.24.0 (toolchain 1.24.9)</p>
+<p><strong>Key Dependencies</strong> (from
+<code>HelixCode/go.mod</code>): - <strong>HTTP/Web</strong>:
+<code>gin-gonic/gin</code>, <code>gorilla/websocket</code> -
+<strong>TUI</strong>: <code>rivo/tview</code>,
+<code>gdamore/tcell/v2</code> - <strong>GUI</strong>:
+<code>fyne.io/fyne/v2</code> - <strong>CLI</strong>:
+<code>spf13/cobra</code>, <code>spf13/viper</code> -
+<strong>Database</strong>: <code>jackc/pgx/v5</code>,
+<code>lib/pq</code> (PostgreSQL) - <strong>Cache</strong>:
+<code>redis/go-redis/v9</code> - <strong>Auth</strong>:
+<code>golang-jwt/jwt/v4</code>, <code>golang.org/x/crypto</code> -
+<strong>Azure</strong>: <code>azure-sdk-for-go/sdk/azcore</code>,
+<code>azidentity</code> - <strong>AWS</strong>:
+<code>aws-sdk-go-v2</code> suite, <code>bedrockruntime</code> -
+<strong>Browser Automation</strong>: <code>chromedp/chromedp</code>,
+<code>chromedp/cdproto</code> - <strong>Memory</strong>:
+<code>getzep/zep-go/v3</code> - <strong>Testing</strong>:
+<code>stretchr/testify</code> - <strong>Tree-sitter</strong>:
+<code>smacker/go-tree-sitter</code> - <strong>Image</strong>:
+<code>nfnt/resize</code> - <strong>OAuth2</strong>:
+<code>golang.org/x/oauth2</code> - <strong>gRPC</strong>:
+<code>google.golang.org/grpc</code> - <strong>YAML</strong>:
+<code>gopkg.in/yaml.v2/v3</code></p>
+<h3 id="configuration">5.3 Configuration</h3>
+<p><strong>Environment File</strong>:
+<code>HelixCode/.env.example</code> (2,998 chars)</p>
+<p>Key environment variables:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Server</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SERVER_HOST</span><span class="op">=</span>0.0.0.0</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SERVER_PORT</span><span class="op">=</span>8080</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SERVER_TLS_ENABLED</span><span class="op">=</span>true</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Database</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_DATABASE_URL</span><span class="op">=</span>postgresql://user:pass@localhost/helix</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_REDIS_URL</span><span class="op">=</span>redis://localhost:6379</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM Providers</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_OPENAI_API_KEY</span><span class="op">=</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_ANTHROPIC_API_KEY</span><span class="op">=</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_GEMINI_API_KEY</span><span class="op">=</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_AZURE_API_KEY</span><span class="op">=</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_BEDROK_AWS_REGION</span><span class="op">=</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_OLLAMA_URL</span><span class="op">=</span>http://localhost:11434</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"># LLMsVerifier</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_VERIFIER_URL</span><span class="op">=</span>http://localhost:9090</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_VERIFIER_ENABLED</span><span class="op">=</span>true</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_VERIFIER_CACHE_TTL</span><span class="op">=</span>300</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Authentication</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_JWT_SECRET</span><span class="op">=</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_OAUTH_CLIENT_ID</span><span class="op">=</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_OAUTH_CLIENT_SECRET</span><span class="op">=</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Features</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_MCP_ENABLED</span><span class="op">=</span>true</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_MEMORY_ENABLED</span><span class="op">=</span>true</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_NOTIFICATIONS_ENABLED</span><span class="op">=</span>true</span></code></pre></div>
+<h3 id="docker">5.4 Docker</h3>
+<p><strong>Files</strong>: - <code>Dockerfile</code> (1,957 chars) -
+Main application container - <code>Dockerfile.test</code> - Test runner
+container - <code>Dockerfile.worker</code> - Background worker container
+- <code>docker-compose.yml</code> - Full stack -
+<code>docker-compose.test.yml</code> - Test stack -
+<code>docker-compose.full-test.yml</code> - Comprehensive test stack -
+<code>docker-compose.aurora-os.yml</code> - Aurora OS specific -
+<code>docker-compose.harmony-os.yml</code> - Harmony OS specific -
+<code>docker-compose.specialized-platforms.yml</code> - Other
+platforms</p>
+<p><strong>Integration Implications for HelixQA</strong>: - Docker
+Compose is the primary deployment target - Container health checks must
+be validated - Multi-container orchestration (app, postgres, redis,
+verifier) needs integration testing - Environment variable injection is
+critical path</p>
+<hr />
+<h2 id="testing-infrastructure">6. Testing Infrastructure</h2>
+<h3 id="test-directory-structure">6.1 Test Directory Structure</h3>
+<p><strong>Unit Tests</strong>: Embedded <code>*_test.go</code> files
+throughout <code>internal/</code></p>
+<p><strong>E2E Tests</strong>: <code>tests/e2e/</code></p>
+<p><strong>Challenge Suite</strong>:
+<code>challenges/scripts/</code></p>
+<p><strong>Standalone Tests</strong>:
+<code>HelixCode/standalone_tests/</code>,
+<code>HelixCode/test_programs/</code></p>
+<h3 id="test-types">6.2 Test Types</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 25%" />
+<col style="width: 23%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>Location</th>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td><code>*_test.go</code> in packages</td>
+<td><code>make test</code></td>
+<td>Package-level unit tests</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td><code>*_integration_test.go</code></td>
+<td><code>make test-integration</code></td>
+<td>Cross-package integration</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td><code>tests/e2e/</code></td>
+<td><code>make test-e2e</code></td>
+<td>Full system end-to-end</td>
+</tr>
+<tr>
+<td>Challenges</td>
+<td><code>challenges/scripts/</code></td>
+<td><code>make test-challenges</code></td>
+<td>7-phase challenge suite</td>
+</tr>
+<tr>
+<td>Security</td>
+<td><code>cmd/security_test/</code></td>
+<td><code>make security-test</code></td>
+<td>Security/penetration tests</td>
+</tr>
+<tr>
+<td>Cloud Provider</td>
+<td><code>cloud_providers_integration_test.go</code></td>
+<td>Manual</td>
+<td>Live provider validation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="challenge-system">6.3 Challenge System</h3>
+<p><strong>Latest Commit</strong>: “Add run_all_challenges.sh to run all
+7 phases” (Apr 30, 2026)</p>
+<p><strong>7 Challenge Phases</strong>: 1. Basic functionality 2.
+Configuration management 3. LLM provider integration 4. Agent execution
+5. Memory system 6. Security &amp; compliance 7. Performance &amp;
+scaling</p>
+<p><strong>Runner</strong>:
+<code>challenges/scripts/run_all_challenges.sh</code></p>
+<h3 id="test-configuration">6.4 Test Configuration</h3>
+<p><strong>Test Config</strong>: <code>test-config.yaml</code>
+<strong>Test Environment</strong>: <code>.env.full-test</code></p>
+<p><strong>Integration Implications for HelixQA</strong>: - The test
+suite is extensive but needs HelixQA to add visual/behavioral validation
+- Challenge phases map well to HelixQA quality gates - Mock vs. real
+provider testing needs coverage analysis - E2E tests validate API
+contracts but not UI behavior</p>
+<hr />
+<h2 id="documentation-inventory">7. Documentation Inventory</h2>
+<h3 id="governance-files-root-level">7.1 Governance Files (Root
+Level)</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Last Update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Agent governance rules</td>
+<td>May 2026</td>
+</tr>
+<tr>
+<td><code>CONSTITUTION.md</code></td>
+<td>Project constitution</td>
+<td>May 2026</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>Claude AI integration guidelines</td>
+<td>May 2026</td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>Main project README</td>
+<td>Jan 2026</td>
+</tr>
+</tbody>
+</table>
+<h3 id="completiontracking-files-50-files">7.2 Completion/Tracking Files
+(50+ files)</h3>
+<p>The repository contains extensive completion tracking: -
+<code>COMPREHENSIVE_COMPLETION_PLAN.md</code> -
+<code>COMPREHENSIVE_COMPLETION_REPORT.md</code> -
+<code>FINAL_COMPLETION.md</code> -
+<code>FINAL_COMPLETION_REPORT.md</code> -
+<code>FINAL_COMPLETION_SUCCESS_REPORT.md</code> - <code>PHASE_1_*</code>
+through <code>PHASE_5_*</code> (session summaries, test reports) -
+<code>AUDIT_*</code> (audit reports and trackers) -
+<code>IMPLEMENTATION_*</code> (implementation plans and summaries)</p>
+<h3 id="technical-documentation">7.3 Technical Documentation</h3>
+<p><strong>In <code>Documentation/</code></strong>: - Architecture
+documentation - API documentation - Deployment guides - Security
+documentation</p>
+<p><strong>In <code>Specification/</code></strong>: - API specifications
+- Architecture specifications - Protocol specifications</p>
+<p><strong>In <code>Implementation_Guide/</code></strong>: - Getting
+started guides - Advanced implementation - Integration guides</p>
+<p><strong>In <code>HelixCode/internal/llm/</code></strong>: -
+<code>README.md</code> - LLM architecture overview -
+<code>AZURE_IMPLEMENTATION_SUMMARY.md</code> -
+<code>LOCAL_LLM_MANAGER_DOCUMENTATION.md</code> -
+<code>LOCAL_PROVIDERS.md</code></p>
+<h3 id="dockerdeployment-docs">7.4 Docker/Deployment Docs</h3>
+<ul>
+<li><code>DOCKER_SETUP.md</code></li>
+<li><code>DOCKER_COMPLETION_SUMMARY.md</code></li>
+<li><code>DOCKER_DEPLOYMENT.md</code></li>
+<li><code>ENTERPRISE_DEPLOYMENT_GUIDE.md</code></li>
+<li><code>ENTERPRISE_USER_MANUAL.md</code></li>
+</ul>
+<hr />
+<h2 id="helixqa-integration-points">8. HelixQA Integration Points</h2>
+<h3 id="where-helixqa-should-integrate-as-submodule">8.1 Where HelixQA
+Should Integrate as Submodule</h3>
+<p><strong>Recommended Path</strong>:
+<code>HelixCode/internal/qa/</code> or root-level
+<code>HelixQA/</code></p>
+<p><strong>Integration Points</strong>:</p>
+<ol type="1">
+<li><strong>API Contract Testing</strong>
+<ul>
+<li>Target: <code>HelixCode/api/openapi.yaml</code></li>
+<li>Action: Validate all REST endpoints against OpenAPI spec</li>
+<li>Files: Test generators for each endpoint category</li>
+</ul></li>
+<li><strong>Client App Validation</strong>
+<ul>
+<li><strong>CLI</strong>: <code>HelixCode/cmd/cli/</code> - Command exit
+codes, output formatting, stdin handling</li>
+<li><strong>TUI</strong>:
+<code>HelixCode/applications/terminal_ui/</code> - Screen rendering,
+navigation flows</li>
+<li><strong>Desktop</strong>:
+<code>HelixCode/applications/desktop/</code> - GUI element
+validation</li>
+<li><strong>Mobile</strong>:
+<code>HelixCode/applications/android/</code>, <code>ios/</code> - API
+contract + UI testing</li>
+</ul></li>
+<li><strong>LLM Provider Testing</strong>
+<ul>
+<li>Target: <code>HelixCode/internal/llm/</code></li>
+<li>Action: Test each provider adapter with mock and real
+credentials</li>
+<li>Files: <code>factory.go</code>, <code>*_provider.go</code></li>
+<li>Key: Fallback chain validation (primary → secondary → local)</li>
+</ul></li>
+<li><strong>Verifier Integration Testing</strong>
+<ul>
+<li>Target: <code>HelixCode/internal/verifier/</code></li>
+<li>Action: Test LLMsVerifier connectivity, cache behavior,
+fallback</li>
+<li>Files: <code>client.go</code>, <code>bootstrap.go</code>,
+<code>cache.go</code>, <code>health.go</code></li>
+</ul></li>
+<li><strong>MCP Protocol Testing</strong>
+<ul>
+<li>Target: <code>HelixCode/internal/mcp/</code></li>
+<li>Action: Tool registration, message serialization, transport
+resilience</li>
+<li>Files: <code>server.go</code>, <code>mock_conn.go</code></li>
+</ul></li>
+<li><strong>Server Integration Testing</strong>
+<ul>
+<li>Target: <code>HelixCode/internal/server/</code></li>
+<li>Action: WebSocket resilience, middleware chain, auth flow</li>
+<li>Files: <code>server.go</code></li>
+</ul></li>
+<li><strong>Configuration Validation</strong>
+<ul>
+<li>Target: <code>HelixCode/internal/config/</code>,
+<code>configs/</code></li>
+<li>Action: Config parsing, validation, environment variable
+binding</li>
+</ul></li>
+<li><strong>Docker Deployment Testing</strong>
+<ul>
+<li>Target: <code>docker-compose.yml</code>,
+<code>Dockerfile</code></li>
+<li>Action: Container health checks, multi-service orchestration</li>
+</ul></li>
+<li><strong>Challenge System Enhancement</strong>
+<ul>
+<li>Target: <code>challenges/scripts/</code></li>
+<li>Action: Add visual/regression tests to the 7-phase challenge
+suite</li>
+</ul></li>
+<li><strong>Memory System Testing</strong>
+<ul>
+<li>Target: <code>HelixCode/internal/memory/</code></li>
+<li>Action: Zep integration validation</li>
+</ul></li>
+</ol>
+<h3 id="recommended-helixqa-architecture">8.2 Recommended HelixQA
+Architecture</h3>
+<pre><code>HelixQA/
+├── api_tests/                      # OpenAPI contract tests
+├── client_tests/
+│   ├── cli/                        # CLI automation tests
+│   ├── tui/                        # TUI screenshot + key tests
+│   ├── desktop/                    # GUI automation tests
+│   └── mobile/                     # Mobile device tests
+├── llm_tests/
+│   ├── provider_mock_tests/        # Mock provider tests
+│   ├── provider_live_tests/        # Live provider smoke tests
+│   └── fallback_chain_tests/       # Provider fallback validation
+├── integration_tests/
+│   ├── verifier_integration/       # LLMsVerifier integration
+│   ├── mcp_integration/            # MCP protocol tests
+│   ├── memory_integration/       # Memory system tests
+│   └── auth_integration/           # Auth flow tests
+├── e2e_tests/
+│   ├── full_workflow_tests/        # End-to-end agent workflows
+│   └── docker_tests/               # Docker-compose stack tests
+├── visual_tests/
+│   ├── screenshot_baseline/        # Baseline screenshots
+│   └── screenshot_compare/         # Comparison engine
+└── reports/                        # Test report generation</code></pre>
+<h3 id="apis-helixqa-should-test">8.3 APIs HelixQA Should Test</h3>
+<p><strong>Critical API Endpoints for Quality Validation</strong>: 1.
+<code>POST /api/v1/auth/login</code> +
+<code>POST /api/v1/auth/refresh</code> - Token lifecycle 2.
+<code>POST /api/v1/agents</code> +
+<code>POST /api/v1/agents/{id}/run</code> - Agent CRUD + execution 3.
+<code>POST /api/v1/llm/generate</code> - LLM text generation with all
+providers 4. <code>POST /api/v1/llm/chat</code> - Chat completion with
+streaming 5. <code>GET /api/v1/verifier/models</code> - Model
+verification data 6. <code>POST /api/v1/chat</code> - Chat streaming via
+WebSocket 7. <code>GET /api/v1/tasks/{id}</code> - Task status
+tracking</p>
+<h3 id="client-apps-helixqa-needs-to-validate">8.4 Client Apps HelixQA
+Needs to Validate</h3>
+<table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Priority</th>
+<th>Test Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI</td>
+<td>P0</td>
+<td>Command execution + output capture</td>
+</tr>
+<tr>
+<td>TUI</td>
+<td>P0</td>
+<td>Terminal screenshot + keyboard input</td>
+</tr>
+<tr>
+<td>Server/API</td>
+<td>P0</td>
+<td>HTTP/WebSocket contract tests</td>
+</tr>
+<tr>
+<td>Desktop</td>
+<td>P1</td>
+<td>GUI automation (Fyne test framework)</td>
+</tr>
+<tr>
+<td>Android</td>
+<td>P2</td>
+<td>API contract + emulator smoke</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>P2</td>
+<td>API contract + simulator smoke</td>
+</tr>
+<tr>
+<td>Aurora OS</td>
+<td>P3</td>
+<td>Build verification only</td>
+</tr>
+<tr>
+<td>Harmony OS</td>
+<td>P3</td>
+<td>Build verification only</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="evidence-collection-gaps">9. Evidence Collection Gaps</h2>
+<h3 id="current-evidence-collection">9.1 Current Evidence
+Collection</h3>
+<p><strong>Existing Screenshot/Visual Evidence</strong>: -
+<code>HelixCode/assets/</code> - Static assets (logos, icons) -
+<code>HelixCode/benchmark_reports/</code> - Performance benchmarks
+(text/csv) - <code>HelixCode/doc_reports/</code> - Documentation
+generation reports - <code>HelixCode/test_reports/</code> - Test
+execution reports - ChromeDP integration
+(<code>chromedp/chromedp</code>) - Browser automation for web
+content</p>
+<p><strong>Code Evidence</strong>: - <code>chromedp</code> is imported
+in go.mod — used for browser-based content extraction -
+<code>nfnt/resize</code> for image processing</p>
+<h3 id="evidence-gaps-identified">9.2 Evidence Gaps Identified</h3>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 22%" />
+<col style="width: 18%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Location</th>
+<th>Impact</th>
+<th>HelixQA Opportunity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No TUI screenshot collection</strong></td>
+<td><code>applications/terminal_ui/</code></td>
+<td>Cannot visually validate terminal UI</td>
+<td>Add <code>terminal_test.go</code> with <code>tcell</code> screenshot
+capture</td>
+</tr>
+<tr>
+<td><strong>No Desktop GUI screenshot tests</strong></td>
+<td><code>applications/desktop/</code></td>
+<td>No visual regression for Fyne apps</td>
+<td>Integrate Fyne’s <code>test.NewApp()</code> for headless
+screenshots</td>
+</tr>
+<tr>
+<td><strong>No WebSocket message logging</strong></td>
+<td><code>internal/server/</code></td>
+<td>Difficult to debug real-time issues</td>
+<td>Add structured WS message capture for replay</td>
+</tr>
+<tr>
+<td><strong>No API response examples</strong></td>
+<td><code>api/openapi.yaml</code></td>
+<td>Missing example responses</td>
+<td>Generate golden files from actual API calls</td>
+</tr>
+<tr>
+<td><strong>No provider response samples</strong></td>
+<td><code>internal/llm/</code></td>
+<td>Cannot validate provider output format</td>
+<td>Add provider response fixtures</td>
+</tr>
+<tr>
+<td><strong>No agent execution traces</strong></td>
+<td><code>internal/agent/</code></td>
+<td>Cannot audit agent reasoning</td>
+<td>Add structured trace collection</td>
+</tr>
+<tr>
+<td><strong>No visual comparison for mobile</strong></td>
+<td><code>applications/android/</code>, <code>ios/</code></td>
+<td>No mobile UI regression</td>
+<td>Add emulator screenshot pipelines</td>
+</tr>
+<tr>
+<td><strong>No LLM output quality metrics</strong></td>
+<td><code>internal/llm/</code></td>
+<td>Cannot measure response quality</td>
+<td>Add LLM evaluation framework (LLM-as-judge)</td>
+</tr>
+<tr>
+<td><strong>No memory system evidence</strong></td>
+<td><code>internal/memory/</code></td>
+<td>Cannot verify memory accuracy</td>
+<td>Add memory read/write trace logs</td>
+</tr>
+<tr>
+<td><strong>No MCP message traces</strong></td>
+<td><code>internal/mcp/</code></td>
+<td>Cannot debug protocol issues</td>
+<td>Add MCP traffic capture</td>
+</tr>
+</tbody>
+</table>
+<h3 id="recommended-evidence-collection-strategy">9.3 Recommended
+Evidence Collection Strategy</h3>
+<p>For HelixQA to fill these gaps:</p>
+<ol type="1">
+<li><strong>Screenshot Baselines</strong>: Create baseline images for
+all TUI screens, desktop windows</li>
+<li><strong>API Golden Files</strong>: Record actual API responses as
+test fixtures</li>
+<li><strong>Provider Fixtures</strong>: Capture real LLM responses
+(anonymized) for regression testing</li>
+<li><strong>Trace Collection</strong>: Implement
+OpenTelemetry-compatible tracing across all internal packages</li>
+<li><strong>Video Recording</strong>: Record TUI/desktop interactions
+for manual review</li>
+<li><strong>Metrics Export</strong>: Prometheus-compatible metrics from
+<code>internal/monitoring/</code></li>
+</ol>
+<hr />
+<h2 id="submodules-external-dependencies">10. Submodules &amp; External
+Dependencies</h2>
+<h3 id="git-submodules">10.1 Git Submodules</h3>
+<p><strong>File</strong>: <code>.gitmodules</code> (10,633 chars)</p>
+<p>Active submodules: - <code>Github-Pages-Website</code> →
+<code>HelixDevelopment-Code/Welcome</code> -
+<code>awesome-ai-memory</code> →
+<code>topoteretes/awesome-ai-memory</code> -
+<code>Example_Projects</code> (converted to SSH) -
+<code>Example_Resources</code> (converted to SSH)</p>
+<p><strong>Initialization</strong>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span></span></code></pre></div>
+<h3 id="upstream-sync">10.2 Upstream Sync</h3>
+<p><strong>Location</strong>: <code>Upstreams/</code>
+<strong>Script</strong>: GitLab upstream sync for maintaining fork
+relationships</p>
+<hr />
+<h2 id="security-architecture">11. Security Architecture</h2>
+<h3 id="security-components">11.1 Security Components</h3>
+<p><strong>Locations</strong>: -
+<code>HelixCode/internal/security/</code> - Security core -
+<code>HelixCode/cmd/security_test/</code> - Security test harness -
+<code>HelixCode/cmd/security_fix/</code> - Security fix tools -
+<code>HelixCode/security/</code> - Security documentation and
+tooling</p>
+<p><strong>Features</strong>: - JWT-based authentication - OAuth2
+integration - Rate limiting - Input sanitization - Container memory caps
+(to prevent host crashes) - <code>helix.security.json</code> - Security
+policy file</p>
+<hr />
+<h2 id="memory-context-system">12. Memory &amp; Context System</h2>
+<h3 id="memory-integration">12.1 Memory Integration</h3>
+<p><strong>Location</strong>: <code>HelixCode/internal/memory/</code>
+<strong>Framework</strong>: Zep (getzep/zep-go/v3)</p>
+<p><strong>Purpose</strong>: Long-term memory for AI agents across
+sessions</p>
+<p><strong>Integration Implications for HelixQA</strong>: - Memory
+read/write correctness validation needed - Cross-session memory
+persistence tests - Memory search/query accuracy validation</p>
+<h3 id="context-management">12.2 Context Management</h3>
+<p><strong>Location</strong>:
+<code>HelixCode/internal/context/</code></p>
+<p><strong>Purpose</strong>: Session context building and management for
+LLM prompts</p>
+<hr />
+<h2 id="recent-commits-analysis">13. Recent Commits Analysis</h2>
+<h3 id="latest-commit-themes">13.1 Latest Commit Themes</h3>
+<table>
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 28%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Date</th>
+<th>Theme</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feat(verifier): remove hardcoded capabilities</code></td>
+<td>May 1, 2026</td>
+<td>LLMsVerifier as source of truth</td>
+</tr>
+<tr>
+<td><code>feat(verifier): wire verifier into server and CLI</code></td>
+<td>May 1, 2026</td>
+<td>Bootstrapping integration</td>
+</tr>
+<tr>
+<td><code>feat(verifier): integrate LLMsVerifier</code></td>
+<td>May 1, 2026</td>
+<td>Core verifier integration</td>
+</tr>
+<tr>
+<td><code>fix(all): achieve 100% test pass</code></td>
+<td>Apr 30, 2026</td>
+<td>CONST-035 anti-bluff compliance</td>
+</tr>
+<tr>
+<td><code>Fix CLI/deployment/LLM bluffs</code></td>
+<td>Apr 30, 2026</td>
+<td>Real implementations replacing stubs</td>
+</tr>
+<tr>
+<td><code>Anti-Bluff planning</code></td>
+<td>Apr 30, 2026</td>
+<td>Architecture hardening</td>
+</tr>
+<tr>
+<td><code>chore(tests): tag t.Skip calls</code></td>
+<td>Apr 30, 2026</td>
+<td>Test audit markers</td>
+</tr>
+<tr>
+<td><code>Add run_all_challenges.sh</code></td>
+<td>Apr 30, 2026</td>
+<td>Challenge automation</td>
+</tr>
+<tr>
+<td><code>chore(governance): propagate Constitution/CLAUDE.md/AGENTS.md</code></td>
+<td>May 1, 2026</td>
+<td>Governance sync</td>
+</tr>
+</tbody>
+</table>
+<h3 id="const-035-anti-bluff-framework">13.2 CONST-035 Anti-Bluff
+Framework</h3>
+<p>The project follows a “Constitution” (CONSTITUTION.md) with clauses
+like CONST-035 that enforce: - No simulated/test-only implementations in
+production code - Real command execution (not stubs) - 100% test pass
+rate requirement - <code>t.Skip</code> calls must be tagged with
+<code>// SKIP-OK: reason</code></p>
+<p><strong>Integration Implications for HelixQA</strong>: - HelixQA must
+comply with anti-bluff rules (no mock-only assertions) - Tests must
+exercise real code paths - Any test skipping requires explicit
+justification</p>
+<hr />
+<h2 id="multi-platform-support-matrix">14. Multi-Platform Support
+Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Client</th>
+<th>Framework</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux</td>
+<td>CLI, TUI, Desktop, Server</td>
+<td>Native</td>
+<td>Fully Supported</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>CLI, TUI, Desktop, Server</td>
+<td>Native</td>
+<td>Fully Supported</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>CLI, TUI, Desktop, Server</td>
+<td>Native</td>
+<td>Fully Supported</td>
+</tr>
+<tr>
+<td>Aurora OS</td>
+<td>Desktop</td>
+<td>Fyne</td>
+<td>Specialized Build</td>
+</tr>
+<tr>
+<td>Harmony OS</td>
+<td>Desktop</td>
+<td>Fyne</td>
+<td>Specialized Build</td>
+</tr>
+<tr>
+<td>Android</td>
+<td>Mobile App</td>
+<td>gomobile</td>
+<td>AAR Bindings</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>Mobile App</td>
+<td>gomobile</td>
+<td>Framework Bindings</td>
+</tr>
+<tr>
+<td>Docker</td>
+<td>Server</td>
+<td>Alpine</td>
+<td>Multi-stage Build</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="key-findings-summary">15. Key Findings Summary</h2>
+<h3 id="architecture-strengths">15.1 Architecture Strengths</h3>
+<ol type="1">
+<li><strong>Modular design</strong>: 34+ internal packages with clear
+separation of concerns</li>
+<li><strong>Multi-client strategy</strong>: 6 client application types
+for different platforms</li>
+<li><strong>Provider abstraction</strong>: Unified LLM interface
+supports 14+ providers</li>
+<li><strong>Verifier integration</strong>: LLMsVerifier as single source
+of truth for model metadata</li>
+<li><strong>MCP protocol</strong>: Modern Model Context Protocol for
+tool integration</li>
+<li><strong>Docker-first</strong>: Comprehensive container
+orchestration</li>
+<li><strong>Constitution-driven</strong>: Governance framework prevents
+quality degradation</li>
+</ol>
+<h3 id="architecture-weaknesses-gaps">15.2 Architecture Weaknesses /
+Gaps</h3>
+<ol type="1">
+<li><strong>Nested root</strong>: The <code>HelixCode/HelixCode/</code>
+nesting is confusing and may complicate imports</li>
+<li><strong>Evidence collection</strong>: No systematic visual evidence
+collection for any client</li>
+<li><strong>Test gaps</strong>: E2E tests validate APIs but not client
+UI behavior</li>
+<li><strong>Provider testing</strong>: Many provider tests use mocks or
+skip markers</li>
+<li><strong>Mobile maturity</strong>: Android/iOS are gomobile bindings
+— limited native UI</li>
+<li><strong>Documentation sprawl</strong>: 100+ .md files at root level
+create noise</li>
+</ol>
+<h3 id="helixqa-opportunities">15.3 HelixQA Opportunities</h3>
+<ol type="1">
+<li><strong>Visual regression</strong>: TUI + Desktop screenshot testing
+is a high-value gap</li>
+<li><strong>API contract</strong>: OpenAPI spec is ready for automated
+contract testing</li>
+<li><strong>Provider validation</strong>: Live provider smoke tests with
+real credentials</li>
+<li><strong>Verifier health</strong>: Continuous monitoring of
+LLMsVerifier integration</li>
+<li><strong>Challenge enhancement</strong>: Add visual/UI tests to the
+7-phase challenge suite</li>
+<li><strong>Docker validation</strong>: Automated Docker Compose stack
+testing</li>
+<li><strong>Trace collection</strong>: Implement structured evidence
+collection across all packages</li>
+</ol>
+<hr />
+<h2 id="appendix-a-exact-file-paths-reference">Appendix A: Exact File
+Paths Reference</h2>
+<h3 id="entry-points">Entry Points</h3>
+<ul>
+<li><code>HelixCode/main.go</code> - Main entry</li>
+<li><code>HelixCode/cmd/root.go</code> - Cobra root command</li>
+<li><code>HelixCode/cmd/cli/main.go</code> - CLI main</li>
+<li><code>HelixCode/cmd/server/main.go</code> - Server main</li>
+<li><code>HelixCode/applications/terminal_ui/main.go</code> - TUI
+main</li>
+<li><code>HelixCode/applications/desktop/main.go</code> - Desktop
+main</li>
+</ul>
+<h3 id="core-server">Core Server</h3>
+<ul>
+<li><code>HelixCode/internal/server/server.go</code> - HTTP server</li>
+<li><code>HelixCode/api/openapi.yaml</code> - API specification</li>
+</ul>
+<h3 id="llm">LLM</h3>
+<ul>
+<li><code>HelixCode/internal/llm/factory.go</code> - Provider
+factory</li>
+<li><code>HelixCode/internal/llm/aliases.go</code> - Model aliases</li>
+<li><code>HelixCode/internal/llm/health_monitor.go</code> - Health
+monitoring</li>
+<li><code>HelixCode/internal/llm/load_balancer.go</code> - Load
+balancing</li>
+</ul>
+<h3 id="mcp">MCP</h3>
+<ul>
+<li><code>HelixCode/internal/mcp/server.go</code> - MCP server</li>
+<li><code>HelixCode/internal/mcp/doc.go</code> - Package docs</li>
+</ul>
+<h3 id="verifier">Verifier</h3>
+<ul>
+<li><code>HelixCode/internal/verifier/client.go</code> - LLMsVerifier
+client</li>
+<li><code>HelixCode/internal/verifier/types.go</code> - VerifiedModel
+types</li>
+<li><code>HelixCode/internal/verifier/bootstrap.go</code> -
+Initialization</li>
+<li><code>HelixCode/internal/verifier/adapter.go</code> - Provider
+adapter</li>
+</ul>
+<h3 id="build">Build</h3>
+<ul>
+<li><code>HelixCode/Makefile</code> - Build orchestration</li>
+<li><code>HelixCode/go.mod</code> - Module dependencies</li>
+<li><code>.gitmodules</code> - Submodule configuration</li>
+</ul>
+<h3 id="config">Config</h3>
+<ul>
+<li><code>HelixCode/.env.example</code> - Environment template</li>
+<li><code>configs/config.yaml</code> - Configuration template</li>
+</ul>
+<h3 id="docker-1">Docker</h3>
+<ul>
+<li><code>Dockerfile</code> - Main container</li>
+<li><code>docker-compose.yml</code> - Compose stack</li>
+<li><code>HelixCode/docker-compose.full-test.yml</code> - Test
+stack</li>
+</ul>
+<h3 id="tests">Tests</h3>
+<ul>
+<li><code>tests/e2e/</code> - E2E tests</li>
+<li><code>challenges/scripts/run_all_challenges.sh</code> - Challenge
+runner</li>
+<li><code>HelixCode/run_tests.sh</code> - Test runner</li>
+<li><code>HelixCode/run_all_tests.sh</code> - Full test runner</li>
+</ul>
+<hr />
+<p><em>End of Architecture Analysis</em></p>
+</body>
+</html>

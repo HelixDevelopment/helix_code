@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-047-redis-testnewclient_withdatabase-needs-live-redis-no-skip-ok-11.4.98-i18n-error-contract-drift">HXC-047
+— redis TestNewClient_WithDatabase: needs-live-Redis (no SKIP-OK
+§11.4.98) + i18n error contract drift</h1>
+<p>internal/redis TestNewClient_WithDatabase — redis_test.go:112: error
+“internal_redis_failed_connect: dial tcp 127.0.0.1:6379: connect:
+connection refused” does not contain “Redis”. TWO findings: (a
+§11.4.98/§11.4.3) the test silently requires a live Redis at :6379 with
+no SKIP-OK guard; (b) the i18n-keyed error no longer contains the
+literal “Redis” the test asserts → contract mismatch. Fix: SKIP-OK guard
+when no Redis + reconcile the assertion to the i18n key (or have the
+error surface the backend name). (HEAD 54ab4e95)</p>
+<h2 id="fixed-commit-7c8c6c91-11.4.120-reconcile-11.4.98-skip-ok">FIXED
+(commit 7c8c6c91) — §11.4.120 reconcile + §11.4.98 SKIP-OK</h2>
+<p>RED reproduced: redis_test.go:112 “internal_redis_failed_connect:
+dial tcp [::1]:6379: connect: connection refused” does not contain
+“Redis” → FAIL. Root: internal/redis was CONST-046-migrated (redis.go:47
+surfaces i18n msg-ID internal_redis_failed_connect; NoopTranslator
+echoes the ID in unit tests). FIX: (1) reconciled assertion
+Contains(“Redis”)→Contains(“internal_redis_failed_connect”) (the stable
+surfaced id, matching sibling tests at lines 45/60); (2) added
+t.Skip(“SKIP-OK: #HXC-047 no live Redis …”) so the live-Redis success
+path is an honest skip not silent pass. GREEN: go build exit 0; go test
+-count=3 -run TestNewClient_WithDatabase → SKIP 3/3 deterministic; full
+pkg ok 3x no flake.</p>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-040-claude.md-93.4-anti-bluff-smoke-command-made-trustworthy">HXC-040
+— CLAUDE.md §9/§3.4 anti-bluff smoke command made trustworthy</h1>
+<h2 id="problem-reproduced">Problem (reproduced)</h2>
+<p>Original literal command
+<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; helix_code/internal helix_code/cmd</code>
+returns 527 hits → prints “BLUFF FOUND” on a GENUINELY CLEAN codebase.
+Breakdown: 218 <code>_test.go</code> (mocks allowed, CONST-050), 123
+i18n <code>tr(</code>/<code>&quot;*_placeholder&quot;</code> keys; production term
+counts: simulated=0, TODO implement=0, for now=3 (all comments
+documenting REMOVED bluffs), placeholder=306 (all i18n/template infra).
+Zero real bluffs.</p>
+<h2 id="latent-bug-found-bonus">Latent bug found (bonus)</h2>
+<p>The ORIGINAL command was case-SENSITIVE → it would have MISSED the
+canonical BLUFF-001 marker <code>// For now, simulate generation</code>
+(capital F) exactly as written in CLAUDE.md §3.3.</p>
+<h2 id="refined-command-now-in-claude.md-3.4-9">Refined command (now in
+CLAUDE.md §3.4 + §9)</h2>
+<p>grep -rniE “nowTODO implement|in production this would”<br />
+helix_code/internal helix_code/cmd | grep -v “_test.go:”<br />
+| grep -vi ’tr(|_placeholder”’ | grep -viE
+‘:[[:space:]]<em>//.</em>”’<br />
+| grep -q . &amp;&amp; echo “BLUFF FOUND” || echo “clean”</p>
+<h2 id="proof">Proof</h2>
+<ul>
+<li>Refined command on real tree → “clean” (0 hits)</li>
+<li>§1.1 mutation pair: planted 3 bluffs into helix_code/cmd/cli/main.go
+(BLUFF-001 comment + simulated-response string + TODO implement) →
+refined command reported “BLUFF FOUND” catching all three → reverted →
+“clean”, main.go md5 byte-identical to backup.</li>
+<li>The quoted-string plant caught proves the //-citation exclusion does
+not weaken real bluff detection.</li>
+</ul>
+</body>
+</html>

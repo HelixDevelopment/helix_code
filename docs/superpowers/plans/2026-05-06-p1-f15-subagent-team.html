@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f15-subagent-team</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f15-subagent-team</h1>
+</header>
+<h1 id="p1-f15-subagent-team-implementation-plan">P1-F15 — Subagent Team
+Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, end-to-end subagent dispatch
+system. The agent calls a new <code>task</code> tool that fans out work
+to one or more subagents, each running its own (inner) agent loop with a
+real <code>llm.Provider</code> invocation and a real tool registry.
+Default execution is <strong>in-process goroutines</strong>; when
+<code>isolation: &quot;worktree&quot;</code> is requested, the subagent runs as a
+<strong>subprocess</strong> (re-exec of the host binary with
+<code>HELIX_SUBAGENT_INVOCATION=1</code>, mirroring F14’s helper-mode
+dispatch) inside an F04-managed worktree. Results stream back over a
+<code>&lt;-chan SubagentResult</code> and the channel closes when the
+last subagent completes; a <code>WaitAll</code> helper drains
+synchronously. A <code>/subagents</code> slash command
+(<code>list</code> / <code>status &lt;id&gt;</code> /
+<code>kill &lt;id&gt;</code>) provides inspection and termination.
+<strong>No cobra subcommand</strong> (Q5=B).</p>
+<p><strong>Architecture:</strong> New
+<code>internal/agent/subagent/</code> package with <code>types.go</code>
+(incl. <code>FakeLLMProvider</code> TEST PROVIDER),
+<code>inprocess_spawner.go</code>, <code>subprocess_spawner.go</code>,
+<code>manager.go</code>, <code>worktree_integration.go</code>,
+<code>helper_mode.go</code> (+ tests). New tool at
+<code>internal/tools/task_tool.go</code> (NOT inside the
+<code>subagent</code> subpackage — keeps the registry self-contained,
+mirrors F13’s LSPTool placement). New slash at
+<code>internal/commands/subagents_command.go</code>.
+<code>internal/tools/registry.go</code> gets a single new method
+<code>SetSubagentManager(*subagent.SubagentManager)</code> (mirrors
+F13’s <code>SetLSPManager</code> and F14’s
+<code>SetSandboxManager</code>) which lazily registers the
+<code>task</code> tool. <code>cmd/cli/main.go</code> adds three lines: a
+<code>subagent.IsSubagentInvocation()</code> early-main check (FIRST
+statement, before <code>sandbox.IsHelperInvocation()</code>), a manager
+construction, and the slash registration.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, spf13/cobra v1.8
+— all already present. <strong>NO new external deps</strong>: subagent
+dispatch uses <code>os/exec</code> + <code>os.Executable()</code> from
+the standard library; helper-mode uses <code>os.Getenv</code> +
+<code>os.Stdin/Stdout</code> (stdlib); JSON encoding/decoding via
+<code>encoding/json</code> (stdlib); UUID generation reuses
+<code>github.com/google/uuid</code> already in <code>go.mod</code> for
+F03/F07/F11. No <code>go get</code> needed. Confirmed:
+<code>go.mod</code> already carries
+<code>github.com/google/uuid v1.6.0</code>,
+<code>github.com/stretchr/testify v1.11.1</code>, and
+<code>go.uber.org/zap v1.27.0</code>.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-06-p1-f15-subagent-team-design.md</code>
+(commit <code>cb078c6</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F15
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/agent/subagent internal/tools/task_tool.go internal/commands/subagents_command.go <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — a “subagent”
+can degenerate into a no-op in three ways: (a) hardcoded “I would have
+done X” string, (b) goroutine that echoes the prompt unchanged, (c)
+struct that “represents” a subagent but never calls the LLM. The four
+real-execution criteria (in-process LLM call count &gt;= 1, subprocess
+fork-exec with distinct PID, worktree dir actually exists at a different
+path from parent cwd, channel-streamed-not-batch-collected ordering) are
+each tested with both unit assertions AND a Challenge phase. The
+<code>FakeLLMProvider</code> is the ONE TEST-ONLY type that lives in
+<code>types.go</code> (not <code>_test.go</code>) so the integration
+binary and Challenge harness can both link it; its anti-misuse comment
+is self-tested via grep, and the bluff scanner gets a special-case
+allowlist for it.</p>
+<p><strong>Why this is consequential:</strong> subagent dispatch is the
+most architecturally invasive feature in Phase 1 — it adds a second kind
+of process (the subprocess subagent), a streaming concurrency model (the
+result channel), and a worktree-isolation seam (F04 integration). Any of
+those silently degrading to a no-op produces a feature that “works” in
+tests but is useless in practice. The Phase A in-process FakeLLM
+call-count assertion is the single most important test in F15.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F15-T01 — bootstrap
+evidence + advance PROGRESS to F15</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T02 —
+<code>internal/agent/subagent/types.go</code>: SubagentTask +
+SubagentResult + Isolation/SubagentState enums + SubagentSpawner
+interface + error sentinels + FakeLLMProvider TEST PROVIDER
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T03 —
+<code>internal/agent/subagent/inprocess_spawner.go</code>:
+goroutine-based spawner; inner agent loop invokes llm.Provider.Generate
+(TDD; FakeLLM call-count assertion)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T04 —
+<code>internal/agent/subagent/subprocess_spawner.go</code>: helper-mode
+re-exec spawner; sentinel env-var dispatch; JSON stdout decode (TDD;
+argv+env assertions on injected Executor)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T05 —
+<code>internal/agent/subagent/manager.go</code>: SubagentManager with
+dispatch + streaming aggregation + max-concurrency + kill-by-id (TDD;
+channel-close-on-error invariant)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T06 —
+<code>internal/agent/subagent/worktree_integration.go</code>: F04
+worktree integration for isolation=worktree (TDD; real
+<code>git init</code> tempdir)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T07 —
+<code>internal/tools/task_tool.go</code>: TaskTool implementing
+tools.Tool interface, registered name <code>task</code>
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T08 —
+<code>internal/agent/subagent/helper_mode.go</code> + main.go
+integration: IsSubagentInvocation + RunAsSubagent + early-main
+dispatch</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T09 —
+<code>internal/commands/subagents_command.go</code>: /subagents slash
+(list / status / kill) (TDD; CONST-042 anti-leak: status shows
+description not prompt body)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T10 — main.go
+wiring (Manager + tool + slash + helper-mode) + integration tests
+(gated, SKIP-OK on missing git)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T11 — Challenge
+harness (Phase A in-process always; Phase B subprocess always; Phase C
+worktree gated on git; Phase D real-LLM gated on
+ANTHROPIC_API_KEY)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F15-T12 — Feature 15
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F15 evidence section header (spec <code>cb078c6</code>),
+update PROGRESS current focus to F15, insert F15 task list (12 items)
+after F14’s. Commit
+<code>docs(P1-F15-T01): bootstrap Phase 1 / Feature 15 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/agent/subagent/types.go</code>, new
+<code>helix_code/internal/agent/subagent/types_test.go</code>.</p>
+<p>Define <code>Isolation</code> enum (<code>IsolationNone</code>,
+<code>IsolationWorktree</code>), <code>SubagentState</code> enum
+(<code>StatePending</code>, <code>StateRunning</code>,
+<code>StateSucceeded</code>, <code>StateFailed</code>,
+<code>StateKilled</code>, <code>StateTimedOut</code>),
+<code>SubagentTask</code> struct, <code>SubagentResult</code> struct,
+<code>SubagentSpawner</code> interface, error sentinels
+(<code>ErrMaxConcurrency</code>, <code>ErrSubagentNotFound</code>,
+<code>ErrWorktreeUnavailable</code>, <code>ErrInvalidIsolation</code>,
+<code>ErrSubagentTimeout</code>, <code>ErrSubagentKilled</code>), and
+<code>FakeLLMProvider</code> (TEST PROVIDER per spec §5.2). Add
+<code>DefaultSubagentTask()</code> (sets
+<code>Isolation: IsolationNone</code>,
+<code>Timeout: 5*time.Minute</code>).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestIsolation_DefaultIsNone<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> IsolationNone<span class="op">,</span> DefaultSubagentTask<span class="op">().</span>Isolation<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagentTask_TimeoutDefaultsTo5Min<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">5</span><span class="op">*</span>time<span class="op">.</span>Minute<span class="op">,</span> DefaultSubagentTask<span class="op">().</span>Timeout<span class="op">)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagentTask_TimeoutClampedTo30Min<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>LessOrEqual<span class="op">(</span>t<span class="op">,</span> ClampTimeout<span class="op">(</span><span class="dv">60</span><span class="op">*</span>time<span class="op">.</span>Minute<span class="op">),</span> <span class="dv">30</span><span class="op">*</span>time<span class="op">.</span>Minute<span class="op">)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">,</span> ClampTimeout<span class="op">(</span><span class="dv">1</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">))</span> <span class="co">// no lower clamp</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFakeLLMProvider_RecordsCallCount<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    f <span class="op">:=</span> NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;hi&quot;</span><span class="op">:</span> <span class="st">&quot;hello&quot;</span><span class="op">})</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> f<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;hi&quot;</span><span class="op">})</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> f<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;hi&quot;</span><span class="op">})</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">2</span><span class="op">,</span> f<span class="op">.</span>GenerateCallCount<span class="op">())</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFakeLLMProvider_LastPrompt<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    f <span class="op">:=</span> NewFakeLLMProvider<span class="op">(</span><span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> f<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;second&quot;</span><span class="op">})</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;second&quot;</span><span class="op">,</span> f<span class="op">.</span>LastPrompt<span class="op">())</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFakeLLMProvider_FallbackEcho<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    f <span class="op">:=</span> NewFakeLLMProvider<span class="op">(</span><span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> _ <span class="op">:=</span> f<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">})</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;FAKE-LLM-ECHO: x&quot;</span><span class="op">,</span> resp<span class="op">.</span>Text<span class="op">)</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFakeLLMProvider_HasAntiMisuseComment<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    src<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span><span class="st">&quot;types.go&quot;</span><span class="op">)</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>src<span class="op">),</span> <span class="st">&quot;TEST-ONLY llm.Provider&quot;</span><span class="op">)</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>src<span class="op">),</span> <span class="st">&quot;MUST NOT be referenced from production code&quot;</span><span class="op">)</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T02): subagent types + Isolation/State enums + FakeLLMProvider TEST PROVIDER</code>.</p>
+<hr />
+<h2 id="task-3-inprocess_spawner.go-tdd">Task 3: inprocess_spawner.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/agent/subagent/inprocess_spawner.go</code>,
+new
+<code>helix_code/internal/agent/subagent/inprocess_spawner_test.go</code>.</p>
+<p><code>InProcessSpawner</code> runs the subagent’s inner agent loop in
+a goroutine. The inner loop is a thin wrapper that: 1. Calls
+<code>provider.Generate(ctx, &amp;llm.LLMRequest{Prompt: task.Prompt})</code>.
+2. Counts the response as the subagent’s <code>Output</code>. 3. Records
+start/finish timestamps. 4. (v1) Does NOT iterate tool calls — a single
+LLM call per subagent. Multi-turn loops are F15.5; v1 keeps the inner
+loop simple to make the call-count assertion unambiguous.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> InProcessSpawner <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Provider     llm<span class="op">.</span>Provider</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    ToolRegistry <span class="op">*</span>tools<span class="op">.</span>ToolRegistry</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Logger       <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewInProcessSpawner<span class="op">(</span>p llm<span class="op">.</span>Provider<span class="op">,</span> r <span class="op">*</span>tools<span class="op">.</span>ToolRegistry<span class="op">,</span> log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>InProcessSpawner</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>InProcessSpawner<span class="op">)</span> Kind<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;in-process&quot;</span> <span class="op">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>InProcessSpawner<span class="op">)</span> Spawn<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sub <span class="op">*</span>Subagent<span class="op">,</span> sink <span class="kw">chan</span><span class="op">&lt;-</span> SubagentResult<span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<p>Tests:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInProcessSpawner_InvokesLLMProvider<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;do thing&quot;</span><span class="op">:</span> <span class="st">&quot;did thing&quot;</span><span class="op">})</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> NewInProcessSpawner<span class="op">(</span>fake<span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="op">&amp;</span>Subagent<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Task<span class="op">:</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;do thing&quot;</span><span class="op">}}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    sink <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> SubagentResult<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> s<span class="op">.</span>Spawn<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sub<span class="op">,</span> sink<span class="op">))</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> <span class="op">&lt;-</span>sink</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;did thing&quot;</span><span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;anti-bluff: output MUST be LLM response, not prompt echo&quot;</span><span class="op">)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> fake<span class="op">.</span>GenerateCallCount<span class="op">(),</span> <span class="st">&quot;anti-bluff: provider MUST be called exactly once&quot;</span><span class="op">)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInProcessSpawner_OutputIsLLMResponse_NotPromptEcho<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> NewFakeLLMProvider<span class="op">(</span><span class="ot">nil</span><span class="op">)</span> <span class="co">// fallback echo: &quot;FAKE-LLM-ECHO: &lt;prompt&gt;&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> NewInProcessSpawner<span class="op">(</span>fake<span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="op">&amp;</span>Subagent<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Task<span class="op">:</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;abc&quot;</span><span class="op">}}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    sink <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> SubagentResult<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> s<span class="op">.</span>Spawn<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sub<span class="op">,</span> sink<span class="op">)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> <span class="op">&lt;-</span>sink</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;FAKE-LLM-ECHO: abc&quot;</span><span class="op">,</span> res<span class="op">.</span>Output<span class="op">)</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEqual<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;abc&quot;</span><span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;result.Output MUST NOT be prompt echo (bluff vector b)&quot;</span><span class="op">)</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInProcessSpawner_PropagatesContextCancel<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> <span class="op">&amp;</span>slowFakeLLMProvider<span class="op">{</span>delay<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">}</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> NewInProcessSpawner<span class="op">(</span>fake<span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="dv">50</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cancel<span class="op">()</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="op">&amp;</span>Subagent<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Task<span class="op">:</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;slow&quot;</span><span class="op">}}</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    sink <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> SubagentResult<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> s<span class="op">.</span>Spawn<span class="op">(</span>ctx<span class="op">,</span> sub<span class="op">,</span> sink<span class="op">)</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> <span class="op">&lt;-</span>sink</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> StateTimedOut<span class="op">,</span> res<span class="op">.</span>State<span class="op">)</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T03): InProcessSpawner with real llm.Provider invocation + ctx cancel</code>.</p>
+<hr />
+<h2 id="task-4-subprocess_spawner.go-tdd">Task 4: subprocess_spawner.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/agent/subagent/subprocess_spawner.go</code>,
+new
+<code>helix_code/internal/agent/subagent/subprocess_spawner_test.go</code>.</p>
+<p><code>SubprocessSpawner</code> fork-execs
+<code>os.Executable()</code> with
+<code>HELIX_SUBAGENT_INVOCATION=1</code> +
+<code>HELIX_SUBAGENT_PAYLOAD=&lt;base64-json&gt;</code>. The injected
+<code>Executor</code> seam lets unit tests assert argv + env without
+spawning a real subprocess.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Executor <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">,</span> args <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> env <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> cwd <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        stdout<span class="op">,</span> stderr <span class="op">*</span>bytes<span class="op">.</span>Buffer<span class="op">)</span> <span class="op">(</span>exitCode <span class="dt">int</span><span class="op">,</span> err <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubprocessSpawner <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    HostBinary <span class="dt">string</span>   <span class="co">// defaults to os.Executable()</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    Executor   Executor <span class="co">// injectable; defaults to defaultExecExecutor</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    Logger     <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSubprocessSpawner<span class="op">(</span>log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">(*</span>SubprocessSpawner<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>SubprocessSpawner<span class="op">)</span> Kind<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;subprocess&quot;</span> <span class="op">}</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>SubprocessSpawner<span class="op">)</span> Spawn<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sub <span class="op">*</span>Subagent<span class="op">,</span> sink <span class="kw">chan</span><span class="op">&lt;-</span> SubagentResult<span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<p>Tests:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubprocessSpawner_BuildsExecCommandWithSentinelEnv<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> <span class="op">&amp;</span>recordingExecutor<span class="op">{</span>stdout<span class="op">:</span> makeJSONResult<span class="op">(</span><span class="st">&quot;subagent-x&quot;</span><span class="op">,</span> StateSucceeded<span class="op">,</span> <span class="st">&quot;ok&quot;</span><span class="op">)}</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>SubprocessSpawner<span class="op">{</span>HostBinary<span class="op">:</span> <span class="st">&quot;/usr/bin/helixcode&quot;</span><span class="op">,</span> Executor<span class="op">:</span> rec<span class="op">,</span> Logger<span class="op">:</span> zap<span class="op">.</span>NewNop<span class="op">()}</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="op">&amp;</span>Subagent<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;subagent-x&quot;</span><span class="op">,</span> Task<span class="op">:</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;p&quot;</span><span class="op">},</span> WorktreePath<span class="op">:</span> <span class="st">&quot;/tmp/wt&quot;</span><span class="op">}</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    sink <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> SubagentResult<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> s<span class="op">.</span>Spawn<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sub<span class="op">,</span> sink<span class="op">))</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;/usr/bin/helixcode&quot;</span><span class="op">,</span> rec<span class="op">.</span>lastName<span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> rec<span class="op">.</span>lastEnv<span class="op">,</span> <span class="st">&quot;HELIX_SUBAGENT_INVOCATION=1&quot;</span><span class="op">)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> hasEnvKey<span class="op">(</span>rec<span class="op">.</span>lastEnv<span class="op">,</span> <span class="st">&quot;HELIX_SUBAGENT_PAYLOAD&quot;</span><span class="op">))</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubprocessSpawner_SetsCwdToWorktreePath<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> <span class="op">&amp;</span>recordingExecutor<span class="op">{</span>stdout<span class="op">:</span> makeJSONResult<span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">,</span> StateSucceeded<span class="op">,</span> <span class="st">&quot;ok&quot;</span><span class="op">)}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>SubprocessSpawner<span class="op">{</span>HostBinary<span class="op">:</span> <span class="st">&quot;/bin/x&quot;</span><span class="op">,</span> Executor<span class="op">:</span> rec<span class="op">,</span> Logger<span class="op">:</span> zap<span class="op">.</span>NewNop<span class="op">()}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="op">&amp;</span>Subagent<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Task<span class="op">:</span> <span class="op">&amp;</span>SubagentTask<span class="op">{},</span> WorktreePath<span class="op">:</span> <span class="st">&quot;/tmp/wt-x&quot;</span><span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> s<span class="op">.</span>Spawn<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sub<span class="op">,</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> SubagentResult<span class="op">,</span> <span class="dv">1</span><span class="op">))</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;/tmp/wt-x&quot;</span><span class="op">,</span> rec<span class="op">.</span>lastCwd<span class="op">)</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubprocessSpawner_DecodesStdoutJSON<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> <span class="op">&amp;</span>recordingExecutor<span class="op">{</span>stdout<span class="op">:</span> makeJSONResult<span class="op">(</span><span class="st">&quot;y&quot;</span><span class="op">,</span> StateSucceeded<span class="op">,</span> <span class="st">&quot;the-answer&quot;</span><span class="op">)}</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>SubprocessSpawner<span class="op">{</span>HostBinary<span class="op">:</span> <span class="st">&quot;/bin/x&quot;</span><span class="op">,</span> Executor<span class="op">:</span> rec<span class="op">,</span> Logger<span class="op">:</span> zap<span class="op">.</span>NewNop<span class="op">()}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="op">&amp;</span>Subagent<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;y&quot;</span><span class="op">,</span> Task<span class="op">:</span> <span class="op">&amp;</span>SubagentTask<span class="op">{}}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    sink <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> SubagentResult<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> s<span class="op">.</span>Spawn<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sub<span class="op">,</span> sink<span class="op">)</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> <span class="op">&lt;-</span>sink</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;the-answer&quot;</span><span class="op">,</span> res<span class="op">.</span>Output<span class="op">)</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> StateSucceeded<span class="op">,</span> res<span class="op">.</span>State<span class="op">)</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubprocessSpawner_HandlesMalformedStdout<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> <span class="op">&amp;</span>recordingExecutor<span class="op">{</span>stdout<span class="op">:</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;not-json&quot;</span><span class="op">)}</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>SubprocessSpawner<span class="op">{</span>HostBinary<span class="op">:</span> <span class="st">&quot;/bin/x&quot;</span><span class="op">,</span> Executor<span class="op">:</span> rec<span class="op">,</span> Logger<span class="op">:</span> zap<span class="op">.</span>NewNop<span class="op">()}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="op">&amp;</span>Subagent<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;z&quot;</span><span class="op">,</span> Task<span class="op">:</span> <span class="op">&amp;</span>SubagentTask<span class="op">{}}</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    sink <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> SubagentResult<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> s<span class="op">.</span>Spawn<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sub<span class="op">,</span> sink<span class="op">)</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> <span class="op">&lt;-</span>sink</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> StateFailed<span class="op">,</span> res<span class="op">.</span>State<span class="op">)</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Error<span class="op">,</span> <span class="st">&quot;subagent stdout malformed&quot;</span><span class="op">)</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T04): SubprocessSpawner with sentinel env var + JSON stdout decode</code>.</p>
+<hr />
+<h2 id="task-5-manager.go-tdd">Task 5: manager.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/agent/subagent/manager.go</code>, new
+<code>helix_code/internal/agent/subagent/manager_test.go</code>.</p>
+<p><code>SubagentManager.Dispatch</code> (per spec §4.2): acquire
+semaphore → assign UUID → set timeout-bound ctx → if isolation=worktree,
+call <code>wtMgr.EnterWorktree</code>, pick subprocess spawner, else
+pick in-process → register sub in <code>m.running</code> → spawn
+goroutine that calls <code>spawner.Spawn</code> and
+<code>defer close(ch)</code> + <code>defer release sem</code>.</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Dispatch_ReturnsIDAndChannel<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;hi&quot;</span><span class="op">:</span> <span class="st">&quot;hello&quot;</span><span class="op">})</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> NewSubagentManager<span class="op">(</span>SubagentManagerOptions<span class="op">{</span>LLMProvider<span class="op">:</span> fake<span class="op">,</span> MaxConcurrency<span class="op">:</span> <span class="dv">5</span><span class="op">})</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    id<span class="op">,</span> ch<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Dispatch<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;hi&quot;</span><span class="op">})</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> id<span class="op">)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> <span class="op">&lt;-</span>ch</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">,</span> res<span class="op">.</span>Output<span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">:=</span> <span class="op">&lt;-</span>ch</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> ok<span class="op">,</span> <span class="st">&quot;channel MUST close after final result&quot;</span><span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Dispatch_RespectsMaxConcurrency<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> <span class="op">&amp;</span>slowFakeLLMProvider<span class="op">{</span>delay<span class="op">:</span> <span class="dv">1</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">}</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> NewSubagentManager<span class="op">(</span>SubagentManagerOptions<span class="op">{</span>LLMProvider<span class="op">:</span> fake<span class="op">,</span> MaxConcurrency<span class="op">:</span> <span class="dv">2</span><span class="op">})</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _<span class="op">,</span> _ <span class="op">=</span> m<span class="op">.</span>Dispatch<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">})</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _<span class="op">,</span> _ <span class="op">=</span> m<span class="op">.</span>Dispatch<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">})</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="dv">100</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cancel<span class="op">()</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Dispatch<span class="op">(</span>ctx<span class="op">,</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;c&quot;</span><span class="op">})</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrMaxConcurrency<span class="op">)</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Dispatch_ChannelClosesEvenOnSpawnError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> NewSubagentManager<span class="op">(</span>SubagentManagerOptions<span class="op">{</span>LLMProvider<span class="op">:</span> NewFakeLLMProvider<span class="op">(</span><span class="ot">nil</span><span class="op">),</span> InProcess<span class="op">:</span> <span class="op">&amp;</span>erroringSpawner<span class="op">{}})</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ch<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Dispatch<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SubagentTask<span class="op">{</span>Prompt<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">})</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> <span class="op">&lt;-</span>ch</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> StateFailed<span class="op">,</span> res<span class="op">.</span>State<span class="op">)</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">:=</span> <span class="op">&lt;-</span>ch</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> ok<span class="op">,</span> <span class="st">&quot;channel MUST close even when spawner errors&quot;</span><span class="op">)</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Dispatch_StreamsResultsAsTheyComplete<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Anti-bluff (4): two subagents, A fast B slow; A&#39;s result lands first.</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    fast <span class="op">:=</span> NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;A&quot;</span><span class="op">:</span> <span class="st">&quot;ra&quot;</span><span class="op">});</span> fast<span class="op">.</span>SetDelay<span class="op">(</span><span class="st">&quot;A&quot;</span><span class="op">,</span> <span class="dv">10</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    slow <span class="op">:=</span> NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;B&quot;</span><span class="op">:</span> <span class="st">&quot;rb&quot;</span><span class="op">});</span> slow<span class="op">.</span>SetDelay<span class="op">(</span><span class="st">&quot;B&quot;</span><span class="op">,</span> <span class="dv">200</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... assert ordering on a merged channel</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Kill_CancelsRunningSubagent<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* cancel ctx; result.State=StateKilled within 500ms */</span> <span class="op">}</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Kill_UnknownID_ReturnsErrSubagentNotFound<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> NewSubagentManager<span class="op">(</span>SubagentManagerOptions<span class="op">{</span>LLMProvider<span class="op">:</span> NewFakeLLMProvider<span class="op">(</span><span class="ot">nil</span><span class="op">)})</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Kill<span class="op">(</span><span class="st">&quot;nonsense&quot;</span><span class="op">),</span> ErrSubagentNotFound<span class="op">)</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_WaitAll_DrainsChannelToClose<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* WaitAll returns all N results in order */</span> <span class="op">}</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Close_DrainsRunningSubagents<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* in-flight subagents finish or get cancelled */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T05): SubagentManager with streaming dispatch + max-concurrency + kill-by-id</code>.</p>
+<hr />
+<h2 id="task-6-worktree_integration.go-tdd">Task 6:
+worktree_integration.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/agent/subagent/worktree_integration.go</code>,
+new
+<code>helix_code/internal/agent/subagent/worktree_integration_test.go</code>.</p>
+<p>Wraps F04’s <code>worktree.Manager.EnterWorktree</code>. The function
+<code>prepareWorktreeForSubagent(ctx, wtMgr, subID, baseBranch)</code>
+returns <code>(path string, err error)</code>. Errors are wrapped with
+<code>ErrWorktreeUnavailable</code> when <code>wtMgr</code> is nil.</p>
+<p>Test (uses real <code>git init</code> tempdir):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWorktreeIntegration_CreatesRealWorktree<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;git&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F15 git not on PATH (install: apt install git OR dnf install git)&quot;</span><span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    repo <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    runGit<span class="op">(</span>t<span class="op">,</span> repo<span class="op">,</span> <span class="st">&quot;init&quot;</span><span class="op">)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    runGit<span class="op">(</span>t<span class="op">,</span> repo<span class="op">,</span> <span class="st">&quot;commit&quot;</span><span class="op">,</span> <span class="st">&quot;--allow-empty&quot;</span><span class="op">,</span> <span class="st">&quot;-m&quot;</span><span class="op">,</span> <span class="st">&quot;init&quot;</span><span class="op">)</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    wtMgr <span class="op">:=</span> worktree<span class="op">.</span>NewManager<span class="op">(</span>repo<span class="op">)</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    path<span class="op">,</span> err <span class="op">:=</span> prepareWorktreeForSubagent<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> wtMgr<span class="op">,</span> <span class="st">&quot;sub-test-1&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>DirExists<span class="op">(</span>t<span class="op">,</span> path<span class="op">)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEqual<span class="op">(</span>t<span class="op">,</span> repo<span class="op">,</span> path<span class="op">,</span> <span class="st">&quot;worktree path must differ from parent cwd&quot;</span><span class="op">)</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Anti-bluff: git rev-parse --show-toplevel inside the worktree returns the worktree itself.</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>Command<span class="op">(</span><span class="st">&quot;git&quot;</span><span class="op">,</span> <span class="st">&quot;-C&quot;</span><span class="op">,</span> path<span class="op">,</span> <span class="st">&quot;rev-parse&quot;</span><span class="op">,</span> <span class="st">&quot;--show-toplevel&quot;</span><span class="op">).</span>Output<span class="op">()</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> path<span class="op">,</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span><span class="dt">string</span><span class="op">(</span>out<span class="op">)))</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWorktreeIntegration_NilManager_ReturnsErrWorktreeUnavailable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> prepareWorktreeForSubagent<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="ot">nil</span><span class="op">,</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrWorktreeUnavailable<span class="op">)</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T06): F04 worktree integration for isolation=worktree (real git tempdir test)</code>.</p>
+<hr />
+<h2 id="task-7-task_tool.go-tdd">Task 7: task_tool.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/task_tool.go</code>, new
+<code>helix_code/internal/tools/task_tool_test.go</code>.</p>
+<p>Lives in package <code>tools</code> (NOT <code>subagent</code>) so it
+can directly implement the <code>Tool</code> interface without an
+adapter. Imports <code>dev.helix.code/internal/agent/subagent</code>.
+New <code>CategorySubagent ToolCategory = &quot;subagent&quot;</code> constant
+added to <code>registry.go</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskTool <span class="kw">struct</span> <span class="op">{</span> manager <span class="op">*</span>subagent<span class="op">.</span>SubagentManager <span class="op">}</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTaskTool<span class="op">(</span>m <span class="op">*</span>subagent<span class="op">.</span>SubagentManager<span class="op">)</span> <span class="op">*</span>TaskTool</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;task&quot;</span> <span class="op">}</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="co">// &quot;Dispatch a subagent to perform a task...&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Schema<span class="op">()</span> ToolSchema</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Category<span class="op">()</span> ToolCategory <span class="op">{</span> <span class="cf">return</span> CategorySubagent <span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TaskTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p>Schema (Q4=B): - <code>description</code> (string, required) -
+<code>prompt</code> (string, required) - <code>isolation</code> (string
+enum <code>&quot;none&quot;|&quot;worktree&quot;</code>, default <code>&quot;none&quot;</code>) -
+<code>subagent_type</code> (string, optional) -
+<code>timeout_seconds</code> (int, default 300, max 1800)</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTaskTool_Name_IsTask<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;task&quot;</span><span class="op">,</span> <span class="op">(&amp;</span>TaskTool<span class="op">{}).</span>Name<span class="op">())</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTaskTool_IsolationDefaultsNone<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> <span class="op">&amp;</span>recordingManager<span class="op">{}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>TaskTool<span class="op">{</span>manager<span class="op">:</span> rec<span class="op">}</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;description&quot;</span><span class="op">:</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;prompt&quot;</span><span class="op">:</span> <span class="st">&quot;p&quot;</span><span class="op">,</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> subagent<span class="op">.</span>IsolationNone<span class="op">,</span> rec<span class="op">.</span>lastTask<span class="op">.</span>Isolation<span class="op">)</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTaskTool_RejectsInvalidIsolation<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> <span class="op">(&amp;</span>TaskTool<span class="op">{}).</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;description&quot;</span><span class="op">:</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;prompt&quot;</span><span class="op">:</span> <span class="st">&quot;p&quot;</span><span class="op">,</span> <span class="st">&quot;isolation&quot;</span><span class="op">:</span> <span class="st">&quot;bogus&quot;</span><span class="op">})</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> subagent<span class="op">.</span>ErrInvalidIsolation<span class="op">)</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTaskTool_ResultMapShape<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> subagent<span class="op">.</span>NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;hi&quot;</span><span class="op">:</span> <span class="st">&quot;ok&quot;</span><span class="op">})</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> subagent<span class="op">.</span>NewSubagentManager<span class="op">(</span>subagent<span class="op">.</span>SubagentManagerOptions<span class="op">{</span>LLMProvider<span class="op">:</span> fake<span class="op">,</span> MaxConcurrency<span class="op">:</span> <span class="dv">5</span><span class="op">})</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> NewTaskTool<span class="op">(</span>m<span class="op">)</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;description&quot;</span><span class="op">:</span> <span class="st">&quot;test&quot;</span><span class="op">,</span> <span class="st">&quot;prompt&quot;</span><span class="op">:</span> <span class="st">&quot;hi&quot;</span><span class="op">,</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> out<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> res<span class="op">[</span><span class="st">&quot;id&quot;</span><span class="op">])</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;succeeded&quot;</span><span class="op">,</span> res<span class="op">[</span><span class="st">&quot;state&quot;</span><span class="op">])</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;ok&quot;</span><span class="op">,</span> res<span class="op">[</span><span class="st">&quot;output&quot;</span><span class="op">])</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;none&quot;</span><span class="op">,</span> res<span class="op">[</span><span class="st">&quot;isolation&quot;</span><span class="op">])</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> res<span class="op">,</span> <span class="st">&quot;worktree_path&quot;</span><span class="op">)</span> <span class="co">// only present for worktree isolation</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T07): TaskTool implementing tools.Tool as task (claude-code-compatible name)</code>.</p>
+<hr />
+<h2 id="task-8-helper_mode.go-main.go-integration-tdd">Task 8:
+helper_mode.go + main.go integration (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/agent/subagent/helper_mode.go</code>, new
+<code>helix_code/internal/agent/subagent/helper_mode_test.go</code>,
+modify <code>helix_code/cmd/cli/main.go</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> subagentInvocationEnvVar <span class="op">=</span> <span class="st">&quot;HELIX_SUBAGENT_INVOCATION&quot;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> subagentPayloadEnvVar    <span class="op">=</span> <span class="st">&quot;HELIX_SUBAGENT_PAYLOAD&quot;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> IsSubagentInvocation<span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> os<span class="op">.</span>Getenv<span class="op">(</span>subagentInvocationEnvVar<span class="op">)</span> <span class="op">==</span> <span class="st">&quot;1&quot;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> RunAsSubagent<span class="op">()</span> <span class="op">(</span>exitCode <span class="dt">int</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    payload<span class="op">,</span> err <span class="op">:=</span> decodeSubagentPayload<span class="op">(</span>os<span class="op">.</span>Getenv<span class="op">(</span>subagentPayloadEnvVar<span class="op">))</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> fmt<span class="op">.</span>Fprintln<span class="op">(</span>os<span class="op">.</span>Stderr<span class="op">,</span> err<span class="op">);</span> <span class="cf">return</span> <span class="dv">2</span> <span class="op">}</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    provider<span class="op">,</span> err <span class="op">:=</span> buildProviderFromEnv<span class="op">()</span> <span class="co">// F12 env wiring</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="co">/* fail-closed → encode error result */</span> <span class="op">}</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// build minimal tool registry (no `task` recursion in v1)</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// run inner agent loop</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// print SubagentResult JSON to stdout, return 0/1</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>main.go modification — three lines (per spec §4.1):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// FIRST statement of main():</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> subagent<span class="op">.</span>IsSubagentInvocation<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span>Exit<span class="op">(</span>subagent<span class="op">.</span>RunAsSubagent<span class="op">())</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">// existing line:</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> sandbox<span class="op">.</span>IsHelperInvocation<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span>Exit<span class="op">(</span>sandbox<span class="op">.</span>RunAsHelper<span class="op">())</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">// … existing bootstrap …</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>saMgr<span class="op">,</span> err <span class="op">:=</span> subagent<span class="op">.</span>NewSubagentManager<span class="op">(</span>subagent<span class="op">.</span>SubagentManagerOptions<span class="op">{</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    LLMProvider<span class="op">:</span> provider<span class="op">,</span> ToolRegistry<span class="op">:</span> toolReg<span class="op">,</span> WorktreeManager<span class="op">:</span> wtMgr<span class="op">,</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    MaxConcurrency<span class="op">:</span> <span class="dv">5</span><span class="op">,</span> DefaultTimeout<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Minute<span class="op">,</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    toolReg<span class="op">.</span>SetSubagentManager<span class="op">(</span>saMgr<span class="op">)</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> saMgr<span class="op">.</span>Close<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>slashRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewSubagentsCommand<span class="op">(</span>saMgr<span class="op">))</span></span></code></pre></div>
+<p>Tests:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestHelperMode_IsSubagentInvocation_ReadsEnvVar<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;HELIX_SUBAGENT_INVOCATION&quot;</span><span class="op">,</span> <span class="st">&quot;1&quot;</span><span class="op">)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> IsSubagentInvocation<span class="op">())</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;HELIX_SUBAGENT_INVOCATION&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> IsSubagentInvocation<span class="op">())</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestHelperMode_RunAsSubagent_DecodesPayloadFromEnv<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    payload <span class="op">:=</span> encodeSubagentPayload<span class="op">(&amp;</span>SubagentPayload<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Prompt<span class="op">:</span> <span class="st">&quot;hi&quot;</span><span class="op">})</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;HELIX_SUBAGENT_INVOCATION&quot;</span><span class="op">,</span> <span class="st">&quot;1&quot;</span><span class="op">)</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;HELIX_SUBAGENT_PAYLOAD&quot;</span><span class="op">,</span> payload<span class="op">)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// capture stdout, run RunAsSubagent, parse result, assert JSON shape</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T08): IsSubagentInvocation + RunAsSubagent helper-mode + main.go early-dispatch</code>.</p>
+<hr />
+<h2 id="task-9-subagents-slash-command-tdd">Task 9: /subagents slash
+command (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/subagents_command.go</code>, new
+<code>helix_code/internal/commands/subagents_command_test.go</code>.</p>
+<p>Mirrors F14 <code>/sandbox</code> command pattern: defines a small
+<code>SubagentManager</code> interface in the commands package so the
+slash is testable with a fake.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentManager <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    List<span class="op">()</span> <span class="op">[]</span>subagent<span class="op">.</span>SubagentInfo</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    Status<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>subagent<span class="op">.</span>SubagentInfo<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    Kill<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubagentsCommand <span class="kw">struct</span> <span class="op">{</span> manager SubagentManager <span class="op">}</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSubagentsCommand<span class="op">(</span>m SubagentManager<span class="op">)</span> <span class="op">*</span>SubagentsCommand</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>SubagentsCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;subagents&quot;</span> <span class="op">}</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>SubagentsCommand<span class="op">)</span> Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>SubagentsCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Inspect or kill running subagents.&quot;</span> <span class="op">}</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>SubagentsCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/subagents [list|status &lt;id&gt;|kill &lt;id&gt;]&quot;</span> <span class="op">}</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>SubagentsCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p>Subcommands: - <code>/subagents</code> (alias of <code>list</code>) —
+table: <code>ID  STATE  ISOLATION  DURATION  DESCRIPTION</code>
+(description, NEVER prompt body — CONST-042). -
+<code>/subagents status &lt;id&gt;</code> — full record minus prompt
+body. - <code>/subagents kill &lt;id&gt;</code> — calls
+<code>manager.Kill(id)</code>.</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagentsCommand_List_RendersTable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake mgr returns 2 infos; output contains both IDs and STATE column */</span> <span class="op">}</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagentsCommand_Status_ShowsDescriptionNotPromptBody<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// CONST-042 anti-leak.</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> <span class="op">&amp;</span>fakeSAMgr<span class="op">{</span>statusInfo<span class="op">:</span> subagent<span class="op">.</span>SubagentInfo<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Description<span class="op">:</span> <span class="st">&quot;do thing&quot;</span><span class="op">}}</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewSubagentsCommand<span class="op">(</span>fake<span class="op">)</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;status&quot;</span><span class="op">,</span> <span class="st">&quot;x&quot;</span><span class="op">}})</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;do thing&quot;</span><span class="op">)</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;SECRET-PROMPT-BODY&quot;</span><span class="op">,</span> <span class="st">&quot;prompt body MUST NEVER appear in slash output&quot;</span><span class="op">)</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagentsCommand_Kill_DelegatesToManager<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake.killCalled[id] == true */</span> <span class="op">}</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagentsCommand_Kill_NoArgs_ReturnsUsageError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagentsCommand_NilManager_ReportsUnavailable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* &quot;.../subagents subagent manager unavailable&quot; */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T09): /subagents slash command (list/status/kill) + CONST-042 anti-leak</code>.</p>
+<hr />
+<h2 id="task-10-main.go-wiring-integration-test">Task 10: main.go wiring
++ integration test</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/cmd/cli/main.go</code>, modify
+<code>helix_code/internal/tools/registry.go</code>, new
+<code>helix_code/tests/integration/subagent_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p><code>registry.go</code> modifications:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> CategorySubagent ToolCategory <span class="op">=</span> <span class="st">&quot;subagent&quot;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>subagentManager <span class="op">*</span>subagent<span class="op">.</span>SubagentManager <span class="co">// optional; nil disables `task` registration</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ToolRegistry<span class="op">)</span> SetSubagentManager<span class="op">(</span>m <span class="op">*</span>subagent<span class="op">.</span>SubagentManager<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">();</span> <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>subagentManager <span class="op">=</span> m</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>tools<span class="op">[</span><span class="st">&quot;task&quot;</span><span class="op">]</span> <span class="op">=</span> NewTaskTool<span class="op">(</span>m<span class="op">)</span>  <span class="co">// direct registration; no adapter needed</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>main.go startup wiring per spec §4.1.</p>
+<p>Integration tests (gated):</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">// +build integration</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagent_InProcess_RealLLM_RealToolRegistry<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// FakeLLMProvider + real ToolRegistry</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagent_Subprocess_RealForkExec_FakeLLM<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Runs the host binary with HELIX_SUBAGENT_INVOCATION=1 + payload</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Asserts child PID != os.Getpid(); stdout decodes; result.State=succeeded</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagent_Worktree_RealGitWorktree<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;git&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F15 git not on PATH (install: apt install git OR dnf install git)&quot;</span><span class="op">)</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// git init tempdir, dispatch worktree-isolated subagent</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// assert result.WorktreePath exists; rev-parse --show-toplevel inside == result.WorktreePath</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagent_StreamingOrder<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// FakeLLMProvider with per-prompt sleep; A fast B slow → A&#39;s result first.</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubagent_Kill_Subprocess<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;git&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F15 git not on PATH (install: apt install git OR dnf install git)&quot;</span><span class="op">)</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// dispatch slow subagent, Kill(id), assert result.State=StateKilled within 6s.</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F15-T10): wire SubagentManager into main.go + /subagents + gated integration tests</code>.</p>
+<hr />
+<h2 id="task-11-challenge-with-runtime-evidence">Task 11: Challenge with
+runtime evidence</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p1f15_challenge/main.go</code>,
+new <code>challenges/p1-f15-subagent-team/CHALLENGE.md</code>, new
+<code>challenges/p1-f15-subagent-team/run.sh</code>.</p>
+<p>Output skeleton:</p>
+<pre><code>=== IN-PROCESS + FakeLLM (always runs) ===
+[PASS] in-process: dispatch returns id+chan
+[PASS] in-process: FakeLLMProvider.GenerateCallCount == 1 (anti-bluff: provider was actually invoked)
+[PASS] in-process: result.Output == canned response (anti-bluff: NOT prompt echo)
+[PASS] in-process: channel closes after WaitAll drains
+[PASS] in-process: duration &gt; 0
+
+=== SUBPROCESS + FakeLLM (always runs) ===
+[PASS] subprocess: child PID != os.Getpid() (anti-bluff: real fork-exec)
+[PASS] subprocess: HELIX_SUBAGENT_INVOCATION=1 sentinel observed in child
+[PASS] subprocess: stdout JSON decodes to SubagentResult
+[PASS] subprocess: result.State == succeeded
+
+=== WORKTREE + Subprocess + FakeLLM (gated) ===
+[PASS|skipped: git not on PATH (install: apt install git OR dnf install git)]
+[PASS] worktree: result.WorktreePath exists (os.Stat succeeds)
+[PASS] worktree: result.WorktreePath != parent cwd (anti-bluff: real isolation)
+[PASS] worktree: git rev-parse --show-toplevel inside path == path
+[PASS] worktree: subagent ran with cmd.Dir set to worktree path
+
+=== REAL LLM (gated) ===
+[PASS|skipped: ANTHROPIC_API_KEY unset (export ANTHROPIC_API_KEY=...)]
+[PASS] real-llm: provider returned non-empty text
+[PASS] real-llm: text contains literal &quot;p1f15-real-llm-ok&quot;
+
+SUMMARY: IN-PROCESS=5/5 PASS; SUBPROCESS=4/4 PASS; WORKTREE=&lt;n&gt;/4 PASS; REAL-LLM=&lt;n&gt;/2 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any assertion failure within
+phases that did run. Anti-bluff smoke clean check appended to harness
+output. Verbatim output captured into
+<code>06_phase_1_evidence.md</code>. Dual commit (Challenges submodule +
+meta-repo bump).</p>
+<p>Subject:
+<code>feat(P1-F15-T11): challenge with runtime evidence (in-process + subprocess always; worktree + real-LLM gated)</code>.</p>
+<hr />
+<h2 id="task-12-close-out-push">Task 12: Close-out + push</h2>
+<p>Tick all 12 items in PROGRESS, advance PROGRESS focus to F16
+candidate, run final verification (<code>make verify-compile</code>,
+anti-bluff smoke,
+<code>go test -count=1 ./internal/agent/subagent/... ./internal/tools/... ./internal/commands/...</code>),
+commit
+<code>chore(P1-F15-T12): close out feature 15 — subagent team</code>,
+push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions).</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types + FakeLLMProvider (§3.3, §5.2), T03 in-process spawner (§4.2,
+§5.2 criterion 1), T04 subprocess spawner (§4.3, §5.2 criterion 2), T05
+manager + streaming (§4.4, §5.2 criterion 4), T06 worktree integration
+(§4.5, §5.2 criterion 3), T07 task tool (§3.3, §3.4), T08 helper-mode +
+main.go (§4.1), T09 /subagents slash (§3.4, §9 CONST-042), T10 wiring +
+integration (§4.1, §6.2), T11 Challenge four phases (§5.2, §6.3), T12
+close-out (§9).</li>
+<li><strong>TDD:</strong> every code task starts with a failing test
+that exercises real code paths (FakeLLM call-count assertion; subprocess
+argv+env recording; worktree dir existence +
+<code>git rev-parse --show-toplevel</code>; channel-close-on-error
+invariant).</li>
+<li><strong>Type consistency:</strong> <code>SubagentTask</code>,
+<code>SubagentResult</code>, <code>Isolation</code>,
+<code>SubagentState</code>, <code>SubagentSpawner</code>,
+<code>SubagentManager</code>, <code>Subagent</code>,
+<code>SubagentInfo</code>, <code>InProcessSpawner</code>,
+<code>SubprocessSpawner</code>, <code>TaskTool</code>,
+<code>SubagentsCommand</code>, <code>FakeLLMProvider</code>, env-var
+names — all match across spec §3.3 and plan T02–T09.</li>
+<li><strong>No new external deps:</strong> <code>os/exec</code>,
+<code>os.Executable</code>, <code>encoding/json</code>,
+<code>os.Getenv</code> are stdlib;
+<code>github.com/google/uuid v1.6.0</code> and
+<code>go.uber.org/zap v1.27.0</code> already in <code>go.mod</code>. No
+<code>go get</code> needed.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has FOUR phases; A and
+B always run; C is gated on <code>git</code>; D is gated on
+<code>ANTHROPIC_API_KEY</code>. The four real-execution criteria each
+have a dedicated PASS line. The FakeLLMProvider’s anti-misuse comment is
+itself self-tested in T02. The bluff scanner gets a special-case
+allowlist for <code>FakeLLMProvider</code> in
+<code>internal/agent/subagent/types.go</code>; ANY other “fake provider”
+outside <code>_test.go</code> files in production paths is a bluff.</li>
+<li><strong>CONST-042:</strong> <code>SubagentTask.Prompt</code> logged
+at DEBUG only; INFO logs use <code>task.Description</code>.
+<code>/subagents status</code> prints description, never prompt body —
+asserted by
+<code>TestSubagentsCommand_Status_ShowsDescriptionNotPromptBody</code>.</li>
+<li><strong>CONST-043:</strong> stays on <code>main</code>, non-force to
+all four remotes; explicit user authorization is requested at T12 before
+pushing.</li>
+<li><strong>F04 worktree API constraint</strong> (non-obvious):
+<code>worktree.Manager.EnterWorktree</code> uses
+<code>git worktree add &lt;path&gt; &lt;branch&gt;</code> which leaves
+the parent’s WIP in the parent — uncommitted changes are NOT copied into
+the new worktree. Subagents start from the clean tip of
+<code>BaseBranch</code> (or HEAD if empty). v1 documents this loudly in
+spec §4.5; auto-stash-on-dispatch is deferred to F15.5. Additionally,
+<code>EnterWorktree</code> mutates the manager’s
+<code>currentWorktree</code> state (it’s used by F04 to track the
+agent’s own location) — F15 must NOT call <code>EnterWorktree</code> on
+a shared manager that the parent agent is also using to track its own
+location, because the call will move the parent’s tracked location into
+the subagent’s worktree. Mitigation:
+<code>prepareWorktreeForSubagent</code> calls a new
+<code>wtMgr.CreateWorktreeForSubagent(ctx, name, baseBranch)</code>
+helper added in T06 that does the git work without mutating
+<code>currentWorktree</code>. If F04’s API does not expose such a
+helper, T06 adds it as a 5-line method on <code>worktree.Manager</code>
+(forking the existing <code>EnterWorktree</code> body but skipping the
+<code>m.currentWorktree = path</code> assignment) and updates F04’s
+tests accordingly.</li>
+<li><strong>Subagent recursion guard (v1):</strong> the subprocess
+child’s <code>RunAsSubagent</code> does NOT register the
+<code>task</code> tool in its inner ToolRegistry. This caps subagent
+depth at 1 in v1. F15.5 may lift with a depth-limit ENV var.</li>
+<li><strong>Branch + push:</strong> stays on <code>main</code>,
+non-force to all four remotes (per CONST-043); explicit user
+authorization is requested at T12 before pushing.</li>
+<li><strong>Reality check:</strong> the existing <code>Tool</code>
+interface in <code>internal/tools/registry.go</code>
+(<code>Name</code>/<code>Description</code>/<code>Schema</code>/<code>Execute</code>/<code>Category</code>/<code>Validate</code>)
+is fully compatible with <code>TaskTool</code>. The
+<code>SetSubagentManager</code> shape matches the existing F13
+<code>SetLSPManager</code> and F14’s <code>SetSandboxManager</code>, so
+the registry change is one method + one constant + one lazy-registration
+line. No registry redesign.</li>
+<li><strong>Helper-mode dispatch ordering:</strong>
+<code>subagent.IsSubagentInvocation()</code> MUST be the FIRST statement
+of <code>main()</code> — before
+<code>sandbox.IsHelperInvocation()</code> — because a subagent
+subprocess might itself spawn a sandboxed shell, but the inverse (a
+sandbox helper spawning a subagent) is not a thing in v1. The ordering
+is documented in main.go as an anti-bluff anchor comment.</li>
+</ol>
+</body>
+</html>

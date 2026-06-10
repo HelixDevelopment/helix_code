@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-08-p4-test-challenge-hardening</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-08-p4-test-challenge-hardening</h1>
+</header>
+<h1 id="phase-4-testchallenge-hardening-implementation-plan">Phase 4 —
+Test/Challenge Hardening — Implementation Plan</h1>
+<blockquote>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-08-helixcode-zero-bluff-completion-design.md</code>
+§6<br />
+<strong>Previous phase:</strong> Phase 3 complete
+(<code>1f1d8f4</code>)</p>
+</blockquote>
+<p><strong>Goal:</strong> Verify every test and challenge carries
+positive runtime evidence. Eliminate all remaining bluff patterns.
+Ensure CONST-035/Article XI §11.9 compliance across the entire test
+suite.</p>
+<hr />
+<h2 id="file-structure-map">File Structure Map</h2>
+<pre><code># New files to create
+helix_code/internal/anti_bluff/types.go              — create (bluff taxonomy scanner)
+helix_code/internal/anti_bluff/scanner.go            — create (grep + static analysis)
+helix_code/internal/anti_bluff/verifier_test.go      — create (self-test)
+helix_code/tests/e2e/challenges/challenges/anti-bluff-verifier-001.json — create
+
+# Files to audit/modify
+helix_code/internal/*/ *_test.go                     — audit all test files for bluffs
+helix_code/tests/e2e/challenges/                     — audit all challenges
+helix_code/cmd/                                      — audit test files</code></pre>
+<hr />
+<h2 id="task-p4-t01-full-test-suite-audit">Task P4-T01: Full Test Suite
+Audit</h2>
+<p><strong>Goal:</strong> Classify every test file, identify
+skip/silent-pass/no-evidence patterns.</p>
+<p><strong>Steps:</strong> - [ ] Scan all <code>*_test.go</code> files
+under <code>helix_code/internal/</code>, <code>helix_code/cmd/</code> -
+[ ] Count by type (unit, integration, e2e, benchmark) - [ ] Identify
+<code>t.Skip()</code> without <code>SKIP-OK:</code> marker - [ ]
+Identify tests that assert on metadata-only (e.g.,
+<code>assert.NotNil</code>) without runtime evidence - [ ] Identify
+tests with <code>testMode: true</code> or <code>mock</code> in non-unit
+contexts - [ ] Classify all tests for bluff risk (high/medium/low)</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Count test files and functions</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-name</span> <span class="st">&#39;*_test.go&#39;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;^func Test&quot;</span> ./internal/ ./cmd/ <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Mark all tests with their type</span></span></code></pre></div>
+<hr />
+<h2 id="task-p4-t02-challenge-harness-audit">Task P4-T02: Challenge
+Harness Audit</h2>
+<p><strong>Goal:</strong> Verify every challenge produces positive
+runtime evidence (not just exit code 0).</p>
+<p><strong>Steps:</strong> - [ ] Audit
+<code>tests/e2e/challenges/challenges/*.json</code> for assertion
+quality - [ ] Verify each challenge has <code>expected.json</code> with
+sha-256 or equivalent verifiable evidence - [ ] Verify exit-code logic
+is not masking failures - [x] Run a representative sample of challenges
+against real providers</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> helix_code/tests/e2e/challenges</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># List all challenges</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> challenges/</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Run challenge runner with --dry-run to validate structure</span></span></code></pre></div>
+<p><strong>Update 2026-05-08 22:07</strong>: Permissions challenge PASS
+after binary rebuild. Old binary (May 8 00:01) lacked dispatcher code.
+Binary rebuilt with
+<code>go build -tags nogui -o bin/helixcode ./cmd/cli</code>. All 3
+scenarios verified with runtime evidence.</p>
+<hr />
+<h2 id="task-p4-t03-bluff-taxonomy-sweep">Task P4-T03: Bluff Taxonomy
+Sweep</h2>
+<p><strong>Goal:</strong> Find every instance of the 5 bluff patterns
+across test and challenge files.</p>
+<p><strong>Steps:</strong> - [ ] Wrapper bluff: check
+<code>assert.Equal(t, 0, exitCode)</code> where exitCode is always 0 - [
+] Contract bluff: check for <code>t.Skip(&quot;feature not available&quot;)</code>
+without <code>SKIP-OK:</code> - [ ] Structural bluff: check file-exists
+tests that don’t verify content - [ ] Comment bluff: grep
+<code>grep &quot;for now\|TODO implement\|placeholder\|simulated&quot;</code> in
+test files - [ ] Skip bluff: all bare <code>t.Skip()</code> without
+<code>SKIP-OK:</code> marker</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Anti-bluff sweep on test files specifically</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder\|stub&quot;</span> internal/ cmd/ <span class="at">--include</span><span class="op">=</span><span class="st">&#39;*_test.go&#39;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Skip audit</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;t\.Skip(&quot;</span> internal/ cmd/ <span class="at">--include</span><span class="op">=</span><span class="st">&#39;*_test.go&#39;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;SKIP-OK&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="task-p4-t04-fix-all-identified-bluffs">Task P4-T04: Fix All
+Identified Bluffs</h2>
+<p><strong>Goal:</strong> Every test and challenge that passes must
+produce positive runtime evidence.</p>
+<p><strong>Fix patterns:</strong> - Replace
+<code>assert.NotNil(t, result)</code> with
+<code>assert.NotEmpty(t, result.Content, &quot;response must have content&quot;)</code>
+- Replace <code>assert.NoError(t, err)</code> with verification of
+actual returned data against expected values - Add
+<code>assert.Greater(t, len(models), 0)</code> to model listing tests -
+Add real HTTP response content assertions to provider tests - Ensure
+every test’s pass means “this feature works for a user”</p>
+<hr />
+<h2 id="task-p4-t05-anti-bluff-verifier-challenge">Task P4-T05:
+Anti-Bluff Verifier Challenge</h2>
+<p><strong>Goal:</strong> Automated challenge that scans for forbidden
+patterns and fails if any found.</p>
+<p><strong>Challenge specification:</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;anti-bluff-verifier-001&quot;</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Verify zero bluffs in production and test code&quot;</span><span class="fu">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;checks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;grep simulated fails in non-test code&quot;</span><span class="ot">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;grep placeholder fails&quot;</span><span class="ot">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;grep &#39;TODO implement&#39; fails&quot;</span><span class="ot">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;all t.Skip() have SKIP-OK marker&quot;</span><span class="ot">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;no test asserts only on nil/not-nil without content verification&quot;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<hr />
+<h2 id="task-p4-t06-challenge-coverage-gaps">Task P4-T06: Challenge
+Coverage Gaps</h2>
+<p><strong>Goal:</strong> Ensure every package has at least one
+challenge that verifies end-user functionality.</p>
+<p><strong>Steps:</strong> - [ ] Map existing challenges to packages - [
+] Identify packages with zero challenge coverage - [ ] Create minimal
+challenges for uncovered packages</p>
+<hr />
+<h2 id="task-p4-t07-full-infrastructure-test-run">Task P4-T07: Full
+Infrastructure Test Run</h2>
+<p><strong>Goal:</strong> Run the complete test suite against real
+infrastructure (docker-compose.full-test.yml).</p>
+<p>Prerequisites: Docker/Podman running.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-up</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-complete</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-down</span></code></pre></div>
+<hr />
+<h2 id="task-p4-t08-cross-compile-verification">Task P4-T08:
+Cross-Compile Verification</h2>
+<p><strong>Goal:</strong> Verify builds on all target platforms.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">GOOS</span><span class="op">=</span>linux <span class="va">GOARCH</span><span class="op">=</span>amd64 <span class="ex">go</span> build ./...</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">GOOS</span><span class="op">=</span>darwin <span class="va">GOARCH</span><span class="op">=</span>arm64 <span class="ex">go</span> build ./...</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="va">GOOS</span><span class="op">=</span>windows <span class="va">GOARCH</span><span class="op">=</span>amd64 <span class="ex">go</span> build ./...</span></code></pre></div>
+<hr />
+<h2 id="governance-verification-parallel">Governance Verification
+(parallel)</h2>
+<p>Before code changes, verify anti-bluff anchor is present in:</p>
+<ol type="1">
+<li>Root governance files: CONSTITUTION.md, CLAUDE.md, AGENTS.md — DONE
+(Phase 1)</li>
+<li>Inner HelixCode AGENTS.md — DONE (Phase 1)</li>
+<li>All owned-by-us submodules: HelixAgent, HelixQA, Challenges,
+Containers, Security, dependencies/HelixDevelopment/* — VERIFY</li>
+<li>All third-party submodules — MUST add <code>.helix-governance</code>
+marker if missing</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/verify-governance-cascade.sh</span></span></code></pre></div>
+<hr />
+<h2 id="anti-bluff-verification-layer-mandatory-before-phase-4-close-out">Anti-Bluff
+Verification Layer (mandatory before Phase 4 close-out)</h2>
+<ol type="1">
+<li><code>grep -rn &quot;simulated\|placeholder\|stub\|TODO\|for now&quot;</code>
+— zero hits in non-test production code</li>
+<li><code>grep -rn &quot;t\.Skip(&quot;</code> — all matches have
+<code>SKIP-OK:</code> marker</li>
+<li><code>go build ./...</code> exits 0</li>
+<li><code>go vet ./...</code> exits 0</li>
+<li><code>go test -short ./...</code> exits 0</li>
+<li>All applicable challenges pass with runtime evidence</li>
+<li><code>verify-governance-cascade.sh</code> exits 0</li>
+</ol>
+</body>
+</html>

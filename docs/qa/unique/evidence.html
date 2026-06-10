@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="retroactive-qa-evidence-commit-81f3c482-run-id-unique">Retroactive
+QA evidence — commit <code>81f3c482</code> (run-id
+<code>unique</code>)</h1>
+<blockquote>
+<p><strong>RECONSTRUCTED, AFTER-THE-FACT DOCUMENTATION (HXC-039,
+§11.4.83).</strong> This file is NOT a captured-at-the-time end-user
+transcript. It is honest retroactive documentation created during the
+HXC-039 §11.4.83 back-fill, operator-authorised, to give a pre-existing
+feature commit its required <code>docs/qa/&lt;run-id&gt;/</code>
+evidence directory WITHOUT rewriting git history. No runtime output
+below is fabricated: where original captured evidence does not exist,
+that is stated plainly (§11.4.6 / §11.4.123).</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Commit SHA</td>
+<td><code>81f3c482a40e7bde6d78e1821680895352aa6bae</code></td>
+</tr>
+<tr>
+<td>Short SHA</td>
+<td><code>81f3c482</code></td>
+</tr>
+<tr>
+<td>Authored</td>
+<td>2026-06-09T13:14:24+05:00</td>
+</tr>
+<tr>
+<td>Subject</td>
+<td><code>fix(deployment): real unique deploy IDs + real perf benchmark (2 production bugs)</code></td>
+</tr>
+<tr>
+<td>run-id basename</td>
+<td><code>unique</code> (a verbatim substring of the commit subject —
+the §11.4.83 gate matches the run-id against the subject)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-the-commit-changed-from-git-show---stat">What the commit
+changed (from <code>git show --stat</code>)</h2>
+<pre><code>helix_code/internal/deployment/production_deployer.go     | 68 ++++++++++++++++------
+helix_code/internal/deployment/production_deployer_test.go | 18 ++++--
+2 files changed, 63 insertions(+), 23 deletions(-)</code></pre>
+<p>Two production bugs in
+<code>internal/deployment/production_deployer.go</code> were fixed: (1)
+deployment IDs were not genuinely unique, and (2) the performance
+benchmark path was not a real measurement. The fix landed alongside
+changes to the package’s own <code>_test.go</code> file.</p>
+<h2 id="verification-that-exists-for-this-commit">Verification that
+exists for this commit</h2>
+<ul>
+<li><strong>Paired unit test changes:</strong>
+<code>production_deployer_test.go</code> was modified in the SAME
+commit, so the fix is covered by the package’s unit suite
+(<code>go test ./internal/deployment/...</code>). The test delta is the
+contemporaneous guard for the two fixes.</li>
+<li><strong>No captured runtime transcript was recorded at commit
+time</strong> for this feature under <code>docs/qa/</code>. This
+directory is retroactive documentation, not a replay of original runtime
+output.</li>
+</ul>
+<h2 id="honesty-statement">Honesty statement</h2>
+<p>This is reconstructed documentation. It contains NO faked PASS logs
+and NO fabricated runtime output. The only verification asserted is the
+in-commit unit-test delta visible in <code>git show 81f3c482</code>.</p>
+</body>
+</html>

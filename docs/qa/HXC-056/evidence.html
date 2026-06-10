@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-056-7-submodules-const-052-capitalised-replace-..pliniuscommon">HXC-056
+— 7 submodules: CONST-052 capitalised replace =&gt;
+../PliniusCommon</h1>
+<p><strong>Captured:</strong> 2026-06-09T15:06:50Z · Bug · Fixed (→
+Fixed.md) ## Defect auto_temp, claritas, gandalf_solutions, hyper_tune,
+leak_hub, ouroborous, veritas each had go.mod line 16
+<code>replace digital.vasic.pliniuscommon =&gt; ../PliniusCommon</code>;
+the capitalised <code>../PliniusCommon</code> dir is absent after the
+CONST-052 rename, the lowercase <code>../plinius_common</code> exists →
+<code>go build ./...</code> failed on all 7. (3 of the 7 —
+auto_temp/claritas/veritas — had the edit in their working tree from a
+rate-limited subagent that died before committing; finished here.) ##
+Fix All 7 go.mod line 16 → <code>=&gt; ../plinius_common</code>
+(path-case only). ## Captured runtime evidence (real
+<code>go build ./...</code> per submodule) auto_temp_BUILD_OK
+claritas_BUILD_OK gandalf_solutions_BUILD_OK hyper_tune_BUILD_OK
+leak_hub_BUILD_OK ouroborous_BUILD_OK veritas_BUILD_OK ## Commits
+(go.mod only, pushed ff to all remotes) auto_temp 816d47b · claritas
+a009751 · gandalf_solutions 141a205 · hyper_tune 34c424d · leak_hub
+be6c9f2 · ouroborous 6700977 · veritas d863c08</p>
+</body>
+</html>

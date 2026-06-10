@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HELIXCODE_CLAUDE</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HELIXCODE_CLAUDE</h1>
+</header>
+<h1 id="claude.md---helixcode-ai-agent-manual">CLAUDE.md - HelixCode AI
+Agent Manual</h1>
+<h2 id="helixcode---ai-agent-operating-manual">HelixCode - AI Agent
+Operating Manual</h2>
+<p><strong>Version</strong>: 1.0.0 <strong>Date</strong>: 2026-04-30
+<strong>Scope</strong>: This document guides AI agents working on the
+HelixCode codebase <strong>Authority</strong>: Cascaded from HelixAgent
+root <code>CLAUDE.md</code> with HelixCode-specific addenda</p>
+<hr />
+<h2 id="agent-identity-purpose">1. Agent Identity &amp; Purpose</h2>
+<p>You are an AI agent working on <strong>HelixCode</strong>, an
+enterprise-grade distributed AI development platform. Your work directly
+impacts the quality and usability of a production system.</p>
+<p><strong>Your mandate</strong>: Write real, working, tested code. No
+simulations. No placeholders. No “for now” implementations. Every
+feature you implement MUST actually work when a user invokes it.</p>
+<hr />
+<h2 id="universal-mandatory-rules-non-negotiable">2. Universal Mandatory
+Rules (Non-Negotiable)</h2>
+<p>These rules cascade from the HelixCode Constitution. They are
+permanent and apply to every task.</p>
+<h3 id="rule-1-no-cicd-pipelines">Rule 1: No CI/CD Pipelines</h3>
+<p>No <code>.github/workflows/</code>, <code>.gitlab-ci.yml</code>,
+<code>Jenkinsfile</code>, <code>.travis.yml</code>,
+<code>.circleci/</code>, or any automated pipeline. All builds and tests
+run manually or via Makefile/script targets.</p>
+<h3 id="rule-2-no-mocks-in-production">Rule 2: No Mocks in
+Production</h3>
+<p>Mocks, stubs, fakes, placeholder classes, TODO implementations are
+STRICTLY FORBIDDEN in production code. Only unit tests may use
+mocks.</p>
+<h3 id="rule-3-no-https-for-git">Rule 3: No HTTPS for Git</h3>
+<p>SSH URLs only (<code>git@github.com:…</code>) for all Git
+operations.</p>
+<h3 id="rule-4-no-manual-container-commands">Rule 4: No Manual Container
+Commands</h3>
+<p>Use the orchestrator binary (<code>make build</code> →
+<code>./bin/&lt;app&gt;</code>). Direct
+<code>docker</code>/<code>docker-compose</code> commands are prohibited
+as workflows.</p>
+<h3 id="rule-5-real-data-for-non-unit-tests">Rule 5: Real Data for
+Non-Unit Tests</h3>
+<p>All integration, E2E, and challenge tests MUST use real
+infrastructure (real databases, real HTTP calls, real containers).</p>
+<h3 id="rule-6-100-challenge-coverage">Rule 6: 100% Challenge
+Coverage</h3>
+<p>Every component MUST have Challenge scripts validating real-life use
+cases.</p>
+<h3 id="rule-7-reproduction-before-fix">Rule 7:
+Reproduction-Before-Fix</h3>
+<p>Every bug MUST be reproduced by a Challenge script BEFORE any fix is
+attempted.</p>
+<h3 id="rule-8-definition-of-done">Rule 8: Definition of Done</h3>
+<p>A change is NOT done because code compiles. “Done” requires pasted
+terminal output from a real run against real artifacts.</p>
+<h3 id="rule-9-no-self-certification">Rule 9: No Self-Certification</h3>
+<p>Words like <em>verified, tested, working, complete, fixed,
+passing</em> are forbidden unless accompanied by pasted command output
+from that session.</p>
+<h3 id="rule-10-zero-bluff-mandate-const-035">Rule 10: Zero-Bluff
+Mandate (CONST-035)</h3>
+<p>A passing test is a claim that the feature <strong>works for the end
+user</strong>. Every test must guarantee Quality + Completion + Full
+Usability. Any test that doesn’t certify all three is a bluff and must
+be tightened.</p>
+<hr />
+<h2 id="helixcode-specific-architecture">3. HelixCode-Specific
+Architecture</h2>
+<h3 id="technology-stack">3.1 Technology Stack</h3>
+<ul>
+<li><strong>Language</strong>: Go 1.24.0 with toolchain go1.24.9</li>
+<li><strong>Module</strong>: <code>dev.helix.code</code></li>
+<li><strong>HTTP Framework</strong>: Gin v1.11.0</li>
+<li><strong>Database</strong>: PostgreSQL 15+ (optional for
+testing)</li>
+<li><strong>Cache</strong>: Redis 7+ (optional)</li>
+<li><strong>Authentication</strong>: JWT v4.5.2 + bcrypt/argon2</li>
+<li><strong>Configuration</strong>: Viper v1.21.0</li>
+<li><strong>CLI</strong>: Cobra v1.8.0</li>
+<li><strong>Testing</strong>: Testify v1.11.1</li>
+</ul>
+<h3 id="directory-structure">3.2 Directory Structure</h3>
+<pre><code>helix_code/
+├── cmd/
+│   ├── server/         # HTTP server entry point
+│   ├── cli/            # CLI client entry point
+│   └── security-test/  # Security testing tools
+├── internal/
+│   ├── auth/           # JWT authentication (VERIFIED REAL)
+│   ├── llm/            # LLM providers (CRITICAL BLUFF AREA - see below)
+│   ├── worker/         # SSH worker pool (VERIFY BEFORE USING)
+│   ├── task/           # Task management &amp; checkpointing
+│   ├── server/         # HTTP handlers &amp; routing
+│   ├── database/       # PostgreSQL layer
+│   ├── redis/          # Redis client
+│   ├── config/         # Viper configuration
+│   ├── tools/          # Tool ecosystem
+│   ├── editor/         # Multi-format code editing
+│   ├── memory/         # Memory provider integration
+│   ├── notification/   # Multi-channel notifications
+│   ├── mcp/            # Model Context Protocol
+│   ├── workflow/       # Workflow execution engine
+│   ├── project/        # Project lifecycle
+│   ├── session/        # Session management
+│   ├── context/        # Context building
+│   ├── agent/          # AI agent coordination
+│   ├── hardware/       # Hardware detection
+│   ├── monitoring/     # Metrics &amp; health
+│   ├── performance/    # Performance optimization
+│   ├── security/       # Security management
+│   └── version/        # Version management
+├── applications/
+│   ├── desktop/        # Fyne GUI
+│   ├── terminal-ui/    # tview TUI
+│   ├── ios/            # iOS (Swift bindings)
+│   ├── android/        # Android (Kotlin)
+│   ├── aurora-os/      # Aurora OS client
+│   └── harmony-os/     # Harmony OS client
+├── tests/
+│   ├── e2e/challenges/ # E2E challenge framework
+│   ├── integration/    # Integration tests
+│   ├── unit/           # Unit tests
+│   ├── security/       # Security tests
+│   └── performance/    # Benchmarks
+├── config/             # Configuration files
+├── docker/             # Docker configurations
+├── scripts/            # Build and utility scripts
+└── go.mod              # Module definition</code></pre>
+<h3 id="critical-implementation-areas">3.3 Critical Implementation
+Areas</h3>
+<h4 id="bluff-001-llm-generation-is-simulated">BLUFF-001: LLM Generation
+is Simulated</h4>
+<p><strong>Location</strong>: <code>cmd/cli/main.go</code> lines 190-214
+<strong>Status</strong>: CRITICAL - MUST FIX IMMEDIATELY <strong>Code
+Pattern</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// ANTI-BLUFF: NEVER write code like this</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;For now, simulate generation&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;In production, this would use the actual LLM provider&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">// WRONG - SIMULATION:</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>response <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;Generated response for: %s</span><span class="ch">\n\n</span><span class="st">This is a simulated response...&quot;</span><span class="op">)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">// CORRECT - REAL IMPLEMENTATION:</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>resp<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>llmProvider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;generation failed: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Println<span class="op">(</span>resp<span class="op">.</span>Text<span class="op">)</span></span></code></pre></div>
+<p><strong>Agent Rule</strong>: When implementing LLM-related code, you
+MUST make real HTTP calls to real providers. NEVER simulate
+responses.</p>
+<h4 id="bluff-002-model-listing-is-hardcoded">BLUFF-002: Model Listing
+is Hardcoded</h4>
+<p><strong>Location</strong>: <code>cmd/cli/main.go</code> lines 101-128
+<strong>Status</strong>: CRITICAL <strong>Correct Pattern</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>CLI<span class="op">)</span> handleListModels<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Query ALL configured providers</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name<span class="op">,</span> provider <span class="op">:=</span> <span class="kw">range</span> c<span class="op">.</span>providerManager<span class="op">.</span>GetProviders<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        models<span class="op">,</span> err <span class="op">:=</span> provider<span class="op">.</span>GetModels<span class="op">()</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Warning: failed to list models from %s: %v&quot;</span><span class="op">,</span> name<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Display real models</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> model <span class="op">:=</span> <span class="kw">range</span> models <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;%s/%s: %s (context: %d)</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> name<span class="op">,</span> model<span class="op">.</span>ID<span class="op">,</span> model<span class="op">.</span>Name<span class="op">,</span> model<span class="op">.</span>ContextSize<span class="op">)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="bluff-003-command-execution-is-simulated">BLUFF-003: Command
+Execution is Simulated</h4>
+<p><strong>Location</strong>: <code>cmd/cli/main.go</code> lines 237-250
+<strong>Status</strong>: HIGH <strong>Correct Pattern</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>CLI<span class="op">)</span> handleCommand<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> command <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Actually execute the command</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;sh&quot;</span><span class="op">,</span> <span class="st">&quot;-c&quot;</span><span class="op">,</span> command<span class="op">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    cmd<span class="op">.</span>Dir <span class="op">=</span> c<span class="op">.</span>workingDirectory</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    output<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>CombinedOutput<span class="op">()</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Exit code: %d</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> cmd<span class="op">.</span>ProcessState<span class="op">.</span>ExitCode<span class="op">())</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Output:</span><span class="ch">\n</span><span class="st">%s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="dt">string</span><span class="op">(</span>output<span class="op">))</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> err</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="code-patterns-for-agents">4. Code Patterns for Agents</h2>
+<h3 id="interface-driven-design">4.1 Interface-Driven Design</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Define the contract</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    HealthCheck<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Implement with REAL behavior</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> OllamaProvider <span class="kw">struct</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>OllamaProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Make REAL HTTP call</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// NO simulation</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="manager-pattern">4.2 Manager Pattern</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    db     TaskRepository</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    mu     sync<span class="op">.</span>RWMutex</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    tasks  <span class="kw">map</span><span class="op">[</span>uuid<span class="op">.</span>UUID<span class="op">]*</span>Task</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>TaskManager<span class="op">)</span> Create<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task <span class="op">*</span>Task<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> m<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Persist to REAL database</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> m<span class="op">.</span>db<span class="op">.</span>Save<span class="op">(</span>ctx<span class="op">,</span> task<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to save task: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>tasks<span class="op">[</span>task<span class="op">.</span>ID<span class="op">]</span> <span class="op">=</span> task</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="error-handling">4.3 Error Handling</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Package-level errors</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    ErrInvalidCredentials <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;invalid credentials&quot;</span><span class="op">)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    ErrTokenExpired       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;token expired&quot;</span><span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Contextual wrapping</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Service<span class="op">)</span> DoSomething<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> s<span class="op">.</span>db<span class="op">.</span>Query<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to query database for user %s: %w&quot;</span><span class="op">,</span> userID<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> s<span class="op">.</span>process<span class="op">(</span>result<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to process query result: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="testing-pattern-unit">4.4 Testing Pattern (Unit)</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestService_DoSomething<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    tests <span class="op">:=</span> <span class="op">[]</span><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        name    <span class="dt">string</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        setup   <span class="kw">func</span><span class="op">(*</span>mockRepository<span class="op">)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        wantErr <span class="dt">bool</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}{</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>            name<span class="op">:</span> <span class="st">&quot;success&quot;</span><span class="op">,</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            setup<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>m <span class="op">*</span>mockRepository<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                m<span class="op">.</span>On<span class="op">(</span><span class="st">&quot;Query&quot;</span><span class="op">,</span> mock<span class="op">.</span>Anything<span class="op">).</span>Return<span class="op">(&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> <span class="st">&quot;test&quot;</span><span class="op">},</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>            wantErr<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>            name<span class="op">:</span> <span class="st">&quot;database_error&quot;</span><span class="op">,</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>            setup<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>m <span class="op">*</span>mockRepository<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>                m<span class="op">.</span>On<span class="op">(</span><span class="st">&quot;Query&quot;</span><span class="op">,</span> mock<span class="op">.</span>Anything<span class="op">).</span>Return<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;connection refused&quot;</span><span class="op">))</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>            wantErr<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> tt <span class="op">:=</span> <span class="kw">range</span> tests <span class="op">{</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Run<span class="op">(</span>tt<span class="op">.</span>name<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>            repo <span class="op">:=</span> <span class="bu">new</span><span class="op">(</span>mockRepository<span class="op">)</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>            tt<span class="op">.</span>setup<span class="op">(</span>repo<span class="op">)</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>            svc <span class="op">:=</span> NewService<span class="op">(</span>repo<span class="op">)</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            err <span class="op">:=</span> svc<span class="op">.</span>DoSomething<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tt<span class="op">.</span>wantErr <span class="op">{</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>                require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>                require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>            repo<span class="op">.</span>AssertExpectations<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="testing-pattern-integration---no-mocks">4.5 Testing Pattern
+(Integration - NO MOCKS)</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAPI_CreateTask_Integration<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> testing<span class="op">.</span>Short<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;Integration test skipped in short mode&quot;</span><span class="op">)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Start REAL PostgreSQL container</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    dbContainer <span class="op">:=</span> startPostgresContainer<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> dbContainer<span class="op">.</span>Terminate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Connect to REAL database</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    db <span class="op">:=</span> connectToPostgres<span class="op">(</span>dbContainer<span class="op">)</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Initialize REAL service</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    taskMgr <span class="op">:=</span> task<span class="op">.</span>NewManager<span class="op">(</span>db<span class="op">)</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Test with REAL data</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    task<span class="op">,</span> err <span class="op">:=</span> taskMgr<span class="op">.</span>Create<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>task<span class="op">.</span>Task<span class="op">{</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        Title<span class="op">:</span> <span class="st">&quot;Integration Test Task&quot;</span><span class="op">,</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotZero<span class="op">(</span>t<span class="op">,</span> task<span class="op">.</span>ID<span class="op">)</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Verify it REALLY exists in database</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    persisted<span class="op">,</span> err <span class="op">:=</span> taskMgr<span class="op">.</span>Get<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> task<span class="op">.</span>ID<span class="op">)</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Integration Test Task&quot;</span><span class="op">,</span> persisted<span class="op">.</span>Title<span class="op">)</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="anti-bluff-checklist-for-every-task">5. Anti-Bluff Checklist for
+Every Task</h2>
+<p>Before marking any task complete, verify:</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>No simulation</strong>: Code
+doesn’t contain “simulate”, “for now”, “TODO implement”,
+“placeholder”</label></li>
+<li><label><input type="checkbox"></input><strong>Real HTTP calls</strong>:
+API clients make actual HTTP requests with real bodies</label></li>
+<li><label><input type="checkbox"></input><strong>Real database
+operations</strong>: Database code uses real queries, not in-memory maps
+(unless explicitly caching)</label></li>
+<li><label><input type="checkbox"></input><strong>Real process
+execution</strong>: Shell/command execution uses <code>os/exec</code>,
+not <code>fmt.Printf</code> + <code>time.Sleep</code></label></li>
+<li><label><input type="checkbox"></input><strong>Real file
+operations</strong>: File tools use
+<code>os.ReadFile</code>/<code>os.WriteFile</code>, not mock in-memory
+buffers</label></li>
+<li><label><input type="checkbox"></input><strong>Test validates
+reality</strong>: Tests check actual behavior, not just function call
+counts</label></li>
+<li><label><input type="checkbox"></input><strong>Challenge validates
+end-to-end</strong>: Challenge script exercises the complete user
+workflow</label></li>
+<li><label><input type="checkbox"></input><strong>Documentation example
+works</strong>: README example executes successfully when
+copy-pasted</label></li>
+<li><label><input type="checkbox"></input><strong>No bare skips</strong>: All
+<code>t.Skip()</code> have <code>SKIP-OK: #&lt;ticket&gt;</code>
+markers</label></li>
+<li><label><input type="checkbox"></input><strong>Evidence pasted</strong>:
+Commit/PR contains actual terminal output from real
+execution</label></li>
+</ul>
+<hr />
+<h2 id="common-anti-patterns-to-avoid">6. Common Anti-Patterns to
+Avoid</h2>
+<h3 id="anti-pattern-1-the-simulation-trap">ANTI-PATTERN 1: The
+Simulation Trap</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// WRONG</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Generate<span class="op">(</span>prompt <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// For now, just return a simulated response</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;Generated: %s&quot;</span><span class="op">,</span> prompt<span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">// CORRECT</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>Provider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>client<span class="op">.</span>Post<span class="op">(</span>p<span class="op">.</span>endpoint<span class="op">,</span> req<span class="op">)</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;generation request failed: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> parseResponse<span class="op">(</span>resp<span class="op">)</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="anti-pattern-2-the-hardcoded-list">ANTI-PATTERN 2: The Hardcoded
+List</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// WRONG</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ListModels<span class="op">()</span> <span class="op">[]</span>Model <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">[]</span>Model<span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;llama-3-8b&quot;</span><span class="op">,</span> <span class="st">&quot;Llama 3 8B&quot;</span><span class="op">},</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;mistral-7b&quot;</span><span class="op">,</span> <span class="st">&quot;Mistral 7B&quot;</span><span class="op">},</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">// CORRECT</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>Provider<span class="op">)</span> GetModels<span class="op">()</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>client<span class="op">.</span>Get<span class="op">(</span>p<span class="op">.</span>baseURL <span class="op">+</span> <span class="st">&quot;/api/tags&quot;</span><span class="op">)</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> parseModelList<span class="op">(</span>resp<span class="op">)</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="anti-pattern-3-the-stub-interface">ANTI-PATTERN 3: The Stub
+Interface</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// WRONG</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> WorkerPool <span class="kw">struct</span> <span class="op">{}</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>WorkerPool<span class="op">)</span> AddWorker<span class="op">(</span>w <span class="op">*</span>Worker<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span>  <span class="co">// </span><span class="al">TODO</span><span class="co">: implement</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">// CORRECT</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>SSHWorkerPool<span class="op">)</span> AddWorker<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> w <span class="op">*</span>SSHWorker<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    client<span class="op">,</span> err <span class="op">:=</span> ssh<span class="op">.</span>Dial<span class="op">(</span><span class="st">&quot;tcp&quot;</span><span class="op">,</span> w<span class="op">.</span>Host<span class="op">,</span> w<span class="op">.</span>SSHConfig<span class="op">)</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to connect to worker %s: %w&quot;</span><span class="op">,</span> w<span class="op">.</span>Host<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> client<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Verify worker has helix binary</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    session<span class="op">,</span> err <span class="op">:=</span> client<span class="op">.</span>NewSession<span class="op">()</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to create SSH session: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> session<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Actually test the worker</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    output<span class="op">,</span> err <span class="op">:=</span> session<span class="op">.</span>Output<span class="op">(</span><span class="st">&quot;which helix || echo &#39;NOT_INSTALLED&#39;&quot;</span><span class="op">)</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>Contains<span class="op">(</span><span class="dt">string</span><span class="op">(</span>output<span class="op">),</span> <span class="st">&quot;NOT_INSTALLED&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Auto-install</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> p<span class="op">.</span>installWorker<span class="op">(</span>ctx<span class="op">,</span> client<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to install worker: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    p<span class="op">.</span>workers<span class="op">[</span>w<span class="op">.</span>Hostname<span class="op">]</span> <span class="op">=</span> w</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="working-with-submodules">7. Working with Submodules</h2>
+<p>HelixCode has 80+ submodules. When working with them:</p>
+<ol type="1">
+<li><strong>Check governance</strong>: Does the submodule have
+Constitution.md / CLAUDE.md / AGENTS.md?</li>
+<li><strong>Add if missing</strong>: Create governance files referencing
+parent</li>
+<li><strong>Verify builds</strong>: Does the submodule actually
+compile?</li>
+<li><strong>Test integration</strong>: Does HelixCode integration with
+this submodule work?</li>
+</ol>
+<hr />
+<h2 id="emergency-procedures">8. Emergency Procedures</h2>
+<h3 id="if-you-discover-a-bluff">If You Discover a Bluff</h3>
+<ol type="1">
+<li>STOP working on dependent features</li>
+<li>Document the bluff in <code>docs/issues/BLUFFS.md</code></li>
+<li>Write a Challenge that reproduces the bluff</li>
+<li>Fix the bluff</li>
+<li>Verify the Challenge now passes</li>
+<li>Update documentation to reflect reality</li>
+</ol>
+<h3 id="if-a-test-passes-but-feature-doesnt-work">If a Test Passes But
+Feature Doesn’t Work</h3>
+<ol type="1">
+<li>The test is a bluff - tighten it</li>
+<li>Add assertions that verify actual output quality</li>
+<li>Add anti-bluff checks (no “simulated” in responses)</li>
+<li>Run the test against real infrastructure</li>
+<li>Verify it FAILS with the broken code</li>
+<li>Then fix the code</li>
+</ol>
+<hr />
+<h2 id="reference-commands">9. Reference Commands</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Unit tests only (mocks allowed)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-short</span> ./...</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Integration tests (NO MOCKS)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> integration-test</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># All challenges</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./tests/e2e/challenges/run_all_challenges.sh</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify no bluffs in code</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> internal/ cmd/ <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;No bluffs found&quot;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify real LLM calls</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/llm/generate <span class="dt">\</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;prompt&quot;:&quot;What is 2+2?&quot;,&quot;model&quot;:&quot;llama3.2&quot;}&#39;</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return actual AI-generated text, NOT &quot;This is a simulated response&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="contact-escalation">10. Contact &amp; Escalation</h2>
+<ul>
+<li><strong>Bluff reports</strong>:
+<code>docs/issues/BLUFFS.md</code></li>
+<li><strong>Bug fixes</strong>:
+<code>docs/issues/fixed/BUGFIXES.md</code></li>
+<li><strong>Architecture questions</strong>:
+<code>docs/ARCHITECTURE.md</code></li>
+<li><strong>Emergency</strong>: Create a Challenge that reproduces the
+issue</li>
+</ul>
+<hr />
+<p><em>Remember: Your code will be used by real people. Write code that
+actually works.</em></p>
+</body>
+</html>

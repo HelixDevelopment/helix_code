@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="retroactive-qa-evidence-commit-d985e3ae-run-id-w6b">Retroactive
+QA evidence — commit <code>d985e3ae</code> (run-id
+<code>W6B</code>)</h1>
+<blockquote>
+<p><strong>RECONSTRUCTED, AFTER-THE-FACT DOCUMENTATION (HXC-039,
+§11.4.83).</strong> This file is NOT a captured-at-the-time end-user
+transcript. It is honest retroactive documentation created during the
+HXC-039 §11.4.83 back-fill, operator-authorised, to give a pre-existing
+feature commit its required <code>docs/qa/&lt;run-id&gt;/</code>
+evidence directory WITHOUT rewriting git history. No runtime output
+below is fabricated (§11.4.6 / §11.4.123).</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Commit SHA</td>
+<td><code>d985e3aeec90f053a9b6855ed2c9955ee1b28336</code></td>
+</tr>
+<tr>
+<td>Short SHA</td>
+<td><code>d985e3ae</code></td>
+</tr>
+<tr>
+<td>Authored</td>
+<td>2026-06-04T15:18:44+05:00</td>
+</tr>
+<tr>
+<td>Subject</td>
+<td><code>feat(worker): wire real in-process multi-node consensus election through SSH pool (W6B)</code></td>
+</tr>
+<tr>
+<td>run-id basename</td>
+<td><code>W6B</code> (a verbatim substring of the commit subject)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-the-commit-changed-from-git-show---stat">What the commit
+changed (from <code>git show --stat</code>)</h2>
+<pre><code>helix_code/internal/worker/consensus.go            |  51 +++++
+helix_code/internal/worker/ssh_pool_consensus.go   | 211 +++++++++++++++++++++
+helix_code/internal/worker/ssh_pool_consensus_test.go | 126 ++++++++++++
+3 files changed, 388 insertions(+)</code></pre>
+<p>Wires real in-process multi-node consensus election through the SSH
+worker pool: new <code>consensus.go</code> logic +
+<code>ssh_pool_consensus.go</code> transport, with a new test file in
+the same commit.</p>
+<h2 id="verification-that-exists-for-this-commit">Verification that
+exists for this commit</h2>
+<ul>
+<li><strong>Paired test file added in the SAME commit:</strong>
+<code>internal/worker/ssh_pool_consensus_test.go</code> (126 new lines)
+directly exercises the new election wiring
+(<code>go test ./internal/worker/...</code>). This is the
+contemporaneous guard for the feature.</li>
+<li><strong>No captured runtime transcript was recorded at commit
+time</strong> under <code>docs/qa/</code>. This directory is retroactive
+documentation, not an original runtime replay.</li>
+</ul>
+<h2 id="honesty-statement">Honesty statement</h2>
+<p>Reconstructed documentation. NO faked PASS logs, NO fabricated
+runtime output. Asserted verification = the in-commit worker consensus
+unit-test file visible in <code>git show d985e3ae</code>.</p>
+</body>
+</html>

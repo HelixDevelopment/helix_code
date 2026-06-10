@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p2-f21-codex-approval-modes</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p2-f21-codex-approval-modes</h1>
+</header>
+<h1 id="p2-f21-codex-approval-modes-implementation-plan-first-phase-2-feature">P2-F21
+— Codex Approval Modes Implementation Plan (FIRST Phase 2 feature)</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<blockquote>
+<p><strong>Programme position:</strong> F21 is the
+<strong>first</strong> Phase 2 feature of CLI-Agent Fusion. Task T01
+advances PROGRESS.md from “Phase 1 complete” to “Phase 2 in flight” and
+creates <code>docs/improvements/07_phase_2_evidence.md</code> (the new
+evidence section for Phase 2).</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, end-to-end <strong>4-mode
+codex-compatible approval system</strong> for the HelixCode CLI agent.
+F21 adds an <code>internal/approval/</code> package with
+<code>ApprovalMode</code> (4 values: <code>suggest</code>,
+<code>auto-edit</code>, <code>full-auto</code>,
+<code>dangerously-bypass</code>) + <code>ApprovalLevel</code> (4 values:
+<code>read-only</code>, <code>edit</code>, <code>run</code>,
+<code>all</code>) + <code>Decision</code> value type +
+<code>ApprovalManager</code> (atomic-pointer mode + 4×4 matrix gate +
+F02 PolicyEngine + F14 SandboxManager + F19 Prompter integration) +
+<code>Selector</code> (flag &gt; env &gt; config &gt; default
+<code>suggest</code>, mirrors F12 pattern). Extends
+<code>tools.Tool</code> interface with
+<code>RequiresApproval() approval.ApprovalLevel</code>; T05 migrates ~30
+existing tools with explicit levels per spec §3.6 table. Wires through
+<code>tools/registry.go::Execute</code> as a NEW pre-execute branch
+(FIRST in chain, before F02). Adds a <code>/approval</code> slash
+command (<code>status</code> / <code>set &lt;mode&gt;</code> /
+<code>show &lt;mode&gt;</code>); NO cobra subcommand. Runtime mode
+change via <code>/approval set</code> is structurally enforced via
+<code>atomic.Pointer[ApprovalMode]</code> swap; the next
+<code>CheckApproval</code> call sees the new mode.</p>
+<p><strong>Architecture:</strong> New <code>internal/approval/</code>
+package with <code>types.go</code> (<code>ApprovalMode</code> +
+<code>ApprovalLevel</code> + <code>Action</code> + <code>Decision</code>
++ <code>ResolvedSource</code> + sentinel errors
+<code>ErrApprovalRequired</code>/<code>ErrUnknownMode</code>/<code>ErrSandboxRequired</code>
++ <code>ModeDescriptors</code> constant table for
+<code>/approval show</code>), <code>selector.go</code>
+(<code>SelectorInput</code> +
+<code>Select(input) (ApprovalMode, ResolvedSource, error)</code> +
+<code>ParseMode(s) (ApprovalMode, error)</code> — pure function;
+injected env closure), <code>manager.go</code>
+(<code>ManagerOptions</code> + <code>ApprovalManager</code> with
+<code>atomic.Pointer[ApprovalMode]</code> +
+<code>CheckApproval(ctx, tool, params) Decision</code> +
+<code>Set(mode)</code> + <code>Mode()</code> + <code>Source()</code> +
+<code>DefaultLevelEdit</code> embeddable struct +
+<code>YesNoPrompter</code> interface), <code>yaml_loader.go</code>
+(<code>LoadConfigFile(path)</code> mirroring F12’s wizard-writer style).
+New <code>internal/commands/approval_command.go</code> for the
+<code>/approval</code> slash command. Two existing files get small
+additions: <code>internal/tools/registry.go</code> (1) <code>Tool</code>
+interface + <code>RequiresApproval() approval.ApprovalLevel</code>
+method, (2) <code>ToolRegistry</code> + <code>approvalMgr</code> field +
+<code>SetApprovalManager(mgr)</code>, (3) <code>Execute</code> gains a
+NEW pre-execute branch (FIRST in chain, before F02) calling
+<code>manager.CheckApproval</code>; <code>cmd/cli/main.go</code> (1)
+construct <code>approval.Select</code> +
+<code>approval.NewManager</code> adjacent to F02 + F14 + F19 wiring, (2)
+<code>--approval</code> pflag wiring, (3)
+<code>c.toolRegistry.SetApprovalManager(c.approvalMgr)</code> + register
+<code>/approval</code> slash. Plus ~30 one-line
+<code>RequiresApproval()</code> methods on existing tools per spec §3.6
+table; tools that don’t override embed
+<code>approval.DefaultLevelEdit</code> (LevelEdit safe-by-default).</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, zap (already in
+<code>go.mod</code>), <code>gopkg.in/yaml.v3</code> (direct dep promoted
+in F20). <strong>Zero new external deps</strong> (atomic, errors, fmt,
+io/fs, os, path/filepath, strings, context, sync are all stdlib).
+<code>go mod tidy</code> after T07 must produce no diff in either
+<code>go.mod</code> or <code>go.sum</code>. T09’s verification step
+asserts this loudly.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-06-p2-f21-codex-approval-modes-design.md</code>
+(commit <code>7128289</code>).</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F21
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/approval internal/commands/approval_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — F21 can
+degenerate in four ways: (a) the manager constructs cleanly +
+<code>/approval status</code> shows the mode + 100% unit-test coverage
+on <code>internal/approval/</code>, but <code>registry.Execute</code>
+never calls <code>CheckApproval</code>, so every tool runs regardless of
+mode (the gate is metadata, not enforcement); (b) <code>suggest</code>
+mode <code>CheckApproval</code> returns <code>Decision.Deny</code>
+correctly, but the registry ignores the deny value and proceeds to
+<code>tool.Execute</code>, so a <code>WriteFileTool</code> call mutates
+disk silently while the test only checks “did the test set up the
+manager” (the deny is computed-but-not-honoured); (c)
+<code>full-auto</code> + <code>LevelRun</code> sets
+<code>params[&quot;_helix_sandbox_required&quot;] = true</code> but the registry’s
+F14 dispatch ignores the marker and runs through plain
+<code>os/exec</code> (the sandbox-on claim is a UI promise without a
+runtime path); (d) <code>/approval set &lt;mode&gt;</code> mutates a
+struct field that <code>CheckApproval</code> doesn’t re-read on entry
+(e.g., the mode is captured in a closure at <code>NewManager</code> time
+so the slash command’s swap is invisible to subsequent calls). The four
+“what counts as approval system works” criteria — (1) real
+<code>WriteFileTool</code> invoked through real registry under
+<code>ModeSuggest</code> returns <code>ErrApprovalRequired</code> AND
+the target file does NOT exist on disk (PHASE-A byte evidence); (2) real
+shell tool under <code>ModeAutoEdit</code> with yes-replying Prompter
+runs (file/output observable); same tool with no-replying Prompter
+returns <code>ErrApprovalRequired</code> AND the exec wrapper’s
+invocation count is 0 (PHASE-B); (3) real shell tool under
+<code>ModeFullAuto</code> routes through
+<code>sandbox.Manager.Execute</code> (sandbox spy invocation count == 1)
+AND the params marker <code>_helix_sandbox_network_allowed</code> is
+false (PHASE-C; skip-with-marker if bwrap unavailable); (4) before/after
+<code>manager.Set(ModeAutoEdit)</code> produces observably different
+<code>registry.Execute</code> outcomes for the same
+<code>WriteFileTool</code> call in the same goroutine (PHASE-D) — are
+each tested with both unit assertions AND a Challenge phase. PHASE-E
+additionally asserts F02 final-deny composition:
+<code>ModeDangerous</code> + an F02 rule denying <code>/etc/</code>
+writes still results in deny, with the file NOT created. The Challenge
+harness uses positive evidence: invocation counters (PHASE-A:
+WriteFileTool counter == 0 proves gate fired before tool; PHASE-B: exec
+counter == 0 in no-reply scenario), filesystem-state assertions
+(PHASE-A: <code>os.IsNotExist</code>; PHASE-B/D:
+<code>os.ReadFile</code> content equality), Prompter-replay equality
+(PHASE-B yes/no branches), sandbox-spy invocation count (PHASE-C count
+== 1), runtime-mode-change observable in tool outcome (PHASE-D),
+F02-final-deny composition (PHASE-E). Byte-evidence mismatch is a hard
+Challenge failure. Absence-of-error is NEVER acceptable.</p>
+<p><strong>Why this is consequential:</strong> the approval system is
+the safety surface every mutating tool flows through. F02 already gates
+per-rule (path globs, command patterns); F14 already sandboxes shell
+tool execution. F21 is the <strong>mode posture</strong> layer: a single
+user-chosen risk dial that gates whole categories at once, so a user in
+<code>suggest</code> mode is structurally protected from any rogue
+mutation regardless of which specific tool the LLM picks. F21’s
+discriminating tests are: (i) PHASE-A’s <code>os.IsNotExist</code>
+assertion (proves real gate enforcement, not metadata-only deny); (ii)
+PHASE-B’s exec-counter=0 in the no-reply branch (proves Prompter
+integration is real, not stubbed); (iii) PHASE-C’s sandbox-spy count ==
+1 (proves the <code>full-auto</code> sandbox-required marker is actually
+honoured by F14’s dispatch, not just stamped on the params); (iv)
+PHASE-D’s before/after differential outcome (proves runtime mode change
+reaches <code>CheckApproval</code>’s entry path, not just a struct
+field); (v) PHASE-E’s F02-final-deny under <code>ModeDangerous</code>
+(proves the composition rule § 4.4 holds — F21 is NOT a license to
+bypass F02). All five must produce positive evidence; none can be
+satisfied by absence-of-error.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P2-F21-T01 — bootstrap
+Phase 2 evidence + advance PROGRESS to F21 (first Phase 2
+feature)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F21-T02 —
+<code>internal/approval/types.go</code>: ApprovalMode + ApprovalLevel +
+Action + Decision + ResolvedSource + sentinels + ModeDescriptors table
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F21-T03 —
+<code>internal/approval/selector.go</code>: flag/env/config precedence +
+ParseMode (TDD; mirror F12 Selector)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F21-T04 —
+<code>internal/approval/manager.go</code>: ApprovalManager with
+atomic-pointer mode + 4×4 matrix gate + F02/F14/F19 integration +
+DefaultLevelEdit + YAML loader (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F21-T05 — Extend
+<code>tools.Tool</code> interface with
+<code>RequiresApproval() approval.ApprovalLevel</code> + apply to all
+~30 existing tools (TDD; coverage table-test)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F21-T06 —
+<code>internal/commands/approval_command.go</code>: /approval slash
+(status/set/show) (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F21-T07 — main.go
+wiring: ApprovalManager construction + <code>--approval</code> pflag +
+registry hook + /approval registration (TDD with integration
+test)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F21-T08 — Challenge
+harness: 5 phases (one per mode + runtime change + F02 composition) with
+positive byte evidence</label></li>
+<li><label><input type="checkbox" checked></input>P2-F21-T09 — F21
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap-phase-2-evidence">Task 1: Bootstrap Phase 2
+evidence</h2>
+<p>Create <code>docs/improvements/07_phase_2_evidence.md</code>
+(mirroring <code>06_phase_1_evidence.md</code> shape; first entry will
+be F21’s evidence in T08). Append F21 evidence section header (spec
+<code>7128289</code>). Update PROGRESS.md current focus from “Phase 1 of
+CLI-Agent Fusion programme COMPLETE” to “Phase 2 of CLI-Agent Fusion
+programme: F21 (Codex Approval Modes) in flight”. Insert F21 task list
+(9 items). Verify zero new external deps — <code>gopkg.in/yaml.v3</code>
+is already direct (F20 promotion).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="st">&quot;yaml.v3&quot;</span> go.mod  <span class="co"># confirm direct (post-F20)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;approval|RequiresApproval&quot;</span> go.mod <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;UNEXPECTED&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>Commit:
+<code>docs(P2-F21-T01): bootstrap Phase 2 evidence + advance PROGRESS to F21 (Codex Approval Modes)</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/approval/types.go</code>, new
+<code>helix_code/internal/approval/types_test.go</code>.</p>
+<p>Define: - <code>ApprovalMode int</code> enum + 4 values
+(<code>ModeSuggest</code> / <code>ModeAutoEdit</code> /
+<code>ModeFullAuto</code> / <code>ModeDangerous</code>) + private
+<code>numModes</code> sentinel. - <code>ApprovalMode.String()</code>
+returning codex-compatible names (“suggest”, “auto-edit”, “full-auto”,
+“dangerously-bypass”). -
+<code>ParseMode(s string) (ApprovalMode, error)</code> — accepts
+kebab-case + underscore variants; returns <code>ErrUnknownMode</code>
+for unknown. - <code>ApprovalLevel int</code> enum + 4 values
+(<code>LevelReadOnly</code> / <code>LevelEdit</code> /
+<code>LevelRun</code> / <code>LevelAll</code>) + private
+<code>numLevels</code> sentinel + <code>String()</code> returning
+“read-only”/“edit”/“run”/“all”. - <code>Action int</code> enum + 3
+values (<code>ActionAllow</code> / <code>ActionDeny</code> /
+<code>ActionPrompt</code>) + <code>String()</code> returning
+“allow”/“deny”/“prompt”. -
+<code>Decision struct { Action Action; Reason string; SandboxRequired bool }</code>.
+- <code>ResolvedSource string</code> type + 4 constants
+(<code>SourceFlag</code> / <code>SourceEnv</code> /
+<code>SourceConfig</code> / <code>SourceDefault</code>). -
+<code>ModeDescriptor struct { Mode ApprovalMode; Summary string; Description string; Matrix [numLevels]Action }</code>.
+- <code>ModeDescriptors [numModes]ModeDescriptor</code> constant table
+per spec §3.4 (4×4 matrix verbatim). - Error sentinels
+(<code>ErrApprovalRequired</code>, <code>ErrUnknownMode</code>,
+<code>ErrSandboxRequired</code>).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalMode_String_AllFour<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;suggest&quot;</span><span class="op">,</span>            ModeSuggest<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">,</span>          ModeAutoEdit<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;full-auto&quot;</span><span class="op">,</span>          ModeFullAuto<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;dangerously-bypass&quot;</span><span class="op">,</span> ModeDangerous<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalMode_ParseMode_OK_KebabAndUnderscore<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    cases <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>ApprovalMode<span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;suggest&quot;</span><span class="op">:</span> ModeSuggest<span class="op">,</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">:</span> ModeAutoEdit<span class="op">,</span> <span class="st">&quot;auto_edit&quot;</span><span class="op">:</span> ModeAutoEdit<span class="op">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;full-auto&quot;</span><span class="op">:</span> ModeFullAuto<span class="op">,</span> <span class="st">&quot;full_auto&quot;</span><span class="op">:</span> ModeFullAuto<span class="op">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;dangerously-bypass&quot;</span><span class="op">:</span> ModeDangerous<span class="op">,</span> <span class="st">&quot;dangerously_bypass&quot;</span><span class="op">:</span> ModeDangerous<span class="op">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> s<span class="op">,</span> want <span class="op">:=</span> <span class="kw">range</span> cases <span class="op">{</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        got<span class="op">,</span> err <span class="op">:=</span> ParseMode<span class="op">(</span>s<span class="op">)</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> s<span class="op">);</span> require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> want<span class="op">,</span> got<span class="op">,</span> s<span class="op">)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalMode_ParseMode_Unknown_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> ParseMode<span class="op">(</span><span class="st">&quot;bogus&quot;</span><span class="op">)</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrUnknownMode<span class="op">)</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalLevel_String_AllFour<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;read-only&quot;</span><span class="op">,</span> LevelReadOnly<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;edit&quot;</span><span class="op">,</span>      LevelEdit<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;run&quot;</span><span class="op">,</span>       LevelRun<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;all&quot;</span><span class="op">,</span>       LevelAll<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAction_String_AllThree<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;allow&quot;</span><span class="op">,</span>  ActionAllow<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;deny&quot;</span><span class="op">,</span>   ActionDeny<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;prompt&quot;</span><span class="op">,</span> ActionPrompt<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestModeDescriptors_TableShape_4x4Matrix<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pin §3.4&#39;s 4×4 matrix byte-for-byte.</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeSuggest<span class="op">].</span>Matrix<span class="op">[</span>LevelReadOnly<span class="op">])</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionDeny<span class="op">,</span>   ModeDescriptors<span class="op">[</span>ModeSuggest<span class="op">].</span>Matrix<span class="op">[</span>LevelEdit<span class="op">])</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionDeny<span class="op">,</span>   ModeDescriptors<span class="op">[</span>ModeSuggest<span class="op">].</span>Matrix<span class="op">[</span>LevelRun<span class="op">])</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionDeny<span class="op">,</span>   ModeDescriptors<span class="op">[</span>ModeSuggest<span class="op">].</span>Matrix<span class="op">[</span>LevelAll<span class="op">])</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeAutoEdit<span class="op">].</span>Matrix<span class="op">[</span>LevelReadOnly<span class="op">])</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeAutoEdit<span class="op">].</span>Matrix<span class="op">[</span>LevelEdit<span class="op">])</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionPrompt<span class="op">,</span> ModeDescriptors<span class="op">[</span>ModeAutoEdit<span class="op">].</span>Matrix<span class="op">[</span>LevelRun<span class="op">])</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionDeny<span class="op">,</span>   ModeDescriptors<span class="op">[</span>ModeAutoEdit<span class="op">].</span>Matrix<span class="op">[</span>LevelAll<span class="op">])</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeFullAuto<span class="op">].</span>Matrix<span class="op">[</span>LevelReadOnly<span class="op">])</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeFullAuto<span class="op">].</span>Matrix<span class="op">[</span>LevelEdit<span class="op">])</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeFullAuto<span class="op">].</span>Matrix<span class="op">[</span>LevelRun<span class="op">])</span> <span class="co">// sandbox forced separately</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionDeny<span class="op">,</span>   ModeDescriptors<span class="op">[</span>ModeFullAuto<span class="op">].</span>Matrix<span class="op">[</span>LevelAll<span class="op">])</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeDangerous<span class="op">].</span>Matrix<span class="op">[</span>LevelReadOnly<span class="op">])</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeDangerous<span class="op">].</span>Matrix<span class="op">[</span>LevelEdit<span class="op">])</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeDangerous<span class="op">].</span>Matrix<span class="op">[</span>LevelRun<span class="op">])</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span>  ModeDescriptors<span class="op">[</span>ModeDangerous<span class="op">].</span>Matrix<span class="op">[</span>LevelAll<span class="op">])</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestErrorSentinels_DistinctErrorsIs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">error</span><span class="op">{</span>ErrApprovalRequired<span class="op">,</span> ErrUnknownMode<span class="op">,</span> ErrSandboxRequired<span class="op">}</span> <span class="op">{</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>        wrapped <span class="op">:=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;wrapped: %w&quot;</span><span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> wrapped<span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F21-T02): approval types - Mode + Level + Action + Decision + ModeDescriptors table</code>.</p>
+<hr />
+<h2 id="task-3-selector.go-tdd-mirror-f12-selector">Task 3: selector.go
+(TDD; mirror F12 Selector)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/approval/selector.go</code>, new
+<code>helix_code/internal/approval/selector_test.go</code>.</p>
+<p><code>selector.go</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SelectorInput <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Flag       <span class="dt">string</span>              <span class="co">// --approval=&lt;value&gt;; &quot;&quot; means flag not set</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Env        <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="co">// env lookup closure (default os.Getenv)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    ConfigPath <span class="dt">string</span>              <span class="co">// ~/.config/helixcode/approval.yaml; &quot;&quot; means no config</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Filesystem fs<span class="op">.</span>FS               <span class="co">// injected for tests; default os.DirFS(&quot;/&quot;)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Select<span class="op">(</span>input SelectorInput<span class="op">)</span> <span class="op">(</span>ApprovalMode<span class="op">,</span> ResolvedSource<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Flag (highest precedence)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> input<span class="op">.</span>Flag <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        m<span class="op">,</span> err <span class="op">:=</span> ParseMode<span class="op">(</span>input<span class="op">.</span>Flag<span class="op">)</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            <span class="co">// log warning + fall through</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> selectFromEnvOrConfig<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> m<span class="op">,</span> SourceFlag<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> selectFromEnvOrConfig<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> selectFromEnvOrConfig<span class="op">(</span>input SelectorInput<span class="op">)</span> <span class="op">(</span>ApprovalMode<span class="op">,</span> ResolvedSource<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Env var</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> input<span class="op">.</span>Env <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> v <span class="op">:=</span> input<span class="op">.</span>Env<span class="op">(</span><span class="st">&quot;HELIXCODE_APPROVAL&quot;</span><span class="op">);</span> v <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>            m<span class="op">,</span> err <span class="op">:=</span> ParseMode<span class="op">(</span>v<span class="op">)</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> m<span class="op">,</span> SourceEnv<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Config file</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> input<span class="op">.</span>ConfigPath <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">&amp;&amp;</span> input<span class="op">.</span>Filesystem <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> m<span class="op">,</span> ok <span class="op">:=</span> loadModeFromYAML<span class="op">(</span>input<span class="op">.</span>Filesystem<span class="op">,</span> input<span class="op">.</span>ConfigPath<span class="op">);</span> ok <span class="op">{</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> m<span class="op">,</span> SourceConfig<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. Default</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ModeSuggest<span class="op">,</span> SourceDefault<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (table-driven; mirror F12 selector pattern):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> fakeEnv<span class="op">(</span>m <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">)</span> <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">func</span><span class="op">(</span>k <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> m<span class="op">[</span>k<span class="op">]</span> <span class="op">}</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_FlagWins_OverEnvAndConfig<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> src<span class="op">,</span> err <span class="op">:=</span> Select<span class="op">(</span>SelectorInput<span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        Flag<span class="op">:</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span>  fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_APPROVAL&quot;</span><span class="op">:</span> <span class="st">&quot;full-auto&quot;</span><span class="op">}),</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ConfigPath set but flag wins</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ModeAutoEdit<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceFlag<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_EnvWins_WhenFlagEmpty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> src<span class="op">,</span> err <span class="op">:=</span> Select<span class="op">(</span>SelectorInput<span class="op">{</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span> fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_APPROVAL&quot;</span><span class="op">:</span> <span class="st">&quot;full-auto&quot;</span><span class="op">}),</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ModeFullAuto<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceEnv<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_ConfigWins_WhenFlagAndEnvEmpty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    fsys <span class="op">:=</span> fstest<span class="op">.</span>MapFS<span class="op">{</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;approval.yaml&quot;</span><span class="op">:</span> <span class="op">&amp;</span>fstest<span class="op">.</span>MapFile<span class="op">{</span>Data<span class="op">:</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;mode: dangerously-bypass</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)},</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> src<span class="op">,</span> err <span class="op">:=</span> Select<span class="op">(</span>SelectorInput<span class="op">{</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span>        fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}),</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        ConfigPath<span class="op">:</span> <span class="st">&quot;approval.yaml&quot;</span><span class="op">,</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        Filesystem<span class="op">:</span> fsys<span class="op">,</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ModeDangerous<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceConfig<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_DefaultSuggest_WhenAllEmpty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> src<span class="op">,</span> err <span class="op">:=</span> Select<span class="op">(</span>SelectorInput<span class="op">{</span>Env<span class="op">:</span> fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{})})</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ModeSuggest<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceDefault<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_UnknownFlag_FallsThroughToEnv<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> src<span class="op">,</span> err <span class="op">:=</span> Select<span class="op">(</span>SelectorInput<span class="op">{</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>        Flag<span class="op">:</span> <span class="st">&quot;garbage&quot;</span><span class="op">,</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span>  fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_APPROVAL&quot;</span><span class="op">:</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">}),</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ModeAutoEdit<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceEnv<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_UnknownEnv_FallsThroughToDefault<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> src<span class="op">,</span> err <span class="op">:=</span> Select<span class="op">(</span>SelectorInput<span class="op">{</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span> fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_APPROVAL&quot;</span><span class="op">:</span> <span class="st">&quot;garbage&quot;</span><span class="op">}),</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ModeSuggest<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceDefault<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_UnknownYAMLMode_FallsThroughToDefault<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    fsys <span class="op">:=</span> fstest<span class="op">.</span>MapFS<span class="op">{</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;approval.yaml&quot;</span><span class="op">:</span> <span class="op">&amp;</span>fstest<span class="op">.</span>MapFile<span class="op">{</span>Data<span class="op">:</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;mode: bogus</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)},</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> src<span class="op">,</span> _ <span class="op">:=</span> Select<span class="op">(</span>SelectorInput<span class="op">{</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span>        fakeEnv<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}),</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>        ConfigPath<span class="op">:</span> <span class="st">&quot;approval.yaml&quot;</span><span class="op">,</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>        Filesystem<span class="op">:</span> fsys<span class="op">,</span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ModeSuggest<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceDefault<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F21-T03): approval selector - flag/env/config/default precedence (mirror F12)</code>.</p>
+<hr />
+<h2 id="task-4-manager.go-yaml_loader.go-tdd-f02f14f19-integration">Task
+4: manager.go + yaml_loader.go (TDD; F02/F14/F19 integration)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/approval/manager.go</code>, new
+<code>helix_code/internal/approval/manager_test.go</code>, new
+<code>helix_code/internal/approval/yaml_loader.go</code>, new
+<code>helix_code/internal/approval/yaml_loader_test.go</code>.</p>
+<p><code>manager.go</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ManagerOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Mode         ApprovalMode</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Source       ResolvedSource</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    PolicyEngine <span class="op">*</span>confirmation<span class="op">.</span>PolicyEngine <span class="co">// F02; nil OK for tests</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    SandboxMgr   <span class="op">*</span>sandbox<span class="op">.</span>SandboxManager    <span class="co">// F14; nil OK for tests (CheckApproval still works)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    Prompter     YesNoPrompter              <span class="co">// F19 wrapper; required for ActionPrompt branch</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    Logger       <span class="op">*</span>zap<span class="op">.</span>Logger                <span class="co">// optional; nil → no-op</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    SleepFunc    <span class="kw">func</span><span class="op">(</span>time<span class="op">.</span>Duration<span class="op">)</span>        <span class="co">// optional; default time.Sleep — for dangerous-pause seam</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> YesNoPrompter <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    PromptYesNo<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> question <span class="dt">string</span><span class="op">,</span> defaultYes <span class="dt">bool</span><span class="op">)</span> <span class="op">(</span><span class="dt">bool</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Tool <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    RequiresApproval<span class="op">()</span> ApprovalLevel</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ApprovalManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    mode      atomic<span class="op">.</span>Pointer<span class="op">[</span>ApprovalMode<span class="op">]</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    source    ResolvedSource</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    pe        <span class="op">*</span>confirmation<span class="op">.</span>PolicyEngine</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    sm        <span class="op">*</span>sandbox<span class="op">.</span>SandboxManager</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    prompter  YesNoPrompter</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    log       <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    sleepFunc <span class="kw">func</span><span class="op">(</span>time<span class="op">.</span>Duration<span class="op">)</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewManager<span class="op">(</span>opts ManagerOptions<span class="op">)</span> <span class="op">*</span>ApprovalManager <span class="op">{</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> <span class="op">&amp;</span>ApprovalManager<span class="op">{</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        source<span class="op">:</span> opts<span class="op">.</span>Source<span class="op">,</span> pe<span class="op">:</span> opts<span class="op">.</span>PolicyEngine<span class="op">,</span> sm<span class="op">:</span> opts<span class="op">.</span>SandboxMgr<span class="op">,</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        prompter<span class="op">:</span> opts<span class="op">.</span>Prompter<span class="op">,</span> log<span class="op">:</span> opts<span class="op">.</span>Logger<span class="op">,</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        sleepFunc<span class="op">:</span> opts<span class="op">.</span>SleepFunc<span class="op">,</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> m<span class="op">.</span>sleepFunc <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> m<span class="op">.</span>sleepFunc <span class="op">=</span> time<span class="op">.</span>Sleep <span class="op">}</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    mode <span class="op">:=</span> opts<span class="op">.</span>Mode</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>mode<span class="op">.</span>Store<span class="op">(&amp;</span>mode<span class="op">)</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>ApprovalManager<span class="op">)</span> CheckApproval<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tool Tool<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> Decision <span class="op">{</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    mode <span class="op">:=</span> <span class="op">*</span>m<span class="op">.</span>mode<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    level <span class="op">:=</span> tool<span class="op">.</span>RequiresApproval<span class="op">()</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> mode <span class="op">&lt;</span> <span class="dv">0</span> <span class="op">||</span> mode <span class="op">&gt;=</span> numModes <span class="op">||</span> level <span class="op">&lt;</span> <span class="dv">0</span> <span class="op">||</span> level <span class="op">&gt;=</span> numLevels <span class="op">{</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Decision<span class="op">{</span>Action<span class="op">:</span> ActionDeny<span class="op">,</span> Reason<span class="op">:</span> <span class="st">&quot;approval: invalid mode or level&quot;</span><span class="op">}</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    action <span class="op">:=</span> ModeDescriptors<span class="op">[</span>mode<span class="op">].</span>Matrix<span class="op">[</span>level<span class="op">]</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> action <span class="op">{</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ActionAllow<span class="op">:</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>        sandbox <span class="op">:=</span> mode <span class="op">==</span> ModeFullAuto <span class="op">&amp;&amp;</span> level <span class="op">==</span> LevelRun</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Decision<span class="op">{</span>Action<span class="op">:</span> ActionAllow<span class="op">,</span> SandboxRequired<span class="op">:</span> sandbox<span class="op">}</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ActionDeny<span class="op">:</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Decision<span class="op">{</span>Action<span class="op">:</span> ActionDeny<span class="op">,</span> Reason<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;approval required: %s mode forbids %s-level operations; switch to %s or higher&quot;</span><span class="op">,</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>            mode<span class="op">,</span> level<span class="op">,</span> minimumModeForLevel<span class="op">(</span>level<span class="op">))}</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ActionPrompt<span class="op">:</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Decision<span class="op">{</span>Action<span class="op">:</span> ActionPrompt<span class="op">,</span> Reason<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;%s mode requires confirmation for %s-level operations&quot;</span><span class="op">,</span> mode<span class="op">,</span> level<span class="op">)}</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Decision<span class="op">{</span>Action<span class="op">:</span> ActionDeny<span class="op">,</span> Reason<span class="op">:</span> <span class="st">&quot;approval: unreachable&quot;</span><span class="op">}</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>ApprovalManager<span class="op">)</span> Mode<span class="op">()</span> ApprovalMode    <span class="op">{</span> <span class="cf">return</span> <span class="op">*</span>m<span class="op">.</span>mode<span class="op">.</span>Load<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>ApprovalManager<span class="op">)</span> Source<span class="op">()</span> ResolvedSource <span class="op">{</span> <span class="cf">return</span> m<span class="op">.</span>source <span class="op">}</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>ApprovalManager<span class="op">)</span> Set<span class="op">(</span>mode ApprovalMode<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> mode <span class="op">==</span> ModeDangerous <span class="op">{</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> m<span class="op">.</span>log <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>            m<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;approval mode changed to dangerously-bypass; ALL approval checks disabled&quot;</span><span class="op">)</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>        m<span class="op">.</span>sleepFunc<span class="op">(</span><span class="dv">2</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>mode<span class="op">.</span>Store<span class="op">(&amp;</span>mode<span class="op">)</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DefaultLevelEdit <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>DefaultLevelEdit<span class="op">)</span> RequiresApproval<span class="op">()</span> ApprovalLevel <span class="op">{</span> <span class="cf">return</span> LevelEdit <span class="op">}</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> minimumModeForLevel<span class="op">(</span>l ApprovalLevel<span class="op">)</span> ApprovalMode <span class="op">{</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> l <span class="op">{</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> LevelReadOnly<span class="op">:</span> <span class="cf">return</span> ModeSuggest</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> LevelEdit<span class="op">:</span>    <span class="cf">return</span> ModeAutoEdit</span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> LevelRun<span class="op">:</span>     <span class="cf">return</span> ModeAutoEdit  <span class="co">// auto-edit prompts; full-auto allows</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> LevelAll<span class="op">:</span>     <span class="cf">return</span> ModeDangerous</span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ModeDangerous</span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>yaml_loader.go</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> approvalConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    Mode <span class="dt">string</span> <span class="st">`yaml:&quot;mode&quot;`</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadConfigFile<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>ApprovalMode<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="co">/* uses os.ReadFile + yaml.Unmarshal */</span> <span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> loadModeFromYAML<span class="op">(</span>fsys fs<span class="op">.</span>FS<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>ApprovalMode<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> fs<span class="op">.</span>ReadFile<span class="op">(</span>fsys<span class="op">,</span> path<span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="dv">0</span><span class="op">,</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> c approvalConfig</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> yaml<span class="op">.</span>Unmarshal<span class="op">(</span>data<span class="op">,</span> <span class="op">&amp;</span>c<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="dv">0</span><span class="op">,</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c<span class="op">.</span>Mode <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> <span class="cf">return</span> <span class="dv">0</span><span class="op">,</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> err <span class="op">:=</span> ParseMode<span class="op">(</span>c<span class="op">.</span>Mode<span class="op">)</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="dv">0</span><span class="op">,</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m<span class="op">,</span> <span class="ot">true</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (16 entries for the 4×4 matrix; runtime swap; F02
+nil-safe; sandbox-required marker; etc.):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> fakeTool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    name  <span class="dt">string</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    level ApprovalLevel</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    calls <span class="dt">int</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakeTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>                       <span class="op">{</span> <span class="cf">return</span> f<span class="op">.</span>name <span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakeTool<span class="op">)</span> RequiresApproval<span class="op">()</span> ApprovalLevel    <span class="op">{</span> <span class="cf">return</span> f<span class="op">.</span>level <span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_CheckApproval_4x4Matrix_ExhaustiveTable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    cases <span class="op">:=</span> <span class="op">[]</span><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        mode    ApprovalMode</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        level   ApprovalLevel</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        wantAct Action</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}{</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeSuggest<span class="op">,</span> LevelReadOnly<span class="op">,</span> ActionAllow<span class="op">},</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeSuggest<span class="op">,</span> LevelEdit<span class="op">,</span>    ActionDeny<span class="op">},</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeSuggest<span class="op">,</span> LevelRun<span class="op">,</span>     ActionDeny<span class="op">},</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeSuggest<span class="op">,</span> LevelAll<span class="op">,</span>     ActionDeny<span class="op">},</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeAutoEdit<span class="op">,</span> LevelReadOnly<span class="op">,</span> ActionAllow<span class="op">},</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeAutoEdit<span class="op">,</span> LevelEdit<span class="op">,</span>    ActionAllow<span class="op">},</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeAutoEdit<span class="op">,</span> LevelRun<span class="op">,</span>     ActionPrompt<span class="op">},</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeAutoEdit<span class="op">,</span> LevelAll<span class="op">,</span>     ActionDeny<span class="op">},</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeFullAuto<span class="op">,</span> LevelReadOnly<span class="op">,</span> ActionAllow<span class="op">},</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeFullAuto<span class="op">,</span> LevelEdit<span class="op">,</span>    ActionAllow<span class="op">},</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeFullAuto<span class="op">,</span> LevelRun<span class="op">,</span>     ActionAllow<span class="op">},</span> <span class="co">// SandboxRequired=true</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeFullAuto<span class="op">,</span> LevelAll<span class="op">,</span>     ActionDeny<span class="op">},</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeDangerous<span class="op">,</span> LevelReadOnly<span class="op">,</span> ActionAllow<span class="op">},</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeDangerous<span class="op">,</span> LevelEdit<span class="op">,</span>    ActionAllow<span class="op">},</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeDangerous<span class="op">,</span> LevelRun<span class="op">,</span>     ActionAllow<span class="op">},</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>ModeDangerous<span class="op">,</span> LevelAll<span class="op">,</span>     ActionAllow<span class="op">},</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> tc <span class="op">:=</span> <span class="kw">range</span> cases <span class="op">{</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        m <span class="op">:=</span> NewManager<span class="op">(</span>ManagerOptions<span class="op">{</span>Mode<span class="op">:</span> tc<span class="op">.</span>mode<span class="op">})</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        dec <span class="op">:=</span> m<span class="op">.</span>CheckApproval<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>fakeTool<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;t&quot;</span><span class="op">,</span> level<span class="op">:</span> tc<span class="op">.</span>level<span class="op">},</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> tc<span class="op">.</span>wantAct<span class="op">,</span> dec<span class="op">.</span>Action<span class="op">,</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;mode=%v level=%v&quot;</span><span class="op">,</span> tc<span class="op">.</span>mode<span class="op">,</span> tc<span class="op">.</span>level<span class="op">)</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_CheckApproval_FullAutoRun_SandboxRequiredTrue<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewManager<span class="op">(</span>ManagerOptions<span class="op">{</span>Mode<span class="op">:</span> ModeFullAuto<span class="op">})</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    dec <span class="op">:=</span> m<span class="op">.</span>CheckApproval<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>fakeTool<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;shell&quot;</span><span class="op">,</span> level<span class="op">:</span> LevelRun<span class="op">},</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span> dec<span class="op">.</span>Action<span class="op">)</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> dec<span class="op">.</span>SandboxRequired<span class="op">)</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_CheckApproval_AutoEditEdit_SandboxRequiredFalse<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewManager<span class="op">(</span>ManagerOptions<span class="op">{</span>Mode<span class="op">:</span> ModeAutoEdit<span class="op">})</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    dec <span class="op">:=</span> m<span class="op">.</span>CheckApproval<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>fakeTool<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;write&quot;</span><span class="op">,</span> level<span class="op">:</span> LevelEdit<span class="op">},</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span> dec<span class="op">.</span>Action<span class="op">)</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> dec<span class="op">.</span>SandboxRequired<span class="op">)</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_CheckApproval_SuggestEdit_DenyReasonHasMinMode<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewManager<span class="op">(</span>ManagerOptions<span class="op">{</span>Mode<span class="op">:</span> ModeSuggest<span class="op">})</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    dec <span class="op">:=</span> m<span class="op">.</span>CheckApproval<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>fakeTool<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;write&quot;</span><span class="op">,</span> level<span class="op">:</span> LevelEdit<span class="op">},</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionDeny<span class="op">,</span> dec<span class="op">.</span>Action<span class="op">)</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> dec<span class="op">.</span>Reason<span class="op">,</span> <span class="st">&quot;approval required&quot;</span><span class="op">)</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> dec<span class="op">.</span>Reason<span class="op">,</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">)</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Set_AtomicSwap_NextCallSeesNewMode<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewManager<span class="op">(</span>ManagerOptions<span class="op">{</span>Mode<span class="op">:</span> ModeSuggest<span class="op">})</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>fakeTool<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;write&quot;</span><span class="op">,</span> level<span class="op">:</span> LevelEdit<span class="op">}</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    dec1 <span class="op">:=</span> m<span class="op">.</span>CheckApproval<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> tool<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionDeny<span class="op">,</span> dec1<span class="op">.</span>Action<span class="op">)</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>Set<span class="op">(</span>ModeAutoEdit<span class="op">)</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    dec2 <span class="op">:=</span> m<span class="op">.</span>CheckApproval<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> tool<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span> dec2<span class="op">.</span>Action<span class="op">)</span></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Set_DangerousBypass_PauseSeamFires<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> slept time<span class="op">.</span>Duration</span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewManager<span class="op">(</span>ManagerOptions<span class="op">{</span></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>        Mode<span class="op">:</span>      ModeSuggest<span class="op">,</span></span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>        SleepFunc<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>d time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">{</span> slept <span class="op">=</span> d <span class="op">},</span></span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>Set<span class="op">(</span>ModeDangerous<span class="op">)</span></span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">2</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">,</span> slept<span class="op">)</span></span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ModeDangerous<span class="op">,</span> m<span class="op">.</span>Mode<span class="op">())</span></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_NilPolicyEngine_OK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewManager<span class="op">(</span>ManagerOptions<span class="op">{</span>Mode<span class="op">:</span> ModeAutoEdit<span class="op">,</span> PolicyEngine<span class="op">:</span> <span class="ot">nil</span><span class="op">})</span></span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>    dec <span class="op">:=</span> m<span class="op">.</span>CheckApproval<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span></span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>fakeTool<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;t&quot;</span><span class="op">,</span> level<span class="op">:</span> LevelEdit<span class="op">},</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ActionAllow<span class="op">,</span> dec<span class="op">.</span>Action<span class="op">)</span></span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDefaultLevelEdit_RequiresApproval_LevelEdit<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> d DefaultLevelEdit</span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> LevelEdit<span class="op">,</span> d<span class="op">.</span>RequiresApproval<span class="op">())</span></span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a><span class="co">// YAML loader tests</span></span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfigFile_OK_AllFourModes<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a>    cases <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>ApprovalMode<span class="op">{</span></span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;suggest&quot;</span><span class="op">:</span> ModeSuggest<span class="op">,</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">:</span> ModeAutoEdit<span class="op">,</span></span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;full-auto&quot;</span><span class="op">:</span> ModeFullAuto<span class="op">,</span> <span class="st">&quot;dangerously-bypass&quot;</span><span class="op">:</span> ModeDangerous<span class="op">,</span></span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> s<span class="op">,</span> want <span class="op">:=</span> <span class="kw">range</span> cases <span class="op">{</span></span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a>        f <span class="op">:=</span> writeTempYAML<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;mode: &quot;</span><span class="op">+</span>s<span class="op">+</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a>        m<span class="op">,</span> err <span class="op">:=</span> LoadConfigFile<span class="op">(</span>f<span class="op">)</span></span>
+<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">);</span> require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> want<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F21-T04): approval manager + yaml loader - 4x4 matrix gate + atomic swap + nil-safe (TDD)</code>.</p>
+<hr />
+<h2 id="task-5-tool.requiresapproval-interface-extension-migrate-30-existing-tools-tdd">Task
+5: Tool.RequiresApproval interface extension + migrate ~30 existing
+tools (TDD)</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/internal/tools/registry.go</code> (add
+<code>RequiresApproval() approval.ApprovalLevel</code> to
+<code>Tool</code> interface); modify ~30 existing tool files to add a
+one-line <code>RequiresApproval()</code> method per spec §3.6 table; new
+<code>helix_code/internal/tools/registry_requires_approval_test.go</code>
+(table-driven coverage test).</p>
+<p>Steps:</p>
+<ol type="1">
+<li>Add <code>RequiresApproval() approval.ApprovalLevel</code> method to
+the <code>Tool</code> interface in <code>registry.go</code>.</li>
+<li>Walk every tool registered in <code>buildToolList</code> (or its
+equivalent) and add a one-line method per spec §3.6 table:
+<ul>
+<li><strong>Read-only tools</strong>:
+<code>func (t *Foo) RequiresApproval() approval.ApprovalLevel { return approval.LevelReadOnly }</code>
+for <code>read_file</code>, <code>list_directory</code>,
+<code>glob</code>, <code>grep</code>, <code>find</code>,
+<code>repomap</code>, <code>mapping_query</code>,
+<code>lsp_query</code>, <code>browser_read</code> variants,
+<code>ask_user</code>, <code>theme_*</code>.</li>
+<li><strong>Edit-level tools</strong> (default): tools that don’t
+override embed <code>approval.DefaultLevelEdit</code> for
+safe-by-default. For <code>write_file</code>, <code>multi_edit</code>,
+<code>smart_edit</code>, <code>notebook_edit</code>,
+<code>mapping_edit</code>, <code>plan_mode_edit</code>,
+<code>git_*</code>, <code>mcp_*</code> (default), explicit override or
+embedding.</li>
+<li><strong>Run-level tools</strong>: <code>LevelRun</code> for
+<code>shell</code>, <code>shell_sandboxed</code>,
+<code>interactive_command</code>,
+<code>browser_navigate/click/type/evaluate</code>,
+<code>browser_run_code_unsafe</code>.</li>
+<li><strong>All-level tools</strong>: <code>LevelAll</code> for
+<code>subagent_dispatch</code> (F15), <code>permission_rule_write</code>
+(F02).</li>
+</ul></li>
+</ol>
+<p>Failing test FIRST (table-driven coverage):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestToolRegistryRequiresApprovalCoverage<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Register every tool in production via the standard buildToolList path.</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewToolRegistry<span class="op">()</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> buildToolList<span class="op">(</span>reg<span class="op">,</span> <span class="co">/* ... real deps with nil-safe defaults ... */</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;buildToolList: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    expected <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>approval<span class="op">.</span>ApprovalLevel<span class="op">{</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;read_file&quot;</span><span class="op">:</span>          approval<span class="op">.</span>LevelReadOnly<span class="op">,</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;list_directory&quot;</span><span class="op">:</span>     approval<span class="op">.</span>LevelReadOnly<span class="op">,</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;glob&quot;</span><span class="op">:</span>               approval<span class="op">.</span>LevelReadOnly<span class="op">,</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;grep&quot;</span><span class="op">:</span>               approval<span class="op">.</span>LevelReadOnly<span class="op">,</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;repomap&quot;</span><span class="op">:</span>            approval<span class="op">.</span>LevelReadOnly<span class="op">,</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;lsp_query&quot;</span><span class="op">:</span>          approval<span class="op">.</span>LevelReadOnly<span class="op">,</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;browser_snapshot&quot;</span><span class="op">:</span>   approval<span class="op">.</span>LevelReadOnly<span class="op">,</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;ask_user&quot;</span><span class="op">:</span>           approval<span class="op">.</span>LevelReadOnly<span class="op">,</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;write_file&quot;</span><span class="op">:</span>         approval<span class="op">.</span>LevelEdit<span class="op">,</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;multi_edit&quot;</span><span class="op">:</span>         approval<span class="op">.</span>LevelEdit<span class="op">,</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;smart_edit&quot;</span><span class="op">:</span>         approval<span class="op">.</span>LevelEdit<span class="op">,</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;notebook_edit&quot;</span><span class="op">:</span>      approval<span class="op">.</span>LevelEdit<span class="op">,</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;shell&quot;</span><span class="op">:</span>              approval<span class="op">.</span>LevelRun<span class="op">,</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;shell_sandboxed&quot;</span><span class="op">:</span>    approval<span class="op">.</span>LevelRun<span class="op">,</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;browser_navigate&quot;</span><span class="op">:</span>   approval<span class="op">.</span>LevelRun<span class="op">,</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;browser_click&quot;</span><span class="op">:</span>      approval<span class="op">.</span>LevelRun<span class="op">,</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;subagent_dispatch&quot;</span><span class="op">:</span> approval<span class="op">.</span>LevelAll<span class="op">,</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name<span class="op">,</span> want <span class="op">:=</span> <span class="kw">range</span> expected <span class="op">{</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>        tool<span class="op">,</span> ok <span class="op">:=</span> reg<span class="op">.</span>Get<span class="op">(</span>name<span class="op">)</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">!</span>ok <span class="op">{</span> t<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;tool %q not registered&quot;</span><span class="op">,</span> name<span class="op">);</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>        got <span class="op">:=</span> tool<span class="op">.</span>RequiresApproval<span class="op">()</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> want<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;tool=%s&quot;</span><span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Bonus: every registered tool MUST return a level in the 4-value enum.</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> name <span class="op">:=</span> <span class="kw">range</span> reg<span class="op">.</span>ListNames<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>        tool<span class="op">,</span> _ <span class="op">:=</span> reg<span class="op">.</span>Get<span class="op">(</span>name<span class="op">)</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>        l <span class="op">:=</span> tool<span class="op">.</span>RequiresApproval<span class="op">()</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> <span class="dt">int</span><span class="op">(</span>l<span class="op">),</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> <span class="dt">int</span><span class="op">(</span>l<span class="op">),</span> <span class="dt">int</span><span class="op">(</span>approval<span class="op">.</span>NumLevels<span class="op">()))</span>  <span class="co">// exposed via package helper</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Non-obvious call</strong>: tools that don’t appear in spec
+§3.6’s explicit table embed <code>approval.DefaultLevelEdit</code>
+(which provides
+<code>RequiresApproval() ApprovalLevel { return LevelEdit }</code>).
+This is the safe-by-default rule (§11 #3 of the spec). The coverage test
+enumerates the expected-level table; any tool registered in
+<code>buildToolList</code> that doesn’t appear in the table is required
+to return <code>LevelEdit</code> (the default), and the test asserts
+this. Future tool additions that forget to override the level get
+<code>LevelEdit</code> automatically — gated, not bypassed.</p>
+<p>Subject:
+<code>feat(P2-F21-T05): Tool.RequiresApproval interface + migrate ~30 existing tools (safe-default LevelEdit)</code>.</p>
+<hr />
+<h2 id="task-6-approval-slash-command-tdd">Task 6: /approval slash
+command (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/approval_command.go</code>, new
+<code>helix_code/internal/commands/approval_command_test.go</code>.</p>
+<p><code>approval_command.go</code>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ApprovalCommand <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">*</span>approval<span class="op">.</span>ApprovalManager</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewApprovalCommand<span class="op">(</span>mgr <span class="op">*</span>approval<span class="op">.</span>ApprovalManager<span class="op">)</span> <span class="op">*</span>ApprovalCommand <span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>ApprovalCommand<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ApprovalCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;approval&quot;</span> <span class="op">}</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ApprovalCommand<span class="op">)</span> Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span>    <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ApprovalCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;Show or change the active approval mode (suggest/auto-edit/full-auto/dangerously-bypass).&quot;</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ApprovalCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/approval [status|set &lt;mode&gt;|show &lt;mode&gt;]&quot;</span> <span class="op">}</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ApprovalCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> cc<span class="op">.</span>Args</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="st">&quot;status&quot;</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>args<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span> sub <span class="op">=</span> args<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">}</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> sub <span class="op">{</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;status&quot;</span><span class="op">:</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>status<span class="op">(),</span> <span class="ot">nil</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;set&quot;</span><span class="op">:</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>args<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">2</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;/approval set &lt;mode&gt;&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>set<span class="op">(</span>args<span class="op">[</span><span class="dv">1</span><span class="op">])</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;show&quot;</span><span class="op">:</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>args<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">2</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;/approval show &lt;mode&gt;&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>show<span class="op">(</span>args<span class="op">[</span><span class="dv">1</span><span class="op">])</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;/approval: unknown subcommand %q (want status|set|show)&quot;</span><span class="op">,</span> sub<span class="op">)</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ApprovalCommand<span class="op">)</span> status<span class="op">()</span> <span class="op">*</span>CommandResult <span class="op">{</span> <span class="co">/* mode + source + per-level matrix */</span> <span class="op">}</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ApprovalCommand<span class="op">)</span> set<span class="op">(</span>modeStr <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> err <span class="op">:=</span> approval<span class="op">.</span>ParseMode<span class="op">(</span>modeStr<span class="op">)</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> m <span class="op">==</span> approval<span class="op">.</span>ModeDangerous <span class="op">{</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">// print warning line BEFORE Set (which sleeps 2s)</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ...</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>mgr<span class="op">.</span>Set<span class="op">(</span>m<span class="op">)</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Output<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;approval mode → %s&quot;</span><span class="op">,</span> m<span class="op">)},</span> <span class="ot">nil</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>ApprovalCommand<span class="op">)</span> show<span class="op">(</span>modeStr <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> err <span class="op">:=</span> approval<span class="op">.</span>ParseMode<span class="op">(</span>modeStr<span class="op">)</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    desc <span class="op">:=</span> approval<span class="op">.</span>ModeDescriptors<span class="op">[</span>m<span class="op">]</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    <span class="co">// render desc.Description + desc.Matrix</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalCommand_Name_IsApproval<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;approval&quot;</span><span class="op">,</span> NewApprovalCommand<span class="op">(</span><span class="ot">nil</span><span class="op">).</span>Name<span class="op">())</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalCommand_Status_PrintsActiveModeAndSource<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> approval<span class="op">.</span>NewManager<span class="op">(</span>approval<span class="op">.</span>ManagerOptions<span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        Mode<span class="op">:</span>   approval<span class="op">.</span>ModeAutoEdit<span class="op">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        Source<span class="op">:</span> approval<span class="op">.</span>SourceFlag<span class="op">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewApprovalCommand<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;status&quot;</span><span class="op">}})</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">)</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;flag&quot;</span><span class="op">)</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalCommand_Set_OK_ChangesMode<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> approval<span class="op">.</span>NewManager<span class="op">(</span>approval<span class="op">.</span>ManagerOptions<span class="op">{</span>Mode<span class="op">:</span> approval<span class="op">.</span>ModeSuggest<span class="op">})</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewApprovalCommand<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;set&quot;</span><span class="op">,</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">}})</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>ModeAutoEdit<span class="op">,</span> mgr<span class="op">.</span>Mode<span class="op">())</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalCommand_Set_UnknownMode_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> approval<span class="op">.</span>NewManager<span class="op">(</span>approval<span class="op">.</span>ManagerOptions<span class="op">{</span>Mode<span class="op">:</span> approval<span class="op">.</span>ModeSuggest<span class="op">})</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewApprovalCommand<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;set&quot;</span><span class="op">,</span> <span class="st">&quot;garbage&quot;</span><span class="op">}})</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> approval<span class="op">.</span>ErrUnknownMode<span class="op">)</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalCommand_Set_Dangerous_PrintsWarning<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> slept time<span class="op">.</span>Duration</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> approval<span class="op">.</span>NewManager<span class="op">(</span>approval<span class="op">.</span>ManagerOptions<span class="op">{</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>        Mode<span class="op">:</span> approval<span class="op">.</span>ModeSuggest<span class="op">,</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>        SleepFunc<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>d time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">{</span> slept <span class="op">=</span> d <span class="op">},</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewApprovalCommand<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;set&quot;</span><span class="op">,</span> <span class="st">&quot;dangerously-bypass&quot;</span><span class="op">}})</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;ALL approval checks&quot;</span><span class="op">)</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">2</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">,</span> slept<span class="op">)</span></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalCommand_Show_AllFourModes_RendersDescriptor<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewApprovalCommand<span class="op">(</span>approval<span class="op">.</span>NewManager<span class="op">(</span>approval<span class="op">.</span>ManagerOptions<span class="op">{}))</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> m <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;suggest&quot;</span><span class="op">,</span> <span class="st">&quot;auto-edit&quot;</span><span class="op">,</span> <span class="st">&quot;full-auto&quot;</span><span class="op">,</span> <span class="st">&quot;dangerously-bypass&quot;</span><span class="op">}</span> <span class="op">{</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>        res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;show&quot;</span><span class="op">,</span> m<span class="op">}})</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApprovalCommand_Show_UnknownMode_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewApprovalCommand<span class="op">(</span>approval<span class="op">.</span>NewManager<span class="op">(</span>approval<span class="op">.</span>ManagerOptions<span class="op">{}))</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;show&quot;</span><span class="op">,</span> <span class="st">&quot;nope&quot;</span><span class="op">}})</span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> approval<span class="op">.</span>ErrUnknownMode<span class="op">)</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F21-T06): /approval slash command (status/set/show) with dangerous-pause warning</code>.</p>
+<hr />
+<h2 id="task-7-main.go-wiring-integration-test-tdd">Task 7: main.go
+wiring + integration test (TDD)</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/cmd/cli/main.go</code> (wiring); new
+<code>helix_code/tests/integration/approval_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p><code>main.go</code> changes (additive only; no new selectors needed
+beyond approval.Selector — F12’s pattern is reused for shape):</p>
+<ol type="1">
+<li>Add <code>--approval=&lt;mode&gt;</code> to existing pflag set (one
+new line near other flag definitions).</li>
+<li>Construct selector + manager AFTER F02 + F14 + F19 wiring is
+complete:</li>
+</ol>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>approvalMode<span class="op">,</span> approvalSource<span class="op">,</span> _ <span class="op">:=</span> approval<span class="op">.</span>Select<span class="op">(</span>approval<span class="op">.</span>SelectorInput<span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    Flag<span class="op">:</span>       <span class="op">*</span>flagApproval<span class="op">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    Env<span class="op">:</span>        os<span class="op">.</span>Getenv<span class="op">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    ConfigPath<span class="op">:</span> filepath<span class="op">.</span>Join<span class="op">(</span>xdgConfigHome<span class="op">(),</span> <span class="st">&quot;helixcode/approval.yaml&quot;</span><span class="op">),</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    Filesystem<span class="op">:</span> os<span class="op">.</span>DirFS<span class="op">(</span><span class="st">&quot;/&quot;</span><span class="op">),</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Force-fail-fast: full-auto requires sandbox.</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> approvalMode <span class="op">==</span> approval<span class="op">.</span>ModeFullAuto <span class="op">&amp;&amp;</span> <span class="op">!</span>c<span class="op">.</span>sandboxMgr<span class="op">.</span>Capabilities<span class="op">().</span>HasSandbox <span class="op">{</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;%w: full-auto requires bubblewrap or native sandbox; &quot;</span><span class="op">+</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;switch with --approval or HELIXCODE_APPROVAL, or install bwrap&quot;</span><span class="op">,</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        approval<span class="op">.</span>ErrSandboxRequired<span class="op">)</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span>approvalMgr <span class="op">=</span> approval<span class="op">.</span>NewManager<span class="op">(</span>approval<span class="op">.</span>ManagerOptions<span class="op">{</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    Mode<span class="op">:</span>         approvalMode<span class="op">,</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    Source<span class="op">:</span>       approvalSource<span class="op">,</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    PolicyEngine<span class="op">:</span> c<span class="op">.</span>policyEngine<span class="op">,</span> <span class="co">// F02</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    SandboxMgr<span class="op">:</span>   c<span class="op">.</span>sandboxMgr<span class="op">,</span>   <span class="co">// F14</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    Prompter<span class="op">:</span>     yesnoAdapter<span class="op">(</span>c<span class="op">.</span>prompter<span class="op">),</span> <span class="co">// wrapper around F19&#39;s Prompter (5-line adapter)</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    Logger<span class="op">:</span>       c<span class="op">.</span>logger<span class="op">,</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span>toolRegistry<span class="op">.</span>SetApprovalManager<span class="op">(</span>c<span class="op">.</span>approvalMgr<span class="op">)</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> regErr <span class="op">:=</span> c<span class="op">.</span>commandRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewApprovalCommand<span class="op">(</span>c<span class="op">.</span>approvalMgr<span class="op">));</span> regErr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;approval: register slash command failed: %v&quot;</span><span class="op">,</span> regErr<span class="op">)</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="3" type="1">
+<li>Modify <code>internal/tools/registry.go::Execute</code> to add the
+F21 gate as the FIRST pre-execute branch (before F02):</li>
+</ol>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// F21 gate (NEW; FIRST in chain)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> r<span class="op">.</span>approvalMgr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    dec <span class="op">:=</span> r<span class="op">.</span>approvalMgr<span class="op">.</span>CheckApproval<span class="op">(</span>ctx<span class="op">,</span> tool<span class="op">,</span> params<span class="op">)</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> dec<span class="op">.</span>Action <span class="op">{</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> approval<span class="op">.</span>ActionDeny<span class="op">:</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;%w: %s&quot;</span><span class="op">,</span> approval<span class="op">.</span>ErrApprovalRequired<span class="op">,</span> dec<span class="op">.</span>Reason<span class="op">)</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> approval<span class="op">.</span>ActionPrompt<span class="op">:</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        ok<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>approvalMgr<span class="op">.</span>Prompter<span class="op">().</span>PromptYesNo<span class="op">(</span>ctx<span class="op">,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;Approve %s?&quot;</span><span class="op">,</span> tool<span class="op">.</span>Name<span class="op">()),</span> <span class="ot">false</span><span class="op">)</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">!</span>ok <span class="op">{</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;%w: user declined at prompt&quot;</span><span class="op">,</span> approval<span class="op">.</span>ErrApprovalRequired<span class="op">)</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> approval<span class="op">.</span>ActionAllow<span class="op">:</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// proceed</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> dec<span class="op">.</span>SandboxRequired <span class="op">{</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> params <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> params <span class="op">=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{}</span> <span class="op">}</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        params<span class="op">[</span><span class="st">&quot;_helix_sandbox_required&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        params<span class="op">[</span><span class="st">&quot;_helix_sandbox_network_allowed&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="ot">false</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co">// Existing F02 hook follows; F14 dispatch reads the marker.</span></span></code></pre></div>
+<p>The <code>yesnoAdapter</code> (5-line wrapper around F19’s
+<code>askuser.Prompter</code>) returns a 2-choice Question {yes, no} and
+maps the result to bool; reuses F19’s tty + retry + ctx cancellation
+handling.</p>
+<p>Failing tests FIRST (focus on the production-code-path byte-evidence
+— most assertions land in T07’s integration test, since the cmd/cli main
+wiring is hard to unit-test in isolation):</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApproval_Integration_SuggestMode_DeniesWriteFile_FileNotCreated<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    tmpfile <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>t<span class="op">.</span>TempDir<span class="op">(),</span> <span class="st">&quot;p2f21-suggest&quot;</span><span class="op">)</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    reg<span class="op">,</span> mgr <span class="op">:=</span> buildIntegrationRegistry<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>ModeSuggest<span class="op">)</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> mgr</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> reg<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;write_file&quot;</span><span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;path&quot;</span><span class="op">:</span> tmpfile<span class="op">,</span> <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> approval<span class="op">.</span>ErrApprovalRequired<span class="op">)</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> statErr <span class="op">:=</span> os<span class="op">.</span>Stat<span class="op">(</span>tmpfile<span class="op">)</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>IsNotExist<span class="op">(</span>statErr<span class="op">),</span> <span class="st">&quot;file should NOT exist; gate must short-circuit&quot;</span><span class="op">)</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApproval_Integration_AutoEditMode_AllowsWriteFile_FileCreated<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    tmpfile <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>t<span class="op">.</span>TempDir<span class="op">(),</span> <span class="st">&quot;p2f21-autoedit&quot;</span><span class="op">)</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    reg<span class="op">,</span> _ <span class="op">:=</span> buildIntegrationRegistry<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>ModeAutoEdit<span class="op">)</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> reg<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;write_file&quot;</span><span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;path&quot;</span><span class="op">:</span> tmpfile<span class="op">,</span> <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>tmpfile<span class="op">)</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> <span class="dt">string</span><span class="op">(</span>data<span class="op">))</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApproval_Integration_RuntimeModeChange_NextCallSeesNewMode<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    tmpfile <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>t<span class="op">.</span>TempDir<span class="op">(),</span> <span class="st">&quot;p2f21-runtime&quot;</span><span class="op">)</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    reg<span class="op">,</span> mgr <span class="op">:=</span> buildIntegrationRegistry<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>ModeSuggest<span class="op">)</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> reg<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;write_file&quot;</span><span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;path&quot;</span><span class="op">:</span> tmpfile<span class="op">,</span> <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> approval<span class="op">.</span>ErrApprovalRequired<span class="op">)</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    mgr<span class="op">.</span>Set<span class="op">(</span>approval<span class="op">.</span>ModeAutoEdit<span class="op">)</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">=</span> reg<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;write_file&quot;</span><span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;path&quot;</span><span class="op">:</span> tmpfile<span class="op">,</span> <span class="st">&quot;content&quot;</span><span class="op">:</span> <span class="st">&quot;y&quot;</span><span class="op">,</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>tmpfile<span class="op">)</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;y&quot;</span><span class="op">,</span> <span class="dt">string</span><span class="op">(</span>data<span class="op">))</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a><span class="co">// Plus: PromptYes/No (auto-edit + run), F02 final-deny override (PHASE-E),</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="co">// FullAuto + bwrap (skip-with-marker if missing).</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F21-T07): main.go wiring (--approval pflag + manager + registry hook + /approval) + integration test</code>.</p>
+<hr />
+<h2 id="task-8-challenge-harness-5-phases-positive-byte-evidence">Task
+8: Challenge harness (5 phases, positive byte evidence)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p2f21_challenge/main.go</code>,
+new <code>challenges/p2-f21-codex-approval-modes/CHALLENGE.md</code>,
+new <code>challenges/p2-f21-codex-approval-modes/run.sh</code>.</p>
+<p>Harness phases (per spec §6.3):</p>
+<ol type="1">
+<li><strong>PHASE-A: SUGGEST-DENIES-EDIT (always runs)</strong> — real
+<code>ApprovalManager(ModeSuggest)</code> + real registry + real
+<code>WriteFileTool</code> → call
+<code>registry.Execute(&quot;write_file&quot;, ...)</code> → assert (i) returned
+error wraps <code>ErrApprovalRequired</code>, (ii)
+<code>os.Stat(target)</code> returns <code>IsNotExist</code>, (iii)
+WriteFileTool’s spy invocation count == 0 (gate short-circuited).</li>
+<li><strong>PHASE-B: AUTO-EDIT-ALLOWS-EDIT-PROMPTS-RUN (always
+runs)</strong> — real <code>ApprovalManager(ModeAutoEdit)</code> +
+yes-replying Prompter → write_file succeeds (file content == expected);
+shell tool with yes-prompter runs (output captured); re-wire with
+no-replying Prompter → shell tool returns
+<code>ErrApprovalRequired</code> AND exec wrapper invocation count ==
+0.</li>
+<li><strong>PHASE-C: FULL-AUTO-FORCES-SANDBOX (skip-with-marker if no
+bwrap)</strong> — assert
+<code>sandbox.Manager.Capabilities().HasSandbox == true</code>; real
+<code>ApprovalManager(ModeFullAuto)</code> + real
+<code>sandbox.Manager</code> → call
+<code>registry.Execute(&quot;shell&quot;, ...)</code>; assert (i) params marker
+<code>_helix_sandbox_required == true</code>, (ii)
+<code>_helix_sandbox_network_allowed == false</code>, (iii)
+sandbox.Manager.Execute spy invocation count == 1, (iv) command output
+captured, (v) network-attempt command exits non-zero.</li>
+<li><strong>PHASE-D: RUNTIME-MODE-CHANGE (always runs)</strong> — start
+with <code>ModeSuggest</code> → write_file →
+<code>ErrApprovalRequired</code> + file does not exist; call
+<code>manager.Set(ModeAutoEdit)</code>; write_file → no error + file
+exists with expected content; assert
+<code>manager.Mode() == ModeAutoEdit</code> after.</li>
+<li><strong>PHASE-E: F02-DENY-OVERRIDES-F21-ALLOW (always runs)</strong>
+— <code>ApprovalManager(ModeDangerous)</code> (F21 would allow
+everything) + real F02 PolicyEngine with rule denying writes to
+<code>/etc/</code> → call
+<code>registry.Execute(&quot;write_file&quot;, {path: &quot;/etc/p2f21-E&quot;, content: &quot;x&quot;})</code>
+→ assert (i) returned error wraps F02’s denial reason, (ii)
+<code>/etc/p2f21-E</code> does NOT exist.</li>
+</ol>
+<p>Output skeleton (verbatim per spec §6.3) ends with:</p>
+<pre><code>SUMMARY: PHASE-A=5/5 PASS; PHASE-B=6/6 PASS; PHASE-C=8/8 PASS [or SKIP-OK: bwrap-absent];
+         PHASE-D=7/7 PASS; PHASE-E=5/5 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch.
+Absence-of-error is NEVER acceptable. Anti-bluff smoke clean check
+appended to harness output. Verbatim output captured into
+<code>07_phase_2_evidence.md</code>. Dual commit (Challenges submodule +
+meta-repo bump).</p>
+<p><code>challenges/p2-f21-codex-approval-modes/run.sh</code> mirrors
+F19/F20 structure:
+<code>cd HelixCode &amp;&amp; go run ./tests/integration/cmd/p2f21_challenge/main.go</code>.</p>
+<p>Subject:
+<code>feat(P2-F21-T08): challenge with 5 phases (suggest deny + auto-edit prompt + full-auto sandbox + runtime change + F02 final-deny) — positive byte evidence</code>.</p>
+<hr />
+<h2 id="task-9-close-out-push">Task 9: Close-out + push</h2>
+<p>Tick all 9 items in PROGRESS, advance PROGRESS focus from F21 to
+“Phase 2 of CLI-Agent Fusion programme: F21 closed; F22 next candidate”.
+Run final verification:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  internal/approval internal/commands/approval_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/approval/...</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/commands/...</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/tools/...</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration ./tests/integration/...</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--exit-code</span> go.mod  <span class="co"># MUST be no-op (zero new deps)</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--exit-code</span> go.sum  <span class="co"># MUST be no-op</span></span></code></pre></div>
+<p>Cross-compile check (matches F19/F20):</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="va">GOOS</span><span class="op">=</span>linux <span class="va">GOARCH</span><span class="op">=</span>amd64 <span class="ex">go</span> build <span class="at">-o</span> /tmp/helixcode-linux-amd64 ./cmd/server</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> /tmp/helixcode-linux-amd64  <span class="co"># confirm produced binary</span></span></code></pre></div>
+<p>Commit
+<code>chore(P2-F21-T09): close out feature 21 — Codex Approval Modes</code>.
+Push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions). Request explicit user authorization at this step
+(CONST-043).</p>
+<p>PROGRESS.md milestone entry (verbatim):</p>
+<pre><code>- 2026-05-06 — Feature 21 (Codex Approval Modes) closed. 9 task commits (T01 ..., T09 close-out).
+  Real, end-to-end 4-mode codex-compatible approval system: suggest (read-only)
+  / auto-edit (edit OK, run prompts) / full-auto (edit + run with sandbox forced
+  + network DENY) / dangerously-bypass (no checks; 2-second pause + warning).
+  Selector: --approval flag &gt; HELIXCODE_APPROVAL env &gt; ~/.config/helixcode/approval.yaml
+  &gt; default suggest. Per-tool Tool.RequiresApproval() ApprovalLevel (read-only/
+  edit/run/all); ~30 existing tools migrated with explicit levels; safe-default
+  LevelEdit for forgotten overrides. /approval slash (status/set/show); runtime
+  mode swap via atomic.Pointer takes effect on next CheckApproval. F02 retains
+  final-deny authority (composition truth table). Zero new external deps.
+  [5-phase Challenge evidence summary]. **First Phase 2 feature shipped.**</code></pre>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types + descriptors (§3.3 + §3.4 4×4 matrix), T03 selector (§3.6
+precedence), T04 manager + YAML loader (§3.3 + §3.7), T05 Tool interface
++ ~30-tool migration (§3.6 per-tool table), T06 /approval slash (§4.5),
+T07 main.go wiring (§4.1 startup) + integration test (§6.2), T08
+Challenge five phases (§5.2 + §6.3), T09 close-out (§9 + Phase 2
+first-feature milestone).</li>
+<li><strong>TDD:</strong> every code task starts with failing tests.
+Types test pins §3.4’s 4×4 matrix byte-for-byte (no recomputation — the
+constant array literal MUST equal the spec table). Selector tests use
+<code>func(string) string</code> closure (no <code>os.Setenv</code> ever
+— pure-function tests). Manager tests use a <code>fakeTool</code> value
+type + atomic.Pointer reads with <code>require.Equal</code> on Decision.
+Migration test (T05) enumerates every registered tool against an
+expected-level table. /approval command tests use a constructed manager
+value type (no mocks). Integration tests wire the production
+<code>Selector</code> + <code>ApprovalManager</code> end-to-end through
+the real registry, real F02, real F14 (skip-with-marker for bwrap).</li>
+<li><strong>Type consistency:</strong> <code>ApprovalMode</code>,
+<code>ApprovalLevel</code>, <code>Action</code>, <code>Decision</code>,
+<code>ResolvedSource</code>, <code>ManagerOptions</code>,
+<code>ApprovalManager</code>, <code>Tool</code>,
+<code>YesNoPrompter</code>, <code>DefaultLevelEdit</code>,
+<code>SelectorInput</code>, sentinel errors
+(<code>ErrApprovalRequired</code>, <code>ErrUnknownMode</code>,
+<code>ErrSandboxRequired</code>), constants
+(<code>ModeSuggest</code>/<code>ModeAutoEdit</code>/<code>ModeFullAuto</code>/<code>ModeDangerous</code>,
+<code>LevelReadOnly</code>/<code>LevelEdit</code>/<code>LevelRun</code>/<code>LevelAll</code>,
+<code>ActionAllow</code>/<code>ActionDeny</code>/<code>ActionPrompt</code>,
+<code>SourceFlag</code>/<code>SourceEnv</code>/<code>SourceConfig</code>/<code>SourceDefault</code>),
+command name <code>approval</code>, env var
+<code>HELIXCODE_APPROVAL</code>, flag <code>--approval</code>, YAML key
+<code>mode</code> — all match across spec §3.3 and plan T02–T07.</li>
+<li><strong>Zero new external deps:</strong> stdlib + existing
+testify/zap + <code>gopkg.in/yaml.v3</code> (already direct from F20).
+<code>go mod tidy</code> after T07 produces no diff in
+<code>go.mod</code> or <code>go.sum</code>. T09’s verification step
+asserts <code>git diff --exit-code go.{mod,sum}</code> is no-op.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has FIVE phases
+(PHASE-C uses skip-with-marker for bwrap-absent hosts; the marker is a
+registered SKIP-OK ticket, not silent-green). Every phase records
+positive evidence: invocation counters (PHASE-A: WriteFileTool counter
+== 0; PHASE-B: exec counter == 0 in no-reply scenario), filesystem-state
+assertions (PHASE-A: <code>os.IsNotExist</code>; PHASE-B/D:
+<code>os.ReadFile</code> content equality), Prompter-replay equality
+(PHASE-B yes/no branches), sandbox-spy invocation count (PHASE-C count
+== 1), runtime-mode-change observable in tool outcome (PHASE-D),
+F02-final-deny composition (PHASE-E). The four real-execution criteria —
+(a) suggest mode actually denies edits with no side-effect; (b)
+auto-edit prompts on run, denies on no-reply; (c) full-auto routes
+through F14 sandbox with network-deny marker; (d) runtime mode change
+reflected in next call — each have dedicated unit + integration +
+Challenge assertions. Coverage test (T05) ensures no tool registered
+without a level. Byte-evidence mismatch is a hard Challenge
+failure.</li>
+<li><strong>CONST-042:</strong> approval YAML carries no secrets (the
+chosen mode is not sensitive). The manager’s logger NEVER logs the tool
+params at INFO level. A unit test scans
+<code>internal/approval/*.go</code> for
+<code>logger\.\bInfo\(.*\b(params|command|args|body)\b</code> matches
+and FAILs on any hit (defensive log discipline; consistent with
+F19/F20’s stance even though there are no actual secrets).</li>
+<li><strong>CONST-043:</strong> stays on <code>main</code>, non-force to
+all four remotes; explicit user authorization is requested at T09 before
+pushing.</li>
+<li><strong>CONST-033:</strong> F21 emits no shell commands of its own.
+<code>full-auto</code> + <code>LevelRun</code> routes USER-supplied
+commands through F14, which has its own CONST-033 deny-list. F21
+inherits that protection.</li>
+<li><strong>Non-obvious call: separate <code>internal/approval/</code>
+package vs extending <code>internal/tools/permissions/</code></strong>
+(recorded in spec §11 #1). F02 is rule-based (path globs); F21 is
+risk-posture-based (single enum). Conflating bloats both layers;
+separate keeps each simple. Composition rule (§4.4) gives the user F02’s
+rule precision AND F21’s mode breadth.</li>
+<li><strong>Non-obvious call: F21 gate runs BEFORE F02</strong>
+(recorded in spec §11 #2). F21 is a coarse posture filter; F02 is
+fine-grained rules. Running F21 first short-circuits the “user is in
+suggest mode” case without asking F02 to enumerate every rule. F02
+retains final-deny authority because its rules are persistent.</li>
+<li><strong>Non-obvious call: tool default <code>LevelEdit</code>
+(safe-by-default)</strong> (recorded in spec §11 #3 + plan T05 explicit
+note). A new tool that forgets to override gets gated, not bypassed. The
+migration test catches forgotten overrides for <strong>existing</strong>
+tools; the embedded <code>DefaultLevelEdit</code> catches
+<strong>future</strong> additions automatically.</li>
+<li><strong>Non-obvious call: atomic-pointer mode swap</strong>
+(recorded in spec §11 #4). Lock-free, single writer + many readers; the
+4×4 matrix is constant data so no locks needed. Anti-bluff (d) is
+structurally impossible because every CheckApproval begins with
+<code>mode := *m.mode.Load()</code>.</li>
+<li><strong>Non-obvious call: 2-second pause before
+<code>dangerously-bypass</code></strong> (recorded in spec §11 #5).
+Deliberate friction, injectable seam for tests, unconditional in
+production v1.</li>
+<li><strong>Non-obvious call: <code>full-auto</code> forces network
+DENY</strong> (recorded in spec §11 #6). Network-allowed full-auto would
+be a prompt-injection footgun. Users who need network use
+<code>dangerously-bypass</code> (which is honest about the risk).</li>
+<li><strong>Non-obvious call: F02 final-deny composition</strong>
+(recorded in spec §11 #7 + spec §4.4 truth table). F21’s
+<code>Allow</code> does NOT override F02’s <code>Deny</code>; the test
+in T07 (PHASE-E) asserts both directions of the composition.</li>
+<li><strong>Non-obvious call: <code>Prompter</code> is F19’s interface
+(wrapped via <code>YesNoPrompter</code>)</strong> (recorded in spec §11
+#8). Reused, not re-implemented; the wrapper is a 5-line adapter that
+maps yes/no to F19’s 2-choice question. T07 reuses F19’s tty + retry +
+ctx cancellation handling.</li>
+<li><strong>Non-obvious call: <code>ModeDescriptors</code> is static
+data, not computed</strong> (recorded in spec §11 #9). The 4×4 matrix is
+the source of truth; T02’s test pins each row byte-for-byte against
+§3.4.</li>
+<li><strong>Non-obvious call: sandbox-required marker in
+<code>params</code> map</strong> (recorded in spec §11 #10). Avoids
+changing <code>Tool.Execute</code>’s signature; the marker is invisible
+to tools that don’t care about sandboxing. T07’s PHASE-C asserts the
+marker is read by F14’s existing dispatch.</li>
+<li><strong>Non-obvious call: <code>full-auto</code> aborts startup if
+sandbox unavailable</strong> (recorded in spec §11 #11). Silent
+downgrade would be a security bluff. T07’s wiring asserts the abort path
+with a fake SandboxMgr whose
+<code>Capabilities().HasSandbox=false</code>.</li>
+<li><strong>Non-obvious call: <code>/approval set</code> does NOT write
+back to YAML</strong> (recorded in spec §11 #12). Ephemeral semantics;
+misclick doesn’t persist. F21.5 may add <code>--persist</code>.</li>
+<li><strong>Non-obvious call: MCP tools default to
+<code>LevelEdit</code></strong> (recorded in spec §11 #13).
+Conservative; F21.5 will read MCP capability metadata for per-server
+level.</li>
+<li><strong>First Phase 2 feature:</strong> F21 is the inaugural Phase 2
+feature. T01 advances PROGRESS.md from “Phase 1 complete” to “Phase 2 in
+flight” + creates <code>docs/improvements/07_phase_2_evidence.md</code>
+(the new evidence section for Phase 2). T09’s milestone entry includes
+“<strong>First Phase 2 feature shipped.</strong>”.</li>
+<li><strong>T07 reuses F12 selector pattern, no new
+infrastructure:</strong> the <code>--approval</code> pflag is added to
+the existing pflag set (one new line near other flags); the env-var read
+uses <code>os.Getenv</code> (or the existing env-getter wrapper if one
+exists); the YAML loader follows F12’s
+<code>wizard_writer.go::LoadWizardConfig</code> shape. NO new selector
+framework or registry needed.</li>
+</ol>
+</body>
+</html>

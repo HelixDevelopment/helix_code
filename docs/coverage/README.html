@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="docscoverage-const-048-four-layer-coverage-ledger-suite">docs/coverage/
+— CONST-048 Four-Layer Coverage Ledger Suite</h1>
+<p><strong>Round 68 creation</strong> — closes 50+ round deferred
+governance debt for the CONST-048 submodule × feature × platform ×
+invariant ledger. Complements the pre-existing feature-axis
+<code>ledger.md</code> (round 41+) with a submodule-axis, fine-grained
+view.</p>
+<h2 id="what-lives-here">What lives here</h2>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 34%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Edited by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COVERAGE_LEDGER.md</code></td>
+<td>The main ledger. Row = (submodule, feature, platform); columns = the
+6 CONST-048 invariants + Overall + Notes.</td>
+<td>Operator (hand-marks PASS) + generator script (refreshes
+scaffold)</td>
+</tr>
+<tr>
+<td><code>SCHEMA.md</code></td>
+<td>Row format, status vocabulary, cross-reference points, invariant
+definitions, regeneration rules.</td>
+<td>Operator on schema changes</td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>This file — explains the suite.</td>
+<td>Operator</td>
+</tr>
+<tr>
+<td><code>ledger.md</code></td>
+<td>Pre-existing feature × invariant rollup (round 41+). Complementary,
+NOT superseded.</td>
+<td><code>scripts/regenerate-coverage-ledger.sh</code></td>
+</tr>
+<tr>
+<td><code>decoupling_review.md</code></td>
+<td>CONST-051(B) decoupling audit.</td>
+<td>Operator</td>
+</tr>
+<tr>
+<td><code>rename_safety_guardrails.md</code></td>
+<td>CONST-052 rename-safety capture.</td>
+<td>Operator</td>
+</tr>
+</tbody>
+</table>
+<h2 id="why-two-ledgers">Why two ledgers?</h2>
+<p><code>ledger.md</code> (round 41) answers: <em>“For each user-facing
+feature F01..F30, what is the test posture across all six
+invariants?”</em> — useful for release-readiness sweeps focused on the
+end-user product surface.</p>
+<p><code>COVERAGE_LEDGER.md</code> (round 68) answers: <em>“For each
+owned-org submodule we ship, what features does it expose, and what is
+the test posture per platform per invariant?”</em> — useful for
+CONST-051(A) equal-codebase audits (does HelixSpecifier get the same
+engineering attention as <code>helix_code/</code>?) and CONST-047
+recursive-application audits.</p>
+<p>Both ledgers MUST stay in sync with reality — divergence between them
+surfaces gaps in either the feature roster (user manual) or the
+submodule roster
+(<code>docs/improvements/submodule_owned.txt</code>).</p>
+<h2 id="const-048-invariants-verbatim-from-constitution-11.4.25">CONST-048
+invariants (verbatim from constitution §11.4.25)</h2>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 39%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Invariant</th>
+<th>Sourced from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I1</td>
+<td>Anti-bluff posture with captured runtime evidence</td>
+<td>CONST-035 / Article XI §11.9</td>
+</tr>
+<tr>
+<td>I2</td>
+<td>Proof of working capability end-to-end on target topology (no mocks
+beyond unit tests)</td>
+<td>CONST-050(A)</td>
+</tr>
+<tr>
+<td>I3</td>
+<td>Implementation matches the documented promise</td>
+<td>§11.4.12</td>
+</tr>
+<tr>
+<td>I4</td>
+<td>No open issues / bugs surfaced</td>
+<td>Issues.md / Issues_Summary.md cross-check</td>
+</tr>
+<tr>
+<td>I5</td>
+<td>Full documentation in sync</td>
+<td>§11.4.12</td>
+</tr>
+<tr>
+<td>I6</td>
+<td>Four-layer test floor (pre-build + post-build + runtime + paired
+mutation)</td>
+<td>§11.4 paired-mutation discipline</td>
+</tr>
+</tbody>
+</table>
+<h2 id="regeneration-cadence">Regeneration cadence</h2>
+<p>Triggers (per constitution §11.4.25 release-gate sweep): 1.
+<strong>Per-round close-out</strong> — the round agent appends evidence
+rows for the submodule it touched. 2. <strong>Pre-release sweep</strong>
+— operator runs <code>bash scripts/generate-coverage-ledger.sh</code> to
+refresh the scaffold + verify every owned submodule has at least one row
+(exit non-zero if missing). 3. <strong>Post <code>constitution/</code>
+pull</strong> (CONST-055) — re-run the generator to surface any new
+submodule added to <code>submodule_owned.txt</code>.</p>
+<h2 id="status-vocabulary-one-line-summary-full-table-in-schema.md">Status
+vocabulary (one-line summary; full table in SCHEMA.md)</h2>
+<table>
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PASS</code></td>
+<td>Captured runtime evidence in current cycle</td>
+</tr>
+<tr>
+<td><code>PENDING_FORENSICS:</code></td>
+<td>Work landed but evidence not yet pasted into the ledger</td>
+</tr>
+<tr>
+<td><code>OPERATOR-BLOCKED:</code></td>
+<td>Needs operator action (real LLM key, hardware, network) — §11.4.21
+audit applies</td>
+</tr>
+<tr>
+<td><code>UNCONFIRMED:</code></td>
+<td>Not yet audited / no evidence captured</td>
+</tr>
+<tr>
+<td><code>SKIP-OK: #&lt;ticket&gt;</code></td>
+<td>Intentionally not covered, with documented reason</td>
+</tr>
+<tr>
+<td><code>PARTIAL</code></td>
+<td>Covered for some platforms / scenarios but not all — see Notes</td>
+</tr>
+<tr>
+<td><code>N/A</code></td>
+<td>Invariant does not apply to this row</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-bluff guarantee</strong> (CONST-035 / Article XI §11.9):
+default cell status is <code>UNCONFIRMED:</code> — never
+<code>PASS</code>. PASS marker requires either (a) a CONTINUATION.md
+round reference quoting the captured evidence, or (b) an in-ledger
+evidence snippet pasted in the Notes column. PASS without one of these
+is a §11.4 PASS-bluff at the governance layer, severity equivalent to a
+false-success test result.</p>
+<h2 id="cross-reference-points-per-schema.md-3">Cross-reference points
+(per SCHEMA.md §3)</h2>
+<ul>
+<li><strong>CONTINUATION.md</strong> — round-by-round narrative is the
+canonical source for PASS justifications.</li>
+<li><strong>Issues.md / Issues_Summary.md</strong> — feeds I4
+(no-open-bugs). HelixCode does not currently maintain a root-level
+Issues tracker; cross-check is via grep of
+<code>// TODO(round-N):</code> / <code>// BUG #NN:</code> markers in
+source.</li>
+<li><strong>SKIP-OK markers</strong> in <code>*_test.go</code> — feeds
+I6 (mutation-test partial-coverage signals).</li>
+<li><strong><code>docs/improvements/submodule_owned.txt</code></strong>
+— canonical roster of owned submodules; one row per submodule
+minimum.</li>
+<li><strong>CONST-051(C) layout audit</strong> in <code>ledger.md</code>
+— feeds I3 (decoupling matches the documented promise of
+project-not-aware reuse).</li>
+</ul>
+<h2 id="initial-population-approach-round-68">Initial population
+approach (round 68)</h2>
+<p>Per the round 68 brief and CONST-035 anti-bluff discipline: the
+ledger is populated <strong>conservatively</strong>.</p>
+<ul>
+<li><code>PASS</code> markers landed ONLY where CONTINUATION.md round
+narrative documents captured evidence (≈ a dozen submodule × feature
+rows from rounds 23, 37, 41, 53, 60, 62, 63, 64, 65).</li>
+<li>Every other cell is <code>UNCONFIRMED:</code> until a future round
+captures evidence and promotes it.</li>
+<li>Auto-populating every cell <code>PASS</code> would itself be a
+CONST-035 PASS-bluff at the governance layer — explicitly forbidden by
+the brief.</li>
+</ul>
+<p>Subsequent rounds promote cells <code>UNCONFIRMED:</code> →
+<code>PASS</code> ONLY by adding (a) the CONTINUATION round reference,
+AND (b) the captured evidence path/snippet in Notes. The generator NEVER
+auto-promotes.</p>
+<h2 id="release-gate-test-runner-round-74">Release-gate test runner
+(round 74)</h2>
+<p><code>scripts/release-gate-test.sh</code> is the EXECUTION
+counterpart to <code>generate-coverage-ledger.sh</code>. Where the
+ledger tracks STRUCTURAL coverage (what we believe is tested, with
+captured evidence), the release-gate runner ACTUALLY EXECUTES tests
+against every owned-org submodule and reports an honest aggregate
+signal.</p>
+<h3 id="what-it-covers">What it covers</h3>
+<ul>
+<li>Walks every submodule listed in
+<code>docs/improvements/submodule_owned.txt</code> (round 56 canonical
+roster).</li>
+<li>For each submodule with a <code>go.mod</code>, runs
+<code>GOMAXPROCS=2 nice -n 19 go test -count=1 -race -timeout=180s ./...</code>
+inside the submodule root.</li>
+<li>Captures stdout+stderr to per-submodule log files under
+<code>$RELEASE_GATE_LOG_DIR</code> (default
+<code>/tmp/release-gate-&lt;pid&gt;/</code>).</li>
+<li>Parses PASS/FAIL/SKIP line counts.</li>
+<li>Detects bare <code>--- SKIP:</code> lines without
+<code>SKIP-OK:</code> markers — these are CONST-035 skip-bluff
+violations.</li>
+</ul>
+<h3 id="what-it-does-not-cover">What it does NOT cover</h3>
+<ul>
+<li>The inner <code>helix_code/</code> Go module — that’s covered by
+<code>make test-full</code> per CLAUDE.md §3.4 (its own four-layer floor
+with real PostgreSQL + Redis + Ollama infra).</li>
+<li>Non-Go submodules (<code>assets/</code>,
+<code>github_pages_website/</code>) — these are SKIP-NO-GOMOD,
+legitimately untested by this runner. Their coverage lives elsewhere
+(the asset/static-site pipelines).</li>
+<li>Integration / E2E tests requiring docker-compose — those need
+<code>make test-infra-up</code> per submodule.</li>
+<li>Mutation tests — paired-mutation runs are tracked in
+<code>COVERAGE_LEDGER.md</code> cell-by-cell.</li>
+</ul>
+<h3 id="exit-code-semantics">Exit code semantics</h3>
+<table>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr>
+<th>Exit</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>All owned submodules either PASSed (<code>go test</code> succeeded)
+or were legitimately SKIP-NO-GOMOD. Release gate GREEN. With
+<code>--skip-env-failures</code>, also returned when ONLY ENV-CLASS
+failures occurred and were skipped.</td>
+</tr>
+<tr>
+<td>1</td>
+<td>At least one submodule FAILed OR at least one bare SKIP detected.
+Release gate RED — see the human summary or <code>--json</code> output
+for the failing list. (Round 74 default behaviour, preserved when
+<code>--skip-env-failures</code> not set.)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Invalid flag, missing required file, or <code>--check</code>
+self-validation failed.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Round 89 — mixed</strong>: at least one LOGIC-CLASS FAIL
+<strong>plus</strong> at least one skipped ENV-CLASS FAIL. Only emitted
+when <code>--skip-env-failures</code> is set. Tells CI “logic-broken AND
+env-dirty” so the operator can distinguish from a clean run that simply
+skipped some env churn.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="flags">Flags</h3>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--json</code></td>
+<td>Emit machine-readable JSON summary for CI integration. Includes
+per-submodule + aggregate counts + log_dir path + (round 89)
+<code>fail_class</code> + <code>fail_reason</code> +
+<code>n_env_class_fail</code> + <code>n_logic_class_fail</code>.</td>
+</tr>
+<tr>
+<td><code>--quick</code></td>
+<td>Stop on first FAIL. Useful for fast CI signal where any failure
+should block. Under <code>--skip-env-failures</code>, only LOGIC-CLASS
+FAIL triggers early-stop (ENV-CLASS is non-blocking).</td>
+</tr>
+<tr>
+<td><code>--only=&lt;glob&gt;</code></td>
+<td>Restrict to submodules matching the shell glob
+(e.g. <code>--only=&#39;dependencies/vasic-digital/*&#39;</code>). Useful for
+targeted re-runs.</td>
+</tr>
+<tr>
+<td><code>--check</code></td>
+<td>Self-validate script + paths without running real tests. Round 89
+extends this to exercise the env-vs-logic classifier against five
+synthetic fixtures (3 ENV, 2 LOGIC) and assert correct
+classification.</td>
+</tr>
+<tr>
+<td><code>--skip-env-failures</code></td>
+<td><strong>Round 89</strong> — classify each FAIL as ENV-CLASS
+(operator-fixable; <code>go mod tidy</code> / install dep) vs
+LOGIC-CLASS (genuine code defect). Report ENV-CLASS but treat as
+non-blocking. LOGIC-CLASS always blocks. Use day-to-day; OMIT for
+release gates.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="round-89-env-vs-logic-fail-classification">Round 89 —
+env-vs-logic FAIL classification</h3>
+<p>Round 74 reports raw FAIL counts. Round 89 layers a deterministic
+regex-based classifier on top to distinguish:</p>
+<ul>
+<li><strong>ENV-CLASS FAIL</strong> — caller environment is missing
+something (<code>go mod tidy</code> hasn’t run, system header/library
+absent, executable not on PATH, port permission denied).
+Operator-actionable; not a code defect.</li>
+<li><strong>LOGIC-CLASS FAIL</strong> — genuine test-logic or
+production-code defect. Always blocks.</li>
+</ul>
+<p><strong>Detection patterns (env-class — ANY hit reclassifies the FAIL
+as ENV):</strong></p>
+<table>
+<colgroup>
+<col style="width: 59%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pattern (extended grep)</th>
+<th>Operator action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>missing go\.sum entry</code></td>
+<td><code>go mod tidy</code></td>
+</tr>
+<tr>
+<td><code>cannot find package</code></td>
+<td><code>go mod tidy</code></td>
+</tr>
+<tr>
+<td><code>no required module provides</code></td>
+<td><code>go mod tidy</code></td>
+</tr>
+<tr>
+<td><code>updates to go\.mod needed</code></td>
+<td><code>go mod tidy</code></td>
+</tr>
+<tr>
+<td><code>inconsistent vendoring</code></td>
+<td><code>go mod vendor</code></td>
+</tr>
+<tr>
+<td><code>package [^ ]+ is not in std</code></td>
+<td><code>go mod tidy</code> / check Go version</td>
+</tr>
+<tr>
+<td><code>command not found</code></td>
+<td>install missing tool</td>
+</tr>
+<tr>
+<td><code>executable file not found</code></td>
+<td>install missing tool (e.g. <code>chromium</code> for chromedp)</td>
+</tr>
+<tr>
+<td><code>permission denied</code></td>
+<td>chmod / chown / use non-privileged port</td>
+</tr>
+<tr>
+<td><code>fatal error: .*\.h: No such file</code></td>
+<td>install <code>-dev</code> package for the C header</td>
+</tr>
+<tr>
+<td><code>X11/[A-Za-z]+\.h</code></td>
+<td>install <code>libX11-dev</code> / equivalent</td>
+</tr>
+<tr>
+<td><code>Xcursor/Xcursor\.h</code></td>
+<td>install <code>libxcursor-dev</code></td>
+</tr>
+<tr>
+<td><code>gtk/gtk\.h</code></td>
+<td>install <code>libgtk-3-dev</code></td>
+</tr>
+<tr>
+<td><code>cannot find -l[A-Za-z]</code></td>
+<td>install matching system library</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-bluff invariant</strong>: classification is
+deterministic regex — <strong>no LLM grading</strong>. Ambiguous
+patterns fail-closed to LOGIC-CLASS, never silently downgraded to ENV.
+Per-failure output includes the matched pattern (or “no env-pattern
+match — fail-closed”) so the classification is auditable +
+reproducible.</p>
+<p><strong>Why this matters</strong>: round 74 reported 26 FAILs across
+owned submodules. Rounds 72/74/87 forensics confirmed most were
+environmental (caller hadn’t run <code>go mod tidy</code>, missing
+system libs, etc.) — not genuine code defects. Without the classifier,
+CI cannot distinguish “operator needs to run <code>go mod tidy</code>”
+from “developer wrote broken code”. Round 89 makes that distinction
+mechanical.</p>
+<h3 id="recommended-invocation-pattern">Recommended invocation
+pattern</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Day-to-day CI (env churn non-blocking, logic defects still blocking):</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/release-gate-test.sh <span class="at">--skip-env-failures</span> <span class="at">--json</span> <span class="op">&gt;</span> release-gate.json</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="va">$(</span><span class="ex">jq</span> <span class="st">&#39;.exit_code&#39;</span> release-gate.json<span class="va">)</span> <span class="kw">in</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="ss">0</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;green (possibly some ENV skipped)&quot;</span> <span class="cf">;;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="ss">1</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;LOGIC-CLASS failure — block merge&quot;</span> <span class="cf">;;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="ss">3</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;LOGIC-CLASS failure AND env-dirty — block merge + ask operator to tidy&quot;</span> <span class="cf">;;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">esac</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Release gate (strict — every FAIL blocks, including env):</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/release-gate-test.sh</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Manual pre-release sweep (full, human-readable, with classification):</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/release-gate-test.sh <span class="at">--skip-env-failures</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Targeted re-run after operator runs `go mod tidy` to clear ENV-CLASS:</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/release-gate-test.sh <span class="at">--only</span><span class="op">=</span><span class="st">&#39;submodules/cache&#39;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Sanity check that the script + classifier are healthy (no real test runs):</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/release-gate-test.sh <span class="at">--check</span></span></code></pre></div>
+<p><strong>CI integration recipe</strong>: use
+<code>--skip-env-failures</code> in the day-to-day per-PR gate so a
+teammate who hasn’t run <code>go mod tidy</code> doesn’t redden the
+board for everyone. Use the <strong>bare</strong>
+<code>release-gate-test.sh</code> (no flag) in the release-tag gate so
+env churn cannot ship past a tagged release. The two gates answer
+different questions: “is the code OK?” vs “is the WORLD ready to
+ship?”.</p>
+<h3 id="cross-reference-with-the-coverage-ledger">Cross-reference with
+the coverage ledger</h3>
+<p>The two tools answer different questions about CONST-048 invariant
+6:</p>
+<ul>
+<li><code>COVERAGE_LEDGER.md</code> answers <em>“do we BELIEVE this
+submodule × platform combo has captured runtime evidence?”</em>
+(structural state).</li>
+<li><code>release-gate-test.sh</code> answers <em>“does
+<code>go test ./...</code> ACTUALLY pass for this submodule RIGHT
+NOW?”</em> (live execution).</li>
+</ul>
+<p>When the ledger says <code>PASS</code> for invariant I6 on a
+submodule but <code>release-gate-test.sh</code> reports FAIL for that
+same submodule, the ledger is stale — a §11.4 PASS-bluff at the
+governance layer. Operator demotes the cell to
+<code>PENDING_FORENSICS:</code> or <code>OPERATOR-BLOCKED:</code> until
+reconciled.</p>
+<h3 id="const-048-invariant-6-closure-note-round-74">CONST-048 invariant
+6 — closure note (round 74)</h3>
+<p>Round 68 landed the STRUCTURAL view of invariant 6. Round 74 lands
+the EXECUTION view. Together they constitute CONST-048 invariant 6’s
+meta-repo-level closure. The inner-module level was already covered by
+<code>make test-full</code> per CLAUDE.md §3.4 + the round 41
+feature-axis <code>ledger.md</code>.</p>
+<p>The verbatim 2026-05-19 operator mandate that motivated round 74
+(preserved per CONST-049 §11.4.17 in the script header):</p>
+<blockquote>
+<p>“all existing tests and Challenges do work in anti-bluff manner -
+they MUST confirm that all tested codebase really works as expected! We
+had been in position that all tests do execute with success and all
+Challenges as well, but in reality the most of the features does not
+work and can’t be used! This MUST NOT be the case and execution of tests
+and Challenges MUST guarantee the quality, the completition and full
+usability by end users of the product!”</p>
+</blockquote>
+<h2 id="see-also">See also</h2>
+<ul>
+<li><code>scripts/release-gate-test.sh</code> — programme-wide
+release-gate test runner (round 74; execution counterpart)</li>
+<li><code>scripts/generate-coverage-ledger.sh</code> — scaffold
+generator + violation checker (round 68; structural counterpart)</li>
+<li><code>scripts/regenerate-coverage-ledger.sh</code> — pre-existing
+feature-axis regenerator (round 41+)</li>
+<li><code>docs/coverage/ledger.md</code> — pre-existing feature-axis
+ledger</li>
+<li><code>docs/coverage/SCHEMA.md</code> — full schema
+documentation</li>
+</ul>
+<h2 id="sources-verified-2026-05-29-internal-governance-doc-no-third-party-service-operator-instructions-to-cross-reference.-this-readme-documents-helixcodes-own-const-048-coverage-ledger-suite-and-the-scriptsrelease-gate-test.sh-scriptsgenerate-coverage-ledger.sh-tooling-the-only-external-references-are-go-toolchain-commands-go-test-go-mod-tidy-go-mod-vendor-and-a-chromedpchromium-mention-in-the-env-class-fail-classifier-none-carry-a-version-pin-requiring-a-vendor-docs-check-and-the-go-commands-are-stable-long-standing-subcommands.-version-authority-per-claude.md-3.1-confirmed-in-tree-inner-module-go-1.26-root-go-1.25.2-postgresql-15-redis-7-no-stale-builddocker-version-pins-in-this-doc-to-correct.-per-const-036-any-modelprovider-identifiers-are-llmsverifier-sourced-at-runtime-helixcode-llm-models-list-not-pinned-here.-reviewed-against-the-live-tree-on-this-date-no-corrections-required.">Sources
+verified 2026-05-29: internal-governance doc — no third-party-service
+operator instructions to cross-reference. This README documents
+HelixCode’s own CONST-048 coverage-ledger suite and the
+<code>scripts/release-gate-test.sh</code> /
+<code>scripts/generate-coverage-ledger.sh</code> tooling; the only
+external references are Go toolchain commands (<code>go test</code>,
+<code>go mod tidy</code>, <code>go mod vendor</code>) and a
+<code>chromedp</code>/<code>chromium</code> mention in the
+env-class-FAIL classifier — none carry a version pin requiring a
+vendor-docs check, and the Go commands are stable, long-standing
+subcommands. Version authority per CLAUDE.md §3.1 (confirmed in-tree):
+inner module <code>go 1.26</code>, root <code>go 1.25.2</code>;
+PostgreSQL 15+; Redis 7+ — no stale build/Docker version pins in this
+doc to correct. Per CONST-036, any model/provider identifiers are
+LLMsVerifier-sourced at runtime
+(<code>helixcode llm models list</code>), not pinned here. Reviewed
+against the live tree on this date; no corrections required.</h2>
+</body>
+</html>

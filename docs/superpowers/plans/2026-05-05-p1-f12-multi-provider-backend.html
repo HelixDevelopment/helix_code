@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f12-multi-provider-backend</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f12-multi-provider-backend</h1>
+</header>
+<h1 id="p1-f12-multi-provider-backend-implementation-plan">P1-F12 —
+Multi-Provider Backend Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Wire Anthropic / AWS Bedrock / Google Vertex
+AI / Azure OpenAI into a unified selection layer
+(<code>--provider</code> flag + <code>HELIX_LLM_PROVIDER</code> env +
+tview wizard + <code>helixcode wizard</code> cobra). Model lists
+exclusively from <code>internal/verifier/</code>. No new external deps.
+Non-breaking — Ollama remains the fallback.</p>
+<p><strong>Architecture:</strong> New
+<code>internal/llm/{selector.go, wizard.go, wizard_writer.go}</code>.
+Extension to <code>internal/llm/factory.go</code>
+(<code>NewCloudProvider</code>). New <code>cmd/cli/wizard_cmd.go</code>.
+<code>cmd/cli/main.go</code> startup replaces hardcoded Ollama with
+<code>Selector.Resolve</code>. The four cloud <code>*_provider.go</code>
+files already exist under <code>internal/llm/</code> and are NOT
+rewritten.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, spf13/cobra
+v1.8, rivo/tview v0.42, gdamore/tcell/v2, aws-sdk-go-v2 +
+service/bedrockruntime, Azure azcore + azidentity,
+golang.org/x/oauth2/google. <strong>No new external deps.</strong></p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-05-p1-f12-multi-provider-backend-design.md</code>
+(commit <code>fd32a82</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/llm/selector.go internal/llm/wizard.go internal/llm/wizard_writer.go <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  cmd/cli/wizard_cmd.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — every PASS
+in this feature MUST distinguish LOCAL evidence from CLOUD evidence;
+cloud round-trips skip with
+<code>SKIP-OK: P1-F12 cloud creds not provided</code> when the
+corresponding env vars are absent. Bare skips are forbidden.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F12-T01 — bootstrap
+evidence + advance PROGRESS</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T02 — provider.go:
+confirm unified Provider + LLMsVerifier integration (TDD audit, no
+rewrite)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T03 —
+provider_anthropic.go: confirm conformance to unified interface (TDD
+audit + gap fixes)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T04 —
+provider_bedrock.go: confirm conformance + verifier-backed GetModels
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T05 —
+provider_vertex.go: confirm conformance + verifier-backed GetModels
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T06 —
+provider_azure.go: confirm conformance + verifier-backed GetModels
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T07 —
+provider_factory.go: NewCloudProvider + selector precedence
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T08 — wizard.go +
+wizard_writer.go: tview TUI wizard (TDD with
+tcell.SimulationScreen)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T09 — main.go
+wiring + <code>helixcode wizard</code> cobra + integration test (gated,
+SKIP-OK on missing creds)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T10 — Challenge
+with runtime evidence (LOCAL always-runs, CLOUD
+credential-gated)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F12-T11 — Feature 12
+close-out + push 4 remotes</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F12 evidence section header (spec <code>fd32a82</code>),
+update PROGRESS current focus to F12, insert F12 task list (11 items)
+after F11’s. Commit
+<code>docs(P1-F12-T01): bootstrap Phase 1 / Feature 12 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-provider.go-audit-llmsverifier-integration-tdd">Task 2:
+provider.go — audit + LLMsVerifier integration (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/llm/missing_types.go</code>
+(review-only), <code>internal/llm/verifier_integration.go</code>
+(review-only), new <code>internal/llm/provider_audit_test.go</code>.</p>
+<p>The unified <code>Provider</code> interface and
+<code>VerifierModelSource</code> already exist. T02 produces an audit
+test that asserts the contract: every provider type returned by
+<code>factory.NewProvider</code> for
+<code>{anthropic, bedrock, vertexai, azure}</code> must implement
+<code>Provider</code> and yield a non-empty <code>GetModels()</code>
+slice when constructed with a <code>VerifierModelSource</code>-backed
+config.</p>
+<p>Test:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestProviderInterface_AllFourCloudProvidersConform<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    types <span class="op">:=</span> <span class="op">[]</span>ProviderType<span class="op">{</span>ProviderTypeAnthropic<span class="op">,</span> ProviderTypeBedrock<span class="op">,</span> ProviderTypeVertexAI<span class="op">,</span> ProviderTypeAzure<span class="op">}</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> pt <span class="op">:=</span> <span class="kw">range</span> types <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        cfg <span class="op">:=</span> ProviderConfigEntry<span class="op">{</span>Type<span class="op">:</span> pt<span class="op">,</span> APIKey<span class="op">:</span> <span class="st">&quot;test&quot;</span><span class="op">,</span> Endpoint<span class="op">:</span> <span class="st">&quot;https://example.test&quot;</span><span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        p<span class="op">,</span> err <span class="op">:=</span> NewProvider<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> <span class="st">&quot;type %s&quot;</span><span class="op">,</span> pt<span class="op">)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> pt<span class="op">,</span> p<span class="op">.</span>GetType<span class="op">(),</span> <span class="st">&quot;type %s&quot;</span><span class="op">,</span> pt<span class="op">)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> p<span class="op">.</span>GetName<span class="op">(),</span> <span class="st">&quot;type %s&quot;</span><span class="op">,</span> pt<span class="op">)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> p<span class="op">.</span>GetContextWindow<span class="op">(),</span> <span class="dv">0</span><span class="op">,</span> <span class="st">&quot;type %s&quot;</span><span class="op">,</span> pt<span class="op">)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F12-T02): provider audit test confirms unified interface for 4 cloud types</code>.</p>
+<hr />
+<h2 id="task-3-provider_anthropic.go-conformance-audit-gap-fix-tdd">Task
+3: provider_anthropic.go — conformance audit + gap fix (TDD)</h2>
+<p><strong>Files:</strong>
+<code>internal/llm/anthropic_provider.go</code> (existing, ~740 lines),
+<code>internal/llm/anthropic_provider_test.go</code> (existing).</p>
+<p>Audit existing tests against the <code>ProviderConfigEntry</code>
+field map in spec §3.4. Gap-fix: ensure
+<code>NewAnthropicProvider</code> honours <code>cfg.Endpoint</code> as
+the <code>ANTHROPIC_BASE_URL</code> override and falls back to env. If a
+gap is found (verbatim), add a failing test, then fix the impl.</p>
+<p>Test:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnthropicProvider_BaseURLPrecedence_ConfigOverEnv<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;ANTHROPIC_BASE_URL&quot;</span><span class="op">,</span> <span class="st">&quot;https://env.example&quot;</span><span class="op">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> ProviderConfigEntry<span class="op">{</span>Type<span class="op">:</span> ProviderTypeAnthropic<span class="op">,</span> APIKey<span class="op">:</span> <span class="st">&quot;k&quot;</span><span class="op">,</span> Endpoint<span class="op">:</span> <span class="st">&quot;https://cfg.example&quot;</span><span class="op">}</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    p<span class="op">,</span> err <span class="op">:=</span> NewAnthropicProvider<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Use a probing http RoundTripper or unexported getter; if unavailable, assert via test-only accessor</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> p<span class="op">.</span>BaseURL<span class="op">(),</span> <span class="st">&quot;cfg.example&quot;</span><span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F12-T03): anthropic provider audit + base URL precedence</code>.</p>
+<hr />
+<h2 id="task-4-provider_bedrock.go-conformance-audit-verifier-backed-getmodels-tdd">Task
+4: provider_bedrock.go — conformance audit + verifier-backed GetModels
+(TDD)</h2>
+<p><strong>Files:</strong> <code>internal/llm/bedrock_provider.go</code>
+(existing, ~1086 lines),
+<code>internal/llm/bedrock_provider_test.go</code>.</p>
+<p>Audit + gap-fix: <code>BedrockProvider.GetModels</code> MUST source
+from <code>VerifierModelSource</code> (filtered by
+<code>ProviderType == bedrock</code>) at construction. Hardcoded slices
+are forbidden by CONST-036/037.</p>
+<p>Test:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBedrockProvider_GetModels_SourcedFromVerifier<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    srv <span class="op">:=</span> startEmbeddedVerifier<span class="op">(</span>t<span class="op">)</span> <span class="co">// existing helper from internal/verifier</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    adapter <span class="op">:=</span> verifier<span class="op">.</span>NewAdapter<span class="op">(</span>srv<span class="op">.</span>URL<span class="op">())</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    src <span class="op">:=</span> NewVerifierModelSource<span class="op">(</span>adapter<span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> ProviderConfigEntry<span class="op">{</span>Type<span class="op">:</span> ProviderTypeBedrock<span class="op">,</span> Parameters<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">{</span><span class="st">&quot;region&quot;</span><span class="op">:</span> <span class="st">&quot;us-east-1&quot;</span><span class="op">}}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    p<span class="op">,</span> err <span class="op">:=</span> newBedrockProviderWithSource<span class="op">(</span>cfg<span class="op">,</span> src<span class="op">)</span> <span class="co">// test-only ctor</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    models <span class="op">:=</span> p<span class="op">.</span>GetModels<span class="op">()</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> models<span class="op">)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> m <span class="op">:=</span> <span class="kw">range</span> models <span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ProviderTypeBedrock<span class="op">,</span> m<span class="op">.</span>Provider<span class="op">)</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F12-T04): bedrock GetModels routes through VerifierModelSource</code>.</p>
+<hr />
+<h2 id="task-5-provider_vertex.go-conformance-audit-verifier-backed-getmodels-tdd">Task
+5: provider_vertex.go — conformance audit + verifier-backed GetModels
+(TDD)</h2>
+<p><strong>Files:</strong>
+<code>internal/llm/vertexai_provider.go</code> (existing, ~1022 lines),
+<code>internal/llm/vertexai_provider_test.go</code>.</p>
+<p>Same shape as T04 but for <code>ProviderTypeVertexAI</code>. Verify
+<code>Parameters[&quot;project_id&quot;]</code> and
+<code>Parameters[&quot;location&quot;]</code> are honoured.</p>
+<p>Test:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestVertexProvider_GetModels_SourcedFromVerifier<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    srv <span class="op">:=</span> startEmbeddedVerifier<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    adapter <span class="op">:=</span> verifier<span class="op">.</span>NewAdapter<span class="op">(</span>srv<span class="op">.</span>URL<span class="op">())</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    src <span class="op">:=</span> NewVerifierModelSource<span class="op">(</span>adapter<span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> ProviderConfigEntry<span class="op">{</span>Type<span class="op">:</span> ProviderTypeVertexAI<span class="op">,</span> Parameters<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">{</span><span class="st">&quot;project_id&quot;</span><span class="op">:</span> <span class="st">&quot;test&quot;</span><span class="op">,</span> <span class="st">&quot;location&quot;</span><span class="op">:</span> <span class="st">&quot;us-central1&quot;</span><span class="op">}}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    p<span class="op">,</span> err <span class="op">:=</span> newVertexProviderWithSource<span class="op">(</span>cfg<span class="op">,</span> src<span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    models <span class="op">:=</span> p<span class="op">.</span>GetModels<span class="op">()</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> models<span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> m <span class="op">:=</span> <span class="kw">range</span> models <span class="op">{</span> assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ProviderTypeVertexAI<span class="op">,</span> m<span class="op">.</span>Provider<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F12-T05): vertex GetModels routes through VerifierModelSource</code>.</p>
+<hr />
+<h2 id="task-6-provider_azure.go-conformance-audit-verifier-backed-getmodels-tdd">Task
+6: provider_azure.go — conformance audit + verifier-backed GetModels
+(TDD)</h2>
+<p><strong>Files:</strong> <code>internal/llm/azure_provider.go</code>
+(existing, ~868 lines),
+<code>internal/llm/azure_provider_test.go</code>.</p>
+<p>Same shape as T04. Verify <code>Endpoint</code> (Azure resource) and
+<code>Parameters[&quot;api_version&quot;]</code>,
+<code>Parameters[&quot;deployment&quot;]</code> are honoured. Confirm
+<code>azidentity.NewClientSecretCredential</code> path validates against
+the spec §3.4 mapping.</p>
+<p>Subject:
+<code>feat(P1-F12-T06): azure GetModels routes through VerifierModelSource</code>.</p>
+<hr />
+<h2 id="task-7-provider_factory.go-newcloudprovider-selector-tdd">Task
+7: provider_factory.go — NewCloudProvider + Selector (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/llm/factory.go</code>
+(modify), <code>internal/llm/selector.go</code> (new),
+<code>internal/llm/selector_test.go</code> (new),
+<code>internal/llm/factory_test.go</code> (extend).</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNewCloudProvider_AcceptsAllFour<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> pt <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span>ProviderType<span class="op">{</span>ProviderTypeAnthropic<span class="op">,</span> ProviderTypeBedrock<span class="op">,</span> ProviderTypeVertexAI<span class="op">,</span> ProviderTypeAzure<span class="op">}</span> <span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        _<span class="op">,</span> err <span class="op">:=</span> NewCloudProvider<span class="op">(</span>ProviderConfigEntry<span class="op">{</span>Type<span class="op">:</span> pt<span class="op">,</span> APIKey<span class="op">:</span> <span class="st">&quot;k&quot;</span><span class="op">,</span> Endpoint<span class="op">:</span> <span class="st">&quot;https://x.y&quot;</span><span class="op">})</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> <span class="st">&quot;type %s&quot;</span><span class="op">,</span> pt<span class="op">)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNewCloudProvider_RejectsNonCloudType<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> NewCloudProvider<span class="op">(</span>ProviderConfigEntry<span class="op">{</span>Type<span class="op">:</span> ProviderTypeOllama<span class="op">})</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;not a cloud provider&quot;</span><span class="op">)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_FlagWinsOverEnv<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* flag=anthropic, env=bedrock =&gt; anthropic */</span> <span class="op">}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_EnvWinsOverConfig<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* env=vertex, config=azure =&gt; vertex */</span> <span class="op">}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_ConfigWinsOverWizard<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* config exists =&gt; no wizard launch */</span> <span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_OllamaFallback_NonTTY<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* AllowWizard=false, no flag/env/config =&gt; Ollama */</span> <span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelector_RejectsUnknownProvider<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* flag=&quot;bogus&quot; =&gt; error */</span> <span class="op">}</span></span></code></pre></div>
+<p>Implementation skeleton:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewCloudProvider<span class="op">(</span>cfg ProviderConfigEntry<span class="op">)</span> <span class="op">(</span>Provider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> cfg<span class="op">.</span>Type <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeAnthropic<span class="op">,</span> ProviderTypeBedrock<span class="op">,</span> ProviderTypeVertexAI<span class="op">,</span> ProviderTypeAzure<span class="op">:</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> NewProvider<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;provider type %q is not a cloud provider (expected anthropic|bedrock|vertexai|azure)&quot;</span><span class="op">,</span> cfg<span class="op">.</span>Type<span class="op">)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Selector <span class="kw">struct</span><span class="op">{</span> opts SelectorOptions <span class="op">}</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSelector<span class="op">(</span>opts SelectorOptions<span class="op">)</span> <span class="op">*</span>Selector <span class="op">{</span> <span class="cf">return</span> <span class="op">&amp;</span>Selector<span class="op">{</span>opts<span class="op">:</span> opts<span class="op">}</span> <span class="op">}</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Selector<span class="op">)</span> Resolve<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span>Provider<span class="op">,</span> ProviderType<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    typ<span class="op">,</span> err <span class="op">:=</span> s<span class="op">.</span>resolveType<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> s<span class="op">.</span>buildConfig<span class="op">(</span>typ<span class="op">)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    p<span class="op">,</span> err <span class="op">:=</span> NewProvider<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> typ<span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;provider %s: %w&quot;</span><span class="op">,</span> typ<span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p<span class="op">,</span> typ<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F12-T07): NewCloudProvider + Selector with flag&gt;env&gt;config&gt;wizard precedence</code>.</p>
+<hr />
+<h2 id="task-8-wizard.go-wizard_writer.go-tview-tui-tdd">Task 8:
+wizard.go + wizard_writer.go — tview TUI (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/llm/wizard.go</code>,
+<code>internal/llm/wizard_writer.go</code>,
+<code>internal/llm/wizard_test.go</code>,
+<code>internal/llm/wizard_writer_test.go</code>.</p>
+<p>Tests use <code>tcell.NewSimulationScreen()</code> for headless
+rendering. Assertions: cell content matches expected glyphs at known
+coords; on-Save callback writes a config file at the configured path
+with mode 0600.</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWizard_RendersAllFourProviderOptions<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    sim <span class="op">:=</span> tcell<span class="op">.</span>NewSimulationScreen<span class="op">(</span><span class="st">&quot;UTF-8&quot;</span><span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> sim<span class="op">.</span>Init<span class="op">())</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> sim<span class="op">.</span>Fini<span class="op">()</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    sim<span class="op">.</span>SetSize<span class="op">(</span><span class="dv">80</span><span class="op">,</span> <span class="dv">24</span><span class="op">)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> NewWizard<span class="op">(&amp;</span>memWriter<span class="op">{},</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span> _<span class="op">,</span> _ <span class="op">=</span> w<span class="op">.</span>RunHeadless<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sim<span class="op">)</span> <span class="op">}()</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    waitForRender<span class="op">(</span>sim<span class="op">)</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    cells<span class="op">,</span> _<span class="op">,</span> _ <span class="op">:=</span> sim<span class="op">.</span>GetContents<span class="op">()</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    text <span class="op">:=</span> cellsToString<span class="op">(</span>cells<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> p <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;anthropic&quot;</span><span class="op">,</span> <span class="st">&quot;bedrock&quot;</span><span class="op">,</span> <span class="st">&quot;vertex&quot;</span><span class="op">,</span> <span class="st">&quot;azure&quot;</span><span class="op">}</span> <span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> text<span class="op">,</span> p<span class="op">)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWizard_DynamicModelDropdown_ViaVerifier<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* verifier-backed dropdown populated */</span> <span class="op">}</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWizard_VerifierOffline_FallbackBannerShown<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* yellow warn banner present */</span> <span class="op">}</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWizard_ValidatesMandatoryFieldsPerProvider<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* per §3.4 */</span> <span class="op">}</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWizard_CancelReturnsError_NoFileWritten<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* ErrWizardCancelled, file absent */</span> <span class="op">}</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWizardWriter_File_O_EXCL_PreventsOverwrite<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> <span class="op">&amp;</span>FileWizardConfigWriter<span class="op">{</span>path<span class="op">:</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;config.yaml&quot;</span><span class="op">)}</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> w<span class="op">.</span>Write<span class="op">(</span>WizardForm<span class="op">{</span>Provider<span class="op">:</span> ProviderTypeAnthropic<span class="op">,</span> APIKey<span class="op">:</span> <span class="st">&quot;k&quot;</span><span class="op">}))</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> w<span class="op">.</span>Write<span class="op">(</span>WizardForm<span class="op">{</span>Provider<span class="op">:</span> ProviderTypeAnthropic<span class="op">,</span> APIKey<span class="op">:</span> <span class="st">&quot;k2&quot;</span><span class="op">})</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> os<span class="op">.</span>ErrExist<span class="op">)</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWizardWriter_File_Mode0600<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> <span class="op">&amp;</span>FileWizardConfigWriter<span class="op">{</span>path<span class="op">:</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;config.yaml&quot;</span><span class="op">)}</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> w<span class="op">.</span>Write<span class="op">(</span>WizardForm<span class="op">{</span>Provider<span class="op">:</span> ProviderTypeAnthropic<span class="op">,</span> APIKey<span class="op">:</span> <span class="st">&quot;k&quot;</span><span class="op">}))</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    info<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>Stat<span class="op">(</span>w<span class="op">.</span>path<span class="op">)</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>FileMode<span class="op">(</span><span class="bn">0600</span><span class="op">),</span> info<span class="op">.</span>Mode<span class="op">().</span>Perm<span class="op">())</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F12-T08): tview wizard + WizardConfigWriter (mode 0600, O_EXCL)</code>.</p>
+<hr />
+<h2 id="task-9-main.go-wiring-helixcode-wizard-cobra-integration-test">Task
+9: main.go wiring + <code>helixcode wizard</code> cobra + integration
+test</h2>
+<p><strong>Files:</strong> <code>cmd/cli/main.go</code> (modify),
+<code>cmd/cli/wizard_cmd.go</code> (new),
+<code>cmd/cli/wizard_cmd_test.go</code> (new),
+<code>tests/integration/multi_provider_test.go</code> (new,
+<code>//go:build integration</code>).</p>
+<p>Replace the hardcoded <code>llm.NewOllamaProvider(...)</code> in
+<code>NewCLI()</code> with:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sel <span class="op">:=</span> llm<span class="op">.</span>NewSelector<span class="op">(</span>llm<span class="op">.</span>SelectorOptions<span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    Flag<span class="op">:</span>        flagProvider<span class="op">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    Env<span class="op">:</span>         os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;HELIX_LLM_PROVIDER&quot;</span><span class="op">),</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    ConfigPath<span class="op">:</span>  filepath<span class="op">.</span>Join<span class="op">(</span>userConfigDir<span class="op">,</span> <span class="st">&quot;helixcode&quot;</span><span class="op">,</span> <span class="st">&quot;config.yaml&quot;</span><span class="op">),</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    AllowWizard<span class="op">:</span> term<span class="op">.</span>IsTerminal<span class="op">(</span><span class="dt">int</span><span class="op">(</span>os<span class="op">.</span>Stdin<span class="op">.</span>Fd<span class="op">())),</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    Verifier<span class="op">:</span>    verifierAdapter<span class="op">,</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>provider<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> sel<span class="op">.</span>Resolve<span class="op">(</span>ctx<span class="op">)</span></span></code></pre></div>
+<p>Add <code>helixcode wizard</code> cobra subcommand mirroring
+F09/F10/F11 patterns; it always launches <code>Wizard.Run</code>
+(overwrites prior config after y/N confirm).</p>
+<p>Integration test:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">// +build integration</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMultiProvider_Anthropic_Health<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;ANTHROPIC_API_KEY&quot;</span><span class="op">)</span> <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F12 cloud creds not provided&quot;</span><span class="op">)</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> llm<span class="op">.</span>ProviderConfigEntry<span class="op">{</span>Type<span class="op">:</span> llm<span class="op">.</span>ProviderTypeAnthropic<span class="op">,</span> APIKey<span class="op">:</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;ANTHROPIC_API_KEY&quot;</span><span class="op">)}</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    p<span class="op">,</span> err <span class="op">:=</span> llm<span class="op">.</span>NewCloudProvider<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    health<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>GetHealth<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;healthy&quot;</span><span class="op">,</span> health<span class="op">.</span>Status<span class="op">)</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">// + TestMultiProvider_Bedrock_Health, TestMultiProvider_Vertex_Health, TestMultiProvider_Azure_Health</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">// + TestMultiProvider_VerifierBackedModelList (always runs, no creds needed)</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F12-T09): wire selector into main.go + helixcode wizard cobra + integration tests</code>.</p>
+<hr />
+<h2 id="task-10-challenge-with-runtime-evidence">Task 10: Challenge with
+runtime evidence</h2>
+<p><strong>Files:</strong>
+<code>tests/integration/cmd/p1f12_challenge/main.go</code> (new),
+<code>challenges/p1-f12-multi-provider/CHALLENGE.md</code> (new),
+<code>challenges/p1-f12-multi-provider/run.sh</code> (new).</p>
+<p>The harness MUST print two distinct sections:</p>
+<pre><code>=== LOCAL EVIDENCE (always runs) ===
+[PASS] factory: anthropic constructed
+[PASS] factory: bedrock constructed
+[PASS] factory: vertexai constructed
+[PASS] factory: azure constructed
+[PASS] factory: rejects ollama as non-cloud
+[PASS] selector: --provider flag wins over env
+[PASS] selector: env wins over config
+[PASS] selector: Ollama fallback when nothing set + non-TTY
+[PASS] wizard: renders 4 provider options (tcell.SimulationScreen)
+[PASS] wizard: model dropdown populated from VerifierModelSource (embedded server)
+[PASS] wizard: file write mode 0600 + O_EXCL
+
+=== CLOUD EVIDENCE (credential-gated) ===
+[SKIP] anthropic Health: SKIP-OK: P1-F12 cloud creds not provided
+[SKIP] bedrock Health:   SKIP-OK: P1-F12 cloud creds not provided
+[SKIP] vertex Health:    SKIP-OK: P1-F12 cloud creds not provided
+[SKIP] azure Health:     SKIP-OK: P1-F12 cloud creds not provided
+
+SUMMARY: LOCAL=11/11 PASS; CLOUD=0/4 (SKIPPED, creds missing)</code></pre>
+<p>When env vars are present, the corresponding line flips from
+<code>[SKIP]</code> to <code>[PASS]</code> with real
+<code>Health(ctx)</code> round-trip evidence (status + latency).</p>
+<p>Anti-bluff smoke clean check appended. Dual commit (Challenges
+submodule + meta-repo bump). Verbatim evidence in
+<code>06_phase_1_evidence.md</code>.</p>
+<p>Subject:
+<code>feat(P1-F12-T10): challenge with runtime evidence (LOCAL + credential-gated CLOUD)</code>.</p>
+<hr />
+<h2 id="task-11-close-out-push">Task 11: Close-out + push</h2>
+<p>Tick 11 items in PROGRESS, advance PROGRESS focus to F13 candidate,
+run final verification (<code>make verify-compile</code>, anti-bluff
+smoke), commit
+<code>chore(P1-F12-T11): close out feature 12 — multi-provider backend</code>,
+push 4 remotes non-force.</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 interface audit, T03–T06 per-provider audits, T07 factory +
+selector, T08 wizard, T09 main wiring + integration tests, T10
+Challenge, T11 close-out.</li>
+<li><strong>TDD:</strong> every code task starts with failing tests;
+per-provider audits add tests only when a gap is identified.</li>
+<li><strong>Type consistency:</strong> <code>Selector</code>,
+<code>SelectorOptions</code>, <code>WizardForm</code>,
+<code>Wizard</code>, <code>WizardConfigWriter</code>,
+<code>FileWizardConfigWriter</code>, <code>NewCloudProvider</code>
+consistent across spec and plan.</li>
+<li><strong>Cross-platform:</strong> pure Go + cloud SDKs already in
+<code>go.mod</code>; tview headless via
+<code>tcell.SimulationScreen</code> — no new deps.</li>
+<li><strong>Anti-bluff:</strong> full 4-term smoke + Challenge with
+explicit LOCAL/CLOUD separation +
+<code>SKIP-OK: P1-F12 cloud creds not provided</code> markers per
+Universal Rule.</li>
+<li><strong>No new deps:</strong> verified —
+<code>aws-sdk-go-v2/service/bedrockruntime</code>,
+<code>Azure/azure-sdk-for-go/sdk/{azcore,azidentity}</code>,
+<code>golang.org/x/oauth2/google</code>, <code>rivo/tview</code>,
+<code>gdamore/tcell/v2</code> all present in
+<code>helix_code/go.mod</code>.</li>
+<li><strong>Branch + push:</strong> stays on main, non-force to all four
+remotes (per CONST-043).</li>
+<li><strong>Reality check:</strong> 4 cloud <code>*_provider.go</code>
+files (anthropic/bedrock/azure/vertexai) ALREADY exist in
+<code>internal/llm/</code>. F12 is the selection/UX/wizard/factory layer
+plus per-provider verifier-routing audits — NOT a from-scratch
+implementation. The porting doc’s brand-new
+<code>Chat</code>/<code>StreamChat</code> interface is intentionally NOT
+adopted; doing so would force a rewrite of every existing provider and
+contradict the non-breaking mandate (Q3=B).</li>
+</ol>
+</body>
+</html>

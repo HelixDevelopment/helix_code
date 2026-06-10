@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f04-git-worktree-agent-isolation-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f04-git-worktree-agent-isolation-design</h1>
+</header>
+<h1 id="p1-f04-git-worktree-agent-isolation-design-spec">P1-F04 — Git
+Worktree Agent Isolation — Design Spec</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Author:</strong> Claude
+Opus 4.7 (1M context) + user (milos85vasic.2nd@gmail.com) <strong>Phase
+/ Feature:</strong> Phase 1, Feature 4 of
+<code>docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>
+<strong>Status:</strong> APPROVED in brainstorming, awaiting user review
+of written spec <strong>Successor:</strong> to be handed to
+<code>superpowers:writing-plans</code> for executable plan
+<strong>Predecessor:</strong> Feature 3 (Tool Result Persistence) —
+closed 2026-05-05 (commits
+<code>f813fc9</code>…<code>0b92630</code>)</p>
+<hr />
+<h2 id="goals-non-goals-success-criteria">1. Goals, non-goals, success
+criteria</h2>
+<h3 id="what-were-building">1.1 What we’re building</h3>
+<p>A claude-code-style git-worktree isolation feature for HelixCode.
+Agents (and humans) can enter a named, validated worktree
+(<code>/[a-zA-Z0-9._-]+/</code>, max 64 chars) at
+<code>&lt;repoRoot&gt;/.helix-worktrees/&lt;name&gt;/</code>, work in
+parallel branches without polluting <code>main</code>, and exit back to
+the main worktree when done. The feature exposes:</p>
+<ul>
+<li>4 agent tools (<code>EnterWorktree</code>,
+<code>ExitWorktree</code>, <code>ListWorktrees</code>,
+<code>RemoveWorktree</code>) registered with
+<code>internal/tools/registry.ToolRegistry</code>.</li>
+<li>4 Cobra subcommands
+<code>helixcode worktree {list,enter,exit,remove}</code>. The stateful
+<code>enter</code>/<code>exit</code> print a help message and exit
+non-zero when run from outside an interactive
+<code>helixcode chat</code> session.</li>
+<li>1 <code>/worktree</code> slash command
+(<code>/worktree [list|enter &lt;name&gt; [branch]|exit|remove &lt;name&gt;]</code>)
+registered with <code>internal/commands/builtin</code>.</li>
+</ul>
+<p>The implementation shells out to the <code>git</code> binary for all
+worktree operations, consistent with the existing
+<code>internal/tools/git/</code> package. It does NOT initialise
+submodules — agents that need submodule code run
+<code>git submodule update --init --recursive</code> from inside the
+worktree.</p>
+<h3 id="goals-priority-order">1.2 Goals (priority order)</h3>
+<ul>
+<li><strong>G1 — No bluff.</strong> Per Constitution Article XI §11.9,
+every PASS in this feature carries positive runtime evidence. The
+Challenge proves a real <code>git worktree add</code> succeeded against
+an ephemeral repo and the agent’s effective working directory actually
+changed.</li>
+<li><strong>G2 — Extend, don’t parallelise.</strong> Same lesson as
+F01/F02/F03. New sub-package <code>internal/tools/worktree/</code> lives
+next to <code>permissions/</code>, <code>persistence/</code>,
+<code>confirmation/</code> — same logical layer, different concern. The
+existing <code>internal/tools/git/</code> package (focused on
+auto-commit + attribution + message generation) is left untouched:
+worktree management is a workflow concern, not a commit-metadata
+concern.</li>
+<li><strong>G3 — Per-session state via single field on
+<code>session.Manager</code>.</strong> The porting doc proposes a
+parallel <code>internal/session/worktree_state.go</code>; we instead add
+a single <code>currentWorktree string</code> field plus getter/setter to
+<code>internal/session/manager.go</code>. Less surface area, same
+outcome.</li>
+<li><strong>G4 — Meta-only worktrees.</strong>
+<code>EnterWorktree</code> does not init submodules. The new worktree
+contains the meta-repo files + the inner Go module at
+<code>helix_code/</code> (a tracked subdirectory, present in any
+checkout). Submodules under <code>helix_agent/</code>,
+<code>dependencies/</code>, etc. are empty placeholder directories.
+Agents that need submodule code run
+<code>git submodule update --init --recursive</code> from inside the
+worktree.</li>
+<li><strong>G5 — Full surface (tools + Cobra + slash).</strong> Mirrors
+F02’s polish level. Agent-facing tools, human-facing CLI, and in-session
+slash command share a single <code>*Manager</code> instance.</li>
+</ul>
+<h3 id="non-goals-explicit-out-of-scope-for-f04">1.3 Non-goals (explicit
+out-of-scope for F04)</h3>
+<ul>
+<li><strong>N1.</strong> Subagent isolation
+(<code>isolation: &quot;worktree&quot;</code> on Task dispatch). Belongs to P1-F15
+(Subagent Team).</li>
+<li><strong>N2.</strong> Cross-session worktree resume (auto-restore “I
+was in worktree X”). Belongs to P1-F11 (Session Transcript Resume).</li>
+<li><strong>N3.</strong> Submodule auto-init. Out of scope per Q2
+(option A).</li>
+<li><strong>N4.</strong> Worktree-aware Read/Write/Bash tools. F04 adds
+<code>Manager.GetCurrentDirectory()</code> and
+<code>Manager.IsIsolated()</code> so future tasks can wire tools to
+honour the active worktree; F04 itself does NOT modify existing tool
+implementations. Until that wiring lands (a Phase 3 follow-up or a later
+P1 feature), the agent must use absolute paths returned by
+<code>EnterWorktree</code>.</li>
+<li><strong>N5.</strong> F02/F03 follow-ups (permissions engine
+threading into <code>ConfirmationCoordinator</code>; persistence
+dispatcher wiring). Tracked separately in PROGRESS.md parking lot.</li>
+<li><strong>N6.</strong> <code>go-git</code> library. F04 shells out to
+the <code>git</code> binary, consistent with
+<code>internal/tools/git/</code>.</li>
+<li><strong>N7.</strong> Worktrees outside the repo
+(<code>&lt;repoRoot&gt;/../...</code> or
+<code>~/.helixcode/worktrees/...</code>). Q3 ratified the in-repo
+location
+<code>&lt;repoRoot&gt;/.helix-worktrees/&lt;name&gt;/</code>.</li>
+</ul>
+<h3 id="success-criteria">1.4 Success criteria</h3>
+<ul>
+<li><strong>S1.</strong> <code>make verify-compile</code> exits 0 with
+the new package + provider wiring + CLI subcommand.</li>
+<li><strong>S2.</strong> Unit tests for
+<code>internal/tools/worktree/</code> pass with <code>-race</code>. Most
+use REAL <code>git</code> against <code>t.TempDir()</code> ephemeral
+repos (shelling out is fast enough; no value in mocking).</li>
+<li><strong>S3.</strong> Integration test
+(<code>-tags=integration</code>, no mocks) demonstrates: a real
+<code>EnterWorktree</code> against an ephemeral repo creates
+<code>.helix-worktrees/feature-x/</code> with the same
+<code>README.md</code> content as <code>main</code>; a commit on
+<code>feature-x</code> does not change main’s HEAD;
+<code>RemoveWorktree</code> cleans the directory and the branch
+metadata.</li>
+<li><strong>S4.</strong> Challenge under
+<code>tests/e2e/challenges/worktree/</code> runs three scenarios with
+runtime evidence pasted into the close-out commit body. The
+mutation-test recipe in the README ensures the Challenge would fail if
+<code>ValidateName</code>’s regex check were disabled.</li>
+<li><strong>S5.</strong> Anti-bluff smoke
+(<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/tools/worktree/</code>)
+returns zero hits.</li>
+<li><strong>S6.</strong> All 4 agent tools registered with
+<code>tools.ToolRegistry</code>. <code>helixcode worktree list</code>
+smoke-tested. <code>/worktree</code> slash command discoverable via
+<code>registry.Get(&quot;worktree&quot;)</code>.</li>
+<li><strong>S7.</strong> Per-session state:
+<code>session.Manager.GetCurrentWorktree()</code> returns the path set
+by <code>EnterWorktree</code> and is reset by
+<code>ExitWorktree</code>.</li>
+</ul>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<h3 id="topology">2.1 Topology</h3>
+<pre><code>┌───────────────────────────────────────────────────────────────┐
+│ Agent tools          /worktree slash      helixcode worktree  │
+│ EnterWorktreeTool    /worktree enter      enter (prints help) │
+│ ExitWorktreeTool     /worktree exit       exit (prints help)  │
+│ ListWorktreesTool    /worktree list       list                │
+│ RemoveWorktreeTool   /worktree remove     remove              │
+└──────────────────────────────┬────────────────────────────────┘
+                               │
+                ┌──────────────▼───────────────────────────────┐
+                │ internal/tools/worktree/                     │  ← NEW
+                │   - manager.go (Manager + state)             │
+                │   - tools.go (4 Tool impls)                  │
+                │   - git.go (git binary wrapper)              │
+                │   - types.go (Worktree, constants)           │
+                │   - doc.go                                   │
+                └──────────────┬───────────────────────────────┘
+                               │ shells out to `git worktree …`
+                ┌──────────────▼─────────────┐
+                │ &lt;repoRoot&gt;/.git/worktrees/ │  ← git internal metadata
+                │ &lt;repoRoot&gt;/.helix-worktrees/&lt;name&gt;/ ← actual checkout
+                └────────────────────────────┘</code></pre>
+<p>A single <code>*worktree.Manager</code> instance is constructed at
+CLI startup with <code>repoRoot = git rev-parse --show-toplevel</code>
+(fallback to <code>os.Getwd()</code>). The same instance is shared by: -
+Tool registration (passed to each <code>*Tool</code> constructor). - The
+slash command (looked up via the existing
+<code>internal/commands/builtin</code> registry). - The Cobra subcommand
+group (passed in from <code>main.go</code>). - The session manager (used
+to keep <code>currentWorktree</code> consistent).</p>
+<h3 id="why-this-shape">2.2 Why this shape</h3>
+<ul>
+<li><strong>One new sub-package.</strong> Same pattern as F02
+(<code>permissions/</code>) and F03 (<code>persistence/</code>).
+Consistent file layout makes the codebase’s tools layer easy to
+navigate.</li>
+<li><strong>Shells out to <code>git</code>.</strong> Existing
+<code>internal/tools/git/</code> already does this (8
+<code>exec.Command</code> callsites). Consistent dependency surface; no
+new library.</li>
+<li><strong>Per-session state in one field, not a parallel
+file.</strong> The porting doc’s
+<code>internal/session/worktree_state.go</code> would add a new file for
+state that’s already naturally a property of the session. A 5-line field
+add to <code>session.Manager</code> is cleaner.</li>
+<li><strong><code>internal/tools/git/</code> untouched.</strong> That
+package is focused on auto-commit + attribution + message generation.
+Worktree management is a different concern — a workflow operation, not a
+commit-metadata one. Mixing them dilutes both.</li>
+</ul>
+<h3 id="component-responsibilities">2.3 Component responsibilities</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>types.go</code></td>
+<td><code>Worktree</code> struct (Name, Path, Branch); constants
+(<code>WorktreeNameRegex</code>, <code>WorktreeNameMaxLength</code>,
+<code>WorktreeDir</code>); compiled
+<code>worktreeNamePattern *regexp.Regexp</code></td>
+</tr>
+<tr>
+<td><code>git.go</code></td>
+<td>Pure functions wrapping <code>exec.Command(&quot;git&quot;, ...)</code>:
+<code>gitWorktreeAdd(ctx, repoRoot, branch, path) (string, error)</code>,
+<code>gitWorktreeAddNewBranch(ctx, repoRoot, branch, path) (string, error)</code>,
+<code>gitWorktreeRemove(ctx, repoRoot, path, force bool) (string, error)</code>,
+<code>gitWorktreeList(ctx, repoRoot) (string, error)</code>,
+<code>gitStatusPorcelain(ctx, dir) (string, error)</code>,
+<code>gitRevParseToplevel(ctx, cwd) (string, error)</code>. Each returns
+<code>(combinedOutput, err)</code>. Separated for unit-test
+clarity.</td>
+</tr>
+<tr>
+<td><code>manager.go</code></td>
+<td><code>Manager</code> struct (<code>repoRoot</code>,
+<code>currentWorktree</code>, <code>mu</code>);
+<code>NewManager(repoRoot)</code>, <code>ValidateName(name)</code>,
+<code>EnterWorktree(ctx, name, baseBranch) (string, error)</code>,
+<code>ExitWorktree()</code>,
+<code>ListWorktrees(ctx) ([]Worktree, error)</code>,
+<code>RemoveWorktree(ctx, name) error</code>,
+<code>GetCurrentDirectory() string</code>,
+<code>IsIsolated() bool</code></td>
+</tr>
+<tr>
+<td><code>tools.go</code></td>
+<td>4 <code>tools.Tool</code> interface impls. Each holds a
+<code>*Manager</code> reference; <code>Execute(ctx, params)</code>
+adapts to <code>Manager</code> calls; <code>Schema()</code> returns
+<code>tools.ToolSchema</code>; <code>Validate(params)</code> checks
+parameter types/names.</td>
+</tr>
+<tr>
+<td><code>cmd/cli/worktree_cmd.go</code></td>
+<td>Cobra <code>helixcode worktree {list,enter,exit,remove}</code>
+group. <code>enter</code>/<code>exit</code> print help “use from inside
+<code>helixcode chat</code> session” and exit 1.
+<code>list</code>/<code>remove</code> call <code>Manager</code> directly
+(since they’re stateless). The CLI’s main dispatcher (added in F02)
+intercepts <code>os.Args[1] == &quot;worktree&quot;</code> before
+<code>flag.Parse()</code>.</td>
+</tr>
+<tr>
+<td><code>internal/commands/worktree_command.go</code></td>
+<td><code>WorktreeCommand</code> struct implementing
+<code>commands.Command</code> (Name, Aliases, Description, Usage,
+Execute). <code>Execute</code> dispatches on
+<code>cmdCtx.Args[0]</code>: empty/<code>list</code> →
+<code>Manager.ListWorktrees</code>; <code>enter</code> →
+<code>EnterWorktree</code>; <code>exit</code> →
+<code>ExitWorktree</code>; <code>remove</code> →
+<code>RemoveWorktree</code>.</td>
+</tr>
+<tr>
+<td><code>internal/commands/builtin/register.go</code> (extended)</td>
+<td>Add
+<code>registry.Register(commands.NewWorktreeCommand(manager))</code>
+alongside the existing <code>NewPermissionsCommand</code> registration.
+Update <code>GetBuiltinCommandNames</code> and
+<code>GetBuiltinCommandAliases</code>.</td>
+</tr>
+<tr>
+<td><code>internal/session/manager.go</code> (extended)</td>
+<td>Add <code>currentWorktree string</code> field +
+<code>GetCurrentWorktree() string</code> +
+<code>SetCurrentWorktree(s string)</code> methods. Use the session’s
+existing mutex (or add <code>sync.RWMutex</code> if absent).</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code> (extended)</td>
+<td>Construct <code>*worktree.Manager</code> at startup with
+<code>repoRoot</code> resolved via <code>gitRevParseToplevel</code>
+(fallback to <code>os.Getwd()</code>). Inject into tool registry, Cobra
+subcommand group, and <code>WorktreeCommand</code> constructor.</td>
+</tr>
+<tr>
+<td><code>.gitignore</code> (root +
+<code>helix_code/.gitignore</code>)</td>
+<td>Add <code>.helix-worktrees/</code> entry to both.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-shapes">3. Data shapes</h2>
+<h3 id="constants">3.1 Constants</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/worktree/types.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> worktree</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;regexp&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// WorktreeNameRegex constrains worktree names to alphanumerics + . _ - .</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Matches claude-code&#39;s own validation pattern.</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    WorktreeNameRegex     <span class="op">=</span> <span class="st">`^[a-zA-Z0-9._-]+$`</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    WorktreeNameMaxLength <span class="op">=</span> <span class="dv">64</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    WorktreeDir           <span class="op">=</span> <span class="st">&quot;.helix-worktrees&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> worktreeNamePattern <span class="op">=</span> regexp<span class="op">.</span>MustCompile<span class="op">(</span>WorktreeNameRegex<span class="op">)</span></span></code></pre></div>
+<h3 id="worktree">3.2 <code>Worktree</code></h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Worktree <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Name   <span class="dt">string</span> <span class="st">`json:&quot;name&quot;`</span>              <span class="co">// user-facing identifier</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Path   <span class="dt">string</span> <span class="st">`json:&quot;path&quot;`</span>              <span class="co">// absolute path on disk</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Branch <span class="dt">string</span> <span class="st">`json:&quot;branch,omitempty&quot;`</span>  <span class="co">// best-effort, may be empty</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="manager">3.3 <code>Manager</code></h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    repoRoot        <span class="dt">string</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    currentWorktree <span class="dt">string</span>       <span class="co">// &quot;&quot; = main worktree</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    mu              sync<span class="op">.</span>RWMutex</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewManager<span class="op">(</span>repoRoot <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>Manager</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> ValidateName<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> EnterWorktree<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name<span class="op">,</span> baseBranch <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> ExitWorktree<span class="op">()</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> ListWorktrees<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">([]</span>Worktree<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> RemoveWorktree<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> GetCurrentDirectory<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> IsIsolated<span class="op">()</span> <span class="dt">bool</span></span></code></pre></div>
+<p><code>GetCurrentDirectory</code> returns
+<code>m.currentWorktree</code> if non-empty, else
+<code>m.repoRoot</code>. <code>IsIsolated</code> returns
+<code>m.currentWorktree != &quot;&quot;</code>. Both use <code>RLock</code>.
+<code>EnterWorktree</code> / <code>ExitWorktree</code> /
+<code>RemoveWorktree</code> use <code>Lock</code>.</p>
+<hr />
+<h2 id="branch-creation-semantics">4. Branch-creation semantics</h2>
+<pre><code>EnterWorktree(name, baseBranch):
+    if err := ValidateName(name); err != nil:
+        return &quot;&quot;, err
+
+    branch := baseBranch
+    if branch == &quot;&quot;:
+        branch = name
+
+    path := filepath.Join(repoRoot, WorktreeDir, name)
+
+    if path exists on disk:
+        # Existing worktree — validate clean, reuse
+        out := gitStatusPorcelain(ctx, path)
+        if out != &quot;&quot;:
+            return &quot;&quot;, &quot;worktree %q has uncommitted changes — clean or remove first&quot;
+        currentWorktree = path
+        return path, nil
+
+    if err := mkdir &lt;repoRoot&gt;/.helix-worktrees/:
+        return &quot;&quot;, err
+
+    # Try existing branch first
+    out, err := gitWorktreeAdd(ctx, repoRoot, branch, path)
+    if err != nil:
+        # Fall back to creating a new branch
+        out2, err2 := gitWorktreeAddNewBranch(ctx, repoRoot, branch, path)
+        if err2 != nil:
+            return &quot;&quot;, composite-error wrapping both outputs
+
+    currentWorktree = path
+    return path, nil</code></pre>
+<p>The two-step “try existing, fall back to new” pattern matches the
+porting doc.</p>
+<hr />
+<h2 id="submodule-handling">5. Submodule handling</h2>
+<p>Per §1.2 G4: <code>EnterWorktree</code> does NOT initialise
+submodules. The <code>Description</code> returned by
+<code>EnterWorktreeTool.Description()</code> documents this:</p>
+<blockquote>
+<p>“Enter a named git worktree for isolated development. Creates the
+worktree if it doesn’t exist (using the worktree name as the branch name
+when no base-branch is supplied). Submodules are NOT initialised — the
+meta-repo and the inner Go module at helix_code/ are present, but
+submodule directories under helix_agent/, dependencies/, etc. are empty
+placeholders. If your work needs submodule code, run
+<code>git submodule update --init --recursive</code> from inside the
+worktree using Bash.”</p>
+</blockquote>
+<p>This becomes part of the LLM-visible tool documentation.</p>
+<hr />
+<h2 id="cli-surface">6. CLI surface</h2>
+<h3 id="cobra-subcommands">6.1 Cobra subcommands</h3>
+<pre><code>helixcode worktree list                          # via Manager.ListWorktrees
+helixcode worktree remove &lt;name&gt;                 # via Manager.RemoveWorktree
+helixcode worktree enter &lt;name&gt; [base-branch]    # prints help + exits 1 (&quot;stateful; use from inside helixcode chat&quot;)
+helixcode worktree exit                          # same</code></pre>
+<p>The <code>enter</code>/<code>exit</code> subcommands DELIBERATELY
+exit non-zero with an explanatory message because session-scoped state
+can’t persist across stateless CLI invocations. The agent inside an
+interactive <code>helixcode chat</code> session uses the tool or slash
+command instead.</p>
+<h3 id="agent-tools">6.2 Agent tools</h3>
+<p>Registered with <code>tools.ToolRegistry</code> at startup. Each
+accepts the <code>*Manager</code> via constructor injection.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Parameters</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EnterWorktree</code></td>
+<td><code>name string</code> (required), <code>baseBranch string</code>
+(optional)</td>
+<td><code>{path: string}</code></td>
+</tr>
+<tr>
+<td><code>ExitWorktree</code></td>
+<td>none</td>
+<td><code>{exited: bool}</code></td>
+</tr>
+<tr>
+<td><code>ListWorktrees</code></td>
+<td>none</td>
+<td><code>{worktrees: []Worktree}</code></td>
+</tr>
+<tr>
+<td><code>RemoveWorktree</code></td>
+<td><code>name string</code> (required)</td>
+<td><code>{removed: bool}</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each tool’s <code>Schema()</code> returns a <code>ToolSchema</code>
+with <code>Type: &quot;object&quot;</code>, <code>Properties</code> enumerating
+the parameters (with <code>description</code> strings for the LLM), and
+<code>Required</code> listing the mandatory ones.</p>
+<h3 id="slash-command">6.3 Slash command</h3>
+<pre><code>/worktree                          # show current state + list (default)
+/worktree list                     # explicit list
+/worktree enter &lt;name&gt; [branch]    # mutates manager + session state
+/worktree exit
+/worktree remove &lt;name&gt;</code></pre>
+<p>Implementation pattern: same as F02’s <code>/permissions</code> slash
+command — a single struct implementing <code>commands.Command</code>,
+registered in <code>internal/commands/builtin/register.go</code>.</p>
+<hr />
+<h2 id="per-session-state">7. Per-session state</h2>
+<p><code>internal/session/manager.go</code> gains:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// existing fields ...</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    currentWorktree <span class="dt">string</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// mu sync.RWMutex (use the session&#39;s existing mutex if present;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// add one if not — depends on the current state of session/manager.go)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> GetCurrentWorktree<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> SetCurrentWorktree<span class="op">(</span>s <span class="dt">string</span><span class="op">)</span></span></code></pre></div>
+<p>Plumbing flow: <code>EnterWorktreeTool.Execute</code> calls BOTH
+<code>worktree.Manager.EnterWorktree(...)</code> (in-process state) AND
+<code>session.Manager.SetCurrentWorktree(path)</code>
+(session-persistent state). On session resume (P1-F11 future), the
+session’s <code>currentWorktree</code> is read and propagated back to
+the WorktreeManager. F04 wires the field; the resume path is
+N2-out-of-scope.</p>
+<p>For F04, the field’s only consumer outside the worktree wiring is the
+slash command’s <code>/worktree</code> (no-args) display, which reports
+current state by reading the session’s
+<code>GetCurrentWorktree()</code>.</p>
+<hr />
+<h2 id="error-handling">8. Error handling</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Case</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Empty name</td>
+<td><code>ValidateName</code> returns
+<code>&quot;worktree name cannot be empty&quot;</code></td>
+</tr>
+<tr>
+<td>Name &gt;64 chars</td>
+<td><code>ValidateName</code> returns
+<code>&quot;worktree name exceeds 64 characters&quot;</code></td>
+</tr>
+<tr>
+<td>Name fails regex</td>
+<td><code>ValidateName</code> returns
+<code>&quot;worktree name %q does not match pattern ^[a-zA-Z0-9._-]+$&quot;</code></td>
+</tr>
+<tr>
+<td><code>repoRoot</code> is not a git repo</td>
+<td><code>gitWorktreeAdd</code> fails; error wraps git’s verbatim
+output</td>
+</tr>
+<tr>
+<td>Pre-existing worktree dir is dirty</td>
+<td><code>EnterWorktree</code> returns
+<code>&quot;worktree %q has uncommitted changes — clean or remove first&quot;</code></td>
+</tr>
+<tr>
+<td>Pre-existing worktree dir is clean</td>
+<td>reuse; update <code>currentWorktree</code>; no git commands run</td>
+</tr>
+<tr>
+<td><code>EnterWorktree</code> while already in another worktree</td>
+<td>log WARN; replace <code>currentWorktree</code>; previous worktree’s
+checkout untouched on disk</td>
+</tr>
+<tr>
+<td><code>RemoveWorktree</code> on the worktree we’re inside</td>
+<td>error:
+<code>&quot;cannot remove the current worktree; ExitWorktree first&quot;</code></td>
+</tr>
+<tr>
+<td><code>RemoveWorktree</code> fails</td>
+<td>retry with <code>-f</code>; if both fail, return composite error
+wrapping both outputs</td>
+</tr>
+<tr>
+<td><code>ListWorktrees</code> when <code>.helix-worktrees/</code>
+doesn’t exist</td>
+<td>return empty slice + nil error</td>
+</tr>
+<tr>
+<td>Branch already checked out by another worktree</td>
+<td>git refuses; error wraps verbatim output (“already used by another
+worktree”)</td>
+</tr>
+<tr>
+<td>Concurrent <code>EnterWorktree</code> calls (same name)</td>
+<td><code>Manager.mu.Lock</code> serialises; both calls resolve to the
+same path</td>
+</tr>
+</tbody>
+</table>
+<p>Error messages are passed verbatim through to the LLM so it can react
+meaningfully (e.g., upon “branch already checked out”, the agent can
+call <code>ListWorktrees</code> to inspect).</p>
+<hr />
+<h2 id="testing-strategy-const-035-article-xi-11.9">9. Testing strategy
+(CONST-035 / Article XI §11.9)</h2>
+<h3 id="unit-internaltoolsworktree_test.go">9.1 Unit
+(<code>internal/tools/worktree/*_test.go</code>)</h3>
+<ul>
+<li><code>ValidateName</code>: empty, 65-char, valid
+(<code>feature-x</code>, <code>_pre-release</code>,
+<code>v1.2.3-rc1</code>), invalid (<code>/</code>, <code>..</code>,
+spaces, unicode, control chars).</li>
+<li><code>git.go</code> wrappers: each tested against a real ephemeral
+repo via <code>t.TempDir() + git init + git commit</code>. Asserts
+<code>gitWorktreeAdd</code> produces a checkout,
+<code>gitStatusPorcelain</code> empty for clean repo, etc.</li>
+<li><code>Manager.EnterWorktree</code>:
+<ul>
+<li>Existing branch path: ephemeral repo with <code>feature-x</code>
+already committed; <code>EnterWorktree(&quot;feature-x&quot;, &quot;&quot;)</code> succeeds;
+verify via <code>git worktree list</code>.</li>
+<li>New branch path: ephemeral repo without <code>feature-x</code>;
+<code>EnterWorktree(&quot;feature-x&quot;, &quot;&quot;)</code> falls through to
+<code>-b feature-x</code> and succeeds.</li>
+<li>Dirty pre-existing worktree: enter once, write a file, enter again →
+returns the dirty error.</li>
+<li><code>repoRoot</code> not a git repo: <code>t.TempDir()</code>
+directly (no <code>git init</code>) → returns the verbatim git
+error.</li>
+</ul></li>
+<li><code>Manager.ListWorktrees</code>: empty dir, multiple entries,
+file-in-<code>.helix-worktrees/</code> ignored (only directories
+counted).</li>
+<li><code>Manager.RemoveWorktree</code>: removes both the dir and the
+branch metadata; refuses to remove the current worktree.</li>
+<li><code>Manager.GetCurrentDirectory</code> / <code>IsIsolated</code>:
+defaults (returns <code>repoRoot</code>, false), after enter (returns
+worktree path, true), after exit (back to defaults).</li>
+</ul>
+<p>Mocks ALLOWED at this layer per CLAUDE.md, but most tests use REAL
+<code>git</code>.</p>
+<h3 id="integration-testsintegrationworktreeworktree_integration_test.go--tagsintegration">9.2
+Integration
+(<code>tests/integration/worktree/worktree_integration_test.go</code>,
+<code>-tags=integration</code>)</h3>
+<ul>
+<li>Uses a real <code>t.TempDir() + git init</code> repo with a real
+seed commit on <code>main</code>.</li>
+<li>Asserts: <code>EnterWorktree(&quot;feature-x&quot;, &quot;&quot;)</code> creates
+<code>.helix-worktrees/feature-x/</code>;
+<code>git -C &lt;path&gt; branch --show-current</code> returns
+<code>feature-x</code>; the worktree contains the same
+<code>README.md</code> content as <code>main</code>.</li>
+<li>Asserts: writing a file in the worktree, committing on
+<code>feature-x</code>, then verifying main’s HEAD is unchanged.</li>
+<li>Asserts: <code>RemoveWorktree(&quot;feature-x&quot;)</code> deletes the dir
+and the branch metadata (verifies via
+<code>git worktree list</code>).</li>
+</ul>
+<p><strong>No mocks.</strong></p>
+<h3 id="challenge-testse2echallengesworktree">9.3 Challenge
+(<code>tests/e2e/challenges/worktree/</code>)</h3>
+<p>End-to-end via a Go-built driver (mirrors F03’s pattern):</p>
+<ul>
+<li><strong>S1</strong> — Create worktree, write a file, commit on the
+new branch, verify main’s HEAD is unchanged. (Proves real
+isolation.)</li>
+<li><strong>S2</strong> — Re-enter the same worktree (already exists,
+clean) → no error, returns same path. (Proves idempotent re-entry.)</li>
+<li><strong>S3</strong> — Try to enter a worktree whose name fails
+validation: <code>../etc</code>, empty (<code>&quot;&quot;</code>), 65-char
+string. All three rejected with the appropriate error. (Proves the
+security guard.)</li>
+</ul>
+<p>Runtime evidence: per-scenario stdout + filesystem inspection
+(<code>ls -la .helix-worktrees/</code> + <code>git worktree list</code>
+output) pasted into the close-out commit body.</p>
+<h3 id="anti-bluff-smoke">9.4 Anti-bluff smoke</h3>
+<p><code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/tools/worktree/</code>
+must be empty.</p>
+<h3 id="mutation-test-const-039">9.5 Mutation test (CONST-039)</h3>
+<p>Temporarily comment out the regex check in <code>ValidateName</code>.
+Re-run Challenge — S3 MUST FAIL because <code>../etc</code> is now
+accepted. Revert and confirm PASS.</p>
+<hr />
+<h2 id="sub-task-plan">10. Sub-task plan</h2>
+<p>13 tasks (matches F02’s surface area):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>Bootstrap <code>06_phase_1_evidence.md</code> §F04 + advance
+PROGRESS to F04-active + add <code>.helix-worktrees/</code> to root +
+<code>helix_code/.gitignore</code></td>
+<td>docs + gitignore only</td>
+</tr>
+<tr>
+<td>T02</td>
+<td><code>internal/tools/worktree/types.go</code> + <code>doc.go</code>
+skeleton (constants + Worktree struct)</td>
+<td>compile-only</td>
+</tr>
+<tr>
+<td>T03</td>
+<td><code>git.go</code> thin git-binary wrappers + tests against real
+ephemeral repo (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T04</td>
+<td><code>manager.go</code>: <code>Manager</code> struct +
+<code>ValidateName</code> + <code>GetCurrentDirectory</code> +
+<code>IsIsolated</code> (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T05</td>
+<td><code>Manager.EnterWorktree</code> (TDD; existing-branch path,
+new-branch path, dirty rejection)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T06</td>
+<td><code>Manager.ExitWorktree</code> +
+<code>Manager.ListWorktrees</code> + <code>Manager.RemoveWorktree</code>
+(TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T07</td>
+<td><code>tools.go</code>: 4 <code>tools.Tool</code> interface impls +
+tests</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T08</td>
+<td><code>internal/session/manager.go</code>: add
+<code>currentWorktree</code> field + getter/setter (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T09</td>
+<td><code>cmd/cli/worktree_cmd.go</code> Cobra subcommand group +
+dispatcher addition + tests</td>
+<td>unit tests pass; <code>helixcode worktree list</code>
+smoke-tested</td>
+</tr>
+<tr>
+<td>T10</td>
+<td><code>internal/commands/worktree_command.go</code> slash command +
+register in <code>builtin/register.go</code> (TDD)</td>
+<td>unit + builtin-registry tests</td>
+</tr>
+<tr>
+<td>T11</td>
+<td><code>cmd/cli/main.go</code> startup wiring: construct
+<code>worktree.Manager</code>; integration test under
+<code>tests/integration/worktree/</code> (no mocks, real ephemeral
+repo)</td>
+<td><code>-tags=integration</code> test passes</td>
+</tr>
+<tr>
+<td>T12</td>
+<td>Challenge under <code>tests/e2e/challenges/worktree/</code> with
+three scenarios from §9.3</td>
+<td>Challenge PASS in commit</td>
+</tr>
+<tr>
+<td>T13</td>
+<td>Feature 4 close-out: anti-bluff scan,
+<code>make verify-foundation</code>, push to all four remotes (no
+force)</td>
+<td>PROGRESS flipped to F05</td>
+</tr>
+</tbody>
+</table>
+<p>13 sub-commits expected. F05 (Hook-Based Extensibility) unblocked
+when T13 lands.</p>
+<hr />
+<h2 id="out-of-scope-for-f04">11. Out of scope for F04</h2>
+<p>Listed in §1.3 (N1–N7). Summarised here: subagent isolation (P1-F15),
+session resume (P1-F11), submodule auto-init, worktree-aware
+Read/Write/Bash tools (later wiring), F02/F03 follow-ups,
+<code>go-git</code>, out-of-repo storage.</p>
+<hr />
+<h2 id="risks-and-mitigations">12. Risks and mitigations</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixCode is itself sometimes a submodule of another repo;
+<code>.helix-worktrees/</code> inside a submodule may confuse
+<code>git worktree</code></td>
+<td><code>Manager.NewManager</code> uses
+<code>gitRevParseToplevel</code> to resolve the actual repo root; T11
+integration test creates an ephemeral repo and verifies the path
+layout.</td>
+</tr>
+<tr>
+<td>Branch already checked out elsewhere</td>
+<td>Plan documents the error case; tool surfaces git’s verbatim output.
+The agent can call <code>ListWorktrees</code> to investigate.</td>
+</tr>
+<tr>
+<td>Concurrent <code>EnterWorktree</code> calls (race on same name)</td>
+<td><code>Manager.mu</code> serialises mutations; concurrent enters with
+the same name converge on the same path.</td>
+</tr>
+<tr>
+<td><code>RemoveWorktree</code> on a worktree that was manually
+deleted</td>
+<td><code>git worktree remove</code> may fail; falls back to
+<code>-f</code>; documented.</td>
+</tr>
+<tr>
+<td><code>.helix-worktrees/</code> name collides with user data</td>
+<td>Unlikely (dot-prefix + specific name). Collision triggers a
+startup-time error or a documented <code>git worktree add</code>
+failure.</td>
+</tr>
+<tr>
+<td>HelixCode meta-repo’s tracked-subdirectory-not-submodule layout for
+<code>helix_code/</code> makes <code>git worktree</code> semantics
+unusual</td>
+<td>The inner Go module IS present in the worktree (it’s a tracked
+subdirectory). T11 integration test verifies.</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code> is large and tangled (per F02/F03
+review notes)</td>
+<td>T09 + T11 only ADD a few lines. No restructuring.</td>
+</tr>
+<tr>
+<td>F02’s permissions wiring gap + F03’s persistence wiring gap also
+touch <code>cmd/cli/main.go</code></td>
+<td>F04’s wiring is independent (different fields, different methods).
+The three features coexist on the CLI struct.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="references">13. References</h2>
+<ul>
+<li>Synthesis spec:
+<code>docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>
+§4.1 (Phase 1 charter)</li>
+<li>Porting doc:
+<code>docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/porting_claude_code.md</code>
+§Feature 4</li>
+<li>Predecessor spec:
+<code>docs/superpowers/specs/2026-05-05-p1-f03-tool-result-persistence-design.md</code>
+(commit <code>f813fc9</code>)</li>
+<li>Predecessor plan:
+<code>docs/superpowers/plans/2026-05-05-p1-f03-tool-result-persistence.md</code>
+(commit <code>d33f674</code>)</li>
+<li>Evidence file (live):
+<code>docs/improvements/06_phase_1_evidence.md</code></li>
+<li>Existing infrastructure being audited (NOT modified except for
+wiring):
+<ul>
+<li><code>helix_code/internal/tools/git/</code> — auto-commit +
+attribution + message generation; uses <code>os/exec</code> to shell out
+to git (8 callsites). Pattern reused; package itself not modified.</li>
+<li><code>helix_code/internal/tools/registry.go</code> —
+<code>Tool</code> interface (<code>Name()</code>,
+<code>Description()</code>,
+<code>Execute(ctx, params) (interface{}, error)</code>,
+<code>Schema() ToolSchema</code>, <code>Category() ToolCategory</code>,
+<code>Validate(params) error</code>); <code>CategoryShell</code> is the
+closest existing category. F04 introduces no new category — worktree
+tools use <code>CategoryShell</code> (closest semantic match).</li>
+<li><code>helix_code/internal/commands/command.go</code> — slash command
+<code>Command</code> interface</li>
+<li><code>helix_code/internal/commands/builtin/register.go</code> —
+slash-command registry entry point</li>
+<li><code>helix_code/internal/session/manager.go</code> — session state
+(extended with one field)</li>
+</ul></li>
+<li>Constitutional anchors:
+<ul>
+<li>Article XI §11.9 — Anti-Bluff Forensic Anchor</li>
+<li>CONST-035 — Zero-Bluff Mandate</li>
+<li>CONST-039 — Challenge System Integrity (mutation testing
+mandatory)</li>
+<li>CONST-042 — No-Secret-Leak (N/A; worktree paths may contain user
+data but not credentials)</li>
+<li>CONST-043 — No-Force-Push (close-out commit T13 pushes without
+force)</li>
+</ul></li>
+</ul>
+<hr />
+<p><em>End of P1-F04 Git Worktree Agent Isolation design spec.</em></p>
+</body>
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>coverage-matrix</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">coverage-matrix</h1>
+</header>
+<h1 id="test-type-coverage-matrix-living-ledger">Test-Type Coverage
+Matrix (Living Ledger)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>LIVING LEDGER — current state verified against the tree on
+2026-06-10; targets are PLANNED (SP-owned)</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td><code>helix_code/</code> (inner Go app <code>dev.helix.code</code>)
++ delegated <code>submodules/helix_qa</code> +
+<code>submodules/challenges</code></td>
+</tr>
+<tr>
+<td>Source plan</td>
+<td><code>docs/superpowers/specs/plans/2026-06-10-SP7-testing-qa-plan.md</code>
+(§1 ground truth, §2 matrix, §7 guard rows)</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>Cascades from <code>constitution/</code> + root
+<code>CLAUDE.md</code>/<code>CONSTITUTION.md</code>. Anti-bluff §11.4
+governs every PASS.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4 / §11.4.123).</strong> This ledger
+separates <strong>what exists today</strong> (file:line or
+<code>ABSENT</code>, verified against the live tree on 2026-06-10) from
+<strong>the target</strong> (PLANNED, owned by a sub-program). A cell
+reading <code>ABSENT</code> or <code>THIN</code> is an honest coverage
+gap, not a failure to find. CONST-050(B): a <em>delegated</em>
+HelixQA/Challenge slot counts ONLY if it truly exercises HelixCode with
+captured evidence — otherwise it is a coverage-bluff risk, flagged
+below.</p>
+</blockquote>
+<hr />
+<h2 id="how-to-read-this-ledger">1. How to read this ledger</h2>
+<ul>
+<li><strong>Rows</strong> = the 15 supported test types (plus two
+cross-cutting meta rows: §1.1 paired-mutation, regression-guard).</li>
+<li><strong>Columns</strong>:
+<ul>
+<li><strong>Today’s status</strong> — <code>file:line</code> /
+<code>dir/</code> if present; <code>ABSENT</code> / <code>THIN</code> /
+<code>DELEGATED</code> otherwise (verified 2026-06-10).</li>
+<li><strong>Target</strong> — the intended end state per the SP7
+plan.</li>
+<li><strong>Owning SP</strong> — which sub-program’s feature area the
+type must cover.</li>
+</ul></li>
+<li><strong>SP feature areas</strong> (the 6 columns of “what must be
+covered”): | SP | Feature area | |—-|————–| | <strong>SP1</strong> |
+Model access (key recognition → working-model funnel) | |
+<strong>SP2</strong> | HelixAgent exposure (unified catalog,
+per-provider/per-model targeting) | | <strong>SP4</strong> | CLI bridge
+(spawn real CLI agents; prompt→edit→commit) | | <strong>SP5</strong> |
+Parallel / subagent execution (worker-pool, scheduler, consensus) | |
+<strong>SP6</strong> | Dynamic flows (flow engine / DAG / pipeline /
+agent-mesh) | | <strong>SP7</strong> | Cross-cutting QA (this ledger;
+autonomous sessions; guard registry) |</li>
+</ul>
+<blockquote>
+<p><strong>Verified ground truth (SP7 §1, re-confirmed
+2026-06-10):</strong> HelixCode-local coverage is
+<strong>STRONG</strong> for unit / integration / e2e / security / chaos
+/ stress / performance / benchmarking, with a real §1.1 meta-test
+harness at
+<code>helix_code/tests/stresschaos/stresschaos_meta_test.go</code>. The
+gaps are concentrated in ddos / scaling / ux / ui (local), HelixQA
+staleness, and the per-defect regression-guard registry.</p>
+</blockquote>
+<hr />
+<h2 id="the-15-test-types-current-status-target-owning-sp">2. The 15
+test types × current status × target × owning SP</h2>
+<table>
+<colgroup>
+<col style="width: 2%" />
+<col style="width: 10%" />
+<col style="width: 47%" />
+<col style="width: 17%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Test type</th>
+<th>Today’s status (helix_code-local + delegated)</th>
+<th>Target (PLANNED)</th>
+<th>Owning SP feature(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>unit</strong></td>
+<td>PRESENT — <code>helix_code/internal/**/*_test.go</code>,
+<code>helix_code/tests/unit/</code>; Makefile <code>test:107</code></td>
+<td>none (strong); add SP-specific unit layers per new pkg</td>
+<td>SP1 (filter logic), SP4 (provider adapters), SP5
+(scheduler/resolver), SP6 (flow units)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>integration</strong> (<code>-tags=integration</code>)</td>
+<td>PRESENT — <code>helix_code/tests/integration/</code>
+(<code>api_integration_test.go</code>, <code>approval_test.go</code>);
+<code>test-integration-full:222</code></td>
+<td>none; add SP1 real-verifier+real-provider case
+<code>sp1_model_access_test.go</code></td>
+<td>SP1 (real verifier CONST-037 + real provider HTTP), SP2 (catalog vs
+real registry), SP4 (spawn real CLI), SP5 (subagent spawn)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>e2e</strong></td>
+<td>PRESENT — <code>helix_code/tests/e2e/</code>
+(<code>complete_workflow_test.go</code>,
+<code>challenges/executor.go</code>,
+<code>comprehensive_matrix_test.go</code>);
+<code>test-e2e-full:228</code></td>
+<td>none; add SP1 <code>sp1_working_models</code>
+one-key→real-generate</td>
+<td>SP1 (<code>/api/v1/llm/generate</code> real output), SP2
+(catalog→completion), SP4 (round-trip), SP5/SP6 (multi-agent
+completes)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>full-automation</strong></td>
+<td>DELEGATED + THIN local — HelixQA <code>cmd/helixqa autonomous</code>
++ <code>helix_code/tests/automation/</code>;
+<code>test-complete:246</code></td>
+<td>autonomous session wired to a §11.4.116 sync-channel (SP7 Phase C);
+<code>-count=3</code> re-runnable</td>
+<td>ALL SPs</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>security</strong></td>
+<td>PRESENT —
+<code>helix_code/tests/security/{owasp,authentication,authorization,tools_security}_test.go</code>
++ scanners <code>security-scan*:751-775</code>;
+<code>test-security-full:234</code></td>
+<td>add SP1 key-leak / CONST-042 cases</td>
+<td>SP1 (key handling CONST-042), SP4 (sandboxed exec), SP2
+(cross-module authz)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>ddos</strong></td>
+<td><strong>ABSENT local</strong> (<code>helix_code/tests/ddos</code>
+does not exist) — DELEGATED only: HelixQA
+<code>challenges/scripts/ddos_health_flood_challenge.sh</code> +
+<code>banks/ddos-ratelimit-comprehensive.yaml</code></td>
+<td><strong>GAP-1</strong> → local
+<code>helix_code/tests/ddos/ddos_harness.go</code> (flood N≥100, capture
+p50/p95/p99) + <code>CM-DDOS-HITS-HELIXCODE</code> gate (SP7 Task
+A1/A5)</td>
+<td>SP1 (rate-limit + <code>/generate</code> flood), SP2
+(exposure-endpoint flood)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>scaling</strong></td>
+<td><strong>ABSENT local</strong> (<code>helix_code/tests/scaling</code>
+does not exist) — DELEGATED only: HelixQA
+<code>challenges/scripts/scaling_horizontal_challenge.sh</code></td>
+<td><strong>GAP-2</strong> → local
+<code>helix_code/tests/scaling/scaling_harness.go</code> (throughput vs
+N=1,2,4,8 over <code>internal/worker</code>) +
+<code>CM-SCALING-HITS-HELIXCODE</code> gate (SP7 Task A2/A5)</td>
+<td>SP5 (SSH worker-pool scale-out), SP1 (provider-fanout throughput vs
+N)</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>chaos</strong></td>
+<td>PRESENT — <code>helix_code/tests/stresschaos/chaos.go</code> +
+per-pkg <code>*_chaos_test.go</code> (~15 pkgs);
+<code>stress-chaos:114</code></td>
+<td>extend for new features only (SP5 kill-mid-flight, SP4 CLI crash,
+SP6 partial-DAG)</td>
+<td>SP5, SP4, SP6</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>stress</strong></td>
+<td>PRESENT — <code>helix_code/tests/stresschaos/stresschaos.go</code> +
+per-pkg <code>*_stress_test.go</code>
+(<code>internal/worker/worker_pool_stress_test.go</code>,
+<code>task/</code>, <code>agent/</code>, <code>workflow/</code>)</td>
+<td>extend for new features (SP5 N≥10 parallel §11.4.85, SP4 N
+concurrent CLI, SP6 wide fan-out)</td>
+<td>SP5, SP4, SP6</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>performance</strong></td>
+<td>PRESENT —
+<code>helix_code/tests/performance/{benchmark_test.go,competitor_baseline_test.go,pprof_harness_test.go,scenarios/}</code>;
+<code>test-benchmark:157</code></td>
+<td>add SP1 tokens/latency (ties §11.4.141) + SP5
+throughput-vs-parallelism scenarios</td>
+<td>SP1 (tokens/latency), SP5 (throughput vs parallelism)</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>benchmarking</strong></td>
+<td>PRESENT — same as #10 + PGO <code>pgo-refresh:90</code> + HelixQA
+<code>banks/benchmarking-baselines.yaml</code></td>
+<td>add baseline rows for new features (ABSENT today)</td>
+<td>SP1 (provider baselines), SP5 (parallelism), SP6 (flow-engine)</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>ui</strong></td>
+<td><strong>THIN local</strong> —
+<code>helix_code/applications/{terminal-ui,desktop}</code> tests;
+DELEGATED HelixQA <code>ui_terminal_interaction_challenge.sh</code></td>
+<td><strong>GAP-3</strong> → local
+<code>helix_code/tests/ui/tui_interaction_test.go</code> (tcell
+<code>SimulationScreen</code>) + §11.4.117 CV/OCR pixel-oracle for
+non-introspectable UI (self-validated golden-good/golden-bad) (SP7 Task
+A4)</td>
+<td>SP4 (terminal interaction), SP6 (human-in-loop flow node UI)</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>ux</strong></td>
+<td><strong>ABSENT local</strong> (<code>helix_code/tests/ux</code> does
+not exist) — DELEGATED only: HelixQA
+<code>challenges/scripts/ux_end_to_end_flow_challenge.sh</code></td>
+<td><strong>GAP-4</strong> → local
+<code>helix_code/tests/ux/ux_journey_test.go</code>
+(init→list→generate→exec, captured transcript §11.4.83) (SP7 Task
+A3)</td>
+<td>SP4 (end-user CLI journey), SP6 (human-in-loop UX flows)</td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>Challenges</strong></td>
+<td>PRESENT — <code>submodules/challenges/{banks,challenges,cmd}</code>
+(<code>p1-f06..p2-f24</code>) +
+<code>helix_code/tests/e2e/challenges/</code></td>
+<td>add new banks per new feature/submodule (ABSENT today) —
+e.g. <code>challenges/banks/sp1_model_access/</code></td>
+<td>ALL SPs</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>HelixQA banks / autonomous-QA-session</strong></td>
+<td>DELEGATED + <strong>STALE</strong> — HelixQA
+<code>cmd/helixqa autonomous</code> +
+<code>banks/helixcode-*.yaml</code>; pin
+<code>v4.0.0-393-g4d2dcb2</code> (round 219 / 2026-05-19)</td>
+<td><strong>GAP-5</strong> → fetch/pull to latest + bump pointer (SP7
+Phase B); wire §11.4.116 sync-channel onto
+<code>internal/helixqa/wrapper.go</code> (Phase C); banks for new
+features</td>
+<td>ALL SPs</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Coverage gaps found: 6</strong> — GAP-1 ddos-local, GAP-2
+scaling-local, GAP-3 ui-thin(+pixel-oracle), GAP-4 ux-local, GAP-5
+HelixQA-stale/no-sync-channel, GAP-6 regression-guard-registry (rows
+below).</p>
+</blockquote>
+<hr />
+<h2 id="cross-cutting-meta-rows">3. Cross-cutting meta rows</h2>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 32%" />
+<col style="width: 36%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>Row</th>
+<th>Today’s status</th>
+<th>Target (PLANNED)</th>
+<th>Owning SP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>§1.1 paired-mutation meta</strong></td>
+<td>PRESENT —
+<code>helix_code/tests/stresschaos/stresschaos_meta_test.go</code>
+(plants deadlock/leak/error-rate/below-floor/chaos-panic, asserts
+detection); <code>stress-chaos-meta:121</code></td>
+<td>every NEW harness/gate gets its own paired mutation (each Phase A
+harness, every <code>CM-*</code> gate)</td>
+<td>every SP harness + gate</td>
+</tr>
+<tr>
+<td><strong>regression-guard</strong></td>
+<td>PRESENT-but-not-a-registry —
+<code>helix_code/tests/regression/{critical_paths_test.go,server_timeout_test.go}</code>
+(no <code>RED_MODE</code> polarity, no D-N rows)</td>
+<td><strong>GAP-6</strong> → standing
+<code>helix_code/tests/regression/guards/</code> registry with
+<code>RED_MODE</code> switch (§11.4.115), tag-blocking, risk-ordered
+first (§11.4.132) (SP7 Phase E)</td>
+<td>every fixed defect across all SPs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="per-defect-regression-guard-rows-gap-6-sp7-phase-e-7">4.
+Per-defect regression-guard rows (GAP-6, SP7 Phase E §7)</h2>
+<p>Each guard = one source with a <code>RED_MODE</code> polarity switch:
+<code>RED_MODE=1</code> reproduces the historical defect on the pre-fix
+artifact (the proof the guard is real); <code>RED_MODE=0</code> is the
+standing GREEN guard asserting absence (§11.4.115). <strong>All ABSENT
+today</strong> (<code>helix_code/tests/regression/guards/</code> does
+not exist).</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 9%" />
+<col style="width: 27%" />
+<col style="width: 26%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Guard file (PLANNED)</th>
+<th>Defect</th>
+<th>RED (<code>=1</code>) reproduces</th>
+<th>GREEN (<code>=0</code>) asserts</th>
+<th>Owning SP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>D1_completion_models_guard_test.go</code></td>
+<td>D-1 hardcoded 3-model list —
+<code>helix_agent/internal/handlers/completion.go:406</code> (verified
+present)</td>
+<td><code>/v1/completion/models</code> returns the static 3-item
+list</td>
+<td>endpoint returns LLMsVerifier-sourced models; count ≠ hardcoded
+set</td>
+<td>SP2</td>
+</tr>
+<tr>
+<td><code>D2_cli_listmodels_guard_test.go</code></td>
+<td>D-2 CLI lists failed/pending as available —
+<code>cmd/cli/main.go:1361</code> (verified present)</td>
+<td>a <code>failed</code>/<code>pending</code> model appears in
+<code>handleListModels</code> output</td>
+<td>only <code>Verified ∧ score≥min</code> models listed</td>
+<td>SP1</td>
+</tr>
+<tr>
+<td><code>D3_loadapikeys_wired_guard_test.go</code></td>
+<td>D-3 dead <code>secrets.LoadAPIKeys</code> —
+<code>internal/secrets/loader.go:30</code> (verified: no prod
+call-site)</td>
+<td>call-graph proof <code>LoadAPIKeys</code> unreferenced in prod
+path</td>
+<td>prod startup invokes <code>LoadAPIKeys</code> (real key load)</td>
+<td>SP1</td>
+</tr>
+<tr>
+<td><code>D4_working_model_filter_guard_test.go</code></td>
+<td>D-4 filter loaded-never-applied — <code>adapter.go:175</code>
+(verified: <code>GetMinAcceptableScore</code> exists,
+<code>GetWorkingModels</code> ABSENT)</td>
+<td>filter config loaded but output includes non-working models</td>
+<td>filter APPLIED — non-working excluded</td>
+<td>SP1</td>
+</tr>
+<tr>
+<td><code>D5_provider_hardcode_guard_test.go</code></td>
+<td>D-5 hardcoded lists — <code>openai_provider.go</code>,
+<code>anthropic_provider.go</code></td>
+<td>provider <code>GetModels</code> returns a static literal slice</td>
+<td><code>GetModels</code> issues a real provider HTTP query
+(CONST-036)</td>
+<td>SP1</td>
+</tr>
+<tr>
+<td><code>D6_cli_agent_exec_guard_test.go</code></td>
+<td>D-6 stub returns hardcoded strings —
+<code>helix_agent/.../qwencode.go:101/115/137</code></td>
+<td>method returns canned string without exec</td>
+<td>method <code>os/exec</code>s the real binary + surfaces real exit
+code</td>
+<td>SP4</td>
+</tr>
+<tr>
+<td><code>D7_replace_dev_helix_agent_guard_test.go</code></td>
+<td>D-7 <code>helix_code/go.mod</code> lacks
+<code>replace dev.helix.agent</code></td>
+<td>go.mod has no <code>replace</code>; real
+<code>clis</code>/<code>agentic</code> un-importable</td>
+<td><code>replace</code> present; a HelixCode test imports + runs the
+real helix_agent <code>clis</code></td>
+<td>SP4/SP5</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="anti-delegation-bluff-gates-sp7-task-a5-planned">5.
+Anti-delegation-bluff gates (SP7 Task A5 — PLANNED)</h2>
+<p>To stop a delegated HelixQA slot from being a config-only PASS
+(CONST-050(B)), each delegated row earns a pre-build gate that asserts
+the HelixQA script’s last run emitted captured evidence referencing a
+<strong>live</strong> HelixCode endpoint/binary (parsing
+<code>qa-results/</code>), each with a paired §1.1 mutation:</p>
+<table>
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 35%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gate (PLANNED)</th>
+<th>Converts row</th>
+<th>Asserts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CM-DDOS-HITS-HELIXCODE</code></td>
+<td>#6 ddos</td>
+<td>the ddos script hit a real HelixCode endpoint with captured
+p50/p95/p99</td>
+</tr>
+<tr>
+<td><code>CM-SCALING-HITS-HELIXCODE</code></td>
+<td>#7 scaling</td>
+<td>scale-out exercised real <code>internal/worker</code> with a
+captured throughput table</td>
+</tr>
+<tr>
+<td><code>CM-UX-HITS-HELIXCODE</code></td>
+<td>#13 ux</td>
+<td>the journey drove the real CLI with a captured bidirectional
+transcript</td>
+</tr>
+<tr>
+<td><code>CM-UI-HITS-HELIXCODE</code></td>
+<td>#12 ui</td>
+<td>the TUI interaction asserted on real rendered cells / OCR
+self-validation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="na-or-delegated-by-design-honest-coverage-notes-11.4.3">6. N/A
+or delegated-by-design (honest coverage notes, §11.4.3)</h2>
+<ul>
+<li><strong>SP1 (server/CLI-only surface):</strong> UI/UX/DDoS/scaling
+are N/A-or-delegated at the SP1 layer; SP7 owns the cross-cutting local
+harnesses (Phase A). Recorded as an honest coverage note, never faked
+(SP1 plan §7).</li>
+<li><strong>DDoS/scaling/ux</strong> currently have NO HelixCode-local
+harness — the delegated HelixQA scripts are the only assets and are
+unproven against HelixCode endpoints until the Task A5 gates land. Treat
+their PASS as provisional until evidence-backed.</li>
+</ul>
+<hr />
+<h2 id="summary">7. Summary</h2>
+<ol type="1">
+<li>The 15 types split into <strong>strong-local</strong> (unit,
+integration, e2e, security, chaos, stress, performance, benchmarking)
+and <strong>gap</strong> (ddos, scaling, ux, ui-thin, HelixQA-stale)
+plus the regression-guard registry gap.</li>
+<li><strong>8 types are working locally today</strong> with a real §1.1
+meta-test harness backing the stress/chaos floor.</li>
+<li><strong>4 types have local gaps</strong> (ddos/scaling/ux ABSENT, ui
+THIN) — covered today only by delegated HelixQA scripts, which are a
+CONST-050(B) coverage-bluff risk until the
+<code>CM-*-HITS-HELIXCODE</code> gates prove they hit real
+HelixCode.</li>
+<li><strong>HelixQA is stale</strong> (round 219 / 2026-05-19, pin
+<code>v4.0.0-393-g4d2dcb2</code>) and not wired to a §11.4.116
+sync-channel — Phase B/C target.</li>
+<li><strong>The per-defect regression-guard registry (GAP-6) is
+ABSENT</strong> — D-1..D-7 guards are all PLANNED; the existing
+<code>tests/regression/</code> files are not a <code>RED_MODE</code>
+registry.</li>
+<li>Every PLANNED cell traces to a specific SP7 task (Phase A harnesses,
+Phase B HelixQA bump, Phase C sync-channel, Phase D code-review gate,
+Phase E guards); nothing here is claimed done that the tree does not
+show.</li>
+</ol>
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<ul>
+<li>Plan:
+<code>docs/superpowers/specs/plans/2026-06-10-SP7-testing-qa-plan.md</code>
+(§1, §2, §7).</li>
+<li>Live tree: <code>helix_code/tests/</code> (present: automation, e2e,
+integration, performance, regression, security, stresschaos, unit;
+<strong>ABSENT</strong>: ddos, scaling, ux, ui),
+<code>helix_code/tests/stresschaos/stresschaos_meta_test.go</code>
+(present), <code>helix_code/tests/regression/</code>
+(<code>critical_paths_test.go</code>,
+<code>server_timeout_test.go</code> only),
+<code>helix_code/internal/helixqa/wrapper.go</code> (present),
+<code>submodules/helix_qa</code> pin <code>v4.0.0-393-g4d2dcb2</code>,
+<code>submodules/helix_agent/internal/handlers/completion.go:406</code>
+(hardcoded list present),
+<code>helix_code/internal/verifier/adapter.go:175</code>
+(<code>GetMinAcceptableScore</code> present,
+<code>GetWorkingModels</code> ABSENT).</li>
+</ul>
+</body>
+</html>

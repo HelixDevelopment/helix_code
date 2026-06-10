@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-054-memory-leak_detector-parallel-flake-11.4.50">HXC-054 —
+memory leak_detector parallel flake (§11.4.50)</h1>
+<p><strong>Captured:</strong> 2026-06-09T14:54:03Z · Bug · Fixed (→
+Fixed.md) <strong>Submodule:</strong> submodules/memory · test
+<code>TestLeakDetector_FalsePositive_HeapOnly</code>
+(pkg/memory/leak_detector_edge_test.go) ## Reproduction (RED, pre-fix)
+<code>go test ./pkg/memory -count=5 -race -parallel=16 -cpu=8</code> ×
+25 fresh runs → 21 PASS / 4 FAIL (ratios 101.57/104.71/105.69/106.21
+just above 100.0 threshold). ## FACT root cause (§11.4.102)
+HeapGrowthRatio uses process-global runtime.MemStats.HeapAlloc. Under
+t.Parallel(), sibling edge tests (50MB allocation etc.) inflate the
+shared heap; baseline captured at a post-GC trough (~1.5MB) vs live
+(~230MB) → ratio crosses 100× though this detector allocated nothing.
+Instrumented: baseline=1517176 live=237499520 ratio=156.54. ## Fix (root
+cause, not symptom) Dropped t.Parallel() (so the heap-growth window
+isn’t polluted by siblings) + runtime.GC()×2 before Start() (settled
+baseline). Assertion contract unchanged. +34/-3. ## GREEN evidence
+(post-fix) - exact scenario -count=5 -race -parallel=16 -cpu=8 → 25/25
+PASS - mandated -count=50 -race → 50/50 PASS (160.8s) - with
+large-allocator siblings under 22× CPU saturation, 50 runs → 50/50 PASS
+- go vet clean Commit <code>dfc8f03</code>, pushed ff
+<code>004d7b5..dfc8f03</code> (both remotes confirmed).</p>
+</body>
+</html>

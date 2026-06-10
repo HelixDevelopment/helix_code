@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ADR-003-memory-provider-strategy</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ADR-003-memory-provider-strategy</h1>
+</header>
+<h1 id="adr-003-memory-provider-strategy">ADR-003: Memory Provider
+Strategy</h1>
+<h2 id="status">Status</h2>
+<p>Accepted</p>
+<h2 id="date">Date</h2>
+<p>2026-01-08</p>
+<h2 id="context">Context</h2>
+<p>HelixCode requires long-term memory capabilities to enable AI agents
+to maintain context across sessions, learn from past interactions, and
+provide personalized assistance. The platform needs to support:</p>
+<ol type="1">
+<li><strong>Multiple memory backends</strong>: Different use cases
+require different storage solutions</li>
+<li><strong>Vector similarity search</strong>: Semantic retrieval of
+relevant memories</li>
+<li><strong>Metadata filtering</strong>: Filter memories by project,
+user, time, tags</li>
+<li><strong>Scalability</strong>: Support from single-user to enterprise
+deployments</li>
+<li><strong>Cost flexibility</strong>: Balance between hosted services
+and self-hosted solutions</li>
+<li><strong>Privacy compliance</strong>: Support for on-premises
+deployments</li>
+<li><strong>Integration flexibility</strong>: Support both AI-native
+memory services and traditional vector databases</li>
+</ol>
+<p>The challenge was creating a unified interface that supports diverse
+memory providers while enabling optimal provider selection based on use
+case requirements.</p>
+<h2 id="decision">Decision</h2>
+<p>We implemented a unified <code>VectorProvider</code> interface with a
+provider registry and factory pattern, supporting multiple memory
+provider categories:</p>
+<h3 id="provider-categories">Provider Categories</h3>
+<p><strong>AI-Native Memory Services</strong> (designed specifically for
+AI memory): - Mem0 (AI memory layer) - Zep (LLM memory server) - Memonto
+(persistent memory) - BaseAI (memory infrastructure)</p>
+<p><strong>Vector Databases</strong> (general-purpose similarity
+search): - Pinecone (managed vector DB) - Weaviate (open-source vector
+DB) - Qdrant (high-performance vector search) - ChromaDB (embedding
+database) - FAISS (Facebook AI Similarity Search) - Milvus (scalable
+vector DB)</p>
+<p><strong>Multi-Modal Platforms</strong>: - DeepLake (multi-modal
+vector store) - LlamaIndex (data framework)</p>
+<h3 id="core-interface">Core Interface</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VectorProvider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Core operations</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Store<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> vectors <span class="op">[]*</span>VectorData<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Retrieve<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> ids <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="op">([]*</span>VectorData<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    Update<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> vector <span class="op">*</span>VectorData<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Delete<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> ids <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Search operations</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    Search<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> query <span class="op">*</span>VectorQuery<span class="op">)</span> <span class="op">(*</span>VectorSearchResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    FindSimilar<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> embedding <span class="op">[]</span><span class="dt">float64</span><span class="op">,</span> k <span class="dt">int</span><span class="op">,</span> filters <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">([]*</span>VectorSimilarityResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    BatchFindSimilar<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> queries <span class="op">[][]</span><span class="dt">float64</span><span class="op">,</span> k <span class="dt">int</span><span class="op">)</span> <span class="op">([][]*</span>VectorSimilarityResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Collection management</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    CreateCollection<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">,</span> config <span class="op">*</span>CollectionConfig<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    DeleteCollection<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    ListCollections<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">([]*</span>CollectionInfo<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Index management</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    CreateIndex<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> collection <span class="dt">string</span><span class="op">,</span> config <span class="op">*</span>IndexConfig<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    DeleteIndex<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> collection<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Metadata operations</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    AddMetadata<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> metadata <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    UpdateMetadata<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> metadata <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Management</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    GetStats<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>ProviderStats<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    Optimize<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    Backup<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    Restore<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Lifecycle</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    Initialize<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> config <span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    Start<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    Stop<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    Health<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>HealthStatus<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Metadata</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    GetName<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    GetType<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    GetCapabilities<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    IsCloud<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    GetCostInfo<span class="op">()</span> <span class="op">*</span>CostInfo</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="data-model">Data Model</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VectorData <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ID         <span class="dt">string</span>                 <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Vector     <span class="op">[]</span><span class="dt">float64</span>              <span class="st">`json:&quot;vector&quot;`</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Metadata   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span> <span class="st">`json:&quot;metadata&quot;`</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    Collection <span class="dt">string</span>                 <span class="st">`json:&quot;collection&quot;`</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Timestamp  time<span class="op">.</span>Time              <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    TTL        <span class="op">*</span>time<span class="op">.</span>Duration         <span class="st">`json:&quot;ttl,omitempty&quot;`</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    Namespace  <span class="dt">string</span>                 <span class="st">`json:&quot;namespace,omitempty&quot;`</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="provider-factory">Provider Factory</h3>
+<p>Providers are instantiated through a factory pattern:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewProvider<span class="op">(</span>providerType ProviderType<span class="op">,</span> config <span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span>VectorProvider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h3 id="load-balancing">Load Balancing</h3>
+<p>Support for multiple load balancing strategies: - Round-robin -
+Weighted (based on performance) - Random</p>
+<h3 id="cost-tracking">Cost Tracking</h3>
+<p>Each provider exposes cost information:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CostInfo <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Currency      <span class="dt">string</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ComputeCost   <span class="dt">float64</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    TransferCost  <span class="dt">float64</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    StorageCost   <span class="dt">float64</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    TotalCost     <span class="dt">float64</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    BillingPeriod <span class="dt">string</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    FreeTierUsed  <span class="dt">float64</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    FreeTierLimit <span class="dt">float64</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="consequences">Consequences</h2>
+<h3 id="positive">Positive</h3>
+<ol type="1">
+<li><strong>Provider Flexibility</strong>: Easy to switch between memory
+providers</li>
+<li><strong>Cost Optimization</strong>: Can use cheaper providers for
+appropriate workloads</li>
+<li><strong>Privacy Compliance</strong>: Support for self-hosted
+providers (FAISS, Qdrant)</li>
+<li><strong>Scalability</strong>: From local FAISS to managed
+Pinecone</li>
+<li><strong>Feature Access</strong>: Each provider’s unique features
+accessible through metadata</li>
+<li><strong>Hybrid Deployments</strong>: Can use multiple providers
+simultaneously</li>
+<li><strong>Testing</strong>: Mock providers enable comprehensive
+testing</li>
+</ol>
+<h3 id="negative">Negative</h3>
+<ol type="1">
+<li><strong>Feature Parity</strong>: Not all providers support all
+features</li>
+<li><strong>Configuration Complexity</strong>: Each provider has
+different config requirements</li>
+<li><strong>Migration Complexity</strong>: Moving data between providers
+requires careful planning</li>
+<li><strong>Performance Variance</strong>: Different providers have
+different performance characteristics</li>
+</ol>
+<h3 id="neutral">Neutral</h3>
+<ol type="1">
+<li><strong>Embedding Generation</strong>: Currently delegated to LLM
+providers; may need tighter integration</li>
+<li><strong>Memory Lifecycle</strong>: TTL and cleanup policies vary by
+provider</li>
+</ol>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
+<h3 id="alternative-1-single-provider-pinecone-only">Alternative 1:
+Single Provider (Pinecone Only)</h3>
+<p><strong>Description</strong>: Standardize on Pinecone as the sole
+memory backend.</p>
+<p><strong>Pros</strong>: - Simplified architecture - Consistent
+behavior - Good documentation - Managed service</p>
+<p><strong>Cons</strong>: - Vendor lock-in - Cost inflexibility - No
+self-hosted option - Internet dependency</p>
+<p><strong>Why Rejected</strong>: Enterprise customers require
+self-hosted options for data privacy. Cost sensitivity varies across
+deployments.</p>
+<h3 id="alternative-2-custom-vector-database">Alternative 2: Custom
+Vector Database</h3>
+<p><strong>Description</strong>: Build a custom vector database
+optimized for AI memory.</p>
+<p><strong>Pros</strong>: - Full control over features - Optimized for
+HelixCode use cases - No external dependencies - Deep integration</p>
+<p><strong>Cons</strong>: - Significant development effort - Ongoing
+maintenance burden - Reinventing solved problems - Risk of suboptimal
+performance</p>
+<p><strong>Why Rejected</strong>: Existing vector databases are mature
+and well-optimized. Development effort better spent on core HelixCode
+features.</p>
+<h3 id="alternative-3-postgresql-with-pgvector">Alternative 3:
+PostgreSQL with pgvector</h3>
+<p><strong>Description</strong>: Use PostgreSQL’s pgvector extension for
+all vector storage.</p>
+<p><strong>Pros</strong>: - Single database for all data - Familiar
+technology - ACID transactions - Good enough performance for many use
+cases</p>
+<p><strong>Cons</strong>: - Limited scalability for large vector sets -
+No specialized memory features - Metadata flexibility limited - Not
+optimized for similarity search</p>
+<p><strong>Why Rejected</strong>: While pgvector works for small
+deployments, enterprise scale requires dedicated vector solutions. The
+interface allows pgvector as one option while supporting more scalable
+alternatives.</p>
+<h3 id="alternative-4-langchain-memory-module">Alternative 4: LangChain
+Memory Module</h3>
+<p><strong>Description</strong>: Use LangChain’s memory
+abstractions.</p>
+<p><strong>Pros</strong>: - Pre-built abstractions - Community ecosystem
+- Multiple provider support - Python-native</p>
+<p><strong>Cons</strong>: - Python dependency - Limited Go support -
+External dependency risk - May not support all providers</p>
+<p><strong>Why Rejected</strong>: HelixCode is Go-based; adding Python
+dependency creates operational complexity. Native Go implementation
+provides better performance and integration.</p>
+<h2 id="implementation-notes">Implementation Notes</h2>
+<ul>
+<li>Provider implementations in
+<code>internal/memory/providers/</code></li>
+<li>Factory pattern for provider instantiation</li>
+<li>Provider registry maintains available providers</li>
+<li>Health checks run periodically for monitoring</li>
+<li>Cognee integration provides additional memory capabilities</li>
+</ul>
+<h2 id="provider-specific-features">Provider-Specific Features</h2>
+<h3 id="mem0">Mem0</h3>
+<ul>
+<li>Automatic memory organization</li>
+<li>Cross-session continuity</li>
+<li>Memory graphs</li>
+</ul>
+<h3 id="zep">Zep</h3>
+<ul>
+<li>Message history management</li>
+<li>Entity extraction</li>
+<li>Summarization</li>
+</ul>
+<h3 id="pinecone">Pinecone</h3>
+<ul>
+<li>Serverless scaling</li>
+<li>Metadata filtering</li>
+<li>Namespace isolation</li>
+</ul>
+<h3 id="faiss">FAISS</h3>
+<ul>
+<li>Local-first operation</li>
+<li>No network dependency</li>
+<li>GPU acceleration support</li>
+</ul>
+<h3 id="weaviate">Weaviate</h3>
+<ul>
+<li>GraphQL API</li>
+<li>Hybrid search (vector + keyword)</li>
+<li>Multi-tenancy</li>
+</ul>
+<h2 id="related-decisions">Related Decisions</h2>
+<ul>
+<li>ADR-001: LLM Provider Interface (similar provider pattern)</li>
+<li>ADR-006: Database Schema Design (memory metadata storage)</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/types.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/factory.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/mem0_provider.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/zep_provider.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/memory/providers/faiss_provider.go</code></li>
+</ul>
+</body>
+</html>

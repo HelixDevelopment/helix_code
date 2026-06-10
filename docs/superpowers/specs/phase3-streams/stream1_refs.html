@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stream1_refs</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stream1_refs</h1>
+</header>
+<h1 id="stream-flat-refs-stale-reference-.gitmodules-audit-read-only-no-editscommits">Stream
+FLAT-REFS — stale reference + .gitmodules audit (READ-ONLY, no
+edits/commits)</h1>
+<p>Repo: /Users/milosvasic/Projects/HelixCode</p>
+<p>Context: A “Phase 2 flatten” (HEAD) moved all own-org submodules from
+<code>dependencies/vasic-digital/X</code>,
+<code>dependencies/HelixDevelopment/X</code>, and several top-level dirs
+INTO <code>submodules/X</code>. <code>helix_code/go.mod</code> replaces
+already rewritten. But ~646 stale <code>dependencies/{org}/...</code>
+strings remain, and <code>.gitmodules</code> still has old-path stanzas.
+The 5 DROPPED mounts (their <code>.gitmodules</code> stanzas must be
+deleted): <code>dependencies/HelixDevelopment/models</code>,
+<code>dependencies/vasic-digital/doc_processor</code>,
+<code>dependencies/vasic-digital/llm_orchestrator</code>,
+<code>dependencies/vasic-digital/llm_provider</code>,
+<code>dependencies/vasic-digital/vision_engine</code>.
+<code>constitution</code> stays at <code>./constitution/</code> (NOT
+flattened, unchanged).</p>
+<p>You have NO Edit tool — that is intentional. Return a precise text
+remediation map only.</p>
+<p>Tasks: 1.
+<code>grep -rIn &quot;dependencies/vasic-digital\|dependencies/HelixDevelopment&quot;</code>
+across the tree. Classify EACH hit: - CLASS A = META-REPO file (NOT
+under <code>submodules/</code>, NOT under
+<code>docs/improvements/</code>, NOT under
+<code>cli_agents_resources/</code>). Needs rewrite: the
+<code>dependencies/{org}/</code> prefix → <code>submodules/</code> (leaf
+name preserved). - CLASS B = file under
+<code>submodules/&lt;leaf&gt;/...</code> — DECOUPLED per CONST-051, MUST
+NOT be rewritten to parent layout. List only; for each note if the ref
+is self-referential (submodule’s own dep layout / its helix-deps.yaml)
+vs genuinely pointing at the parent. - CLASS C = under
+<code>docs/improvements/**</code> or
+<code>cli_agents_resources/**</code> (archived/third-party). Leave;
+report COUNT only. 2. For CLASS A only: produce an EXACT table grouped
+by file: <code>file : line : old-string → new-string</code>. Do not
+summarize it away — I apply these patches serially. 3. Read the FULL
+<code>.gitmodules</code>. Report: (a) every stanza still on a
+<code>dependencies/{org}/</code> path + the corrected
+<code>path = submodules/&lt;leaf&gt;</code> it should become (note if
+<code>url</code> needs no change); (b) the 5 dropped-mount stanzas to
+delete entirely; (c) confirm <code>constitution</code> stanza unchanged;
+(d) flag any DUPLICATE stanzas (same leaf under both old and new path).
+4. Totals per class + a 1-line readiness verdict.</p>
+<p>Output: compact markdown.</p>
+</body>
+</html>

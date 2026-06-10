@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ADR-001-llm-provider-interface</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ADR-001-llm-provider-interface</h1>
+</header>
+<h1 id="adr-001-llm-provider-interface-design">ADR-001: LLM Provider
+Interface Design</h1>
+<h2 id="status">Status</h2>
+<p>Accepted</p>
+<h2 id="date">Date</h2>
+<p>2026-01-08</p>
+<h2 id="context">Context</h2>
+<p>HelixCode is an enterprise-grade distributed AI development platform
+that needs to integrate with multiple Large Language Model (LLM)
+providers. The platform must support:</p>
+<ol type="1">
+<li><strong>Local providers</strong> for privacy-sensitive deployments
+and development environments:
+<ul>
+<li>Ollama</li>
+<li>Llama.cpp</li>
+<li>vLLM</li>
+<li>LocalAI</li>
+<li>KoboldAI</li>
+</ul></li>
+<li><strong>Cloud providers</strong> for production scalability and
+access to state-of-the-art models:
+<ul>
+<li>OpenAI (GPT-4, GPT-4 Turbo, o1)</li>
+<li>Anthropic (Claude 3, Claude 3.5)</li>
+<li>Google Gemini (Gemini Pro, Gemini Ultra)</li>
+<li>xAI (Grok)</li>
+<li>AWS Bedrock (multi-model)</li>
+<li>Azure OpenAI</li>
+<li>Groq</li>
+<li>OpenRouter</li>
+<li>Qwen</li>
+<li>Vertex AI</li>
+</ul></li>
+<li><strong>Operational requirements</strong>:
+<ul>
+<li>Automatic failover when a provider becomes unavailable</li>
+<li>Load balancing across multiple providers</li>
+<li>Cost optimization through provider selection strategies</li>
+<li>Health monitoring and latency tracking</li>
+<li>Streaming response support for real-time feedback</li>
+<li>Model capability detection and matching</li>
+</ul></li>
+</ol>
+<p>The challenge was to create a unified interface that abstracts away
+provider-specific details while maintaining the ability to leverage
+provider-specific features when needed.</p>
+<h2 id="decision">Decision</h2>
+<p>We implemented a unified <code>Provider</code> interface that all LLM
+providers must implement, combined with a provider registry, health
+monitoring, and intelligent selection strategies.</p>
+<h3 id="core-interface">Core Interface</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Core generation methods</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">,</span> ch <span class="kw">chan</span><span class="op">&lt;-</span> LLMResponse<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Provider metadata</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    GetType<span class="op">()</span> ProviderType</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    GetName<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">[]</span>ModelInfo</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    GetCapabilities<span class="op">()</span> <span class="op">[]</span>ModelCapability</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Health and lifecycle</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    IsAvailable<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    GetHealth<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>ProviderHealth<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    Close<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="requestresponse-model">Request/Response Model</h3>
+<p>The <code>LLMRequest</code> structure provides a provider-agnostic
+way to specify generation parameters:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ID          uuid<span class="op">.</span>UUID</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Model       <span class="dt">string</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Messages    <span class="op">[]</span>Message</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    MaxTokens   <span class="dt">int</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Temperature <span class="dt">float64</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    TopP        <span class="dt">float64</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    Stream      <span class="dt">bool</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    Tools       <span class="op">[]</span>Tool</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Provider-specific options</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    Options     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="provider-selection-strategies">Provider Selection
+Strategies</h3>
+<p>Multiple selection strategies are supported:</p>
+<ol type="1">
+<li><strong>Performance-based</strong>: Selects provider with lowest
+latency</li>
+<li><strong>Cost-based</strong>: Selects cheapest provider for the
+request</li>
+<li><strong>Availability-based</strong>: Selects most reliable
+provider</li>
+<li><strong>Round-robin</strong>: Distributes load evenly</li>
+<li><strong>Capability-based</strong>: Selects provider that best
+matches required capabilities</li>
+</ol>
+<h3 id="health-monitoring">Health Monitoring</h3>
+<p>Each provider includes health monitoring with: - Periodic health
+checks (configurable interval) - Latency tracking and averaging - Error
+count tracking - Automatic status transitions (healthy -&gt; degraded
+-&gt; unhealthy)</p>
+<h3 id="automatic-fallback">Automatic Fallback</h3>
+<p>When <code>llm.selection.fallback_enabled</code> is configured: 1.
+Primary provider is selected based on strategy 2. If primary fails,
+secondary provider is selected 3. Continues through provider list until
+success or exhaustion 4. Failed providers are temporarily excluded from
+selection</p>
+<h2 id="consequences">Consequences</h2>
+<h3 id="positive">Positive</h3>
+<ol type="1">
+<li><strong>Vendor Flexibility</strong>: Easy to switch between
+providers without code changes</li>
+<li><strong>Cost Optimization</strong>: Can route requests to cheaper
+providers for non-critical tasks</li>
+<li><strong>High Availability</strong>: Automatic failover ensures
+continuous operation</li>
+<li><strong>Performance Optimization</strong>: Load balancing prevents
+single-provider bottlenecks</li>
+<li><strong>Future-Proofing</strong>: New providers can be added by
+implementing the interface</li>
+<li><strong>Testability</strong>: Mock providers can be easily created
+for testing</li>
+<li><strong>Local Development</strong>: Can develop offline with local
+providers like Ollama</li>
+</ol>
+<h3 id="negative">Negative</h3>
+<ol type="1">
+<li><strong>Abstraction Overhead</strong>: Some provider-specific
+features may be harder to access</li>
+<li><strong>Configuration Complexity</strong>: Multiple providers
+require careful configuration</li>
+<li><strong>Debugging Complexity</strong>: Issues may be harder to
+diagnose across providers</li>
+<li><strong>Capability Variance</strong>: Not all providers support all
+features (tools, vision, etc.)</li>
+</ol>
+<h3 id="neutral">Neutral</h3>
+<ol type="1">
+<li><strong>Learning Curve</strong>: Team needs to understand the
+abstraction layer</li>
+<li><strong>Maintenance Burden</strong>: Each new provider requires
+implementation and testing</li>
+</ol>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
+<h3 id="alternative-1-direct-provider-integration">Alternative 1: Direct
+Provider Integration</h3>
+<p><strong>Description</strong>: Directly integrate with each provider
+without abstraction.</p>
+<p><strong>Pros</strong>: - Full access to provider-specific features -
+No abstraction overhead - Simpler for single-provider deployments</p>
+<p><strong>Cons</strong>: - No automatic failover - Switching providers
+requires code changes - Testing requires actual provider access - Cannot
+leverage multiple providers simultaneously</p>
+<p><strong>Why Rejected</strong>: The multi-provider requirement and
+enterprise reliability needs made this approach insufficient.</p>
+<h3 id="alternative-2-third-party-abstraction-layer-litellm-langchain">Alternative
+2: Third-Party Abstraction Layer (LiteLLM, LangChain)</h3>
+<p><strong>Description</strong>: Use an existing abstraction
+library.</p>
+<p><strong>Pros</strong>: - Pre-built abstractions - Community support -
+Regular updates</p>
+<p><strong>Cons</strong>: - External dependency risk - Limited control
+over behavior - May not support all required providers - Performance
+overhead from additional layer - Difficulty customizing selection
+strategies</p>
+<p><strong>Why Rejected</strong>: The need for custom selection
+strategies, health monitoring, and tight integration with HelixCode’s
+architecture favored a native implementation.</p>
+<h3 id="alternative-3-message-queue-based-routing">Alternative 3:
+Message Queue-Based Routing</h3>
+<p><strong>Description</strong>: Use a message queue to route requests
+to provider-specific workers.</p>
+<p><strong>Pros</strong>: - Natural load balancing - Easy horizontal
+scaling - Decoupled architecture</p>
+<p><strong>Cons</strong>: - Additional infrastructure complexity -
+Higher latency for streaming - Operational overhead - More complex error
+handling</p>
+<p><strong>Why Rejected</strong>: The latency requirements for
+interactive development workflows made message queue overhead
+unacceptable.</p>
+<h2 id="implementation-notes">Implementation Notes</h2>
+<ul>
+<li>Provider implementations are in <code>internal/llm/</code> with
+naming convention <code>{provider}_provider.go</code></li>
+<li>Health monitoring runs in background goroutines</li>
+<li>Provider registry maintains singleton instances</li>
+<li>Configuration is loaded from <code>config/config.yaml</code> with
+environment variable overrides</li>
+<li>Streaming uses channels for backpressure-aware delivery</li>
+</ul>
+<h2 id="related-decisions">Related Decisions</h2>
+<ul>
+<li>ADR-004: Workflow Execution Model (uses LLM providers for code
+generation)</li>
+<li>ADR-003: Memory Provider Strategy (uses similar provider
+pattern)</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/local_provider.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/anthropic_provider.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/README.md</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/llm/LOCAL_PROVIDERS.md</code></li>
+</ul>
+</body>
+</html>

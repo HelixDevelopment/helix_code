@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f27-aider-voice-repomap</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f27-aider-voice-repomap</h1>
+</header>
+<h1 id="p2-f27-aider-voice-input-repo-map-implementation-plan">P2-F27 —
+Aider Voice Input + Repo-Map Implementation Plan</h1>
+<blockquote>
+<p><strong>Programme position:</strong> F27 is the
+<strong>seventh</strong> Phase 2 feature (after F21-F26).</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship real voice input (speech-to-text) and
+tree-sitter repository mapping. 4 tools + /aider slash. New packages:
+<code>internal/voice/</code>, extends
+<code>internal/repomap/</code>.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-07-p2-f27-aider-voice-repomap-design.md</code>
+<strong>Q1-Q5:</strong> Aider / Core / Hybrid Whisper / Tree-sitter / 4
+tools + slash</p>
+<p><strong>Zero new external deps</strong> — go-tree-sitter already
+indirect, whisper.cpp is CLI binary not Go dep.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>P2-F27-T01 — bootstrap F27 evidence
++ advance PROGRESS + CONTINUATION</label></li>
+<li><label><input type="checkbox"></input>P2-F27-T02 —
+<code>internal/voice/types.go</code> + <code>recorder.go</code>:
+VoiceRecorder with arecord/sox (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F27-T03 —
+<code>internal/voice/transcriber.go</code>: Whisper API + whisper.cpp
+(TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F27-T04 —
+<code>internal/voice/voice_tools.go</code>: voice_start/stop/transcribe
+(TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F27-T05 —
+<code>internal/repomap/mapper.go</code> + <code>cache.go</code>:
+tree-sitter AST map (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F27-T06 —
+<code>internal/repomap/repomap_tool.go</code>: repomap tool
+(TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F27-T07 — <code>/aider</code>
+slash command (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F27-T08 — main.go wiring +
+integration tests</label></li>
+<li><label><input type="checkbox"></input>P2-F27-T09 — Challenge harness 6
+phases + close-out + push 4 remotes</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap-f27">Task 1: Bootstrap F27</h2>
+<p>Advance PROGRESS.md to “F27 in flight”. Update CONTINUATION.md F27
+mid-flight section. Append evidence header.</p>
+<h2 id="task-2-voicetypes.go-recorder.go">Task 2: voice/types.go +
+recorder.go</h2>
+<ul>
+<li><code>VoiceRecorder</code> with
+<code>Start(outputPath string)</code>, <code>Stop()</code>,
+<code>IsRecording() bool</code></li>
+<li>Shell: <code>arecord -f cd -t wav &lt;path&gt;</code> (Linux) with
+<code>sox</code> fallback</li>
+<li>Subprocess management via <code>os/exec</code>, signal-based
+graceful stop</li>
+<li>WAV validation: check RIFF header, non-zero data chunk</li>
+<li>Tests: mock recorder for unit tests, real recorder gated
+(<code>SKIP-OK</code>)</li>
+</ul>
+<h2 id="task-3-voicetranscriber.go">Task 3: voice/transcriber.go</h2>
+<ul>
+<li><code>VoiceTranscriber</code> with
+<code>Transcribe(audioPath string) (string, error)</code></li>
+<li>Primary: OpenAI Whisper API
+(<code>POST /v1/audio/transcriptions</code>)</li>
+<li>Fallback: <code>whisper.cpp</code> CLI
+(<code>whisper-cli -m &lt;model&gt; -f &lt;wav&gt;</code>)</li>
+<li>Env vars: <code>OPENAI_API_KEY</code> for API,
+<code>HELIXCODE_WHISPER_MODEL</code> for local model path</li>
+<li>Tests: mock HTTP server for API, mock CLI for fallback</li>
+</ul>
+<h2 id="task-4-voice_tools.go">Task 4: voice_tools.go</h2>
+<ul>
+<li><code>voice_start</code>: starts recording to temp WAV</li>
+<li><code>voice_stop</code>: stops recording, returns path +
+duration</li>
+<li><code>voice_transcribe</code>: transcribes stopped recording,
+returns text</li>
+<li>Category: <code>voice</code>. RequiresApproval:
+transcribe→LevelEdit, start/stop→LevelReadOnly</li>
+</ul>
+<h2 id="task-5-repomapmapper.go-cache.go">Task 5: repomap/mapper.go +
+cache.go</h2>
+<ul>
+<li>Extend existing <code>internal/repomap/</code> package</li>
+<li>Tree-sitter parser: for each source file, parse AST, extract
+function/class/import nodes</li>
+<li>Map struct: <code>RepoMap{Files []FileMap}</code> where
+<code>FileMap{Path, Functions, Classes, Imports}</code></li>
+<li>Cache: <code>Cache{mu, entries map[string]*RepoMap}</code> keyed by
+<code>git rev-parse HEAD</code></li>
+<li>Tests with real tempdir repos containing Go/Python/JS files</li>
+</ul>
+<h2 id="task-6-repomap_tool.go">Task 6: repomap_tool.go</h2>
+<ul>
+<li><code>repomap</code> tool: scans project dir, returns structured map
+as JSON</li>
+<li>Category: <code>mapping</code>. RequiresApproval: LevelReadOnly</li>
+</ul>
+<h2 id="task-7-aider-slash">Task 7: /aider slash</h2>
+<ul>
+<li><code>/aider voice [start|stop|transcribe]</code> — voice
+control</li>
+<li><code>/aider repomap [generate|show|clear]</code> — repo-map
+control</li>
+<li>Aliases: <code>/aider</code>, <code>/ai</code></li>
+</ul>
+<h2 id="task-8-main.go-wiring">Task 8: main.go wiring</h2>
+<p>Register 4 tools + /aider slash in main.go startup.</p>
+<h2 id="task-9-challenge-harness">Task 9: Challenge harness</h2>
+<p>6 phases: - A: Voice record (gated on microphone) → WAV &gt; 44 bytes
+- B: Voice transcribe (gated on API key/model) → non-empty text - C:
+Repo-map on tempdir with Go files → finds functions - D: Repo-map cache
+→ same commit returns cached, new commit invalidates - E: Hybrid
+fallback → API absent exercises whisper.cpp path - F: /aider slash
+subcommands → correct routing</p>
+<hr />
+<p><em>Plan written. Execute via TDD starting with T01.</em></p>
+</body>
+</html>

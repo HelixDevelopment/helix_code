@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-08-phase5-end-user-materials</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-08-phase5-end-user-materials</h1>
+</header>
+<h1 id="phase-5-end-user-materials-uplift-implementation-plan">Phase 5 —
+End-User Materials Uplift Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development (recommended) or
+superpowers:executing-plans to implement this plan task-by-task. Steps
+use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Close all documentation gaps per
+USER_MANUAL_EXPANSION_PLAN.md, produce installers for
+Linux/macOS/Windows/Docker, and update the website to match reality.</p>
+<p><strong>Architecture:</strong> Three sequential work streams —
+documentation first (content is foundation), installers second
+(packaging the product), website last (reflects final docs content).
+Each stream has independent parallel sub-tasks.</p>
+<p><strong>Tech Stack:</strong> Go 1.24, dpkg-deb/rpmbuild (Linux
+packaging), Homebrew (macOS), NSIS/WiX (Windows), Docker, vanilla
+HTML/CSS/JS (website)</p>
+<p><strong>Design spec:</strong>
+<code>docs/superpowers/specs/2026-05-08-phase5-end-user-materials-design.md</code></p>
+<hr />
+<h2 id="file-structure">File Structure</h2>
+<h3 id="documentation-modifications">Documentation modifications</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Action</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/user_manual/README.md</code></td>
+<td>Edit — add sections in Parts III/IV/V/X</td>
+<td>Provider deep-dives, advanced features, developer guides,
+troubleshooting</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/SUMMARY.md</code></td>
+<td>Edit — sync topic index</td>
+<td>Cross-reference integrity</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/INDEX.md</code></td>
+<td>Edit — sync keyword index</td>
+<td>Cross-reference integrity</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/tutorials/Tutorial_*.md</code></td>
+<td>Edit — minor stale-reference fixes</td>
+<td>Cross-reference integrity</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_*.md</code></td>
+<td>Edit — fix stale config keys if any</td>
+<td>Cross-reference integrity</td>
+</tr>
+</tbody>
+</table>
+<h3 id="installer-new-files">Installer new files</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/install.sh</code></td>
+<td>Platform-agnostic Linux/macOS installer (detects OS/arch, downloads
+package)</td>
+</tr>
+<tr>
+<td><code>scripts/install.ps1</code></td>
+<td>Windows PowerShell installer</td>
+</tr>
+<tr>
+<td><code>packaging/debian/control</code></td>
+<td>Debian package metadata</td>
+</tr>
+<tr>
+<td><code>packaging/debian/postinst</code></td>
+<td>Post-installation script</td>
+</tr>
+<tr>
+<td><code>packaging/debian/prerm</code></td>
+<td>Pre-removal script</td>
+</tr>
+<tr>
+<td><code>packaging/debian/helixcode.service</code></td>
+<td>systemd service unit</td>
+</tr>
+<tr>
+<td><code>packaging/rpm/helixcode.spec</code></td>
+<td>RPM spec file</td>
+</tr>
+<tr>
+<td><code>packaging/rpm/helixcode.service</code></td>
+<td>systemd service unit (same as debian variant or separate)</td>
+</tr>
+<tr>
+<td><code>packaging/homebrew/helixcode.rb</code></td>
+<td>Homebrew formula</td>
+</tr>
+<tr>
+<td><code>packaging/windows/installer.nsi</code></td>
+<td>NSIS installer script</td>
+</tr>
+<tr>
+<td><code>packaging/docker/Dockerfile</code></td>
+<td>Minimal production Dockerfile</td>
+</tr>
+<tr>
+<td><code>Makefile</code></td>
+<td>Edit — add <code>installers</code> target</td>
+</tr>
+</tbody>
+</table>
+<h3 id="website-modifications">Website modifications</h3>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>github_pages_website/docs/index.html</code></td>
+<td>Edit — stats, links, feature list</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/manual/index.html</code></td>
+<td>Edit — sync manual</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/courses/</code></td>
+<td>Edit — if stale</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/mobile/</code></td>
+<td>Edit — if stale</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="task-doc-1-provider-deep-dive-guides">Task DOC-1: Provider
+Deep-Dive Guides</h3>
+<p><strong>Files:</strong> - Modify:
+<code>docs/user_manual/README.md</code> (Part III — add sections after
+existing §6-7)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Read existing Part
+III structure</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;^### &quot;</span> docs/user_manual/README.md <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;(6\.|7\.|Anthropic|Gemini|Bedrock|Azure|XAI|OpenRouter)&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Add Anthropic/Claude
+extended thinking and prompt caching guide</strong></label></li>
+</ul>
+<p>Add a new subsection after §6.1 Anthropic Claude in
+<code>docs/user_manual/README.md</code>:</p>
+<pre><code>#### 6.1.1 Extended Thinking
+Enable extended thinking in config.yaml:
+```yaml
+llm:
+  providers:
+    anthropic:
+      api_key: &quot;${ANTHROPIC_API_KEY}&quot;
+      extended_thinking: true
+      thinking_budget: 16000  # tokens allocated to reasoning</code></pre>
+<p>When enabled, Claude produces a <code>thinking</code> block before
+the response. HelixCode surfaces this in the UI as an expandable
+reasoning trace. Use for complex debugging, architectural decisions, and
+multi-step planning.</p>
+<h4 id="prompt-caching">6.1.2 Prompt Caching</h4>
+<p>Cache frequently used context (system prompts, tool definitions,
+document excerpts):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">anthropic</span><span class="kw">:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">prompt_caching</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">cache_ttl</span><span class="kw">:</span><span class="at"> </span><span class="dv">300</span><span class="co">  # seconds</span></span></code></pre></div>
+<p>Cache hit reduces cost by ~90% and latency by ~50%. Breakpoints:
+system prompts (automatically cached), tool definitions (automatically
+cached), and document blocks (manual <code>cache_control</code>
+points).</p>
+<pre><code>
+- [ ] **Step 3: Add Google Gemini multimodal and 2M context guide**
+
+Add a new subsection after §6.2 Google Gemini:
+</code></pre>
+<h4 id="multimodal-inputs">6.2.1 Multimodal Inputs</h4>
+<p>Gemini accepts images, video, and audio inline:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">gemini</span><span class="kw">:</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${GEMINI_API_KEY}&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">multimodal</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
+<p>Usage: attach image files with <code>@image.png</code> in prompts.
+Gemini 2.5 Pro handles up to 2M tokens — enough for full codebase
+analysis.</p>
+<h4 id="flash-models-for-speed">6.2.2 Flash Models for Speed</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">gemini</span><span class="kw">:</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;gemini-2.5-flash-preview-05-06&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">parameters</span><span class="kw">:</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">temperature</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.7</span></span></code></pre></div>
+<p>Flash models offer 4x faster inference at lower cost, suitable for
+code generation and refactoring.</p>
+<pre><code>
+- [ ] **Step 4: Add AWS Bedrock and Azure OpenAI enterprise setup guide**
+
+Add after §6.4 AWS Bedrock and §6.5 Azure OpenAI:
+</code></pre>
+<h4 id="aws-iam-authentication">6.4.1 AWS IAM Authentication</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">bedrock</span><span class="kw">:</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">region</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;us-east-1&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">credentials</span><span class="kw">:</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">access_key_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${AWS_ACCESS_KEY_ID}&quot;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">secret_access_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${AWS_SECRET_ACCESS_KEY}&quot;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">session_token</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${AWS_SESSION_TOKEN}&quot;</span><span class="co">  # optional, for temporary creds</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">models</span><span class="kw">:</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;anthropic.claude-sonnet-4-20250505&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;amazon.titan-text-premier-v1:0&quot;</span></span></code></pre></div>
+<p>IAM policy must grant <code>bedrock:InvokeModel</code> and
+<code>bedrock:InvokeModelWithResponseStream</code>. Cross-region
+inference requires <code>bedrock:ListFoundationModels</code>.</p>
+<h4 id="azure-entra-id-authentication">6.5.1 Azure Entra ID
+Authentication</h4>
+<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">azure</span><span class="kw">:</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://&lt;resource&gt;.openai.azure.com&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">deployment_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;gpt-4o&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2025-05-01-preview&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">auth</span><span class="kw">:</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;entra_id&quot;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">client_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${AZURE_CLIENT_ID}&quot;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">client_secret</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${AZURE_CLIENT_SECRET}&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">tenant_id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${AZURE_TENANT_ID}&quot;</span></span></code></pre></div>
+<p>Requires Azure AI Service role assignment. Managed identity also
+supported via <code>auth.type: &quot;managed_identity&quot;</code>.</p>
+<pre><code>
+- [ ] **Step 5: Add free provider guides (XAI/Grok, OpenRouter, Qwen)**
+
+Add after §7 (Free &amp; Open Source Providers):
+</code></pre>
+<h4 id="xai-grok-free-tier">7.7 XAI (Grok) Free Tier</h4>
+<div class="sourceCode" id="cb11"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">xai</span><span class="kw">:</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${XAI_API_KEY}&quot;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;grok-3-fast-beta&quot;</span><span class="co">  # free tier</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">parameters</span><span class="kw">:</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">temperature</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.7</span></span></code></pre></div>
+<p>Free tier: 100 requests/hour, 16K context. Upgrade for 1M context and
+priority access.</p>
+<h4 id="openrouter-free-models">7.8 OpenRouter Free Models</h4>
+<div class="sourceCode" id="cb12"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">openrouter</span><span class="kw">:</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${OPENROUTER_API_KEY}&quot;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">free_tier</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="co">  # automatically selects free models</span></span></code></pre></div>
+<p>Routes to models like <code>mistralai/mixtral-8x22b-instruct</code>
+(free), <code>google/gemma-2-27b-it</code> (free). Rate-limited to 20
+req/min on free tier.</p>
+<h4 id="qwen-free-quota">7.9 Qwen Free Quota</h4>
+<div class="sourceCode" id="cb13"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">qwen</span><span class="kw">:</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${QWEN_API_KEY}&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;qwen-max&quot;</span></span></code></pre></div>
+<p>Free: 2,000 requests/day. Paid: 10,000 req/min. Supports tool calling
+and streaming.</p>
+<pre><code>
+- [ ] **Step 6: Verify sections exist in README**
+
+```bash
+grep -c &quot;Extended Thinking\|Prompt Caching\|Multimodal Inputs\|IAM Authentication\|Entra ID\|Free Tier\|Free Quota&quot; docs/user_manual/README.md</code></pre>
+<p>Expected: 7 matches minimum.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 7:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/user_manual/README.md</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs: add provider deep-dive guides (Anthropic, Gemini, AWS/Azure, free tiers)&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-doc-2-advanced-feature-guides">Task DOC-2: Advanced Feature
+Guides</h3>
+<p><strong>Files:</strong> - Modify:
+<code>docs/user_manual/README.md</code> (Parts IV-V — add sections after
+tool/workflow chapters)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Read existing Part
+IV structure</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;^### &quot;</span> docs/user_manual/README.md <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;(8\.|9\.|10\.|11\.|12\.|13\.)&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Add memory system
+guide</strong></label></li>
+</ul>
+<p>Add after existing Part V (Advanced Workflows) or as a new
+chapter:</p>
+<pre><code>### 16. Memory System
+
+#### 16.1 Available Backends
+| Backend | Persistence | Scaling | Use Case |
+|---------|-------------|---------|----------|
+| In-Memory | None (ephemeral) | Single process | Development, testing |
+| Filesystem | Disk (JSON) | Single node | Small projects |
+| Redis | RAM + RDB/AOF | Distributed | High-speed caching |
+| Memcached | RAM (volatile) | Distributed | Session cache |
+| ChromaDB | Disk (vector) | Distributed | Semantic search |
+| Qdrant | Disk (vector) | Distributed | Production RAG |
+| Weaviate | Disk (vector + hybrid) | Distributed | Enterprise RAG |
+| Cognee | Disk (graph + vector) | Distributed | AI-native memory |
+
+#### 16.2 Configuration
+```yaml
+memory:
+  backend: &quot;chromadb&quot;  # or redis, filesystem, qdrant, weaviate, cognee
+  connection:
+    host: &quot;localhost&quot;
+    port: 8000
+    tls: false
+  persistence:
+    path: &quot;/var/lib/helixcode/memory/&quot;
+    sync_interval: 60  # seconds
+  vector:
+    dimensions: 1536  # match embedding model output
+    distance: &quot;cosine&quot;  # cosine, euclidean, dot</code></pre>
+<h4 id="choosing-the-right-backend">16.3 Choosing the Right Backend</h4>
+<ul>
+<li><strong>Development</strong>: Start with <code>filesystem</code> —
+zero dependencies, data survives restart</li>
+<li><strong>Team</strong>: Use <code>redis</code> — fast, shared across
+team members</li>
+<li><strong>Semantic search</strong>: Use <code>chromadb</code> or
+<code>qdrant</code> — vector similarity for context retrieval</li>
+<li><strong>Enterprise</strong>: Use <code>weaviate</code> or
+<code>cognee</code> — hybrid search, multi-tenancy, audit trails</li>
+</ul>
+<pre><code>
+- [ ] **Step 3: Add tool sandboxing guide**
+
+Add to §9 Shell Execution:
+</code></pre>
+<h4 id="sandbox-configuration">9.5 Sandbox Configuration</h4>
+<div class="sourceCode" id="cb19"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">shell</span><span class="kw">:</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">sandbox</span><span class="kw">:</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">allowed_commands</span><span class="kw">:</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;go&quot;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;python&quot;</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;node&quot;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;npm&quot;</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;git&quot;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;docker&quot;</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;make&quot;</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;curl&quot;</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;ls&quot;</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;cat&quot;</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;grep&quot;</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;find&quot;</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">blocked_commands</span><span class="kw">:</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;rm -rf /&quot;</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;dd&quot;</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;mkfs&quot;</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;:(){ :|:&amp; };:&quot;</span><span class="co">  # fork bomb</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> </span><span class="dv">300</span><span class="co">  # seconds per command</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_output_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">10485760</span><span class="co">  # 10MB</span></span></code></pre></div>
+<p>Commands not in <code>allowed_commands</code> require interactive
+confirmation. Commands matching <code>blocked_commands</code> are
+rejected outright. Set <code>sandbox.enabled: false</code> only in
+trusted, isolated environments.</p>
+<pre><code>
+- [ ] **Step 4: Add web tools enablement guide**
+
+Add to §11 Web Tools:
+</code></pre>
+<h4 id="search-provider-configuration">11.4 Search Provider
+Configuration</h4>
+<div class="sourceCode" id="cb21"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">web</span><span class="kw">:</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">search</span><span class="kw">:</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;tavily&quot;</span><span class="co">  # or google, bing, duckduckgo</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${TAVILY_API_KEY}&quot;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_results</span><span class="kw">:</span><span class="at"> </span><span class="dv">8</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">safe_search</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">fetch</span><span class="kw">:</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">user_agent</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helix_code/2.0&quot;</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">5242880</span><span class="co">  # 5MB</span></span></code></pre></div>
+<p>Supported providers: Tavily (recommended — AI-optimized), Google
+Custom Search, Bing Web Search, DuckDuckGo (no API key needed,
+rate-limited).</p>
+<pre><code>
+- [ ] **Step 5: Verify sections**
+
+```bash
+grep -c &quot;Memory System\|Sandbox Configuration\|Search Provider&quot; docs/user_manual/README.md</code></pre>
+<p>Expected: 3 matches minimum.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/user_manual/README.md</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs: add advanced feature guides (memory, sandbox, web tools)&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-doc-3-developer-guides">Task DOC-3: Developer Guides</h3>
+<p><strong>Files:</strong> - Create:
+<code>docs/user_manual/tutorials/Tutorial_9_Custom_Provider.md</code> -
+Create:
+<code>docs/user_manual/tutorials/Tutorial_10_Adding_a_Tool.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create Tutorial 9 —
+Custom Provider</strong></label></li>
+</ul>
+<p>Write
+<code>docs/user_manual/tutorials/Tutorial_9_Custom_Provider.md</code>:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Tutorial 9: Creating a Custom LLM Provider</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>**Duration**: 30 minutes | **Level**: Advanced</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>Extend HelixCode with your own LLM provider by implementing the <span class="in">`Provider`</span> interface.</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## Prerequisites</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Go 1.24+</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Running HelixCode development environment</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Access to your LLM API</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="fu">## Step 1: Provider Scaffold</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>Create <span class="in">`internal/llm/providers/myprovider/myprovider.go`</span>:</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="in">```go</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> myprovider</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;dev.helix.code/llm&quot;</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MyProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>    apiKey <span class="dt">string</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    endpoint <span class="dt">string</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>    model   <span class="dt">string</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Implement the <code>llm.Provider</code> interface: -
+<code>Name() string</code> — return <code>&quot;myprovider&quot;</code> -
+<code>Generate(ctx context.Context, req *llm.Request) (*llm.Response, error)</code>
+-
+<code>GenerateStream(ctx context.Context, req *llm.Request) (&lt;-chan *llm.Response, error)</code></p>
+<h2 id="step-2-configuration">Step 2: Configuration</h2>
+<p>Register in <code>config/config.yaml</code>:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">myprovider</span><span class="kw">:</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">type</span><span class="kw">:</span><span class="at"> myprovider</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.myprovider.com/v1&quot;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${MYPROVIDER_API_KEY}&quot;</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span></code></pre></div>
+<h2 id="step-3-testing">Step 3: Testing</h2>
+<div class="sourceCode" id="cb26"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMyProvider_Generate<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> <span class="op">&amp;</span>MyProvider<span class="op">{</span>apiKey<span class="op">:</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;MYPROVIDER_API_KEY&quot;</span><span class="op">)}</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>Request<span class="op">{</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{{</span>Role<span class="op">:</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span> <span class="st">&quot;Hello&quot;</span><span class="op">}},</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> resp<span class="op">.</span>Content<span class="op">)</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="step-4-registration">Step 4: Registration</h2>
+<p>In <code>internal/llm/providers/registry.go</code>:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;dev.helix.code/llm/providers/myprovider&quot;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> init<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    Register<span class="op">(</span><span class="st">&quot;myprovider&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>cfg Config<span class="op">)</span> <span class="op">(</span>llm<span class="op">.</span>Provider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>myprovider<span class="op">.</span>MyProvider<span class="op">{</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>            apiKey<span class="op">:</span>   cfg<span class="op">.</span>APIKey<span class="op">,</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>            endpoint<span class="op">:</span> cfg<span class="op">.</span>Endpoint<span class="op">,</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>            model<span class="op">:</span>    cfg<span class="op">.</span>Model<span class="op">,</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Build: <code>go build ./...</code> — should succeed.</p>
+<pre><code>
+- [ ] **Step 2: Create Tutorial 10 — Adding a Tool via MCP SDK**
+
+Write `docs/user_manual/tutorials/Tutorial_10_Adding_a_Tool.md`:
+
+```markdown
+# Tutorial 10: Adding a New Tool via MCP SDK
+
+**Duration**: 30 minutes | **Level**: Advanced
+
+## Overview
+Create a custom tool that integrates with HelixCode&#39;s MCP server.
+
+## Prerequisites
+- HelixCode running with MCP enabled
+- Go 1.24+
+- Understanding of JSON-RPC
+
+## Step 1: Define Tool Schema
+Create `internal/tools/mycalculator/tool.go`:
+
+```go
+package mycalculator
+
+import (
+    &quot;context&quot;
+    &quot;encoding/json&quot;
+    &quot;fmt&quot;
+)
+
+type CalculatorArgs struct {
+    A float64 `json:&quot;a&quot;`
+    B float64 `json:&quot;b&quot;`
+}
+
+func (t *CalculatorTool) Name() string { return &quot;calculator&quot; }
+func (t *CalculatorTool) Description() string {
+    return &quot;Performs arithmetic operations on two numbers&quot;
+}
+
+func (t *CalculatorTool) Schema() json.RawMessage {
+    return json.RawMessage(`{
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;properties&quot;: {
+            &quot;a&quot;: {&quot;type&quot;: &quot;number&quot;},
+            &quot;b&quot;: {&quot;type&quot;: &quot;number&quot;}
+        },
+        &quot;required&quot;: [&quot;a&quot;, &quot;b&quot;]
+    }`)
+}</code></pre>
+<h2 id="step-2-implement-execute">Step 2: Implement Execute</h2>
+<div class="sourceCode" id="cb29"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>CalculatorTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> args json<span class="op">.</span>RawMessage<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> parsed CalculatorArgs</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> json<span class="op">.</span>Unmarshal<span class="op">(</span>args<span class="op">,</span> <span class="op">&amp;</span>parsed<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;&quot;</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;invalid args: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    result <span class="op">:=</span> parsed<span class="op">.</span>A <span class="op">+</span> parsed<span class="op">.</span>B</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%f&quot;</span><span class="op">,</span> result<span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="step-3-register-with-mcp">Step 3: Register with MCP</h2>
+<p>In <code>internal/mcp/registry.go</code>:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;dev.helix.code/tools/mycalculator&quot;</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> init<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    RegisterTool<span class="op">(&amp;</span>mycalculator<span class="op">.</span>CalculatorTool<span class="op">{})</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Test: Start server, connect via WebSocket, send
+<code>{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;tools/call&quot;,&quot;params&quot;:{&quot;name&quot;:&quot;calculator&quot;,&quot;arguments&quot;:{&quot;a&quot;:5,&quot;b&quot;:3}}}</code>.
+Expected response: <code>{&quot;result&quot;: &quot;8.000000&quot;}</code>.</p>
+<h2 id="step-4-tool-confirmation-optional">Step 4: Tool Confirmation
+(Optional)</h2>
+<p>Implement <code>Confirmable</code> interface for dangerous tools:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>CalculatorTool<span class="op">)</span> RequiresConfirmation<span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">false</span>  <span class="co">// calculator is safe</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<pre><code>
+- [ ] **Step 3: Update SUMMARY.md to include new tutorials**
+
+```bash
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</code></pre>
+<p>Add to <code>docs/user_manual/SUMMARY.md</code>:</p>
+<pre><code>| Tutorial 9: Custom Provider | 30 min | Advanced |
+| Tutorial 10: Adding a Tool | 30 min | Advanced |</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb34"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/user_manual/tutorials/Tutorial_9_Custom_Provider.md docs/user_manual/tutorials/Tutorial_10_Adding_a_Tool.md docs/user_manual/SUMMARY.md</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs: add developer guides (custom provider, tool via MCP SDK)&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-doc-4-troubleshooting-guide">Task DOC-4: Troubleshooting
+Guide</h3>
+<p><strong>Files:</strong> - Modify:
+<code>docs/user_manual/README.md</code> (Part X — expand Troubleshooting
+section)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Read existing
+troubleshooting section</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;^### 3[0-9]\.&quot;</span> docs/user_manual/README.md</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Add SSH worker
+troubleshooting</strong></label></li>
+</ul>
+<p>Add to §30 Troubleshooting Guide:</p>
+<pre><code>#### 30.1 SSH Worker Issues
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| &quot;connection refused&quot; | Worker SSH not running | `systemctl start sshd` on worker |
+| &quot;permission denied (publickey)&quot; | Key not authorized | `ssh-copy-id user@worker` |
+| &quot;host key verification failed&quot; | Host key changed | `ssh-keygen -R worker-hostname` |
+| &quot;worker timed out after 30s&quot; | Network latency | Increase `workers.health_ttl` in config |
+| &quot;worker rejected task&quot; | Capability mismatch | Check `workers.capabilities` config |
+
+#### 30.2 LLM Connection Issues
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| &quot;401 Unauthorized&quot; | Invalid API key | Check `HELIX_*_API_KEY` env var |
+| &quot;429 Too Many Requests&quot; | Rate limited | Enable rate limiter: `llm.rate_limit.enabled: true` |
+| &quot;503 Service Unavailable&quot; | Provider outage | Enable fallback: `llm.selection.fallback_enabled: true` |
+| &quot;model not found&quot; | Wrong model name | Run `helix models` to list available models |
+| &quot;context window exceeded&quot; | Too many tokens | Enable compression: `llm.compression.enabled: true` |
+
+#### 30.3 Rate Limit Handling
+```yaml
+llm:
+  rate_limit:
+    enabled: true
+    strategy: &quot;token_bucket&quot;  # token_bucket, sliding_window, backoff
+    requests_per_minute: 60
+    burst: 10
+    backoff_base: 2  # exponential backoff multiplier
+    backoff_max: 120  # maximum wait in seconds</code></pre>
+<p>When rate limited, HelixCode automatically queues requests and
+retries with exponential backoff. Configure different limits per
+provider.</p>
+<pre><code>
+- [ ] **Step 3: Commit**
+
+```bash
+git add docs/user_manual/README.md
+git commit -m &quot;docs: add troubleshooting guide (SSH, LLM, rate limits)&quot;</code></pre>
+<hr />
+<h3 id="task-doc-5-cross-reference-sync">Task DOC-5: Cross-Reference
+Sync</h3>
+<p><strong>Files:</strong> - Modify:
+<code>docs/user_manual/SUMMARY.md</code> - Modify:
+<code>docs/user_manual/INDEX.md</code> - Verify:
+<code>docs/COMPLETE_*.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Walk SUMMARY.md
+against README.md sections</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb38"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;^### &quot;</span> docs/user_manual/README.md <span class="op">&gt;</span> /tmp/readme_sections.txt</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;|.*|&quot;</span> docs/user_manual/SUMMARY.md <span class="op">&gt;</span> /tmp/summary_entries.txt</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span> <span class="op">&lt;(</span><span class="fu">cut</span> <span class="at">-d</span><span class="st">&#39; &#39;</span> <span class="at">-f2-</span> /tmp/readme_sections.txt <span class="kw">|</span> <span class="fu">sort</span><span class="op">)</span> <span class="op">&lt;(</span><span class="fu">cut</span> <span class="at">-d</span><span class="st">&#39;|&#39;</span> <span class="at">-f2</span> /tmp/summary_entries.txt <span class="kw">|</span> <span class="fu">sed</span> <span class="st">&#39;s/^ *//&#39;</span> <span class="kw">|</span> <span class="fu">sort</span><span class="op">)</span> <span class="kw">||</span> <span class="fu">true</span></span></code></pre></div>
+<p>Fix any mismatches in SUMMARY.md.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Walk INDEX.md
+against README.md</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb39"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-oP</span> <span class="st">&#39;(?&lt;=^# ).*&#39;</span> docs/user_manual/README.md <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="va">section</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-qi</span> <span class="st">&quot;</span><span class="va">$section</span><span class="st">&quot;</span> docs/user_manual/INDEX.md<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;MISSING in INDEX: </span><span class="va">$section</span><span class="st">&quot;</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>Add any missing index entries.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>**Step 3: Verify COMPLETE_*.md
+config keys match actual config**</label></li>
+</ul>
+<div class="sourceCode" id="cb40"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rh</span> <span class="st">&quot;^[a-z]&quot;</span> docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare against actual config/config.yaml</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span> <span class="op">&lt;(</span><span class="fu">grep</span> <span class="at">-rh</span> <span class="st">&quot;^[a-z]&quot;</span> config/config.yaml <span class="kw">|</span> <span class="fu">sort</span><span class="op">)</span> <span class="op">&lt;(</span><span class="fu">grep</span> <span class="at">-rh</span> <span class="st">&quot;^[a-z]&quot;</span> docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md <span class="kw">|</span> <span class="fu">sort</span><span class="op">)</span> <span class="kw">||</span> <span class="fu">true</span></span></code></pre></div>
+<p>Fix any stale keys.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Check Tutorial 1-8
+for stale feature names</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb41"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;HelixCode v1\.0\|old-feature-name\|deprecated&quot;</span> docs/user_manual/tutorials/</span></code></pre></div>
+<p>Replace any stale references.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb42"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/user_manual/SUMMARY.md docs/user_manual/INDEX.md docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md docs/user_manual/tutorials/</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs: cross-reference sync (SUMMARY, INDEX, COMPLETE docs, tutorials)&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-inst-1-linux-packages-.deb">Task INST-1: Linux Packages
+(.deb)</h3>
+<p><strong>Files:</strong> - Create:
+<code>packaging/debian/control</code> - Create:
+<code>packaging/debian/postinst</code> - Create:
+<code>packaging/debian/prerm</code> - Create:
+<code>packaging/debian/helixcode.service</code> - Modify:
+<code>Makefile</code> (add deb target)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create debian
+control file</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/debian/control</code>:</p>
+<pre><code>Source: helixcode
+Section: devel
+Priority: optional
+Maintainer: Helix Development &lt;dev@helix.code&gt;
+Build-Depends: debhelper-compat (= 13), golang-go (&gt;= 1.24)
+Standards-Version: 4.6.2
+Homepage: https://helixcode.dev
+
+Package: helixcode
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ca-certificates
+Description: Distributed AI Development Platform
+ HelixCode is an enterprise-grade distributed AI development platform
+ that enables intelligent task division, work preservation, and
+ multi-provider LLM integration through a unified CLI, REST API,
+ and Terminal UI.</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create systemd
+service unit</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/debian/helixcode.service</code>:</p>
+<pre><code>[Unit]
+Description=HelixCode AI Development Server
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
+
+[Service]
+Type=simple
+User=helixcode
+Group=helixcode
+ExecStart=/usr/bin/helixcode server
+Restart=on-failure
+RestartSec=10
+EnvironmentFile=-/etc/helixcode/helixcode.env
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Create postinst
+script</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/debian/postinst</code>:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/sh</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-e</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="ss">configure</span><span class="kw">)</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create helixcode user if not exists</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="ot">! </span><span class="fu">getent</span> passwd helixcode <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>            <span class="ex">adduser</span> <span class="at">--system</span> <span class="at">--group</span> <span class="at">--home</span> /var/lib/helixcode helixcode</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create data directory</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mkdir</span> <span class="at">-p</span> /var/lib/helixcode /etc/helixcode</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">chown</span> <span class="at">-R</span> helixcode:helixcode /var/lib/helixcode</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create default config if missing</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-f</span> /etc/helixcode/config.yaml <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cp</span> /usr/share/helixcode/config.yaml.example /etc/helixcode/config.yaml</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Enable and start service</span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>        <span class="ex">systemctl</span> daemon-reload</span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>        <span class="ex">systemctl</span> enable helixcode.service</span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a>        <span class="ex">systemctl</span> start helixcode.service <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span></span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a><span class="cf">esac</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Create prerm
+script</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/debian/prerm</code>:</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/sh</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-e</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="ss">remove</span><span class="kw">|</span><span class="ss">purge</span><span class="kw">)</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">systemctl</span> stop helixcode.service <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>        <span class="ex">systemctl</span> disable helixcode.service <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="cf">esac</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Add Makefile
+target</strong></label></li>
+</ul>
+<p>Add to <code>helix_code/Makefile</code>:</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> deb</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="dv">deb:</span><span class="dt"> build</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>mkdir -p packaging/debian/helixcode/DEBIAN</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    mkdir -p packaging/debian/helixcode/usr/bin</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    mkdir -p packaging/debian/helixcode/etc/helixcode</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    mkdir -p packaging/debian/helixcode/lib/systemd/system</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    mkdir -p packaging/debian/helixcode/usr/share/doc/helixcode</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    cp bin/helixcode packaging/debian/helixcode/usr/bin/</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    cp packaging/debian/control packaging/debian/helixcode/DEBIAN/</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    cp packaging/debian/postinst packaging/debian/helixcode/DEBIAN/</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    cp packaging/debian/prerm packaging/debian/helixcode/DEBIAN/</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>    cp packaging/debian/helixcode.service packaging/debian/helixcode/lib/systemd/system/</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>    cp config/config.yaml packaging/debian/helixcode/etc/helixcode/config.yaml.example</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>    cp README.md packaging/debian/helixcode/usr/share/doc/helixcode/</span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>    chmod 755 packaging/debian/helixcode/DEBIAN/postinst</span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>    chmod 755 packaging/debian/helixcode/DEBIAN/prerm</span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>    dpkg-deb --build packaging/debian/helixcode</span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>    mv packaging/debian/helixcode.deb packaging/helixcode_<span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span>_amd64.deb</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Debian package: packaging/helixcode_</span><span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span><span class="st">_amd64.deb&quot;</span></span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> installers</span></span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a><span class="dv">installers:</span><span class="dt"> deb rpm homebrew windows</span></span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;All installers built in packaging/&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6: Build and
+verify</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb48"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> deb</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> packaging/helixcode_<span class="pp">*</span>.deb</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="ex">dpkg-deb</span> <span class="at">--info</span> packaging/helixcode_<span class="pp">*</span>.deb <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;Package|Version|Architecture&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 7:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb49"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add packaging/debian/ Makefile</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add Debian packaging (.deb)&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-inst-2-linux-packages-.rpm">Task INST-2: Linux Packages
+(.rpm)</h3>
+<p><strong>Files:</strong> - Create:
+<code>packaging/rpm/helixcode.spec</code> - Create:
+<code>packaging/rpm/helixcode.service</code> - Modify:
+<code>Makefile</code> (add rpm target)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create RPM spec
+file</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/rpm/helixcode.spec</code>:</p>
+<pre><code>Name: helixcode
+Version: 3.0.0
+Release: 1%{?dist}
+Summary: Distributed AI Development Platform
+License: Proprietary
+URL: https://helixcode.dev
+Source0: helixcode-%{version}.tar.gz
+BuildRequires: golang &gt;= 1.24
+Requires: ca-certificates
+
+%description
+HelixCode is an enterprise-grade distributed AI development platform
+that enables intelligent task division, work preservation, and
+multi-provider LLM integration.
+
+%prep
+%setup -q
+
+%build
+make build
+
+%install
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_sysconfdir}/helixcode
+mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_sharedstatedir}/helixcode
+install -m 755 bin/helixcode %{buildroot}%{_bindir}/helixcode
+install -m 644 config/config.yaml %{buildroot}%{_sysconfdir}/helixcode/config.yaml.example
+install -m 644 packaging/rpm/helixcode.service %{buildroot}%{_unitdir}/helixcode.service
+
+%pre
+getent group helixcode &gt;/dev/null || groupadd -r helixcode
+getent passwd helixcode &gt;/dev/null || useradd -r -g helixcode -d /var/lib/helixcode -s /sbin/nologin helixcode
+exit 0
+
+%post
+systemctl daemon-reload
+systemctl enable helixcode.service || true
+systemctl start helixcode.service || true
+
+%preun
+systemctl stop helixcode.service || true
+systemctl disable helixcode.service || true
+
+%files
+%{_bindir}/helixcode
+%{_sysconfdir}/helixcode/config.yaml.example
+%{_unitdir}/helixcode.service
+%dir %{_sharedstatedir}/helixcode
+%doc README.md
+
+%changelog
+* Thu May 08 2026 Helix Development &lt;dev@helix.code&gt; - 3.0.0
+- Initial RPM release</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create RPM systemd
+service</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/rpm/helixcode.service</code>:</p>
+<pre><code>[Unit]
+Description=HelixCode AI Development Server
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=helixcode
+Group=helixcode
+ExecStart=/usr/bin/helixcode server
+Restart=on-failure
+RestartSec=10
+EnvironmentFile=-/etc/helixcode/helixcode.env
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Add Makefile rpm
+target</strong></label></li>
+</ul>
+<p>Add to <code>helix_code/Makefile</code>:</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> rpm</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="dv">rpm:</span><span class="dt"> build</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>mkdir -p packaging/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    cp packaging/rpm/helixcode.spec packaging/rpmbuild/SPECS/</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    tar czf packaging/rpmbuild/SOURCES/helixcode-<span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span>.tar.gz \</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">--transform</span><span class="ch">=</span><span class="st">&quot;s/^/helixcode-</span><span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span><span class="st">\//&quot; </span><span class="ch">\</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a><span class="st">        bin/helixcode config/config.yaml README.md</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    rpmbuild --define <span class="st">&quot;_topdir </span><span class="ch">$(</span><span class="dt">PWD</span><span class="ch">)</span><span class="st">/packaging/rpmbuild&quot;</span> \</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>        <span class="ch">-</span><span class="fu">bb packaging/rpmbuild/SPECS/helixcode.spec</span></span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>    cp packaging/rpmbuild/RPMS/x86_64/helixcode-*.rpm packaging/</span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;RPM package: packaging/helixcode-</span><span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span><span class="st">-1.x86_64.rpm&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Build and
+verify</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb53"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> rpm</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> packaging/helixcode-<span class="pp">*</span>.rpm</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="ex">rpm</span> <span class="at">-qip</span> packaging/helixcode-<span class="pp">*</span>.rpm <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;Name|Version|Architecture&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb54"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add packaging/rpm/ Makefile</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add RPM packaging (.rpm)&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-inst-3-macos-homebrew-formula">Task INST-3: macOS Homebrew
+Formula</h3>
+<p><strong>Files:</strong> - Create:
+<code>packaging/homebrew/helixcode.rb</code> - Modify:
+<code>Makefile</code> (add homebrew target)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create Homebrew
+formula</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/homebrew/helixcode.rb</code>:</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="cf">class</span> <span class="dt">Helixcode</span> <span class="op">&lt;</span> <span class="dt">Formula</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  desc <span class="st">&quot;Distributed AI Development Platform&quot;</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  homepage <span class="st">&quot;https://helixcode.dev&quot;</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  url <span class="st">&quot;https://github.com/helixcode/helixcode/releases/download/v3.0.0/helixcode-3.0.0.darwin.amd64.tar.gz&quot;</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  sha256 <span class="st">&quot;0000000000000000000000000000000000000000000000000000000000000000&quot;</span> <span class="co"># placeholder</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  license <span class="st">&quot;Proprietary&quot;</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>  depends_on <span class="st">&quot;go&quot;</span> <span class="op">=&gt;</span> <span class="wa">:build</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> install</span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>    bin<span class="at">.install</span> <span class="st">&quot;helixcode&quot;</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>    etc<span class="at">.install</span> <span class="st">&quot;config.yaml&quot;</span> <span class="op">=&gt;</span> <span class="st">&quot;helixcode/config.yaml.example&quot;</span></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>    ohai <span class="st">&quot;HelixCode installed!&quot;</span></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>    ohai <span class="st">&quot;Run &#39;helixcode server&#39; to start the server&quot;</span></span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>    ohai <span class="st">&quot;Run &#39;helix code --help&#39; for usage&quot;</span></span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> caveats</span>
+<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;&lt;~</span><span class="cf">EOS</span></span>
+<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a><span class="do">      HelixCode requires configuration. Copy the example config:</span></span>
+<span id="cb55-21"><a href="#cb55-21" aria-hidden="true" tabindex="-1"></a><span class="do">        cp </span><span class="sc">#{</span>etc<span class="sc">}</span><span class="do">/helixcode/config.yaml.example </span><span class="sc">#{</span>etc<span class="sc">}</span><span class="do">/helixcode/config.yaml</span></span>
+<span id="cb55-22"><a href="#cb55-22" aria-hidden="true" tabindex="-1"></a><span class="do">      Then edit </span><span class="sc">#{</span>etc<span class="sc">}</span><span class="do">/helixcode/config.yaml with your API keys.</span></span>
+<span id="cb55-23"><a href="#cb55-23" aria-hidden="true" tabindex="-1"></a><span class="do">    </span><span class="cf">EOS</span></span>
+<span id="cb55-24"><a href="#cb55-24" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
+<span id="cb55-25"><a href="#cb55-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-26"><a href="#cb55-26" aria-hidden="true" tabindex="-1"></a>  service <span class="cf">do</span></span>
+<span id="cb55-27"><a href="#cb55-27" aria-hidden="true" tabindex="-1"></a>    run <span class="kw">[</span>bin<span class="op">/</span><span class="st">&quot;helixcode&quot;</span>, <span class="st">&quot;server&quot;</span><span class="kw">]</span></span>
+<span id="cb55-28"><a href="#cb55-28" aria-hidden="true" tabindex="-1"></a>    keep_alive <span class="dv">true</span></span>
+<span id="cb55-29"><a href="#cb55-29" aria-hidden="true" tabindex="-1"></a>    log_path var<span class="op">/</span><span class="st">&quot;log/helixcode.log&quot;</span></span>
+<span id="cb55-30"><a href="#cb55-30" aria-hidden="true" tabindex="-1"></a>    error_log_path var<span class="op">/</span><span class="st">&quot;log/helixcode-error.log&quot;</span></span>
+<span id="cb55-31"><a href="#cb55-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
+<span id="cb55-32"><a href="#cb55-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-33"><a href="#cb55-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">test</span> <span class="cf">do</span></span>
+<span id="cb55-34"><a href="#cb55-34" aria-hidden="true" tabindex="-1"></a>    assert_match <span class="st">&quot;helixcode version </span><span class="sc">#{</span>version<span class="sc">}</span><span class="st">&quot;</span>, shell_output(<span class="st">&quot;</span><span class="sc">#{</span>bin<span class="sc">}</span><span class="st">/helixcode version&quot;</span>)</span>
+<span id="cb55-35"><a href="#cb55-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
+<span id="cb55-36"><a href="#cb55-36" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Add Makefile
+target</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb56"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> homebrew</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="dv">homebrew:</span><span class="dt"> build</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>mkdir -p packaging/homebrew</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    tar czf packaging/helixcode-<span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span>.darwin.amd64.tar.gz \</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>        <span class="ch">-</span><span class="fu">C bin helixcode </span><span class="ch">\</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="fu">        -C ../config config.yaml</span></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>    shasum -a 256 packaging/helixcode-<span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span>.darwin.amd64.tar.gz \</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>        &gt; packaging/helixcode-<span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span>.darwin.amd64.tar.gz.sha256</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Homebrew archive: packaging/helixcode-</span><span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span><span class="st">.darwin.amd64.tar.gz&quot;</span></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Formula: packaging/homebrew/helixcode.rb&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb57"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add packaging/homebrew/ Makefile</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add macOS Homebrew formula&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-inst-4-windows-installer">Task INST-4: Windows
+Installer</h3>
+<p><strong>Files:</strong> - Create:
+<code>packaging/windows/installer.nsi</code> - Create:
+<code>scripts/install.ps1</code> - Modify: <code>Makefile</code> (add
+windows target)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create NSIS
+installer script</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/windows/installer.nsi</code>:</p>
+<pre class="nsis"><code>!define PRODUCT_NAME &quot;HelixCode&quot;
+!define PRODUCT_VERSION &quot;3.0.0&quot;
+!define PRODUCT_PUBLISHER &quot;Helix Development&quot;
+
+Name &quot;${PRODUCT_NAME} ${PRODUCT_VERSION}&quot;
+OutFile &quot;helixcode-${PRODUCT_VERSION}-setup.exe&quot;
+InstallDir &quot;$PROGRAMFILES64\${PRODUCT_NAME}&quot;
+
+Section &quot;Install&quot;
+  SetOutPath &quot;$INSTDIR&quot;
+  File &quot;bin\helixcode.exe&quot;
+  File &quot;config\config.yaml&quot;
+  CreateDirectory &quot;$APPDATA\HelixCode&quot;
+  CreateShortCut &quot;$SMPROGRAMS\HelixCode.lnk&quot; &quot;$INSTDIR\helixcode.exe&quot;
+  WriteUninstaller &quot;$INSTDIR\uninstall.exe&quot;
+  EnVar::SetHKLM
+  EnVar::AddValue &quot;PATH&quot; &quot;$INSTDIR&quot;
+SectionEnd
+
+Section &quot;Uninstall&quot;
+  Delete &quot;$INSTDIR\helixcode.exe&quot;
+  Delete &quot;$INSTDIR\config.yaml&quot;
+  Delete &quot;$INSTDIR\uninstall.exe&quot;
+  RMDir &quot;$INSTDIR&quot;
+  Delete &quot;$SMPROGRAMS\HelixCode.lnk&quot;
+  EnVar::DeleteValue &quot;PATH&quot; &quot;$INSTDIR&quot;
+SectionEnd</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create PowerShell
+installer</strong></label></li>
+</ul>
+<p>Write <code>helix_code/scripts/install.ps1</code>:</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env pwsh</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;#</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a><span class="co">.SYNOPSIS</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a><span class="co">    HelixCode Windows Installer</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a><span class="co">.DESCRIPTION</span></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Downloads and installs HelixCode on Windows</span></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a><span class="co">.PARAMETER Version</span></span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Version to install (default: latest)</span></span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a><span class="co">.PARAMETER InstallDir</span></span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Installation directory (default: $env:LOCALAPPDATA\HelixCode)</span></span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a><span class="kw">param</span><span class="op">(</span></span>
+<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="va">$Version</span> <span class="op">=</span> <span class="st">&quot;latest&quot;</span><span class="op">,</span></span>
+<span id="cb59-15"><a href="#cb59-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="va">$InstallDir</span> <span class="op">=</span> <span class="st">&quot;</span><span class="va">$env</span><span class="op">:</span><span class="va">LOCALAPPDATA</span><span class="st">\HelixCode&quot;</span></span>
+<span id="cb59-16"><a href="#cb59-16" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb59-17"><a href="#cb59-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-18"><a href="#cb59-18" aria-hidden="true" tabindex="-1"></a><span class="va">$ErrorActionPreference</span> <span class="op">=</span> <span class="st">&quot;Stop&quot;</span></span>
+<span id="cb59-19"><a href="#cb59-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-20"><a href="#cb59-20" aria-hidden="true" tabindex="-1"></a><span class="fu">Write-Host</span> <span class="st">&quot;Installing HelixCode </span><span class="va">$Version</span><span class="st">...&quot;</span> <span class="op">-</span>ForegroundColor Green</span>
+<span id="cb59-21"><a href="#cb59-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-22"><a href="#cb59-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine architecture</span></span>
+<span id="cb59-23"><a href="#cb59-23" aria-hidden="true" tabindex="-1"></a><span class="va">$arch</span> <span class="op">=</span> <span class="cf">if</span> <span class="op">([</span>Environment<span class="op">]::</span>Is64BitOperatingSystem<span class="op">)</span> <span class="op">{</span> <span class="st">&quot;amd64&quot;</span> <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span> <span class="st">&quot;386&quot;</span> <span class="op">}</span></span>
+<span id="cb59-24"><a href="#cb59-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-25"><a href="#cb59-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Download URL</span></span>
+<span id="cb59-26"><a href="#cb59-26" aria-hidden="true" tabindex="-1"></a><span class="va">$url</span> <span class="op">=</span> <span class="st">&quot;https://github.com/helixcode/helixcode/releases/download/v</span><span class="va">$Version</span><span class="st">/helixcode-</span><span class="va">$Version</span><span class="st">.windows.</span><span class="va">$arch</span><span class="st">.zip&quot;</span></span>
+<span id="cb59-27"><a href="#cb59-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-28"><a href="#cb59-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Download and extract</span></span>
+<span id="cb59-29"><a href="#cb59-29" aria-hidden="true" tabindex="-1"></a><span class="fu">Write-Host</span> <span class="st">&quot;Downloading from </span><span class="va">$url</span><span class="st">...&quot;</span> <span class="op">-</span>ForegroundColor Yellow</span>
+<span id="cb59-30"><a href="#cb59-30" aria-hidden="true" tabindex="-1"></a><span class="va">$zipPath</span> <span class="op">=</span> <span class="st">&quot;</span><span class="va">$env</span><span class="op">:</span><span class="va">TEMP</span><span class="st">\helixcode.zip&quot;</span></span>
+<span id="cb59-31"><a href="#cb59-31" aria-hidden="true" tabindex="-1"></a><span class="fu">Invoke-WebRequest</span> <span class="op">-</span>Uri <span class="va">$url</span> <span class="op">-</span>OutFile <span class="va">$zipPath</span></span>
+<span id="cb59-32"><a href="#cb59-32" aria-hidden="true" tabindex="-1"></a>Expand-Archive <span class="op">-</span>Path <span class="va">$zipPath</span> <span class="op">-</span>DestinationPath <span class="va">$InstallDir</span> <span class="op">-</span>Force</span>
+<span id="cb59-33"><a href="#cb59-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-34"><a href="#cb59-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Add to PATH</span></span>
+<span id="cb59-35"><a href="#cb59-35" aria-hidden="true" tabindex="-1"></a><span class="va">$userPath</span> <span class="op">=</span> <span class="op">[</span>Environment<span class="op">]::</span>GetEnvironmentVariable<span class="op">(</span><span class="st">&quot;PATH&quot;</span><span class="op">,</span> <span class="st">&quot;User&quot;</span><span class="op">)</span></span>
+<span id="cb59-36"><a href="#cb59-36" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span><span class="va">$userPath</span> <span class="op">-notlike</span> <span class="st">&quot;*</span><span class="va">$InstallDir</span><span class="st">*&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb59-37"><a href="#cb59-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span>Environment<span class="op">]::</span>SetEnvironmentVariable<span class="op">(</span><span class="st">&quot;PATH&quot;</span><span class="op">,</span> <span class="st">&quot;</span><span class="va">$userPath</span><span class="st">;</span><span class="va">$InstallDir</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;User&quot;</span><span class="op">)</span></span>
+<span id="cb59-38"><a href="#cb59-38" aria-hidden="true" tabindex="-1"></a>    <span class="va">$env</span><span class="op">:</span><span class="va">PATH</span> <span class="op">+=</span> <span class="st">&quot;;</span><span class="va">$InstallDir</span><span class="st">&quot;</span></span>
+<span id="cb59-39"><a href="#cb59-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb59-40"><a href="#cb59-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-41"><a href="#cb59-41" aria-hidden="true" tabindex="-1"></a><span class="fu">Write-Host</span> <span class="st">&quot;HelixCode installed to </span><span class="va">$InstallDir</span><span class="st">&quot;</span> <span class="op">-</span>ForegroundColor Green</span>
+<span id="cb59-42"><a href="#cb59-42" aria-hidden="true" tabindex="-1"></a><span class="fu">Write-Host</span> <span class="st">&quot;Run &#39;helixcode version&#39; to verify.&quot;</span> <span class="op">-</span>ForegroundColor Green</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Add Makefile
+target</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb60"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> windows</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="dv">windows:</span><span class="dt"> build</span></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>mkdir -p packaging/windows</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">GOOS</span><span class="ch">=</span><span class="st">windows GOARCH=amd64 go build -o bin/helixcode.exe ./cmd/server/</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>    zip -j packaging/helixcode-<span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span>.windows.amd64.zip bin/helixcode.exe config/config.yaml</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;Windows package: packaging/helixcode-</span><span class="ch">$(</span><span class="dt">VERSION</span><span class="ch">)</span><span class="st">.windows.amd64.zip&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb61"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add packaging/windows/ scripts/install.ps1 Makefile</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add Windows installer (NSIS + PowerShell)&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-inst-5-platform-agnostic-install-script-docker">Task
+INST-5: Platform-Agnostic Install Script + Docker</h3>
+<p><strong>Files:</strong> - Create: <code>scripts/install.sh</code> -
+Create: <code>packaging/docker/Dockerfile</code> - Modify:
+<code>README.md</code> (add install badge/one-liner)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create
+install.sh</strong></label></li>
+</ul>
+<p>Write <code>helix_code/scripts/install.sh</code>:</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/sh</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-eu</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a><span class="va">REPO</span><span class="op">=</span><span class="st">&quot;helixcode/helixcode&quot;</span></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a><span class="va">VERSION</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${1</span><span class="op">:-</span>latest<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="va">INSTALL_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${HELIXCODE_DIR</span><span class="op">:-</span>/usr/local/bin<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a><span class="fu">detect_os()</span> <span class="kw">{</span></span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">uname</span> <span class="at">-s</span><span class="va">)</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>        <span class="ss">Linux</span><span class="kw">)</span>   <span class="bu">echo</span> <span class="st">&quot;linux&quot;</span> <span class="cf">;;</span></span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>        <span class="ss">Darwin</span><span class="kw">)</span>  <span class="bu">echo</span> <span class="st">&quot;darwin&quot;</span> <span class="cf">;;</span></span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>        <span class="pp">*</span><span class="kw">)</span>       <span class="bu">echo</span> <span class="st">&quot;unsupported&quot;</span> <span class="cf">;;</span></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">esac</span></span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a><span class="fu">detect_arch()</span> <span class="kw">{</span></span>
+<span id="cb62-17"><a href="#cb62-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">uname</span> <span class="at">-m</span><span class="va">)</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb62-18"><a href="#cb62-18" aria-hidden="true" tabindex="-1"></a>        <span class="ss">x86_64</span><span class="kw">|</span><span class="ss">amd64</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;amd64&quot;</span> <span class="cf">;;</span></span>
+<span id="cb62-19"><a href="#cb62-19" aria-hidden="true" tabindex="-1"></a>        <span class="ss">aarch64</span><span class="kw">|</span><span class="ss">arm64</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;arm64&quot;</span> <span class="cf">;;</span></span>
+<span id="cb62-20"><a href="#cb62-20" aria-hidden="true" tabindex="-1"></a>        <span class="pp">*</span><span class="kw">)</span>            <span class="bu">echo</span> <span class="st">&quot;unsupported&quot;</span> <span class="cf">;;</span></span>
+<span id="cb62-21"><a href="#cb62-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">esac</span></span>
+<span id="cb62-22"><a href="#cb62-22" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb62-23"><a href="#cb62-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-24"><a href="#cb62-24" aria-hidden="true" tabindex="-1"></a><span class="fu">main()</span> <span class="kw">{</span></span>
+<span id="cb62-25"><a href="#cb62-25" aria-hidden="true" tabindex="-1"></a>    <span class="va">os</span><span class="op">=</span><span class="va">$(</span><span class="ex">detect_os</span><span class="va">)</span></span>
+<span id="cb62-26"><a href="#cb62-26" aria-hidden="true" tabindex="-1"></a>    <span class="va">arch</span><span class="op">=</span><span class="va">$(</span><span class="ex">detect_arch</span><span class="va">)</span></span>
+<span id="cb62-27"><a href="#cb62-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-28"><a href="#cb62-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$os</span><span class="st">&quot;</span> <span class="ot">=</span> <span class="st">&quot;unsupported&quot;</span> <span class="bu">]</span> <span class="kw">||</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$arch</span><span class="st">&quot;</span> <span class="ot">=</span> <span class="st">&quot;unsupported&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb62-29"><a href="#cb62-29" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;Unsupported platform: </span><span class="va">$(</span><span class="fu">uname</span> <span class="at">-s</span><span class="va">)</span><span class="st"> </span><span class="va">$(</span><span class="fu">uname</span> <span class="at">-m</span><span class="va">)</span><span class="st">&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb62-30"><a href="#cb62-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;See https://helixcode.dev/docs/install for alternatives&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb62-31"><a href="#cb62-31" aria-hidden="true" tabindex="-1"></a>        <span class="bu">exit</span> 1</span>
+<span id="cb62-32"><a href="#cb62-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb62-33"><a href="#cb62-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-34"><a href="#cb62-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;HelixCode Installer&quot;</span></span>
+<span id="cb62-35"><a href="#cb62-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;Platform: </span><span class="va">$os</span><span class="st">/</span><span class="va">$arch</span><span class="st">&quot;</span></span>
+<span id="cb62-36"><a href="#cb62-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb62-37"><a href="#cb62-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-38"><a href="#cb62-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Download latest release info</span></span>
+<span id="cb62-39"><a href="#cb62-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$VERSION</span><span class="st">&quot;</span> <span class="ot">=</span> <span class="st">&quot;latest&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb62-40"><a href="#cb62-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">download_url</span><span class="op">=</span><span class="st">&quot;https://github.com/</span><span class="va">$REPO</span><span class="st">/releases/latest/download/helixcode-</span><span class="va">$os</span><span class="st">-</span><span class="va">$arch</span><span class="st">.tar.gz&quot;</span></span>
+<span id="cb62-41"><a href="#cb62-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb62-42"><a href="#cb62-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">download_url</span><span class="op">=</span><span class="st">&quot;https://github.com/</span><span class="va">$REPO</span><span class="st">/releases/download/v</span><span class="va">$VERSION</span><span class="st">/helixcode-</span><span class="va">$VERSION</span><span class="st">.</span><span class="va">$os</span><span class="st">-</span><span class="va">$arch</span><span class="st">.tar.gz&quot;</span></span>
+<span id="cb62-43"><a href="#cb62-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb62-44"><a href="#cb62-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-45"><a href="#cb62-45" aria-hidden="true" tabindex="-1"></a>    <span class="va">tmpdir</span><span class="op">=</span><span class="va">$(</span><span class="fu">mktemp</span> <span class="at">-d</span><span class="va">)</span></span>
+<span id="cb62-46"><a href="#cb62-46" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;Downloading from </span><span class="va">$download_url</span><span class="st"> ...&quot;</span></span>
+<span id="cb62-47"><a href="#cb62-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">command</span> <span class="at">-v</span> curl <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb62-48"><a href="#cb62-48" aria-hidden="true" tabindex="-1"></a>        <span class="ex">curl</span> <span class="at">-fsSL</span> <span class="st">&quot;</span><span class="va">$download_url</span><span class="st">&quot;</span> <span class="at">-o</span> <span class="st">&quot;</span><span class="va">$tmpdir</span><span class="st">/helixcode.tar.gz&quot;</span></span>
+<span id="cb62-49"><a href="#cb62-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> <span class="bu">command</span> <span class="at">-v</span> wget <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb62-50"><a href="#cb62-50" aria-hidden="true" tabindex="-1"></a>        <span class="fu">wget</span> <span class="at">-q</span> <span class="st">&quot;</span><span class="va">$download_url</span><span class="st">&quot;</span> <span class="at">-O</span> <span class="st">&quot;</span><span class="va">$tmpdir</span><span class="st">/helixcode.tar.gz&quot;</span></span>
+<span id="cb62-51"><a href="#cb62-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb62-52"><a href="#cb62-52" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;Need curl or wget&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb62-53"><a href="#cb62-53" aria-hidden="true" tabindex="-1"></a>        <span class="bu">exit</span> 1</span>
+<span id="cb62-54"><a href="#cb62-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb62-55"><a href="#cb62-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-56"><a href="#cb62-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tar</span> xzf <span class="st">&quot;</span><span class="va">$tmpdir</span><span class="st">/helixcode.tar.gz&quot;</span> <span class="at">-C</span> <span class="st">&quot;</span><span class="va">$tmpdir</span><span class="st">&quot;</span></span>
+<span id="cb62-57"><a href="#cb62-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-58"><a href="#cb62-58" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Install binary</span></span>
+<span id="cb62-59"><a href="#cb62-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">$INSTALL_DIR</span><span class="st">&quot;</span></span>
+<span id="cb62-60"><a href="#cb62-60" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cp</span> <span class="st">&quot;</span><span class="va">$tmpdir</span><span class="st">/helixcode&quot;</span> <span class="st">&quot;</span><span class="va">$INSTALL_DIR</span><span class="st">/helixcode&quot;</span></span>
+<span id="cb62-61"><a href="#cb62-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">chmod</span> +x <span class="st">&quot;</span><span class="va">$INSTALL_DIR</span><span class="st">/helixcode&quot;</span></span>
+<span id="cb62-62"><a href="#cb62-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-63"><a href="#cb62-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rm</span> <span class="at">-rf</span> <span class="st">&quot;</span><span class="va">$tmpdir</span><span class="st">&quot;</span></span>
+<span id="cb62-64"><a href="#cb62-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-65"><a href="#cb62-65" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb62-66"><a href="#cb62-66" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;HelixCode installed to </span><span class="va">$INSTALL_DIR</span><span class="st">/helixcode&quot;</span></span>
+<span id="cb62-67"><a href="#cb62-67" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;Run &#39;helixcode version&#39; to verify.&quot;</span></span>
+<span id="cb62-68"><a href="#cb62-68" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb62-69"><a href="#cb62-69" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;Quick start:&quot;</span></span>
+<span id="cb62-70"><a href="#cb62-70" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;  1. Copy config example: helixcode init-config&quot;</span></span>
+<span id="cb62-71"><a href="#cb62-71" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;  2. Edit config:         </span><span class="dt">\$</span><span class="st">EDITOR ~/.config/helixcode/config.yaml&quot;</span></span>
+<span id="cb62-72"><a href="#cb62-72" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;  3. Start server:        helixcode server&quot;</span></span>
+<span id="cb62-73"><a href="#cb62-73" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb62-74"><a href="#cb62-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-75"><a href="#cb62-75" aria-hidden="true" tabindex="-1"></a><span class="ex">main</span> <span class="st">&quot;</span><span class="va">$@</span><span class="st">&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create production
+Dockerfile</strong></label></li>
+</ul>
+<p>Write <code>helix_code/packaging/docker/Dockerfile</code>:</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> golang:1.24-alpine <span class="kw">AS</span> builder</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="kw">WORKDIR</span> /build</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> . .</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">go</span> build <span class="at">-o</span> /build/helixcode ./cmd/server/</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> alpine:3.20</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">apk</span> add <span class="at">--no-cache</span> ca-certificates tzdata</span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">addgroup</span> <span class="at">-S</span> helixcode <span class="kw">&amp;&amp;</span> <span class="ex">adduser</span> <span class="at">-S</span> <span class="at">-G</span> helixcode helixcode</span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> <span class="op">--from=builder</span> /build/helixcode /usr/local/bin/helixcode</span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a><span class="kw">COPY</span> config/config.yaml /etc/helixcode/config.yaml</span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="fu">mkdir</span> <span class="at">-p</span> /var/lib/helixcode <span class="kw">&amp;&amp;</span> <span class="fu">chown</span> <span class="at">-R</span> helixcode:helixcode /var/lib/helixcode</span>
+<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-15"><a href="#cb63-15" aria-hidden="true" tabindex="-1"></a><span class="kw">USER</span> helixcode</span>
+<span id="cb63-16"><a href="#cb63-16" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPOSE</span> 8080</span>
+<span id="cb63-17"><a href="#cb63-17" aria-hidden="true" tabindex="-1"></a><span class="kw">VOLUME</span> [<span class="st">&quot;/var/lib/helixcode&quot;</span>, <span class="st">&quot;/etc/helixcode&quot;</span>]</span>
+<span id="cb63-18"><a href="#cb63-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-19"><a href="#cb63-19" aria-hidden="true" tabindex="-1"></a><span class="kw">ENTRYPOINT</span> [<span class="st">&quot;helixcode&quot;</span>]</span>
+<span id="cb63-20"><a href="#cb63-20" aria-hidden="true" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">&quot;server&quot;</span>]</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Verify install.sh
+works (dry-run)</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb64"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x scripts/install.sh</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="at">-n</span> scripts/install.sh</span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Syntax OK&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb65"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add scripts/install.sh packaging/docker/Dockerfile</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add platform-agnostic installer script and production Dockerfile&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-web-1-website-content-accuracy-audit">Task WEB-1: Website
+Content Accuracy Audit</h3>
+<p><strong>Files:</strong> - Modify:
+<code>github_pages_website/docs/index.html</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Audit actual
+provider count from code</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb66"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Provider implementations:&quot;</span></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-d</span> internal/llm/providers/<span class="pp">*</span>/</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Total providers: </span><span class="va">$(</span><span class="fu">ls</span> <span class="at">-d</span> internal/llm/providers/<span class="pp">*</span>/ <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Audit actual feature
+count</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb67"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Tool categories:&quot;</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-d</span> internal/tools/<span class="pp">*</span>/</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Total tool packages: </span><span class="va">$(</span><span class="fu">ls</span> <span class="at">-d</span> internal/tools/<span class="pp">*</span>/ <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span><span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Audit Go
+LOC</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb68"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-name</span> <span class="st">&quot;*.go&quot;</span> <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./vendor/*&quot;</span> <span class="kw">|</span> <span class="fu">xargs</span> wc <span class="at">-l</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-1</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Update index.html
+stats</strong></label></li>
+</ul>
+<p>Replace the statistics section in <code>index.html</code>. Find and
+update: - Provider count (update from old number to actual) - Feature
+count (update from old number to actual) - Language count - Lines of
+code</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/Github-Pages-Website</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Fix GitHub
+links</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb70"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&#39;github.com/helixcode\|github.com/helix&#39;</span> docs/index.html</span></code></pre></div>
+<p>Verify each link resolves. Fix any that 404 (repo structure
+changed).</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb71"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add github_pages_website/docs/index.html</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;website: update stats, provider count, and fix links&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-web-2-manual-sync">Task WEB-2: Manual Sync</h3>
+<p><strong>Files:</strong> - Modify:
+<code>github_pages_website/docs/manual/index.html</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Compare manual HTML
+against README.md</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb72"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract section headings from both</span></span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;^### &quot;</span> helix_code/docs/user_manual/README.md <span class="kw">|</span> <span class="fu">head</span> <span class="at">-50</span></span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;class=</span><span class="dt">\&quot;</span><span class="st">section</span><span class="dt">\&quot;</span><span class="st">\|&lt;h[23]&quot;</span> github_pages_website/docs/manual/index.html <span class="kw">|</span> <span class="fu">head</span> <span class="at">-50</span></span></code></pre></div>
+<p>Identify missing/extra sections.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Update manual HTML
+with any missing sections</strong></label></li>
+</ul>
+<p>Add any provider deep-dives, memory system, troubleshooting sections
+that were added to README.md but are missing from the website
+manual.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Check courses and
+mobile sub-sites</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb73"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> github_pages_website/docs/courses/</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> github_pages_website/docs/courses/README.md <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span></code></pre></div>
+<p>If curricula/metadata is stale, update the relevant course data
+files.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb74"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add github_pages_website/docs/manual/index.html github_pages_website/docs/courses/</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;website: sync manual and courses with latest docs&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-web-3-website-test-suite">Task WEB-3: Website Test
+Suite</h3>
+<p><strong>Files:</strong> - None (run tests, fix failures)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Run local test
+script</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb75"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/Github-Pages-Website</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./test-local.sh</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-20</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Run full website
+test</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb76"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./test-website.sh</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-30</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Run performance
+test</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb77"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./test-performance.sh</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-10</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Fix any test
+failures</strong></label></li>
+</ul>
+<p>If tests fail, inspect the specific test’s output, fix the underlying
+issue in the relevant file, re-run.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Verify no
+404s</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb78"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&#39;href=&quot;http&#39;</span> github_pages_website/docs/ <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&#39;https://helixcode.dev\|https://github.com/helixcode&#39;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span></code></pre></div>
+<p>Check each external link manually or via curl.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6: Commit any
+fixes</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb79"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add github_pages_website/</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;website: fix test failures and broken links&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="final-phase-5-evidence-and-close-out">Final: Phase 5 Evidence
+and Close-Out</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Verify all expansion
+plan items ticked</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb80"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;Extended Thinking\|Prompt Caching\|Multimodal\|IAM\|Entra ID\|Memory System\|Sandbox\|Web Tools\|Custom Provider\|MCP SDK\|SSH Worker\|LLM Connection\|Rate Limit&quot;</span> docs/user_manual/README.md</span></code></pre></div>
+<p>Expected: 13+ matches (all expansion plan topics present).</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Verify all
+installers exist</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb81"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> packaging/helixcode_<span class="pp">*</span>.deb packaging/helixcode-<span class="pp">*</span>.rpm packaging/helixcode-<span class="pp">*</span>.darwin.<span class="pp">*</span>.tar.gz packaging/helixcode-<span class="pp">*</span>.windows.<span class="pp">*</span>.zip</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Verify install.sh
+works</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb82"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="at">-n</span> scripts/install.sh</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Update
+PROGRESS.md</strong></label></li>
+</ul>
+<p>Mark Phase 5 complete, update all task checkboxes, add commit
+SHAs.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Update
+CONTINUATION.md</strong></label></li>
+</ul>
+<p>Sync with Phase 5 close-out.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6: Final
+commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb83"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/improvements/PROGRESS.md docs/CONTINUATION.md</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;phase5: close out end-user materials uplift&quot;</span></span></code></pre></div>
+</body>
+</html>

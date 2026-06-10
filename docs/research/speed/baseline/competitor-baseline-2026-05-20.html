@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>competitor-baseline-2026-05-20</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">competitor-baseline-2026-05-20</h1>
+</header>
+<!--
+Document-Metadata (constitution §11.4.44)
+Revision: 1
+Generated: 20260520T133654Z
+Authority: HelixCode speed programme — P0-T03 competitor wall-clock baseline.
+           Produced by scripts/testing/competitor_speed_baseline.sh.
+Scope:     Captured measurement artefact. Numbers are real wall-clock from
+           the host below; absent agents are SKIP-OK, never fabricated
+           (CONST-035 anti-bluff / §11.4.6 no-guessing).
+-->
+<h1 id="competitor-wall-clock-baseline-20260520t133654z">Competitor
+Wall-Clock Baseline — 20260520T133654Z</h1>
+<p>Speed-programme Phase 0 task <strong>P0-T03</strong>. Establishes the
+competitor numbers HelixCode must beat (R4 §3). Captured by
+<code>scripts/testing/competitor_speed_baseline.sh</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Host</td>
+<td><code>Linux 6.12.61-6.12-alt1 x86_64</code></td>
+</tr>
+<tr>
+<td>Generated (UTC)</td>
+<td>20260520T133654Z</td>
+</tr>
+<tr>
+<td>Runs per scenario</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Timing tool</td>
+<td><code>/usr/bin/time</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="measured-wall-clock">Measured wall-clock</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Command</th>
+<th>Scenario</th>
+<th>Median</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td><code>claude</code></td>
+<td>S1 cold-start</td>
+<td>111 ms</td>
+<td>min 102 / mean 110 / max 117 ms (n=3)</td>
+</tr>
+<tr>
+<td>Gemini CLI</td>
+<td><code>gemini</code></td>
+<td>S1 cold-start</td>
+<td>2015 ms</td>
+<td>min 1920 / mean 1988 / max 2031 ms (n=3)</td>
+</tr>
+<tr>
+<td>Aider</td>
+<td><code>aider</code></td>
+<td>S1 cold-start</td>
+<td>645 ms</td>
+<td>min 624 / mean 651 / max 685 ms (n=3)</td>
+</tr>
+<tr>
+<td>Cline</td>
+<td><code>cline</code></td>
+<td>S1 cold-start</td>
+<td>SKIP-OK</td>
+<td>not installed on host</td>
+</tr>
+<tr>
+<td>Crush</td>
+<td><code>crush</code></td>
+<td>S1 cold-start</td>
+<td>128 ms</td>
+<td>min 117 / mean 127 / max 136 ms (n=3)</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>opencode</code></td>
+<td>S1 cold-start</td>
+<td>1025 ms</td>
+<td>min 970 / mean 1018 / max 1060 ms (n=3)</td>
+</tr>
+<tr>
+<td>Qwen Code</td>
+<td><code>qwen</code></td>
+<td>S1 cold-start</td>
+<td>919 ms</td>
+<td>min 887 / mean 916 / max 943 ms (n=3)</td>
+</tr>
+</tbody>
+</table>
+<p>S1 cold-start = <code>&lt;agent&gt; --version</code> wall-clock — a
+safe, no-LLM-cost, repeatable measurement. <code>SKIP-OK</code> rows are
+agents not installed on this host; per CONST-035 / §11.4.6 no number is
+fabricated for them.</p>
+<p><strong>S2-S4 (LLM-invoking):</strong> skipped — they would cost real
+API tokens. Set <code>COMPETITOR_BENCH_LLM=1</code> to opt in. The S1
+cold-start figures above are the default no-cost baseline (CONST-050: no
+fake LLM, no fabricated number).</p>
+<h2 id="raw-time-evidence-anti-bluff-independently-checkable">Raw
+<code>time</code> evidence (anti-bluff — independently checkable)</h2>
+<h3 id="claude-code-claude-s1-cold-start">Claude Code
+(<code>claude</code>) — S1 cold-start</h3>
+<p>binary: /home/milosvasic/.local/bin/claude samples (ms): 111 117 102
+median: 111 ms | mean: 110 ms | min: 102 ms | max: 117 ms</p>
+<pre><code>run 1: wall=111ms rc=0
+    2.1.143 (Claude Code)
+        Command being timed: &quot;claude --version&quot;
+        User time (seconds): 0.06
+        System time (seconds): 0.04
+        Percent of CPU this job got: 102%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.10
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 203280
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 18757
+        Voluntary context switches: 75
+        Involuntary context switches: 42
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 2: wall=117ms rc=0
+    2.1.143 (Claude Code)
+        Command being timed: &quot;claude --version&quot;
+        User time (seconds): 0.07
+        System time (seconds): 0.04
+        Percent of CPU this job got: 103%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.11
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 202640
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 18551
+        Voluntary context switches: 99
+        Involuntary context switches: 164
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 3: wall=102ms rc=0
+    2.1.143 (Claude Code)
+        Command being timed: &quot;claude --version&quot;
+        User time (seconds): 0.06
+        System time (seconds): 0.03
+        Percent of CPU this job got: 104%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.09
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 203252
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 18760
+        Voluntary context switches: 83
+        Involuntary context switches: 107
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 8
+        Socket messages sent: 0</code></pre>
+<h3 id="gemini-cli-gemini-s1-cold-start">Gemini CLI
+(<code>gemini</code>) — S1 cold-start</h3>
+<p>binary: /home/milosvasic/.npm-global/bin/gemini samples (ms): 2031
+2015 1920 median: 2015 ms | mean: 1988 ms | min: 1920 ms | max: 2031
+ms</p>
+<pre><code>run 1: wall=2031ms rc=0
+    0.33.2
+        Command being timed: &quot;gemini --version&quot;
+        User time (seconds): 2.38
+        System time (seconds): 0.28
+        Percent of CPU this job got: 131%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.02
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 234212
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 58960
+        Voluntary context switches: 673
+        Involuntary context switches: 299
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 96
+        Socket messages sent: 0
+run 2: wall=2015ms rc=0
+    0.33.2
+        Command being timed: &quot;gemini --version&quot;
+        User time (seconds): 2.40
+        System time (seconds): 0.27
+        Percent of CPU this job got: 132%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:02.01
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 232532
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 62428
+        Voluntary context switches: 609
+        Involuntary context switches: 144
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 3: wall=1920ms rc=0
+    0.33.2
+        Command being timed: &quot;gemini --version&quot;
+        User time (seconds): 2.31
+        System time (seconds): 0.25
+        Percent of CPU this job got: 134%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.91
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 232264
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 59879
+        Voluntary context switches: 707
+        Involuntary context switches: 117
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 8
+        Socket messages sent: 0</code></pre>
+<h3 id="aider-aider-s1-cold-start">Aider (<code>aider</code>) — S1
+cold-start</h3>
+<p>binary: /home/milosvasic/.local/bin/aider samples (ms): 624 645 685
+median: 645 ms | mean: 651 ms | min: 624 ms | max: 685 ms</p>
+<pre><code>run 1: wall=624ms rc=0
+    aider 0.86.2
+        Command being timed: &quot;aider --version&quot;
+        User time (seconds): 0.57
+        System time (seconds): 0.04
+        Percent of CPU this job got: 100%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.62
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 73100
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 15165
+        Voluntary context switches: 9
+        Involuntary context switches: 10
+        Swaps: 0
+        File system inputs: 256
+        File system outputs: 0
+        Socket messages sent: 0
+run 2: wall=645ms rc=0
+    aider 0.86.2
+        Command being timed: &quot;aider --version&quot;
+        User time (seconds): 0.59
+        System time (seconds): 0.04
+        Percent of CPU this job got: 100%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.64
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 73032
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 15164
+        Voluntary context switches: 9
+        Involuntary context switches: 8
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 3: wall=685ms rc=0
+    aider 0.86.2
+        Command being timed: &quot;aider --version&quot;
+        User time (seconds): 0.63
+        System time (seconds): 0.04
+        Percent of CPU this job got: 99%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.68
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 73116
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 15171
+        Voluntary context switches: 9
+        Involuntary context switches: 8
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0</code></pre>
+<h3 id="cline-cline-skip-ok">Cline (<code>cline</code>) — SKIP-OK</h3>
+<p>CONST-§11.4.3 topology-dispatch: <code>cline</code> not found on
+PATH; no number fabricated.</p>
+<h3 id="crush-crush-s1-cold-start">Crush (<code>crush</code>) — S1
+cold-start</h3>
+<p>binary: /home/milosvasic/.npm-global/bin/crush samples (ms): 136 117
+128 median: 128 ms | mean: 127 ms | min: 117 ms | max: 136 ms</p>
+<pre><code>run 1: wall=136ms rc=0
+    crush version v0.56.0
+        Command being timed: &quot;crush --version&quot;
+        User time (seconds): 0.14
+        System time (seconds): 0.03
+        Percent of CPU this job got: 134%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.13
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 75104
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 11324
+        Voluntary context switches: 301
+        Involuntary context switches: 19
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 2: wall=117ms rc=0
+    crush version v0.56.0
+        Command being timed: &quot;crush --version&quot;
+        User time (seconds): 0.12
+        System time (seconds): 0.03
+        Percent of CPU this job got: 140%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.11
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 73728
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 11543
+        Voluntary context switches: 282
+        Involuntary context switches: 7
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 3: wall=128ms rc=0
+    crush version v0.56.0
+        Command being timed: &quot;crush --version&quot;
+        User time (seconds): 0.13
+        System time (seconds): 0.03
+        Percent of CPU this job got: 137%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.12
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 72540
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 11430
+        Voluntary context switches: 269
+        Involuntary context switches: 10
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0</code></pre>
+<h3 id="opencode-opencode-s1-cold-start">OpenCode
+(<code>opencode</code>) — S1 cold-start</h3>
+<p>binary: /home/milosvasic/.opencode/bin/opencode samples (ms): 1060
+970 1025 median: 1025 ms | mean: 1018 ms | min: 970 ms | max: 1060
+ms</p>
+<pre><code>run 1: wall=1060ms rc=0
+    1.14.41
+        Command being timed: &quot;opencode --version&quot;
+        User time (seconds): 1.13
+        System time (seconds): 0.18
+        Percent of CPU this job got: 125%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.05
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 271512
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 54936
+        Voluntary context switches: 1648
+        Involuntary context switches: 883
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 2: wall=970ms rc=0
+    1.14.41
+        Command being timed: &quot;opencode --version&quot;
+        User time (seconds): 1.09
+        System time (seconds): 0.13
+        Percent of CPU this job got: 127%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.96
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 272056
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 54384
+        Voluntary context switches: 1918
+        Involuntary context switches: 1091
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 3: wall=1025ms rc=0
+    1.14.41
+        Command being timed: &quot;opencode --version&quot;
+        User time (seconds): 1.14
+        System time (seconds): 0.14
+        Percent of CPU this job got: 126%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.02
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 275816
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 55452
+        Voluntary context switches: 1722
+        Involuntary context switches: 788
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0</code></pre>
+<h3 id="qwen-code-qwen-s1-cold-start">Qwen Code (<code>qwen</code>) — S1
+cold-start</h3>
+<p>binary: /home/milosvasic/.npm-global/bin/qwen samples (ms): 887 919
+943 median: 919 ms | mean: 916 ms | min: 887 ms | max: 943 ms</p>
+<pre><code>run 1: wall=887ms rc=0
+    0.14.5
+        Command being timed: &quot;qwen --version&quot;
+        User time (seconds): 0.89
+        System time (seconds): 0.11
+        Percent of CPU this job got: 114%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.88
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 218432
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 55465
+        Voluntary context switches: 305
+        Involuntary context switches: 27
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 2: wall=919ms rc=0
+    0.14.5
+        Command being timed: &quot;qwen --version&quot;
+        User time (seconds): 0.93
+        System time (seconds): 0.13
+        Percent of CPU this job got: 116%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.91
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 227436
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 57994
+        Voluntary context switches: 296
+        Involuntary context switches: 67
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+run 3: wall=943ms rc=0
+    0.14.5
+        Command being timed: &quot;qwen --version&quot;
+        User time (seconds): 0.96
+        System time (seconds): 0.12
+        Percent of CPU this job got: 115%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.93
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 227764
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 57817
+        Voluntary context switches: 274
+        Involuntary context switches: 54
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0</code></pre>
+</body>
+</html>

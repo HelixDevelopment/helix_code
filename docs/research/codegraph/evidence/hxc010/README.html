@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="hxc-010-kimi-cli-qwen-code-codegraph-end-to-end-evidence">HXC-010 —
+Kimi CLI + Qwen Code CodeGraph end-to-end evidence</h1>
+<p>Captured 2026-05-21 after the operator supplied OpenAI-compatible
+router credentials. Both agents were re-driven through their canonical
+Challenge scripts and produced <strong>true tier-1 PASS</strong> results
+— each agent genuinely invoked a <code>codegraph_*</code> MCP tool and
+received real graph data from the scanned HelixCode code-graph.</p>
+<h2 id="path-used">Path used</h2>
+<p>The originally-blocking backends are still blocked:</p>
+<ul>
+<li><strong>Kimi</strong> — the <code>KIMI_API_KEY</code> shares the
+same exhausted account-level monthly billing-cycle quota as the bundled
+OAuth credentials (<code>exceeded_current_quota_error</code> on
+<code>api.kimi.com/coding/v1</code>).</li>
+<li><strong>Qwen Code</strong> — bundled OAuth free tier discontinued
+2026-04-15.</li>
+</ul>
+<p>Both agents were therefore driven against an
+<strong>OpenAI-compatible router</strong> (SiliconFlow —
+<code>OPENROUTER_API_KEY</code> had insufficient credit, ~$0.0007):</p>
+<ul>
+<li>Kimi CLI: an <code>openai_legacy</code>-type provider (config-file
+carrying a placeholder api_key); the real key is injected at runtime via
+the <code>OPENAI_API_KEY</code> environment variable — never written to
+disk.</li>
+<li>Qwen Code: <code>--auth-type openai</code> with
+<code>OPENAI_API_KEY</code> / <code>OPENAI_BASE_URL</code> /
+<code>OPENAI_MODEL</code> environment variables — never written into the
+tracked <code>.qwen/settings.json</code>.</li>
+</ul>
+<p>The Challenge scripts <code>cg-challenge-05-kimi.sh</code> /
+<code>cg-challenge-07-qwen.sh</code> now honour
+<code>HELIX_CG_OPENAI_API_KEY</code> +
+<code>HELIX_CG_OPENAI_BASE_URL</code> (+ optional
+<code>HELIX_CG_QWEN_MODEL</code>) environment variables for the
+credentialed path, falling back to the bundled (quota-gated) provider
+when those env vars are absent.</p>
+<h2 id="result">Result</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Challenge</th>
+<th>Agent</th>
+<th>Model (via SiliconFlow)</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CG-CHALLENGE-05</td>
+<td>Kimi CLI</td>
+<td><code>moonshotai/Kimi-K2.6</code></td>
+<td>PASS (true end-to-end)</td>
+</tr>
+<tr>
+<td>CG-CHALLENGE-07</td>
+<td>Qwen Code</td>
+<td><code>Qwen/Qwen3-Coder-30B-A3B-Instruct</code></td>
+<td>PASS (true end-to-end)</td>
+</tr>
+</tbody>
+</table>
+<p>Both transcripts in this directory show the MCP loader connecting to
+the <code>codegraph</code> server, the agent invoking
+<code>codegraph_search</code> for symbol <code>Provider</code>, the tool
+returning 10 real <code>.go</code> symbol paths, and the agent answering
+with a real file path. No API-key value appears in any transcript.</p>
+</body>
+</html>

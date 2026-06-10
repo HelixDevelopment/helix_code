@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>screenshot_testing_strategy</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">screenshot_testing_strategy</h1>
+</header>
+<h1 id="helixqa-screenshot-pipeline-anti-bluff-testing-strategy">HelixQA
+Screenshot Pipeline &amp; Anti-Bluff Testing Strategy</h1>
+<blockquote>
+<p><strong>Version</strong>: 1.0<br />
+<strong>Date</strong>: 2026-05-01<br />
+<strong>Scope</strong>: Full-stack analysis of current evidence
+collection architecture, on-demand screenshot pipeline design,
+client-app screenshot matrix for all platforms, anti-bluff verification
+methodology, and exact implementation plan.<br />
+<strong>Based on</strong>: Source code analysis of <code>HelixQA</code>
+repository (commit ~2026-05-01)</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-current-screenshot-architecture-deep-dive">Current
+Screenshot Architecture Deep Dive</a></li>
+<li><a href="#2-on-demand-screenshot-requirements-analysis">On-Demand
+Screenshot Requirements Analysis</a></li>
+<li><a href="#3-client-app-screenshot-matrix">Client App Screenshot
+Matrix</a></li>
+<li><a href="#4-anti-bluff-testing-strategy">Anti-Bluff Testing
+Strategy</a></li>
+<li><a href="#5-cicd-integration-no-pipeline-model">CI/CD Integration
+(No-Pipeline Model)</a></li>
+<li><a href="#6-exact-implementation-plan">Exact Implementation
+Plan</a></li>
+<li><a href="#7-appendix-current-code-references">Appendix: Current Code
+References</a></li>
+</ol>
+<hr />
+<h2 id="current-screenshot-architecture-deep-dive">1. Current Screenshot
+Architecture Deep Dive</h2>
+<h3 id="evidence-collection-layer-pkgevidence">1.1 Evidence Collection
+Layer (<code>pkg/evidence</code>)</h3>
+<p>The <code>Collector</code> is the primary centralized evidence
+collection hub. It is <strong>platform-aware</strong> but <strong>not
+executor-bound</strong> — it uses external command runners rather than
+the navigator’s ActionExecutor interface.</p>
+<p><strong>Core Types:</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Type <span class="dt">string</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    TypeScreenshot Type <span class="op">=</span> <span class="st">&quot;screenshot&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    TypeVideo      Type <span class="op">=</span> <span class="st">&quot;video&quot;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    TypeLogcat     Type <span class="op">=</span> <span class="st">&quot;logcat&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    TypeStackTrace Type <span class="op">=</span> <span class="st">&quot;stacktrace&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    TypeConsoleLog Type <span class="op">=</span> <span class="st">&quot;console_log&quot;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    TypeAudio      Type <span class="op">=</span> <span class="st">&quot;audio&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Item <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    Type      Type            <span class="st">`json:&quot;type&quot;`</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    Path      <span class="dt">string</span>          <span class="st">`json:&quot;path&quot;`</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    Platform  config<span class="op">.</span>Platform <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    Step      <span class="dt">string</span>          <span class="st">`json:&quot;step,omitempty&quot;`</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    Timestamp time<span class="op">.</span>Time       <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    Size      <span class="dt">int64</span>           <span class="st">`json:&quot;size&quot;`</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Screenshot Capture Methods per Platform:</strong></p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 19%" />
+<col style="width: 36%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Method</th>
+<th>Exact Command</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android</td>
+<td><code>adb shell screencap -p</code> + <code>adb pull</code></td>
+<td><code>adb shell screencap -p /sdcard/helixqa-screenshot.png</code>
+then <code>adb pull</code></td>
+<td>PNG file</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>Playwright CLI</td>
+<td><code>npx playwright screenshot --path &lt;path&gt;</code></td>
+<td>PNG file</td>
+</tr>
+<tr>
+<td>Desktop</td>
+<td>ImageMagick import</td>
+<td><code>import -window root &lt;path&gt;</code></td>
+<td>PNG file</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Observations:</strong> -
+<code>captureAndroidScreenshot</code> writes to
+<code>/sdcard/helixqa-screenshot.png</code>, pulls, then cleans up. -
+<code>captureWebScreenshot</code> shells out to
+<code>npx playwright screenshot</code> — <strong>requires Playwright to
+be installed globally</strong> or in a discoverable
+<code>node_modules</code>. - <code>captureDesktopScreenshot</code> uses
+<code>import -window root</code> (ImageMagick) — <strong>assumes X11 is
+running</strong> and <code>import</code> is on PATH. - The
+<code>defaultRunner</code> returns a hardcoded error:
+<code>&quot;default runner: command execution not available in test&quot;</code> —
+this means <strong>evidence collection is effectively disabled in pure
+unit tests</strong> unless a mock <code>CommandRunner</code> is
+injected. - <strong>Video recording</strong>
+(<code>StartRecording</code>/<code>StopRecording</code>) only sets flags
+and allocates paths — <strong>no actual ffmpeg or adb screenrecord
+process is spawned by the Collector itself</strong>. The actual
+recording is delegated to the caller (autonomous pipeline) or nexus
+record layer. - <strong>Audio recording</strong> uses
+<code>ffmpeg -f pulse -i &lt;device&gt;</code> directly — sends SIGINT
+for graceful shutdown.</p>
+<h3 id="session-recording-layer-pkgsession">1.2 Session Recording Layer
+(<code>pkg/session</code>)</h3>
+<p>The <code>SessionRecorder</code> coordinates <strong>multiple
+concurrent platform recordings</strong>, maintains a timeline, and
+indexes screenshots.</p>
+<p><strong>Architecture:</strong></p>
+<pre><code>SessionRecorder
+├── sessionID, outputDir
+├── videos: map[string]*VideoManager   (per-platform video state)
+├── timeline: *Timeline               (chronological events)
+└── screenshotIdx: int                 (sequential counter)</code></pre>
+<p><strong>VideoManager</strong> is a <strong>state tracker
+only</strong> — it does NOT execute ffmpeg/adb directly. It tracks: -
+<code>startedAt time.Time</code> for offset calculation -
+<code>recording bool</code> for state - <code>outputPath string</code>
+for the final video file</p>
+<p><strong>Screenshot Indexing:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sr <span class="op">*</span>SessionRecorder<span class="op">)</span> CaptureScreenshot<span class="op">(</span>platform<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> Screenshot <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    sr<span class="op">.</span>screenshotIdx<span class="op">++</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    path <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>sr<span class="op">.</span>outputDir<span class="op">,</span> <span class="st">&quot;screenshots&quot;</span><span class="op">,</span> platform<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%04d-%s.png&quot;</span><span class="op">,</span> idx<span class="op">,</span> name<span class="op">))</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// VideoOffset links screenshot to video timestamp</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ss <span class="op">:=</span> Screenshot<span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        Path<span class="op">:</span>        path<span class="op">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        Platform<span class="op">:</span>    platform<span class="op">,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        Name<span class="op">:</span>        name<span class="op">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        Index<span class="op">:</span>       idx<span class="op">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        Timestamp<span class="op">:</span>   now<span class="op">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        VideoOffset<span class="op">:</span> offset<span class="op">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    sr<span class="op">.</span>timeline<span class="op">.</span>RecordEvent<span class="op">(</span>TimelineEvent<span class="op">{...</span>ScreenshotPath<span class="op">:</span> path<span class="op">...})</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ss</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Critical Gaps:</strong> - <code>CaptureScreenshot</code>
+<strong>returns a path but does NOT write bytes</strong>. The caller
+(autonomous pipeline) must write the actual image data to the path. -
+There is <strong>no mechanism to retrieve a screenshot by index or
+query</strong> — callers must know the filesystem path. - There is
+<strong>no on-demand API</strong> — screenshots are only captured during
+predetermined pipeline phases. - <code>VideoManager</code> tracks timing
+but the actual video encoding is handled elsewhere (nexus record
+layer).</p>
+<h3 id="platform-executor-screenshot-methods-pkgnavigator">1.3 Platform
+Executor Screenshot Methods (<code>pkg/navigator</code>)</h3>
+<p>These are the <strong>actual byte producers</strong> used by the
+autonomous pipeline. Each implements
+<code>ActionExecutor.Screenshot(ctx) ([]byte, error)</code>.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 19%" />
+<col style="width: 21%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>Executor</th>
+<th>Platform</th>
+<th>Mechanism</th>
+<th>Validation</th>
+<th>Retry Logic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ADBExecutor</code></td>
+<td>Android</td>
+<td><code>adb exec-out screencap -p</code> (fast path) → fallback to
+<code>adb shell screencap -p</code></td>
+<td>Size check (&lt;5000 bytes = blank); <code>isUniformImage()</code>
+sampling</td>
+<td>5 retries, 500ms delay</td>
+</tr>
+<tr>
+<td><code>PlaywrightExecutor</code></td>
+<td>Web</td>
+<td>Bridge script <code>{&quot;action&quot;:&quot;screenshot&quot;}</code> via Node.js child
+process</td>
+<td>None in executor</td>
+<td>No retry</td>
+</tr>
+<tr>
+<td><code>X11Executor</code></td>
+<td>Desktop Linux</td>
+<td><code>import -window root png:-</code> (raw bytes to stdout)</td>
+<td>None in executor</td>
+<td>No retry</td>
+</tr>
+<tr>
+<td><code>CLIExecutor</code></td>
+<td>CLI/TUI</td>
+<td>Returns <code>runner.Run(command, args...)</code> stdout as
+“screenshot”</td>
+<td>None</td>
+<td>No retry</td>
+</tr>
+<tr>
+<td><code>APIExecutor</code></td>
+<td>HTTP APIs</td>
+<td>Returns empty bytes (noop)</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ADBExecutor Screenshot Validation (CRITICAL):</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> attempt <span class="op">:=</span> <span class="dv">1</span><span class="op">;</span> attempt <span class="op">&lt;=</span> <span class="dv">5</span><span class="op">;</span> attempt<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> a<span class="op">.</span>cmdRunner<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;adb&quot;</span><span class="op">,</span> <span class="st">&quot;-s&quot;</span><span class="op">,</span> a<span class="op">.</span>device<span class="op">,</span> <span class="st">&quot;exec-out&quot;</span><span class="op">,</span> <span class="st">&quot;screencap&quot;</span><span class="op">,</span> <span class="st">&quot;-p&quot;</span><span class="op">)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="co">/* fallback to shell method */</span> <span class="op">}</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>data<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">5000</span> <span class="op">{</span> <span class="co">/* too small, retry */</span> <span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> isUniformImage<span class="op">(</span>data<span class="op">)</span> <span class="op">{</span> <span class="co">/* blank, retry */</span> <span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> data<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Key Observations:</strong> - ADB screenshot uses
+<code>exec-out</code> for zero-copy speed (~bypasses /sdcard I/O). -
+Blank/uniform detection samples 4 bytes from the PNG payload (after
+header) with a threshold of 10. - Playwright screenshots go through a
+Node.js bridge script (<code>scripts/playwright-bridge.js</code>) that
+communicates via stdin/stdout JSON. - X11 uses
+<code>import -window root png:-</code> to output raw PNG bytes to
+stdout. - <strong>CLIExecutor “screenshots” are just stdout
+text</strong> — there is no visual rendering. This is a fundamental
+limitation for CLI/TUI visual regression.</p>
+<h3 id="nexus-capture-layer-pkgnexuscapture">1.4 Nexus Capture Layer
+(<code>pkg/nexus/capture</code>)</h3>
+<p>This is the <strong>OCU P1/P1.5 real-time frame capture
+pipeline</strong> — the most sophisticated capture layer. It implements
+<code>contracts.CaptureSource</code> for continuous frame streaming.</p>
+<p><strong>Android (<code>pkg/nexus/capture/android</code>):</strong> -
+<code>adb shell screenrecord --output-format=h264 --size WxH -</code>
+pipes H.264 NAL units over stdout - Splits NAL units by start-code
+prefix (<code>0x000001</code>) - Emits <code>contracts.Frame</code> with
+<code>PixelFormatH264</code> - Kill-switches:
+<code>HELIXQA_CAPTURE_ANDROID_STUB=1</code> or <code>adb</code> not on
+PATH</p>
+<p><strong>Web (<code>pkg/nexus/capture/web</code>):</strong> - Uses
+<code>chromedp</code> (Chrome DevTools Protocol) with headless Chromium
+- <code>chromedp.CaptureScreenshot(&amp;buf)</code> at configurable FPS
+(default 10) - Decodes PNG to BGRA8 raw pixels - Emits
+<code>contracts.Frame</code> with <code>PixelFormatBGRA8</code> -
+Kill-switches: <code>HELIXQA_CAPTURE_WEB_STUB=1</code> or no chromium on
+PATH</p>
+<p><strong>Linux Desktop
+(<code>pkg/nexus/capture/linux</code>):</strong> - Backend priority:
+<code>xwd</code> + <code>convert</code> (ImageMagick) →
+<code>gnome-screenshot</code> → <code>grim</code> (Wayland) - XWD
+producer captures raw X11 framebuffer, converts to PNG - Emits
+<code>contracts.Frame</code> with platform-detected format -
+Kill-switches: <code>HELIXQA_CAPTURE_LINUX_STUB=1</code>, no display
+env, no tools on PATH</p>
+<h3 id="video-recording-pipeline-pkgnexusrecord">1.5 Video Recording
+Pipeline (<code>pkg/nexus/record</code>)</h3>
+<pre><code>CaptureSource.Frames() → Recorder.drain() → FrameRing.Push() → Encoder.Encode()
+                                                            → WebRTCPublisher (optional)</code></pre>
+<p><strong>Components:</strong> - <code>FrameRing</code>: Bounded ring
+buffer (default 1024 frames) for clip extraction - <code>Encoder</code>:
+Injectable backend — x264, NVENC, VAAPI stubs registered (all return
+<code>ErrNotWired</code> in P5) -
+<code>Clip(around time.Time, window time.Duration, out io.Writer, opts ClipOptions)</code>:
+Extracts time-windowed segments from the ring buffer -
+<code>LiveStream</code>: Delegates to <code>WebRTCPublisher</code> (WHIP
+ingest — not wired in P5)</p>
+<p><strong>Current State:</strong> The actual video encoding to MP4 is
+<strong>not yet wired in production</strong> — all encoder backends
+return <code>ErrNotWired</code>. Video recording works at the capture
+layer (frames are produced) but the final MP4 muxing is pending
+P5.5.</p>
+<h3 id="vision-server-internalvisionserver">1.6 Vision Server
+(<code>internal/visionserver</code>)</h3>
+<p>HTTP server (default <code>:8090</code>) exposing cheaper vision
+analysis:</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/analyze</code></td>
+<td>POST</td>
+<td>Base64 PNG + prompt → <code>VisionResult</code></td>
+</tr>
+<tr>
+<td><code>/providers</code></td>
+<td>GET</td>
+<td>List registered vision providers</td>
+</tr>
+<tr>
+<td><code>/health</code></td>
+<td>GET</td>
+<td>Liveness probe</td>
+</tr>
+<tr>
+<td><code>/learning/stats</code></td>
+<td>GET</td>
+<td>Cache hits, request totals</td>
+</tr>
+<tr>
+<td><code>/learning/clear</code></td>
+<td>POST</td>
+<td>Reset learning state</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Config (<code>HELIX_VISION_*</code> env vars):</strong> -
+Provider: <code>auto</code> (dynamic probing), <code>qwen25vl</code>,
+<code>glm4v</code>, etc. - Fallback chain, parallel execution,
+exact/differential/vector caching - Few-shot learning, change threshold
+(0.05)</p>
+<h3 id="autonomous-pipeline-screenshots-pkgautonomous">1.7 Autonomous
+Pipeline Screenshots (<code>pkg/autonomous</code>)</h3>
+<p>The autonomous coordinator drives the screenshot flow during test
+execution:</p>
+<pre><code>For each test:
+  For each platform the test targets:
+    1. executor.Screenshot(testCtx) → []byte PNG
+    2. Validate: len &gt; 0, not blank (IsBlankScreenshot)
+    3. Write to screenshotDir: &quot;&lt;platform&gt;_&lt;testName&gt;_&lt;timestamp&gt;.png&quot;
+    4. Store path in allScreenshots
+    5. Send to vision provider if within maxVisionScreenshots (15)</code></pre>
+<p><strong>Blank Detection (<code>IsBlankScreenshot</code>):</strong> -
+Samples 81 points on a 9x9 grid - Computes per-channel range (max-min)
+across all samples - If maxRange &lt; 20 → declared blank - Also rejects
+images &lt; 1000 bytes or &lt; 10x10 pixels</p>
+<p><strong>Screenshot Downsizing:</strong> -
+<code>maxScreenshotWidth = 480px</code> - Nearest-neighbor downscale for
+LLM vision API - Keeps file size under ~50KB for fast CPU inference</p>
+<hr />
+<h2 id="on-demand-screenshot-requirements-analysis">2. On-Demand
+Screenshot Requirements Analysis</h2>
+<h3 id="what-currently-exists">2.1 What Currently Exists</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 24%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Exists?</th>
+<th>Location</th>
+<th>Limitations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Platform-aware screenshot capture</td>
+<td>✅</td>
+<td><code>pkg/evidence/collector.go</code></td>
+<td>Shell-out only; no executor integration</td>
+</tr>
+<tr>
+<td>Per-step pre/post screenshots</td>
+<td>✅</td>
+<td><code>pkg/validator/validator.go</code></td>
+<td>Only during validation steps</td>
+</tr>
+<tr>
+<td>Session-scoped screenshot indexing</td>
+<td>✅</td>
+<td><code>pkg/session/recorder.go</code></td>
+<td>Returns path; caller writes bytes</td>
+</tr>
+<tr>
+<td>Real-time frame capture</td>
+<td>✅</td>
+<td><code>pkg/nexus/capture/*</code></td>
+<td>Continuous streaming, not on-demand</td>
+</tr>
+<tr>
+<td>Vision analysis of screenshots</td>
+<td>✅</td>
+<td><code>internal/visionserver</code></td>
+<td>Requires base64 upload; no direct session integration</td>
+</tr>
+<tr>
+<td>Blank/uniform detection</td>
+<td>✅</td>
+<td><code>pkg/autonomous/screenshot.go</code></td>
+<td>Used only in autonomous pipeline</td>
+</tr>
+<tr>
+<td>Cross-device visual regression</td>
+<td>✅</td>
+<td><code>pkg/regression/visual.go</code></td>
+<td>Requires multiple device screenshots upfront</td>
+</tr>
+<tr>
+<td>Video timeline correlation</td>
+<td>✅</td>
+<td><code>pkg/session/timeline.go</code></td>
+<td>Screenshots linked to video offsets</td>
+</tr>
+</tbody>
+</table>
+<h3 id="whats-missing-for-true-on-demand-capability">2.2 What’s Missing
+for True On-Demand Capability</h3>
+<p><strong>Critical Gaps:</strong></p>
+<ol type="1">
+<li><p><strong>No unified on-demand screenshot API</strong>: There is no
+single function or endpoint that says “capture screenshot for platform X
+right now and give me the bytes/path”. The existing
+<code>Collector.CaptureScreenshot</code> is evidence-oriented (writes to
+disk) while <code>ActionExecutor.Screenshot</code> is executor-oriented
+(returns bytes). They are not unified.</p></li>
+<li><p><strong>No programmatic screenshot retrieval</strong>: Once a
+screenshot is saved, there’s no API to query it by sessionID, timestamp,
+platform, or step name. Callers must construct filesystem paths
+manually.</p></li>
+<li><p><strong>No presentational delivery format</strong>: Screenshots
+are saved as raw PNG files. There’s no service to serve them over HTTP,
+embed them in reports, or generate thumbnails.</p></li>
+<li><p><strong>No CLI/TUI visual rendering</strong>: CLIExecutor returns
+stdout text as “screenshot” — there is no actual visual capture of
+terminal state (ANSI colors, ncurses layouts, etc.).</p></li>
+<li><p><strong>No responsive breakpoint screenshots for Web</strong>:
+PlaywrightExecutor captures the current viewport only. There’s no
+mechanism to capture at multiple breakpoints (mobile, tablet, desktop)
+in one call.</p></li>
+<li><p><strong>No multi-monitor support for Desktop</strong>:
+X11Executor captures <code>:0</code> (root window) only. No per-display
+selection, no multi-monitor stitching.</p></li>
+<li><p><strong>No iOS support at all</strong>: No iOS simulator or
+device screenshot capability exists in the codebase.</p></li>
+<li><p><strong>No on-demand screenshot during video recording</strong>:
+While <code>VideoManager</code> tracks offsets, there’s no API to say
+“capture a frame right now from the active video stream”.</p></li>
+</ol>
+<h3 id="proposed-on-demand-screenshot-api">2.3 Proposed On-Demand
+Screenshot API</h3>
+<p><strong>Design Principles:</strong> - <strong>Unified
+interface</strong>: One API serves all platforms -
+<strong>Bytes-first</strong>: Return <code>[]byte</code> by default;
+optionally persist to disk - <strong>Synchronous and async</strong>:
+Immediate capture for tests; background capture for sessions -
+<strong>Metadata-rich</strong>: Every screenshot includes platform,
+timestamp, session, step context - <strong>Retrievable</strong>: Query
+screenshots by any dimension (session, time, platform, step) -
+<strong>Deliverable</strong>: Serve via HTTP, embed in reports, generate
+thumbnails</p>
+<p><strong>Proposed Core API:</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pkg/screenshot/manager.go</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> screenshot</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;image&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Manager is the unified on-demand screenshot orchestrator.</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Per-platform screenshot engines</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    engines <span class="kw">map</span><span class="op">[</span>Platform<span class="op">]</span>Engine</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Storage backend</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    store   Storage</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Optional: link to active session recorder</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    session <span class="op">*</span>session<span class="op">.</span>SessionRecorder</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Vision server for analysis</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    vision  visionserver<span class="op">.</span>VisionExecutor</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">// Engine is the platform-specific capture implementation.</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Engine <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Capture returns raw screenshot bytes.</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Supported returns true if this engine is wired and available.</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    Supported<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Platform returns the platform identifier.</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    Platform<span class="op">()</span> Platform</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="co">// CaptureOptions parameterises a single screenshot request.</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CaptureOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Format: png, jpeg, webp (default: png)</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    Format <span class="dt">string</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Quality for lossy formats (1-100, default: 90)</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    Quality <span class="dt">int</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Width/Height: 0 means native resolution</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    Width  <span class="dt">int</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    Height <span class="dt">int</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">// FullPage: for web, capture full scrollable page</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    FullPage <span class="dt">bool</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Responsive: for web, capture at multiple breakpoints</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    ResponsiveBreakpoints <span class="op">[]</span>Breakpoint</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">// DisplayID: for desktop, target specific display</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    DisplayID <span class="dt">string</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    <span class="co">// WindowID: for desktop, target specific window</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>    WindowID <span class="dt">string</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">// WaitForRender: delay before capture (e.g. for animations)</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    WaitForRender time<span class="op">.</span>Duration</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ValidateContent: reject blank/uniform screenshots</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>    ValidateContent <span class="dt">bool</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">// MaxRetries: number of retry attempts (default: 3)</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>    MaxRetries <span class="dt">int</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="co">// Breakpoint defines a responsive viewport size.</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Breakpoint <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>    Name   <span class="dt">string</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>    Width  <span class="dt">int</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>    Height <span class="dt">int</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="co">// Result contains a single captured screenshot.</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    Data      <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>    Format    <span class="dt">string</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>    Width     <span class="dt">int</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>    Height    <span class="dt">int</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>    Platform  Platform</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>    Timestamp time<span class="op">.</span>Time</span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>    Duration  time<span class="op">.</span>Duration</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Metadata for retrieval and linking</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>    SessionID <span class="dt">string</span></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a>    StepName  <span class="dt">string</span></span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>    StepIndex <span class="dt">int</span></span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Path is set if persisted to storage</span></span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>    Path <span class="dt">string</span></span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>    <span class="co">// VideoOffset links to session video</span></span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>    VideoOffset time<span class="op">.</span>Duration</span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Thumbnail is a downscaled preview</span></span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>    Thumbnail <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a><span class="co">// Capture takes a single screenshot on the given platform.</span></span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> platform Platform<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a><span class="co">// CaptureAll captures screenshots on all supported/wired platforms.</span></span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CaptureAll<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a><span class="co">// CaptureResponsive captures web screenshots at multiple breakpoints.</span></span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CaptureResponsive<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> breakpoints <span class="op">[]</span>Breakpoint<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a><span class="co">// CaptureMultiDisplay captures all desktop displays.</span></span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CaptureMultiDisplay<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a><span class="co">// Get retrieves a screenshot by its storage path or ID.</span></span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Get<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a><span class="co">// Query retrieves screenshots matching criteria.</span></span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Query<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> q Query<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a><span class="co">// ServeHTTP makes screenshots available via HTTP (for reports/presentations).</span></span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> ServeHTTP<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span></span></code></pre></div>
+<p><strong>HTTP API for On-Demand Screenshots:</strong></p>
+<pre><code>POST /api/v1/screenshot/capture
+{
+  &quot;platform&quot;: &quot;web|android|desktop|ios|cli|tui&quot;,
+  &quot;format&quot;: &quot;png|jpeg|webp&quot;,
+  &quot;quality&quot;: 90,
+  &quot;width&quot;: 1920,
+  &quot;height&quot;: 1080,
+  &quot;full_page&quot;: true,
+  &quot;responsive_breakpoints&quot;: [
+    {&quot;name&quot;: &quot;mobile&quot;, &quot;width&quot;: 375, &quot;height&quot;: 667},
+    {&quot;name&quot;: &quot;tablet&quot;, &quot;width&quot;: 768, &quot;height&quot;: 1024},
+    {&quot;name&quot;: &quot;desktop&quot;, &quot;width&quot;: 1920, &quot;height&quot;: 1080}
+  ],
+  &quot;validate_content&quot;: true,
+  &quot;wait_ms&quot;: 500
+}
+
+Response:
+{
+  &quot;screenshots&quot;: [
+    {
+      &quot;id&quot;: &quot;ss-20260501-001&quot;,
+      &quot;platform&quot;: &quot;web&quot;,
+      &quot;breakpoint&quot;: &quot;desktop&quot;,
+      &quot;format&quot;: &quot;png&quot;,
+      &quot;width&quot;: 1920,
+      &quot;height&quot;: 1080,
+      &quot;timestamp&quot;: &quot;2026-05-01T12:00:00Z&quot;,
+      &quot;url&quot;: &quot;/api/v1/screenshot/ss-20260501-001/download&quot;,
+      &quot;thumbnail_url&quot;: &quot;/api/v1/screenshot/ss-20260501-001/thumbnail&quot;,
+      &quot;video_offset_ms&quot;: 12500,
+      &quot;size_bytes&quot;: 245760
+    }
+  ]
+}
+
+GET /api/v1/screenshot/{id}/download        → raw image bytes
+GET /api/v1/screenshot/{id}/thumbnail     → 480px wide thumbnail
+GET /api/v1/screenshot/{id}/analyze       → vision analysis result
+GET /api/v1/screenshot/query?session=xxx&amp;platform=web&amp;step=login</code></pre>
+<p><strong>Delivery Modes:</strong> - <strong>Inline</strong>: Base64
+embedded in JSON response (for small thumbnails) - <strong>URL</strong>:
+HTTP URL to fetch the full image (for reports, dashboards) -
+<strong>File</strong>: Local filesystem path (for pipeline consumption)
+- <strong>Stream</strong>: WebSocket/frame channel (for live
+monitoring)</p>
+<hr />
+<h2 id="client-app-screenshot-matrix">3. Client App Screenshot
+Matrix</h2>
+<h3 id="web-browser">3.1 Web (Browser)</h3>
+<p><strong>Current:</strong>
+<code>PlaywrightExecutor.Screenshot()</code> via Node.js bridge →
+<code>chromedp.CaptureScreenshot()</code> in nexus capture.</p>
+<p><strong>Strategy:</strong></p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 23%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Current</th>
+<th>Required</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Engine</td>
+<td>Node.js bridge + <code>chromedp</code></td>
+<td>Playwright/CDP for consistency</td>
+<td>Unify on <code>chromedp</code> or Playwright</td>
+</tr>
+<tr>
+<td>Viewport</td>
+<td>Single viewport</td>
+<td>Multiple responsive breakpoints</td>
+<td>Add <code>CaptureResponsive()</code> with configurable
+breakpoints</td>
+</tr>
+<tr>
+<td>Full Page</td>
+<td>Viewport only</td>
+<td>Full scrollable page</td>
+<td><code>chromedp</code> fullPage option; Playwright
+<code>fullPage: true</code></td>
+</tr>
+<tr>
+<td>Element-level</td>
+<td>No</td>
+<td>Specific DOM element</td>
+<td>Add <code>ElementSelector</code> to <code>CaptureOptions</code></td>
+</tr>
+<tr>
+<td>Mobile emulation</td>
+<td>No</td>
+<td>Device emulation (iPhone, Pixel)</td>
+<td>Use Playwright device descriptors</td>
+</tr>
+<tr>
+<td>Dark mode</td>
+<td>No</td>
+<td><code>prefers-color-scheme</code> testing</td>
+<td>Add <code>ColorScheme</code> option</td>
+</tr>
+<tr>
+<td>Network idle</td>
+<td>No</td>
+<td>Wait for network idle before capture</td>
+<td>Integrate with <code>waitForLoadState(&#39;networkidle&#39;)</code></td>
+</tr>
+<tr>
+<td>Cross-browser</td>
+<td>Chromium only</td>
+<td>Firefox, WebKit</td>
+<td>Add browser selection to config</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Proposed Implementation:</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// WebEngine uses Playwright or chromedp for capture</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> WebEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    browserURL <span class="dt">string</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    page       <span class="op">*</span>playwright<span class="op">.</span>Page  <span class="co">// or chromedp context</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>WebEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> opts<span class="op">.</span>FullPage <span class="op">{</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Playwright: page.Screenshot(playwright.PageScreenshotOptions{FullPage: true})</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// chromedp: chromedp.FullScreenshot</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>opts<span class="op">.</span>ResponsiveBreakpoints<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> results <span class="op">[]*</span>Result</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> bp <span class="op">:=</span> <span class="kw">range</span> opts<span class="op">.</span>ResponsiveBreakpoints <span class="op">{</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span>setViewport<span class="op">(</span>bp<span class="op">.</span>Width<span class="op">,</span> bp<span class="op">.</span>Height<span class="op">)</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>            r<span class="op">,</span> _ <span class="op">:=</span> e<span class="op">.</span>captureSingle<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            r<span class="op">.</span>BreakpointName <span class="op">=</span> bp<span class="op">.</span>Name</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>results<span class="op">,</span> r<span class="op">)</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> results<span class="op">[</span><span class="dv">0</span><span class="op">],</span> <span class="ot">nil</span> <span class="co">// or return all</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> e<span class="op">.</span>captureSingle<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="desktop-linux">3.2 Desktop (Linux)</h3>
+<p><strong>Current:</strong> <code>X11Executor</code> uses
+<code>import -window root</code>; <code>pkg/nexus/capture/linux</code>
+uses <code>xwd+convert</code> → <code>gnome-screenshot</code> →
+<code>grim</code>.</p>
+<p><strong>Strategy:</strong></p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 23%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Current</th>
+<th>Required</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>X11</td>
+<td><code>import -window root</code>, <code>xwd+convert</code></td>
+<td>Keep as fallback</td>
+<td>Maintain both</td>
+</tr>
+<tr>
+<td>Wayland</td>
+<td><code>grim</code></td>
+<td>Better compositor integration</td>
+<td>Add <code>wlroots-screencopy</code> for wlroots-based
+compositors</td>
+</tr>
+<tr>
+<td>Multi-monitor</td>
+<td>Root window only (all displays)</td>
+<td>Per-display capture</td>
+<td>Parse <code>xrandr</code> / <code>wl_output</code> to enumerate
+displays</td>
+</tr>
+<tr>
+<td>Window capture</td>
+<td>No</td>
+<td>Specific window by ID/title</td>
+<td><code>xwd -id &lt;windowid&gt;</code>;
+<code>screencapture -l &lt;winid&gt;</code> on macOS</td>
+</tr>
+<tr>
+<td>Cursor</td>
+<td>Always included</td>
+<td>Optional hide/show cursor</td>
+<td>Add <code>CursorVisible</code> option</td>
+</tr>
+<tr>
+<td>HiDPI</td>
+<td>Not handled</td>
+<td>Scale-aware capture</td>
+<td>Read <code>Xft.dpi</code> / <code>GDK_SCALE</code> environment</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Proposed Implementation:</strong></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// LinuxEngine probes available backends</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LinuxEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    backend <span class="dt">string</span> <span class="co">// &quot;xwd&quot;, &quot;gnome&quot;, &quot;grim&quot;, &quot;pipewire&quot;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    display <span class="dt">string</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>LinuxEngine<span class="op">)</span> Supported<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;DISPLAY&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;xwd&quot;</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span>backend <span class="op">=</span> <span class="st">&quot;xwd&quot;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">true</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;WAYLAND_DISPLAY&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;grim&quot;</span><span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            e<span class="op">.</span>backend <span class="op">=</span> <span class="st">&quot;grim&quot;</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">true</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">false</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>LinuxEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> e<span class="op">.</span>backend <span class="op">{</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;xwd&quot;</span><span class="op">:</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> opts<span class="op">.</span>DisplayID <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> e<span class="op">.</span>captureX11Display<span class="op">(</span>opts<span class="op">.</span>DisplayID<span class="op">)</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> opts<span class="op">.</span>WindowID <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> e<span class="op">.</span>captureX11Window<span class="op">(</span>opts<span class="op">.</span>WindowID<span class="op">)</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureX11Root<span class="op">()</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;grim&quot;</span><span class="op">:</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureWaylandOutput<span class="op">(</span>opts<span class="op">.</span>DisplayID<span class="op">)</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="desktop-macos">3.3 Desktop (macOS)</h3>
+<p><strong>Current:</strong> <code>pkg/capture/macos_capture.go</code>
+has <code>captureMacOSScreenshot</code> using
+<code>screencapture -x</code>.</p>
+<p><strong>Strategy:</strong></p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 23%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Current</th>
+<th>Required</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Screenshot</td>
+<td><code>screencapture -x</code></td>
+<td>Keep; add ScreenCaptureKit for P5.5</td>
+<td>Use <code>screencapture</code> as fallback</td>
+</tr>
+<tr>
+<td>Window capture</td>
+<td><code>screencapture -l &lt;winid&gt;</code></td>
+<td>Specific window by title/ID</td>
+<td><code>screencapture -l</code> or AppleScript</td>
+</tr>
+<tr>
+<td>Display list</td>
+<td><code>system_profiler SPDisplaysDataType</code></td>
+<td>Accurate display enumeration</td>
+<td>Parse JSON output</td>
+</tr>
+<tr>
+<td>Permission</td>
+<td>Manual</td>
+<td>Auto-request + verify</td>
+<td><code>CheckScreenRecordingPermission()</code> exists</td>
+</tr>
+<tr>
+<td>Video</td>
+<td>GStreamer <code>avfvideosrc</code></td>
+<td>Native ScreenCaptureKit (CGO)</td>
+<td>P5.5: <code>CaptureWithScreenCaptureKit()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="desktop-windows">3.4 Desktop (Windows)</h3>
+<p><strong>Current:</strong> No Windows-specific code found in the
+codebase.</p>
+<p><strong>Strategy:</strong> - Use <code>PrintWindow</code> Win32 API
+or <code>Graphics.CopyFromScreen</code> in C# bridge - For P5.5: DXGI
+Desktop Duplication API for video capture - Screenshot:
+<code>BitBlt</code> or <code>DwmPrintWindow</code> for window capture -
+Enumerate displays with <code>EnumDisplayMonitors</code></p>
+<h3 id="mobile-android">3.5 Mobile (Android)</h3>
+<p><strong>Current:</strong> <code>ADBExecutor</code> uses
+<code>exec-out screencap -p</code>; nexus capture uses
+<code>adb shell screenrecord</code>.</p>
+<p><strong>Strategy:</strong></p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 20%" />
+<col style="width: 23%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Current</th>
+<th>Required</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Screenshot</td>
+<td><code>adb exec-out screencap -p</code></td>
+<td>Keep; add scrcpy for speed</td>
+<td><code>scrcpy --no-display --record</code></td>
+</tr>
+<tr>
+<td>Video</td>
+<td><code>adb shell screenrecord</code></td>
+<td>Keep; add scrcpy as alternative</td>
+<td><code>scrcpy</code> has lower latency</td>
+</tr>
+<tr>
+<td>Multiple devices</td>
+<td>Single device per executor</td>
+<td>Concurrent multi-device</td>
+<td>Device pool in <code>Manager</code></td>
+</tr>
+<tr>
+<td>Screen size/DPI</td>
+<td>Not handled</td>
+<td>Capture at native resolution</td>
+<td><code>screencap</code> already does this</td>
+</tr>
+<tr>
+<td>Android TV</td>
+<td>IME handling in <code>Type()</code></td>
+<td>Keep; verify screenshot timing</td>
+<td>DPAD_CENTER before capture on slow TVs</td>
+</tr>
+<tr>
+<td>Blank detection</td>
+<td><code>isUniformImage()</code> sampling</td>
+<td>Keep; add <code>IsBlankScreenshot()</code> from autonomous</td>
+<td>Unify blank detection</td>
+</tr>
+<tr>
+<td>Rotation</td>
+<td>Not handled</td>
+<td>Auto-rotate screenshots</td>
+<td>Parse <code>dumpsys display</code> for orientation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mobile-ios">3.6 Mobile (iOS)</h3>
+<p><strong>Current:</strong> No iOS support exists.</p>
+<p><strong>Strategy:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Status</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simulator</td>
+<td>❌ Not implemented</td>
+<td><code>xcrun simctl io &lt;udid&gt; screenshot &lt;path&gt;</code></td>
+</tr>
+<tr>
+<td>Real Device</td>
+<td>❌ Not implemented</td>
+<td><code>ios-deploy</code> + <code>WebDriverAgent</code> (Appium) or
+<code>go-ios</code></td>
+</tr>
+<tr>
+<td>Video (Simulator)</td>
+<td>❌ Not implemented</td>
+<td><code>xcrun simctl io &lt;udid&gt; recordVideo &lt;path&gt;</code></td>
+</tr>
+<tr>
+<td>Video (Device)</td>
+<td>❌ Not implemented</td>
+<td>QuickTime + <code>avfoundation</code> or
+<code>ios_screen_capture</code></td>
+</tr>
+<tr>
+<td>Frame extraction</td>
+<td>❌ Not implemented</td>
+<td>Convert simulator video to frame stream</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Priority:</strong> iOS screenshot support is
+<strong>HIGH</strong> for comprehensive mobile coverage. Minimum
+viable:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// iOSSimulatorEngine uses xcrun simctl</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> iOSSimulatorEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    udid <span class="dt">string</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>iOSSimulatorEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    tmpFile <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>os<span class="op">.</span>TempDir<span class="op">(),</span> <span class="st">&quot;ios-screenshot.png&quot;</span><span class="op">)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;xcrun&quot;</span><span class="op">,</span> <span class="st">&quot;simctl&quot;</span><span class="op">,</span> <span class="st">&quot;io&quot;</span><span class="op">,</span> e<span class="op">.</span>udid<span class="op">,</span> <span class="st">&quot;screenshot&quot;</span><span class="op">,</span> tmpFile<span class="op">).</span>Output<span class="op">()</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>tmpFile<span class="op">)</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span>Remove<span class="op">(</span>tmpFile<span class="op">)</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> data<span class="op">,</span> Format<span class="op">:</span> <span class="st">&quot;png&quot;</span><span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="cli-command-line-interface">3.7 CLI (Command Line
+Interface)</h3>
+<p><strong>Current:</strong> <code>CLIExecutor.Screenshot()</code>
+returns <code>runner.Run(command, args...)</code> — i.e., the
+<strong>stdout text</strong>.</p>
+<p><strong>Strategy:</strong></p>
+<p>CLI “screenshots” are fundamentally different from GUI screenshots.
+There are two valid approaches:</p>
+<p><strong>Approach A: Text-as-Evidence (Current)</strong> - Capture
+stdout/stderr as text - Format as terminal transcript - No visual
+representation</p>
+<p><strong>Approach B: Terminal Rendering (Proposed)</strong> - Use
+<code>script</code> command or <code>asciinema</code> to record terminal
+session - Convert to image using terminal renderer (e.g.,
+<code>terminalizer</code>, <code>termtosvg</code>, or custom HTML/CSS
+renderer) - Capture ANSI colors, cursor position, bold/italic
+formatting</p>
+<p><strong>Proposed Implementation:</strong></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// CLIEngine supports both text and rendered modes</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CLIEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    command <span class="dt">string</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    args    <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    mode    CLICaptureMode <span class="co">// &quot;text&quot; | &quot;rendered&quot;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CLICaptureMode <span class="dt">string</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    CLIModeText     CLICaptureMode <span class="op">=</span> <span class="st">&quot;text&quot;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    CLIModeRendered CLICaptureMode <span class="op">=</span> <span class="st">&quot;rendered&quot;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>CLIEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> e<span class="op">.</span>mode <span class="op">==</span> CLIModeRendered <span class="op">{</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Use asciinema or custom ANSI-to-image renderer</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureRendered<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Default: text mode</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> e<span class="op">.</span>runner<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">,</span> e<span class="op">.</span>command<span class="op">,</span> e<span class="op">.</span>args<span class="op">...)</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Result<span class="op">{</span>Data<span class="op">:</span> data<span class="op">,</span> Format<span class="op">:</span> <span class="st">&quot;text/plain&quot;</span><span class="op">},</span> err</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>CLIEngine<span class="op">)</span> captureRendered<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Run command with script/asciinema recording</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Convert recording to PNG using headless browser or native renderer</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Return image bytes</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Tools for Terminal Rendering:</strong> -
+<code>asciinema</code>: Records terminal sessions as JSON (cast format)
+- <code>svg-term</code>: Converts asciinema casts to animated SVG -
+<code>termtosvg</code>: Records to SVG directly -
+<code>terminalizer</code>: Renders to GIF/PNG with custom themes -
+Custom: Use headless Chromium with xterm.js to render ANSI text to
+canvas</p>
+<h3 id="tui-terminal-user-interface">3.8 TUI (Terminal User
+Interface)</h3>
+<p><strong>Current:</strong> Same as CLI — <code>CLIExecutor</code> with
+stdout-as-screenshot.</p>
+<p><strong>Strategy:</strong></p>
+<p>TUI apps (e.g., <code>htop</code>, <code>vim</code>,
+<code>ncdu</code>, <code>ranger</code>) use ncurses or similar libraries
+to draw on the terminal. Capturing them requires:</p>
+<ol type="1">
+<li><strong>ANSI Sequence Recording</strong>: Record all escape
+sequences sent to the terminal</li>
+<li><strong>State Reconstruction</strong>: Reconstruct the terminal grid
+state from sequences</li>
+<li><strong>Visual Rendering</strong>: Render the grid to an image</li>
+</ol>
+<p><strong>Implementation Options:</strong></p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 20%" />
+<col style="width: 27%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th>Method</th>
+<th>Tool</th>
+<th>Output</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>asciinema + svg-term</td>
+<td>asciinema</td>
+<td>SVG/PNG</td>
+<td>Works for most TUIs; preserves colors</td>
+</tr>
+<tr>
+<td>tmux capture-pane</td>
+<td>tmux</td>
+<td>Text</td>
+<td><code>tmux capture-pane -p</code> captures current pane content</td>
+</tr>
+<tr>
+<td>script + ansilove</td>
+<td>script, ansilove</td>
+<td>PNG/ANSI art</td>
+<td>ansilove renders ANSI files to PNG</td>
+</tr>
+<tr>
+<td>headless terminal</td>
+<td>xterm.js, ttyd</td>
+<td>PNG via Puppeteer</td>
+<td>Most accurate; renders true terminal state</td>
+</tr>
+<tr>
+<td>blessings/urwid direct</td>
+<td>Python hooks</td>
+<td>Image</td>
+<td>Requires instrumentation of TUI framework</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Proposed TUI Engine:</strong></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// TUIEngine captures rich terminal interfaces</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TUIEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Terminal emulator backend</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    emulator <span class="dt">string</span> <span class="co">// &quot;asciinema&quot;, &quot;tmux&quot;, &quot;xtermjs&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>TUIEngine<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> e<span class="op">.</span>emulator <span class="op">{</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;asciinema&quot;</span><span class="op">:</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Record for opts.WaitForRender duration, then convert to PNG</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureAsciinema<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;tmux&quot;</span><span class="op">:</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Capture current pane content</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureTmux<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;xtermjs&quot;</span><span class="op">:</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Launch headless browser with xterm.js, feed ANSI sequences, screenshot</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> e<span class="op">.</span>captureXtermJS<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="anti-bluff-testing-strategy">4. Anti-Bluff Testing Strategy</h2>
+<h3 id="philosophy">4.1 Philosophy</h3>
+<blockquote>
+<p><strong>“A test that passes when the feature is broken is worse than
+no test at all.”</strong> — Constitution Article IX, HelixQA</p>
+</blockquote>
+<p>The anti-bluff strategy ensures that every test <strong>actually
+exercises the real functionality</strong> it claims to test. The core
+principle is:</p>
+<p><strong>TCP-open is the floor, not the ceiling. A passing
+<code>net.Dial</code> does not mean the service works.</strong></p>
+<h3 id="test-type-matrix">4.2 Test Type Matrix</h3>
+<p>HelixQA must support and validate the following test types with
+<strong>100% coverage</strong> of all supported platforms:</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 24%" />
+<col style="width: 27%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>What It Tests</th>
+<th>Screenshot Role</th>
+<th>Anti-Bluff Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unit</strong></td>
+<td>Individual functions/packages</td>
+<td>None (too fast)</td>
+<td>Deliberately break the function; test must fail</td>
+</tr>
+<tr>
+<td><strong>Integration</strong></td>
+<td>Component interactions</td>
+<td>Per-step screenshots of state transitions</td>
+<td>Mutate interface contract; verify failure</td>
+</tr>
+<tr>
+<td><strong>E2E</strong></td>
+<td>Full user journey</td>
+<td>Screenshots at every action + before/after</td>
+<td>Replace endpoint with 404; verify pipeline fails</td>
+</tr>
+<tr>
+<td><strong>Functional</strong></td>
+<td>Feature correctness</td>
+<td>Screenshot of expected UI state</td>
+<td>Break feature code; screenshot must show broken state</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>Auth, injection, permissions</td>
+<td>Screenshots of error pages / denied access</td>
+<td>Bypass auth; screenshot must show login page</td>
+</tr>
+<tr>
+<td><strong>Stress</strong></td>
+<td>Behavior under load</td>
+<td>Screenshots during peak load</td>
+<td>Verify UI remains responsive visually</td>
+</tr>
+<tr>
+<td><strong>Chaos</strong></td>
+<td>Resilience to failures</td>
+<td>Screenshots during induced failures</td>
+<td>Kill dependency container; screenshot must show degraded state</td>
+</tr>
+<tr>
+<td><strong>Benchmark</strong></td>
+<td>Performance baselines</td>
+<td>Screenshots of loading states</td>
+<td>Compare load-time screenshots across versions</td>
+</tr>
+<tr>
+<td><strong>Challenge</strong></td>
+<td>Real-world usability</td>
+<td>Full session recording + screenshots</td>
+<td>Human-in-the-loop validation of workflow</td>
+</tr>
+<tr>
+<td><strong>Runtime Verification</strong></td>
+<td>Invariants during execution</td>
+<td>Periodic screenshots</td>
+<td>Assert screenshot invariants (no crash dialogs)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="anti-bluff-verification-methods">4.3 Anti-Bluff Verification
+Methods</h3>
+<h4 id="method-1-the-deliberately-break-it-test-const-035">Method 1: The
+“Deliberately Break It” Test (CONST-035)</h4>
+<p>For every test that claims to verify feature X: 1. Run the test →
+must PASS 2. Introduce a deliberate bug in feature X (e.g., swap a
+condition, remove a handler) 3. Run the test again → must FAIL 4. If it
+still passes, the test is <strong>bluffing</strong></p>
+<p><strong>Screenshot-Specific Application:</strong> 1. Run test that
+verifies “login button is visible” via screenshot analysis 2. Hide the
+login button in the app code (CSS <code>display: none</code> or remove
+element) 3. Run test again → must FAIL with screenshot showing missing
+button 4. If it passes, the screenshot analysis or element detection is
+bluffing</p>
+<h4 id="method-2-protocol-layer-functional-probes">Method 2:
+Protocol-Layer Functional Probes</h4>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 28%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr>
+<th>Protocol Layer</th>
+<th>Floor (Useless)</th>
+<th>Ceiling (Real Verification)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP</td>
+<td><code>net.Dial(&quot;tcp&quot;, host)</code> succeeds</td>
+<td>Actual application protocol handshake completes</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td><code>curl -I http://host</code> returns 200</td>
+<td>Real request with real payload returns correct body +
+screenshot</td>
+</tr>
+<tr>
+<td>WebSocket</td>
+<td><code>ws.Dial()</code> succeeds</td>
+<td>Real message exchange with screenshot of resulting UI state</td>
+</tr>
+<tr>
+<td>ADB</td>
+<td><code>adb devices</code> lists device</td>
+<td><code>adb shell screencap -p</code> returns valid PNG bytes</td>
+</tr>
+<tr>
+<td>Playwright</td>
+<td>Browser launches</td>
+<td>Screenshot of actual page matches expected visual state</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Implementation:</strong></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Probe verifies a screenshot pipeline actually produces images</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestScreenshotPipelineReal<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Floor: executor exists</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    executor <span class="op">:=</span> getExecutor<span class="op">()</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> executor<span class="op">)</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Ceiling: screenshot has content</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    ctx <span class="op">:=</span> context<span class="op">.</span>Background<span class="op">()</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> executor<span class="op">.</span>Screenshot<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> <span class="bu">len</span><span class="op">(</span>data<span class="op">),</span> <span class="dv">5000</span><span class="op">,</span> <span class="st">&quot;screenshot must have content&quot;</span><span class="op">)</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Anti-bluff: decode as PNG</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    img<span class="op">,</span> format<span class="op">,</span> err <span class="op">:=</span> image<span class="op">.</span>Decode<span class="op">(</span>bytes<span class="op">.</span>NewReader<span class="op">(</span>data<span class="op">))</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> <span class="st">&quot;must be valid image&quot;</span><span class="op">)</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;png&quot;</span><span class="op">,</span> format<span class="op">)</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> img<span class="op">.</span>Bounds<span class="op">().</span>Dx<span class="op">(),</span> <span class="dv">100</span><span class="op">)</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> img<span class="op">.</span>Bounds<span class="op">().</span>Dy<span class="op">(),</span> <span class="dv">100</span><span class="op">)</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Anti-bluff: not blank</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> autonomous<span class="op">.</span>IsBlankScreenshot<span class="op">(</span>data<span class="op">),</span> <span class="st">&quot;screenshot must not be blank&quot;</span><span class="op">)</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="method-3-real-http-requests-with-real-responses">Method 3: Real
+HTTP Requests with Real Responses</h4>
+<p>For web testing: - <strong>Never</strong> mock the HTTP client in E2E
+tests - Make real requests to the real server - Verify response body AND
+screenshot of rendered page - Compare headers, cookies, localStorage</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoginFlowReal<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Real request</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> http<span class="op">.</span>PostForm<span class="op">(</span><span class="st">&quot;http://localhost:8080/login&quot;</span><span class="op">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        url<span class="op">.</span>Values<span class="op">{</span><span class="st">&quot;username&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;test&quot;</span><span class="op">},</span> <span class="st">&quot;password&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;test&quot;</span><span class="op">}})</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">302</span><span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Real screenshot of resulting page</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    screenshot<span class="op">,</span> err <span class="op">:=</span> webExecutor<span class="op">.</span>Screenshot<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Vision verification: is this the dashboard?</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> vision<span class="op">.</span>Analyze<span class="op">(</span>screenshot<span class="op">,</span> <span class="st">&quot;Is this a dashboard page with a welcome message?&quot;</span><span class="op">)</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> strings<span class="op">.</span>Contains<span class="op">(</span>result<span class="op">.</span>Text<span class="op">,</span> <span class="st">&quot;yes&quot;</span><span class="op">))</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="method-4-real-cli-invocations-with-real-output-parsing">Method
+4: Real CLI Invocations with Real Output Parsing</h4>
+<p>For CLI testing: - Invoke the actual binary via <code>os/exec</code>
+- Capture stdout/stderr AND rendered terminal screenshot - Parse output
+with real string operations - Verify exit codes</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCLIOutputReal<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;./myapp&quot;</span><span class="op">,</span> <span class="st">&quot;status&quot;</span><span class="op">)</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>CombinedOutput<span class="op">()</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>out<span class="op">),</span> <span class="st">&quot;Status: OK&quot;</span><span class="op">)</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Rendered screenshot of terminal</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    screenshot<span class="op">,</span> err <span class="op">:=</span> cliEngine<span class="op">.</span>CaptureRendered<span class="op">(</span>ctx<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// OCR or vision: does the image contain &quot;Status: OK&quot;?</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> vision<span class="op">.</span>Analyze<span class="op">(</span>screenshot<span class="op">,</span> <span class="st">&quot;Does this terminal screenshot show &#39;Status: OK&#39;?&quot;</span><span class="op">)</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> result<span class="op">.</span>Text<span class="op">,</span> <span class="st">&quot;yes&quot;</span><span class="op">)</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="method-5-visual-verification-screenshots-show-actual-ui-state">Method
+5: Visual Verification (Screenshots Show Actual UI State)</h4>
+<p>The most powerful anti-bluff method. Every UI test must: 1. Take a
+screenshot 2. Verify the screenshot shows the <strong>expected</strong>
+state 3. If the expected element is missing, the test must fail</p>
+<p><strong>Techniques:</strong> - <strong>Template matching</strong>:
+Compare against golden reference images - <strong>Vision LLM
+analysis</strong>: Ask “Is the login button visible?” - <strong>OCR
+extraction</strong>: Read text from screenshot, verify presence -
+<strong>Pixel-color assertions</strong>: Verify specific regions have
+expected colors - <strong>Structural comparison</strong>: SSIM or
+perceptual hash comparison</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestButtonVisible<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    screenshot<span class="op">,</span> _ <span class="op">:=</span> executor<span class="op">.</span>Screenshot<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Method A: Vision LLM</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> _ <span class="op">:=</span> vision<span class="op">.</span>Analyze<span class="op">(</span>screenshot<span class="op">,</span> <span class="st">&quot;Is there a blue &#39;Submit&#39; button in the bottom right?&quot;</span><span class="op">)</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> result<span class="op">.</span>Text<span class="op">,</span> <span class="st">&quot;yes&quot;</span><span class="op">)</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Method B: Template matching</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    found<span class="op">,</span> _ <span class="op">:=</span> vision<span class="op">.</span>TemplateMatch<span class="op">(</span>screenshot<span class="op">,</span> submitButtonTemplate<span class="op">)</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> found<span class="op">,</span> <span class="st">&quot;Submit button must be visible&quot;</span><span class="op">)</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Method C: Anti-bluff — break it</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// (In a separate test file, hide the button and verify failure)</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="challenge-design">4.4 Challenge Design</h3>
+<p>Challenges are end-to-end user journeys that prove real usability.
+Each challenge must:</p>
+<ol type="1">
+<li><strong>Define the Goal</strong>: A concrete user task (e.g., “Log
+in, add item to cart, checkout”)</li>
+<li><strong>Define the Success Criteria</strong>: Observable outcomes
+(e.g., “Order confirmation page with order number”)</li>
+<li><strong>Capture Evidence</strong>: Full session recording +
+screenshots at every step</li>
+<li><strong>Validate with Vision</strong>: Use vision analysis to
+confirm UI states</li>
+<li><strong>Measure Performance</strong>: Track time per step, detect
+stagnation</li>
+</ol>
+<p><strong>Challenge Validation Checklist:</strong> - [ ] Challenge can
+be executed autonomously by HelixQA - [ ] Every step produces a
+screenshot showing the expected UI state - [ ] Final screenshot proves
+the goal was achieved - [ ] Video recording shows smooth interaction
+without stalls - [ ] Breaking any step in the app code causes the
+challenge to fail - [ ] Challenge passes on all target platforms (Web,
+Android, Desktop)</p>
+<p><strong>Example Challenge: “Purchase Flow”</strong></p>
+<pre><code>Step 1: Navigate to product page → Screenshot shows product details
+Step 2: Click &quot;Add to Cart&quot; → Screenshot shows cart icon with &quot;1&quot; badge
+Step 3: Click cart icon → Screenshot shows cart page with product
+Step 4: Click &quot;Checkout&quot; → Screenshot shows checkout form
+Step 5: Fill shipping info → Screenshots show typed fields
+Step 6: Click &quot;Place Order&quot; → Screenshot shows order confirmation with number
+Vision Validation: &quot;Does the confirmation page show an order number?&quot;</code></pre>
+<h3 id="synthetic-user-workflows">4.5 Synthetic User Workflows</h3>
+<p>Synthetic workflows are automated user journeys that run continuously
+to detect regressions.</p>
+<p><strong>Design Principles:</strong> 1.
+<strong>Representative</strong>: Covers the most common user paths 2.
+<strong>Measurable</strong>: Each step has timing, success/failure,
+screenshot 3. <strong>Self-Validating</strong>: No human judgment
+required; vision or assertion confirms success 4.
+<strong>Reproducible</strong>: Same inputs → same outputs every time 5.
+<strong>Cross-Platform</strong>: Runs on Web, Android, Desktop with
+platform-specific adaptations</p>
+<p><strong>Workflow Types:</strong></p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 23%" />
+<col style="width: 28%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Platforms</th>
+<th>Screenshots</th>
+<th>Validation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Onboarding</td>
+<td>All</td>
+<td>5-10 screenshots</td>
+<td>Vision: “Is the welcome tutorial visible?”</td>
+</tr>
+<tr>
+<td>Login/Logout</td>
+<td>All</td>
+<td>3-5 screenshots</td>
+<td>Assert: profile page visible after login</td>
+</tr>
+<tr>
+<td>CRUD Operations</td>
+<td>All</td>
+<td>8-15 screenshots</td>
+<td>Assert: created item appears in list</td>
+</tr>
+<tr>
+<td>Search</td>
+<td>Web, Desktop</td>
+<td>4-6 screenshots</td>
+<td>Assert: search results match query</td>
+</tr>
+<tr>
+<td>Navigation</td>
+<td>All</td>
+<td>Per-screen</td>
+<td>Assert: all screens reachable from menu</td>
+</tr>
+<tr>
+<td>Error Handling</td>
+<td>All</td>
+<td>2-4 screenshots</td>
+<td>Assert: error page shows helpful message</td>
+</tr>
+<tr>
+<td>Payment Flow</td>
+<td>Web, Android</td>
+<td>10-20 screenshots</td>
+<td>Vision: “Is payment confirmed?”</td>
+</tr>
+<tr>
+<td>Settings Change</td>
+<td>All</td>
+<td>5-8 screenshots</td>
+<td>Assert: setting persists after app restart</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cicd-integration-no-pipeline-model">5. CI/CD Integration
+(No-Pipeline Model)</h2>
+<h3 id="current-state">5.1 Current State</h3>
+<p>The repository has a <strong>“NO CI/CD pipelines” rule</strong>.
+Tests are triggered via:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test        <span class="co"># go test ./... -count=1</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-race   <span class="co"># go test ./... -race -count=1</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-cover  <span class="co"># go test ./... -coverprofile=coverage.out</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> vet         <span class="co"># go vet ./...</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> lint        <span class="co"># golangci-lint run ./...</span></span></code></pre></div>
+<h3 id="test-orchestration-without-cicd">5.2 Test Orchestration Without
+CI/CD</h3>
+<p>Since there are no CI/CD pipelines, tests must be orchestrated
+through:</p>
+<p><strong>A. Makefile Targets (Local/Remote Execution)</strong></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Heavy QA session orchestration</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-session:</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>go run ./cmd/helixqa --mode=autonomous --platforms=<span class="ch">$(</span><span class="dt">PLATFORMS</span><span class="ch">)</span> --output=<span class="ch">$(</span><span class="dt">HELIX_OUTPUT_DIR</span><span class="ch">)</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-screenshot-all:</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>go test ./pkg/screenshot/... -run TestAllPlatforms -v</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-challenge:</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>go run ./cmd/helixqa --mode=challenge --challenge=<span class="ch">$(</span><span class="dt">CHALLENGE</span><span class="ch">)</span> --platforms=web,android,desktop</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-anti-bluff:</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Run tests, then run with deliberately broken code</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    ./scripts/anti-bluff-verify.sh</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-visual-regression:</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>go test ./pkg/regression/... -run TestVisualRegression -v</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-stress:</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>go test ./pkg/... -run TestStress -count=5 -timeout=30m</span></code></pre></div>
+<p><strong>B. Script-Based Orchestration</strong></p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/run-qa-suite.sh</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="va">PLATFORMS</span><span class="op">=</span><span class="st">&quot;android,web,desktop&quot;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="va">OUTPUT_DIR</span><span class="op">=</span><span class="st">&quot;./qa-results/</span><span class="va">$(</span><span class="fu">date</span> +%Y%m%d_%H%M%S<span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Unit tests</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Screenshot pipeline verification</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> qa-screenshot-all</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Anti-bluff verification</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> qa-anti-bluff</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Challenge runs</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> challenge <span class="kw">in</span> onboarding login checkout<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">make</span> qa-challenge CHALLENGE=<span class="va">$challenge</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Collect evidence</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cp</span> <span class="at">-r</span> <span class="va">$OUTPUT_DIR</span>/challenges/<span class="va">$challenge</span> ./reports/</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Generate report</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/helixqa <span class="at">--mode</span><span class="op">=</span>report <span class="at">--input</span><span class="op">=</span><span class="va">$OUTPUT_DIR</span> <span class="at">--formats</span><span class="op">=</span>markdown,html</span></code></pre></div>
+<p><strong>C. Result Reporting</strong></p>
+<p>Without CI/CD, results are reported via: 1. <strong>Local
+filesystem</strong>: <code>qa-results/session-YYYYMMDD_HHMMSS/</code> 2.
+<strong>Markdown/HTML reports</strong>: Generated by HelixQA report
+generator 3. <strong>JSON artifacts</strong>: Structured data for
+downstream processing 4. <strong>Screenshots directory</strong>:
+<code>screenshots/&lt;platform&gt;/</code> 5. <strong>Video
+directory</strong>:
+<code>videos/&lt;platform&gt;-&lt;sessionID&gt;.mp4</code> 6.
+<strong>Timeline JSON</strong>: <code>timeline.json</code> with all
+events</p>
+<p><strong>Report Structure:</strong></p>
+<pre><code>qa-results/
+└── session-20260501_120000/
+    ├── report.md
+    ├── report.html
+    ├── timeline.json
+    ├── screenshots/
+    │   ├── android/
+    │   │   ├── 0001-login_pre.png
+    │   │   └── 0002-login_post.png
+    │   ├── web/
+    │   │   ├── 0001-homepage.png
+    │   │   └── 0002-login.png
+    │   └── desktop/
+    │       ├── 0001-launch.png
+    │       └── 0002-dashboard.png
+    ├── videos/
+    │   ├── android-session-20260501_120000.mp4
+    │   ├── web-session-20260501_120000.mp4
+    │   └── desktop-session-20260501_120000.mp4
+    ├── evidence/
+    │   ├── logcat.txt
+    │   └── console.log
+    └── tickets/
+        └── HELIX-001-crash-on-login.md</code></pre>
+<h3 id="heavy-qa-session-orchestration">5.3 Heavy QA Session
+Orchestration</h3>
+<p>For long-running autonomous sessions:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Session orchestrator coordinates multi-platform testing</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SessionOrchestrator <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    sessionID   <span class="dt">string</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    platforms   <span class="op">[]</span>Platform</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    screenshot  <span class="op">*</span>screenshot<span class="op">.</span>Manager</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    recorder    <span class="op">*</span>session<span class="op">.</span>SessionRecorder</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    validator   <span class="op">*</span>validator<span class="op">.</span>Validator</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    challenges  <span class="op">[]</span>Challenge</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>so <span class="op">*</span>SessionOrchestrator<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>SessionResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Start recording on all platforms</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> p <span class="op">:=</span> <span class="kw">range</span> so<span class="op">.</span>platforms <span class="op">{</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>        so<span class="op">.</span>recorder<span class="op">.</span>StartRecording<span class="op">(</span>p<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Run challenges</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> ch <span class="op">:=</span> <span class="kw">range</span> so<span class="op">.</span>challenges <span class="op">{</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        result <span class="op">:=</span> so<span class="op">.</span>runChallenge<span class="op">(</span>ctx<span class="op">,</span> ch<span class="op">)</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Capture per-step screenshots</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> step <span class="op">:=</span> <span class="kw">range</span> result<span class="op">.</span>Steps <span class="op">{</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>            ss<span class="op">,</span> _ <span class="op">:=</span> so<span class="op">.</span>screenshot<span class="op">.</span>Capture<span class="op">(</span>ctx<span class="op">,</span> ch<span class="op">.</span>Platform<span class="op">,</span> screenshot<span class="op">.</span>CaptureOptions<span class="op">{</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>                StepName<span class="op">:</span> step<span class="op">.</span>Name<span class="op">,</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>                ValidateContent<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>            <span class="op">})</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>            step<span class="op">.</span>ScreenshotPath <span class="op">=</span> ss<span class="op">.</span>Path</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Stop recording</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> p <span class="op">:=</span> <span class="kw">range</span> so<span class="op">.</span>platforms <span class="op">{</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>        so<span class="op">.</span>recorder<span class="op">.</span>StopRecording<span class="op">(</span>p<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. Generate report</span></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> so<span class="op">.</span>generateReport<span class="op">()</span></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="exact-implementation-plan">6. Exact Implementation Plan</h2>
+<h3 id="new-package-pkgscreenshot">6.1 New Package:
+<code>pkg/screenshot</code></h3>
+<p><strong>File Structure:</strong></p>
+<pre><code>pkg/screenshot/
+├── manager.go              # Core Manager type
+├── options.go              # CaptureOptions, Breakpoint, etc.
+├── result.go               # Result type and helpers
+├── storage.go              # Storage interface and filesystem impl
+├── query.go                # Query type and filtering
+├── server.go               # HTTP server for screenshot serving
+├── engines/
+│   ├── engine.go           # Engine interface
+│   ├── web.go              # WebEngine (Playwright/chromedp)
+│   ├── android.go          # AndroidEngine (ADB/scrcpy)
+│   ├── ios.go              # iOSEngine (simctl)
+│   ├── linux.go            # LinuxEngine (xwd/grim)
+│   ├── macos.go            # macOSEngine (screencapture)
+│   ├── windows.go          # WindowsEngine (Win32 API)
+│   ├── cli.go              # CLIEngine (text/rendered)
+│   └── tui.go              # TUIEngine (asciinema/xtermjs)
+├── anti_bluff.go           # Anti-bluff verification helpers
+└── anti_bluff_test.go      # Anti-bluff test suite</code></pre>
+<h3 id="new-configuration-options-.env.example">6.2 New Configuration
+Options (<code>.env.example</code>)</h3>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── Screenshot Engine ───────────────────────────────────</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_ENGINE_WEB</span><span class="op">=</span>playwright          <span class="co"># playwright | chromedp</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_ENGINE_ANDROID</span><span class="op">=</span>adb             <span class="co"># adb | scrcpy</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_ENGINE_DESKTOP</span><span class="op">=</span>auto            <span class="co"># auto | xwd | grim | screencapture</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_ENGINE_IOS</span><span class="op">=</span>simctl              <span class="co"># simctl | go-ios</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_ENGINE_CLI</span><span class="op">=</span>text                <span class="co"># text | rendered</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_ENGINE_TUI</span><span class="op">=</span>asciinema           <span class="co"># asciinema | tmux | xtermjs</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── On-Demand Screenshot Server ─────────────────────────</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_SERVER_ENABLED</span><span class="op">=</span>true</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_SERVER_ADDR</span><span class="op">=</span>:8091</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_SERVER_THUMBNAIL_WIDTH</span><span class="op">=</span>480</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_SERVER_MAX_UPLOAD_MB</span><span class="op">=</span>50</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── Responsive Breakpoints ───────────────────────────────</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_BREAKPOINTS</span><span class="op">=</span>mobile:375x667,tablet:768x1024,desktop:1920x1080</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── Screenshot Validation ───────────────────────────────</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_VALIDATE_CONTENT</span><span class="op">=</span>true</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_MIN_SIZE_BYTES</span><span class="op">=</span>5000</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_MAX_RETRIES</span><span class="op">=</span>3</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_RETRY_DELAY_MS</span><span class="op">=</span>500</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── Storage ─────────────────────────────────────────────</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_STORAGE</span><span class="op">=</span>filesystem             <span class="co"># filesystem | s3 | memory</span></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_STORAGE_PATH</span><span class="op">=</span>./qa-results/screenshots</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SCREENSHOT_KEEP_DAYS</span><span class="op">=</span>30</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── iOS / macOS ─────────────────────────────────────────</span></span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_IOS_SIMULATOR_UDID</span><span class="op">=</span>                       <span class="co"># auto-detect if empty</span></span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_MACOS_PERMISSION_AUTO_REQUEST</span><span class="op">=</span>true</span></code></pre></div>
+<h3 id="new-cli-flags-cmdhelixqa">6.3 New CLI Flags
+(<code>cmd/helixqa</code>)</h3>
+<div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> screenshot capture <span class="dt">\</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--platform</span><span class="op">=</span>web <span class="dt">\</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--format</span><span class="op">=</span>png <span class="dt">\</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--width</span><span class="op">=</span>1920 <span class="dt">\</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--height</span><span class="op">=</span>1080 <span class="dt">\</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--full-page</span> <span class="dt">\</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span><span class="op">=</span>./screenshot.png</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> screenshot capture-all <span class="dt">\</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--platforms</span><span class="op">=</span>web,android,desktop <span class="dt">\</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--responsive</span> <span class="dt">\</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output-dir</span><span class="op">=</span>./screenshots/</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> screenshot serve <span class="dt">\</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">--addr</span><span class="op">=</span>:8091 <span class="dt">\</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">--storage</span><span class="op">=</span>./qa-results/screenshots</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> screenshot query <span class="dt">\</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">--session</span><span class="op">=</span>session-20260501_120000 <span class="dt">\</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">--platform</span><span class="op">=</span>web <span class="dt">\</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">--step</span><span class="op">=</span>login</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> screenshot anti-bluff <span class="dt">\</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">--test</span><span class="op">=</span>TestLoginFlow <span class="dt">\</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">--break-method</span><span class="op">=</span>hide_element <span class="dt">\</span></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">--element</span><span class="op">=</span><span class="st">&quot;#login-button&quot;</span></span></code></pre></div>
+<h3 id="new-apis-to-add">6.4 New APIs to Add</h3>
+<p><strong>A. Manager API
+(<code>pkg/screenshot/manager.go</code>)</strong></p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewManager<span class="op">(</span>opts <span class="op">...</span>ManagerOption<span class="op">)</span> <span class="op">*</span>Manager</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> RegisterEngine<span class="op">(</span>e Engine<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Capture<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> platform Platform<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CaptureAll<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> opts CaptureOptions<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CaptureResponsive<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> url <span class="dt">string</span><span class="op">,</span> bps <span class="op">[]</span>Breakpoint<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Get<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Query<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> q Query<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Delete<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Analyze<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>vision<span class="op">.</span>VisionResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>B. Storage Interface
+(<code>pkg/screenshot/storage.go</code>)</strong></p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Storage <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    Store<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> r <span class="op">*</span>Result<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    Retrieve<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    Query<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> q Query<span class="op">)</span> <span class="op">([]*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    Delete<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    Thumbnail<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> maxWidth <span class="dt">int</span><span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>C. HTTP Server
+(<code>pkg/screenshot/server.go</code>)</strong></p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewServer<span class="op">(</span>m <span class="op">*</span>Manager<span class="op">,</span> cfg ServerConfig<span class="op">)</span> <span class="op">*</span>Server</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Routes:</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co">// POST /api/v1/screenshot/capture</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co">// GET  /api/v1/screenshot/{id}</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co">// GET  /api/v1/screenshot/{id}/download</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co">// GET  /api/v1/screenshot/{id}/thumbnail</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co">// POST /api/v1/screenshot/{id}/analyze</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co">// GET  /api/v1/screenshot/query</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co">// DELETE /api/v1/screenshot/{id}</span></span></code></pre></div>
+<h3 id="modifications-to-existing-code">6.5 Modifications to Existing
+Code</h3>
+<p><strong>A. <code>pkg/evidence/collector.go</code></strong> -
+Deprecate <code>CaptureScreenshot</code> in favor of
+<code>pkg/screenshot.Manager</code> - Add
+<code>WithManager(m *screenshot.Manager)</code> option - Delegate
+screenshot capture to Manager while maintaining backward
+compatibility</p>
+<p><strong>B. <code>pkg/session/recorder.go</code></strong> - Add
+<code>ScreenshotManager *screenshot.Manager</code> field -
+<code>CaptureScreenshot</code> should call
+<code>manager.Capture()</code> and write bytes to the returned path -
+Add <code>GetScreenshot(index int) (*screenshot.Result, error)</code>
+for retrieval</p>
+<p><strong>C. <code>pkg/validator/validator.go</code></strong> - Replace
+<code>ScreenshotFunc</code> with <code>*screenshot.Manager</code> -
+<code>ValidateStep</code> should use <code>manager.Capture()</code> for
+pre/post screenshots - Add option to run vision analysis on
+post-screenshot for automatic validation</p>
+<p><strong>D. <code>pkg/autonomous/pipeline.go</code></strong> - Replace
+manual <code>executor.Screenshot()</code> calls with
+<code>screenshot.Manager.Capture()</code> - Add
+<code>CaptureOptions</code> per test step for platform-specific options
+- Integrate responsive breakpoints for web tests</p>
+<p><strong>E. <code>pkg/navigator/executor.go</code></strong> - Add
+<code>Platform() Platform</code> method to <code>ActionExecutor</code>
+interface - Consider deprecating <code>Screenshot()</code> in favor of
+screenshot engines - Keep for backward compatibility during
+transition</p>
+<h3 id="anti-bluff-test-implementation">6.6 Anti-Bluff Test
+Implementation</h3>
+<p><strong>File:
+<code>pkg/screenshot/anti_bluff_test.go</code></strong></p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> screenshot</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co">// TestScreenshotNotBlank verifies that screenshots contain actual content.</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestScreenshotNotBlank<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    engines <span class="op">:=</span> <span class="op">[]</span><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>        name   <span class="dt">string</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>        engine Engine</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}{</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;web&quot;</span><span class="op">,</span> newWebEngine<span class="op">(</span>t<span class="op">)},</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;android&quot;</span><span class="op">,</span> newAndroidEngine<span class="op">(</span>t<span class="op">)},</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;desktop&quot;</span><span class="op">,</span> newLinuxEngine<span class="op">(</span>t<span class="op">)},</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> engines <span class="op">{</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Run<span class="op">(</span>e<span class="op">.</span>name<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>            ctx <span class="op">:=</span> context<span class="op">.</span>Background<span class="op">()</span></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>            result<span class="op">,</span> err <span class="op">:=</span> e<span class="op">.</span>engine<span class="op">.</span>Capture<span class="op">(</span>ctx<span class="op">,</span> CaptureOptions<span class="op">{</span></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>                ValidateContent<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>                WaitForRender<span class="op">:</span>   <span class="dv">1</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span></span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>            <span class="op">})</span></span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Skipf<span class="op">(</span><span class="st">&quot;engine not wired: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a>            <span class="co">// 1. Must have data</span></span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>result<span class="op">.</span>Data<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">5000</span> <span class="op">{</span></span>
+<span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;screenshot too small: %d bytes&quot;</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>result<span class="op">.</span>Data<span class="op">))</span></span>
+<span id="cb30-34"><a href="#cb30-34" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb30-35"><a href="#cb30-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-36"><a href="#cb30-36" aria-hidden="true" tabindex="-1"></a>            <span class="co">// 2. Must decode as image</span></span>
+<span id="cb30-37"><a href="#cb30-37" aria-hidden="true" tabindex="-1"></a>            img<span class="op">,</span> format<span class="op">,</span> err <span class="op">:=</span> image<span class="op">.</span>Decode<span class="op">(</span>bytes<span class="op">.</span>NewReader<span class="op">(</span>result<span class="op">.</span>Data<span class="op">))</span></span>
+<span id="cb30-38"><a href="#cb30-38" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb30-39"><a href="#cb30-39" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;invalid image: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb30-40"><a href="#cb30-40" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb30-41"><a href="#cb30-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> format <span class="op">!=</span> <span class="st">&quot;png&quot;</span> <span class="op">&amp;&amp;</span> format <span class="op">!=</span> <span class="st">&quot;jpeg&quot;</span> <span class="op">{</span></span>
+<span id="cb30-42"><a href="#cb30-42" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;unexpected format: %s&quot;</span><span class="op">,</span> format<span class="op">)</span></span>
+<span id="cb30-43"><a href="#cb30-43" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb30-44"><a href="#cb30-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-45"><a href="#cb30-45" aria-hidden="true" tabindex="-1"></a>            <span class="co">// 3. Must have reasonable dimensions</span></span>
+<span id="cb30-46"><a href="#cb30-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> img<span class="op">.</span>Bounds<span class="op">().</span>Dx<span class="op">()</span> <span class="op">&lt;</span> <span class="dv">100</span> <span class="op">||</span> img<span class="op">.</span>Bounds<span class="op">().</span>Dy<span class="op">()</span> <span class="op">&lt;</span> <span class="dv">100</span> <span class="op">{</span></span>
+<span id="cb30-47"><a href="#cb30-47" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;image too small: %dx%d&quot;</span><span class="op">,</span> img<span class="op">.</span>Bounds<span class="op">().</span>Dx<span class="op">(),</span> img<span class="op">.</span>Bounds<span class="op">().</span>Dy<span class="op">())</span></span>
+<span id="cb30-48"><a href="#cb30-48" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb30-49"><a href="#cb30-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-50"><a href="#cb30-50" aria-hidden="true" tabindex="-1"></a>            <span class="co">// 4. Must not be blank</span></span>
+<span id="cb30-51"><a href="#cb30-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> autonomous<span class="op">.</span>IsBlankScreenshot<span class="op">(</span>result<span class="op">.</span>Data<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-52"><a href="#cb30-52" aria-hidden="true" tabindex="-1"></a>                t<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;screenshot is blank/uniform&quot;</span><span class="op">)</span></span>
+<span id="cb30-53"><a href="#cb30-53" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb30-54"><a href="#cb30-54" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb30-55"><a href="#cb30-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-56"><a href="#cb30-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb30-57"><a href="#cb30-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-58"><a href="#cb30-58" aria-hidden="true" tabindex="-1"></a><span class="co">// TestDeliberatelyBreakScreenshot verifies anti-bluff by hiding elements.</span></span>
+<span id="cb30-59"><a href="#cb30-59" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDeliberatelyBreakScreenshot<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-60"><a href="#cb30-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;HELIX_ANTIBLUFF_BREAK&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;1&quot;</span> <span class="op">{</span></span>
+<span id="cb30-61"><a href="#cb30-61" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;Set HELIX_ANTIBLUFF_BREAK=1 to run deliberate-break tests&quot;</span><span class="op">)</span></span>
+<span id="cb30-62"><a href="#cb30-62" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-63"><a href="#cb30-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-64"><a href="#cb30-64" aria-hidden="true" tabindex="-1"></a>    <span class="co">// This test runs against a modified app where the login button is hidden.</span></span>
+<span id="cb30-65"><a href="#cb30-65" aria-hidden="true" tabindex="-1"></a>    <span class="co">// The screenshot test MUST fail.</span></span>
+<span id="cb30-66"><a href="#cb30-66" aria-hidden="true" tabindex="-1"></a>    ctx <span class="op">:=</span> context<span class="op">.</span>Background<span class="op">()</span></span>
+<span id="cb30-67"><a href="#cb30-67" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> webEngine<span class="op">.</span>Capture<span class="op">(</span>ctx<span class="op">,</span> CaptureOptions<span class="op">{</span></span>
+<span id="cb30-68"><a href="#cb30-68" aria-hidden="true" tabindex="-1"></a>        URL<span class="op">:</span> <span class="st">&quot;http://localhost:8080/login&quot;</span><span class="op">,</span></span>
+<span id="cb30-69"><a href="#cb30-69" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb30-70"><a href="#cb30-70" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb30-71"><a href="#cb30-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-72"><a href="#cb30-72" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Vision analysis: is login button visible?</span></span>
+<span id="cb30-73"><a href="#cb30-73" aria-hidden="true" tabindex="-1"></a>    analysis<span class="op">,</span> err <span class="op">:=</span> vision<span class="op">.</span>Analyze<span class="op">(</span>result<span class="op">.</span>Data<span class="op">,</span> <span class="st">&quot;Is the login button visible?&quot;</span><span class="op">)</span></span>
+<span id="cb30-74"><a href="#cb30-74" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb30-75"><a href="#cb30-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-76"><a href="#cb30-76" aria-hidden="true" tabindex="-1"></a>    <span class="co">// When HELIX_ANTIBLUFF_BREAK=1, the button is hidden, so analysis should say &quot;no&quot;</span></span>
+<span id="cb30-77"><a href="#cb30-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>Contains<span class="op">(</span>strings<span class="op">.</span>ToLower<span class="op">(</span>analysis<span class="op">.</span>Text<span class="op">),</span> <span class="st">&quot;yes&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb30-78"><a href="#cb30-78" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;ANTI-BLUFF FAILURE: test passed when button was deliberately hidden&quot;</span><span class="op">)</span></span>
+<span id="cb30-79"><a href="#cb30-79" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb30-80"><a href="#cb30-80" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="implementation-phases">6.7 Implementation Phases</h3>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 36%" />
+<col style="width: 27%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Deliverables</th>
+<th>Timeline</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P1</strong></td>
+<td>Core <code>pkg/screenshot</code> package; <code>Manager</code>,
+<code>Result</code>, <code>Storage</code> interfaces; filesystem
+storage</td>
+<td>Week 1</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>WebEngine + AndroidEngine + LinuxEngine with <code>Capture()</code>
+methods; HTTP server with <code>/capture</code> and
+<code>/download</code></td>
+<td>Week 2</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>P3</strong></td>
+<td>iOSEngine + macOSEngine + CLIEngine + TUIEngine; responsive
+breakpoints; multi-display support</td>
+<td>Week 3</td>
+<td>High (iOS permissions)</td>
+</tr>
+<tr>
+<td><strong>P4</strong></td>
+<td>Integration with <code>pkg/session</code>,
+<code>pkg/validator</code>, <code>pkg/autonomous</code>; on-demand API
+in <code>cmd/helixqa</code></td>
+<td>Week 4</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>P5</strong></td>
+<td>Anti-bluff test suite; challenge screenshot validation; visual
+regression integration</td>
+<td>Week 5</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>P5.5</strong></td>
+<td>Native video frame extraction from screenshots; NVENC/VAAPI encoder
+wiring; ScreenCaptureKit on macOS</td>
+<td>Week 6-8</td>
+<td>High (CGO, hardware)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-current-code-references">7. Appendix: Current Code
+References</h2>
+<h3 id="key-source-files">7.1 Key Source Files</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 40%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/evidence/collector.go</code></td>
+<td>Evidence collection hub</td>
+<td>521</td>
+</tr>
+<tr>
+<td><code>pkg/session/recorder.go</code></td>
+<td>Session recording coordinator</td>
+<td>247</td>
+</tr>
+<tr>
+<td><code>pkg/session/timeline.go</code></td>
+<td>Timeline event tracking</td>
+<td>152</td>
+</tr>
+<tr>
+<td><code>pkg/session/video.go</code></td>
+<td>Video state tracking (no encoding)</td>
+<td>111</td>
+</tr>
+<tr>
+<td><code>pkg/validator/validator.go</code></td>
+<td>Step validation with pre/post screenshots</td>
+<td>262</td>
+</tr>
+<tr>
+<td><code>pkg/navigator/executor.go</code></td>
+<td>ActionExecutor interface + ADBExecutor</td>
+<td>424</td>
+</tr>
+<tr>
+<td><code>pkg/navigator/playwright_executor.go</code></td>
+<td>Playwright web executor</td>
+<td>340</td>
+</tr>
+<tr>
+<td><code>pkg/navigator/x11_executor.go</code></td>
+<td>X11 desktop executor</td>
+<td>169</td>
+</tr>
+<tr>
+<td><code>pkg/navigator/cli_executor.go</code></td>
+<td>CLI/TUI executor</td>
+<td>135</td>
+</tr>
+<tr>
+<td><code>pkg/navigator/api_executor.go</code></td>
+<td>HTTP API executor</td>
+<td>133</td>
+</tr>
+<tr>
+<td><code>pkg/nexus/capture/android/source.go</code></td>
+<td>ADB H.264 frame capture</td>
+<td>307</td>
+</tr>
+<tr>
+<td><code>pkg/nexus/capture/linux/source.go</code></td>
+<td>Linux screenshot frame capture</td>
+<td>221</td>
+</tr>
+<tr>
+<td><code>pkg/nexus/capture/web/source.go</code></td>
+<td>Chromedp web frame capture</td>
+<td>290</td>
+</tr>
+<tr>
+<td><code>pkg/nexus/record/recorder.go</code></td>
+<td>Frame recording pipeline</td>
+<td>220</td>
+</tr>
+<tr>
+<td><code>pkg/nexus/native/contracts/capture.go</code></td>
+<td>Capture interface contracts</td>
+<td>137</td>
+</tr>
+<tr>
+<td><code>pkg/nexus/native/contracts/record.go</code></td>
+<td>Recorder interface contracts</td>
+<td>49</td>
+</tr>
+<tr>
+<td><code>pkg/autonomous/screenshot.go</code></td>
+<td>Blank detection + resizing</td>
+<td>153</td>
+</tr>
+<tr>
+<td><code>pkg/autonomous/pipeline.go</code></td>
+<td>Autonomous QA pipeline (screenshot flow)</td>
+<td>~2500</td>
+</tr>
+<tr>
+<td><code>pkg/regression/visual.go</code></td>
+<td>Cross-device visual regression</td>
+<td>460</td>
+</tr>
+<tr>
+<td><code>pkg/visual/comparator.go</code></td>
+<td>Screenshot comparison tools</td>
+<td>~400</td>
+</tr>
+<tr>
+<td><code>pkg/capture/macos_capture.go</code></td>
+<td>macOS capture (build-tagged)</td>
+<td>341</td>
+</tr>
+<tr>
+<td><code>internal/visionserver/server.go</code></td>
+<td>Vision HTTP server</td>
+<td>73</td>
+</tr>
+<tr>
+<td><code>internal/visionserver/handlers.go</code></td>
+<td>Vision API handlers</td>
+<td>199</td>
+</tr>
+<tr>
+<td><code>internal/visionserver/config.go</code></td>
+<td>Vision server config</td>
+<td>190</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td>Environment configuration template</td>
+<td>137</td>
+</tr>
+<tr>
+<td><code>Makefile</code></td>
+<td>Build and test targets</td>
+<td>48</td>
+</tr>
+</tbody>
+</table>
+<h3 id="current-screenshot-flow-during-autonomous-session">7.2 Current
+Screenshot Flow During Autonomous Session</h3>
+<pre><code>Autonomous Pipeline (pkg/autonomous/pipeline.go)
+    │
+    ▼
+For each test ──────────────────────────────►
+    │
+    ├── For each target platform
+    │       │
+    │       ├── executor.Screenshot(ctx) → []byte PNG
+    │       │       │
+    │       │       ├── ADBExecutor: adb exec-out screencap -p
+    │       │       ├── PlaywrightExecutor: bridge script → screenshot action
+    │       │       ├── X11Executor: import -window root png:-
+    │       │       └── CLIExecutor: runner.Run(command, args...) stdout
+    │       │
+    │       ├── Validate: len &gt; 0, not blank (IsBlankScreenshot)
+    │       ├── Write to: screenshots/&lt;platform&gt;/&lt;name&gt;_&lt;timestamp&gt;.png
+    │       └── (if within max 15) Send to Vision Provider for analysis
+    │
+    └── Collect all screenshot paths in test result</code></pre>
+<h3 id="evidence-storage-layout-current">7.3 Evidence Storage Layout
+(Current)</h3>
+<pre><code>&lt;outputDir&gt;/
+├── evidence/
+│   ├── &lt;name&gt;-&lt;timestamp&gt;.png          (Collector screenshots)
+│   ├── &lt;name&gt;-logcat-&lt;timestamp&gt;.txt    (Logcat)
+│   ├── &lt;recordingID&gt;.mp4               (Video - path allocated, may not exist)
+│   └── &lt;recordingID&gt;.wav               (Audio)
+├── screenshots/
+│   ├── android/
+│   │   └── 0001-&lt;name&gt;.png             (SessionRecorder indexed)
+│   ├── web/
+│   │   └── 0001-&lt;name&gt;.png
+│   └── desktop/
+│       └── 0001-&lt;name&gt;.png
+├── videos/
+│   ├── android-&lt;sessionID&gt;.mp4
+│   ├── web-&lt;sessionID&gt;.mp4
+│   └── desktop-&lt;sessionID&gt;.mp4
+└── timeline.json</code></pre>
+<h3 id="configuration-parameters-affecting-screenshots">7.4
+Configuration Parameters Affecting Screenshots</h3>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 34%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Env Var</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HELIX_RECORDING_SCREENSHOTS</code></td>
+<td><code>true</code></td>
+<td>Enable/disable screenshot capture</td>
+</tr>
+<tr>
+<td><code>HELIX_RECORDING_SCREENSHOT_FORMAT</code></td>
+<td><code>png</code></td>
+<td>Screenshot file format</td>
+</tr>
+<tr>
+<td><code>HELIX_RECORDING_VIDEO</code></td>
+<td><code>true</code></td>
+<td>Enable/disable video recording</td>
+</tr>
+<tr>
+<td><code>HELIX_RECORDING_VIDEO_QUALITY</code></td>
+<td><code>medium</code></td>
+<td>Video quality setting</td>
+</tr>
+<tr>
+<td><code>HELIX_RECORDING_FFMPEG_PATH</code></td>
+<td><code>/usr/bin/ffmpeg</code></td>
+<td>ffmpeg binary location</td>
+</tr>
+<tr>
+<td><code>HELIX_OUTPUT_DIR</code></td>
+<td><code>./qa-results</code></td>
+<td>Base output directory</td>
+</tr>
+<tr>
+<td><code>HELIX_ANDROID_DEVICE</code></td>
+<td><code>emulator-5554</code></td>
+<td>ADB target device</td>
+</tr>
+<tr>
+<td><code>HELIX_WEB_URL</code></td>
+<td><code>http://localhost:8080</code></td>
+<td>Web target URL</td>
+</tr>
+<tr>
+<td><code>HELIX_DESKTOP_DISPLAY</code></td>
+<td><code>:0</code></td>
+<td>X11 display</td>
+</tr>
+<tr>
+<td><code>HELIXQA_CAPTURE_ANDROID_STUB</code></td>
+<td><code>0</code></td>
+<td>Disable real ADB capture</td>
+</tr>
+<tr>
+<td><code>HELIXQA_CAPTURE_LINUX_STUB</code></td>
+<td><code>0</code></td>
+<td>Disable real Linux capture</td>
+</tr>
+<tr>
+<td><code>HELIXQA_CAPTURE_WEB_STUB</code></td>
+<td><code>0</code></td>
+<td>Disable real web capture</td>
+</tr>
+<tr>
+<td><code>HELIXQA_ADB_SERIAL</code></td>
+<td>`<code>| ADB device serial override | |</code>HELIX_VISION_PROVIDER<code>|</code>auto<code>| Vision provider selection | |</code>HELIX_VISION_MAX_IMAGE_SIZE<code>|</code>4096<code>| Max image dimension for vision | |</code>HELIX_VISION_SSIM_THRESHOLD<code>|</code>0.95`</td>
+<td>Screenshot similarity threshold</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="summary">Summary</h2>
+<p>This strategy document provides a comprehensive analysis of HelixQA’s
+current screenshot and evidence collection architecture, identifies
+critical gaps for on-demand screenshot capability, defines
+platform-specific strategies for all client app types (Web, Desktop
+Linux/macOS/Windows, Android, iOS, CLI, TUI), designs a rigorous
+anti-bluff testing methodology, outlines test orchestration without
+CI/CD pipelines, and delivers an exact implementation plan with file
+paths, function signatures, and phased delivery schedule.</p>
+<p><strong>Top Priority Actions:</strong> 1. Create
+<code>pkg/screenshot</code> package with unified Manager and Engine
+interfaces 2. Implement on-demand HTTP API for screenshot capture,
+retrieval, and analysis 3. Add iOS simulator screenshot engine
+(currently completely absent) 4. Add TUI/CLI rendered screenshot
+capability (asciinema/xtermjs) 5. Integrate Manager with
+<code>pkg/session</code>, <code>pkg/validator</code>, and
+<code>pkg/autonomous</code> 6. Implement anti-bluff test suite that
+deliberately breaks features to verify test validity 7. Add responsive
+breakpoint capture for web platforms 8. Add multi-display capture for
+desktop platforms</p>
+<p><strong>Immediate Code Changes:</strong> - Add
+<code>Platform() Platform</code> to <code>ActionExecutor</code>
+interface - Add <code>screenshot.Manager</code> reference to
+<code>SessionRecorder</code> - Create
+<code>screenshot.CaptureOptions</code> with <code>WaitForRender</code>,
+<code>ValidateContent</code>, <code>MaxRetries</code> - Implement
+<code>WebEngine</code> wrapping PlaywrightExecutor with full-page and
+responsive support - Create HTTP handlers for
+<code>/api/v1/screenshot/*</code> endpoints - Add anti-bluff environment
+variable <code>HELIX_ANTIBLUFF_BREAK</code> for deliberate-break
+tests</p>
+</body>
+</html>

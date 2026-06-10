@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-08-phase5-end-user-materials-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-08-phase5-end-user-materials-design</h1>
+</header>
+<h1 id="phase-5-end-user-materials-uplift-design-spec">Phase 5 —
+End-User Materials Uplift Design Spec</h1>
+<p><strong>Date:</strong> 2026-05-08 <strong>Author:</strong> Claude
+Opus 4.7 <strong>Status:</strong> DRAFT (awaiting user review)
+<strong>Successor:</strong> to be handed to
+<code>superpowers:writing-plans</code> for executable plan
+<strong>Phase:</strong> 5 of CLI-Agent Fusion programme</p>
+<hr />
+<h2 id="goals-non-goals-success-criteria">1. Goals, non-goals, success
+criteria</h2>
+<h3 id="what-were-building">1.1 What we’re building</h3>
+<p>A staged uplift of all end-user facing materials for HelixCode —
+documentation, installers/packaging, and website — closing the gaps
+identified in the existing <code>USER_MANUAL_EXPANSION_PLAN.md</code>
+and adding delivery mechanisms that let end users install and evaluate
+the product with minimal friction.</p>
+<h3 id="existing-materials-assessment">1.2 Existing materials
+assessment</h3>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 37%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Contents</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reference docs</td>
+<td>8 <code>COMPLETE_*.md</code> files (API, CLI, Config, Deployment,
+Examples, Performance, Security, Troubleshooting)</td>
+<td>Comprehensive but need content audit for stale/outdated
+sections</td>
+</tr>
+<tr>
+<td>User manual</td>
+<td><code>README.md</code> (3027 lines), <code>SUMMARY.md</code> (632
+lines), <code>INDEX.md</code> (13K)</td>
+<td>Mature v2.0 manual; expansion plan already defines gaps</td>
+</tr>
+<tr>
+<td>Tutorials</td>
+<td>8 tutorials (2,355 lines total)</td>
+<td>Cover major features; may need updating</td>
+</tr>
+<tr>
+<td>Examples</td>
+<td>4 config YAML files (basic, provider, enterprise, multi-worker)</td>
+<td>Good baseline</td>
+</tr>
+<tr>
+<td>Website</td>
+<td>Full HTML/CSS/JS site (80K index.html), courses, mobile sub-sites,
+nginx config, Containerfile, test scripts, install-podman.sh</td>
+<td>Feature-rich but may have stale links/stats</td>
+</tr>
+<tr>
+<td>Installers</td>
+<td>Only <code>install-podman.sh</code> (macOS Podman)</td>
+<td>Major gap — no Linux packages, Homebrew, Windows installer</td>
+</tr>
+<tr>
+<td>Materials</td>
+<td><code>Encryption_Algs.md</code>,
+<code>LLMs_Optimization.md</code></td>
+<td>Niche; may need integration into main docs</td>
+</tr>
+<tr>
+<td>Package READMEs</td>
+<td>35+ <code>internal/*/README.md</code> files</td>
+<td>Developer-facing; not user-facing but usable as source truth</td>
+</tr>
+</tbody>
+</table>
+<h3 id="gap-analysis-from-expansion-plan-audit">1.3 Gap analysis (from
+expansion plan + audit)</h3>
+<p><strong>Documentation gaps:</strong> - Provider-specific deep-dives
+(Anthropic extended thinking, Gemini multimodal, AWS/Azure IAM setup) -
+Memory system guide (vector DB comparison, persistence config) - Tool
+sandboxing configuration - Web tools enablement guide - Developer guides
+(custom provider tutorial, new tool via MCP SDK) - Troubleshooting (SSH
+workers, LLM connection debugging, rate limit handling) -
+Cross-reference integrity (SUMMARY/INDEX may be out of sync with manual
+content)</p>
+<p><strong>Installer gaps:</strong> - No <code>.deb</code> or
+<code>.rpm</code> packages for Linux - No Homebrew formula for macOS -
+No Windows installer - Docker deployment docs exist but no streamlined
+end-user <code>docker run</code> one-liner documented - No
+<code>install.sh</code> that detects platform and runs the right
+installer</p>
+<p><strong>Website gaps:</strong> - Feature listing may be stale (new
+features since Nov 2025) - Links to GitHub may be broken (repo structure
+changed) - Provider count/stats may need updating - Manual section on
+website may not reflect all user manual content - Mobile/courses
+subsites may need content sync</p>
+<h3 id="goals-priority-order">1.4 Goals (priority order)</h3>
+<ul>
+<li><strong>G1 — Complete documentation.</strong> Close every gap in the
+expansion plan. No “TODO” or “Coming soon” sections in user-facing
+docs.</li>
+<li><strong>G2 — Installable on all major platforms.</strong> Linux
+(deb/rpm), macOS (Homebrew), Windows (installer), plus streamlined
+Docker.</li>
+<li><strong>G3 — Website matches reality.</strong> Stats, links, feature
+descriptions reflect the actual HelixCode codebase, not aspirational
+goals.</li>
+<li><strong>G4 — Cross-reference integrity.</strong> SUMMARY, INDEX,
+tutorials, and website all agree on feature names, config keys, and CLI
+flags.</li>
+</ul>
+<h3 id="non-goals-explicit-out-of-scope">1.5 Non-goals (explicit
+out-of-scope)</h3>
+<ul>
+<li><strong>N1.</strong> Rewriting the user manual from scratch. The
+existing 3K-line manual is solid; we extend it.</li>
+<li><strong>N2.</strong> Redesigning the website layout. Content updates
+only, not restructuring.</li>
+<li><strong>N3.</strong> Video course production. The existing courses
+subsite has materials; we don’t produce new videos.</li>
+<li><strong>N4.</strong> Writing package-level Go doc comments for every
+internal package. That’s a developer experience concern, not end-user
+facing.</li>
+<li><strong>N5.</strong> Translating docs to other languages.</li>
+</ul>
+<h3 id="success-criteria">1.6 Success criteria</h3>
+<ul>
+<li><strong>S1.</strong> <code>USER_MANUAL_EXPANSION_PLAN.md</code>
+every checkbox ticked.</li>
+<li><strong>S2.</strong> Installer exists for each of: Linux (deb),
+Linux (rpm), macOS (Homebrew), Windows (exe/msi).</li>
+<li><strong>S3.</strong> <code>install.sh</code> (or equivalent) detects
+platform and invokes correct installer.</li>
+<li><strong>S4.</strong> Website feature list, provider count, and stats
+match codebase reality (verified by grep of actual provider
+implementations).</li>
+<li><strong>S5.</strong> No 404 links from website to GitHub or
+docs.</li>
+<li><strong>S6.</strong> <code>SUMMARY.md</code> and
+<code>INDEX.md</code> consistent with <code>README.md</code> section
+headers.</li>
+</ul>
+<hr />
+<h2 id="work-packages">2. Work packages</h2>
+<h3 id="wp-doc-documentation-uplift">WP-DOC: Documentation uplift</h3>
+<p><strong>D1 — Provider deep-dives</strong> - Anthropic/Claude:
+extended thinking config, prompt caching setup, 200K context usage
+patterns - Google Gemini: multimodal (images/video) usage, 2M token
+context, flash models - Enterprise: AWS Bedrock IAM auth, Azure Entra ID
+setup, region selection - Free providers: XAI Grok free tier, OpenRouter
+free models, Qwen quota limits - Add sections to
+<code>docs/user_manual/README.md</code> Part III</p>
+<p><strong>D2 — Advanced feature guides</strong> - Memory system: vector
+DB comparison (Zep, Weaviate, ChromaDB, Qdrant), persistence config,
+choosing the right backend - Tool sandboxing: safe shell execution
+config, sandbox restrictions, allowed commands - Web tools: enabling web
+search, configuring search providers, HTML fetch/parse pipeline - Add
+sections to <code>docs/user_manual/README.md</code> Part IV / Part V</p>
+<p><strong>D3 — Developer guides</strong> - “Creating a Custom
+Provider”: step-by-step tutorial with example provider implementation -
+“Adding a New Tool”: using the MCP SDK tool registry, dispatch, and
+testing - New tutorials or appendix entries in
+<code>docs/user_manual/tutorials/</code></p>
+<p><strong>D4 — Troubleshooting</strong> - SSH worker common errors (key
+auth, host key verification, connection timeout) - LLM connection
+debugging (timeout, auth failure, rate limit, model not found) - Rate
+limit handling (per-provider backoff, queue management, fallback chains)
+- Add to <code>docs/user_manual/README.md</code> Part X</p>
+<p><strong>D5 — Cross-reference sync</strong> - Walk SUMMARY.md topic
+list against README.md actual sections; fix mismatches - Walk INDEX.md
+against both; fix mismatches - Verify 8 COMPLETE_*.md files reference
+the same config keys as actual <code>config/config.yaml</code> - Update
+Tutorial 1-8 if any feature names/CLI flags changed</p>
+<h3 id="wp-inst-installers-packaging">WP-INST: Installers &amp;
+packaging</h3>
+<p><strong>I1 — Linux packages</strong> - <code>.deb</code> package
+(Debian/Ubuntu): control file, systemd service, man page, postinst/prerm
+scripts - <code>.rpm</code> package (Fedora/RHEL): spec file, systemd
+service, man page - Both: install binary to
+<code>/usr/local/bin/helixcode</code>, config to
+<code>/etc/helixcode/</code>, data to <code>/var/lib/helixcode/</code> -
+Docker-based build for reproducibility (no host toolchain needed)</p>
+<p><strong>I2 — macOS Homebrew formula</strong> - Formula in
+<code>Homebrew/helixcode</code> tap or core PR - Binary bottle
+distribution - Post-install message with quick-start instructions -
+Support both Intel and Apple Silicon</p>
+<p><strong>I3 — Windows installer</strong> - NSIS or WiX MSI installer -
+Add to PATH, create start menu entry, install config template -
+PowerShell detection script for minimum version check</p>
+<p><strong>I4 — Platform-agnostic install script</strong> -
+<code>install.sh</code> (or <code>install.ps1</code> for Windows):
+detect OS/arch, download appropriate package, verify checksum, install -
+Supports <code>--version</code>, <code>--dry-run</code>,
+<code>--prefix</code> flags - Modeled after rustup/brew one-liner
+pattern:
+<code>curl -fsSL https://helixcode.dev/install.sh | sh</code></p>
+<p><strong>I5 — Docker streamlined</strong> - Update existing
+Containerfile to produce minimal production image - Document one-liner:
+<code>docker run -d -p 8080:8080 -v helixcode-data:/var/lib/helixcode helixcode/helixcode:latest</code>
+- Docker Compose for production (postgres + redis + helixcode)</p>
+<h3 id="wp-web-website-uplift">WP-WEB: Website uplift</h3>
+<p><strong>W1 — Content accuracy audit</strong> - Compare every feature
+listed in <code>index.html</code> against actual Go code
+(<code>internal/</code> package listing) - Update provider count from
+old to actual (verify via grep of provider implementations) - Update
+stats (lines of code, supported languages, etc.) via actual measurements
+- Fix any GitHub links that changed due to repo restructuring</p>
+<p><strong>W2 — Manual sync</strong> - Ensure
+<code>docs/manual/index.html</code> reflects current
+<code>docs/user_manual/README.md</code> content - Update courses subsite
+(<code>docs/courses/</code>) if curriculum has changed - Update mobile
+subsite (<code>docs/mobile/</code>) if mobile client info has
+changed</p>
+<p><strong>W3 — Test suite run</strong> - Run
+<code>test-local.sh</code>, <code>test-website.sh</code>,
+<code>test-performance.sh</code> - Fix any failures - Verify
+containerized deployment via Containerfile</p>
+<hr />
+<h2 id="dependencies-and-ordering">3. Dependencies and ordering</h2>
+<pre><code>WP-DOC (docs first — content is foundation)
+  ├── D1 (provider deep-dives)
+  ├── D2 (advanced features)
+  ├── D3 (developer guides)
+  ├── D4 (troubleshooting)
+  └── D5 (cross-reference sync — runs last, touches everything)
+
+WP-INST (installers — depends on knowing what to ship)
+  ├── I1 (Linux packages)
+  ├── I2 (macOS Homebrew)
+  ├── I3 (Windows installer)
+  ├── I4 (platform-agnostic install.sh)
+  └── I5 (Docker streamline — can run in parallel with I1-I4)
+
+WP-WEB (website — depends on docs content being finalized)
+  ├── W1 (content audit — can start early)
+  ├── W2 (manual sync)
+  └── W3 (test suite — final verification)</code></pre>
+<p><strong>Recommended execution order:</strong> 1. D1-D4 in parallel
+(independent content areas) 2. D5 (cross-ref sync after all content is
+in) 3. W1 starts after D1-D4 content is draft (can overlap with D5) 4.
+I1-I5 in any order (independent of each other) 5. W2 after D5 is
+complete (manual reflects final content) 6. W3 final verification</p>
+<hr />
+<h2 id="concrete-file-changes">4. Concrete file changes</h2>
+<h3 id="wp-doc-file-changes">WP-DOC file changes</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 38%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Action</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/user_manual/README.md</code></td>
+<td>Edit (add sections in Parts III, IV, V, X)</td>
+<td>Expand ~300-500 lines</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/SUMMARY.md</code></td>
+<td>Edit (sync with README changes)</td>
+<td>Update topic list</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/INDEX.md</code></td>
+<td>Edit (sync with README changes)</td>
+<td>Update keyword index</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/tutorials/Tutorial_*.md</code></td>
+<td>Edit (minor updates if needed)</td>
+<td>Fix stale references</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_*.md</code></td>
+<td>Edit (minor updates if needed)</td>
+<td>Fix stale config keys</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/examples/*.yaml</code></td>
+<td>Edit (minor updates if needed)</td>
+<td>Add new provider examples</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wp-inst-new-files">WP-INST new files</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 38%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Action</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/install.sh</code></td>
+<td>Create</td>
+<td>Platform-agnostic installer</td>
+</tr>
+<tr>
+<td><code>scripts/install.ps1</code></td>
+<td>Create</td>
+<td>Windows PowerShell installer</td>
+</tr>
+<tr>
+<td><code>packaging/debian/</code></td>
+<td>Create</td>
+<td>Debian packaging (control, postinst, prerm, service)</td>
+</tr>
+<tr>
+<td><code>packaging/rpm/</code></td>
+<td>Create</td>
+<td>RPM packaging (spec, service)</td>
+</tr>
+<tr>
+<td><code>packaging/homebrew/helixcode.rb</code></td>
+<td>Create</td>
+<td>Homebrew formula</td>
+</tr>
+<tr>
+<td><code>packaging/windows/</code></td>
+<td>Create</td>
+<td>NSIS/WiX installer config</td>
+</tr>
+<tr>
+<td><code>packaging/docker/Dockerfile</code></td>
+<td>Create</td>
+<td>Minimal production Dockerfile</td>
+</tr>
+<tr>
+<td><code>Makefile</code></td>
+<td>Edit</td>
+<td>Add <code>make installers</code> target</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wp-web-file-changes">WP-WEB file changes</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 38%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Action</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>github_pages_website/docs/index.html</code></td>
+<td>Edit</td>
+<td>Update stats, links, feature list</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/manual/index.html</code></td>
+<td>Edit</td>
+<td>Sync with user manual</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/courses/</code></td>
+<td>Edit</td>
+<td>Update if curriculum stale</td>
+</tr>
+<tr>
+<td><code>github_pages_website/docs/mobile/</code></td>
+<td>Edit</td>
+<td>Update if mobile info stale</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="evidence-verification">5. Evidence &amp; verification</h2>
+<p>Each work package MUST produce its own evidence:</p>
+<ul>
+<li><strong>WP-DOC</strong>: <code>grep</code> for each expansion plan
+topic in README.md to confirm it exists. No “TODO” or “Coming soon”
+markers.</li>
+<li><strong>WP-INST</strong>: Each package installs on a clean OS of the
+target type. <code>make installers</code> builds all. Verify with
+<code>docker run</code> test.</li>
+<li><strong>WP-WEB</strong>: Test scripts pass. Manual walk-through of
+top 10 pages confirms no 404s. Stats match <code>grep -c</code> counts
+from actual code.</li>
+</ul>
+<p>Phase 5 is DONE when: - [ ]
+<code>USER_MANUAL_EXPANSION_PLAN.md</code> all checkboxes ticked - [ ]
+<code>make installers</code> produces <code>.deb</code>,
+<code>.rpm</code>, <code>.rb</code>, <code>.exe</code>/<code>.msi</code>
+- [ ] <code>curl -fsSL https://helixcode.dev/install.sh | sh</code>
+works on Linux/macOS - [ ] Website test suite passes with 0 failures - [
+] Website feature list matches actual codebase features</p>
+</body>
+</html>

@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ARCHITECTURE_AND_DIAGRAMS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ARCHITECTURE_AND_DIAGRAMS</h1>
+</header>
+<h1 id="helixcode-architecture-system-design">HelixCode Architecture
+&amp; System Design</h1>
+<h2 id="system-architecture-overview">System Architecture Overview</h2>
+<p><strong>Version</strong>: 1.0.0 <strong>Date</strong>: 2026-04-30
+<strong>Status</strong>: Foundation verified, critical bluff areas
+identified</p>
+<hr />
+<h2 id="high-level-architecture">1. High-Level Architecture</h2>
+<figure>
+<img role="img" aria-label="HelixCode Architecture" src="helixcode_architecture_diagram.png" alt="HelixCode Architecture" />
+<figcaption aria-hidden="true">HelixCode Architecture</figcaption>
+</figure>
+<h3 id="architecture-layers">Architecture Layers</h3>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 42%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Components</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Client Layer</strong></td>
+<td>CLI, TUI (tview), Desktop (Fyne), Web/Mobile</td>
+<td>Structure exists, need verification</td>
+</tr>
+<tr>
+<td><strong>API Gateway</strong></td>
+<td>REST (Gin), WebSocket, MCP Protocol</td>
+<td>Partially implemented</td>
+</tr>
+<tr>
+<td><strong>Core Services</strong></td>
+<td>Auth, LLM, Task, Worker, Workflow, Project</td>
+<td>Auth VERIFIED REAL, LLM BLUFF AREA</td>
+</tr>
+<tr>
+<td><strong>Tools &amp; Editor</strong></td>
+<td>Filesystem, Shell, Git, Browser, Editor</td>
+<td>Need verification</td>
+</tr>
+<tr>
+<td><strong>Data Layer</strong></td>
+<td>PostgreSQL, Redis, Session Store</td>
+<td>Schema advertised, need verification</td>
+</tr>
+<tr>
+<td><strong>Infrastructure</strong></td>
+<td>Docker, K8s, Monitoring, Health Checks</td>
+<td>Docker exists, need verification</td>
+</tr>
+<tr>
+<td><strong>External</strong></td>
+<td>15+ LLM Providers (OpenAI, Anthropic, Ollama, etc.)</td>
+<td>NOT connected (simulated)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="component-interaction-flow">2. Component Interaction Flow</h2>
+<h3 id="llm-generation-flow-target---current-is-simulated">2.1 LLM
+Generation Flow (TARGET - Current is Simulated)</h3>
+<pre><code>User -&gt; CLI --prompt &quot;Hello&quot;
+  |
+  v
+CLI.handleGenerate()
+  |
+  v
+ProviderManager.Generate(ctx, req)
+  |
+  +---&gt; Fallback Chain:
+        1. OllamaProvider.Generate()  --&gt; HTTP POST /api/generate
+        2. OpenAIProvider.Generate()  --&gt; HTTP POST /v1/chat/completions
+        3. AnthropicProvider.Generate() --&gt; HTTP POST /v1/messages
+        |
+        +---&gt; Circuit Breaker (per provider)
+              |
+              +---&gt; Real HTTP Call
+                    |
+                    +---&gt; Response
+                          |
+                          v
+                    User receives actual AI-generated text</code></pre>
+<p><strong>Current State (BLUFF)</strong>: The flow stops at
+<code>CLI.handleGenerate()</code> which returns a simulated response
+without ever calling <code>ProviderManager</code>.</p>
+<p><strong>Required Fix</strong>: Implement real provider dispatch with
+circuit breakers and fallback chains.</p>
+<h3 id="task-distribution-flow-target">2.2 Task Distribution Flow
+(TARGET)</h3>
+<pre><code>User -&gt; API: POST /api/v1/tasks (project build)
+  |
+  v
+TaskManager.Create(ctx, task)
+  |
+  v
+TaskManager.Distribute(task)
+  |
+  +---&gt; Worker Pool Selection:
+        - Filter by capabilities (CPU, GPU, memory)
+        - Health check (SSH probe)
+        - Load balancing (least loaded)
+        |
+        +---&gt; SSHWorkerPool.Dispatch(task, worker)
+              |
+              +---&gt; SSH Connection
+                    |
+                    +---&gt; Remote Execution
+                          |
+                          +---&gt; Checkpoint every 300s
+                                |
+                                +---&gt; Result Collection
+                                      |
+                                      v
+                                TaskManager.Complete(task, result)</code></pre>
+<h3 id="authentication-flow-verified-real">2.3 Authentication Flow
+(VERIFIED REAL)</h3>
+<pre><code>User -&gt; API: POST /api/v1/auth/register
+  |
+  v
+AuthService.Register(username, email, password)
+  |
+  +---&gt; validateRegistration()  [input validation]
+  |
+  +---&gt; hashPassword()  [bcrypt with configured cost]
+  |
+  +---&gt; db.CreateUser()  [persist to PostgreSQL]
+  |
+  v
+User created
+
+User -&gt; API: POST /api/v1/auth/login
+  |
+  v
+AuthService.Login(username, password)
+  |
+  +---&gt; db.GetUserByUsername()  [fetch user + hash]
+  |
+  +---&gt; verifyPassword()  [bcrypt.CompareHashAndPassword]
+              |
+              +---&gt; fallback: verifyArgon2Password()
+                        [parse Argon2 params, decode salt, compute hash, constant-time compare]
+  |
+  +---&gt; generateSessionToken()  [crypto/rand, 32 bytes]
+  |
+  +---&gt; db.CreateSession()  [persist session]
+  |
+  v
+Session returned with JWT token
+
+User -&gt; API: GET /api/v1/workers (with Bearer token)
+  |
+  v
+AuthService.VerifyJWT(token)
+  |
+  +---&gt; jwt.Parse()  [validate signature, check expiry]
+  |
+  +---&gt; VerifyJWTWithDB()  [optional: fetch complete user, check IsActive]
+  |
+  v
+Request authorized</code></pre>
+<p><strong>Verified Quality</strong>: This flow uses real cryptography
+(bcrypt/argon2), real database operations, proper input validation, and
+secure token generation. This is the quality standard all other
+subsystems must match.</p>
+<hr />
+<h2 id="database-schema-advertised---verification-required">3. Database
+Schema (Advertised - Verification Required)</h2>
+<h3 id="core-tables">Core Tables</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- users: User accounts and authentication</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> users (</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    username <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    email <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    password_hash <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    display_name <span class="dt">VARCHAR</span>(<span class="dv">255</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    is_active <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">true</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    is_verified <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">false</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    mfa_enabled <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">false</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    last_login <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">-- sessions: Active user sessions</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> sessions (</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    user_id UUID <span class="kw">REFERENCES</span> users(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    session_token <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    client_type <span class="dt">VARCHAR</span>(<span class="dv">50</span>),</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    ip_address INET,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    user_agent TEXT,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    expires_at <span class="dt">TIMESTAMP</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">-- workers: Distributed worker nodes</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> workers (</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    hostname <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    display_name <span class="dt">VARCHAR</span>(<span class="dv">255</span>),</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    ssh_host <span class="dt">VARCHAR</span>(<span class="dv">255</span>),</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    ssh_port <span class="dt">INTEGER</span> <span class="kw">DEFAULT</span> <span class="dv">22</span>,</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    ssh_username <span class="dt">VARCHAR</span>(<span class="dv">255</span>),</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    ssh_key_path <span class="dt">VARCHAR</span>(<span class="dv">255</span>),</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    status <span class="dt">VARCHAR</span>(<span class="dv">50</span>) <span class="kw">DEFAULT</span> <span class="st">&#39;inactive&#39;</span>,</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    cpu_count <span class="dt">INTEGER</span>,</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    memory_bytes BIGINT,</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    gpu_count <span class="dt">INTEGER</span>,</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    gpu_model <span class="dt">VARCHAR</span>(<span class="dv">255</span>),</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    last_heartbeat <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="co">-- tasks: Task management with checkpoints</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> tasks (</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    project_id UUID,</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    title <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    description TEXT,</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    status <span class="dt">VARCHAR</span>(<span class="dv">50</span>) <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span>,</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    priority <span class="dt">INTEGER</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    worker_id UUID <span class="kw">REFERENCES</span> workers(<span class="kw">id</span>),</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    dependencies UUID[],</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    checkpoint_data JSONB,</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    result_data JSONB,</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    retry_count <span class="dt">INTEGER</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    max_retries <span class="dt">INTEGER</span> <span class="kw">DEFAULT</span> <span class="dv">3</span>,</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    started_at <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    completed_at <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="co">-- projects: Project lifecycle</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> projects (</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    name <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    description TEXT,</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    status <span class="dt">VARCHAR</span>(<span class="dv">50</span>) <span class="kw">DEFAULT</span> <span class="st">&#39;planning&#39;</span>,</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    owner_id UUID <span class="kw">REFERENCES</span> users(<span class="kw">id</span>),</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    config JSONB,</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW(),</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a><span class="co">-- llm_providers: Provider configurations</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> llm_providers (</span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    name <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    provider_type <span class="dt">VARCHAR</span>(<span class="dv">50</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    config JSONB,</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>    is_enabled <span class="dt">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">true</span>,</span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>    priority <span class="dt">INTEGER</span> <span class="kw">DEFAULT</span> <span class="dv">0</span>,</span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>    last_health_check <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="co">-- notifications: Notification history</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> notifications (</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>    title <span class="dt">VARCHAR</span>(<span class="dv">255</span>),</span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>    message TEXT,</span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>    <span class="kw">type</span> <span class="dt">VARCHAR</span>(<span class="dv">50</span>),</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>    priority <span class="dt">VARCHAR</span>(<span class="dv">50</span>),</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    channels <span class="dt">VARCHAR</span>(<span class="dv">50</span>)[],</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    status <span class="dt">VARCHAR</span>(<span class="dv">50</span>) <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span>,</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>    sent_at <span class="dt">TIMESTAMP</span>,</span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">DEFAULT</span> NOW()</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p><strong>Verification Required</strong>: These tables must exist in
+migration files and be verified by component tests.</p>
+<hr />
+<h2 id="api-specification">4. API Specification</h2>
+<h3 id="authentication-endpoints">4.1 Authentication Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Auth Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/register</code></td>
+<td>User registration</td>
+<td>No</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/login</code></td>
+<td>User login</td>
+<td>No</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/refresh</code></td>
+<td>Token refresh</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/logout</code></td>
+<td>Logout</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="worker-endpoints">4.2 Worker Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Auth Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/workers</code></td>
+<td>List workers</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/workers</code></td>
+<td>Register worker</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/workers/:id</code></td>
+<td>Get worker details</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/workers/:id/health</code></td>
+<td>Worker health check</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="task-endpoints">4.3 Task Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Auth Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/tasks</code></td>
+<td>List tasks</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks</code></td>
+<td>Create task</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/tasks/:id</code></td>
+<td>Get task details</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks/:id/start</code></td>
+<td>Start task</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/tasks/:id/checkpoint</code></td>
+<td>Create checkpoint</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="llm-endpoints">4.4 LLM Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Auth Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/llm/generate</code></td>
+<td>Generate text</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/llm/generate/stream</code></td>
+<td>Stream generation</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/llm/models</code></td>
+<td>List models</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/llm/providers</code></td>
+<td>List providers</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/llm/providers/:id/health</code></td>
+<td>Provider health</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Anti-Bluff Requirement</strong>: The
+<code>/api/v1/llm/generate</code> endpoint MUST make real HTTP calls to
+configured providers. The response MUST NOT contain simulated
+content.</p>
+<hr />
+<h2 id="provider-architecture">5. Provider Architecture</h2>
+<h3 id="provider-interface">5.1 Provider Interface</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Generate completes a single generation request</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// GenerateStream returns a channel of response chunks</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(&lt;-</span><span class="kw">chan</span> <span class="op">*</span>GenerateChunk<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// GetModels returns available models from this provider</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// GetCapabilities returns provider capabilities</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    GetCapabilities<span class="op">()</span> <span class="op">*</span>Capabilities</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ValidateConfig validates provider-specific configuration</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    ValidateConfig<span class="op">(</span>config <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// HealthCheck verifies provider is accessible</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    HealthCheck<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="provider-registry">5.2 Provider Registry</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderRegistry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    providers <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>Provider</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    mu        sync<span class="op">.</span>RWMutex</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ProviderRegistry<span class="op">)</span> Register<span class="op">(</span>name <span class="dt">string</span><span class="op">,</span> provider Provider<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>providers<span class="op">[</span>name<span class="op">]</span> <span class="op">=</span> provider</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ProviderRegistry<span class="op">)</span> Get<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Provider<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>RLock<span class="op">()</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>RUnlock<span class="op">()</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    p<span class="op">,</span> ok <span class="op">:=</span> r<span class="op">.</span>providers<span class="op">[</span>name<span class="op">]</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p<span class="op">,</span> ok</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="provider-implementations-required">5.3 Provider Implementations
+Required</h3>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 35%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Protocol</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ollama</td>
+<td>HTTP /api/generate</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>Llama.cpp</td>
+<td>HTTP /completion</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>OpenAI</td>
+<td>HTTP /v1/chat/completions</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>HTTP /v1/messages</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td>HTTP /v1beta/models</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>xAI/Grok</td>
+<td>HTTP /v1/chat/completions</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td>HTTP /v1/chat/completions</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>GitHub Copilot</td>
+<td>HTTP /v1/engines/copilot-codex/completions</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>Qwen</td>
+<td>HTTP /compatible-mode/v1/chat/completions</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>Azure</td>
+<td>HTTP /openai/deployments</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>AWS Bedrock</td>
+<td>AWS SDK</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>VertexAI</td>
+<td>HTTP /v1/projects</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td>HTTP /v1/chat/completions</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>vLLM</td>
+<td>HTTP /v1/completions</td>
+<td>TO IMPLEMENT</td>
+</tr>
+<tr>
+<td>KoboldAI</td>
+<td>HTTP /api/v1/generate</td>
+<td>TO IMPLEMENT</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="worker-architecture">6. Worker Architecture</h2>
+<h3 id="ssh-worker-pool">6.1 SSH Worker Pool</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SSHWorkerPool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    workers     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>SSHWorker</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    mu          sync<span class="op">.</span>RWMutex</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    healthInterval time<span class="op">.</span>Duration</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    maxConcurrent  <span class="dt">int</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SSHWorker <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    Hostname    <span class="dt">string</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    DisplayName <span class="dt">string</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    SSHConfig   <span class="op">*</span>ssh<span class="op">.</span>ClientConfig</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    Status      WorkerStatus</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    Capabilities <span class="op">*</span>WorkerCapabilities</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    LastHeartbeat time<span class="op">.</span>Time</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="worker-lifecycle">6.2 Worker Lifecycle</h3>
+<ol type="1">
+<li><strong>Registration</strong>: Admin adds worker via CLI or API</li>
+<li><strong>Connection</strong>: Pool establishes SSH connection</li>
+<li><strong>Capability Discovery</strong>: Worker reports CPU, GPU,
+memory</li>
+<li><strong>Health Monitoring</strong>: Periodic SSH probe every
+30s</li>
+<li><strong>Task Dispatch</strong>: Tasks assigned based on
+capabilities</li>
+<li><strong>Auto-Installation</strong>: If helix binary missing,
+auto-install via SSH</li>
+<li><strong>Removal</strong>: On failed health checks or admin
+command</li>
+</ol>
+<hr />
+<h2 id="security-architecture">7. Security Architecture</h2>
+<h3 id="authentication-layers">7.1 Authentication Layers</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Mechanism</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Auth</td>
+<td>JWT Bearer tokens</td>
+<td>VERIFIED REAL</td>
+</tr>
+<tr>
+<td>Session</td>
+<td>Redis-backed sessions</td>
+<td>To verify</td>
+</tr>
+<tr>
+<td>Worker</td>
+<td>SSH key-based</td>
+<td>To verify</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Password + SSL</td>
+<td>To configure</td>
+</tr>
+</tbody>
+</table>
+<h3 id="input-validation">7.2 Input Validation</h3>
+<ul>
+<li>Path validation: Prevent directory traversal (<code>../</code>)</li>
+<li>Command blocklist: Prevent dangerous shell commands</li>
+<li>Schema validation: All tools validate params against JSON
+schema</li>
+<li>SQL injection: Use parameterized queries (pgx)</li>
+</ul>
+<h3 id="sandboxing">7.3 Sandboxing</h3>
+<ul>
+<li>Shell execution: Whitelist + timeout + resource limits</li>
+<li>File operations: Restrict to workspace directory</li>
+<li>Network: Rate limiting on web requests</li>
+<li>Container: Non-root user, read-only root fs where possible</li>
+</ul>
+<hr />
+<h2 id="testing-architecture">8. Testing Architecture</h2>
+<figure>
+<img role="img" aria-label="Testing Pyramid" src="helixcode_testing_pyramid.png" alt="Testing Pyramid" />
+<figcaption aria-hidden="true">Testing Pyramid</figcaption>
+</figure>
+<h3 id="test-infrastructure">8.1 Test Infrastructure</h3>
+<pre><code> tests/
+ ├── unit/              # Unit tests (mocks OK)
+ │   ├── auth_test.go
+ │   ├── llm_test.go
+ │   └── ...
+ ├── contract/          # Provider API contracts (NO MOCKS)
+ │   ├── ollama_contract_test.go
+ │   └── openai_contract_test.go
+ ├── component/         # Real subsystems (NO MOCKS)
+ │   ├── database_component_test.go
+ │   └── worker_component_test.go
+ ├── integration/       # Full app (NO MOCKS)
+ │   ├── api_integration_test.go
+ │   └── workflow_integration_test.go
+ ├── e2e/
+ │   └── challenges/    # Real user workflows (NO MOCKS)
+ │       ├── run_all_challenges.sh
+ │       ├── llm_generation_challenge.sh
+ │       ├── command_execution_challenge.sh
+ │       └── ...
+ ├── security/          # OWASP tests (NO MOCKS)
+ └── performance/       # Benchmarks</code></pre>
+<hr />
+<h2 id="container-architecture">9. Container Architecture</h2>
+<h3 id="docker-compose-stack">9.1 Docker Compose Stack</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;3.8&#39;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">helixcode-server</span><span class="kw">:</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span><span class="at"> .</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;8080:8080&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;2222:2222&quot;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> HELIX_DATABASE_URL=postgres://helix:helixpass@postgres:5432/helixcode_prod</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> HELIX_REDIS_URL=redis://redis:6379</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> HELIX_AUTH_JWT_SECRET=${HELIX_AUTH_JWT_SECRET}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> postgres</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> redis</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;CMD&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;curl&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;-f&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;http://localhost:8080/health&quot;</span><span class="kw">]</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 10s</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> helix-network</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">postgres</span><span class="kw">:</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:15-alpine</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> POSTGRES_USER=helix</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> POSTGRES_PASSWORD=${HELIX_DATABASE_PASSWORD}</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> POSTGRES_DB=helixcode_prod</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> postgres_data:/var/lib/postgresql/data</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;CMD-SHELL&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;pg_isready -U helix&quot;</span><span class="kw">]</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 10s</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 5s</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> helix-network</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">redis</span><span class="kw">:</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> redis:7-alpine</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">command</span><span class="kw">:</span><span class="at"> redis-server --requirepass ${HELIX_REDIS_PASSWORD}</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> redis_data:/data</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">healthcheck</span><span class="kw">:</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;CMD&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;redis-cli&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;ping&quot;</span><span class="kw">]</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">interval</span><span class="kw">:</span><span class="at"> 10s</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 5s</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> helix-network</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">nginx</span><span class="kw">:</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> nginx:alpine</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;80:80&quot;</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;443:443&quot;</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./docker/nginx.conf:/etc/nginx/nginx.conf:ro</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> helixcode-server</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> helix-network</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">postgres_data</span><span class="kw">:</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">redis_data</span><span class="kw">:</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a><span class="fu">networks</span><span class="kw">:</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">helix-network</span><span class="kw">:</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">driver</span><span class="kw">:</span><span class="at"> bridge</span></span></code></pre></div>
+<h3 id="health-check-requirements">9.2 Health Check Requirements</h3>
+<p>Per CONST-019: Container <code>Up</code> ≠ Healthy. Each service MUST
+implement deep health checks:</p>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 38%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Service</th>
+<th>Health Check</th>
+<th>Deep Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>helixcode-server</td>
+<td><code>GET /health</code></td>
+<td>DB connection, provider availability</td>
+</tr>
+<tr>
+<td>postgres</td>
+<td><code>pg_isready</code></td>
+<td><code>SELECT 1</code></td>
+</tr>
+<tr>
+<td>redis</td>
+<td><code>redis-cli ping</code></td>
+<td><code>PONG</code></td>
+</tr>
+<tr>
+<td>nginx</td>
+<td><code>curl localhost</code></td>
+<td>upstream server response</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="deployment-architecture">10. Deployment Architecture</h2>
+<h3 id="development">10.1 Development</h3>
+<pre><code>Developer Machine
+  |
+  +---&gt; make dev
+        |
+        +---&gt; config/dev/config.yaml
+        +---&gt; PostgreSQL (local or container)
+        +---&gt; Redis (local or container)
+        +---&gt; ./bin/helixcode (server)</code></pre>
+<h3 id="staging">10.2 Staging</h3>
+<pre><code>Docker Compose Stack
+  |
+  +---&gt; nginx (reverse proxy)
+  +---&gt; helixcode-server (2 replicas)
+  +---&gt; PostgreSQL (1 instance)
+  +---&gt; Redis (1 instance + sentinel)
+  +---&gt; Prometheus + Grafana</code></pre>
+<h3 id="production-kubernetes">10.3 Production (Kubernetes)</h3>
+<pre><code>K8s Cluster
+  |
+  +---&gt; Ingress (nginx-ingress)
+  +---&gt; helixcode-deployment (3+ replicas, HPA)
+  +---&gt; PostgreSQL StatefulSet
+  +---&gt; Redis Cluster
+  +---&gt; Prometheus + Grafana
+  +---&gt; cert-manager (TLS)</code></pre>
+<hr />
+<h2 id="monitoring-observability">11. Monitoring &amp;
+Observability</h2>
+<h3 id="metrics-prometheus">11.1 Metrics (Prometheus)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>helix_requests_total</td>
+<td>Counter</td>
+<td>Total HTTP requests</td>
+</tr>
+<tr>
+<td>helix_request_duration_seconds</td>
+<td>Histogram</td>
+<td>Request latency</td>
+</tr>
+<tr>
+<td>helix_llm_generation_duration</td>
+<td>Histogram</td>
+<td>LLM generation time</td>
+</tr>
+<tr>
+<td>helix_llm_provider_failures</td>
+<td>Counter</td>
+<td>Provider failure count</td>
+</tr>
+<tr>
+<td>helix_workers_total</td>
+<td>Gauge</td>
+<td>Active workers</td>
+</tr>
+<tr>
+<td>helix_tasks_pending</td>
+<td>Gauge</td>
+<td>Pending tasks</td>
+</tr>
+<tr>
+<td>helix_db_connections</td>
+<td>Gauge</td>
+<td>DB connection pool</td>
+</tr>
+</tbody>
+</table>
+<h3 id="logging-structured">11.2 Logging (Structured)</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-04-30T12:00:00Z&quot;</span><span class="fu">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;level&quot;</span><span class="fu">:</span> <span class="st">&quot;info&quot;</span><span class="fu">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;service&quot;</span><span class="fu">:</span> <span class="st">&quot;helixcode&quot;</span><span class="fu">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;component&quot;</span><span class="fu">:</span> <span class="st">&quot;llm&quot;</span><span class="fu">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;provider&quot;</span><span class="fu">:</span> <span class="st">&quot;ollama&quot;</span><span class="fu">,</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;model&quot;</span><span class="fu">:</span> <span class="st">&quot;llama3.2&quot;</span><span class="fu">,</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;request_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;duration_ms&quot;</span><span class="fu">:</span> <span class="dv">1250</span><span class="fu">,</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tokens_input&quot;</span><span class="fu">:</span> <span class="dv">10</span><span class="fu">,</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tokens_output&quot;</span><span class="fu">:</span> <span class="dv">50</span><span class="fu">,</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="st">&quot;success&quot;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="tracing-opentelemetry">11.3 Tracing (OpenTelemetry)</h3>
+<ul>
+<li>Request tracing across API -&gt; LLM -&gt; Provider</li>
+<li>Task execution tracing across Task -&gt; Worker -&gt; Result</li>
+<li>Error tracing with full stack context</li>
+</ul>
+<hr />
+<h2 id="multi-platform-architecture">12. Multi-Platform
+Architecture</h2>
+<h3 id="platform-matrix">12.1 Platform Matrix</h3>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>UI Framework</th>
+<th>Build Target</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux</td>
+<td>CLI + TUI</td>
+<td>x86_64, ARM64</td>
+<td>Target</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>CLI + TUI + Desktop</td>
+<td>x86_64, ARM64</td>
+<td>Target</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>CLI + Desktop</td>
+<td>x86_64</td>
+<td>Target</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>SwiftUI</td>
+<td>.xcframework</td>
+<td>Target</td>
+</tr>
+<tr>
+<td>Android</td>
+<td>Jetpack Compose</td>
+<td>.aar</td>
+<td>Target</td>
+</tr>
+<tr>
+<td>Aurora OS</td>
+<td>Qt/QML</td>
+<td>RPM</td>
+<td>Target</td>
+</tr>
+<tr>
+<td>Harmony OS</td>
+<td>ArkUI</td>
+<td>.hap</td>
+<td>Target</td>
+</tr>
+</tbody>
+</table>
+<h3 id="shared-core">12.2 Shared Core</h3>
+<pre><code>shared/mobile-core/
+  |
+  +---&gt; Go bindings (gomobile bind)
+        |
+        +---&gt; iOS: .xcframework
+        +---&gt; Android: .aar</code></pre>
+<hr />
+<h2 id="appendix-a-file-references">Appendix A: File References</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Key Files</th>
+<th>Lines (Approx)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auth</td>
+<td><code>internal/auth/auth.go</code></td>
+<td>470</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>cmd/cli/main.go</code></td>
+<td>341</td>
+</tr>
+<tr>
+<td>Dockerfile</td>
+<td><code>Dockerfile</code></td>
+<td>55</td>
+</tr>
+<tr>
+<td>go.mod</td>
+<td><code>go.mod</code></td>
+<td>10</td>
+</tr>
+<tr>
+<td>.gitmodules</td>
+<td><code>.gitmodules</code></td>
+<td>233</td>
+</tr>
+</tbody>
+</table>
+<h2 id="appendix-b-verification-commands">Appendix B: Verification
+Commands</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify architecture diagrams are accurate</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> internal/auth/auth.go <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;func.*AuthService&quot;</span>  <span class="co"># Should be &gt; 0</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> cmd/cli/main.go <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;simulate&quot;</span>  <span class="co"># Should be 0 after fix</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify database schema</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> internal/database/schema.sql <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;CREATE TABLE&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>  <span class="co"># Should be &gt;= 11</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify API endpoints</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> internal/server/routes.go <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;POST\|GET\|PUT\|DELETE&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>  <span class="co"># Should be &gt;= 20</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify provider implementations</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> internal/llm/providers/ <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>  <span class="co"># Should be &gt;= 15</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify health checks</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> docker-compose.yml <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;healthcheck&quot;</span>  <span class="co"># Should be &gt;= 4</span></span></code></pre></div>
+</body>
+</html>

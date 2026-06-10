@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ADR-007-test-framework-architecture</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ADR-007-test-framework-architecture</h1>
+</header>
+<h1 id="adr-007-test-framework-architecture">ADR-007: Test Framework
+Architecture</h1>
+<h2 id="status">Status</h2>
+<p>Accepted</p>
+<h2 id="date">Date</h2>
+<p>2026-01-08</p>
+<h2 id="context">Context</h2>
+<p>HelixCode is a complex distributed system that requires comprehensive
+testing at multiple levels:</p>
+<ol type="1">
+<li><strong>Unit Tests</strong>: Test individual functions and
+components</li>
+<li><strong>Integration Tests</strong>: Test component interactions with
+real dependencies</li>
+<li><strong>E2E Tests</strong>: Test complete workflows from user
+perspective</li>
+<li><strong>Challenge Tests</strong>: Validate AI code generation
+capabilities</li>
+<li><strong>Performance Tests</strong>: Ensure system meets
+latency/throughput requirements</li>
+<li><strong>Security Tests</strong>: Verify security controls and OWASP
+compliance</li>
+</ol>
+<p>The testing framework must: - Support testing against multiple LLM
+providers - Validate generated code actually compiles and runs - Handle
+distributed worker scenarios - Provide comprehensive coverage reporting
+- Enable parallel test execution - Support CI/CD integration</p>
+<h2 id="decision">Decision</h2>
+<p>We implemented a multi-tier testing architecture with specialized
+frameworks for different testing needs:</p>
+<h3 id="test-organization">Test Organization</h3>
+<pre><code>tests/
+├── automation/         # Hardware and automation tests
+├── e2e/               # End-to-end tests
+│   ├── challenges/    # AI code generation challenge tests
+│   ├── core/          # Core E2E functionality tests
+│   ├── mocks/         # Mock services (LLM, Slack)
+│   ├── orchestrator/  # Test orchestration
+│   ├── phase2/        # Integration phase tests
+│   ├── phase3/        # Performance phase tests
+│   └── test-bank/     # Reusable test definitions
+├── integration/       # Integration tests
+├── memory/           # Memory system tests
+├── performance/      # Performance benchmarks
+├── qa/               # Quality assurance tests
+├── regression/       # Regression tests
+├── security/         # Security tests (OWASP)
+├── testinfra/        # Test infrastructure utilities
+└── unit/             # Unit tests</code></pre>
+<h3 id="unit-testing">Unit Testing</h3>
+<p>Standard Go testing with testify assertions:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestExample<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    result <span class="op">:=</span> doSomething<span class="op">()</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> expected<span class="op">,</span> result<span class="op">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Location</strong>: Alongside source files
+(<code>manager_test.go</code> next to <code>manager.go</code>)</p>
+<h3 id="challenge-testing-framework">Challenge Testing Framework</h3>
+<p>The most unique aspect: an AI code generation validation
+framework.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ChallengeSpec <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span>        <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span>        <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>        <span class="st">`json:&quot;description&quot;`</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    Type        ChallengeType <span class="st">`json:&quot;type&quot;`</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Prompt      <span class="dt">string</span>        <span class="st">`json:&quot;prompt&quot;`</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    Language    <span class="dt">string</span>        <span class="st">`json:&quot;language&quot;`</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    Timeout     Duration      <span class="st">`json:&quot;timeout&quot;`</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    Requirements <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        Files            <span class="op">[]</span><span class="dt">string</span> <span class="st">`json:&quot;files&quot;`</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        HasTests         <span class="dt">bool</span>     <span class="st">`json:&quot;has_tests&quot;`</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        CompilationCheck <span class="dt">bool</span>     <span class="st">`json:&quot;compilation_check&quot;`</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        TestsPass        <span class="dt">bool</span>     <span class="st">`json:&quot;tests_pass&quot;`</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        RunCheck         <span class="dt">bool</span>     <span class="st">`json:&quot;run_check&quot;`</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="st">`json:&quot;requirements&quot;`</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Challenge Types</strong>: - CLI applications - Web
+applications - REST APIs - Microservices - CRUD applications - Libraries
+- Full-stack applications - Bots - Games - Machine learning projects</p>
+<p><strong>Execution Modes</strong>: - Single instance - 2-worker
+distributed - 5-worker distributed - 10-worker distributed</p>
+<p><strong>Provider Testing</strong>: Challenges can be executed against
+any configured LLM provider: - Local: Ollama, Llama.cpp, vLLM, LocalAI -
+Cloud: OpenAI, Anthropic, Gemini, Mistral, Qwen, xAI, Groq, Azure,
+Bedrock, VertexAI, OpenRouter</p>
+<h3 id="challenge-execution">Challenge Execution</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ChallengeExecution <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ID            <span class="dt">string</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ChallengeID   <span class="dt">string</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Interface     ChallengeInterface    <span class="co">// cli, tui, rest, websocket, desktop</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Distribution  ChallengeDistribution</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Provider      LLMProviderType</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Model         <span class="dt">string</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    StartTime     time<span class="op">.</span>Time</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    Duration      time<span class="op">.</span>Duration</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    Status        ExecutionStatus</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    ResultDir     <span class="dt">string</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    ValidationResults <span class="op">[]</span>ValidationResult</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    Metrics       ExecutionMetrics</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ExecutionMetrics <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    FilesGenerated    <span class="dt">int</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    LinesOfCode       <span class="dt">int</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    Requests          <span class="dt">int</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    TokensUsed        <span class="dt">int</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    CompilationTime   time<span class="op">.</span>Duration</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    TestExecutionTime time<span class="op">.</span>Duration</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    PlaceholdersFound <span class="dt">int</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    EmptyFunctions    <span class="dt">int</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    CoveragePercent   <span class="dt">float64</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="validation-pipeline">Validation Pipeline</h3>
+<ol type="1">
+<li><strong>File Validation</strong>: Check expected files exist</li>
+<li><strong>Compilation Validation</strong>: Verify code compiles</li>
+<li><strong>Test Validation</strong>: Run tests, check they pass</li>
+<li><strong>Runtime Validation</strong>: Execute the application</li>
+<li><strong>Functional Validation</strong>: Verify functionality</li>
+<li><strong>Use Case Validation</strong>: Test specific use cases</li>
+</ol>
+<h3 id="mock-services">Mock Services</h3>
+<p><strong>Mock LLM Provider</strong>: - OpenAI-compatible API -
+Configurable responses - Request/response logging - Latency
+simulation</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// handlers/completions.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> HandleCompletions<span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> r <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Parse request</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Generate mock response</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Optionally add latency</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Mock Notification Services</strong>: - Slack webhook mock -
+Message capture and verification</p>
+<h3 id="test-orchestration">Test Orchestration</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TestOrchestrator <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Executor   <span class="op">*</span>Executor</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Scheduler  <span class="op">*</span>Scheduler</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    Reporter   <span class="op">*</span>Reporter</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    Validator  <span class="op">*</span>Validator</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Features</strong>: - Parallel test execution - Test
+scheduling and prioritization - Multiple report formats (JSON, JUnit) -
+Result aggregation</p>
+<h3 id="configuration">Configuration</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ChallengeConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    HelixCodeHost <span class="dt">string</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    HelixCodePort <span class="dt">int</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    HelixCodeAuth <span class="dt">string</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ResultsBaseDir <span class="dt">string</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    LogsBaseDir    <span class="dt">string</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    MaxConcurrent  <span class="dt">int</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    DefaultTimeout time<span class="op">.</span>Duration</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    RetryCount     <span class="dt">int</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    ValidateCompilation <span class="dt">bool</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    ValidateTests       <span class="dt">bool</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    ValidateRun         <span class="dt">bool</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    StrictValidation    <span class="dt">bool</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    VerboseLogging         <span class="dt">bool</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    SaveAllRequests        <span class="dt">bool</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    SaveAllResponses       <span class="dt">bool</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    SaveIntermediateStates <span class="dt">bool</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="test-commands">Test Commands</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Unit tests</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/auth</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Single test</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/auth <span class="at">-run</span> TestSpecific</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Coverage</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-coverage</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-cover</span> ./...</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Benchmarks</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-benchmark</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co"># All tests</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_all_tests.sh</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Challenge tests</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> tests/e2e/challenges</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run cmd/runner/main.go <span class="at">-list</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run cmd/runner/main.go <span class="at">-challenge</span> notes-project-001</span></code></pre></div>
+<h3 id="test-infrastructure">Test Infrastructure</h3>
+<p>Shared utilities in <code>tests/testinfra/</code>: - Test database
+setup - Mock service initialization - Test data generators - Assertion
+helpers</p>
+<h2 id="consequences">Consequences</h2>
+<h3 id="positive">Positive</h3>
+<ol type="1">
+<li><strong>Comprehensive Coverage</strong>: Tests at all levels</li>
+<li><strong>AI Validation</strong>: Unique ability to validate generated
+code</li>
+<li><strong>Provider Testing</strong>: Test against multiple LLM
+providers</li>
+<li><strong>Distributed Testing</strong>: Validate multi-worker
+scenarios</li>
+<li><strong>CI/CD Integration</strong>: JUnit/JSON output for
+pipelines</li>
+<li><strong>Parallelization</strong>: Efficient test execution</li>
+<li><strong>Regression Prevention</strong>: Comprehensive test
+suite</li>
+</ol>
+<h3 id="negative">Negative</h3>
+<ol type="1">
+<li><strong>Complexity</strong>: Multiple test frameworks to
+maintain</li>
+<li><strong>Duration</strong>: Challenge tests are time-consuming</li>
+<li><strong>Dependencies</strong>: Some tests require external
+services</li>
+<li><strong>Flakiness Risk</strong>: AI-based tests may have
+variance</li>
+<li><strong>Resource Intensive</strong>: Challenge tests use significant
+compute</li>
+</ol>
+<h3 id="neutral">Neutral</h3>
+<ol type="1">
+<li><strong>Learning Curve</strong>: Team needs to understand multiple
+frameworks</li>
+<li><strong>Maintenance</strong>: Test code requires maintenance like
+production code</li>
+</ol>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
+<h3 id="alternative-1-single-framework-go-testing-only">Alternative 1:
+Single Framework (Go Testing Only)</h3>
+<p><strong>Description</strong>: Use only standard Go testing for
+everything.</p>
+<p><strong>Pros</strong>: - Simplicity - No additional dependencies -
+Standard approach - Good tooling</p>
+<p><strong>Cons</strong>: - Limited for E2E testing - No challenge
+validation - No distributed testing - Manual orchestration</p>
+<p><strong>Why Rejected</strong>: The unique requirements of AI code
+generation validation require specialized frameworks.</p>
+<h3 id="alternative-2-bdd-framework-ginkgogomega">Alternative 2: BDD
+Framework (Ginkgo/Gomega)</h3>
+<p><strong>Description</strong>: Use BDD-style testing throughout.</p>
+<p><strong>Pros</strong>: - Readable specifications - Nested contexts -
+Better organization - Parallel execution</p>
+<p><strong>Cons</strong>: - Learning curve - Additional dependency -
+Different from Go conventions - Verbose for simple tests</p>
+<p><strong>Why Rejected</strong>: Standard Go testing with testify
+provides sufficient structure. BDD adds complexity without proportional
+benefit.</p>
+<h3 id="alternative-3-external-test-platform-cypress-playwright">Alternative
+3: External Test Platform (Cypress, Playwright)</h3>
+<p><strong>Description</strong>: Use browser-based E2E testing
+tools.</p>
+<p><strong>Pros</strong>: - Mature ecosystems - Visual testing - Good
+debugging - Record and playback</p>
+<p><strong>Cons</strong>: - Focused on web UI - Not applicable to
+CLI/API - Different language (JavaScript) - Additional
+infrastructure</p>
+<p><strong>Why Rejected</strong>: HelixCode is primarily CLI/API
+focused. Browser-based tools don’t address core testing needs.</p>
+<h3 id="alternative-4-contract-testing-pact">Alternative 4: Contract
+Testing (Pact)</h3>
+<p><strong>Description</strong>: Use contract testing for API
+verification.</p>
+<p><strong>Pros</strong>: - Provider/consumer contracts - Independent
+testing - Clear API boundaries - Good for microservices</p>
+<p><strong>Cons</strong>: - Additional infrastructure - Contract
+maintenance - Not applicable to AI generation - Overkill for current
+architecture</p>
+<p><strong>Why Rejected</strong>: Current architecture is monolithic.
+Contract testing better suited for microservices decomposition.</p>
+<h2 id="implementation-notes">Implementation Notes</h2>
+<ul>
+<li>Unit tests use testify
+(<code>github.com/stretchr/testify</code>)</li>
+<li>Mock interfaces in <code>internal/mocks/</code></li>
+<li>Test configs in <code>config/test-config.yaml</code> and
+<code>config/minimal-config.yaml</code></li>
+<li>Challenge definitions in
+<code>tests/e2e/challenges/challenges/</code></li>
+<li>Results stored in
+<code>tests/e2e/challenges/test-results/</code></li>
+</ul>
+<h2 id="test-data-management">Test Data Management</h2>
+<ul>
+<li>Tests create temporary directories</li>
+<li>Database tests use transactions with rollback</li>
+<li>External service mocks replace real services</li>
+<li>Challenge results preserved for analysis</li>
+</ul>
+<h2 id="continuous-integration">Continuous Integration</h2>
+<p>Test pipeline stages: 1. Unit tests (fast, always run) 2. Integration
+tests (medium, on PR) 3. E2E core tests (slow, on merge) 4. Challenge
+tests (very slow, nightly) 5. Performance tests (scheduled) 6. Security
+tests (scheduled)</p>
+<h2 id="related-decisions">Related Decisions</h2>
+<ul>
+<li>ADR-001: LLM Provider Interface (provider testing)</li>
+<li>ADR-002: Distributed Worker Architecture (distributed testing)</li>
+<li>ADR-004: Workflow Execution Model (workflow testing)</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/types.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/executor.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/validator.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges/README.md</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/testinfra/testinfra.go</code></li>
+</ul>
+</body>
+</html>

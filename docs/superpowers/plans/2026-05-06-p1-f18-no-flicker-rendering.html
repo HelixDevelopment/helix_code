@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f18-no-flicker-rendering</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f18-no-flicker-rendering</h1>
+</header>
+<h1 id="p1-f18-no-flicker-rendering-implementation-plan">P1-F18 —
+No-Flicker Rendering Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, end-to-end <strong>no-flicker
+terminal renderer</strong> for the HelixCode CLI agent. F18 adds an
+<code>internal/render/</code> package with a <code>Renderer</code>
+interface, two impls (<code>ansiRenderer</code> for TTY,
+<code>plainRenderer</code> for non-TTY), a <code>Viewport</code> for
+dirty-region tracking, and a <code>RendererFactory</code> that selects
+an impl at startup based on
+<code>HELIXCODE_RENDER=plain|fancy|auto</code> (default
+<code>auto</code>) + <code>term.IsTerminal(stdout.Fd())</code>.
+Streaming LLM tokens flow through <code>WriteToken</code> (in-place line
+update via <code>\r\033[K</code>); tool result blocks (LSP diagnostics,
+sandbox stdout, smart-edit diffs, subagent results) render via
+<code>RenderFrame</code> with dirty-region diff (only changed lines
+redrawn via cursor positioning + clear-line). Non-TTY fallback is
+structural: <code>plainRenderer</code> emits zero ANSI escapes and zero
+<code>\r</code> characters. <strong>No new external
+dependencies</strong> — pure stdlib + <code>golang.org/x/term</code>
+(already in <code>go.mod</code> as indirect at v0.41.0; F18 promotes to
+direct). <strong>No slash command. No cobra subcommand.</strong> Env var
+only (Q5=B). The renderer is wired into
+<code>cmd/cli/main.go::handleGenerate</code> (lines 1080–1090; existing
+<code>fmt.Printf(&quot;%s &quot;, chunk.Content)</code> loop replaced with
+<code>Begin/WriteToken/Commit</code>). The agent loop’s non-streaming
+<code>Generate</code> path
+(<code>internal/agent/base_agent.go::executeTaskWithLLM</code>) is NOT
+modified — agent-loop streaming is out of scope for F18.</p>
+<p><strong>Architecture:</strong> New <code>internal/render/</code>
+package with <code>types.go</code> (Renderer interface + Frame +
+RenderMode + error sentinels + env-var constants),
+<code>ansi_renderer.go</code> (TTY-mode impl; <code>\r\033[K</code> for
+in-place line update;
+<code>\033[&lt;n&gt;A</code>/<code>\033[&lt;n&gt;B</code>
+cursor-positioning for multi-line frame;
+<code>\033[?25l</code>/<code>\033[?25h</code> cursor hide/show;
+per-block <code>Viewport</code> for dirty-region diff),
+<code>plain_renderer.go</code> (line-by-line <code>fmt.Fprint</code>
+fallback; per-block buffer flushed at newline boundaries; strips
+<code>\r</code> from tokens silently for log-grep-safety; passes ANSI
+through verbatim per §5.4), <code>viewport.go</code>
+(<code>Viewport{lines, lastLines}</code> +
+<code>Diff(newFrame Frame) []int</code> returning indices of changed
+lines; pure Go), <code>factory.go</code>
+(<code>NewRenderer(opts Options) (Renderer, RenderMode, error)</code>;
+reads <code>HELIXCODE_RENDER</code> env var via injectable
+<code>Options.Env</code>; probes TTY via <code>term.IsTerminal</code>
+with <code>Options.IsTTY</code> test seam; returns
+<code>ErrInvalidEnvMode</code> for typo’d values which
+<code>cmd/cli/main.go</code> falls back to plain on),
+<code>tool_helpers.go</code>
+(<code>RenderToolResult(r, id, result)</code> glue: type-switch over LSP
+diagnostic / sandbox result / smart-edit result / subagent result;
+unknown types fall back to <code>fmt.Fprintln</code>). Two existing
+files get tiny additions: <code>cmd/cli/main.go</code> (renderer
+construction at startup + <code>defer renderer.Close()</code> + replace
+streaming-print loop in <code>handleGenerate</code> + wrap tool-result
+printing through <code>RenderToolResult</code>).</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, zap (already in
+<code>go.mod</code>) — already present. <strong>NO new external
+deps.</strong> <code>golang.org/x/term</code> is at v0.41.0 in
+<code>go.sum</code> (verified via
+<code>grep &quot;golang.org/x/term&quot; helix_code/go.sum</code>); currently
+indirect. After T02 introduces a direct import
+(<code>import &quot;golang.org/x/term&quot;</code> in <code>factory.go</code>),
+<code>go mod tidy</code> promotes the <code>go.mod</code> line from
+<code>// indirect</code> to a direct require — that is the one expected
+<code>go.mod</code> change for F18, and <code>go.sum</code> is
+unchanged. Brief justification: (1) ANSI control is a small finite set
+of byte sequences → pure constants + <code>fmt.Sprintf</code> for the
+parameterised ones; (2) dirty-region diff is a
+<code>for i := range max(len(old), len(new))</code> loop; (3) TTY
+detection is a single <code>term.IsTerminal(int)</code> call from
+<code>golang.org/x/term</code>; (4) width probe (one-shot, factory time)
+is <code>term.GetSize(int)</code>. <code>go mod tidy</code> after T02
+must produce <strong>zero new entries in <code>go.sum</code></strong>
+(only the indirect→direct promotion in <code>go.mod</code>). T10’s
+verification step asserts this loudly.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-06-p1-f18-no-flicker-rendering-design.md</code>
+(commit <code>7f52a9c</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F18
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/render <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — F18 can
+degenerate in four ways: (a) renderer initialised in <code>main()</code>
+but never called from the streaming hot path (the loop in
+<code>handleGenerate</code> still uses <code>fmt.Printf</code>); (b)
+test asserts ANSI sequences in some buffer but never observes the ACTUAL
+production code path; (c) <code>plainRenderer</code> claims fallback but
+accidentally emits <code>\r</code> that breaks log capture
+(<code>grep</code> against the captured log returns mangled lines); (d)
+dirty-region diff claims to skip unchanged lines but actually re-emits
+everything (<code>Viewport.Diff</code> returns all indices, OR the
+renderer ignores the diff result). The four “what counts as no-flicker”
+criteria — (1) production hot path actually goes through
+<code>WriteToken</code>/<code>RenderFrame</code>; (2)
+<code>plainRenderer</code> emits zero <code>0x1b</code> and zero
+<code>0x0d</code> bytes; (3) one-line-changed render emits exactly one
+<code>\033[&lt;n&gt;A</code> cursor-up + one <code>\r\033[K</code>
+clear-line; (4) all-lines-changed render emits all dirty-line emissions
+(negative control) — are each tested with both unit assertions AND a
+Challenge phase. The Challenge harness uses positive byte evidence
+(specific byte sequences, byte counts, signature presence). Disk-state
+mismatch (er, byte-signature mismatch) is a hard Challenge failure.
+Absence-of-error is NEVER acceptable.</p>
+<p><strong>Why this is consequential:</strong> flicker-free streaming is
+the difference between a CLI that <em>feels</em> like an interactive
+agent and a CLI that <em>feels</em> like a print-line script.
+Claude-code’s perceived polish vs other open-source agents largely
+traces to in-place updates done right. F18’s discriminating tests are:
+(i) the Challenge’s STREAMING-FANCY phase (assert capture contains 10
+<code>\r\x1b[K</code> sequences for 10 streamed tokens — proving the
+production hot path goes through the renderer, NOT through
+<code>fmt.Printf</code>); (ii) the Challenge’s STREAMING-PLAIN phase
+(capture contains zero <code>\x1b</code> and zero <code>\x0d</code> —
+proving the non-TTY fallback is safe to grep); (iii) the Challenge’s
+DIRTY-REGION-DIFF phase (one-line-change capture is strictly smaller
+than initial render AND contains exactly one cursor-up sequence —
+proving the diff actually saves bytes). All three must produce positive
+evidence; none can be satisfied by absence-of-error.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F18-T01 — bootstrap
+evidence + advance PROGRESS to F18</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T02 —
+<code>internal/render/types.go</code>: Renderer interface + RenderMode
+enum + Frame + error sentinels + env-var constants (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T03 —
+<code>internal/render/ansi_renderer.go</code>: in-place line update via
+<code>\r\033[K</code> + multi-line frame rendering with dirty-region
+diff (TDD against <code>bytes.Buffer</code>)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T04 —
+<code>internal/render/plain_renderer.go</code>: line-by-line
+<code>fmt.Fprint</code> fallback with newline-boundary buffering +
+<code>\r</code>-strip + zero-ANSI invariant (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T05 —
+<code>internal/render/viewport.go</code>: Frame buffer + dirty-line
+tracking + pure-Go <code>Diff</code> (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T06 —
+<code>internal/render/factory.go</code>: RendererFactory with
+<code>HELIXCODE_RENDER</code> env var + TTY detection via
+<code>golang.org/x/term</code>; constructor-injection seams for tests
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T07 — Wire LLM
+streaming hook in <code>cmd/cli/main.go::handleGenerate</code> (replace
+<code>fmt.Printf(&quot;%s &quot;, chunk.Content)</code> loop with
+<code>Begin/WriteToken/Commit</code>) (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T08 —
+<code>internal/render/tool_helpers.go</code> + wire tool-result frame
+rendering at the existing print sites in <code>cmd/cli/main.go</code>
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T09 — Challenge
+harness (4 always-run phases + 1 TTY-gated phase: STREAMING-FANCY +
+STREAMING-PLAIN + DIRTY-REGION-DIFF + TTY-FALLBACK + REAL-TTY) with
+positive byte evidence</label></li>
+<li><label><input type="checkbox" checked></input>P1-F18-T10 — Feature 18
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F18 evidence section header (spec <code>7f52a9c</code>),
+update PROGRESS current focus to F18 (replacing the F17 close-out’s “F18
+next candidate” pointer), insert F18 task list (10 items) after F17’s.
+Confirm <code>06_phase_1_evidence.md</code> has an F18 anchor. Verify
+<code>golang.org/x/term v0.41.0</code> is in
+<code>helix_code/go.sum</code> (sanity check before T06 promotes it to
+direct).</p>
+<p>Commit:
+<code>docs(P1-F18-T01): bootstrap Phase 1 / Feature 18 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/render/types.go</code>, new
+<code>helix_code/internal/render/types_test.go</code>.</p>
+<p>Define: - <code>RenderMode</code> enum
+(<code>RenderModePlain = 0</code>, <code>RenderModeFancy = 1</code>)
+with <code>String() string</code> method (<code>&quot;plain&quot;</code> /
+<code>&quot;fancy&quot;</code>). - <code>Frame{ID string; Lines []string}</code>.
+- <code>Renderer</code> interface (Begin / WriteToken / RenderFrame /
+Commit / Close / Mode). - Error sentinels
+(<code>ErrUnknownBlockID</code>, <code>ErrInvalidEnvMode</code>). -
+Env-var constants (<code>EnvRenderMode = &quot;HELIXCODE_RENDER&quot;</code>,
+<code>ModePlainEnv = &quot;plain&quot;</code>,
+<code>ModeFancyEnv = &quot;fancy&quot;</code>,
+<code>ModeAutoEnv = &quot;auto&quot;</code>).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRenderMode_String_Plain<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;plain&quot;</span><span class="op">,</span> RenderModePlain<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRenderMode_String_Fancy<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;fancy&quot;</span><span class="op">,</span> RenderModeFancy<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestErrorSentinels_DistinctErrorsIs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">error</span><span class="op">{</span>ErrUnknownBlockID<span class="op">,</span> ErrInvalidEnvMode<span class="op">}</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        wrapped <span class="op">:=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;wrapped: %w&quot;</span><span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> wrapped<span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEnvVarConstants_ExactValues<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;HELIXCODE_RENDER&quot;</span><span class="op">,</span> EnvRenderMode<span class="op">)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;plain&quot;</span><span class="op">,</span>            ModePlainEnv<span class="op">)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;fancy&quot;</span><span class="op">,</span>            ModeFancyEnv<span class="op">)</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;auto&quot;</span><span class="op">,</span>             ModeAutoEnv<span class="op">)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFrame_FieldsZeroValueOK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    f <span class="op">:=</span> Frame<span class="op">{}</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> f<span class="op">.</span>ID<span class="op">)</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Nil<span class="op">(</span>t<span class="op">,</span> f<span class="op">.</span>Lines<span class="op">)</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F18-T02): Renderer interface + RenderMode enum + Frame + error sentinels</code>.</p>
+<hr />
+<h2 id="task-3-ansi_renderer.go-tdd">Task 3: ansi_renderer.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/render/ansi_renderer.go</code>, new
+<code>helix_code/internal/render/ansi_renderer_test.go</code>.</p>
+<p><code>ansi_renderer.go</code> exports nothing public (the factory
+returns the <code>Renderer</code> interface). Internals:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ansiRenderer <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    w     io<span class="op">.</span>Writer</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    width <span class="dt">int</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    mu    sync<span class="op">.</span>Mutex</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    blocks <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>blockState</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    cursorHidden <span class="dt">bool</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> blockState <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    viewport      <span class="op">*</span>Viewport</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    activeLine    <span class="dt">string</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    activeLineIdx <span class="dt">int</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    inProgress    <span class="dt">bool</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> newAnsiRenderer<span class="op">(</span>w io<span class="op">.</span>Writer<span class="op">,</span> width <span class="dt">int</span><span class="op">)</span> <span class="op">*</span>ansiRenderer</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">// implements Renderer per spec §3.3</span></span></code></pre></div>
+<p>Key implementation points (spec §4.2 + §4.3): - <code>Begin</code>:
+lazy block creation; emit <code>\033[?25l</code> (hide cursor) on FIRST
+Begin call. - <code>WriteToken</code>: append to
+<code>bs.activeLine</code>; on newline, flush completed lines with
+<code>\r\x1b[K%s\n</code>; emit current partial via
+<code>\r\x1b[K%s</code>. - <code>RenderFrame</code>: first frame → write
+all lines + <code>\n</code>; subsequent frames →
+<code>Viewport.Diff</code> → for each dirty index, emit
+<code>\x1b[&lt;n&gt;A\r\x1b[K&lt;line&gt;\x1b[&lt;n&gt;B\r</code>; then
+<code>Viewport.Apply(frame)</code>. - <code>Commit</code>: emit final
+<code>\n</code>; mark block as not-in-progress. - <code>Close</code>:
+commit any open blocks; emit <code>\033[?25h</code> (show cursor) if
+hidden. - <code>Mode</code>: returns <code>RenderModeFancy</code>.</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_WriteToken_EmitsClearLineSequence<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;hi&quot;</span><span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// expected: \x1b[?25l + \r\x1b[Khi</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[?25l&quot;</span><span class="op">)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\r\x1b</span><span class="st">[Khi&quot;</span><span class="op">)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_WriteToken_TwoTokens_AccumulateAndRedraw<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">)</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;world&quot;</span><span class="op">)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// First WriteToken emits \r\x1b[Khello; second emits \r\x1b[Khelloworld</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\r\x1b</span><span class="st">[Khello&quot;</span><span class="op">)</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\r\x1b</span><span class="st">[Khelloworld&quot;</span><span class="op">)</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_WriteToken_NewlineCommitsLine<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;line1</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\r\x1b</span><span class="st">[Kline1</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_RenderFrame_FirstFrame_EmitsAllLines<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">}})</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;a</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;b</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;c</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_RenderFrame_OneLineChanged_EmitsOneCursorUp_DirtyRegionDiffProof<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;e&quot;</span><span class="op">}})</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    firstLen <span class="op">:=</span> buf<span class="op">.</span>Len<span class="op">()</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    buf<span class="op">.</span>Reset<span class="op">()</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;CHANGED&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;e&quot;</span><span class="op">}})</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    secondLen <span class="op">:=</span> buf<span class="op">.</span>Len<span class="op">()</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">// CRITICAL anti-bluff: second render &lt; first render (proves dirty-region diff)</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> secondLen<span class="op">,</span> firstLen<span class="op">)</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">// CRITICAL anti-bluff: exactly ONE cursor-up sequence</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> strings<span class="op">.</span>Count<span class="op">(</span>got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[&quot;</span><span class="op">))</span>  <span class="co">// approximation; tighten in impl</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\r\x1b</span><span class="st">[K&quot;</span><span class="op">)</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;CHANGED&quot;</span><span class="op">)</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;a</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span>  <span class="co">// unchanged lines NOT re-emitted</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> firstLen</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_RenderFrame_AllLinesChanged_EmitsAllDirtyEmissions<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Negative control: when all lines change, all 5 should be re-emitted via dirty-region writes</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;e&quot;</span><span class="op">}})</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    buf<span class="op">.</span>Reset<span class="op">()</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;A&quot;</span><span class="op">,</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> <span class="st">&quot;C&quot;</span><span class="op">,</span> <span class="st">&quot;D&quot;</span><span class="op">,</span> <span class="st">&quot;E&quot;</span><span class="op">}})</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">5</span><span class="op">,</span> strings<span class="op">.</span>Count<span class="op">(</span>got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\r\x1b</span><span class="st">[K&quot;</span><span class="op">))</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_Commit_EmitsTrailingNewline<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;x&quot;</span><span class="op">)</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    buf<span class="op">.</span>Reset<span class="op">()</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Commit<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> buf<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_Close_RestoresCursor<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Close<span class="op">())</span></span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> buf<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[?25h&quot;</span><span class="op">)</span></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_TokenContainsAnsiEscape_PassedThroughVerbatim<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[31mred</span><span class="ch">\x1b</span><span class="st">[0m&quot;</span><span class="op">)</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> buf<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[31mred</span><span class="ch">\x1b</span><span class="st">[0m&quot;</span><span class="op">)</span></span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAnsiRenderer_ConcurrentBlocks_SerialisedNoPanic<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> wg sync<span class="op">.</span>WaitGroup</span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>        wg<span class="op">.</span>Add<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>        <span class="cf">go</span> <span class="kw">func</span><span class="op">(</span>i <span class="dt">int</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>            <span class="cf">defer</span> wg<span class="op">.</span>Done<span class="op">()</span></span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>            id <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;b%d&quot;</span><span class="op">,</span> i<span class="op">)</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>            r<span class="op">.</span>Begin<span class="op">(</span>id<span class="op">)</span></span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>            r<span class="op">.</span>WriteToken<span class="op">(</span>id<span class="op">,</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;token-%d</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> i<span class="op">))</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>            r<span class="op">.</span>Commit<span class="op">(</span>id<span class="op">)</span></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>        <span class="op">}(</span>i<span class="op">)</span></span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>    wg<span class="op">.</span>Wait<span class="op">()</span> <span class="co">// no panic = pass</span></span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F18-T03): ansiRenderer with in-place line updates + dirty-region frame diff</code>.</p>
+<hr />
+<h2 id="task-4-plain_renderer.go-tdd">Task 4: plain_renderer.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/render/plain_renderer.go</code>, new
+<code>helix_code/internal/render/plain_renderer_test.go</code>.</p>
+<p><code>plain_renderer.go</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> plainRenderer <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    w  io<span class="op">.</span>Writer</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    mu sync<span class="op">.</span>Mutex</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    buffers <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>strings<span class="op">.</span>Builder</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> newPlainRenderer<span class="op">(</span>w io<span class="op">.</span>Writer<span class="op">)</span> <span class="op">*</span>plainRenderer</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">// implements Renderer per spec §3.3</span></span></code></pre></div>
+<p>Key implementation points (spec §4.2 + §5.1): - <code>Begin</code>:
+lazy block creation (empty <code>strings.Builder</code>). -
+<code>WriteToken</code>: strip <code>\r</code> silently from text;
+append to per-block buffer; flush whole lines (every <code>\n</code>
+boundary) with <code>fmt.Fprintln</code>. - <code>RenderFrame</code>:
+print each line via <code>fmt.Fprintln</code>. - <code>Commit</code>:
+flush remaining buffer with trailing <code>\n</code>. -
+<code>Close</code>: flush all open blocks. - <code>Mode</code>: returns
+<code>RenderModePlain</code>.</p>
+<p><strong>Critical invariants</strong> (anti-bluff §5.2 (c)): -
+Captured output contains zero <code>0x1b</code> bytes (no ANSI). -
+Captured output contains zero <code>0x0d</code> bytes (no CR).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_WriteToken_PartialLineBufferedUntilNewline<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> buf<span class="op">.</span>String<span class="op">())</span> <span class="co">// partial line not flushed yet</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_WriteToken_FullLineFlushed<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;hello</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;hello</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> buf<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_RenderFrame_PrintsLines<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">}})</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;a</span><span class="ch">\n</span><span class="st">b</span><span class="ch">\n</span><span class="st">c</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> buf<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_NoAnsiEscapesEver<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">100</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;token-%d &quot;</span><span class="op">,</span> i<span class="op">))</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;l1&quot;</span><span class="op">,</span> <span class="st">&quot;l2&quot;</span><span class="op">,</span> <span class="st">&quot;l3&quot;</span><span class="op">,</span> <span class="st">&quot;l4&quot;</span><span class="op">,</span> <span class="st">&quot;l5&quot;</span><span class="op">}})</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Commit<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>Bytes<span class="op">()</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="dt">byte</span><span class="op">(</span><span class="bn">0x1b</span><span class="op">),</span> <span class="st">&quot;plain renderer must never emit ANSI ESC&quot;</span><span class="op">)</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_NoCarriageReturnsEver<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">100</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;tok%d</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> i<span class="op">))</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">}})</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Commit<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>Bytes<span class="op">()</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="dt">byte</span><span class="op">(</span><span class="bn">0x0d</span><span class="op">),</span> <span class="st">&quot;plain renderer must never emit </span><span class="ch">\\</span><span class="st">r&quot;</span><span class="op">)</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_TokenContainsCR_StrippedSilently<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;hello</span><span class="ch">\r</span><span class="st">world</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;helloworld</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> buf<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_TokenContainsAnsi_PassedThroughVerbatim<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    <span class="co">// §5.4 v1 policy: pass-through ANSI from user-provided text (asymmetric vs CR strip).</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[31mred</span><span class="ch">\x1b</span><span class="st">[0m</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[31mred</span><span class="ch">\x1b</span><span class="st">[0m</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> buf<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_Commit_FlushesPendingBuffer<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;no-newline-yet&quot;</span><span class="op">)</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Commit<span class="op">(</span><span class="st">&quot;b1&quot;</span><span class="op">)</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;no-newline-yet</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> buf<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_Close_FlushesAllBlocks<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* multi-block; Close flushes all */</span> <span class="op">}</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestPlainRenderer_Mode_IsPlain<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>bytes<span class="op">.</span>Buffer<span class="op">{})</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModePlain<span class="op">,</span> r<span class="op">.</span>Mode<span class="op">())</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F18-T04): plainRenderer with line-by-line fallback + zero-ANSI/zero-CR invariants</code>.</p>
+<hr />
+<h2 id="task-5-viewport.go-tdd">Task 5: viewport.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/render/viewport.go</code>, new
+<code>helix_code/internal/render/viewport_test.go</code>.</p>
+<p><code>viewport.go</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Viewport <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    lines     <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    lastLines <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewViewport<span class="op">()</span> <span class="op">*</span>Viewport</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Viewport<span class="op">)</span> Diff<span class="op">(</span>newFrame Frame<span class="op">)</span> <span class="op">[]</span><span class="dt">int</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>Viewport<span class="op">)</span> Apply<span class="op">(</span>newFrame Frame<span class="op">)</span></span></code></pre></div>
+<p><code>Diff</code> returns 0-indexed line indices that changed.
+Includes added indices (<code>i &gt;= len(lastLines)</code>) and removed
+indices (<code>i &gt;= len(newFrame.Lines)</code>).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestViewport_Diff_FirstFrame_AllNew<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    v <span class="op">:=</span> NewViewport<span class="op">()</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    dirty <span class="op">:=</span> v<span class="op">.</span>Diff<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">}})</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">int</span><span class="op">{</span><span class="dv">0</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">},</span> dirty<span class="op">)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestViewport_Diff_NoChange_EmptyDirty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    v <span class="op">:=</span> NewViewport<span class="op">()</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    v<span class="op">.</span>Apply<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">}})</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    dirty <span class="op">:=</span> v<span class="op">.</span>Diff<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">}})</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> dirty<span class="op">)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestViewport_Diff_OneLineChanged_OneIndex<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    v <span class="op">:=</span> NewViewport<span class="op">()</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    v<span class="op">.</span>Apply<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;e&quot;</span><span class="op">}})</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    dirty <span class="op">:=</span> v<span class="op">.</span>Diff<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;CHANGED&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;e&quot;</span><span class="op">}})</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">int</span><span class="op">{</span><span class="dv">2</span><span class="op">},</span> dirty<span class="op">)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestViewport_Diff_AllLinesChanged_AllIndices<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    v <span class="op">:=</span> NewViewport<span class="op">()</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    v<span class="op">.</span>Apply<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">}})</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    dirty <span class="op">:=</span> v<span class="op">.</span>Diff<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;A&quot;</span><span class="op">,</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> <span class="st">&quot;C&quot;</span><span class="op">}})</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">int</span><span class="op">{</span><span class="dv">0</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">},</span> dirty<span class="op">)</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestViewport_Diff_NewFrameLonger_AddedIndicesIncluded<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    v <span class="op">:=</span> NewViewport<span class="op">()</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    v<span class="op">.</span>Apply<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">}})</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    dirty <span class="op">:=</span> v<span class="op">.</span>Diff<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">}})</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">int</span><span class="op">{</span><span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">},</span> dirty<span class="op">)</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestViewport_Diff_NewFrameShorter_RemovedIndicesIncluded<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    v <span class="op">:=</span> NewViewport<span class="op">()</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    v<span class="op">.</span>Apply<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">}})</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    dirty <span class="op">:=</span> v<span class="op">.</span>Diff<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">}})</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">int</span><span class="op">{</span><span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">},</span> dirty<span class="op">)</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestViewport_Apply_UpdatesLastLines<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    v <span class="op">:=</span> NewViewport<span class="op">()</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    v<span class="op">.</span>Apply<span class="op">(</span>Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;x&quot;</span><span class="op">,</span> <span class="st">&quot;y&quot;</span><span class="op">}})</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;x&quot;</span><span class="op">,</span> <span class="st">&quot;y&quot;</span><span class="op">},</span> v<span class="op">.</span>lastLines<span class="op">)</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F18-T05): Viewport with pure-Go dirty-line Diff + Apply</code>.</p>
+<hr />
+<h2 id="task-6-factory.go-tdd">Task 6: factory.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/render/factory.go</code>, new
+<code>helix_code/internal/render/factory_test.go</code>.</p>
+<p><code>factory.go</code> introduces the direct
+<code>golang.org/x/term</code> import. After this commit, run
+<code>go mod tidy</code> once — <code>go.mod</code> line for
+<code>golang.org/x/term v0.41.0</code> drops the
+<code>// indirect</code> marker; <code>go.sum</code> is unchanged. T10
+verifies this loudly.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;golang.org/x/term&quot;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Options <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    Writer io<span class="op">.</span>Writer</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    IsTTY  <span class="op">*</span><span class="dt">bool</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    Env    <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    Width  <span class="dt">int</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewRenderer<span class="op">(</span>opts Options<span class="op">)</span> <span class="op">(</span>Renderer<span class="op">,</span> RenderMode<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> opts<span class="op">.</span>Writer <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> opts<span class="op">.</span>Writer <span class="op">=</span> os<span class="op">.</span>Stdout <span class="op">}</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> opts<span class="op">.</span>Env <span class="op">==</span> <span class="ot">nil</span>    <span class="op">{</span> opts<span class="op">.</span>Env <span class="op">=</span> os<span class="op">.</span>Getenv <span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    env <span class="op">:=</span> opts<span class="op">.</span>Env<span class="op">(</span>EnvRenderMode<span class="op">)</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> isTTY <span class="dt">bool</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> opts<span class="op">.</span>IsTTY <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> isTTY <span class="op">=</span> <span class="op">*</span>opts<span class="op">.</span>IsTTY <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span> isTTY <span class="op">=</span> term<span class="op">.</span>IsTerminal<span class="op">(</span><span class="dt">int</span><span class="op">(</span>os<span class="op">.</span>Stdout<span class="op">.</span>Fd<span class="op">()))</span> <span class="op">}</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    width <span class="op">:=</span> opts<span class="op">.</span>Width</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> width <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> w<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> term<span class="op">.</span>GetSize<span class="op">(</span><span class="dt">int</span><span class="op">(</span>os<span class="op">.</span>Stdout<span class="op">.</span>Fd<span class="op">()));</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> width <span class="op">=</span> w <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span> width <span class="op">=</span> <span class="dv">80</span> <span class="op">}</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> env <span class="op">{</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ModePlainEnv<span class="op">:</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> newPlainRenderer<span class="op">(</span>opts<span class="op">.</span>Writer<span class="op">),</span> RenderModePlain<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ModeFancyEnv<span class="op">:</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> newAnsiRenderer<span class="op">(</span>opts<span class="op">.</span>Writer<span class="op">,</span> width<span class="op">),</span> RenderModeFancy<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ModeAutoEnv<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">:</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> isTTY <span class="op">{</span> <span class="cf">return</span> newAnsiRenderer<span class="op">(</span>opts<span class="op">.</span>Writer<span class="op">,</span> width<span class="op">),</span> RenderModeFancy<span class="op">,</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> newPlainRenderer<span class="op">(</span>opts<span class="op">.</span>Writer<span class="op">),</span> RenderModePlain<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> newPlainRenderer<span class="op">(</span>opts<span class="op">.</span>Writer<span class="op">),</span> RenderModePlain<span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;%w: got %q&quot;</span><span class="op">,</span> ErrInvalidEnvMode<span class="op">,</span> env<span class="op">)</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (mode-resolution truth table — spec §4.4):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> boolPtr<span class="op">(</span>b <span class="dt">bool</span><span class="op">)</span> <span class="op">*</span><span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">&amp;</span>b <span class="op">}</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> envFn<span class="op">(</span>m <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">)</span> <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">func</span><span class="op">(</span>k <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> m<span class="op">[</span>k<span class="op">]</span> <span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFactory_AutoTTY_Fancy<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    r<span class="op">,</span> mode<span class="op">,</span> err <span class="op">:=</span> NewRenderer<span class="op">(</span>Options<span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        Writer<span class="op">:</span> <span class="op">&amp;</span>bytes<span class="op">.</span>Buffer<span class="op">{},</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span>  boolPtr<span class="op">(</span><span class="ot">true</span><span class="op">),</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span>    envFn<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_RENDER&quot;</span><span class="op">:</span> <span class="st">&quot;auto&quot;</span><span class="op">}),</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModeFancy<span class="op">,</span> mode<span class="op">)</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModeFancy<span class="op">,</span> r<span class="op">.</span>Mode<span class="op">())</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFactory_AutoNonTTY_Plain<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> mode<span class="op">,</span> err <span class="op">:=</span> NewRenderer<span class="op">(</span>Options<span class="op">{</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        Writer<span class="op">:</span> <span class="op">&amp;</span>bytes<span class="op">.</span>Buffer<span class="op">{},</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span>  boolPtr<span class="op">(</span><span class="ot">false</span><span class="op">),</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        Env<span class="op">:</span>    envFn<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_RENDER&quot;</span><span class="op">:</span> <span class="st">&quot;auto&quot;</span><span class="op">}),</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModePlain<span class="op">,</span> mode<span class="op">)</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFactory_Unset_TreatedAsAuto_TTYTrue_Fancy<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> mode<span class="op">,</span> err <span class="op">:=</span> NewRenderer<span class="op">(</span>Options<span class="op">{</span>IsTTY<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">true</span><span class="op">),</span> Env<span class="op">:</span> envFn<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}),</span> Writer<span class="op">:</span> <span class="op">&amp;</span>bytes<span class="op">.</span>Buffer<span class="op">{}})</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModeFancy<span class="op">,</span> mode<span class="op">)</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFactory_Unset_TreatedAsAuto_TTYFalse_Plain<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> mode<span class="op">,</span> err <span class="op">:=</span> NewRenderer<span class="op">(</span>Options<span class="op">{</span>IsTTY<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">false</span><span class="op">),</span> Env<span class="op">:</span> envFn<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}),</span> Writer<span class="op">:</span> <span class="op">&amp;</span>bytes<span class="op">.</span>Buffer<span class="op">{}})</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModePlain<span class="op">,</span> mode<span class="op">)</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFactory_PlainTTY_Plain<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> mode<span class="op">,</span> _ <span class="op">:=</span> NewRenderer<span class="op">(</span>Options<span class="op">{</span>IsTTY<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">true</span><span class="op">),</span> Env<span class="op">:</span> envFn<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_RENDER&quot;</span><span class="op">:</span> <span class="st">&quot;plain&quot;</span><span class="op">}),</span> Writer<span class="op">:</span> <span class="op">&amp;</span>bytes<span class="op">.</span>Buffer<span class="op">{}})</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModePlain<span class="op">,</span> mode<span class="op">)</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFactory_FancyNonTTY_Fancy_UserOptIn<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> mode<span class="op">,</span> _ <span class="op">:=</span> NewRenderer<span class="op">(</span>Options<span class="op">{</span>IsTTY<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">false</span><span class="op">),</span> Env<span class="op">:</span> envFn<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_RENDER&quot;</span><span class="op">:</span> <span class="st">&quot;fancy&quot;</span><span class="op">}),</span> Writer<span class="op">:</span> <span class="op">&amp;</span>bytes<span class="op">.</span>Buffer<span class="op">{}})</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModeFancy<span class="op">,</span> mode<span class="op">)</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFactory_Garbage_FallbackPlain_ReturnsErr<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    r<span class="op">,</span> mode<span class="op">,</span> err <span class="op">:=</span> NewRenderer<span class="op">(</span>Options<span class="op">{</span>IsTTY<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">true</span><span class="op">),</span> Env<span class="op">:</span> envFn<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;HELIXCODE_RENDER&quot;</span><span class="op">:</span> <span class="st">&quot;garbage&quot;</span><span class="op">}),</span> Writer<span class="op">:</span> <span class="op">&amp;</span>bytes<span class="op">.</span>Buffer<span class="op">{}})</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrInvalidEnvMode<span class="op">)</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModePlain<span class="op">,</span> mode<span class="op">)</span> <span class="co">// fallback</span></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> RenderModePlain<span class="op">,</span> r<span class="op">.</span>Mode<span class="op">())</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFactory_DefaultOptions_UsesOsStdout<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    r<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> NewRenderer<span class="op">(</span>Options<span class="op">{</span>IsTTY<span class="op">:</span> boolPtr<span class="op">(</span><span class="ot">false</span><span class="op">),</span> Env<span class="op">:</span> envFn<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{})})</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Close<span class="op">())</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNoLoggerInfoOrDebugTakesContent_CONST042_SourceScan<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Anti-bluff §5.2: scan internal/render/*.go for any logger.Info/Debug</span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>    <span class="co">// call site that takes &quot;token&quot; or &quot;frame&quot; or &quot;content&quot; or &quot;text&quot; as an arg.</span></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Must be zero matches.</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>    matches<span class="op">,</span> err <span class="op">:=</span> filepath<span class="op">.</span>Glob<span class="op">(</span><span class="st">&quot;*.go&quot;</span><span class="op">)</span></span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>    forbidden <span class="op">:=</span> regexp<span class="op">.</span>MustCompile<span class="op">(</span><span class="st">`logger\.\b(Info|Debug)\b.*\b(token|frame|content|text)\b`</span><span class="op">)</span></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> f <span class="op">:=</span> <span class="kw">range</span> matches <span class="op">{</span></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>        b<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>f<span class="op">);</span> require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> forbidden<span class="op">.</span>Match<span class="op">(</span>b<span class="op">),</span> <span class="st">&quot;%s contains forbidden logger call: CONST-042&quot;</span><span class="op">,</span> f<span class="op">)</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F18-T06): RendererFactory with HELIXCODE_RENDER env var + TTY detection via x/term</code>.</p>
+<hr />
+<h2 id="task-7-wire-llm-streaming-hook-in-cmdclimain.go-tdd">Task 7:
+Wire LLM streaming hook in cmd/cli/main.go (TDD)</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/cmd/cli/main.go</code>, modify (or extend)
+<code>helix_code/cmd/cli/main_test.go</code> if it exists, OR create a
+new integration test in
+<code>helix_code/tests/integration/render_test.go</code>.</p>
+<p><code>main.go</code> changes:</p>
+<ol type="1">
+<li><p><strong>Renderer construction at startup</strong> (in
+<code>main()</code> or <code>NewCLI</code>):</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;dev.helix.code/internal/render&quot;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>r<span class="op">,</span> mode<span class="op">,</span> rerr <span class="op">:=</span> render<span class="op">.</span>NewRenderer<span class="op">(</span>render<span class="op">.</span>Options<span class="op">{})</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> rerr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;invalid HELIXCODE_RENDER value; falling back to plain&quot;</span><span class="op">,</span> zap<span class="op">.</span>Error<span class="op">(</span>rerr<span class="op">))</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>logger<span class="op">.</span>Info<span class="op">(</span><span class="st">&quot;render mode&quot;</span><span class="op">,</span> zap<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;mode&quot;</span><span class="op">,</span> mode<span class="op">.</span>String<span class="op">()))</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> r<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span>renderer <span class="op">=</span> r</span></code></pre></div>
+<p>Add <code>renderer render.Renderer</code> field to the
+<code>CLI</code> struct.</p></li>
+<li><p><strong>Replace streaming-print loop in
+<code>handleGenerate</code></strong> (lines 1080–1090 of current
+<code>cmd/cli/main.go</code>):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> stream <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    chunkChan <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> llm<span class="op">.</span>LLMResponse<span class="op">,</span> <span class="dv">100</span><span class="op">)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> provider<span class="op">.</span>GenerateStream<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">,</span> chunkChan<span class="op">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;streaming generation failed: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    blockID <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;llm-stream-%d&quot;</span><span class="op">,</span> time<span class="op">.</span>Now<span class="op">().</span>UnixNano<span class="op">())</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>renderer<span class="op">.</span>Begin<span class="op">(</span>blockID<span class="op">)</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> chunk <span class="op">:=</span> <span class="kw">range</span> chunkChan <span class="op">{</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>renderer<span class="op">.</span>WriteToken<span class="op">(</span>blockID<span class="op">,</span> chunk<span class="op">.</span>Content<span class="op">)</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>renderer<span class="op">.</span>Commit<span class="op">(</span>blockID<span class="op">)</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+</ol>
+<p>Failing tests FIRST (in <code>tests/integration/render_test.go</code>
+with <code>//go:build integration</code>):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">// +build integration</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> integration</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRender_StreamingPipeline_FancyMode_EmitsClearLineSequences<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    r<span class="op">,</span> mode<span class="op">,</span> err <span class="op">:=</span> render<span class="op">.</span>NewRenderer<span class="op">(</span>render<span class="op">.</span>Options<span class="op">{</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        Writer<span class="op">:</span> <span class="op">&amp;</span>buf<span class="op">,</span> IsTTY<span class="op">:</span> ptrTrue<span class="op">(),</span> Env<span class="op">:</span> <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;&quot;</span> <span class="op">},</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> render<span class="op">.</span>RenderModeFancy<span class="op">,</span> mode<span class="op">)</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    blockID <span class="op">:=</span> <span class="st">&quot;test-stream&quot;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span>blockID<span class="op">)</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;Hello&quot;</span><span class="op">,</span> <span class="st">&quot; &quot;</span><span class="op">,</span> <span class="st">&quot;world&quot;</span><span class="op">,</span> <span class="st">&quot;!&quot;</span><span class="op">}</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> tok <span class="op">:=</span> <span class="kw">range</span> tokens <span class="op">{</span> r<span class="op">.</span>WriteToken<span class="op">(</span>blockID<span class="op">,</span> tok<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Commit<span class="op">(</span>blockID<span class="op">)</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Each token causes an in-place redraw via \r\x1b[K</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> strings<span class="op">.</span>Count<span class="op">(</span>got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\r\x1b</span><span class="st">[K&quot;</span><span class="op">),</span> <span class="dv">4</span><span class="op">)</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;Hello world!&quot;</span><span class="op">)</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRender_StreamingPipeline_PlainMode_NoAnsiNoCR<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    r<span class="op">,</span> mode<span class="op">,</span> err <span class="op">:=</span> render<span class="op">.</span>NewRenderer<span class="op">(</span>render<span class="op">.</span>Options<span class="op">{</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>        Writer<span class="op">:</span> <span class="op">&amp;</span>buf<span class="op">,</span> IsTTY<span class="op">:</span> ptrFalse<span class="op">(),</span> Env<span class="op">:</span> <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;&quot;</span> <span class="op">},</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> render<span class="op">.</span>RenderModePlain<span class="op">,</span> mode<span class="op">)</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span><span class="st">&quot;p1&quot;</span><span class="op">)</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> tok <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;Hello&quot;</span><span class="op">,</span> <span class="st">&quot; &quot;</span><span class="op">,</span> <span class="st">&quot;world&quot;</span><span class="op">,</span> <span class="st">&quot;!</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">}</span> <span class="op">{</span> r<span class="op">.</span>WriteToken<span class="op">(</span><span class="st">&quot;p1&quot;</span><span class="op">,</span> tok<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Commit<span class="op">(</span><span class="st">&quot;p1&quot;</span><span class="op">)</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>Bytes<span class="op">()</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="dt">byte</span><span class="op">(</span><span class="bn">0x1b</span><span class="op">))</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="dt">byte</span><span class="op">(</span><span class="bn">0x0d</span><span class="op">))</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>got<span class="op">),</span> <span class="st">&quot;Hello world!&quot;</span><span class="op">)</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRender_HandleGenerateStreamPath_GoesThroughRendererNotFmtPrint<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Wire up a real CLI with a FakeProvider; capture stdout via the renderer&#39;s Writer.</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Assert the captured output contains the renderer&#39;s signature byte pattern,</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>    <span class="co">// NOT the today&#39;s \&quot;%s \&quot; (token-with-space) pattern.</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>    r<span class="op">,</span> _<span class="op">,</span> _ <span class="op">:=</span> render<span class="op">.</span>NewRenderer<span class="op">(</span>render<span class="op">.</span>Options<span class="op">{</span>Writer<span class="op">:</span> <span class="op">&amp;</span>buf<span class="op">,</span> IsTTY<span class="op">:</span> ptrTrue<span class="op">(),</span> Env<span class="op">:</span> <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;&quot;</span> <span class="op">}})</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    cli <span class="op">:=</span> <span class="op">&amp;</span>CLI<span class="op">{</span> llmProvider<span class="op">:</span> <span class="op">&amp;</span>fakeProvider<span class="op">{</span>tokens<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">}},</span> renderer<span class="op">:</span> r <span class="op">}</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> cli<span class="op">.</span>handleGenerate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;p&quot;</span><span class="op">,</span> <span class="st">&quot;fake:m&quot;</span><span class="op">,</span> <span class="dv">100</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Close<span class="op">())</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\r\x1b</span><span class="st">[K&quot;</span><span class="op">)</span></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Negative: ensure the today&#39;s bluffy &quot;%s &quot; pattern is NOT used (3 tokens with single-space separator)</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;a b c &quot;</span><span class="op">)</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F18-T07): wire renderer into handleGenerate streaming hot path + render mode log</code>.</p>
+<hr />
+<h2 id="task-8-tool_helpers.go-wire-tool-result-rendering-tdd">Task 8:
+tool_helpers.go + wire tool result rendering (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/render/tool_helpers.go</code>, new
+<code>helix_code/internal/render/tool_helpers_test.go</code>, modify
+<code>helix_code/cmd/cli/main.go</code> (call
+<code>RenderToolResult</code> at existing tool-result print sites).</p>
+<p><code>tool_helpers.go</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> render</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">// RenderToolResult inspects known tool-result types and renders them as</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">// a Frame via r.RenderFrame. Unknown types fall back to fmt.Fprintln on</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">// the underlying writer (via r.Begin/RenderFrame with a one-line frame).</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> RenderToolResult<span class="op">(</span>r Renderer<span class="op">,</span> blockID <span class="dt">string</span><span class="op">,</span> result <span class="kw">interface</span><span class="op">{})</span> <span class="op">{</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    frame <span class="op">:=</span> convertResultToFrame<span class="op">(</span>blockID<span class="op">,</span> result<span class="op">)</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Begin<span class="op">(</span>blockID<span class="op">)</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>RenderFrame<span class="op">(</span>blockID<span class="op">,</span> frame<span class="op">)</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Commit<span class="op">(</span>blockID<span class="op">)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> convertResultToFrame<span class="op">(</span>id <span class="dt">string</span><span class="op">,</span> result <span class="kw">interface</span><span class="op">{})</span> Frame <span class="op">{</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> v <span class="op">:=</span> result<span class="op">.(</span><span class="kw">type</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> Frame<span class="op">:</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        v<span class="op">.</span>ID <span class="op">=</span> id<span class="op">;</span> <span class="cf">return</span> v</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="op">[]</span><span class="dt">string</span><span class="op">:</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Frame<span class="op">{</span>ID<span class="op">:</span> id<span class="op">,</span> Lines<span class="op">:</span> v<span class="op">}</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="dt">string</span><span class="op">:</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Frame<span class="op">{</span>ID<span class="op">:</span> id<span class="op">,</span> Lines<span class="op">:</span> strings<span class="op">.</span>Split<span class="op">(</span>v<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)}</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> fmt<span class="op">.</span>Stringer<span class="op">:</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Frame<span class="op">{</span>ID<span class="op">:</span> id<span class="op">,</span> Lines<span class="op">:</span> strings<span class="op">.</span>Split<span class="op">(</span>v<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)}</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Frame<span class="op">{</span>ID<span class="op">:</span> id<span class="op">,</span> Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span>fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%v&quot;</span><span class="op">,</span> result<span class="op">)}}</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The conversion is intentionally generic — the renderer package does
+NOT import
+<code>lsp</code>/<code>sandbox</code>/<code>smartedit</code>/<code>subagent</code>
+types directly (would create import cycles). Those callers can pass an
+already-formatted <code>[]string</code> or a <code>Frame</code>
+directly. The CLI’s tool-result print sites convert their typed results
+to <code>Frame</code> or <code>[]string</code> BEFORE calling
+<code>RenderToolResult</code>.</p>
+<p>Failing tests FIRST (<code>tool_helpers_test.go</code>):</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRenderToolResult_Frame_PassesThrough<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    RenderToolResult<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> Frame<span class="op">{</span>Lines<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">}})</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;a</span><span class="ch">\n</span><span class="st">b</span><span class="ch">\n</span><span class="st">c</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> buf<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRenderToolResult_StringSlice_RendersLines<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    RenderToolResult<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;x&quot;</span><span class="op">,</span> <span class="st">&quot;y&quot;</span><span class="op">})</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;x</span><span class="ch">\n</span><span class="st">y</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> buf<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRenderToolResult_String_SplitsOnNewline<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    RenderToolResult<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="st">&quot;line1</span><span class="ch">\n</span><span class="st">line2&quot;</span><span class="op">)</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> buf<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;line1</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> buf<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;line2</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRenderToolResult_Stringer_UsesString<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    RenderToolResult<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="op">&amp;</span>fakeStringer<span class="op">{</span><span class="st">&quot;stringified&quot;</span><span class="op">})</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> buf<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;stringified&quot;</span><span class="op">)</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRenderToolResult_Unknown_FallsBackToFmt<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newPlainRenderer<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    RenderToolResult<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="dv">42</span><span class="op">)</span> <span class="co">// int — not handled specially</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> buf<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;42&quot;</span><span class="op">)</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRenderToolResult_DirtyDiff_OneLineChanged_FewerBytes<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANSI mode: render twice with one line changed; second render &lt; first render.</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> newAnsiRenderer<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">80</span><span class="op">)</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    RenderToolResult<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;c&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;e&quot;</span><span class="op">})</span></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    firstLen <span class="op">:=</span> buf<span class="op">.</span>Len<span class="op">()</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>    buf<span class="op">.</span>Reset<span class="op">()</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>    RenderToolResult<span class="op">(</span>r<span class="op">,</span> <span class="st">&quot;b1&quot;</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;CHANGED&quot;</span><span class="op">,</span> <span class="st">&quot;d&quot;</span><span class="op">,</span> <span class="st">&quot;e&quot;</span><span class="op">})</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    secondLen <span class="op">:=</span> buf<span class="op">.</span>Len<span class="op">()</span></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> secondLen<span class="op">,</span> firstLen<span class="op">)</span></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> firstLen</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Wire-in: replace selected <code>fmt.Println(result)</code> /
+<code>fmt.Printf(&quot;%v\n&quot;, result)</code> call sites in
+<code>cmd/cli/main.go</code> for tool results with
+<code>render.RenderToolResult(c.renderer, blockID, result)</code>. The
+integration test from T07 is extended to assert the wired path produces
+the expected byte pattern.</p>
+<p>Subject:
+<code>feat(P1-F18-T08): RenderToolResult helper + wire tool-result frame rendering at CLI print sites</code>.</p>
+<hr />
+<h2 id="task-9-challenge-harness-5-phase-byte-signature-positive-evidence">Task
+9: Challenge harness (5-phase, byte-signature positive evidence)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p1f18_challenge/main.go</code>,
+new <code>challenges/p1-f18-no-flicker-rendering/CHALLENGE.md</code>,
+new <code>challenges/p1-f18-no-flicker-rendering/run.sh</code>.</p>
+<p>Harness phases (per spec §6.3):</p>
+<ol type="1">
+<li><strong>STREAMING-FANCY (always runs)</strong> — construct
+<code>ansiRenderer</code> with <code>bytes.Buffer</code> writer +
+<code>IsTTY=true</code>; fake LLM provider emits 10 tokens; assert
+capture contains 10 <code>\r\x1b[K</code> sequences AND ≤ 1 trailing
+<code>\n</code> AND the concatenated token text.</li>
+<li><strong>STREAMING-PLAIN (always runs)</strong> — construct
+<code>plainRenderer</code> with <code>bytes.Buffer</code> writer +
+<code>IsTTY=false</code>; same 10 tokens; assert capture contains zero
+<code>\x1b</code> AND zero <code>\x0d</code> AND the concatenated token
+text byte-for-byte.</li>
+<li><strong>DIRTY-REGION-DIFF (always runs)</strong> — render initial
+5-line frame; render same frame with line 2 changed; assert
+second-render byte count &lt; first-render byte count AND second-render
+contains exactly 1 <code>\x1b[&lt;n&gt;A</code> cursor-up + 1
+<code>\r\x1b[K</code> clear-line. Negative control: render with all 5
+lines changed; assert all 5 dirty-line emissions present.</li>
+<li><strong>TTY-FALLBACK (always runs)</strong> — construct renderer via
+factory with <code>HELIXCODE_RENDER=auto</code> +
+<code>IsTTY=false</code>; resolved mode = plain; run streaming +
+tool-block pipelines; assert capture has zero <code>\x1b</code> AND zero
+<code>\x0d</code>.</li>
+<li><strong>REAL-TTY (gated; SKIP-OK on non-TTY)</strong> —
+<code>term.IsTerminal(int(os.Stdout.Fd()))</code>; if non-TTY, SKIP-OK
+with marker
+<code>SKIP-OK: P1-F18 real-TTY phase requires interactive terminal (CI / pipe)</code>.
+When TTY, construct renderer via factory; assert mode = fancy; stream 10
+tokens to <code>os.Stdout</code> for real; <code>Close()</code> returns
+nil.</li>
+</ol>
+<p>Output skeleton (verbatim per spec §6.3) ends with:</p>
+<pre><code>SUMMARY: STREAMING-FANCY=7/7 PASS; STREAMING-PLAIN=7/7 PASS; DIRTY-REGION-DIFF=6/6 PASS; TTY-FALLBACK=5/5 PASS; REAL-TTY=4/4 PASS or SKIP-OK</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-signature mismatch.
+Absence-of-error is NEVER acceptable. SHA / size mismatches (e.g.,
+<code>secondLen &gt;= firstLen</code> when one line changed) are hard
+failures. Anti-bluff smoke clean check appended to harness output.
+Verbatim output captured into <code>06_phase_1_evidence.md</code>. Dual
+commit (Challenges submodule + meta-repo bump).</p>
+<p>Subject:
+<code>feat(P1-F18-T09): challenge with byte-signature positive evidence per phase (4 always-run + 1 TTY-gated)</code>.</p>
+<hr />
+<h2 id="task-10-close-out-push">Task 10: Close-out + push</h2>
+<p>Tick all 10 items in PROGRESS, advance PROGRESS focus to F19
+candidate (AskUserQuestion with Previews per porting doc), run final
+verification:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  internal/render <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/render/...</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration ./tests/integration/...</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># go.mod expected change: golang.org/x/term v0.41.0 line drops &quot;// indirect&quot;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># go.sum expected change: NONE</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--exit-code</span> go.sum  <span class="co"># MUST be no-op</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff go.mod              <span class="co"># one line: &quot;// indirect&quot; removed for golang.org/x/term</span></span></code></pre></div>
+<p>Commit
+<code>chore(P1-F18-T10): close out feature 18 — no-flicker rendering</code>.
+Push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions). Request explicit user authorization at this step
+(CONST-043).</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types + interface (§3.3), T03 ansiRenderer (§4.2 + §4.3 + §5.2
+dirty-region), T04 plainRenderer (§5.1 + §5.2 (c) zero-ANSI/zero-CR
+invariants + §5.4 ANSI pass-through), T05 viewport (§3.3), T06 factory
+(§4.1 + §4.4 truth table + CONST-042 source-scan), T07 streaming wire-in
+(§3.6 + §5.2 (a) + (b)), T08 tool-result wire-in (§4.3 + §3.3
+RenderToolResult), T09 Challenge five phases (§5.2 + §6.3), T10
+close-out (§9).</li>
+<li><strong>TDD:</strong> every code task starts with a failing test.
+Renderer impls test against <code>bytes.Buffer</code> (real
+<code>io.Writer</code>, no mocks). Factory uses
+<code>Options.IsTTY</code> + <code>Options.Env</code> constructor
+injection (test seam). Integration tests wire up the actual
+<code>CLI</code> struct with a <code>FakeProvider</code> to prove the
+production hot path goes through the renderer (anti-bluff §5.2
+(a)).</li>
+<li><strong>Type consistency:</strong> <code>Renderer</code>,
+<code>Frame</code>, <code>RenderMode</code>, <code>Viewport</code>,
+<code>Options</code>, error sentinels (<code>ErrUnknownBlockID</code>,
+<code>ErrInvalidEnvMode</code>), env-var constants
+(<code>EnvRenderMode</code>, <code>ModePlainEnv</code>,
+<code>ModeFancyEnv</code>, <code>ModeAutoEnv</code>) — all match across
+spec §3.3 and plan T02–T08.</li>
+<li><strong>Zero new external deps:</strong> stdlib + existing
+testify/zap + <code>golang.org/x/term</code> (already in
+<code>go.sum</code> at v0.41.0; promoted from indirect to direct in
+T06). <code>go mod tidy</code> after T06 produces NO new entries in
+<code>go.sum</code> (only the indirect→direct promotion in
+<code>go.mod</code>). T10’s verification step asserts this loudly.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has FOUR always-run
+phases + 1 TTY-gated phase. Every phase records positive byte evidence
+(specific byte sequences, byte counts, signature presence). The four
+real-execution criteria — (a) production hot path goes through
+<code>WriteToken</code>/<code>RenderFrame</code> (T07 integration test
+asserts the today’s <code>&quot;%s &quot;</code> pattern is ABSENT); (b) test
+observes the actual rendered bytes (Challenge captures via injected
+<code>bytes.Buffer</code>); (c) <code>plainRenderer</code> emits zero
+ANSI / zero CR (T04 invariant tests + Challenge phase 2 + 4); (d)
+dirty-region diff actually saves bytes (T03 + T05 + Challenge phase 3
+with both positive AND negative-control assertions) — each have
+dedicated unit + integration + Challenge assertions. Byte-signature
+mismatch is a hard Challenge failure.</li>
+<li><strong>CONST-042:</strong> the renderer NEVER logs token text or
+frame content at any level. Source-scan test
+(<code>TestNoLoggerInfoOrDebugTakesContent_CONST042_SourceScan</code> in
+T06) enforces this with a regex over <code>internal/render/*.go</code>.
+The Challenge’s saved evidence file records byte lengths + signature
+presence, never the rendered text itself.</li>
+<li><strong>CONST-043:</strong> stays on <code>main</code>, non-force to
+all four remotes; explicit user authorization is requested at T10 before
+pushing.</li>
+<li><strong>Custom ANSI vs library (Q1=A) — non-obvious call</strong>
+(recorded in spec §2 trailer): no new deps + small render surface +
+<code>applications/terminal_ui/</code> already uses
+<code>tview/tcell</code> for the full TUI; adding <code>bubbletea</code>
+here would be a third paradigm. The renderer is ~300 lines of pure Go; a
+library would be 50 KLOC.</li>
+<li><strong>Env var only, no slash, no cobra (Q5=B) — non-obvious
+call</strong>: render mode is a startup property; switching mid-process
+would require viewport reset and unwinding in-flight in-place updates.
+v1 punts on the complexity. Slash command is a F18.5 candidate if user
+demand emerges.</li>
+<li><strong><code>fancy</code> on a non-TTY is allowed (user opt-in) —
+non-obvious call</strong> (recorded in spec §11 #1): when
+<code>HELIXCODE_RENDER=fancy</code> is explicitly set against a
+pipe/file, the user gets raw ANSI in their captured output. The default
+(<code>auto</code>) protects the 99% case.</li>
+<li><strong><code>plainRenderer</code> strips <code>\r</code> from
+tokens silently — non-obvious call</strong> (recorded in spec §11 #2):
+preserves log-grep-safety; documented; no toggle. Asymmetric vs ANSI
+pass-through (which IS preserved per §5.4) — <code>\r</code> corrupts
+log capture irrecoverably; ANSI is recoverable post-hoc with a
+<code>sed</code>.</li>
+<li><strong>Single-writer concurrency assumption — non-obvious
+call</strong> (recorded in spec §5.3): the renderer’s mutex is for
+safety, not for promised interleaving. Two concurrent
+<code>Begin</code>/<code>WriteToken</code>/<code>Commit</code> cycles
+for distinct block IDs serialise via mutex order (block A finishes, then
+block B) — NOT stream-aware merging. Acceptable v1 tradeoff; F18.5 may
+add a multiplexer.</li>
+<li><strong>Terminal width read once at factory time — non-obvious
+call</strong> (recorded in spec §5.5 + §5.6): SIGWINCH handling deferred
+to F18.5; v1 documents that long lines are passed through and the
+terminal’s own soft-wrap may leave artefacts on screen for in-place
+updates. Plain mode is unaffected.</li>
+<li><strong>No filesystem abstraction; pure <code>os.Stdout</code> +
+<code>golang.org/x/term</code></strong> — matches F17’s discipline. One
+seam (<code>Options.Writer</code> + <code>Options.IsTTY</code> +
+<code>Options.Env</code>), not five.</li>
+<li><strong>Why <code>RenderToolResult</code> is a renderer-package
+helper, not registry-side</strong> (recorded in spec §11 #11): keeps the
+registry decoupled from the renderer; the helper is called from CLI
+tool-result print sites in <code>cmd/cli/main.go</code>. Alternative
+(registry-side hook) would force every <code>Tool.Execute</code>
+consumer to know about the renderer. Helper is opt-in; existing callers
+that don’t use it print results the old way (still works).</li>
+</ol>
+</body>
+</html>

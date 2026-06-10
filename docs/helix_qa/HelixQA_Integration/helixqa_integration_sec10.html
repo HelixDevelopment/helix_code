@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec10</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec10</h1>
+</header>
+<h2 id="phase-9-build-automation-integration">10. Phase 9: Build &amp;
+Automation Integration</h2>
+<p>HelixQA must become an invocable target within HelixCode’s existing
+build surface, not an external process that operators remember to run.
+The constraint is constitutional: the project mandates <em>no</em> CI/CD
+pipelines, <em>no</em> <code>.github/workflows/</code>, and <em>no</em>
+automated remote triggers. All quality automation is therefore expressed
+as Makefile targets and shell scripts that an operator executes manually
+on a workstation or build host. This chapter specifies the exact
+targets, their dependency chains, the scripts that implement them, and
+the resource-governance rules that keep the suite within the 30–40%
+host-resource ceiling defined by the constitution.</p>
+<h3 id="makefile-targets">10.1 Makefile Targets</h3>
+<p>HelixCode’s <code>Makefile</code> (15,341 characters, nested at
+<code>HelixCode/Makefile</code>) already exposes <code>build</code>,
+<code>test</code>, <code>test-integration</code>, <code>test-e2e</code>,
+and <code>test-challenges</code>. HelixQA integration appends five new
+top-level targets that compose the existing ones with QA-specific
+stages. Every target carries an explicit <code>QA_RESOURCE_CAP</code>
+annotation defaulting to 35%, the midpoint of the constitutional 30–40%
+band.</p>
+<p><strong>Target <code>qa-all</code></strong> runs the complete
+pipeline: unit → integration → e2e → screenshot-verify → anti-bluff →
+challenges → report. A failure in an early stage halts the pipeline
+before later stages consume resources. The <code>timeout</code> utility
+enforces a 4-hour ceiling.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">## ── HelixQA Integration Targets ──────────────────────────────────</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> qa-all qa-session qa-anti-bluff qa-screenshot qa-report</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="dt">QA_TIMEOUT</span>       <span class="ch">?=</span><span class="st"> 4h</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="dt">QA_RESOURCE_CAP</span>  <span class="ch">?=</span><span class="st"> 35</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="dt">QA_OUTPUT_DIR</span>    <span class="ch">?=</span><span class="st"> ./qa-results</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="dt">QA_BANKS_DIR</span>     <span class="ch">?=</span><span class="st"> ../HelixQA/banks</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="dt">QA_CHALLENGE_DIR</span> <span class="ch">?=</span><span class="st"> ../HelixQA/challenges/scripts</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-all:</span><span class="dt"> build test test-integration test-e2e qa-screenshot qa-anti-bluff test-challenges qa-report</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-all] Full QA pipeline completed. Report: </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="st">/report.md&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">if [ -f </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu">/report.json ]; then </span><span class="ch">\</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">        jq </span><span class="st">&#39;.failed_challenges&#39;</span><span class="fu"> </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu">/report.json | </span><span class="ch">\</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">        grep -qv </span><span class="st">&#39;0&#39;</span><span class="fu"> &amp;&amp; exit 1 || exit 0; </span><span class="ch">\</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">    fi</span></span></code></pre></div>
+<p>The final <code>if</code> block extracts
+<code>failed_challenges</code> from <code>report.json</code> and returns
+non-zero when failures are present, preserving Make’s contract that a
+failed target aborts dependent work.</p>
+<p><strong>Target <code>qa-session</code></strong> launches a full
+autonomous QA session. It accepts <code>QA_PLATFORMS</code> (default
+<code>android,desktop,web</code>) and <code>QA_COVERAGE_TARGET</code>
+(default <code>0.90</code>). The resource guard runs before the session
+starts.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-session:</span><span class="dt"> build</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-session] Resource guard: max </span><span class="ch">$(</span><span class="dt">QA_RESOURCE_CAP</span><span class="ch">)</span><span class="st">% host usage&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">bash scripts/resource_guard.sh </span><span class="ch">$(</span><span class="dt">QA_RESOURCE_CAP</span><span class="ch">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">mkdir -p </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">timeout </span><span class="ch">$(</span><span class="dt">QA_TIMEOUT</span><span class="ch">)</span><span class="fu"> ../HelixQA/bin/helixqa autonomous </span><span class="ch">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">        --project </span><span class="ch">$(</span><span class="dt">PWD</span><span class="ch">)</span><span class="fu"> </span><span class="ch">\</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">        --platforms </span><span class="ch">$(</span><span class="dt">QA_PLATFORMS</span><span class="ch">)</span><span class="fu"> </span><span class="ch">\</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">        --env .env.qa </span><span class="ch">\</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">        --timeout 2h </span><span class="ch">\</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">        --output </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu">/session</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-session] Artifacts: </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="st">/session&quot;</span></span></code></pre></div>
+<p><strong>Target <code>qa-anti-bluff</code></strong> executes the
+deliberate-break validation suite. It injects known defects into a
+temporary build tree, runs the corresponding tests, and asserts that
+those tests <em>fail</em>. A passing test under an injected defect is
+flagged as a bluff under CONST-035 (HelixQA) / CONST-017 (HelixCode), a
+release-blocking condition per the constitution.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-anti-bluff:</span><span class="dt"> build</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-anti-bluff] Running deliberate-break validation&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">mkdir -p </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu">/anti-bluff</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">bash scripts/run_anti_bluff.sh </span><span class="ch">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">        --source </span><span class="ch">$(</span><span class="dt">PWD</span><span class="ch">)</span><span class="fu"> </span><span class="ch">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">        --output </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu">/anti-bluff </span><span class="ch">\</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">        --resource-cap </span><span class="ch">$(</span><span class="dt">QA_RESOURCE_CAP</span><span class="ch">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-anti-bluff] Complete: </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="st">/anti-bluff/&quot;</span></span></code></pre></div>
+<p><strong>Target <code>qa-screenshot</code></strong> captures platform
+screenshots on demand by launching each client application and storing
+images under <code>$(QA_OUTPUT_DIR)/screenshots/</code>. It is not part
+of the <code>qa-all</code> dependency graph; it is intended for ad-hoc
+visual regression baselines.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-screenshot:</span><span class="dt"> build</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-screenshot] Capturing screenshots for all client apps&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">mkdir -p </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu">/screenshots</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">bash scripts/capture_screenshots.sh </span><span class="ch">\</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">        --output </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu">/screenshots </span><span class="ch">\</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">        --bin-dir ./bin </span><span class="ch">\</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">        --resource-cap </span><span class="ch">$(</span><span class="dt">QA_RESOURCE_CAP</span><span class="ch">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-screenshot] Written: </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="st">/screenshots/&quot;</span></span></code></pre></div>
+<p><strong>Target <code>qa-report</code></strong> aggregates artifacts
+from earlier stages into Markdown, HTML, and JSON reports. It has no
+runtime dependency on the applications themselves.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode makefile"><code class="sourceCode makefile"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dv">qa-report:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-report] Generating consolidated QA report&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">mkdir -p </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">../HelixQA/bin/helixqa report </span><span class="ch">\</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">        --input </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu"> </span><span class="ch">\</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">        --format markdown,html,json </span><span class="ch">\</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">        --output </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="fu">/report</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="ch">@</span><span class="fu">echo </span><span class="st">&quot;[qa-report] </span><span class="ch">$(</span><span class="dt">QA_OUTPUT_DIR</span><span class="ch">)</span><span class="st">/report.{md,html,json}&quot;</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Target</th>
+<th>Dependencies</th>
+<th>Primary Command</th>
+<th>Output</th>
+<th>Resource Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>qa-all</code></td>
+<td><code>build test test-integration test-e2e qa-screenshot qa-anti-bluff test-challenges qa-report</code></td>
+<td>Sequential pipeline with <code>timeout 4h</code></td>
+<td><code>qa-results/report.{md,html,json}</code></td>
+<td>35% host cap via <code>resource_guard.sh</code></td>
+</tr>
+<tr>
+<td><code>qa-session</code></td>
+<td><code>build</code></td>
+<td><code>helixqa autonomous --platforms … --timeout 2h</code></td>
+<td><code>qa-results/session/</code> with videos, screenshots,
+tickets</td>
+<td>35% host cap enforced before launch</td>
+</tr>
+<tr>
+<td><code>qa-anti-bluff</code></td>
+<td><code>build</code></td>
+<td><code>run_anti_bluff.sh --source … --resource-cap 35</code></td>
+<td><code>qa-results/anti-bluff/</code> with bluff-detection log</td>
+<td>35% host cap within script</td>
+</tr>
+<tr>
+<td><code>qa-screenshot</code></td>
+<td><code>build</code></td>
+<td><code>capture_screenshots.sh --bin-dir ./bin</code></td>
+<td><code>qa-results/screenshots/*.png</code> per platform</td>
+<td>35% host cap within script</td>
+</tr>
+<tr>
+<td><code>qa-report</code></td>
+<td><em>(aggregation only)</em></td>
+<td><code>helixqa report --input qa-results/ --format …</code></td>
+<td><code>qa-results/report.{md,html,json}</code></td>
+<td>Negligible (no app launch)</td>
+</tr>
+</tbody>
+</table>
+<p>The dependency graph guarantees structural ordering:
+<code>qa-all</code> chains seven stages, and if
+<code>test-integration</code> fails, <code>qa-screenshot</code> and all
+later stages are skipped. The 35% default cap is surfaced as a tunable
+<code>QA_RESOURCE_CAP</code> so operators on smaller hosts can reduce it
+to 30% or raise it to 40% on dedicated workstations.</p>
+<h3 id="session-scripts">10.2 Session Scripts</h3>
+<p>The Makefile delegates to shell scripts in
+<code>HelixCode/scripts/</code>. These scripts implement timeout
+handling, process supervision, resource monitoring, screenshot
+validation, and multi-platform challenge orchestration. All scripts
+assume standard Unix utilities (<code>timeout</code>,
+<code>ulimit</code>, <code>jq</code>, <code>ffmpeg</code>,
+<code>adb</code> when Android testing is enabled).</p>
+<h4 id="scriptsrun_full_qa.sh">10.2.1
+<code>scripts/run_full_qa.sh</code></h4>
+<p>This script is the reference implementation of the
+<code>qa-all</code> target’s runtime logic. It can also be executed
+directly when an operator wants extra flags not exposed in the
+Makefile.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="va">PROJECT_ROOT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">${BASH_SOURCE</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span><span class="va">)</span><span class="st">/..&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="va">QA_OUTPUT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR</span><span class="op">:-</span><span class="va">${PROJECT_ROOT}</span>/qa-results<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="va">QA_RESOURCE_CAP</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_RESOURCE_CAP</span><span class="op">:-</span>35<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="va">QA_TIMEOUT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_TIMEOUT</span><span class="op">:-</span>4h<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="va">QA_PLATFORMS</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_PLATFORMS</span><span class="op">:-</span>android,desktop,web<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="fu">log()</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;[run_full_qa] </span><span class="va">$(</span><span class="fu">date</span> <span class="st">&#39;+%Y-%m-%d %H:%M:%S&#39;</span><span class="va">)</span><span class="st"> </span><span class="va">$*</span><span class="st">&quot;</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">die()</span> <span class="kw">{</span> <span class="ex">log</span> <span class="st">&quot;FATAL: </span><span class="va">$*</span><span class="st">&quot;</span><span class="kw">;</span> <span class="bu">exit</span> 1<span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/scripts/resource_guard.sh&quot;</span> <span class="st">&quot;</span><span class="va">${QA_RESOURCE_CAP}</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="dt">\</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="ex">die</span> <span class="st">&quot;Host resource check failed (cap=</span><span class="va">${QA_RESOURCE_CAP}</span><span class="st">%)&quot;</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">&quot;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Stage 1: Build&quot;</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixCode&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">make</span> build</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Stage 2: Unit tests&quot;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Stage 3: Integration tests&quot;</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-integration</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Stage 4: E2E tests&quot;</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-e2e</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Stage 5: Screenshot capture&quot;</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/screenshots&quot;</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/scripts/capture_screenshots.sh&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">--output</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/screenshots&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">--bin-dir</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixCode/bin&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">--resource-cap</span> <span class="st">&quot;</span><span class="va">${QA_RESOURCE_CAP}</span><span class="st">&quot;</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Stage 6: Anti-bluff validation&quot;</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/anti-bluff&quot;</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/scripts/run_anti_bluff.sh&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">--source</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixCode&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">--output</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/anti-bluff&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">--resource-cap</span> <span class="st">&quot;</span><span class="va">${QA_RESOURCE_CAP}</span><span class="st">&quot;</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Stage 7: Challenges&quot;</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-challenges</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Stage 8: Report generation&quot;</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixQA/bin/helixqa&quot;</span> report <span class="dt">\</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">--input</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">--format</span> markdown,html,json <span class="dt">\</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">--output</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/report&quot;</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Pipeline complete. Report: </span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/report.md&quot;</span></span></code></pre></div>
+<p><code>set -euo pipefail</code> ensures any failed stage exits
+immediately. The <code>timeout</code> wrapper from the Makefile applies
+to the entire invocation; within the script, individual stages rely on
+the Go test runner’s own timeouts (<code>-timeout 30m</code> for unit
+tests, <code>-timeout 60m</code> for e2e tests, configured in the
+existing Makefile).</p>
+<h4 id="scriptsrun_nightly_qa.sh">10.2.2
+<code>scripts/run_nightly_qa.sh</code></h4>
+<p>This script is for scheduled heavy QA sessions, invoked via
+<code>cron</code> on a dedicated build workstation. The constitution
+prohibits CI/CD pipelines; <code>cron</code> on an operator-controlled
+host is the only permissible form of scheduled automation.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="va">PROJECT_ROOT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">${BASH_SOURCE</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span><span class="va">)</span><span class="st">/..&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">QA_OUTPUT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR</span><span class="op">:-</span><span class="va">${PROJECT_ROOT}</span>/qa-results/nightly<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="va">QA_RESOURCE_CAP</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_RESOURCE_CAP</span><span class="op">:-</span>40<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="va">QA_TIMEOUT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_TIMEOUT</span><span class="op">:-</span>8h<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="va">QA_PLATFORMS</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_PLATFORMS</span><span class="op">:-</span>android,androidtv,desktop,web,cli,api<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[nightly-qa] </span><span class="va">$(</span><span class="fu">date</span><span class="va">)</span><span class="st"> Starting on platforms: </span><span class="va">${QA_PLATFORMS}</span><span class="st">&quot;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/scripts/resource_guard.sh&quot;</span> <span class="st">&quot;</span><span class="va">${QA_RESOURCE_CAP}</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="kw">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[nightly-qa] Resource guard failed — aborting&quot;</span><span class="kw">;</span> <span class="bu">exit</span> 1<span class="kw">;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">&quot;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixCode&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">make</span> build</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixQA/bin/helixqa&quot;</span> run <span class="dt">\</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">--banks</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixQA/banks&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">--platform</span> <span class="st">&quot;</span><span class="va">${QA_PLATFORMS}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">--output</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">--speed</span> slow <span class="dt">\</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">--report</span> markdown,html,json <span class="dt">\</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">--validate</span> <span class="at">--record</span> <span class="dt">\</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">--timeout</span> <span class="st">&quot;</span><span class="va">${QA_TIMEOUT}</span><span class="st">&quot;</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixQA/bin/helixqa&quot;</span> autonomous <span class="dt">\</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">--project</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixCode&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">--platforms</span> <span class="st">&quot;</span><span class="va">${QA_PLATFORMS}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">--env</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixCode/.env.full-test&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">--timeout</span> <span class="st">&quot;</span><span class="va">${QA_TIMEOUT}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">--output</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/autonomous&quot;</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[nightly-qa] </span><span class="va">$(</span><span class="fu">date</span><span class="va">)</span><span class="st"> Complete. Artifacts: </span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">&quot;</span></span></code></pre></div>
+<p>The <code>nightly</code> script raises the resource cap to 40%, the
+top of the constitutional band, because it runs on a dedicated host.
+<code>--speed slow</code> reduces CPU contention during the orchestrated
+bank run; <code>--record</code> captures video evidence for every
+platform.</p>
+<h4 id="scriptsverify_screenshots.sh">10.2.3
+<code>scripts/verify_screenshots.sh</code></h4>
+<p>Screenshot validation is a critical anti-bluff gate. A screenshot
+that is empty, uniformly colored, or missing expected UI elements is not
+valid evidence and must fail the gate.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="va">SCREENSHOT_DIR</span><span class="op">=</span><span class="st">&quot;&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="va">EXPECTED_ELEMENTS_FILE</span><span class="op">=</span><span class="st">&quot;&quot;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="va">FAIL_ON_INVALID</span><span class="op">=</span>1</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="kw">[[</span> <span class="va">$#</span> <span class="ot">-gt</span> 0 <span class="kw">]];</span> <span class="cf">do</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="ss">--dir</span><span class="kw">)</span> <span class="va">SCREENSHOT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$2</span><span class="st">&quot;</span><span class="kw">;</span> <span class="bu">shift</span> 2 <span class="cf">;;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="ss">--expected-elements</span><span class="kw">)</span> <span class="va">EXPECTED_ELEMENTS_FILE</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$2</span><span class="st">&quot;</span><span class="kw">;</span> <span class="bu">shift</span> 2 <span class="cf">;;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="ss">--warn-only</span><span class="kw">)</span> <span class="va">FAIL_ON_INVALID</span><span class="op">=</span>0<span class="kw">;</span> <span class="bu">shift</span> <span class="cf">;;</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="pp">*</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;Unknown arg: </span><span class="va">$1</span><span class="st">&quot;</span><span class="kw">;</span> <span class="bu">exit</span> 1 <span class="cf">;;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">esac</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span> <span class="ot">-d</span> <span class="st">&quot;</span><span class="va">${SCREENSHOT_DIR}</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">||</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;Directory not found: </span><span class="va">${SCREENSHOT_DIR}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="bu">exit</span> 1<span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="va">INVALID_COUNT</span><span class="op">=</span>0</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> img <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${SCREENSHOT_DIR}</span><span class="st">&quot;</span>/<span class="pp">*</span>.png<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">[[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">${img}</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">||</span> <span class="cf">continue</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="va">SIZE</span><span class="op">=</span><span class="va">$(</span><span class="fu">stat</span> <span class="at">-c%s</span> <span class="st">&quot;</span><span class="va">${img}</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">stat</span> <span class="at">-f%z</span> <span class="st">&quot;</span><span class="va">${img}</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">${SIZE}</span><span class="st">&quot;</span> <span class="ot">-lt</span> 100 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;EMPTY: </span><span class="va">${img}</span><span class="st"> (size=</span><span class="va">${SIZE}</span><span class="st">)&quot;</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="kw">((</span><span class="va">INVALID_COUNT</span><span class="op">++</span><span class="kw">));</span> <span class="cf">continue</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">command</span> <span class="at">-v</span> convert <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">VARIANCE</span><span class="op">=</span><span class="va">$(</span><span class="ex">convert</span> <span class="st">&quot;</span><span class="va">${img}</span><span class="st">&quot;</span> <span class="at">-format</span> <span class="st">&#39;%[standard-deviation]&#39;</span> info: <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;0&quot;</span><span class="va">)</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">${VARIANCE</span><span class="op">%</span>.<span class="pp">*</span><span class="va">}</span><span class="st">&quot;</span> <span class="ot">-eq</span> 0 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>            <span class="bu">echo</span> <span class="st">&quot;UNIFORM: </span><span class="va">${img}</span><span class="st"> (stddev=0)&quot;</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>            <span class="kw">((</span><span class="va">INVALID_COUNT</span><span class="op">++</span><span class="kw">));</span> <span class="cf">continue</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">${EXPECTED_ELEMENTS_FILE}</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">${EXPECTED_ELEMENTS_FILE}</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">BASENAME</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">&quot;</span><span class="va">${img}</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;</span><span class="va">${BASENAME}</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">${EXPECTED_ELEMENTS_FILE}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>            <span class="bu">echo</span> <span class="st">&quot;MISSING_ELEMENTS: </span><span class="va">${img}</span><span class="st">&quot;</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>            <span class="kw">((</span><span class="va">INVALID_COUNT</span><span class="op">++</span><span class="kw">));</span> <span class="cf">continue</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;VALID: </span><span class="va">${img}</span><span class="st">&quot;</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;verify_screenshots: </span><span class="va">${INVALID_COUNT}</span><span class="st"> invalid&quot;</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span> <span class="st">&quot;</span><span class="va">${FAIL_ON_INVALID}</span><span class="st">&quot;</span> <span class="ot">-eq</span> 1 <span class="kw">&amp;&amp;</span> <span class="st">&quot;</span><span class="va">${INVALID_COUNT}</span><span class="st">&quot;</span> <span class="ot">-gt</span> 0 <span class="kw">]]</span> <span class="kw">&amp;&amp;</span> <span class="bu">exit</span> 1</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span> 0</span></code></pre></div>
+<p>The <code>--warn-only</code> mode is available for initial pipeline
+integration; once baselines are established, the default behavior
+enforces CONST-035: a screenshot gate that passes on blank frames is
+itself a bluff.</p>
+<h4 id="scriptsrun_all_challenges.sh">10.2.4
+<code>scripts/run_all_challenges.sh</code></h4>
+<p>The existing 7-phase challenge suite is extended to include
+anti-bluff and screenshot challenges. The extension wraps the original
+runner and appends new validation stages.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="va">PROJECT_ROOT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">${BASH_SOURCE</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span><span class="va">)</span><span class="st">/..&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="va">QA_OUTPUT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR</span><span class="op">:-</span><span class="va">${PROJECT_ROOT}</span>/qa-results/challenges<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="va">QA_RESOURCE_CAP</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${QA_RESOURCE_CAP</span><span class="op">:-</span>35<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">&quot;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[challenges] Phase 1–7: Base suite&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/challenges/scripts/run_all_challenges.sh&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">--output</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/base&quot;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[challenges] Phase 8: Anti-bluff&quot;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/scripts/run_anti_bluff.sh&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">--source</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixCode&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">--output</span> <span class="st">&quot;</span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">/anti-bluff&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">--resource-cap</span> <span class="st">&quot;</span><span class="va">${QA_RESOURCE_CAP}</span><span class="st">&quot;</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[challenges] Phase 9: Screenshot verification&quot;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/scripts/verify_screenshots.sh&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dir</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/qa-results/screenshots&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">--expected-elements</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/scripts/expected_elements.txt&quot;</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[challenges] All phases complete: </span><span class="va">${QA_OUTPUT_DIR}</span><span class="st">&quot;</span></span></code></pre></div>
+<p>The extended suite produces a unified exit code: any non-zero phase
+fails the entire run, satisfying CONST-035’s requirement that a green
+summary line with a broken feature is a critical defect.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Script</th>
+<th>Purpose</th>
+<th>Trigger</th>
+<th>Platforms</th>
+<th>Timeout</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/run_full_qa.sh</code></td>
+<td>Complete QA pipeline with resource guard</td>
+<td><code>make qa-all</code> or manual</td>
+<td><code>android,desktop,web</code> (configurable)</td>
+<td>4 hours</td>
+<td><code>qa-results/</code></td>
+</tr>
+<tr>
+<td><code>scripts/run_nightly_qa.sh</code></td>
+<td>Heavy scheduled session with full bank coverage</td>
+<td><code>cron</code> or systemd timer on dedicated host</td>
+<td><code>android,androidtv,desktop,web,cli,api</code></td>
+<td>8 hours</td>
+<td><code>qa-results/nightly/</code></td>
+</tr>
+<tr>
+<td><code>scripts/verify_screenshots.sh</code></td>
+<td>Validate screenshots are non-empty, non-uniform, contain expected
+elements</td>
+<td><code>make qa-screenshot</code> or
+<code>run_all_challenges.sh</code></td>
+<td>All captured platforms</td>
+<td>10 minutes</td>
+<td>Exit code + stdout classification</td>
+</tr>
+<tr>
+<td><code>scripts/run_all_challenges.sh</code></td>
+<td>Extended 9-phase suite (base 7 + anti-bluff + screenshot)</td>
+<td><code>make test-challenges</code> or manual</td>
+<td>All platforms in challenge config</td>
+<td>2 hours</td>
+<td><code>qa-results/challenges/</code></td>
+</tr>
+</tbody>
+</table>
+<p>The scripts are composable: <code>run_full_qa.sh</code> invokes
+<code>verify_screenshots.sh</code>; <code>run_nightly_qa.sh</code>
+invokes both <code>helixqa run</code> and
+<code>helixqa autonomous</code>. An operator who wants only the
+anti-bluff gate can execute <code>bash scripts/run_anti_bluff.sh</code>
+directly. This composability is the advantage of a script-based model
+over a CI/CD pipeline — each stage is independently inspectable,
+debuggable, and replaceable.</p>
+<h3 id="no-cicd-compliance">10.3 No-CI/CD Compliance</h3>
+<p>The HelixCode constitution prohibits CI/CD pipelines across
+<code>CONSTITUTION.md</code>, <code>CLAUDE.md</code>, and
+<code>AGENTS.md</code>, propagated to all submodules per CONST-036.</p>
+<h4 id="absence-of-.githubworkflows">10.3.1 Absence of
+<code>.github/workflows/</code></h4>
+<p>HelixCode contains a <code>.github/workflows/</code> directory at
+<code>HelixCode/.github/workflows/</code>, but the constitutional
+mandate requires that <em>no</em> CI/CD pipelines exist. The integration
+plan treats any existing workflow files as a pre-existing condition to
+be deprecated, not extended. All new automation is expressed exclusively
+in <code>Makefile</code> and <code>scripts/</code>; no GitHub Actions,
+GitLab CI, Jenkinsfile, Tekton pipeline, or remote webhook trigger is
+added.</p>
+<h4 id="manual-trigger-model">10.3.2 Manual Trigger Model</h4>
+<p>Every QA operation is initiated by an operator running a Make target
+or script on a host they control. After a significant commit — for
+example, a provider integration change in <code>internal/llm/</code> or
+a UI rework in <code>applications/desktop/</code> — the operator runs
+<code>make qa-all</code> and waits for the pipeline to complete. There
+is no automated post-push trigger. Article XI §11.9 states that “the bar
+for shipping is not ‘tests pass’ but ‘users can use the feature’”;
+manual execution forces a human review step that automated pipelines
+bypass.</p>
+<h4 id="pre-commit-hooks-prohibited-local-verification-via-scriptspre-validate.sh">10.3.3
+Pre-commit Hooks Prohibited; Local Verification via
+<code>scripts/pre-validate.sh</code></h4>
+<p>The constitution prohibits pre-commit hooks because they impose
+unreviewed executable code into the Git lifecycle. In their place, a
+<code>scripts/pre-validate.sh</code> script provides an optional local
+gate that an operator can run before committing, but which does not
+execute automatically.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># pre-validate.sh — optional local gate, NOT a Git hook</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="va">PROJECT_ROOT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">${BASH_SOURCE</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span><span class="va">)</span><span class="st">/..&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[pre-validate] Local verification (no Git hook invoked)&quot;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">${PROJECT_ROOT}</span><span class="st">/HelixCode&quot;</span> <span class="kw">||</span> <span class="bu">exit</span> 1</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> lint</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-integration</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[pre-validate] Passed. You may now commit.&quot;</span></span></code></pre></div>
+<p>The header comment explicitly states that the script is <em>not</em>
+a Git hook, preserving constitutional compliance. Operators who want
+convenience can create a shell alias, but the repository itself installs
+no <code>.git/hooks/</code> content.</p>
+<h4 id="build-orchestrator-owns-container-lifecycle">10.3.4 Build
+Orchestrator Owns Container Lifecycle</h4>
+<p>Docker containers are launched only through Make targets
+(<code>make docker-build</code>, <code>make docker-compose-up</code>) or
+through the <code>digital.vasic.containers</code> sibling module. Direct
+<code>docker</code> commands by operators are discouraged because they
+bypass the resource-limit enforcement and health-check configuration
+embedded in the orchestrator. QA targets that need a running stack
+depend on these Make targets rather than issuing ad-hoc
+<code>docker run</code> invocations. This ownership model ensures that
+container resource limits (memory caps, CPU quotas) are consistently
+applied and that the constitutional 30–40% ceiling is never exceeded by
+container sprawl.</p>
+<p>The resource-guard script (<code>scripts/resource_guard.sh</code>) is
+the enforcement point. It reads <code>/proc/stat</code> and
+<code>/proc/meminfo</code> (Linux) or uses <code>vm_stat</code> and
+<code>top</code> (macOS) to compute current host utilization, then
+compares projected additional load against the cap. If the projected
+total exceeds the cap, the script exits with code <code>1</code> and the
+target aborts before any test starts. Without this guard, an operator
+running <code>make qa-all</code> on a shared workstation could exhaust
+host resources and trigger an out-of-memory kill — an event the
+constitution classifies as a host-power-management violation under
+CONST-033 (“Host Power Management is Forbidden”). By enforcing the cap
+at the entry point, the architecture prevents resource exhaustion before
+it occurs.</p>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-A-constitution-fork-mandate</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-A-constitution-fork-mandate</h1>
+</header>
+<h1 id="workstream-a-constitution-submodule-new-fork-and-maintain-mandate">Workstream
+A — Constitution submodule + new fork-and-maintain mandate</h1>
+<p><strong>Analysis date:</strong> 2026-06-10 <strong>Mode:</strong>
+READ-ONLY (no code modified, no git operations performed, no network
+calls) <strong>Request under analysis:</strong>
+<code>docs/requests/helix_code_request_llms_access.txt</code> (lines
+14–15) <strong>Scope:</strong> Constitution submodule state; existing
+third-party / fork governance; draft of the NEW fork-and-maintain
+anchor; reusable-script specs; CONST-049 edit workflow.</p>
+<p>Every claim below cites a file path + line range actually read this
+session. Where something is absent, that is stated as
+<code>ABSENT (searched …)</code>.</p>
+<hr />
+<h2 id="task-1-constitution-submodule-state-local-only-no-fetchpull-performed">Task
+1 — Constitution submodule state (local only; no fetch/pull
+performed)</h2>
+<p><strong>Local HEAD (read via
+<code>git -C constitution</code>):</strong> - HEAD commit:
+<code>60e2d667ec08a0729725ed8c4ec40c74c2fa067a</code> -
+<code>git -C constitution status</code>:
+<code>HEAD detached from 9e96f6b</code> /
+<code>nothing to commit, working tree clean</code> -
+<code>git -C constitution log --oneline -5</code> top entry:
+<code>60e2d66 1.2.0-dev: §11.4.140 universal action-prefix system … + §11.4.141 token-efficiency mandate … User mandates 2026-06-09. §11.4.113 no-force-push.</code>
+- Recent log also shows merge/cascade commits: <code>9e96f6b</code>,
+<code>f861df5</code>
+(<code>Merge branch &#39;main&#39; of gitflic.ru:helixdevelopment/helixconstitution</code>),
+<code>f26e960</code>, <code>4ede601</code>.</p>
+<p><strong>Version / revision headers actually read:</strong> -
+<code>constitution/Constitution.md</code> top-of-file anchors: the most
+recent substantive anchor present in the body is
+<strong>§11.4.141</strong> (token-efficiency mandate, dated 2026-06-09).
+Highest <code>11.4.N</code> token present = <code>11.4.141</code> (grep
+of <code>constitution/Constitution.md</code>, sorted numeric). -
+<code>constitution/CLAUDE.md</code> metadata table (read in full):
+<code>| Revision | 23 |</code>,
+<code>| Last modified | 2026-06-07T12:30:00Z |</code>,
+<code>| Status | active |</code>. NOTE: the CLAUDE.md table’s
+<code>Last modified</code> (2026-06-07) lags the Constitution.md body,
+but the CLAUDE.md body <strong>does</strong> carry the §11.4.140 +
+§11.4.141 mirror blocks at the end — so the mirror content is present
+even though the metadata <code>Last modified</code> line was not bumped
+in lockstep. (Minor §11.4.44 metadata-drift observation, not blocking
+for this workstream.)</p>
+<p><strong>Currency verdict (local-state only, per instruction not to
+fetch):</strong> The detached HEAD <code>60e2d66</code> is the tip of
+the local <code>constitution</code> checkout and carries the newest
+anchors (§11.4.140/§11.4.141, 2026-06-09). It is <code>clean</code>.
+<strong>Whether it is current vs. the four upstreams is NOT knowable
+without a fetch</strong> (per §11.4.6 / §11.4.37 remote state is
+unknowable without <code>git fetch</code>); CONST-049 step 1 (fetch+pull
+first) MUST be executed before any edit — see Task 5. The detached-HEAD
+state means a future edit MUST first <code>git checkout main</code> (or
+the canonical branch) inside the submodule before committing, or the
+commit will be unreachable.</p>
+<hr />
+<h2 id="task-2-existing-anchors-governing-third-party-submodules-forking-what-exists-vs.-what-is-missing">Task
+2 — Existing anchors governing THIRD-PARTY submodules + forking (what
+exists vs. what is MISSING)</h2>
+<p>Searched <code>constitution/Constitution.md</code> +
+<code>constitution/CLAUDE.md</code> for: <code>third-party</code>,
+<code>3rd party</code>, <code>fork</code>, <code>upstream merge</code>,
+<code>not control</code>, <code>§11.4.74</code>,
+<code>§11.4.51</code>.</p>
+<h3 id="what-already-exists-third-party-submodules-are-treated-as-vendored-untouched-exempt">What
+ALREADY EXISTS (third-party submodules are treated as “vendored,
+untouched, exempt”)</h3>
+<ol type="1">
+<li><p><strong>§11.4.74 — Submodule-catalogue-first discovery +
+extend-don’t-reimplement</strong>
+(<code>constitution/Constitution.md:6836-6869</code>; mirror
+<code>constitution/CLAUDE.md</code>). Governs <strong>own-org</strong>
+repos only (<code>vasic-digital</code> + <code>HelixDevelopment</code>):
+survey the 142-repo catalogue
+(<code>constitution/submodules-catalogue.md</code>, confirmed present),
+reuse ≥80%, or extend-in-place via upstream PR. It introduces the
+<code>Catalogue-Check: reuse|extend|no-match</code> tracker field where
+<code>no-match → vendor</code> is the third-party path. <strong>It does
+NOT say anything about forking the vendored third-party
+repo.</strong></p></li>
+<li><p><strong>§11.4.28(C) — Submodules-As-Equal-Codebase +
+dependency-layout</strong>
+(<code>constitution/Constitution.md:2413</code> region; mirror
+<code>constitution/CLAUDE.md</code> §11.4.28 block). “Nested own-org
+submodule chains are FORBIDDEN … <strong>Third-party submodules
+exempt.</strong>” (<code>constitution/Constitution.md:2454-2456</code>:
+“Third-party submodules (not under our orgs) are exempt — they MAY
+appear at any depth as the upstream’s structure dictates.”). So today
+nested third-party chains are explicitly <em>allowed</em>
+as-is.</p></li>
+<li><p><strong>§11.4.29 / §11.4.52 naming</strong>
+(<code>constitution/Constitution.md:2276-2278</code>): “<strong>Vendor /
+upstream submodules</strong> (third-party orgs not in our owned set)
+keep their upstream-mandated names — we MUST NOT rename a third party’s
+repo.”</p></li>
+<li><p><strong>§11.4.79 — own-org submodules in the CodeGraph
+index</strong> (<code>constitution/CLAUDE.md:2491</code>;
+<code>constitution/Constitution.md:7143-7160</code>):
+“<strong>Third-party submodules</strong> (the §11.4.74
+<code>no-match → vendor</code> path,
+e.g. <code>gopkg.in/telebot.v3</code>) — MUST be
+<strong>EXCLUDED</strong>.” + respect “load-bearing pins on third-party
+submodules” (<code>Constitution.md:7149</code>).</p></li>
+<li><p><strong>§11.4.65 — universal Markdown export</strong>
+(<code>constitution/CLAUDE.md</code> §11.4.65 block): excludes
+“third-party submodules NOT in the owned set.”</p></li>
+<li><p><strong>§11.4.51 — Live-ADB-First</strong>
+(<code>constitution/Constitution.md:4399</code>): unrelated to forking
+(rebuild-class classification). Confirmed it does NOT touch third-party
+submodule forking.</p></li>
+<li><p>The repo-root <code>CLAUDE.md</code> §3.3 / inner architecture
+note: <code>cli_agents/</code> holds “reference CLI agents (aider,
+cline, plandex, openhands, …)” and Rule 2 of the project manual forbids
+modifying CLI-agent submodules (“We MUST NOT change any codebase of CLI
+agents Submodules since we do not control them” — request line 14
+restates this).</p></li>
+</ol>
+<h3 id="what-is-missing-the-gap-the-request-opens">What is MISSING (the
+gap the request opens)</h3>
+<p><code>ABSENT (searched constitution/Constitution.md + constitution/CLAUDE.md for &quot;fork&quot;, &quot;upstream merge&quot;, &quot;not control&quot;):</code>
+there is <strong>NO</strong> anchor, clause, or script that mandates ANY
+of the request’s fork-and-maintain workflow. Specifically missing:</p>
+<ul>
+<li><strong>(M1)</strong> No rule to <strong>fork every 3rd-party
+(not-owned) submodule</strong> into an owned org
+(<code>vasic-digital</code>) with a <strong>naming prefix</strong>
+(request proposes <code>caf-</code>), using GitHub + GitLab CLIs.</li>
+<li><strong>(M2)</strong> No rule to <strong>swap the project’s
+submodule pointer</strong> from the upstream third-party URL to our
+fork’s SSH URL.</li>
+<li><strong>(M3)</strong> No rule to <strong>recursively fork nested
+third-party deps</strong> of each forked CLI agent and rewire the fork’s
+own nested <code>.gitmodules</code> to point at <em>our</em> forks.
+(Today §11.4.28(C) explicitly <em>exempts</em> third-party nesting — the
+new anchor must carve a refinement, not a contradiction:
+forked-into-our-org repos become own-org and thus fall back under
+§11.4.28(C)/§11.4.79 inclusion semantics.)</li>
+<li><strong>(M4)</strong> No rule for a <strong>regular fetch+merge of
+upstream <code>main</code>/<code>master</code> into our fork</strong>
+(scheduled maintenance) — the request’s core automation ask.</li>
+<li><strong>(M5)</strong> No <strong>reusable, decoupled, generic
+fork/update scripts</strong> in <code>constitution/scripts/</code>
+(confirmed:
+<code>ls constitution/scripts/ | grep -iE &quot;fork|merge|upstream|vendor&quot;</code>
+→ NONE; see Task 4).</li>
+<li><strong>(M6)</strong> No statement of how the fork-and-maintain
+workflow <strong>composes with §11.4.113</strong> (absolute
+no-force-push) — upstream-merge-into-fork MUST be
+merge-onto-latest-main, never a history-rewriting overwrite.</li>
+</ul>
+<p><strong>Tension to resolve in the anchor (not a blocker):</strong>
+the request says we WILL commit small changes (gitignore, minor) into
+our forks (M1/M2), which appears to conflict with §11.4.28(B) “NEVER
+inject project-specific context INTO a submodule” and the project-manual
+“we do not control them.” The new anchor resolves this cleanly:
+<strong>once forked into our org the repo IS owned</strong>, so §11.4.28
+equal-codebase semantics apply, BUT the anchor must add a <em>decoupling
+guard</em> — fork edits are restricted to a closed allow-list
+(<code>.gitignore</code>, upstream-tracking config, CI-disable,
+governance-pointer files) and MUST NOT inject consuming-project context,
+so the fork stays generically reusable and cleanly mergeable with
+upstream (§11.4.28(B) preserved).</p>
+<hr />
+<h2 id="task-3-draft-of-the-new-constitutional-anchor">Task 3 — DRAFT of
+the new constitutional anchor</h2>
+<p><strong>Chosen number: §11.4.142.</strong> Rationale: highest
+existing anchor in both <code>constitution/Constitution.md</code> body
+and <code>constitution/CLAUDE.md</code> mirror is
+<strong>§11.4.141</strong> (grep, sorted numeric). Highest
+<code>CM-COVENANT-114-N</code> is <code>CM-COVENANT-114-141</code>. Next
+free = <strong>§11.4.142</strong> /
+<code>CM-COVENANT-114-142-PROPAGATION</code>. (§11.4.100 is RETIRED but
+its slot is not reusable — numbering is append-only per the
+§-slot-history convention.)</p>
+<p>Draft below is in the SAME house style as §11.4.122–§11.4.141
+(verbatim forensic anchor → mandate body → composes-with list →
+classification → propagation gate + recommended gate + paired mutation →
+canonical authority → no-escape-hatch line). The forensic anchor quotes
+the request file lines 14–15 verbatim.</p>
+<hr />
+<blockquote>
+<h3 id="fork-and-maintain-mandate-for-third-party-not-owned-submodules-recursive-nested-dependency-forking-user-mandate-2026-06-10">§11.4.142
+— Fork-and-maintain mandate for third-party (not-owned) submodules +
+recursive nested-dependency forking (User mandate, 2026-06-10)</h3>
+<p><strong>Forensic anchor — verbatim user mandate (2026-06-10,
+<code>helix_code_request_llms_access.txt</code> lines
+14–15):</strong></p>
+<blockquote>
+<p>“We MUST NOT change any codebase of CLI agents Submodules since we do
+not controll them! Maybe we should fork each in our own repository (with
+some proper naming prefix) under vasic-digital org using CLIs for GitHub
+and GitLab both. Then we use these repos as Submodule and we are able to
+commit and push (updates to git ignore files and other minor changes).
+On top of this WE MUST have bash scripts which will regulalry fetch and
+pull main (master) branches of all CLI agents main repos, and perform
+merging of the latest changes to our forks! We MUST support all
+recursive Submodules nested inside every single CLI agent we fork and in
+our forks use only our versions of these Submodules. All forked
+Submodules CLI agents use MUST BE maintained regularly as well by
+fethcing and pulling the parent (original) repos and merging all new
+codebase changes into our repository versions! This MUST be fully
+automatized and whole idea added as MANDATORY for all future and current
+work with 3rd party owned Submodules and its 3rd party Submodule (fully
+recursive!!!) dependencies! … We MUST make reusable bash scripts for
+forking, updating and other work … as reusable, decoupled, generic tools
+for any projects MUST BE part of constitution Submodule properly placed
+under proper directories (scripts dir for example).”</p>
+</blockquote>
+<p><strong>The mandate.</strong> Any third-party (not under an owned org
+— <code>vasic-digital</code> / <code>HelixDevelopment</code> / the other
+§11.4.28(A) orgs) Git submodule that a consuming project needs to (a)
+carry minor non-upstreamable edits for (gitignore, remote/CI config,
+governance pointer), OR (b) keep building/running locally under our own
+version control, MUST be brought under our control by FORKING rather
+than by editing the upstream in place or carrying a detached patched
+copy:</p>
+<ol type="1">
+<li><strong>Fork into an owned org with a stable naming prefix.</strong>
+Fork the upstream repo into <code>vasic-digital</code> (GitHub AND
+GitLab, both, via <code>gh</code> + <code>glab</code> CLIs) under a
+deterministic prefix (project-declared per §11.4.35; the consumer’s
+default is <code>caf-</code> for “CLI-Agent Fork”,
+e.g. <code>vasic-digital/caf-aider</code>). The prefix MUST be unique,
+lowercase-snake/kebab consistent with §11.4.29, and MUST encode that the
+repo is a maintained fork (so the catalogue and CodeGraph classifiers
+can tell forks from native own-org repos).</li>
+<li><strong>Swap the consuming project’s submodule pointer to the
+fork.</strong> The project’s <code>.gitmodules</code> entry MUST point
+at the fork’s SSH URL (§3 SSH-only), never the upstream HTTPS/SSH URL.
+The fork becomes the project’s source of truth for that dependency.</li>
+<li><strong>Recursively fork nested third-party dependencies.</strong>
+Every third-party submodule nested inside a forked repo MUST itself be
+forked into the owned org (same prefix discipline), and the fork’s OWN
+<code>.gitmodules</code> rewired to point at <em>our</em> nested forks —
+“in our forks use only our versions of these Submodules.” This REFINES
+§11.4.28(C): a forked-into-our-org repo IS now own-org, so its nested
+own-org (forked) deps follow §11.4.28(C) root-layout + §11.4.79
+CodeGraph-inclusion semantics; the original “third-party nesting exempt”
+clause now applies only to dependencies NOT yet forked (the migration
+frontier), never as a permanent excuse to leave a build-essential
+third-party chain un-forked.</li>
+<li><strong>Regular upstream-tracking maintenance (fully
+automated).</strong> Each fork MUST be maintained by a scheduled job
+that: <code>git fetch</code> the original upstream’s
+<code>main</code>/<code>master</code>, <code>git merge</code> (NEVER
+rebase/reset/<code>-s ours</code> that drops commits) the latest
+upstream changes onto the fork, resolve conflicts preserving our minor
+edits, and push to ALL owned-org mirrors. Recursive: the maintenance
+walks every nested fork too. Cadence: project-declared, weekly floor
+(per §11.4.45 / §11.4.80 status-digest cadence). A fork un-merged from
+its upstream for &gt; 2 cycles with open dependent work is a release
+blocker (mirrors §11.4.80’s staleness rule).</li>
+<li><strong>Decoupling guard (preserves §11.4.28(B)).</strong> Edits
+committed to a fork are restricted to a CLOSED allow-list —
+<code>.gitignore</code>, git remote / upstream-tracking config,
+CI-disable markers, governance pointer files, and other non-functional
+minor changes that DO NOT inject consuming-project context (no hardcoded
+host paths, asset names, project-private logic). The fork MUST stay
+generically reusable + cleanly mergeable with upstream. Functional
+capability changes follow the §11.4.74 extend-don’t-reimplement /
+upstream-PR path, not a divergent in-fork patch.</li>
+<li><strong>Anti-bluff.</strong> A fork claimed “maintained” with no
+merge commits tracking the upstream tip, OR a <code>.gitmodules</code>
+still pointing at the un-forked upstream after a fork was created, OR a
+nested third-party chain left un-forked while the parent is forked, is a
+§11.4 PASS-bluff at the dependency-control layer. Maintenance runs MUST
+capture evidence (fetch output + merged upstream SHA + push result per
+mirror) per §11.4.5.</li>
+</ol>
+<p>Reusable, decoupled, project-agnostic tooling for (1)–(4) lives in
+<code>constitution/scripts/</code> (per the mandate’s explicit “part of
+constitution Submodule … scripts dir”) and is inherited by reference
+(per §11.4.80 codegraph-script precedent — referenced, NEVER copied).
+See the script specs in Task 4.</p>
+<p><strong>Composes with</strong> §11.4.28 (own-equal-codebase +
+decoupling(B) + dependency-layout(C) — forks become own-org; this anchor
+REFINES the “third-party nesting exempt” clause) / §11.4.29 (fork name
+follows naming convention) / §11.4.36 (<code>install_upstreams</code> on
+the fork after clone) / §11.4.74 (catalogue-first — a fork is recorded
+<code>Catalogue-Check: fork &lt;upstream&gt;@&lt;sha&gt; → vasic-digital/caf-&lt;name&gt;</code>)
+/ §11.4.79 (forked-into-own-org repos now INCLUDED in CodeGraph) /
+§11.4.80 (scheduled-update + status-doc automation precedent + &gt;
+2-cycle staleness blocker) / §11.4.113 (upstream-merge-into-fork is
+merge-onto-latest-main, force-push STRICTLY forbidden) / §2.1
+(multi-mirror push of the fork) / §3 (SSH-only remotes) / §11.4.5 /
+§11.4.6 / §1.1.</p>
+<p><strong>Classification:</strong> universal (§11.4.17) — a
+platform-neutral dependency-control discipline reusable by ANY project
+that consumes third-party submodules; the consuming project supplies its
+concrete fork prefix, target org, and dependency list per §11.4.35.</p>
+<p>Propagation gate <code>CM-COVENANT-114-142-PROPAGATION</code>
+(literal <code>11.4.142</code> across the consumer fleet) + recommended
+gates <code>CM-THIRD-PARTY-FORKED-NOT-UPSTREAM</code> (a
+<code>.gitmodules</code> entry for a build-essential third-party dep
+whose upstream is forkable resolves to an owned-org fork, not the
+upstream) / <code>CM-FORK-UPSTREAM-TRACKING-FRESH</code> (each fork has
+a recorded upstream-merge within the cadence window) /
+<code>CM-FORK-EDIT-ALLOWLIST</code> (fork diffs vs. upstream touch only
+the closed allow-list) + paired §1.1 meta-test mutations (point a
+<code>.gitmodules</code> at the un-forked upstream → first gate FAILs;
+backdate a fork’s last-merge stamp → second gate FAILs; inject a
+functional change into a fork diff → third gate FAILs).</p>
+<p><strong>Canonical authority:</strong> constitution submodule <a href="Constitution.md"><code>Constitution.md</code></a> §11.4.142.
+Non-compliance is a release blocker. No escape hatch — no
+<code>--edit-upstream-in-place</code>, <code>--skip-fork</code>,
+<code>--no-upstream-tracking</code>,
+<code>--leave-nested-third-party</code>,
+<code>--fork-without-prefix</code>, <code>--point-at-upstream-url</code>
+flag.</p>
+</blockquote>
+<hr />
+<h2 id="task-4-inventory-of-constitutionscripts-specs-for-the-new-reusable-scripts">Task
+4 — Inventory of <code>constitution/scripts/</code> + specs for the NEW
+reusable scripts</h2>
+<h3 id="current-constitutionscripts-inventory-actually-listed-this-session">Current
+<code>constitution/scripts/</code> inventory (actually listed this
+session)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Entry</th>
+<th>Kind</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>action_prefix_lib.sh</code></td>
+<td>action-prefix system (§11.4.140)</td>
+</tr>
+<tr>
+<td><code>codegraph_sync.sh</code>,
+<code>codegraph_update.sh</code></td>
+<td>CodeGraph automation (§11.4.78–§11.4.80) — <strong>the by-reference
+precedent for the new scripts</strong></td>
+</tr>
+<tr>
+<td><code>enable_prompt_caching_check.sh</code> +
+<code>.md/.html/.pdf</code></td>
+<td>token-efficiency (§11.4.141)</td>
+</tr>
+<tr>
+<td><code>generate_agent_prefix_commands.sh</code>,
+<code>install_action_prefix.sh</code></td>
+<td>action-prefix wiring</td>
+</tr>
+<tr>
+<td><code>subagent_tier.sh</code>,
+<code>subagent_model_tiering.*</code></td>
+<td>model-tiering (§11.4.141)</td>
+</tr>
+<tr>
+<td><code>token_accounting.sh</code></td>
+<td>token-efficiency harness (§11.4.141)</td>
+</tr>
+<tr>
+<td><code>hooks/</code></td>
+<td><code>action_prefix_expand.sh</code>,
+<code>guard-forbidden-commands.sh</code> (§11.4.109/§11.4.113 PreToolUse
+guard)</td>
+</tr>
+<tr>
+<td><code>workable-items/</code></td>
+<td>Go binary for §11.4.93 SQLite tracker</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Confirmed ABSENT:</strong> any <code>fork*</code>,
+<code>*merge*</code>, <code>*upstream*</code>, <code>*vendor*</code>
+script (<code>ls … | grep -iE &quot;fork|merge|upstream|vendor&quot;</code> →
+NONE). The three new scripts below are NEW work.</p>
+<p>All three MUST be project-decoupled (CONST-051 / §11.4.28(B)): NO
+hardcoded project paths, org names, prefixes, or dependency lists —
+everything via env/args. They follow the §11.4.80 “inherited by
+reference, never copied” pattern and ship a companion
+<code>docs/scripts/&lt;name&gt;.md</code> per §11.4.18.</p>
+<h3 id="script-1-constitutionscriptsfork_third_party_submodule.sh">Script 1
+— <code>constitution/scripts/fork_third_party_submodule.sh</code></h3>
+<ul>
+<li><strong>Purpose:</strong> Fork (or create-from-mirror if the
+upstream forbids forks) a third-party repo into a target owned org on
+BOTH GitHub and GitLab, with a naming prefix; configure the fork’s
+upstream remote; optionally swap the consuming project’s
+<code>.gitmodules</code> pointer.</li>
+<li><strong>Inputs (env/args, no hardcoding):</strong>
+<ul>
+<li><code>--upstream-url &lt;ssh-or-https&gt;</code> (the third-party
+repo)</li>
+<li><code>--target-org &lt;org&gt;</code> (default from
+<code>$HELIX_FORK_ORG</code>, e.g. <code>vasic-digital</code>)</li>
+<li><code>--prefix &lt;str&gt;</code> (default
+<code>$HELIX_FORK_PREFIX</code>, e.g. <code>caf-</code>)</li>
+<li><code>--hosts &lt;github,gitlab&gt;</code> (default both)</li>
+<li><code>--swap-gitmodules &lt;path&gt;</code> (optional; rewrites the
+entry to the fork SSH URL)</li>
+<li><code>--dry-run</code></li>
+</ul></li>
+<li><strong>Outputs:</strong> the fork’s SSH URL(s) on stdout; an
+evidence record (fork creation API response + configured
+<code>upstream</code> remote) under
+<code>$HELIX_FORK_EVIDENCE_DIR/&lt;prefix&gt;&lt;name&gt;/created.json</code>;
+exit 0 only when the fork exists on every requested host AND has its
+<code>upstream</code> remote set.</li>
+<li><strong>Anti-bluff Challenge:</strong> bootstrap a throwaway test
+org/repo (or a sandbox fixture), run the script, assert via
+<code>gh repo view</code> / <code>glab repo view</code> that the fork
+exists on both hosts with the correct prefixed name AND
+<code>git remote -v</code> in the cloned fork shows the upstream —
+<code>gh</code> exit 0 alone is NOT proof (mirrors §11.4.80 “npm exit 0
+≠ working binary”). Paired §1.1 mutation: strip the prefix → assert the
+post-create name-check FAILs.</li>
+</ul>
+<h3 id="script-2-constitutionscriptsupdate_fork_from_upstream.sh">Script
+2 — <code>constitution/scripts/update_fork_from_upstream.sh</code></h3>
+<ul>
+<li><strong>Purpose:</strong> Fetch the upstream
+<code>main</code>/<code>master</code>, merge it onto the fork’s latest
+main (merge-onto-latest-main per §11.4.113, NEVER force/rebase/reset),
+resolve via configured strategy, push to ALL owned mirrors. Records the
+merged upstream SHA + per-mirror push result.</li>
+<li><strong>Inputs:</strong> <code>--fork-dir &lt;path&gt;</code> OR
+<code>--fork-url &lt;ssh&gt;</code>;
+<code>--upstream-branch &lt;main|master&gt;</code> (auto-detect
+default); <code>--conflict-policy &lt;abort|operator&gt;</code> (default
+<code>abort</code> — never silent
+<code>--ours</code>/<code>--theirs</code>, per §11.4.6 + §11.4.113 step
+3); <code>--recurse &lt;true|false&gt;</code> (walk nested forks).
+<code>$HELIX_FORK_MIRRORS</code> lists push remotes.</li>
+<li><strong>Outputs:</strong> captured <code>git fetch</code> stdout,
+the merged upstream SHA, the merge commit SHA, per-mirror
+<code>git push</code> results, appended to a
+<code>docs/codegraph/Status.md</code>-style ledger
+(<code>docs/forks/Status.md</code> proposed); a
+<code>.regenerated/&lt;fork&gt;.ok</code> freshness stamp for the
+freshness gate. Exit non-zero on any conflict (so an operator resolves),
+on any dropped-commit detection, or any mirror push rejection.</li>
+<li><strong>Anti-bluff Challenge:</strong> create a fork whose upstream
+has a NEW commit the fork lacks; run the script; assert
+<code>git merge-base --is-ancestor &lt;upstream-tip&gt; &lt;fork-HEAD&gt;</code>
+is now true (upstream genuinely integrated) AND no commit was dropped
+(<code>git rev-list</code> count monotonic) AND the freshness stamp is
+fresh. Paired §1.1 mutation: replace the merge with
+<code>git reset --hard upstream/main</code> (a history-rewrite) → assert
+the no-dropped-commit guard FAILs (composes §11.4.113
+<code>CM-NO-FORCE-PUSH-ABSOLUTE</code>).</li>
+</ul>
+<h3 id="script-3-constitutionscriptsresolve_recursive_fork_deps.sh">Script 3
+— <code>constitution/scripts/resolve_recursive_fork_deps.sh</code></h3>
+<ul>
+<li><strong>Purpose:</strong> Recursively walk a forked repo’s
+<code>.gitmodules</code>, identify every nested third-party submodule,
+fork each (delegating to Script 1), and rewrite the fork’s own
+<code>.gitmodules</code> so nested entries point at OUR forks (“in our
+forks use only our versions”). Emits the dependency graph as an audit
+record (analogue of §11.4.31 <code>.helix-manifest.yaml</code>).</li>
+<li><strong>Inputs:</strong> <code>--root-fork-dir &lt;path&gt;</code>;
+<code>--target-org</code>, <code>--prefix</code>, <code>--hosts</code>
+(passed through to Script 1); <code>--max-depth &lt;n&gt;</code> (cycle
+guard); <code>--exclude &lt;glob&gt;</code> (deps deliberately left
+upstream, e.g. an unforkable vendor blob — must be justified).
+<code>$HELIX_FORK_ORG</code> etc. inherited.</li>
+<li><strong>Outputs:</strong> the rewritten <code>.gitmodules</code>
+(staged, not auto-committed — §11.4.84 quiescence), a
+<code>forks-manifest.yaml</code> listing <code>upstream → fork</code>
+per node + depth, and an evidence directory. Exit 0 only when every
+non-excluded nested third-party dep resolves to an owned-org fork.</li>
+<li><strong>Anti-bluff Challenge:</strong> fixture repo with a 2-level
+nested third-party chain; run the script; assert every
+<code>.gitmodules</code> entry at every depth (parse recursively) points
+at <code>$HELIX_FORK_ORG/&lt;prefix&gt;*</code> and that each referenced
+fork actually exists on both hosts. Paired §1.1 mutation: leave one
+nested dep pointing at its upstream → assert the recursion-complete gate
+FAILs (composes <code>CM-THIRD-PARTY-FORKED-NOT-UPSTREAM</code>).</li>
+</ul>
+<p><strong>Cross-cutting (all three):</strong> §11.4.18 in-source doc
+block + <code>docs/scripts/&lt;name&gt;.md</code>; §11.4.67
+<code>sh -n</code> parseable; §11.4.81 cross-platform
+(<code>gh</code>/<code>glab</code>/<code>git</code> behave on macOS +
+Linux — <code>case &quot;$(uname -s)&quot;</code> only if a platform-specific path
+appears); §11.4.10 credentials via env, never logged; §11.4.65
+doc-export siblings.</p>
+<hr />
+<h2 id="task-5-const-049-11.4.26-workflow-that-must-be-followed-when-later-editing-the-constitution">Task
+5 — CONST-049 / §11.4.26 workflow that MUST be followed when later
+EDITING the constitution</h2>
+<p>Source read: <code>constitution/CLAUDE.md</code> §11.4.26 block
+(7-step pipeline) + root <code>CLAUDE.md</code> CONST-049 anchor. When
+the team later lands §11.4.142 (and its CLAUDE.md/AGENTS.md/QWEN.md
+mirrors), execute IN ORDER:</p>
+<ol type="1">
+<li><strong>Fetch + pull FIRST</strong> — inside
+<code>constitution/</code>: <code>git fetch</code> every remote, then
+<code>git pull --ff-only</code> (or <code>--rebase</code> if non-FF;
+never
+<code>--strategy=ours</code>/<code>--allow-unrelated-histories</code>
+unauthorised). Submodule MUST be at upstream tip before any edit.
+<strong>Plus:</strong> the current local checkout is a DETACHED HEAD at
+<code>60e2d66</code> — <code>git checkout main</code> (canonical branch)
+before editing/committing, or the commit will be unreachable.</li>
+<li><strong>Apply the change</strong> — classify per §11.4.17 (this is
+<strong>universal</strong> — goes in the constitution submodule, not the
+consumer). Cite the verbatim mandate (request lines 14–15) in the commit
+message. Add the §11.4.142 block to <code>Constitution.md</code> +
+mirror blocks to <code>constitution/CLAUDE.md</code> +
+<code>constitution/AGENTS.md</code> +
+<code>constitution/QWEN.md</code>.</li>
+<li><strong>Validate before commit</strong> — run
+<code>meta_test_inheritance.sh</code> (or equivalent);
+<code>grep -rn &#39;^&lt;&lt;&lt;&lt;&lt;&lt;&lt; \|^=======$\|^&gt;&gt;&gt;&gt;&gt;&gt;&gt; &#39;</code>
+returns empty; verify Constitution + CLAUDE + AGENTS + QWEN
+cross-reference §11.4.142 consistently; the new
+<code>CM-COVENANT-114-142-PROPAGATION</code> literal
+<code>11.4.142</code> is present in every governed file.</li>
+<li><strong>Commit + push to ALL upstreams</strong> — stage ONLY the
+governance files (NEVER <code>git add -A</code> inside the submodule,
+per §11.4.30); push to EVERY configured remote across GitHub + GitLab +
+GitFlic + GitVerse (a one-upstream landing is a §2.1 + §11.4.26
+violation). Push is fast-forward-only (§11.4.113 — force-push STRICTLY
+forbidden, no exception).</li>
+<li><strong>Conflict resolution</strong> — if
+<code>pull --ff-only</code> reports non-FF, merge carefully onto latest
+main (§11.4.113 step 2–4), preserve union of governance content, no
+clause dropped, re-classify, re-validate. Force-push to “make conflicts
+go away” is FORBIDDEN.</li>
+<li><strong>Post-merge validation + cascade</strong> —
+<code>git submodule update --remote --init</code> in the consumer, then
+re-run the cascade verifier
+(<code>scripts/verify-governance-cascade.sh</code> / CONST-047)
+confirming §11.4.142 reached every owned submodule’s CONSTITUTION.md /
+CLAUDE.md / AGENTS.md / QWEN.md. Close any cascade gap in the same
+change-window.</li>
+<li><strong>Bump consuming-project pointer</strong> — advance the
+<code>.gitmodules</code>-tracked <code>constitution</code> submodule
+pointer to the new constitution HEAD in the SAME commit as the cascade
+work (out-of-sync pointer = §11.4.26 violation). Also bump
+<code>constitution/CLAUDE.md</code> metadata <code>Revision</code>
+(currently 23) + <code>Last modified</code> per §11.4.44 — and note the
+current metadata-drift (table says 2026-06-07 while body carries
+2026-06-09 §11.4.140/141) should be corrected in the same pass.</li>
+</ol>
+<p>Additional binding constraints for the edit: §11.4.99
+(cross-reference latest
+<code>gh</code>/<code>glab</code>/<code>git</code> fork-API docs before
+publishing the script instructions, <code>## Sources verified</code>
+footer) and §11.4.125/§11.4.134 (code-review gate iterate-until-GO
+before the build/landing).</p>
+<hr />
+<h2 id="executive-summary-10-lines">Executive summary (10 lines)</h2>
+<ol type="1">
+<li>Constitution submodule local HEAD = <code>60e2d66</code> (DETACHED,
+clean), carrying the newest anchors <strong>§11.4.140 +
+§11.4.141</strong> (2026-06-09); currency vs. upstreams is NOT knowable
+without a fetch (not performed per instruction).</li>
+<li><code>constitution/CLAUDE.md</code> metadata = Revision 23 /
+Last-modified 2026-06-07 — lags the body (which DOES contain the
+§11.4.140/141 mirrors); minor §11.4.44 metadata-drift to fix on next
+edit.</li>
+<li>The DETACHED-HEAD state means a future edit MUST
+<code>git checkout main</code> inside the submodule before
+committing.</li>
+<li><strong>Highest existing anchor = §11.4.141; highest gate =
+<code>CM-COVENANT-114-141</code>. Next free = §11.4.142 /
+<code>CM-COVENANT-114-142-PROPAGATION</code></strong> (chosen).</li>
+<li>Existing third-party governance treats not-owned submodules as
+<strong>vendored / untouched / exempt</strong>: §11.4.74 (catalogue,
+own-org only), §11.4.28(C) (“third-party nesting exempt”), §11.4.79
+(excluded from CodeGraph), §11.4.29/§11.4.65 (keep upstream names,
+excluded from export).</li>
+<li><strong>ABSENT (searched “fork”, “upstream merge”, “not
+control”):</strong> NO anchor and NO script for forking third-party
+submodules, swapping pointers to our fork, recursively forking nested
+deps, or scheduled upstream-merge maintenance.</li>
+<li>Drafted <strong>§11.4.142 — Fork-and-maintain mandate</strong>
+(forensic anchor = verbatim request lines 14–15) with a 6-clause body, a
+decoupling guard preserving §11.4.28(B), explicit §11.4.113
+no-force-push composition, propagation + 3 recommended gates + paired
+mutations.</li>
+<li><code>constitution/scripts/</code> has NO fork/merge/upstream
+tooling today (confirmed by grep); specified <strong>3 new reusable,
+CONST-051-decoupled scripts</strong>:
+<code>fork_third_party_submodule.sh</code>,
+<code>update_fork_from_upstream.sh</code>,
+<code>resolve_recursive_fork_deps.sh</code> — each with env/arg inputs,
+evidence outputs, and an anti-bluff Challenge + §1.1 mutation; they
+follow the §11.4.80 “inherited-by-reference” precedent.</li>
+<li>The fork-edit allow-list (gitignore / remote-config / CI-disable /
+governance pointers only) reconciles the request’s “we commit minor
+changes to our forks” with §11.4.28(B) “never inject project
+context.”</li>
+<li>When landing the anchor, follow the <strong>CONST-049 / §11.4.26
+7-step pipeline</strong> (fetch+pull first → classify universal →
+validate no-conflict-markers → commit governance-only + push ALL four
+upstreams fast-forward-only → careful conflict merge → cascade-verify
+reaches every owned submodule → bump consumer <code>.gitmodules</code>
+pointer + Revision in the same commit).</li>
+</ol>
+<p><strong>Chosen new anchor number: §11.4.142</strong> (gate
+<code>CM-COVENANT-114-142-PROPAGATION</code>).</p>
+</body>
+</html>

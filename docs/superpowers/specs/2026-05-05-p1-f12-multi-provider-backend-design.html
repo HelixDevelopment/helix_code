@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f12-multi-provider-backend-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f12-multi-provider-backend-design</h1>
+</header>
+<h1 id="phase-1-feature-12-multi-provider-backend">Phase 1 / Feature 12
+— Multi-Provider Backend</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a unified multi-provider front-end for the existing
+<code>internal/llm.Provider</code> so users can choose Anthropic, AWS
+Bedrock, Google Vertex AI, or Azure OpenAI as the active LLM backend at
+startup. Selection happens through three precedence-ordered
+surfaces:</p>
+<ol type="1">
+<li>CLI flag <code>--provider &lt;name&gt;</code>
+(<code>anthropic</code>, <code>bedrock</code>, <code>vertex</code>,
+<code>azure</code>).</li>
+<li>Env var <code>HELIX_LLM_PROVIDER</code>.</li>
+<li>Interactive <strong>tview</strong> wizard launched on first run when
+no provider is configured, and explicitly via the
+<code>helixcode wizard</code> cobra subcommand.</li>
+</ol>
+<p>Model lists for every provider are sourced exclusively from
+<code>internal/verifier/</code> (LLMsVerifier) per CONST-036/037; no
+hardcoded <code>[]Model</code> literals. The four cloud-provider
+implementations (<code>anthropic_provider.go</code>,
+<code>bedrock_provider.go</code>, <code>azure_provider.go</code>,
+<code>vertexai_provider.go</code>) <strong>already exist</strong> under
+<code>helix_code/internal/llm/</code> — F12 wires them into a coherent
+factory + UX layer without re-implementing the providers.</p>
+<p>The change is non-breaking: <code>cmd/cli/main.go</code> currently
+hardcodes Ollama via <code>llm.NewOllamaProvider</code>; after F12,
+Ollama remains the fallback when none of flag/env/wizard yields a
+configured cloud provider, preserving local-only workflows.</p>
+<h2 id="architecture">2. Architecture</h2>
+<p>The existing <code>llm.Provider</code> interface
+(<code>Generate</code>/<code>GenerateStream</code>/<code>GetModels</code>/<code>GetCapabilities</code>/<code>IsAvailable</code>/<code>GetHealth</code>/<code>Close</code>/<code>GetContextWindow</code>/<code>CountTokens</code>)
+is the unified contract. F12 adds three orthogonal pieces:</p>
+<ul>
+<li><strong>Selection layer</strong> —
+<code>internal/llm/selector.go</code> resolves the active
+<code>ProviderType</code> using
+<code>flag &gt; env &gt; config-file &gt; wizard &gt; Ollama-fallback</code>
+precedence and returns a fully-constructed
+<code>llm.Provider</code>.</li>
+<li><strong>Factory entry</strong> — extends
+<code>internal/llm/factory.go::NewProvider</code> with a thin
+<code>NewCloudProvider(ProviderConfigEntry) (Provider, error)</code>
+helper that validates the four F12 cloud types and rejects unknown ones
+with a descriptive error. The existing big switch is preserved.</li>
+<li><strong>Wizard</strong> — <code>internal/llm/wizard.go</code>
+renders a tview <code>tview.Application</code> with a
+<code>tview.Form</code>, validating credentials inline and writing the
+resulting config into the user-scoped config file
+(<code>$XDG_CONFIG_HOME/helixcode/config.yaml</code>, mode 0600).</li>
+</ul>
+<p>LLMsVerifier integration reuses
+<code>internal/llm/verifier_integration.go::VerifierModelSource</code>.
+The wizard’s “model” dropdown is populated by calling
+<code>VerifierModelSource.FetchModels(ctx)</code> and filtering by
+<code>ModelInfo.Provider == selectedProviderType</code>. When the
+verifier is unreachable, the wizard falls back to
+<code>verifier.fallback_models.go</code> and surfaces a yellow warning
+banner (“Verifier offline — using cached models”) rather than empty
+selectors. NO hardcoded model arrays.</p>
+<p><code>ProviderConfigEntry</code> (existing in
+<code>internal/llm/missing_types.go:94</code>) is the single config
+payload for all four cloud providers. F12 documents the field map per
+provider in §3.4.</p>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/llm/selector.go</code> —
+<code>Selector</code> struct,
+<code>Resolve(ctx, opts) (Provider, ProviderType, error)</code>,
+precedence rules, env var parsing.</li>
+<li><code>helix_code/internal/llm/selector_test.go</code> — table-driven
+precedence + fallback tests.</li>
+<li><code>helix_code/internal/llm/wizard.go</code> — tview application,
+form fields, validation, config write-out.</li>
+<li><code>helix_code/internal/llm/wizard_test.go</code> — headless tview
+screen tests (<code>tcell.SimulationScreen</code>).</li>
+<li><code>helix_code/internal/llm/wizard_writer.go</code> — file-only
+<code>WizardConfigWriter</code> so unit tests can assert without
+touching real <code>~/.config</code>.</li>
+<li><code>helix_code/internal/llm/wizard_writer_test.go</code>.</li>
+<li><code>helix_code/cmd/cli/wizard_cmd.go</code> —
+<code>helixcode wizard</code> cobra subcommand.</li>
+<li><code>helix_code/cmd/cli/wizard_cmd_test.go</code>.</li>
+<li><code>helix_code/tests/integration/multi_provider_test.go</code> —
+<code>//go:build integration</code>, gated per §5.</li>
+<li><code>challenges/p1-f12-multi-provider/CHALLENGE.md</code> +
+<code>run.sh</code>.</li>
+<li><code>helix_code/tests/integration/cmd/p1f12_challenge/main.go</code>
+— runtime evidence harness.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/internal/llm/factory.go</code> — add
+<code>NewCloudProvider(cfg ProviderConfigEntry)</code> cloud-only helper
+that validates
+<code>cfg.Type ∈ {anthropic, bedrock, vertexai, azure}</code>. The
+existing <code>NewProvider</code> switch is left intact for non-cloud
+types.</li>
+<li><code>helix_code/cmd/cli/main.go</code> — replace the hardcoded
+Ollama bootstrap in <code>NewCLI()</code> with
+<code>llm.NewSelector(...).Resolve(ctx, opts)</code>. Add
+<code>--provider</code>, <code>--model</code>, <code>--llm-config</code>
+top-level flags. Register <code>helixcode wizard</code> cobra command.
+First-run guard: when no config file exists AND no flag/env set,
+auto-launch the wizard before constructing the agent.</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/llm/selector.go</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SelectorOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Flag       <span class="dt">string</span>                  <span class="co">// --provider value</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Env        <span class="dt">string</span>                  <span class="co">// HELIX_LLM_PROVIDER value</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    ConfigPath <span class="dt">string</span>                  <span class="co">// ~/.config/helixcode/config.yaml</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Stdin      io<span class="op">.</span>Reader               <span class="co">// wizard input (for tests)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    Stdout     io<span class="op">.</span>Writer               <span class="co">// wizard output (for tests)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    AllowWizard <span class="dt">bool</span>                   <span class="co">// false in non-TTY contexts</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    Verifier   <span class="op">*</span>verifier<span class="op">.</span>Adapter       <span class="co">// optional; nil disables verifier-backed model lookup</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Selector <span class="kw">struct</span><span class="op">{</span> opts SelectorOptions <span class="op">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSelector<span class="op">(</span>opts SelectorOptions<span class="op">)</span> <span class="op">*</span>Selector</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Selector<span class="op">)</span> Resolve<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span>llm<span class="op">.</span>Provider<span class="op">,</span> llm<span class="op">.</span>ProviderType<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/llm/wizard.go</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> WizardForm <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    Provider   ProviderType</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    APIKey     <span class="dt">string</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    Model      <span class="dt">string</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    Region     <span class="dt">string</span>  <span class="co">// bedrock, vertex</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    ProjectID  <span class="dt">string</span>  <span class="co">// vertex</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    Endpoint   <span class="dt">string</span>  <span class="co">// azure</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    BaseURL    <span class="dt">string</span>  <span class="co">// anthropic ANTHROPIC_BASE_URL override</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Wizard <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    app      <span class="op">*</span>tview<span class="op">.</span>Application</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    screen   tcell<span class="op">.</span>Screen           <span class="co">// injected for tests</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    writer   WizardConfigWriter</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    verifier <span class="op">*</span>verifier<span class="op">.</span>Adapter</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewWizard<span class="op">(</span>w WizardConfigWriter<span class="op">,</span> v <span class="op">*</span>verifier<span class="op">.</span>Adapter<span class="op">)</span> <span class="op">*</span>Wizard</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>Wizard<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>WizardForm<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>Wizard<span class="op">)</span> RunHeadless<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sim tcell<span class="op">.</span>SimulationScreen<span class="op">)</span> <span class="op">(*</span>WizardForm<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/llm/wizard_writer.go</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> WizardConfigWriter <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    Write<span class="op">(</span>form WizardForm<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    Path<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FileWizardConfigWriter <span class="kw">struct</span><span class="op">{</span> path <span class="dt">string</span> <span class="op">}</span></span></code></pre></div>
+<p>The unified <code>Provider</code> interface is unchanged.
+<code>ProviderConfigEntry</code> (existing) is reused; per-provider
+field expectations documented in §3.4.</p>
+<h3 id="providerconfigentry-field-map-per-provider">3.4
+ProviderConfigEntry field map (per provider)</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th><code>Endpoint</code></th>
+<th><code>APIKey</code></th>
+<th><code>Parameters[...]</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>anthropic</td>
+<td>optional <code>ANTHROPIC_BASE_URL</code> override</td>
+<td>required</td>
+<td>—</td>
+</tr>
+<tr>
+<td>bedrock</td>
+<td>unused</td>
+<td>unused (uses AWS SDK chain)</td>
+<td><code>region</code> (string), <code>profile</code> (string)</td>
+</tr>
+<tr>
+<td>vertexai</td>
+<td>optional REST root override</td>
+<td>unused (ADC via <code>GOOGLE_APPLICATION_CREDENTIALS</code>)</td>
+<td><code>project_id</code>, <code>location</code></td>
+</tr>
+<tr>
+<td>azure</td>
+<td>required Azure resource endpoint</td>
+<td>required</td>
+<td><code>api_version</code>, <code>deployment</code></td>
+</tr>
+</tbody>
+</table>
+<p>This mapping is canonical — implementations already use these keys in
+the existing <code>*_provider.go</code> files.</p>
+<h3 id="user-surfaces">3.5 User surfaces</h3>
+<p>CLI flags (top-level; parsed before dispatcher): -
+<code>helixcode --provider anthropic</code> -
+<code>helixcode --provider bedrock --model claude-3-5-sonnet-20241022</code>
+- <code>helixcode --llm-config /path/to/config.yaml</code></p>
+<p>Env vars: - <code>HELIX_LLM_PROVIDER</code> (one of
+<code>anthropic</code>, <code>bedrock</code>, <code>vertex</code>,
+<code>azure</code>) - <code>ANTHROPIC_API_KEY</code>,
+<code>ANTHROPIC_BASE_URL</code> - <code>AWS_ACCESS_KEY_ID</code>,
+<code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_REGION</code> -
+<code>GOOGLE_APPLICATION_CREDENTIALS</code>,
+<code>VERTEX_PROJECT_ID</code>, <code>VERTEX_LOCATION</code> -
+<code>AZURE_OPENAI_API_KEY</code>, <code>AZURE_OPENAI_ENDPOINT</code>,
+<code>AZURE_OPENAI_API_VERSION</code></p>
+<p>Cobra: - <code>helixcode wizard</code> — explicit re-run of the
+configuration wizard (overwrites prior config).</p>
+<p>First-run trigger: in <code>cmd/cli/main.go</code> startup, if
+<code>os.Stat(configPath)</code> returns <code>os.ErrNotExist</code> AND
+no <code>--provider</code> flag AND no <code>HELIX_LLM_PROVIDER</code>
+env var AND <code>term.IsTerminal(int(os.Stdin.Fd()))</code> returns
+true, the selector auto-launches <code>Wizard.Run</code>. Non-TTY (CI,
+scripts) bypasses the wizard and falls back to Ollama with a stderr
+WARN.</p>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup-precedence">4.1 Startup precedence</h3>
+<pre><code>NewCLI()
+  └─ Selector.Resolve(ctx)
+       ├─ if opts.Flag != &quot;&quot;:      type := opts.Flag
+       ├─ else if opts.Env != &quot;&quot;:  type := opts.Env
+       ├─ else if configFile.exists: type := configFile.Provider
+       ├─ else if AllowWizard &amp;&amp; tty: type, form := Wizard.Run() ; writer.Write(form)
+       └─ else: type := ProviderTypeOllama (fallback)
+       │
+       ├─ cfg := buildProviderConfigEntry(type, env, configFile)
+       └─ provider, err := llm.NewProvider(cfg)   // existing factory</code></pre>
+<h3 id="wizard-flow-tview">4.2 Wizard flow (tview)</h3>
+<pre><code>Wizard.Run
+  ├─ render tview.Form
+  │    ├─ DropDown &quot;Provider&quot; → [anthropic, bedrock, vertex, azure]
+  │    ├─ on-change: rebuild model dropdown via VerifierModelSource.FetchModels
+  │    │             filtered by ProviderType
+  │    ├─ InputField &quot;API Key&quot; / &quot;Region&quot; / &quot;Project ID&quot; / &quot;Endpoint&quot; (conditional)
+  │    └─ Buttons [Save] [Cancel]
+  ├─ on-Save: validate (non-empty mandatories per §3.4), then writer.Write(form)
+  ├─ on-Cancel: return ErrWizardCancelled
+  └─ return WizardForm</code></pre>
+<h3 id="model-discovery">4.3 Model discovery</h3>
+<pre><code>provider.GetModels()
+  └─ existing impl: returns provider.models slice
+       └─ which is populated at construction by:
+            VerifierModelSource.FetchModels(ctx)  // CONST-036/037
+            └─ filter by ProviderType</code></pre>
+<p>If the verifier is unreachable at provider construction,
+<code>verifier.fallback_models.go</code> supplies the cached set. If
+both fail, the provider construction returns a non-nil error and the
+selector reports the failure to the user with the path to the wizard for
+re-configuration.</p>
+<h2 id="error-handling-edge-cases-and-anti-bluff">5. Error handling,
+edge cases, and anti-bluff</h2>
+<h3 id="error-paths">5.1 Error paths</h3>
+<ul>
+<li><strong>Missing credentials</strong> — provider construction returns
+a typed error (<code>ErrProviderUnavailable</code> from
+<code>missing_types.go:187</code>); selector surfaces via
+<code>fmt.Errorf(&quot;provider %s: %w&quot;, type, err)</code> and tells the user
+to run <code>helixcode wizard</code>.</li>
+<li><strong>Verifier unreachable</strong> — fall back to
+<code>fallback_models.go</code>; emit one stderr WARN; do not
+crash.</li>
+<li><strong>Wizard cancelled</strong> — exit 1 with a friendly message;
+do not write a partial config file.</li>
+<li><strong>Invalid endpoint URL</strong> — wizard shows inline error;
+form does not advance.</li>
+<li><strong>Non-TTY with wizard required</strong> — selector returns an
+explicit error: “no provider configured and stdin is not a TTY; set
+–provider, HELIX_LLM_PROVIDER, or run <code>helixcode wizard</code>
+interactively”.</li>
+<li><strong>Concurrent first-run launches</strong> — wizard writer uses
+<code>os.OpenFile(path, O_CREATE|O_EXCL|O_WRONLY, 0600)</code>; second
+concurrent run returns <code>os.ErrExist</code> and the user is told to
+use <code>helixcode wizard</code> to overwrite.</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9-loud">5.2 Anti-bluff (CONST-035 /
+§11.9) — LOUD</h3>
+<p><strong>The single most dangerous bluff vector for F12 is fake-PASS
+on cloud calls.</strong> Real Bedrock/Vertex/Azure round-trips require
+credentials we cannot assume the test environment has. Therefore:</p>
+<ol type="1">
+<li><p><strong>Unit tests</strong> — mocks of the cloud-SDK boundary are
+permitted (per Universal Rule 2). They MUST validate request shaping
+(URL, headers, body), response parsing, and error mapping.</p></li>
+<li><p><strong>Integration tests
+(<code>-tags=integration</code>)</strong> — gated by env-var presence,
+with explicit <code>SKIP-OK</code> markers when credentials are
+missing:</p>
+<ul>
+<li><code>ANTHROPIC_API_KEY</code> →
+<code>TestProvider_Anthropic_*</code></li>
+<li><code>AWS_ACCESS_KEY_ID &amp;&amp; AWS_REGION</code> →
+<code>TestProvider_Bedrock_*</code></li>
+<li><code>GOOGLE_APPLICATION_CREDENTIALS</code> →
+<code>TestProvider_Vertex_*</code></li>
+<li><code>AZURE_OPENAI_API_KEY &amp;&amp; AZURE_OPENAI_ENDPOINT</code> →
+<code>TestProvider_Azure_*</code></li>
+</ul>
+<p>Skip body MUST be exactly
+<code>t.Skip(&quot;SKIP-OK: P1-F12 cloud creds not provided&quot;)</code> — bare
+skips break <code>make ci-validate-all</code>.</p></li>
+<li><p><strong>Challenge harness</strong> must clearly separate
+evidence:</p>
+<ul>
+<li><strong>Local evidence (always runs)</strong>: factory construction
+of all four <code>ProviderType</code>s with synthetic configs (no
+network); wizard form rendering + field validation under
+<code>tcell.SimulationScreen</code>; selector precedence (flag &gt; env
+&gt; config &gt; wizard &gt; fallback); LLMsVerifier-backed model
+dropdown population using a stub adapter pointing at the embedded
+verifier server.</li>
+<li><strong>Credentialed evidence (skipped when env unset)</strong>:
+real <code>Health(ctx)</code> round-trip per provider, with the SKIP
+markers above. The Challenge prints a final breakdown —
+<code>LOCAL: PASS</code> vs <code>CLOUD: SKIPPED (creds missing)</code>
+— so a reader can never confuse the two.</li>
+</ul></li>
+<li><p><strong><code>internal/llm/wizard.go</code> must use real
+<code>tview.Application</code></strong> wired via
+<code>WithScreen(tcell.SimulationScreen)</code> for tests. Tests assert
+on rendered cell content, not on captured <code>fmt.Print</code> output.
+Form-state assertions exercise the real callback chain.</p></li>
+<li><p>The standard 4-term smoke clean check applies to every new
+file:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  internal/llm/selector.go internal/llm/wizard.go internal/llm/wizard_writer.go <span class="dt">\</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  cmd/cli/wizard_cmd.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div></li>
+</ol>
+<h2 id="testing">6. Testing</h2>
+<p>Unit (mocks OK): - <code>TestSelector_FlagWinsOverEnv</code> -
+<code>TestSelector_EnvWinsOverConfig</code> -
+<code>TestSelector_ConfigWinsOverWizard</code> -
+<code>TestSelector_WizardWhenNothingSet_TTY</code> -
+<code>TestSelector_OllamaFallback_NonTTY</code> -
+<code>TestSelector_RejectsUnknownProvider</code> -
+<code>TestNewCloudProvider_AcceptsAllFour</code> -
+<code>TestNewCloudProvider_RejectsNonCloudType</code> -
+<code>TestWizard_RendersAllFourProviderOptions</code>
+(tcell.SimulationScreen) -
+<code>TestWizard_DynamicModelDropdown_ViaVerifier</code> -
+<code>TestWizard_VerifierOffline_FallbackBannerShown</code> -
+<code>TestWizard_ValidatesMandatoryFieldsPerProvider</code> -
+<code>TestWizard_CancelReturnsError_NoFileWritten</code> -
+<code>TestWizardWriter_File_O_EXCL_PreventsOverwrite</code> -
+<code>TestWizardWriter_File_Mode0600</code> -
+<code>TestWizardCmd_RunsWizard_AndPersists</code> - Per-provider
+request-shaping tests
+(<code>TestAnthropicProvider_Generate_ShapesRequest</code>, etc.) —
+these may already exist; F12 only adds gaps it identifies.</p>
+<p>Integration (<code>-tags=integration</code>, gated): -
+<code>TestMultiProvider_Anthropic_Health</code> —
+<code>SKIP-OK: P1-F12 cloud creds not provided</code> when env unset. -
+<code>TestMultiProvider_Bedrock_Health</code> -
+<code>TestMultiProvider_Vertex_Health</code> -
+<code>TestMultiProvider_Azure_Health</code> -
+<code>TestMultiProvider_VerifierBackedModelList</code> — runs against
+the embedded verifier server (always available; not
+credential-gated).</p>
+<p>Challenge: - Local: factory + wizard rendering + selector precedence
++ verifier-backed model list (always runs). - Credentialed: real
+<code>Health(ctx)</code> per provider (skipped when creds missing, with
+explicit reporting in the Challenge output).</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>All cloud SDKs are pure Go and already in
+<code>helix_code/go.mod</code>: -
+<code>github.com/aws/aws-sdk-go-v2 v1.32.7</code> and
+<code>service/bedrockruntime v1.23.1</code> -
+<code>github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0</code>,
+<code>sdk/azidentity v1.8.0</code> - Vertex AI is implemented over
+<strong>raw HTTPS + <code>golang.org/x/oauth2/google</code></strong>
+(already in deps; see <code>vertexai_provider.go</code>); we
+deliberately do NOT pull <code>cloud.google.com/go/aiplatform</code>
+because the existing impl already works and adding the SDK would be a
+30+MB dep churn for zero gain. -
+<code>github.com/rivo/tview v0.42.0</code> and
+<code>github.com/gdamore/tcell/v2</code> are already in deps.</p>
+<p><strong>No new dependencies required.</strong> Cross-compile sanity
+for linux/darwin/windows is the canonical check; tview supports all
+three.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li>Multi-provider routing / fallback chains across providers
+(route-by-cost, route-by-availability).</li>
+<li>Per-request provider switching mid-session.</li>
+<li>Encrypted credential storage (creds remain in <code>.env</code> mode
+0600 + system OS key-store integration deferred).</li>
+<li>Telemetry attribution per provider (call counts, cost
+dashboards).</li>
+<li>OAuth interactive flow for Anthropic Claude.ai accounts (only
+API-key path supported in F12).</li>
+<li>Vertex AI Anthropic-via-Model-Garden enforcement (existing
+<code>vertexai_provider.go</code> supports it; F12 does not change
+behaviour).</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>§11.9 / CONST-035</strong> — Challenge separates LOCAL vs
+CLOUD evidence with explicit credential-gating, never claims a green
+PASS without runtime evidence.</li>
+<li><strong>CONST-036 / CONST-037</strong> — Wizard model dropdown and
+provider construction both source models from
+<code>internal/verifier/</code>. Hardcoded model lists are forbidden and
+asserted-against by
+<code>TestWizard_DynamicModelDropdown_ViaVerifier</code>.</li>
+<li><strong>CONST-038</strong> — Existing verifier poller (60s interval)
+is honoured; F12 does not introduce any cache that could outlive the 60s
+mandate.</li>
+<li><strong>CONST-039</strong> — All four mandated cloud providers
+shipped together; <code>TestNewCloudProvider_AcceptsAllFour</code>
+enforces.</li>
+<li><strong>CONST-040</strong> — Capability flags propagate through
+<code>VerifierModelSource.ConvertVerifiedToModelInfo</code>; never
+hardcoded.</li>
+<li><strong>CONST-042</strong> — Credentials are read from env and
+<code>~/.config/helixcode/config.yaml</code> (mode 0600, in
+<code>.gitignore</code> — verified by Challenge). Wizard writer enforces
+mode 0600 via <code>os.OpenFile</code> with explicit perm bits.</li>
+<li><strong>CONST-043</strong> — All commits land on <code>main</code>
+non-force; the close-out task pushes to all four remotes non-force.</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: provider scope</td>
+<td>(A) ship all four — Anthropic, AWS Bedrock, Google Vertex AI, Azure
+OpenAI</td>
+</tr>
+<tr>
+<td>Q2: selection surface</td>
+<td>(C) <code>--provider</code> flag + <code>HELIX_LLM_PROVIDER</code>
+env + interactive wizard (cobra <code>helixcode wizard</code> +
+first-run auto-launch)</td>
+</tr>
+<tr>
+<td>Q3: relationship to existing internal/llm</td>
+<td>(B) wrap existing <code>internal/llm</code> (4 cloud impls already
+exist); F12 adds the unified selection/factory/wizard layer;
+non-breaking</td>
+</tr>
+<tr>
+<td>Q4: wizard UX</td>
+<td>(B) full tview TUI (modal forms, focus, inline validation) — NOT
+plain stdin prompts</td>
+</tr>
+<tr>
+<td>Q5: model source</td>
+<td>(A) LLMsVerifier mandatory; <code>internal/verifier</code> is the
+sole source of truth for model lists per CONST-036/037</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

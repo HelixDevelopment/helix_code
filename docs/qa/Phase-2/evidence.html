@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="retroactive-qa-evidence-commit-cee5cdae-run-id-phase-2">Retroactive
+QA evidence — commit <code>cee5cdae</code> (run-id
+<code>Phase-2</code>)</h1>
+<blockquote>
+<p><strong>RECONSTRUCTED, AFTER-THE-FACT DOCUMENTATION (HXC-039,
+§11.4.83).</strong> This file is NOT a captured-at-the-time end-user
+transcript. It is honest retroactive documentation created during the
+HXC-039 §11.4.83 back-fill, operator-authorised, to give a pre-existing
+commit its required <code>docs/qa/&lt;run-id&gt;/</code> evidence
+directory WITHOUT rewriting git history. No runtime output below is
+fabricated (§11.4.6 / §11.4.123).</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Commit SHA</td>
+<td><code>cee5cdae96adf30dd4075e87c9553e773ee4a69c</code></td>
+</tr>
+<tr>
+<td>Short SHA</td>
+<td><code>cee5cdae</code></td>
+</tr>
+<tr>
+<td>Authored</td>
+<td>2026-06-09T11:31:42+05:00</td>
+</tr>
+<tr>
+<td>Subject</td>
+<td><code>feat(meta): Phase-2 completion — 64-submodule §11.4.122-139 cascade + 4 CONST-055 gates green + .dockerignore (CONST-047/055)</code></td>
+</tr>
+<tr>
+<td>run-id basename</td>
+<td><code>Phase-2</code> (a verbatim substring of the commit
+subject)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-the-commit-changed-from-git-show---stat">What the commit
+changed (from <code>git show --stat</code>)</h2>
+<p>This is predominantly a <strong>governance/meta cascade</strong>
+commit: a §11.4.122–139 constitutional-anchor cascade across 64
+submodule pointers, plus <code>.dockerignore</code>, docs-summary regen,
+and the <code>docs/workable_items.db</code>. The ONLY production-code
+touch that tripped the §11.4.83 feature heuristic is a one-line
+change:</p>
+<pre><code>helix_code/internal/worker/ssh_pool_consensus.go   | 2 +-</code></pre>
+<p>Other entries are <code>.dockerignore</code>, <code>docs/*.md</code>,
+<code>docs/workable_items.db</code> (Bin), and ~60
+<code>submodules/*</code> pointer bumps — none of which are end-user
+features.</p>
+<h2 id="verification-that-exists-for-this-commit">Verification that
+exists for this commit</h2>
+<ul>
+<li>The single production-code line in
+<code>ssh_pool_consensus.go</code> is part of the worker consensus
+package, whose contemporaneous tests
+(<code>ssh_pool_consensus_test.go</code>,
+<code>consensus_*_test.go</code>) cover that surface
+(<code>go test ./internal/worker/...</code>).</li>
+<li>The substantive content of this commit (the 64-submodule anchor
+cascade + 4 CONST-055 gates) is governance, validated by the cascade
+verifier (<code>scripts/verify-governance-cascade.sh</code>) and the
+CONST-055 gates referenced in the subject — NOT an end-user runtime
+feature.</li>
+<li>This commit arguably should have carried a
+<code>[no-qa-evidence]</code> opt-out token (it is a meta/governance
+change, not a user-facing feature). This directory records that
+determination retroactively instead.</li>
+</ul>
+<h2 id="honesty-statement">Honesty statement</h2>
+<p>Reconstructed documentation. NO faked PASS logs, NO fabricated
+runtime output. The bulk of this commit is governance, not a shippable
+end-user feature; the lone prod-code line is covered by the worker
+package’s existing tests.</p>
+</body>
+</html>

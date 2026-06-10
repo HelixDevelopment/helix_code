@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ADR-005-authentication-system</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ADR-005-authentication-system</h1>
+</header>
+<h1 id="adr-005-authentication-system">ADR-005: Authentication
+System</h1>
+<h2 id="status">Status</h2>
+<p>Accepted</p>
+<h2 id="date">Date</h2>
+<p>2026-01-08</p>
+<h2 id="context">Context</h2>
+<p>HelixCode is a multi-client platform supporting multiple interfaces:
+- REST API (web applications, integrations) - CLI (command-line
+development) - TUI (terminal user interface) - Desktop application -
+Mobile applications (iOS, Android) - WebSocket (real-time
+communications)</p>
+<p>The authentication system must:</p>
+<ol type="1">
+<li><strong>Support multiple client types</strong>: Each client has
+different security characteristics</li>
+<li><strong>Provide session management</strong>: Track active sessions
+across devices</li>
+<li><strong>Enable secure password storage</strong>: Protect credentials
+at rest</li>
+<li><strong>Support token-based authentication</strong>: For API and
+stateless clients</li>
+<li><strong>Enable MFA</strong>: Multi-factor authentication for
+enterprise security</li>
+<li><strong>Audit authentication events</strong>: Track login attempts
+and security events</li>
+<li><strong>Handle session lifecycle</strong>: Creation, validation,
+expiration, revocation</li>
+<li><strong>Scale horizontally</strong>: Support distributed
+deployments</li>
+</ol>
+<h2 id="decision">Decision</h2>
+<p>We implemented a hybrid authentication system combining JWT tokens
+for stateless API access with session-based authentication for stateful
+clients.</p>
+<h3 id="core-authentication-service">Core Authentication Service</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuthService <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    config AuthConfig</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    db     AuthRepository</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuthConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    JWTSecret       <span class="dt">string</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    TokenExpiry     time<span class="op">.</span>Duration</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    SessionExpiry   time<span class="op">.</span>Duration</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    BcryptCost      <span class="dt">int</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    Argon2Time      <span class="dt">uint32</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    Argon2Memory    <span class="dt">uint32</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    Argon2Threads   <span class="dt">uint8</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    Argon2KeyLength <span class="dt">uint32</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="user-model">User Model</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> User <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ID          uuid<span class="op">.</span>UUID <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Username    <span class="dt">string</span>    <span class="st">`json:&quot;username&quot;`</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Email       <span class="dt">string</span>    <span class="st">`json:&quot;email&quot;`</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    DisplayName <span class="dt">string</span>    <span class="st">`json:&quot;display_name&quot;`</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    IsActive    <span class="dt">bool</span>      <span class="st">`json:&quot;is_active&quot;`</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    IsVerified  <span class="dt">bool</span>      <span class="st">`json:&quot;is_verified&quot;`</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    MFAEnabled  <span class="dt">bool</span>      <span class="st">`json:&quot;mfa_enabled&quot;`</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    LastLogin   time<span class="op">.</span>Time <span class="st">`json:&quot;last_login&quot;`</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    CreatedAt   time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    UpdatedAt   time<span class="op">.</span>Time <span class="st">`json:&quot;updated_at&quot;`</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="session-model">Session Model</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Session <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ID           uuid<span class="op">.</span>UUID <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    UserID       uuid<span class="op">.</span>UUID <span class="st">`json:&quot;user_id&quot;`</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    SessionToken <span class="dt">string</span>    <span class="st">`json:&quot;session_token&quot;`</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ClientType   <span class="dt">string</span>    <span class="st">`json:&quot;client_type&quot;`</span>  <span class="co">// terminal_ui, cli, rest_api, mobile_ios, mobile_android</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    IPAddress    net<span class="op">.</span>IP    <span class="st">`json:&quot;ip_address&quot;`</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    UserAgent    <span class="dt">string</span>    <span class="st">`json:&quot;user_agent&quot;`</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ExpiresAt    time<span class="op">.</span>Time <span class="st">`json:&quot;expires_at&quot;`</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    CreatedAt    time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="password-security">Password Security</h3>
+<p><strong>Dual Algorithm Support</strong>: - <strong>Primary</strong>:
+bcrypt for new passwords (configurable cost factor) -
+<strong>Fallback</strong>: Argon2id for migrated passwords</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>AuthService<span class="op">)</span> hashPassword<span class="op">(</span>password <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    hash<span class="op">,</span> err <span class="op">:=</span> bcrypt<span class="op">.</span>GenerateFromPassword<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>password<span class="op">),</span> s<span class="op">.</span>config<span class="op">.</span>BcryptCost<span class="op">)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dt">string</span><span class="op">(</span>hash<span class="op">),</span> err</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>AuthService<span class="op">)</span> verifyPassword<span class="op">(</span>password<span class="op">,</span> hash <span class="dt">string</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Try bcrypt first</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> bcrypt<span class="op">.</span>CompareHashAndPassword<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>hash<span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span>password<span class="op">))</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">true</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Fallback to Argon2</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">.</span>verifyArgon2Password<span class="op">(</span>password<span class="op">,</span> hash<span class="op">)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Argon2 Parameters</strong>: - Time cost: 1 iteration -
+Memory: 64 MB - Parallelism: 4 threads - Key length: 32 bytes</p>
+<h3 id="jwt-token-system">JWT Token System</h3>
+<p>JWT tokens for API authentication:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>AuthService<span class="op">)</span> GenerateJWT<span class="op">(</span>user <span class="op">*</span>User<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    claims <span class="op">:=</span> jwt<span class="op">.</span>MapClaims<span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;user_id&quot;</span><span class="op">:</span>  user<span class="op">.</span>ID<span class="op">.</span>String<span class="op">(),</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;username&quot;</span><span class="op">:</span> user<span class="op">.</span>Username<span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;email&quot;</span><span class="op">:</span>    user<span class="op">.</span>Email<span class="op">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;exp&quot;</span><span class="op">:</span>      time<span class="op">.</span>Now<span class="op">().</span>Add<span class="op">(</span>s<span class="op">.</span>config<span class="op">.</span>TokenExpiry<span class="op">).</span>Unix<span class="op">(),</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;iat&quot;</span><span class="op">:</span>      time<span class="op">.</span>Now<span class="op">().</span>Unix<span class="op">(),</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    token <span class="op">:=</span> jwt<span class="op">.</span>NewWithClaims<span class="op">(</span>jwt<span class="op">.</span>SigningMethodHS256<span class="op">,</span> claims<span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> token<span class="op">.</span>SignedString<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>s<span class="op">.</span>config<span class="op">.</span>JWTSecret<span class="op">))</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Two verification methods</strong>: 1. <code>VerifyJWT</code>:
+Fast, returns minimal user from claims 2. <code>VerifyJWTWithDB</code>:
+Slower, returns complete user with database lookup</p>
+<h3 id="authentication-flow">Authentication Flow</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                    Authentication Flow                          │
+│                                                                 │
+│  ┌──────────┐    ┌──────────────┐    ┌──────────────────┐      │
+│  │  Client  │───▶│  Auth API    │───▶│  Auth Service    │      │
+│  └──────────┘    └──────────────┘    └────────┬─────────┘      │
+│                                               │                 │
+│                              ┌────────────────┼────────────────┐│
+│                              │                │                ││
+│                              ▼                ▼                ││
+│                      ┌──────────────┐  ┌──────────────┐       ││
+│                      │   Verify     │  │   Create     │       ││
+│                      │  Password    │  │  Session     │       ││
+│                      └──────────────┘  └──────────────┘       ││
+│                              │                │                ││
+│                              └────────┬───────┘                ││
+│                                       │                        ││
+│                                       ▼                        ││
+│                              ┌──────────────┐                  ││
+│                              │   Return     │                  ││
+│                              │  JWT/Session │                  ││
+│                              └──────────────┘                  ││
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="session-management">Session Management</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Create session on login</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>session <span class="op">:=</span> <span class="op">&amp;</span>Session<span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">:</span>           uuid<span class="op">.</span>New<span class="op">(),</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    UserID<span class="op">:</span>       user<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    SessionToken<span class="op">:</span> s<span class="op">.</span>generateSessionToken<span class="op">(),</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ClientType<span class="op">:</span>   clientType<span class="op">,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    IPAddress<span class="op">:</span>    ip<span class="op">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    UserAgent<span class="op">:</span>    userAgent<span class="op">,</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    ExpiresAt<span class="op">:</span>    time<span class="op">.</span>Now<span class="op">().</span>Add<span class="op">(</span>s<span class="op">.</span>config<span class="op">.</span>SessionExpiry<span class="op">),</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Session token generation (32 bytes, URL-safe base64)</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>AuthService<span class="op">)</span> generateSessionToken<span class="op">()</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    bytes <span class="op">:=</span> <span class="bu">make</span><span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dv">32</span><span class="op">)</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> rand<span class="op">.</span>Read<span class="op">(</span>bytes<span class="op">)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> base64<span class="op">.</span>URLEncoding<span class="op">.</span>EncodeToString<span class="op">(</span>bytes<span class="op">),</span> err</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="security-features">Security Features</h3>
+<ol type="1">
+<li><strong>Constant-time comparison</strong>: Prevents timing attacks
+on password verification</li>
+<li><strong>Session IP tracking</strong>: Detect session hijacking</li>
+<li><strong>User agent tracking</strong>: Identify device changes</li>
+<li><strong>Account deactivation support</strong>: Disabled accounts
+cannot authenticate</li>
+<li><strong>Session expiration</strong>: Automatic cleanup of expired
+sessions</li>
+</ol>
+<h3 id="repository-interface">Repository Interface</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AuthRepository <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    CreateUser<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> user <span class="op">*</span>User<span class="op">,</span> passwordHash <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    GetUserByUsername<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> username <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>User<span class="op">,</span> <span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    GetUserByEmail<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> email <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>User<span class="op">,</span> <span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    GetUserByID<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id uuid<span class="op">.</span>UUID<span class="op">)</span> <span class="op">(*</span>User<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    UpdateUserLastLogin<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id uuid<span class="op">.</span>UUID<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    UpdateUser<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">,</span> displayName<span class="op">,</span> email <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>User<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    DeleteUser<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    CreateSession<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> session <span class="op">*</span>Session<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    GetSession<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> token <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Session<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    DeleteSession<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> token <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    DeleteUserSessions<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="consequences">Consequences</h2>
+<h3 id="positive">Positive</h3>
+<ol type="1">
+<li><strong>Flexibility</strong>: Supports both token and session-based
+auth</li>
+<li><strong>Security</strong>: Strong password hashing with
+bcrypt/Argon2</li>
+<li><strong>Multi-client</strong>: Different client types handled
+appropriately</li>
+<li><strong>Auditability</strong>: Sessions track client type, IP, user
+agent</li>
+<li><strong>Scalability</strong>: JWT tokens are stateless for
+horizontal scaling</li>
+<li><strong>Backwards Compatibility</strong>: Dual algorithm support for
+migrations</li>
+<li><strong>Session Control</strong>: Users can revoke individual or all
+sessions</li>
+</ol>
+<h3 id="negative">Negative</h3>
+<ol type="1">
+<li><strong>Token Revocation</strong>: JWT cannot be revoked before
+expiry without blacklist</li>
+<li><strong>Secret Management</strong>: JWT secret must be carefully
+managed</li>
+<li><strong>Session Storage</strong>: Session-based auth requires
+database access</li>
+<li><strong>Complexity</strong>: Supporting multiple auth methods
+increases complexity</li>
+</ol>
+<h3 id="neutral">Neutral</h3>
+<ol type="1">
+<li><strong>MFA</strong>: Currently flagged but not fully
+implemented</li>
+<li><strong>OAuth</strong>: Future consideration for third-party
+auth</li>
+</ol>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
+<h3 id="alternative-1-oauth-2.0-only">Alternative 1: OAuth 2.0 Only</h3>
+<p><strong>Description</strong>: Use OAuth 2.0 with authorization code
+flow for all clients.</p>
+<p><strong>Pros</strong>: - Industry standard - Third-party auth support
+- Token refresh flow - Well-documented</p>
+<p><strong>Cons</strong>: - Complex for CLI clients - Requires redirect
+flow - Overkill for internal auth - Additional dependencies</p>
+<p><strong>Why Rejected</strong>: CLI and TUI clients need simpler
+authentication. OAuth can be added later for third-party
+integrations.</p>
+<h3 id="alternative-2-session-only-authentication">Alternative 2:
+Session-Only Authentication</h3>
+<p><strong>Description</strong>: Use server-side sessions exclusively,
+no JWT.</p>
+<p><strong>Pros</strong>: - Immediate session revocation - No token
+expiry issues - Simpler implementation - Centralized session control</p>
+<p><strong>Cons</strong>: - Database lookup for every request - Harder
+to scale horizontally - Session affinity requirements - Higher
+latency</p>
+<p><strong>Why Rejected</strong>: API clients benefit from stateless JWT
+tokens. Hybrid approach provides flexibility.</p>
+<h3 id="alternative-3-passwordless-magic-linkswebauthn">Alternative 3:
+Passwordless (Magic Links/WebAuthn)</h3>
+<p><strong>Description</strong>: Eliminate passwords in favor of magic
+links or WebAuthn.</p>
+<p><strong>Pros</strong>: - No password management - Phishing resistant
+(WebAuthn) - Better user experience - Modern approach</p>
+<p><strong>Cons</strong>: - Email dependency (magic links) - Hardware
+dependency (WebAuthn) - Not all clients support - Complex
+implementation</p>
+<p><strong>Why Rejected</strong>: Many HelixCode use cases require
+offline or automated access where passwordless doesn’t work well. Can be
+added as an option later.</p>
+<h3 id="alternative-4-api-keys-only">Alternative 4: API Keys Only</h3>
+<p><strong>Description</strong>: Use long-lived API keys for all
+authentication.</p>
+<p><strong>Pros</strong>: - Simple to implement - No expiry management -
+Easy for automation - Stateless</p>
+<p><strong>Cons</strong>: - No session management - Hard to revoke -
+Security risk if leaked - No user context changes</p>
+<p><strong>Why Rejected</strong>: Interactive clients need session
+tracking for security. API keys can be a supplementary option.</p>
+<h2 id="implementation-notes">Implementation Notes</h2>
+<ul>
+<li>Auth implementation in <code>internal/auth/auth.go</code></li>
+<li>Database integration in <code>internal/auth/auth_db.go</code></li>
+<li>Default config provides secure defaults</li>
+<li>Environment variable <code>HELIX_AUTH_JWT_SECRET</code> for
+production secret</li>
+<li>Session tokens are 32 bytes of cryptographic randomness</li>
+</ul>
+<h2 id="security-considerations">Security Considerations</h2>
+<ol type="1">
+<li><strong>Password Requirements</strong>: Minimum 8 characters
+enforced</li>
+<li><strong>Email Validation</strong>: Basic format validation</li>
+<li><strong>Username Requirements</strong>: 3-255 characters</li>
+<li><strong>Session Token Entropy</strong>: 256 bits (32 bytes)</li>
+<li><strong>JWT Signing</strong>: HMAC-SHA256</li>
+</ol>
+<h2 id="related-decisions">Related Decisions</h2>
+<ul>
+<li>ADR-006: Database Schema Design (user and session storage)</li>
+<li>ADR-008: Mobile Platform Strategy (mobile authentication flow)</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/auth/auth.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/auth/auth_db.go</code></li>
+</ul>
+</body>
+</html>

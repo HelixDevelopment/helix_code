@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-parallel-agent-coordination</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-parallel-agent-coordination</h1>
+</header>
+<h1 id="parallel-agent-coordination-deep-web-research-sp5">Parallel
+Agent Coordination — Deep-Web Research (SP5)</h1>
+<p><strong>Revision</strong>: 1 <strong>Created</strong>: 2026-06-10
+<strong>Last modified</strong>: 2026-06-10 <strong>Status</strong>:
+active <strong>Scope</strong>: Research feeding SP5 — “All work
+performed by HelixCode MUST be possible to be done by multiple parallel
+agents which are properly coordinated; subagents-driven development used
+as much as possible.” READ-ONLY research; no code changed.</p>
+<blockquote>
+<p>Per §11.4.99 this document cites the latest authoritative online
+sources (URLs + access date in the <code>## Sources verified</code>
+footer). Claims are grounded; honest negatives are flagged inline.</p>
+</blockquote>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-what-exists-in-repo-today-ground-truth">1. What exists
+in-repo today (ground truth)</a></li>
+<li><a href="#2-multi-agent-coordination-frameworks">2. Multi-agent
+coordination frameworks</a></li>
+<li><a href="#3-durable--parallel-task-orchestration-temporal-ray-dask">3.
+Durable / parallel task orchestration (Temporal, Ray, Dask)</a></li>
+<li><a href="#4-go-worker-pool--actor-patterns--the-concurrency-submodule">4.
+Go worker-pool / actor patterns + the <code>concurrency</code>
+submodule</a></li>
+<li><a href="#5-the-convergent-operation--parallel-dispatchable-unit-abstraction">5.
+The convergent “operation = parallel-dispatchable unit”
+abstraction</a></li>
+<li><a href="#6-isolation-for-parallel-mutation-worktree--cow--scoped-locks">6.
+Isolation for parallel mutation (worktree / CoW / scoped locks)</a></li>
+<li><a href="#7-recommendation--single-shared-substrate-for-helixcode--helixagent">7.
+Recommendation — single shared substrate for HelixCode +
+HelixAgent</a></li>
+<li><a href="#8-summary">8. Summary</a></li>
+<li><a href="#sources-verified-2026-06-10">Sources verified
+2026-06-10</a></li>
+</ul>
+<hr />
+<h2 id="what-exists-in-repo-today-ground-truth">1. What exists in-repo
+today (ground truth)</h2>
+<p>Three in-repo artefacts bound the build-vs-reuse decision (read
+read-only this session):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Artefact</th>
+<th>Path</th>
+<th>Capability today</th>
+<th>Gap vs SP5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>concurrency</code> submodule
+(<code>digital.vasic.concurrency</code>, Go 1.24+)</td>
+<td><code>submodules/concurrency/</code>
+(<code>pkg/{pool,queue,limiter,breaker,semaphore,monitor}</code>)</td>
+<td>Worker pool (bounded concurrency,
+<code>Submit</code>/<code>SubmitWait</code>/<code>SubmitBatch</code>/<code>Map</code>/<code>ParallelExecute</code>,
+metrics, graceful shutdown), generic priority queue
+(<code>queue.New[T]</code>, 4 levels, FIFO ties), token-bucket +
+sliding-window limiters, circuit breaker, weighted semaphore, resource
+monitor. <code>pool.Task</code> = <code>ID()</code> +
+<code>Execute(ctx)</code>.</td>
+<td>No notion of an <em>agent unit</em> with capability-matching, no
+Resolver/conflict-resolution, no isolation per task. It is the
+<strong>mechanical substrate</strong>, not the agentic layer.</td>
+</tr>
+<tr>
+<td><code>agentic</code> submodule (<code>digital.vasic.agentic</code>,
+Go 1.24+, ~2.6k LOC)</td>
+<td><code>submodules/agentic/</code></td>
+<td>Graph-based DAG workflow engine: typed nodes
+(<code>agent</code>/<code>tool</code>/<code>condition</code>/<code>parallel</code>/<code>human</code>/<code>subgraph</code>),
+<code>WorkflowState</code> (messages/variables/history/checkpoints,
+RWMutex), conditional <code>ConditionFunc</code> edges,
+exponential-backoff retries, checkpoint/restore,
+<code>NodeTypeParallel</code> fan-out, <code>ShouldEnd</code>
+short-circuit. Downstream-consumed by HelixLLM; siblings
+Planning/LLMOps/SelfImprove/ToolSchema.</td>
+<td>The DAG-execution layer <strong>above</strong>
+<code>concurrency</code>. Has <code>NodeTypeParallel</code> but no
+documented scheduler that maps N independent units onto a worker pool
+with isolation; checkpoints copy variables only (not messages/history);
+no graph-build-time validation.</td>
+</tr>
+<tr>
+<td><code>coordinator.go</code> (in-app, duplicated)</td>
+<td><code>helix_code/internal/agent/coordinator.go</code></td>
+<td>In-app <code>Coordinator</code>: <code>registry</code> of agents,
+<code>tasks</code>/<code>taskQueue</code>/<code>results</code> maps
+under one <code>sync.RWMutex</code>,
+<code>SubmitTask</code>/<code>ExecuteTask</code>,
+<code>findSuitableAgent</code> (linear scan for
+<code>CanHandle(t) &amp;&amp; Status()==Idle</code>), circuit-breaker
+manager + retry policy, <code>WorkflowExecutor</code>.</td>
+<td><strong>This is the duplication SP5 calls out.</strong>
+<code>ExecuteTask</code> is single-task synchronous (no internal fan-out
+across the queue); <code>taskQueue</code> is appended but never drained
+in parallel; capability matching + resilience are re-implemented here
+rather than consumed from <code>concurrency</code>/<code>agentic</code>.
+A second, divergent coordinator vs the agentic stack.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Finding (FACT):</strong> <code>concurrency</code> already
+provides the worker-pool/priority-queue/semaphore/breaker primitives the
+literature converges on; <code>agentic</code> already provides the DAG +
+state + checkpoint layer. <code>coordinator.go</code> re-implements a
+thin slice of both with no parallel drain and its own
+capability-matching — exactly the “duplicated coordinator.go vs agentic
+stacks” the SP5 brief flags.</p>
+<h2 id="multi-agent-coordination-frameworks">2. Multi-agent coordination
+frameworks</h2>
+<p>How the leading agentic stacks decompose work into parallel units and
+coordinate them. All are Python (the agentic ecosystem is Python-first);
+HelixCode is Go, so these inform the <em>interface design</em>, not a
+drop-in dependency.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Repo / license / lang</th>
+<th>Decomposition unit</th>
+<th>Coordination primitive</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangGraph</strong></td>
+<td><code>github.com/langchain-ai/langgraph</code> · MIT · Python (JS
+port exists)</td>
+<td>Node in a <code>StateGraph</code> (each node a function; subgraphs
+are full graphs compiled as nodes)</td>
+<td><strong>Centralized shared state</strong> threaded through nodes;
+fan-out = one node triggers multiple downstream nodes;
+<strong>scatter-gather</strong> with a barrier (downstream waits until
+all parallel branches complete); supervisor pattern via nested
+subgraphs. The dominant 2026 default for stateful workflows.</td>
+</tr>
+<tr>
+<td><strong>CrewAI</strong></td>
+<td><code>github.com/crewAIInc/crewAI</code> · MIT · Python</td>
+<td>Role-playing <code>Agent</code> (role/goal/backstory) +
+<code>Task</code>, assembled into a <code>Crew</code></td>
+<td>Supervisor (subagents one level deep), fan-out (parallel subagent
+dispatch), pipeline (sequential tasks). YAML-driven role
+delegation.</td>
+</tr>
+<tr>
+<td><strong>AutoGen</strong></td>
+<td><code>github.com/microsoft/autogen</code> · MIT (CC-BY for docs) ·
+Python (.NET port)</td>
+<td>Conversable agent in a multi-agent
+<strong>conversation</strong></td>
+<td>Message-passing conversation patterns (group chat, nested chat); a
+manager/orchestrator selects the next speaker. Strong for offline
+quality-sensitive flows.</td>
+</tr>
+<tr>
+<td><strong>OpenAI Agents SDK</strong> (replaced Swarm, GA Mar
+2025)</td>
+<td><code>github.com/openai/openai-agents-python</code> · MIT ·
+Python</td>
+<td><code>Agent</code> (instructions + model + tools +
+allowed-handoffs)</td>
+<td>Named primitives: <strong>Agent / Runner / Handoffs / Tools /
+Sessions / Guardrails</strong>. <code>Runner</code> is the built-in
+agent loop (tool-call → result → repeat until done);
+<strong>Handoff</strong> = explicit agent-to-agent control transfer
+carrying context; <strong>Sessions</strong> = persistent memory;
+<strong>Guardrails</strong> run <em>in parallel</em> with execution.
+Subagents (parent spawns specialized children) formalized 2026. Closest
+to a minimal, named substrate.</td>
+</tr>
+<tr>
+<td><strong>OpenAI Swarm</strong></td>
+<td><code>github.com/openai/swarm</code> · MIT · Python</td>
+<td>Lightweight agent + handoff</td>
+<td>Educational/superseded by Agents SDK; the handoff abstraction is the
+lasting contribution.</td>
+</tr>
+<tr>
+<td><strong>MetaGPT</strong></td>
+<td><code>github.com/FoundationAgents/MetaGPT</code> (was
+geekan/MetaGPT) · MIT · Python</td>
+<td>Role agent governed by an <strong>SOP</strong> (predefined
+workflow)</td>
+<td><strong>Shared message pool + publish/subscribe</strong>: agents
+publish structured messages, subscribe by profile — decouples producers
+from consumers (no constant peer-to-peer). The pub/sub message pool is
+the reusable coordination idea for HelixCode’s event bus.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Convergent patterns</strong> (the “5 that work in 2026”):
+<strong>fan-out</strong> (parallel dispatch + gather),
+<strong>pipeline</strong> (sequential stages),
+<strong>supervisor</strong> (a coordinator routes/delegates, one level
+deep), <strong>debate</strong> (multiple agents argue to consensus),
+<strong>swarm</strong> (peer handoffs, no central router). HelixCode’s
+own <code>debate_orchestrator</code> submodule already maps to “debate”;
+<code>agentic</code>’s DAG covers “pipeline” + “fan-out”;
+<code>coordinator.go</code>’s registry maps to “supervisor”.</p>
+<h2 id="durable-parallel-task-orchestration-temporal-ray-dask">3.
+Durable / parallel task orchestration (Temporal, Ray, Dask)</h2>
+<p>How a unit of work becomes <em>independently dispatchable + retried +
+isolated</em> — the durability/scheduler layer below the agent
+layer.</p>
+<ul>
+<li><strong>Temporal</strong>
+(<code>github.com/temporalio/temporal</code> +
+<code>go.temporal.io/sdk</code>, MIT, Go SDK first-class). Unit = an
+<strong>Activity</strong> (a function that the SDK retries automatically
+per a configurable <code>RetryPolicy</code>, with timeouts) driven from
+a <strong>Workflow</strong> (durable, replayable, fault-tolerant — full
+running state survives worker crash). Dispatch = <strong>Task
+Queues</strong> (lightweight, dynamically allocated;
+Workflow/Activity/Nexus task queues that Workers poll). When a worker
+dies the tasks persist in the queue until a worker recovers.
+<strong>This is the canonical “operation = durable retried dispatchable
+unit” model and it has a native Go SDK</strong> — directly relevant to a
+Go HelixCode substrate.</li>
+<li><strong>Ray</strong> (<code>github.com/ray-project/ray</code>,
+Apache-2.0, Python/C++ core). Two units: <strong>Task</strong>
+(stateless remote function) and <strong>Actor</strong> (stateful remote
+object — keeps state collocated with compute). <strong>Fully
+distributed, decoupled control plane + scheduler</strong> (no single
+master bottleneck) — scales to millions of tasks/s. The Task-vs-Actor
+split is the key design lesson: stateless agent operations → tasks,
+stateful long-lived agents → actors.</li>
+<li><strong>Dask</strong> (<code>github.com/dask/dask</code>, BSD-3,
+Python). Unit = a node in a <strong>lazily-built task graph</strong>
+optimized before execution; a <strong>centralized scheduler</strong>
+coordinates (throughput ceiling ~3k tasks/s on 512 cores — the
+centralized-scheduler bottleneck Ray was designed to escape). Best for
+data-parallel pipelines, weaker for fine-grained agent dispatch.</li>
+</ul>
+<p><strong>Lesson for HelixCode:</strong> Temporal’s
+Activity+TaskQueue+RetryPolicy and Ray’s Task-vs-Actor split are the
+durability/scheduling vocabulary. A decentralized scheduler (Ray) beats
+a centralized one (Dask) for fine-grained dispatch; durable task-queue
+persistence (Temporal) is the recovery story. HelixCode does NOT need to
+adopt Temporal/Ray as dependencies — it needs to mirror their
+<em>interface shape</em> on top of the existing <code>concurrency</code>
+worker pool.</p>
+<h2 id="go-worker-pool-actor-patterns-the-concurrency-submodule">4. Go
+worker-pool / actor patterns + the <code>concurrency</code>
+submodule</h2>
+<p>The <code>submodules/concurrency</code> README/docs (read this
+session) confirm it already implements the Go-idiomatic versions of
+these patterns:</p>
+<ul>
+<li><strong>Worker pool</strong>:
+<code>pool.NewWorkerPool(&amp;pool.PoolConfig{Workers, QueueSize, TaskTimeout, ShutdownGrace, OnError})</code>
+with <code>Submit</code> / <code>SubmitWait(ctx)</code> /
+<code>SubmitBatch</code> (channel of results) /
+<code>ParallelExecute</code> / generic
+<code>Map[T,R](ctx, items, parallelism, fn)</code>.
+<code>pool.Task</code> interface = <code>ID() string</code> +
+<code>Execute(ctx) (interface{}, error)</code> — <strong>this is already
+the minimal dispatchable-unit interface.</strong></li>
+<li><strong>Priority queue</strong>: <code>queue.New[T](capacity)</code>
+generic, 4 levels
+(<code>Critical</code>/<code>High</code>/<code>Normal</code>/<code>Low</code>),
+heap with stable FIFO tie-break — directly supports §11.4.42/§11.4.72
+priority-first + audio-first dispatch ordering.</li>
+<li><strong>Weighted semaphore</strong>
+(<code>semaphore.New(weight)</code> +
+<code>Acquire(ctx, n)</code>/<code>Release(n)</code>) — the
+resource-budget primitive for §11.4.119 single-resource-owner
+partitioning and §12.6 memory-gated concurrency.</li>
+<li><strong>Circuit breaker</strong> +
+<strong>token-bucket/sliding-window limiters</strong> + <strong>resource
+monitor</strong> (CPU/mem/disk via gopsutil) — resilience +
+back-pressure, mirroring Temporal’s retry/timeout story.</li>
+</ul>
+<p>The classic Go actor pattern (a goroutine owning private state,
+reachable only via a channel) is the natural fit for Ray-style stateful
+“actor” agents on top of this — but <code>concurrency</code> does NOT
+ship an actor/mailbox primitive today (honest gap). Per §11.4.74
+extend-don’t-reimplement, an <code>pkg/actor</code> (goroutine + typed
+mailbox + supervisor) belongs <strong>inside
+<code>concurrency</code></strong>, not in a consuming project.</p>
+<h2 id="the-convergent-operation-parallel-dispatchable-unit-abstraction">5.
+The convergent “operation = parallel-dispatchable unit” abstraction</h2>
+<p>Synthesizing §2–§4, the literature converges on a four-role
+interface. Naming aligned to what already exists in-repo so HelixCode +
+HelixAgent consume ONE substrate:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Role</th>
+<th>Convergent meaning (Temporal / Ray / LangGraph / Agents SDK)</th>
+<th>In-repo anchor to build on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unit</strong></td>
+<td>A self-describing piece of work: id, payload, declared
+capability/resource requirements, priority, idempotency key. (Temporal
+Activity, Ray Task, LangGraph node, Agents-SDK tool/handoff
+target.)</td>
+<td>Extend <code>concurrency</code> <code>pool.Task</code>
+(<code>ID()</code>+<code>Execute(ctx)</code>) with
+<code>Requires() Capabilities</code> + <code>Priority()</code> +
+<code>ResourceClass()</code>.</td>
+</tr>
+<tr>
+<td><strong>Scheduler</strong></td>
+<td>Decides WHICH units run now + in what order, honoring priority,
+resource budget, and a decentralized (not single-master) control
+plane.</td>
+<td><code>concurrency</code> <code>queue.PriorityQueue[Unit]</code> +
+<code>semaphore</code> for budget + <code>monitor</code> for §12.6
+memory gating.</td>
+</tr>
+<tr>
+<td><strong>Dispatcher</strong></td>
+<td>Maps a ready unit onto an executor (worker goroutine, subagent, or
+remote worker) with retry/timeout/circuit-breaking + isolation.</td>
+<td><code>concurrency</code> <code>pool.WorkerPool</code> +
+<code>breaker</code> + <code>limiter</code>; isolation layer per
+§6.</td>
+</tr>
+<tr>
+<td><strong>Resolver</strong></td>
+<td>Picks the right executor for a unit (capability match) and
+merges/reconciles results from parallel units (conflict resolution,
+voting, scatter-gather barrier).</td>
+<td>This is the genuinely NEW layer. <code>coordinator.go</code>’s
+<code>findSuitableAgent</code> + <code>ResolutionMethodVoting</code> is
+a first draft; the agentic <code>WorkflowState</code> + barrier is the
+merge half.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The single substrate = <code>Unit</code> +
+<code>Scheduler</code> + <code>Dispatcher</code> +
+<code>Resolver</code></strong> layered as: <code>concurrency</code>
+(Scheduler+Dispatcher mechanics) ← <code>agentic</code>
+(DAG/state/checkpoint = the orchestration shape) ← a thin new
+<strong><code>coordination</code> capability</strong> (Unit + Resolver:
+capability-match + result-merge + isolation policy) that BOTH
+<code>helix_code/internal/agent/coordinator.go</code> AND HelixAgent
+import instead of each re-implementing. Per §11.4.74/§11.4.51 it is a
+decoupled, project-not-aware own-org submodule consumed from the project
+root — NOT a fourth in-app coordinator.</p>
+<h2 id="isolation-for-parallel-mutation-worktree-cow-scoped-locks">6.
+Isolation for parallel mutation (worktree / CoW / scoped locks)</h2>
+<p>Maps directly to §11.4.58 (PWU disjoint scope) / §11.4.84
+(quiescence) / §11.4.119 (single-resource-owner). 2025–2026 best
+practice for parallel AI agents mutating a shared tree:</p>
+<ol type="1">
+<li><strong>One task → one branch → one git worktree → one
+agent</strong> (the canonical invariant). <code>git worktree add</code>
+(Git ≥ 2.5) gives each agent an isolated working directory sharing ONE
+<code>.git</code> object store — creation is instant, disk is near-free
+(CoW-like via shared objects). Changes in one worktree are invisible to
+others; conflicts surface as <em>standard git conflicts</em> instead of
+invisible runtime corruption + <code>.git/index.lock</code> races.
+Native worktree support landed in Claude Code / Cursor / Copilot CLI
+(Oct 2025–Feb 2026). This is exactly the
+<code>concurrency</code>/<code>agentic</code> “git worktree add per
+subagent” recommendation already in §11.4.84.</li>
+<li><strong>Decompose by domain/feature boundary</strong>, never split
+work that touches the same files from different directions (the §11.4.58
+disjoint-PWU rule).</li>
+<li><strong>Runtime isolation above the worktree</strong> when &gt;4
+concurrent agents: one lightweight container per worktree (isolated
+DB/dev-server) — emerging production standard. For HelixCode this is the
+§11.4.76 <code>containers</code> submodule per agent.</li>
+<li><strong>Scoped locks for genuinely-shared exclusive
+resources</strong>: a worktree isolates the <em>filesystem</em> but NOT
+a shared DB row, a single HDMI/audio sink, or a device handle — those
+need the §11.4.119 single-owner advisory lock (claim-when-free,
+release-immediately) + <code>concurrency</code> <code>semaphore</code>.
+The <code>.git/MUTATION_IN_PROGRESS</code> lockfile (§11.4.84) is the
+same pattern for mutation gates.</li>
+<li><strong><code>git sparse-checkout</code></strong> per worktree to
+constrain each agent’s tree to the files it needs (monorepo I/O
+containment).</li>
+</ol>
+<p>Practical cap: 8–10 concurrent worktrees before management overhead
+exceeds parallelism benefit — consistent with the §11.4.58 6-agent /
+§12.6 60%-memory caps already in governance.</p>
+<h2 id="recommendation-single-shared-substrate-for-helixcode-helixagent">7.
+Recommendation — single shared substrate for HelixCode + HelixAgent</h2>
+<p><strong>REUSE, then EXTEND — do not build a fourth
+coordinator</strong> (per §11.4.74 catalogue-first):</p>
+<ol type="1">
+<li><strong>Keep <code>concurrency</code> as the Scheduler+Dispatcher
+floor</strong> (worker pool + priority queue + semaphore + breaker +
+limiter + monitor). It already matches the Temporal/Ray mechanical
+model. <strong>Extend it</strong> (PR upstream, §11.4.74) with: (a) a
+richer <code>Unit</code> interface
+(<code>Requires()</code>/<code>Priority()</code>/<code>ResourceClass()</code>
+over the existing <code>pool.Task</code>); (b) a new
+<code>pkg/actor</code> (goroutine + typed mailbox + supervisor) for
+Ray-style stateful agents — the honest gap from §4.</li>
+<li><strong>Keep <code>agentic</code> as the orchestration
+shape</strong> (DAG + <code>WorkflowState</code> + checkpoints +
+<code>NodeTypeParallel</code> fan-out + scatter-gather barrier).
+<strong>Extend it</strong> so <code>NodeTypeParallel</code> drains onto
+a <code>concurrency</code> worker pool with a real scheduler (today the
+link is thin), and so checkpoints copy messages+history not just
+variables (§4 gap).</li>
+<li><strong>Build the genuinely-new thin
+<code>Resolver</code>/<code>Unit</code> layer once</strong> —
+capability-match + result-merge (voting/scatter-gather) + isolation
+policy — as a decoupled own-org submodule (or a <code>pkg/</code> inside
+<code>agentic</code>), and have <strong>both</strong>
+<code>helix_code/internal/agent/coordinator.go</code> AND HelixAgent
+consume it. This <strong>retires the duplication</strong>:
+<code>coordinator.go</code>’s <code>findSuitableAgent</code> +
+<code>ResolutionMethodVoting</code> + circuit-breaker/retry get
+re-expressed as consumers of the shared substrate, not
+re-implementations.</li>
+<li><strong>Adopt named primitives from the Agents SDK +
+MetaGPT</strong> for the agentic surface: <strong>Handoff</strong>
+(explicit unit-to-unit control transfer carrying context),
+<strong>Guardrails</strong> (validation in parallel with execution), and
+a <strong>shared pub/sub message pool</strong> (MetaGPT) — HelixCode
+already has an <code>event_bus</code> submodule to host the pub/sub
+coordination.</li>
+<li><strong>Isolation = git worktree per subagent +
+<code>containers</code> per worktree above 4 agents +
+<code>semaphore</code>/single-owner lock for shared exclusive
+resources</strong> (§6) — this is already the
+§11.4.58/§11.4.84/§11.4.119 governance; the substrate just needs to
+enforce it mechanically (claim a worktree + a resource token before
+dispatch).</li>
+</ol>
+<p>Net: HelixCode’s parallel-agent story is <strong>~80% already
+built</strong> across <code>concurrency</code> + <code>agentic</code>;
+the missing 20% is (a) wiring <code>agentic</code>’s parallel node to
+<code>concurrency</code>’s scheduler, (b) one shared
+<code>Unit</code>+<code>Resolver</code> layer replacing the in-app
+<code>coordinator.go</code> duplication, (c) a <code>pkg/actor</code>
+for stateful agents, (d) mechanical worktree+resource-token
+isolation.</p>
+<h2 id="summary">8. Summary</h2>
+<ol type="1">
+<li>SP5 substrate = <strong>Unit + Scheduler + Dispatcher +
+Resolver</strong> — the four roles every surveyed stack (Temporal, Ray,
+LangGraph, OpenAI Agents SDK, MetaGPT) converges on.</li>
+<li><strong>Unit</strong> = self-describing work (id,
+capability/resource reqs, priority, idempotency) — extend
+<code>concurrency</code>’s existing <code>pool.Task</code>
+(<code>ID()</code>+<code>Execute(ctx)</code>).</li>
+<li><strong>Scheduler</strong> = <code>concurrency</code>
+<code>queue.PriorityQueue[Unit]</code> + <code>semaphore</code> budget +
+<code>monitor</code> (§12.6 memory gate); decentralized beats Dask’s
+centralized scheduler.</li>
+<li><strong>Dispatcher</strong> = <code>concurrency</code>
+<code>pool.WorkerPool</code> + <code>breaker</code> +
+<code>limiter</code> + retry — mirrors Temporal
+Activity/TaskQueue/RetryPolicy (native Go SDK exists, so the shape is
+proven in Go).</li>
+<li><strong>Resolver</strong> = the genuinely-new layer:
+capability-match + scatter-gather/voting result-merge + isolation
+policy.</li>
+<li><strong>REUSE not rebuild</strong>: <code>concurrency</code> already
+ships worker-pool/priority-queue/semaphore/breaker; <code>agentic</code>
+already ships the DAG+state+checkpoint+parallel-node layer. ~80%
+exists.</li>
+<li><strong>Retire the duplication</strong>:
+<code>helix_code/internal/agent/coordinator.go</code> re-implements
+capability-match + resilience + a never-drained <code>taskQueue</code>;
+re-express it as a CONSUMER of the shared substrate.</li>
+<li><strong>EXTEND (§11.4.74)</strong>: wire <code>agentic</code>
+<code>NodeTypeParallel</code> to a real <code>concurrency</code>
+scheduler; add <code>pkg/actor</code> (goroutine+mailbox) for Ray-style
+stateful agents; checkpoint messages+history not just variables.</li>
+<li><strong>Adopt named primitives</strong>: Handoff + Guardrails
+(Agents SDK) + shared pub/sub message pool (MetaGPT, host on the
+<code>event_bus</code> submodule).</li>
+<li><strong>Isolation strategy</strong>: one task→one branch→one
+<strong>git worktree</strong>→one agent (CoW-like, instant, conflicts
+surface as git conflicts) — §11.4.58/§11.4.84.</li>
+<li><strong>Above 4 agents</strong>: one
+<code>containers</code>-submodule container per worktree (§11.4.76);
+<code>sparse-checkout</code> to bound each tree; cap 6–10 agents
+(§11.4.58 / §12.6).</li>
+<li><strong>Shared exclusive resources</strong> (DB row, single sink,
+device handle) need a §11.4.119 single-owner advisory lock +
+<code>concurrency</code> <code>semaphore</code> — worktree isolation
+alone does NOT cover them.</li>
+</ol>
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<ul>
+<li>LangGraph vs AutoGen vs CrewAI architecture comparison —
+https://latenode.com/blog/platform-comparisons-alternatives/automation-platform-comparisons/langgraph-vs-autogen-vs-crewai-complete-ai-agent-framework-comparison-architecture-analysis-2025
+(accessed 2026-06-10)</li>
+<li>LangGraph multi-agent orchestration +
+supervisor/fan-out/shared-state —
+https://latenode.com/blog/ai-frameworks-technical-infrastructure/langgraph-multi-agent-orchestration/langgraph-multi-agent-orchestration-complete-framework-guide-architecture-analysis-2025
+(accessed 2026-06-10)</li>
+<li>Swarm vs Supervisor multi-agent architecture —
+https://www.augmentcode.com/guides/swarm-vs-supervisor (accessed
+2026-06-10)</li>
+<li>Multi-agent orchestration: 5 patterns
+(fan-out/pipeline/debate/supervisor/swarm) —
+https://www.digitalapplied.com/blog/multi-agent-orchestration-5-patterns-that-work
+(accessed 2026-06-10)</li>
+<li>OpenAI Agents SDK docs
+(Agent/Runner/Handoffs/Tools/Sessions/Guardrails) —
+https://openai.github.io/openai-agents-python/ (accessed
+2026-06-10)</li>
+<li>OpenAI Swarm (educational, superseded) —
+https://github.com/openai/swarm (accessed 2026-06-10)</li>
+<li>MetaGPT shared message pool + pub/sub + SOP/roles —
+https://arxiv.org/html/2308.00352v6 (accessed 2026-06-10)</li>
+<li>Temporal durable execution / Activity / Task Queue / RetryPolicy —
+https://docs.temporal.io/task-queue and
+https://docs.temporal.io/activity-execution and
+https://pkg.go.dev/go.temporal.io/sdk/temporal (accessed
+2026-06-10)</li>
+<li>Ray actor/task model, decentralized scheduler —
+https://arxiv.org/pdf/1712.05889 and
+https://docs.ray.io/en/latest/ray-more-libs/dask-on-ray.html (accessed
+2026-06-10)</li>
+<li>Ray vs Dask (centralized vs decentralized scheduler, throughput) —
+https://www.oreateai.com/blog/dask-vs-ray-choosing-the-right-framework-for-distributed-computing/1c4610b09094611aca8b1969c1beb83e
+(accessed 2026-06-10)</li>
+<li>Git worktree isolation for parallel AI agents (one task→one
+branch→one worktree; runtime isolation; caps) —
+https://www.augmentcode.com/guides/git-worktrees-parallel-ai-agent-execution
+and
+https://www.mindstudio.ai/blog/git-worktrees-parallel-ai-coding-agents
+(accessed 2026-06-10)</li>
+</ul>
+<p><strong>Honest negatives:</strong> (a) the agentic-framework
+comparison sources are vendor/secondary blogs, not the primary framework
+docs for every claim — primary repos cited where load-bearing (Swarm,
+MetaGPT arXiv, Temporal/Ray docs). (b) No source claims a Go-native
+equivalent of LangGraph/CrewAI exists at production grade — the Go
+agentic substrate for HelixCode is genuinely original work built on the
+<code>concurrency</code>+<code>agentic</code> submodules, not a reusable
+off-the-shelf Go framework. (c) <code>concurrency</code> ships no
+actor/mailbox primitive today — the <code>pkg/actor</code>
+recommendation is a gap-fill, not a description of existing code.</p>
+</body>
+</html>

@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ZERO_BLUFF_USER_MANUAL</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ZERO_BLUFF_USER_MANUAL</h1>
+</header>
+<h1 id="helixcode-user-manual-zero-bluff-phase-5-edition">HelixCode User
+Manual — Zero-Bluff Phase 5 Edition</h1>
+<p><strong>Audience</strong>: End users installing and using HelixCode.
+<strong>Companion</strong>: For depth, see <a href="README.md"><code>README.md</code></a> (3,240-line comprehensive
+reference), <a href="INDEX.md"><code>INDEX.md</code></a>, and <a href="SUMMARY.md"><code>SUMMARY.md</code></a>. <strong>Scope</strong>:
+This document covers the 30 shipped features (F01–F30) and the
+Zero-Bluff infrastructure with end-user-actionable detail. Every command
+shown is real and was validated against the codebase. <strong>Last
+updated</strong>: 2026-05-12</p>
+<hr />
+<h2 id="getting-started">1. Getting Started</h2>
+<h3 id="system-requirements">1.1 System Requirements</h3>
+<ul>
+<li>Linux (kernel ≥ 5.10), macOS (≥ 12), or Windows (10+ via WSL2)</li>
+<li>Go 1.26 (only for builds from source; binary releases need no
+toolchain)</li>
+<li>PostgreSQL 15+ and Redis 7+ for full-feature mode (single-user mode
+runs without them)</li>
+<li>4 GB RAM minimum, 16 GB recommended for repomap / large
+codebases</li>
+<li>Optional: Ollama for local LLM (default offline provider)</li>
+</ul>
+<h3 id="install-from-source">1.2 Install From Source</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:HelixDevelopment/HelixCode.git</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./setup.sh</span>             <span class="co"># initialises submodules, builds binaries, runs smoke test</span></span></code></pre></div>
+<p><code>setup.sh</code> performs (in order):</p>
+<ol type="1">
+<li><code>git submodule update --init --recursive</code></li>
+<li>Verifies Go 1.26 toolchain</li>
+<li><code>cd HelixCode &amp;&amp; make build</code> → produces
+<code>bin/helixcode</code> (server) and <code>bin/cli</code></li>
+<li>Runs <code>make verify-compile</code> smoke test</li>
+</ol>
+<h3 id="first-run-wizard-f01-f02">1.3 First-Run Wizard (F01 + F02)</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./helix_code/bin/cli</span> wizard</span></code></pre></div>
+<p>The wizard walks through:</p>
+<ul>
+<li>Selecting your primary LLM provider (Anthropic, OpenAI, Ollama,
+etc.)</li>
+<li>Pasting API keys (stored in
+<code>~/.config/helixcode/api_keys.sh</code>, mode 0600)</li>
+<li>Choosing an approval mode (see §3.1)</li>
+<li>Configuring sandbox profile (see §3.2)</li>
+</ul>
+<p>After completion you have a populated
+<code>~/.config/helixcode/config.yaml</code>.</p>
+<h3 id="configuration-layers">1.4 Configuration Layers</h3>
+<p>Resolution order (highest precedence first):</p>
+<ol type="1">
+<li>CLI flag (<code>--approval</code>, <code>--config</code>,
+<code>--provider</code>, …)</li>
+<li>Environment variable (<code>HELIXCODE_APPROVAL</code>,
+<code>HELIXCODE_PROVIDER</code>, …)</li>
+<li>User config file (<code>~/.config/helixcode/config.yaml</code>)</li>
+<li>Repo-local override (<code>.helixcode.yaml</code> in current
+dir)</li>
+<li>Built-in defaults</li>
+</ol>
+<hr />
+<h2 id="core-features-by-category">2. Core Features by Category</h2>
+<h3 id="editing-filesystem-f03-f17-f26">2.1 Editing &amp; Filesystem
+(F03, F17, F26)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>What it does</th>
+<th>How to invoke</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F03 — Tool result persistence</td>
+<td>Every tool call writes structured results to
+<code>~/.local/share/helixcode/sessions/&lt;id&gt;/tool_results.jsonl</code></td>
+<td>Automatic on every edit</td>
+</tr>
+<tr>
+<td>F17 — Smart File Editing</td>
+<td>4 formats (diff/whole/search-replace/line) auto-selected per LLM
+model</td>
+<td>Used internally by the <code>edit</code> tool</td>
+</tr>
+<tr>
+<td>F26 — Workspace Manager</td>
+<td>Tracks the active project root</td>
+<td><code>/workspace show</code>,
+<code>/workspace switch &lt;path&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Smart-edit format selection happens automatically based on the
+model’s strengths; see
+<code>helix_code/internal/editor/README.md</code>.</p>
+<h3 id="approval-sandbox-f02-f14-f21">2.2 Approval &amp; Sandbox (F02,
+F14, F21)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Modes / Profiles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F02 — Permission rules</td>
+<td>Allow / deny tool, allow / deny path</td>
+</tr>
+<tr>
+<td>F14 — Sandboxed Shell Execution</td>
+<td><code>read-only</code>, <code>workspace-write</code>,
+<code>danger-full-access</code></td>
+</tr>
+<tr>
+<td>F21 — Codex Approval Modes</td>
+<td><code>suggest</code>, <code>auto-edit</code>,
+<code>full-auto</code>, <code>dangerously-bypass</code></td>
+</tr>
+</tbody>
+</table>
+<p>Set the mode at startup:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./helix_code/bin/cli</span> <span class="at">--approval</span> suggest</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./helix_code/bin/cli</span> <span class="at">--approval</span> auto-edit</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./helix_code/bin/cli</span> <span class="at">--approval</span> full-auto      <span class="co"># requires sandbox</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="va">HELIXCODE_APPROVAL</span><span class="op">=</span>full-auto <span class="ex">./helix_code/bin/cli</span></span></code></pre></div>
+<p>Inspect / change at runtime:</p>
+<pre><code>/approval status      # shows current mode, source, descriptors
+/approval set auto-edit
+/approval show        # explains the 4×4 matrix</code></pre>
+<p><code>full-auto</code> mode requires sandbox enforcement
+(<code>approval: full-auto mode requires sandbox</code>); the executor
+refuses to start without it.</p>
+<h3 id="sessions-memory-plans-f07-f08-f11-f24-f25">2.3 Sessions, Memory
+&amp; Plans (F07, F08, F11, F24, F25)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Slash command / CLI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F07 — Background Task System</td>
+<td><code>task</code> subcommand; tracks long-running jobs with
+checkpoints</td>
+</tr>
+<tr>
+<td>F08 — Plan Mode</td>
+<td><code>/plan on</code>, <code>/plan off</code>; agent must produce a
+plan before edits</td>
+</tr>
+<tr>
+<td>F11 — Session Transcript &amp; Resume</td>
+<td><code>./bin/cli sessions list</code>,
+<code>./bin/cli sessions resume &lt;id&gt;</code></td>
+</tr>
+<tr>
+<td>F24 — Project Memory</td>
+<td><code>/memory show</code>, <code>/memory add &lt;fact&gt;</code>,
+<code>/memory clear</code></td>
+</tr>
+<tr>
+<td>F25 — Plandex Plan Trees</td>
+<td><code>/plan tree</code>,
+<code>/plan rollback &lt;node&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Project memory loads <code>.helixcode/memory.md</code> from the repo
+root and caches it across sessions.</p>
+<h3 id="llm-providers-f12">2.4 LLM Providers (F12)</h3>
+<p>15 providers ship in <code>internal/providers/</code>: Anthropic
+Claude, OpenAI, Google Gemini, AWS Bedrock, Azure OpenAI, Google
+VertexAI, Groq, Mistral, DeepSeek, xAI, OpenRouter, Ollama, llama.cpp,
+LiteLLM gateway, CharacterAI.</p>
+<p><strong>There are TWO provider-access paths</strong> (anti-bluff: an
+earlier revision of this doc claimed
+<code>./bin/cli --provider ollama</code> worked directly; in reality
+only 4 providers route through the F12 CLI shortcut, and the others go
+through the server-mediated path):</p>
+<p><strong>Path A — F12 direct-cloud CLI shortcut</strong> (15 providers
+as of round 41 final):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> anthropic  <span class="at">--model</span> claude-3-5-sonnet</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> bedrock    <span class="at">--model</span> anthropic.claude-3-5-sonnet</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> vertexai   <span class="at">--model</span> gemini-1.5-pro</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> azure      <span class="at">--model</span> gpt-4o</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> groq       <span class="at">--model</span> llama-3.3-70b-versatile</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> openai     <span class="at">--model</span> gpt-4o</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> gemini     <span class="at">--model</span> gemini-1.5-pro</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> openrouter <span class="at">--model</span> openai/gpt-oss-20b:free   <span class="co"># auto-selects from live /models</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> xai        <span class="at">--model</span> grok-3-fast-beta</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> qwen       <span class="at">--model</span> qwen-max</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> copilot    <span class="at">--model</span> gpt-4o</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> mistral    <span class="at">--model</span> mistral-small-latest</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> deepseek   <span class="at">--model</span> deepseek-chat</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> ollama     <span class="at">--model</span> llama3.2          <span class="co"># local — needs ollama running</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--provider</span> llamacpp   <span class="at">--model</span> <span class="op">&lt;</span>path-to-model<span class="op">&gt;</span>   <span class="co"># local — needs llama-server running</span></span></code></pre></div>
+<p>These fifteen read credentials from the user’s
+<code>~/.config/helixcode/</code> or <code>HELIX_LLM_PROVIDER</code> env
+(e.g. <code>GROQ_API_KEY</code>, <code>OPENAI_API_KEY</code>,
+<code>GEMINI_API_KEY</code>, <code>XAI_API_KEY</code>,
+<code>OPENROUTER_API_KEY</code>, <code>QWEN_API_KEY</code>,
+<code>MISTRAL_API_KEY</code>, <code>DEEPSEEK_API_KEY</code>,
+<code>GITHUB_TOKEN</code> for Copilot; local providers ollama/llamacpp
+default to their standard ports <code>:11434</code> / <code>:8080</code>
+on localhost and need no API key). They construct the provider directly
+in the CLI process — no server required. This is the
+<strong>just-plug-in-an-API-key-and-go</strong> path for the most-used
+cloud providers AND the most-used local providers, giving HelixCode CLI
+parity with modern single-binary CLI agents (Claude Code, Aider, Cline)
+for these fifteen.</p>
+<p><strong>Path B — server-mediated (the remaining 3
+providers)</strong>:</p>
+<p>For vLLM, LocalAI, LM Studio (and any other OpenAI-compatible
+passthrough endpoint with no dedicated constructor): add an entry under
+<code>llm.providers:</code> in
+<code>helix_code/config/config.yaml</code>, start the HelixCode server
+(<code>make build &amp;&amp; ./bin/helixcode server</code>), and access
+the provider via the server’s REST API or via the CLI’s
+<code>-server-url</code> flag pointing at the server. The server hosts
+the provider manager (CONST-039) and exposes a unified API. These
+providers are served via the OpenAI-compatible passthrough since they
+don’t have dedicated standalone constructors.</p>
+<p>A <code>./bin/cli --provider &lt;Path-B-provider&gt;</code>
+invocation surfaces a directed error (since round 41) that names this
+path explicitly — no more ambiguous “unknown cloud provider”
+message.</p>
+<p>List available models (queries every configured provider — no
+hardcoding per CONST-036):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/cli</span> <span class="at">--list-models</span>      <span class="co"># CLI flag — shows F12 + verifier-known providers</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Or, inside the interactive REPL:</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> models</span></code></pre></div>
+<h3 id="tools-extensibility-f05-f06-f09-f10-f15-f30">2.5 Tools &amp;
+Extensibility (F05, F06, F09, F10, F15, F30)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F05 — Hooks</td>
+<td>Lifecycle hooks (pre-tool, post-tool, on-error, on-commit) — Go
+plugins or shell scripts in <code>~/.config/helixcode/hooks/</code></td>
+</tr>
+<tr>
+<td>F06 — MCP Full Lifecycle</td>
+<td>Model Context Protocol servers managed via <code>/mcp</code>
+commands</td>
+</tr>
+<tr>
+<td>F09 — Slash Commands</td>
+<td>Built-in + user-defined; see <code>/help</code></td>
+</tr>
+<tr>
+<td>F10 — Skill System</td>
+<td>Skills as <code>.md</code> + frontmatter in
+<code>~/.config/helixcode/skills/</code></td>
+</tr>
+<tr>
+<td>F15 — Subagent Team</td>
+<td>Dispatch parallel subagents via the <code>Task</code> tool</td>
+</tr>
+<tr>
+<td>F30 — Continue IDE</td>
+<td>IDE companion integration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="git-repo-f04-f22-f27">2.6 Git &amp; Repo (F04, F22, F27)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Slash command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F04 — Git Worktree Agent Isolation</td>
+<td><code>/worktree create &lt;branch&gt;</code>,
+<code>/worktree exit</code></td>
+</tr>
+<tr>
+<td>F22 — Aider Git Auto-Commit</td>
+<td><code>/git_auto_commit on</code>,
+<code>/git_auto_commit off</code></td>
+</tr>
+<tr>
+<td>F27 — Aider Voice &amp; Repomap</td>
+<td><code>/repomap show</code>, <code>/voice on</code> (requires audio
+backend)</td>
+</tr>
+</tbody>
+</table>
+<p>Auto-commit produces LLM-summarised messages with a Co-Authored-By
+trailer and runs a secret filter on the commit subject.</p>
+<h3 id="browser-voice-f23-f27">2.7 Browser &amp; Voice (F23, F27)</h3>
+<pre><code>/browser navigate https://example.com
+/browser snapshot
+/browser click &lt;selector&gt;
+/voice on              # mic capture → transcription → prompt</code></pre>
+<h3 id="ui-theming-f18-f19-f20">2.8 UI &amp; Theming (F18, F19,
+F20)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Slash command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F18 — No-Flicker Rendering</td>
+<td>Automatic; tune via
+<code>~/.config/helixcode/render.yaml</code></td>
+</tr>
+<tr>
+<td>F19 — Ask User Question</td>
+<td>LLM-generated, locale-aware (CONST-046) — never hardcoded</td>
+</tr>
+<tr>
+<td>F20 — Theme System</td>
+<td><code>/theme list</code>, <code>/theme set &lt;name&gt;</code>,
+<code>/theme reload</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="refactoring-code-intelligence-f13-f28-f29">2.9 Refactoring &amp;
+Code Intelligence (F13, F28, F29)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Slash command / capability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F13 — LSP Integration</td>
+<td><code>./bin/cli lsp list-servers</code>,
+<code>/lsp start &lt;lang&gt;</code>, <code>/lsp hover</code></td>
+</tr>
+<tr>
+<td>F28 — Kilocode Refactoring</td>
+<td><code>/refactor rename &lt;sym&gt;</code>,
+<code>/refactor extract</code>, <code>/impact &lt;sym&gt;</code></td>
+</tr>
+<tr>
+<td>F29 — RooCode Full Port</td>
+<td><code>/roo agent &lt;task&gt;</code>, end-to-end agent
+workflows</td>
+</tr>
+</tbody>
+</table>
+<h3 id="telemetry-observability-f16">2.10 Telemetry &amp; Observability
+(F16)</h3>
+<pre><code>HELIXCODE_OTEL_ENDPOINT=http://localhost:4317 ./bin/cli
+/telemetry status
+/telemetry flush</code></pre>
+<p>Spans, metrics, and logs are exported via OpenTelemetry (gRPC
+default). See <code>docs/deployment_guide/README.md</code> §3.</p>
+<hr />
+<h2 id="cli-reference-summary">3. CLI Reference (summary)</h2>
+<p>Full reference: <a href="../COMPLETE_CLI_REFERENCE.md"><code>docs/COMPLETE_CLI_REFERENCE.md</code></a>
+(1,031 lines).</p>
+<h3 id="top-level-subcommands">3.1 Top-level subcommands</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helixcode wizard</code></td>
+<td>First-run setup</td>
+</tr>
+<tr>
+<td><code>cli</code></td>
+<td>Interactive REPL</td>
+</tr>
+<tr>
+<td><code>cli --list-models</code></td>
+<td>Enumerate models from every configured provider</td>
+</tr>
+<tr>
+<td><code>cli sessions list</code></td>
+<td>Show past sessions</td>
+</tr>
+<tr>
+<td><code>cli sessions resume &lt;id&gt;</code></td>
+<td>Resume a transcript</td>
+</tr>
+<tr>
+<td><code>cli lsp list-servers</code></td>
+<td>Show configured LSP servers</td>
+</tr>
+<tr>
+<td><code>cli task list</code></td>
+<td>Active background tasks</td>
+</tr>
+<tr>
+<td><code>helix-config</code></td>
+<td>Standalone config validator</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-flags">3.2 Common flags</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Env var</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--approval</code></td>
+<td><code>HELIXCODE_APPROVAL</code></td>
+<td><code>suggest</code></td>
+</tr>
+<tr>
+<td><code>--provider</code></td>
+<td><code>HELIXCODE_PROVIDER</code></td>
+<td><code>ollama</code></td>
+</tr>
+<tr>
+<td><code>--model</code></td>
+<td><code>HELIXCODE_MODEL</code></td>
+<td>provider default</td>
+</tr>
+<tr>
+<td><code>--config</code></td>
+<td><code>HELIXCODE_CONFIG</code></td>
+<td><code>~/.config/helixcode/config.yaml</code></td>
+</tr>
+<tr>
+<td><code>--workspace</code></td>
+<td><code>HELIXCODE_WORKSPACE</code></td>
+<td><code>$PWD</code></td>
+</tr>
+<tr>
+<td><code>--no-sandbox</code></td>
+<td><code>HELIXCODE_NO_SANDBOX</code></td>
+<td>false (refused with <code>full-auto</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="built-in-slash-commands">3.3 Built-in slash commands</h3>
+<p><code>/help</code>, <code>/approval</code>,
+<code>/git_auto_commit</code>, <code>/memory</code>, <code>/plan</code>,
+<code>/worktree</code>, <code>/workspace</code>, <code>/browser</code>,
+<code>/voice</code>, <code>/refactor</code>, <code>/impact</code>,
+<code>/lsp</code>, <code>/mcp</code>, <code>/theme</code>,
+<code>/telemetry</code>, <code>/roo</code>, <code>/repomap</code>,
+<code>/sessions</code>, <code>/skills</code>, <code>/hooks</code>.</p>
+<p>User-defined commands live in
+<code>~/.config/helixcode/commands/*.md</code> (markdown +
+frontmatter).</p>
+<hr />
+<h2 id="troubleshooting">4. Troubleshooting</h2>
+<p>For comprehensive troubleshooting see <a href="../COMPLETE_TROUBLESHOOTING_GUIDE.md"><code>docs/COMPLETE_TROUBLESHOOTING_GUIDE.md</code></a>
+(1,174 lines).</p>
+<p>Common errors:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>approval: full-auto mode requires sandbox</code></td>
+<td>Sandbox disabled while in full-auto</td>
+<td>Drop <code>--no-sandbox</code> or change mode</td>
+</tr>
+<tr>
+<td><code>provider not configured: &lt;name&gt;</code></td>
+<td>API key missing</td>
+<td>Run <code>./bin/cli wizard</code> or set
+<code>&lt;NAME&gt;_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>git_auto_commit: working tree clean</code></td>
+<td>No mutations to commit</td>
+<td>Expected no-op</td>
+</tr>
+<tr>
+<td><code>lsp: server not found for &lt;lang&gt;</code></td>
+<td>Server binary missing</td>
+<td><code>./bin/cli lsp install &lt;lang&gt;</code></td>
+</tr>
+<tr>
+<td><code>mcp: handshake failed</code></td>
+<td>Server crashed before init</td>
+<td>Check
+<code>~/.local/share/helixcode/mcp/&lt;name&gt;.log</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="configuration-file-reference">5. Configuration File
+Reference</h2>
+<p><code>~/.config/helixcode/config.yaml</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">approval</span><span class="kw">:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mode</span><span class="kw">:</span><span class="at"> suggest</span><span class="co">                  # suggest|auto-edit|full-auto|dangerously-bypass</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">config_file</span><span class="kw">:</span><span class="at"> ~/.config/helixcode/approval.yaml</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sandbox</span><span class="kw">:</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">profile</span><span class="kw">:</span><span class="at"> workspace-write</span><span class="co">       # read-only|workspace-write|danger-full-access</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">default</span><span class="kw">:</span><span class="at"> anthropic</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">anthropic</span><span class="kw">:</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> claude-3-5-sonnet</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">session</span><span class="kw">:</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">retention_days</span><span class="kw">:</span><span class="at"> </span><span class="dv">30</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">memory</span><span class="kw">:</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> .helixcode/memory.md</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">telemetry</span><span class="kw">:</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">endpoint</span><span class="kw">:</span><span class="at"> http://localhost:4317</span></span></code></pre></div>
+<p>See <a href="../COMPLETE_CONFIGURATION_DOCUMENTATION.md"><code>docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md</code></a>
+(1,150 lines) for every field.</p>
+<hr />
+<h2 id="anti-bluff-guarantee-for-users">6. Anti-Bluff Guarantee (for
+users)</h2>
+<p>Every visible feature is backed by:</p>
+<ul>
+<li>A passing test (<code>helix_code/&lt;pkg&gt;/*_test.go</code>).</li>
+<li>A Challenge that exercises the end-to-end user workflow against real
+infrastructure (<code>challenges/</code>).</li>
+<li>An evidence trail in
+<code>docs/improvements/PROGRESS.md</code>.</li>
+</ul>
+<p>If a feature does not behave as documented, file an issue with the
+failing command — per CONST-035 documentation mismatches are critical
+defects.</p>
+<hr />
+<h2 id="sources-verified-2026-05-29-httpsgo.devdocdevelrelease-httpswww.postgresql.orgsupportversioning-httpsgithub.comredisredisreleases-httpsdocs.ollama.comfaq-httpsopentelemetry.iodocsspecsotlp-httpsplatform.claude.comdocsendocsbuild-with-claudeprompt-caching">Sources
+verified 2026-05-29: https://go.dev/doc/devel/release,
+https://www.postgresql.org/support/versioning/,
+https://github.com/redis/redis/releases, https://docs.ollama.com/faq,
+https://opentelemetry.io/docs/specs/otlp/,
+https://platform.claude.com/docs/en/docs/build-with-claude/prompt-caching</h2>
+<p>Cross-referenced every external version pin / port / service
+reference in this operator manual against the latest official docs per
+Constitution §11.4.99:</p>
+<ul>
+<li><strong>Go 1.26</strong> (§1.1, §1.2) — <strong>CONFIRMED
+current.</strong> go.dev release history shows Go 1.26.0 (2026-02-10),
+latest patch <strong>go1.26.3</strong> (2026-05-07). Matches CLAUDE.md
+§3.1. No change.</li>
+<li><strong>PostgreSQL 15+</strong> (§1.1) — <strong>CONFIRMED
+valid.</strong> postgresql.org versioning page: 15 is supported until
+2027-11; 18 is the latest major (18.4). The <code>15+</code> floor
+correctly admits 15–18. No change.</li>
+<li><strong>Redis 7+</strong> (§1.1) — <strong>CONFIRMED valid.</strong>
+github.com/redis/redis/releases: 7.4.x and 7.2.x still receive security
+updates and Redis 8.x is GA; the <code>7+</code> floor is correct. No
+change.</li>
+<li><strong>Ollama default <code>:11434</code></strong> (§2.4, F12 local
+path) — <strong>CONFIRMED.</strong> docs.ollama.com/faq: “Ollama binds
+127.0.0.1 port 11434 by default” (overridable via
+<code>OLLAMA_HOST</code>). No change.</li>
+<li><strong>OpenTelemetry OTLP gRPC <code>:4317</code></strong> (§2.10,
+§3.2) — <strong>CONFIRMED.</strong> opentelemetry.io OTLP spec: default
+OTLP/gRPC port is 4317 (HTTP is 4318). No change.</li>
+<li><strong>macOS ≥ 12 / Windows 10+ via WSL2 / Linux kernel ≥
+5.10</strong> (§1.1) — these are HelixCode’s own declared
+minimum-support floors (see <code>docs/platforms/</code>), not a single
+vendor’s “latest” claim; the supported-platforms manifest
+(<code>docs/platforms/supported_platforms.yaml</code>) is the source of
+truth. No third-party-doc contradiction found.</li>
+</ul>
+<p><strong>CONST-036 model-ID notes (flagged, NOT re-pinned):</strong>
+the §2.4 / §5 example model identifiers (<code>claude-3-5-sonnet</code>,
+<code>gemini-1.5-pro</code>, <code>gpt-4o</code>,
+<code>llama-3.3-70b-versatile</code>, <code>grok-3-fast-beta</code>,
+<code>qwen-max</code>, <code>mistral-small-latest</code>,
+<code>deepseek-chat</code>, <code>llama3.2</code>,
+<code>openai/gpt-oss-20b:free</code>) and the
+<code>anthropic.model: claude-3-5-sonnet</code> config snippet are
+<strong>LLMsVerifier-runtime-sourced</strong> — they are illustrative
+<code>--provider/--model</code> invocation examples and may be stale.
+The authoritative live list is <code>./bin/cli --list-models</code> /
+<code>helixcode llm models list</code>, which queries every configured
+provider per CONST-036. Not re-pinned per CONST-036 (LLMsVerifier is the
+single source of truth). The provider-count claims (“15 providers”,
+“Path B — remaining 3”) describe HelixCode’s own integration surface,
+not a vendor figure, and were not externally verifiable.</p>
+<p><strong>Negative findings:</strong> no Anthropic/OpenAI/etc.
+account-safety or login-flow instructions are present in this manual
+that would carry a ban-risk under §11.4.99(D); the only credential
+guidance is local <code>.env</code> / <code>api_keys.sh</code> (mode
+0600) handling, which contradicts no vendor policy. OpenAI’s
+reasoning-guide page was not fetched here (it returns HTTP 403 to
+automated fetch — see the FEATURE_IMPLEMENTATION_COMPLETE footer); this
+manual cites no OpenAI URL.</p>
+</body>
+</html>

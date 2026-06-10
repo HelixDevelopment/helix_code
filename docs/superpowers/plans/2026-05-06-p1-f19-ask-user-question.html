@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f19-ask-user-question</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f19-ask-user-question</h1>
+</header>
+<h1 id="p1-f19-askuserquestion-with-previews-implementation-plan">P1-F19
+— AskUserQuestion with Previews Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, end-to-end
+<strong><code>ask_user</code> tool</strong> for the HelixCode CLI agent.
+F19 adds an <code>internal/tools/askuser/</code> package with
+<code>Choice</code> / <code>Question</code> / <code>Result</code> value
+types, a <code>Prompter</code> interface, a production
+<code>stdinPrompter</code> (real stdin readline + retry-on-invalid +
+timeout + non-TTY graceful fallback), and an <code>AskUserTool</code>
+(<code>tools.Tool</code> impl) that the registry exposes under the
+stable name <code>ask_user</code> (snake_case; Q3=A) in the new category
+<code>tools.CategoryAskUser</code>. Stdin readline reuses F18’s
+<code>render.RenderLines</code> to format the question + per-choice
+inline <code>preview</code> (Q2=A) + numbered menu; the user types a
+number + Enter; ENTER alone with <code>default</code> set picks the
+default. Non-TTY (<code>term.IsTerminal=false</code>; Q4=B)
+short-circuits BEFORE any read: with <code>default</code> set it returns
+the default with <code>Source=&quot;default&quot;</code>; without default it
+returns <code>ErrNoTTYNoDefault</code> (“ask_user requires interactive
+terminal AND no default specified”). <strong>Tool only</strong> (Q5=A) —
+NO slash command, NO cobra subcommand. <strong>No new external
+dependencies</strong> — pure stdlib (<code>bufio</code>,
+<code>context</code>, <code>errors</code>, <code>fmt</code>,
+<code>io</code>, <code>os</code>, <code>strconv</code>,
+<code>strings</code>, <code>sync</code>, <code>time</code>) +
+<code>golang.org/x/term</code> (already a direct dep after F18) +
+<code>dev.helix.code/internal/render</code>.</p>
+<p><strong>Architecture:</strong> New
+<code>internal/tools/askuser/</code> package with <code>types.go</code>
+(<code>Choice</code> + <code>Question</code> + <code>Result</code> +
+<code>Prompter</code> interface + sentinels
+<code>ErrInvalidQuestion</code>/<code>ErrNoTTYNoDefault</code>/<code>ErrUserCancelled</code>/<code>ErrPromptTimeout</code>/<code>ErrTooManyInvalidAttempts</code>
++ constants
+<code>DefaultTimeout=5min</code>/<code>DefaultMaxRetries=3</code>/<code>SourceStdin</code>/<code>SourceDefault</code>),
+<code>stdin_prompter.go</code> (production <code>stdinPrompter</code>
+with
+<code>Reader</code>/<code>Writer</code>/<code>IsTTY</code>/<code>Renderer</code>/<code>Timeout</code>/<code>MaxRetries</code>
+constructor seams; <code>FormatQuestion</code> exported pure helper;
+non-TTY branch short-circuits before read; TTY branch reads via
+<code>bufio.ReadString(&#39;\n&#39;)</code> in a goroutine with
+<code>select</code>-on-<code>ctx.Done</code> for cancellation; retries
+up to <code>MaxRetries</code> on empty/non-numeric/out-of-range; EOF →
+<code>ErrUserCancelled</code>; ctx-cancel/timeout →
+<code>ErrPromptTimeout</code>), <code>ask_user_tool.go</code>
+(<code>AskUserTool</code> implements <code>tools.Tool</code>;
+<code>Name()==&quot;ask_user&quot;</code>;
+<code>Category()==tools.CategoryAskUser</code>; parses
+<code>params[&quot;question&quot;]</code>/<code>params[&quot;choices&quot;]</code>/<code>params[&quot;default&quot;]</code>;
+calls <code>prompter.Prompt</code>; returns <code>Result</code> as
+<code>map[string]interface{}</code>). Two existing files get tiny
+additions: <code>internal/tools/registry.go</code> (new
+<code>CategoryAskUser ToolCategory = &quot;ask-user&quot;</code> const + optional
+<code>AskUserPrompter askuser.Prompter</code> field on
+<code>RegistryConfig</code> + registration in
+<code>buildToolList</code>); <code>cmd/cli/main.go</code> (no changes
+required for correctness; optional polish to share
+<code>c.renderer</code> via
+<code>RegistryConfig.AskUserPrompter</code>).</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, zap (already in
+<code>go.mod</code>) — already present. <strong>NO new external
+deps.</strong> <code>golang.org/x/term</code> is a direct dep at v0.41.0
+(promoted from indirect by F18-T06; verified via
+<code>grep &quot;golang.org/x/term&quot; helix_code/go.mod</code>).
+<code>dev.helix.code/internal/render</code> is the F18-internal package;
+<code>internal/tools/askuser/</code> imports <code>render</code> for
+<code>RenderLines</code> only. <code>go mod tidy</code> after T02 must
+produce <strong>zero new entries in <code>go.sum</code></strong> AND
+<strong>zero changes to <code>go.mod</code></strong>. T07’s verification
+step asserts this loudly.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-06-p1-f19-ask-user-question-design.md</code>
+(commit <code>cedd81e</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F19
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/askuser <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — F19 can
+degenerate in four ways: (a) <code>Prompt</code> short-circuits to the
+default without checking IsTTY (so any test with default gets the
+default, hiding stdin-read regressions); (b) the non-TTY error path is
+never tested (a regression that <em>blocks</em> on <code>os.Stdin</code>
+in non-TTY mode is silently shipped); (c) default-pick behavior is
+tested only with mocks (the production <code>stdinPrompter</code> is
+never exercised; a real-world non-TTY invocation hangs); (d) preview
+text is rendered AFTER the choice label (or omitted), defeating the
+entire point. The four “what counts as ask_user works” criteria — (1)
+production <code>stdinPrompter</code> reads from the injected reader and
+consumes the expected bytes; (2) non-TTY-without-default returns
+<code>ErrNoTTYNoDefault</code> with ZERO bytes consumed (reader-position
+invariant); (3) non-TTY-with-default returns the default with ZERO bytes
+consumed AND <code>Source=&quot;default&quot;</code>; (4) preview text appears in
+the captured prompt output BEFORE the choice label (byte-offset
+invariant) — are each tested with both unit assertions AND a Challenge
+phase. The Challenge harness uses positive evidence: returned
+<code>Result.Value</code>/<code>Source</code>/<code>Index</code>,
+captured byte content, byte offsets, and reader-position invariants.
+Disk-state-equivalent (reader-position) mismatch is a hard Challenge
+failure. Absence-of-error is NEVER acceptable.</p>
+<p><strong>Why this is consequential:</strong> the agent asking the user
+a structured question is the difference between “the agent guesses and
+apologises later” and “the agent confirms the destructive operation
+before running it”. F19’s discriminating tests are: (i) the Challenge’s
+PHASE-B (non-TTY + default + reader has <code>&quot;NEVER\n&quot;</code>; assert
+reader bytes unchanged AND Source=“default” — proves the production
+class short-circuits BEFORE reading); (ii) the Challenge’s PHASE-C
+(non-TTY + no default; assert
+<code>errors.Is(err, ErrNoTTYNoDefault)</code> AND reader bytes
+unchanged — proves the production class errors loudly instead of
+blocking); (iii) the Challenge’s PHASE-D (TTY + previews; capture
+writer; assert byte offsets put each preview BEFORE its choice label —
+proves the menu is rendered correctly, not just “rendered”); (iv) the
+Challenge’s PHASE-E (TTY + reader <code>&quot;9\n1\n&quot;</code>; assert prompter
+consumes both lines AND retry message appears exactly once — proves the
+retry loop reads new bytes, not the same ones in a loop). All four must
+produce positive evidence; none can be satisfied by
+absence-of-error.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F19-T01 — bootstrap
+evidence + advance PROGRESS to F19</label></li>
+<li><label><input type="checkbox" checked></input>P1-F19-T02 —
+<code>internal/tools/askuser/types.go</code>: Choice + Question + Result
++ Prompter interface + sentinels + constants (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F19-T03 —
+<code>internal/tools/askuser/stdin_prompter.go</code>: stdinPrompter
+using F18 renderer + non-TTY short-circuit + retry loop + timeout (TDD
+against <code>bytes.Buffer</code>)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F19-T04 —
+<code>internal/tools/askuser/ask_user_tool.go</code>: AskUserTool
+wrapping Prompter + add <code>CategoryAskUser</code> to registry
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F19-T05 —
+<code>cmd/cli/main.go</code> wiring (register tool through registry
+config) + integration test (always-runs both branches via real
+<code>bytes.Buffer</code>)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F19-T06 — Challenge
+harness (5 always-run phases: STDIN-INPUT + NON-TTY-WITH-DEFAULT +
+NON-TTY-WITHOUT-DEFAULT-ERR + PREVIEW-RENDERING + INVALID-INPUT-RETRY)
+with positive byte/reader-position evidence</label></li>
+<li><label><input type="checkbox" checked></input>P1-F19-T07 — Feature 19
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F19 evidence section header (spec <code>cedd81e</code>),
+update PROGRESS current focus to F19 (replacing the F18 close-out’s “F19
+next candidate” pointer), insert F19 task list (7 items) after F18’s.
+Confirm <code>06_phase_1_evidence.md</code> has an F19 anchor. Verify
+<code>golang.org/x/term v0.41.0</code> is a direct dep in
+<code>helix_code/go.mod</code> (sanity check before T03 imports it).</p>
+<p>Commit:
+<code>docs(P1-F19-T01): bootstrap Phase 1 / Feature 19 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/askuser/types.go</code>, new
+<code>helix_code/internal/tools/askuser/types_test.go</code>.</p>
+<p>Define: - <code>Choice{Label, Value, Preview string}</code>. -
+<code>Question{Question string; Choices []Choice; Default string}</code>
++ <code>Validate() error</code> method. -
+<code>Result{Value, Label string; Index int; Source string}</code>. -
+<code>Prompter</code> interface
+(<code>Prompt(ctx, q Question) (Result, error)</code>). - Error
+sentinels (<code>ErrInvalidQuestion</code>,
+<code>ErrNoTTYNoDefault</code>, <code>ErrUserCancelled</code>,
+<code>ErrPromptTimeout</code>, <code>ErrTooManyInvalidAttempts</code>).
+- Constants (<code>DefaultTimeout = 5 * time.Minute</code>,
+<code>DefaultMaxRetries = 3</code>, <code>SourceStdin = &quot;stdin&quot;</code>,
+<code>SourceDefault = &quot;default&quot;</code>).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestChoice_FieldsZeroValueOK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    c <span class="op">:=</span> Choice<span class="op">{}</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> c<span class="op">.</span>Label<span class="op">);</span> require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> c<span class="op">.</span>Value<span class="op">);</span> require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> c<span class="op">.</span>Preview<span class="op">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestQuestion_Validate_OK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        Question<span class="op">:</span> <span class="st">&quot;Pick one&quot;</span><span class="op">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        Choices<span class="op">:</span>  <span class="op">[]</span>Choice<span class="op">{{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span> <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">}},</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> q<span class="op">.</span>Validate<span class="op">())</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestQuestion_Validate_OK_WithDefault<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        Question<span class="op">:</span> <span class="st">&quot;Pick one&quot;</span><span class="op">,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        Choices<span class="op">:</span>  <span class="op">[]</span>Choice<span class="op">{{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span> <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">}},</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        Default<span class="op">:</span>  <span class="st">&quot;b&quot;</span><span class="op">,</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> q<span class="op">.</span>Validate<span class="op">())</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestQuestion_Validate_EmptyText_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span>Choices<span class="op">:</span> <span class="op">[]</span>Choice<span class="op">{{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span> <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">}}}</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> q<span class="op">.</span>Validate<span class="op">(),</span> ErrInvalidQuestion<span class="op">)</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestQuestion_Validate_TooFewChoices_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span>Question<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Choices<span class="op">:</span> <span class="op">[]</span>Choice<span class="op">{{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">}}}</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> q<span class="op">.</span>Validate<span class="op">(),</span> ErrInvalidQuestion<span class="op">)</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestQuestion_Validate_EmptyLabel_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span>Question<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Choices<span class="op">:</span> <span class="op">[]</span>Choice<span class="op">{{</span>Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span> <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">}}}</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> q<span class="op">.</span>Validate<span class="op">(),</span> ErrInvalidQuestion<span class="op">)</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestQuestion_Validate_EmptyValue_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span>Question<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Choices<span class="op">:</span> <span class="op">[]</span>Choice<span class="op">{{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">},</span> <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">}}}</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> q<span class="op">.</span>Validate<span class="op">(),</span> ErrInvalidQuestion<span class="op">)</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestQuestion_Validate_DuplicateValue_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span>Question<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Choices<span class="op">:</span> <span class="op">[]</span>Choice<span class="op">{{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span> <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">}}}</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> q<span class="op">.</span>Validate<span class="op">(),</span> ErrInvalidQuestion<span class="op">)</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestQuestion_Validate_DefaultNotInChoices_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>        Question<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>        Choices<span class="op">:</span>  <span class="op">[]</span>Choice<span class="op">{{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span> <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">}},</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>        Default<span class="op">:</span>  <span class="st">&quot;z&quot;</span><span class="op">,</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> q<span class="op">.</span>Validate<span class="op">(),</span> ErrInvalidQuestion<span class="op">)</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestErrorSentinels_DistinctErrorsIs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">error</span><span class="op">{</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>        ErrInvalidQuestion<span class="op">,</span> ErrNoTTYNoDefault<span class="op">,</span> ErrUserCancelled<span class="op">,</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>        ErrPromptTimeout<span class="op">,</span> ErrTooManyInvalidAttempts<span class="op">,</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="op">{</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>        wrapped <span class="op">:=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;wrapped: %w&quot;</span><span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> wrapped<span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestConstants_DefaultTimeoutAndRetries<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">5</span><span class="op">*</span>time<span class="op">.</span>Minute<span class="op">,</span> DefaultTimeout<span class="op">)</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">3</span><span class="op">,</span>             DefaultMaxRetries<span class="op">)</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;stdin&quot;</span><span class="op">,</span>       SourceStdin<span class="op">)</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;default&quot;</span><span class="op">,</span>     SourceDefault<span class="op">)</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F19-T02): askuser types - Choice + Question + Result + Prompter interface + sentinels</code>.</p>
+<hr />
+<h2 id="task-3-stdin_prompter.go-tdd">Task 3: stdin_prompter.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/askuser/stdin_prompter.go</code>, new
+<code>helix_code/internal/tools/askuser/stdin_prompter_test.go</code>.</p>
+<p><code>stdin_prompter.go</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StdinPrompterOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Reader     io<span class="op">.</span>Reader</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Writer     io<span class="op">.</span>Writer</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    IsTTY      <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    Renderer   render<span class="op">.</span>Renderer</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Timeout    time<span class="op">.</span>Duration</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    MaxRetries <span class="dt">int</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> stdinPrompter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    reader     io<span class="op">.</span>Reader</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    writer     io<span class="op">.</span>Writer</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    isTTY      <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    renderer   render<span class="op">.</span>Renderer</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    timeout    time<span class="op">.</span>Duration</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    maxRetries <span class="dt">int</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewStdinPrompter<span class="op">(</span>opts StdinPrompterOptions<span class="op">)</span> <span class="op">*</span>stdinPrompter <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> <span class="op">&amp;</span>stdinPrompter<span class="op">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        reader<span class="op">:</span>     opts<span class="op">.</span>Reader<span class="op">,</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        writer<span class="op">:</span>     opts<span class="op">.</span>Writer<span class="op">,</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        isTTY<span class="op">:</span>      opts<span class="op">.</span>IsTTY<span class="op">,</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        renderer<span class="op">:</span>   opts<span class="op">.</span>Renderer<span class="op">,</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        timeout<span class="op">:</span>    opts<span class="op">.</span>Timeout<span class="op">,</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        maxRetries<span class="op">:</span> opts<span class="op">.</span>MaxRetries<span class="op">,</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p<span class="op">.</span>reader <span class="op">==</span> <span class="ot">nil</span>  <span class="op">{</span> p<span class="op">.</span>reader <span class="op">=</span> os<span class="op">.</span>Stdin <span class="op">}</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p<span class="op">.</span>writer <span class="op">==</span> <span class="ot">nil</span>  <span class="op">{</span> p<span class="op">.</span>writer <span class="op">=</span> os<span class="op">.</span>Stdout <span class="op">}</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p<span class="op">.</span>isTTY <span class="op">==</span> <span class="ot">nil</span>   <span class="op">{</span> p<span class="op">.</span>isTTY <span class="op">=</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> term<span class="op">.</span>IsTerminal<span class="op">(</span><span class="dt">int</span><span class="op">(</span>os<span class="op">.</span>Stdin<span class="op">.</span>Fd<span class="op">()))</span> <span class="op">}</span> <span class="op">}</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p<span class="op">.</span>renderer <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> r<span class="op">,</span> _<span class="op">,</span> _ <span class="op">:=</span> render<span class="op">.</span>NewRenderer<span class="op">(</span>render<span class="op">.</span>FactoryOptions<span class="op">{</span>Writer<span class="op">:</span> p<span class="op">.</span>writer<span class="op">});</span> p<span class="op">.</span>renderer <span class="op">=</span> r <span class="op">}</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p<span class="op">.</span>timeout <span class="op">==</span> <span class="dv">0</span>   <span class="op">{</span> p<span class="op">.</span>timeout <span class="op">=</span> DefaultTimeout <span class="op">}</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p<span class="op">.</span>maxRetries <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span> p<span class="op">.</span>maxRetries <span class="op">=</span> DefaultMaxRetries <span class="op">}</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">// Prompt — see spec §4.2 (non-TTY) + §4.3 (TTY)</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>stdinPrompter<span class="op">)</span> Prompt<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> q Question<span class="op">)</span> <span class="op">(</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">// FormatQuestion is exported (spec §11 #5). Pure function: given a Question,</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">// returns the lines that make up the rendered prompt menu in display order.</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> FormatQuestion<span class="op">(</span>q Question<span class="op">)</span> <span class="op">[]</span><span class="dt">string</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<p>Implementation notes (spec §4.2 + §4.3 + §5.2): -
+<code>FormatQuestion</code>: emit <code>q.Question</code> line; blank
+line; for each choice <code>i</code>: if <code>Preview != &quot;&quot;</code>,
+split on <code>\n</code> and emit each line; emit
+<code>fmt.Sprintf(&quot;%d. %s&quot;, i+1, choice.Label)</code>; final blank line.
+- Non-TTY branch: validate <code>q</code> first (so caller gets
+<code>ErrInvalidQuestion</code> even on non-TTY); if
+<code>!isTTY()</code> and default is set → linear scan to find matching
+choice; if <code>!isTTY()</code> and no default →
+<code>ErrNoTTYNoDefault</code>. <strong>Zero reads from
+<code>p.reader</code>.</strong> - TTY branch: render menu via
+<code>render.RenderLines(p.renderer, &quot;ask-user&quot;, FormatQuestion(q))</code>;
+emit prompt text via <code>fmt.Fprint(p.writer, ...)</code>; spawn
+goroutine doing <code>bufio.NewReader(p.reader).ReadString(&#39;\n&#39;)</code>;
+<code>select</code> on <code>ctx.Done()</code> vs result chan; classify
+input → number / empty / EOF / out-of-range / non-numeric. - Retry loop:
+<code>for attempt := 0; attempt &lt; p.maxRetries; attempt++</code>.
+Each iteration emits the prompt line again, reads a fresh line from the
+buffered reader. Counter resets on each <code>Prompt</code> call. - EOF
+→ <code>ErrUserCancelled</code>. Empty input + default → return default
+with <code>Source=&quot;default&quot;</code>. Empty + no default → re-prompt with
+“Empty input; …” message; counts toward retries. Non-numeric /
+out-of-range → re-prompt with “Invalid choice; …” message; counts toward
+retries.</p>
+<p>Failing tests FIRST (real <code>bytes.Buffer</code> for I/O; injected
+<code>IsTTY</code> closure):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> newPrompter<span class="op">(</span>reader io<span class="op">.</span>Reader<span class="op">,</span> writer io<span class="op">.</span>Writer<span class="op">,</span> isTTY <span class="dt">bool</span><span class="op">)</span> <span class="op">*</span>stdinPrompter <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> NewStdinPrompter<span class="op">(</span>StdinPrompterOptions<span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        Reader<span class="op">:</span> reader<span class="op">,</span> Writer<span class="op">:</span> writer<span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> isTTY <span class="op">},</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        Timeout<span class="op">:</span> <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        MaxRetries<span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> sampleQuestion<span class="op">()</span> Question <span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Question<span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        Question<span class="op">:</span> <span class="st">&quot;Pick one&quot;</span><span class="op">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        Choices<span class="op">:</span> <span class="op">[]</span>Choice<span class="op">{</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;Option A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;opt-a&quot;</span><span class="op">,</span> Preview<span class="op">:</span> <span class="st">&quot;preview-1&quot;</span><span class="op">},</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;Option B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;opt-b&quot;</span><span class="op">,</span> Preview<span class="op">:</span> <span class="st">&quot;preview-2&quot;</span><span class="op">},</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFormatQuestion_NoPreview_NumberedMenuOnly<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        Question<span class="op">:</span> <span class="st">&quot;Pick&quot;</span><span class="op">,</span> Choices<span class="op">:</span> <span class="op">[]</span>Choice<span class="op">{{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span> <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">}},</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    lines <span class="op">:=</span> FormatQuestion<span class="op">(</span>q<span class="op">)</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> lines<span class="op">,</span> <span class="st">&quot;1. A&quot;</span><span class="op">)</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> lines<span class="op">,</span> <span class="st">&quot;2. B&quot;</span><span class="op">)</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> l <span class="op">:=</span> <span class="kw">range</span> lines <span class="op">{</span> require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> l<span class="op">,</span> <span class="st">&quot;preview&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFormatQuestion_PreviewBeforeLabel_ByteOrder<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> sampleQuestion<span class="op">()</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    lines <span class="op">:=</span> FormatQuestion<span class="op">(</span>q<span class="op">)</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    joined <span class="op">:=</span> strings<span class="op">.</span>Join<span class="op">(</span>lines<span class="op">,</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    p1 <span class="op">:=</span> strings<span class="op">.</span>Index<span class="op">(</span>joined<span class="op">,</span> <span class="st">&quot;preview-1&quot;</span><span class="op">)</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    l1 <span class="op">:=</span> strings<span class="op">.</span>Index<span class="op">(</span>joined<span class="op">,</span> <span class="st">&quot;1. Option A&quot;</span><span class="op">)</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    p2 <span class="op">:=</span> strings<span class="op">.</span>Index<span class="op">(</span>joined<span class="op">,</span> <span class="st">&quot;preview-2&quot;</span><span class="op">)</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    l2 <span class="op">:=</span> strings<span class="op">.</span>Index<span class="op">(</span>joined<span class="op">,</span> <span class="st">&quot;2. Option B&quot;</span><span class="op">)</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> p1<span class="op">,</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> p1<span class="op">,</span> l1<span class="op">,</span> <span class="st">&quot;preview-1 must precede label 1&quot;</span><span class="op">)</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> p2<span class="op">,</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> p2<span class="op">,</span> l2<span class="op">,</span> <span class="st">&quot;preview-2 must precede label 2&quot;</span><span class="op">)</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFormatQuestion_MultiLinePreview_LinesPreserved<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> Question<span class="op">{</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        Question<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        Choices<span class="op">:</span> <span class="op">[]</span>Choice<span class="op">{</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">,</span> Preview<span class="op">:</span> <span class="st">&quot;line1</span><span class="ch">\n</span><span class="st">line2&quot;</span><span class="op">},</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">},</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    lines <span class="op">:=</span> FormatQuestion<span class="op">(</span>q<span class="op">)</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> lines<span class="op">,</span> <span class="st">&quot;line1&quot;</span><span class="op">)</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> lines<span class="op">,</span> <span class="st">&quot;line2&quot;</span><span class="op">)</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_NonTTY_NoDefault_ErrNoTTY_ZeroReads<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;NEVER</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">false</span><span class="op">)</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrNoTTYNoDefault<span class="op">)</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;interactive terminal&quot;</span><span class="op">)</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;NEVER</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> reader<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;must NOT consume any bytes&quot;</span><span class="op">)</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_NonTTY_WithDefault_ReturnsDefault_ZeroReads<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;NEVER</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">false</span><span class="op">)</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> sampleQuestion<span class="op">();</span> q<span class="op">.</span>Default <span class="op">=</span> <span class="st">&quot;opt-b&quot;</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> q<span class="op">)</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;opt-b&quot;</span><span class="op">,</span> res<span class="op">.</span>Value<span class="op">)</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> res<span class="op">.</span>Index<span class="op">)</span></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceDefault<span class="op">,</span> res<span class="op">.</span>Source<span class="op">)</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;NEVER</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> reader<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;must NOT consume any bytes&quot;</span><span class="op">)</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_ValidInput_ReturnsChoice<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;2</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;opt-b&quot;</span><span class="op">,</span> res<span class="op">.</span>Value<span class="op">)</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> res<span class="op">.</span>Index<span class="op">)</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceStdin<span class="op">,</span> res<span class="op">.</span>Source<span class="op">)</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_EmptyWithDefault_ReturnsDefault<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> sampleQuestion<span class="op">();</span> q<span class="op">.</span>Default <span class="op">=</span> <span class="st">&quot;opt-a&quot;</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> q<span class="op">)</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceDefault<span class="op">,</span> res<span class="op">.</span>Source<span class="op">)</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;opt-a&quot;</span><span class="op">,</span> res<span class="op">.</span>Value<span class="op">)</span></span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_OutOfRange_RePromptsThenAccepts<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;9</span><span class="ch">\n</span><span class="st">1</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> res<span class="op">.</span>Index<span class="op">)</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> strings<span class="op">.</span>Count<span class="op">(</span>writer<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;Invalid choice&quot;</span><span class="op">))</span></span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_NonNumeric_RePromptsThenAccepts<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;abc</span><span class="ch">\n</span><span class="st">2</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> res<span class="op">.</span>Index<span class="op">)</span></span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> writer<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;Invalid choice&quot;</span><span class="op">)</span></span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_ThreeInvalids_ErrTooMany<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;a</span><span class="ch">\n</span><span class="st">b</span><span class="ch">\n</span><span class="st">c</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrTooManyInvalidAttempts<span class="op">)</span></span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_EOF_ErrUserCancelled<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">)</span> <span class="co">// empty → EOF on first read</span></span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrUserCancelled<span class="op">)</span></span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_CtxCancel_ErrPromptTimeout<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>    pr<span class="op">,</span> _ <span class="op">:=</span> io<span class="op">.</span>Pipe<span class="op">()</span> <span class="co">// never written → blocks</span></span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> NewStdinPrompter<span class="op">(</span>StdinPrompterOptions<span class="op">{</span></span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>        Reader<span class="op">:</span> pr<span class="op">,</span> Writer<span class="op">:</span> <span class="op">&amp;</span>writer<span class="op">,</span></span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">},</span></span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>        Timeout<span class="op">:</span> <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span> MaxRetries<span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithCancel<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span> time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">50</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">);</span> cancel<span class="op">()</span> <span class="op">}()</span></span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>ctx<span class="op">,</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrPromptTimeout<span class="op">)</span></span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_TimeoutExpires_ErrPromptTimeout<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>    pr<span class="op">,</span> _ <span class="op">:=</span> io<span class="op">.</span>Pipe<span class="op">()</span></span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> NewStdinPrompter<span class="op">(</span>StdinPrompterOptions<span class="op">{</span></span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a>        Reader<span class="op">:</span> pr<span class="op">,</span> Writer<span class="op">:</span> <span class="op">&amp;</span>writer<span class="op">,</span></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">},</span></span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>        Timeout<span class="op">:</span> <span class="dv">50</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">,</span> MaxRetries<span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrPromptTimeout<span class="op">)</span></span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_PreviewRenderedBeforeLabel_ByteOffset<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;1</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">())</span></span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>    <span class="bu">cap</span> <span class="op">:=</span> writer<span class="op">.</span>Bytes<span class="op">()</span></span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>    p1 <span class="op">:=</span> bytes<span class="op">.</span>Index<span class="op">(</span><span class="bu">cap</span><span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;preview-1&quot;</span><span class="op">))</span></span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a>    l1 <span class="op">:=</span> bytes<span class="op">.</span>Index<span class="op">(</span><span class="bu">cap</span><span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;1. Option A&quot;</span><span class="op">))</span></span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>    p2 <span class="op">:=</span> bytes<span class="op">.</span>Index<span class="op">(</span><span class="bu">cap</span><span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;preview-2&quot;</span><span class="op">))</span></span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>    l2 <span class="op">:=</span> bytes<span class="op">.</span>Index<span class="op">(</span><span class="bu">cap</span><span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;2. Option B&quot;</span><span class="op">))</span></span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> p1<span class="op">,</span> <span class="dv">0</span><span class="op">);</span> require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> p1<span class="op">,</span> l1<span class="op">)</span></span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> p2<span class="op">,</span> <span class="dv">0</span><span class="op">);</span> require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> p2<span class="op">,</span> l2<span class="op">)</span></span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_RetryCounter_ResetsAcrossPromptCalls<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Two consecutive prompts on the SAME reader: first has 2 invalids + valid;</span></span>
+<span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a>    <span class="co">// second has 2 invalids + valid. Both must succeed (counter resets).</span></span>
+<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;a</span><span class="ch">\n</span><span class="st">b</span><span class="ch">\n</span><span class="st">1</span><span class="ch">\n</span><span class="st">c</span><span class="ch">\n</span><span class="st">d</span><span class="ch">\n</span><span class="st">2</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a>    r1<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">());</span> require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> r1<span class="op">.</span>Index<span class="op">)</span></span>
+<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a>    r2<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> sampleQuestion<span class="op">());</span> require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> r2<span class="op">.</span>Index<span class="op">)</span></span>
+<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestStdinPrompter_TTY_DefaultDoesNotPreemptInput<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a>    <span class="co">// IsTTY=true + default set + reader has &quot;1\n&quot; → returns Index 0 (the user&#39;s</span></span>
+<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a>    <span class="co">// explicit &quot;1&quot;), NOT the default. Pins the anti-bluff branch where Prompt</span></span>
+<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a>    <span class="co">// short-circuits to default regardless of IsTTY.</span></span>
+<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;1</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> newPrompter<span class="op">(</span>reader<span class="op">,</span> <span class="op">&amp;</span>writer<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a>    q <span class="op">:=</span> sampleQuestion<span class="op">();</span> q<span class="op">.</span>Default <span class="op">=</span> <span class="st">&quot;opt-b&quot;</span></span>
+<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Prompt<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> q<span class="op">)</span></span>
+<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> res<span class="op">.</span>Index<span class="op">)</span></span>
+<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceStdin<span class="op">,</span> res<span class="op">.</span>Source<span class="op">)</span></span>
+<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-205"><a href="#cb4-205" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNoLoggerInfoOrDebugTakesQuestionOrInput_CONST042_SourceScan<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-206"><a href="#cb4-206" aria-hidden="true" tabindex="-1"></a>    matches<span class="op">,</span> err <span class="op">:=</span> filepath<span class="op">.</span>Glob<span class="op">(</span><span class="st">&quot;*.go&quot;</span><span class="op">)</span></span>
+<span id="cb4-207"><a href="#cb4-207" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-208"><a href="#cb4-208" aria-hidden="true" tabindex="-1"></a>    forbidden <span class="op">:=</span> regexp<span class="op">.</span>MustCompile<span class="op">(</span><span class="st">`logger\.\b(Info|Debug)\b.*\b(question|preview|label|input|answer)\b`</span><span class="op">)</span></span>
+<span id="cb4-209"><a href="#cb4-209" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> f <span class="op">:=</span> <span class="kw">range</span> matches <span class="op">{</span></span>
+<span id="cb4-210"><a href="#cb4-210" aria-hidden="true" tabindex="-1"></a>        b<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>f<span class="op">);</span> require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-211"><a href="#cb4-211" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> forbidden<span class="op">.</span>Match<span class="op">(</span>b<span class="op">),</span> <span class="st">&quot;%s contains forbidden logger call: CONST-042&quot;</span><span class="op">,</span> f<span class="op">)</span></span>
+<span id="cb4-212"><a href="#cb4-212" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-213"><a href="#cb4-213" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F19-T03): stdinPrompter with non-TTY short-circuit + retry loop + timeout + F18 menu render</code>.</p>
+<hr />
+<h2 id="task-4-ask_user_tool.go-tdd-registry-category">Task 4:
+ask_user_tool.go (TDD) + registry category</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/askuser/ask_user_tool.go</code>, new
+<code>helix_code/internal/tools/askuser/ask_user_tool_test.go</code>,
+modify <code>helix_code/internal/tools/registry.go</code> (add
+<code>CategoryAskUser</code> const).</p>
+<p><code>ask_user_tool.go</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AskUserTool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    prompter Prompter</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewAskUserTool<span class="op">(</span>p Prompter<span class="op">)</span> <span class="op">*</span>AskUserTool <span class="op">{</span> <span class="cf">return</span> <span class="op">&amp;</span>AskUserTool<span class="op">{</span>prompter<span class="op">:</span> p<span class="op">}</span> <span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>AskUserTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;ask_user&quot;</span> <span class="op">}</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>AskUserTool<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;Ask the user a multiple-choice question with optional inline previews. &quot;</span> <span class="op">+</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Returns the user&#39;s chosen value, label, 0-based index, and source (&#39;stdin&#39; or &#39;default&#39;). &quot;</span> <span class="op">+</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;On non-interactive stdin (CI / pipe) and a default value is provided, returns the default; &quot;</span> <span class="op">+</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;if no default is provided, returns an error.&quot;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>AskUserTool<span class="op">)</span> Category<span class="op">()</span> tools<span class="op">.</span>ToolCategory <span class="op">{</span> <span class="cf">return</span> tools<span class="op">.</span>CategoryAskUser <span class="op">}</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>AskUserTool<span class="op">)</span> Schema<span class="op">()</span> tools<span class="op">.</span>ToolSchema <span class="op">{</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tools<span class="op">.</span>ToolSchema<span class="op">{</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        Type<span class="op">:</span> <span class="st">&quot;object&quot;</span><span class="op">,</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        Properties<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;question&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span> <span class="st">&quot;description&quot;</span><span class="op">:</span> <span class="st">&quot;The question text to show the user. Required.&quot;</span><span class="op">},</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;choices&quot;</span><span class="op">:</span>  <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;array&quot;</span><span class="op">,</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;description&quot;</span><span class="op">:</span> <span class="st">&quot;Ordered list of choices. Each choice has label (required), value (required), preview (optional inline context shown above the label). Minimum 2 choices.&quot;</span><span class="op">,</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;items&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;object&quot;</span><span class="op">,</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;properties&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;label&quot;</span><span class="op">:</span>   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">},</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;value&quot;</span><span class="op">:</span>   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">},</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;preview&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">},</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>                    <span class="op">},</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;required&quot;</span><span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;label&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">},</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>                <span class="op">},</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;minItems&quot;</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;default&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span> <span class="st">&quot;description&quot;</span><span class="op">:</span> <span class="st">&quot;Optional. If set, MUST equal one choice&#39;s value. Picked when stdin is non-TTY or user presses Enter without typing a number.&quot;</span><span class="op">},</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        Required<span class="op">:</span>    <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;question&quot;</span><span class="op">,</span> <span class="st">&quot;choices&quot;</span><span class="op">},</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>        Description<span class="op">:</span> <span class="st">&quot;Pause the agent loop and ask the user to pick one of N choices.&quot;</span><span class="op">,</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>AskUserTool<span class="op">)</span> Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    q<span class="op">,</span> err <span class="op">:=</span> parseParams<span class="op">(</span>params<span class="op">)</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> q<span class="op">.</span>Validate<span class="op">()</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>AskUserTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>prompter <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;ask_user: prompter not configured&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    q<span class="op">,</span> err <span class="op">:=</span> parseParams<span class="op">(</span>params<span class="op">)</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> q<span class="op">.</span>Validate<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> t<span class="op">.</span>prompter<span class="op">.</span>Prompt<span class="op">(</span>ctx<span class="op">,</span> q<span class="op">)</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;value&quot;</span><span class="op">:</span>  res<span class="op">.</span>Value<span class="op">,</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;label&quot;</span><span class="op">:</span>  res<span class="op">.</span>Label<span class="op">,</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;index&quot;</span><span class="op">:</span>  res<span class="op">.</span>Index<span class="op">,</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;source&quot;</span><span class="op">:</span> res<span class="op">.</span>Source<span class="op">,</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="co">// parseParams converts map[string]interface{} → Question, surfacing type errors clearly.</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> parseParams<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span>Question<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<p><code>registry.go</code> change (one line in const block):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// existing categories...</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    CategoryAskUser ToolCategory <span class="op">=</span> <span class="st">&quot;ask-user&quot;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>(The actual registration lives in T05 to keep T04 focused on the tool
+unit.)</p>
+<p>Failing tests FIRST (<code>ask_user_tool_test.go</code>):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> fakePrompter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    calls   <span class="op">[]</span>Question</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    result  Result</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    err     <span class="dt">error</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakePrompter<span class="op">)</span> Prompt<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> q Question<span class="op">)</span> <span class="op">(</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    f<span class="op">.</span>calls <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>f<span class="op">.</span>calls<span class="op">,</span> q<span class="op">);</span> <span class="cf">return</span> f<span class="op">.</span>result<span class="op">,</span> f<span class="op">.</span>err</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> validParams<span class="op">()</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span> <span class="op">{</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;question&quot;</span><span class="op">:</span> <span class="st">&quot;Pick&quot;</span><span class="op">,</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;choices&quot;</span><span class="op">:</span> <span class="op">[]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">},</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Name_IsAskUser<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;ask_user&quot;</span><span class="op">,</span> NewAskUserTool<span class="op">(&amp;</span>fakePrompter<span class="op">{}).</span>Name<span class="op">())</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Category_IsAskUser<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> tools<span class="op">.</span>CategoryAskUser<span class="op">,</span> NewAskUserTool<span class="op">(&amp;</span>fakePrompter<span class="op">{}).</span>Category<span class="op">())</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Description_MentionsChoices<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    d <span class="op">:=</span> NewAskUserTool<span class="op">(&amp;</span>fakePrompter<span class="op">{}).</span>Description<span class="op">()</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> d<span class="op">,</span> <span class="st">&quot;choice&quot;</span><span class="op">)</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> d<span class="op">,</span> <span class="st">&quot;default&quot;</span><span class="op">)</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Schema_HasRequiredFields<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> NewAskUserTool<span class="op">(&amp;</span>fakePrompter<span class="op">{}).</span>Schema<span class="op">()</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ElementsMatch<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;question&quot;</span><span class="op">,</span> <span class="st">&quot;choices&quot;</span><span class="op">},</span> s<span class="op">.</span>Required<span class="op">)</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Validate_OK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> NewAskUserTool<span class="op">(&amp;</span>fakePrompter<span class="op">{}).</span>Validate<span class="op">(</span>validParams<span class="op">()))</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Validate_MissingQuestion_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> validParams<span class="op">();</span> <span class="bu">delete</span><span class="op">(</span>p<span class="op">,</span> <span class="st">&quot;question&quot;</span><span class="op">)</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> NewAskUserTool<span class="op">(&amp;</span>fakePrompter<span class="op">{}).</span>Validate<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Validate_ChoicesWrongType_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> validParams<span class="op">();</span> p<span class="op">[</span><span class="st">&quot;choices&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="st">&quot;not an array&quot;</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> NewAskUserTool<span class="op">(&amp;</span>fakePrompter<span class="op">{}).</span>Validate<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Execute_DispatchesToPrompter<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>    fp <span class="op">:=</span> <span class="op">&amp;</span>fakePrompter<span class="op">{</span>result<span class="op">:</span> Result<span class="op">{</span>Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Index<span class="op">:</span> <span class="dv">1</span><span class="op">,</span> Source<span class="op">:</span> SourceStdin<span class="op">}}</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> NewAskUserTool<span class="op">(</span>fp<span class="op">).</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> validParams<span class="op">())</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> fp<span class="op">.</span>calls<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Pick&quot;</span><span class="op">,</span> fp<span class="op">.</span>calls<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Question<span class="op">)</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Execute_ReturnsMapShape<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>    fp <span class="op">:=</span> <span class="op">&amp;</span>fakePrompter<span class="op">{</span>result<span class="op">:</span> Result<span class="op">{</span>Value<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> Label<span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> Index<span class="op">:</span> <span class="dv">1</span><span class="op">,</span> Source<span class="op">:</span> SourceStdin<span class="op">}}</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> NewAskUserTool<span class="op">(</span>fp<span class="op">).</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> validParams<span class="op">())</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> ok <span class="op">:=</span> out<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{});</span> require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> m<span class="op">[</span><span class="st">&quot;value&quot;</span><span class="op">])</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> m<span class="op">[</span><span class="st">&quot;label&quot;</span><span class="op">])</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span>   m<span class="op">[</span><span class="st">&quot;index&quot;</span><span class="op">])</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> SourceStdin<span class="op">,</span> m<span class="op">[</span><span class="st">&quot;source&quot;</span><span class="op">])</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Execute_PrompterError_Propagated<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>    fp <span class="op">:=</span> <span class="op">&amp;</span>fakePrompter<span class="op">{</span>err<span class="op">:</span> ErrUserCancelled<span class="op">}</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> NewAskUserTool<span class="op">(</span>fp<span class="op">).</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> validParams<span class="op">())</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrUserCancelled<span class="op">)</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUserTool_Execute_NilPrompter_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> NewAskUserTool<span class="op">(</span><span class="ot">nil</span><span class="op">).</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> validParams<span class="op">())</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;ask_user&quot;</span><span class="op">)</span></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F19-T04): AskUserTool wrapping Prompter + CategoryAskUser registry const</code>.</p>
+<hr />
+<h2 id="task-5-registry-wiring-integration-test">Task 5: registry wiring
++ integration test</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/internal/tools/registry.go</code> (register
+<code>askuser.NewAskUserTool</code> in <code>buildToolList</code> or
+equivalent + add optional <code>AskUserPrompter askuser.Prompter</code>
+field on <code>RegistryConfig</code>), modify
+<code>helix_code/cmd/cli/main.go</code> (optional: pass
+<code>c.renderer</code> via
+<code>RegistryConfig.AskUserPrompter</code>), new
+<code>helix_code/tests/integration/askuser_test.go</code>.</p>
+<p><code>registry.go</code> changes:</p>
+<ol type="1">
+<li><p>Add field <code>AskUserPrompter askuser.Prompter</code> to
+<code>RegistryConfig</code>.</p></li>
+<li><p>In the registration block, add:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> askUserPrompter askuser<span class="op">.</span>Prompter</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> cfg<span class="op">.</span>AskUserPrompter <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    askUserPrompter <span class="op">=</span> cfg<span class="op">.</span>AskUserPrompter</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    askUserPrompter <span class="op">=</span> askuser<span class="op">.</span>NewStdinPrompter<span class="op">(</span>askuser<span class="op">.</span>StdinPrompterOptions<span class="op">{})</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>r<span class="op">.</span>tools<span class="op">[</span><span class="st">&quot;ask_user&quot;</span><span class="op">]</span> <span class="op">=</span> askuser<span class="op">.</span>NewAskUserTool<span class="op">(</span>askUserPrompter<span class="op">)</span></span></code></pre></div></li>
+<li><p>New import:
+<code>dev.helix.code/internal/tools/askuser</code>.</p></li>
+</ol>
+<p>Integration tests (<code>tests/integration/askuser_test.go</code> —
+<code>//go:build integration</code>; ALWAYS-runs; no infrastructure
+dep):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> integration</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUser_Integration_TTY_RealRender_ContainsPreviewBeforeLabel<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;1</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> askuser<span class="op">.</span>NewStdinPrompter<span class="op">(</span>askuser<span class="op">.</span>StdinPrompterOptions<span class="op">{</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        Reader<span class="op">:</span> reader<span class="op">,</span> Writer<span class="op">:</span> <span class="op">&amp;</span>writer<span class="op">,</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">},</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        Timeout<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span> MaxRetries<span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> askuser<span class="op">.</span>NewAskUserTool<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;question&quot;</span><span class="op">:</span> <span class="st">&quot;Pick&quot;</span><span class="op">,</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;choices&quot;</span><span class="op">:</span> <span class="op">[]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;preview&quot;</span><span class="op">:</span> <span class="st">&quot;preview-A&quot;</span><span class="op">},</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;preview&quot;</span><span class="op">:</span> <span class="st">&quot;preview-B&quot;</span><span class="op">},</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> out<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;a&quot;</span><span class="op">,</span> m<span class="op">[</span><span class="st">&quot;value&quot;</span><span class="op">])</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">cap</span> <span class="op">:=</span> writer<span class="op">.</span>Bytes<span class="op">()</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> bytes<span class="op">.</span>Index<span class="op">(</span><span class="bu">cap</span><span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;preview-A&quot;</span><span class="op">)),</span> bytes<span class="op">.</span>Index<span class="op">(</span><span class="bu">cap</span><span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;1. A&quot;</span><span class="op">)))</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> bytes<span class="op">.</span>Index<span class="op">(</span><span class="bu">cap</span><span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;preview-B&quot;</span><span class="op">)),</span> bytes<span class="op">.</span>Index<span class="op">(</span><span class="bu">cap</span><span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;2. B&quot;</span><span class="op">)))</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUser_Integration_NonTTY_Default_ReturnsDefault_ZeroReads<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;NEVER</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> askuser<span class="op">.</span>NewStdinPrompter<span class="op">(</span>askuser<span class="op">.</span>StdinPrompterOptions<span class="op">{</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        Reader<span class="op">:</span> reader<span class="op">,</span> Writer<span class="op">:</span> <span class="op">&amp;</span>writer<span class="op">,</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span> <span class="op">},</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>        Timeout<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span> MaxRetries<span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> askuser<span class="op">.</span>NewAskUserTool<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;question&quot;</span><span class="op">:</span> <span class="st">&quot;Pick&quot;</span><span class="op">,</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;choices&quot;</span><span class="op">:</span> <span class="op">[]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">},</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;default&quot;</span><span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">,</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> out<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;b&quot;</span><span class="op">,</span> m<span class="op">[</span><span class="st">&quot;value&quot;</span><span class="op">])</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> askuser<span class="op">.</span>SourceDefault<span class="op">,</span> m<span class="op">[</span><span class="st">&quot;source&quot;</span><span class="op">])</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;NEVER</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> reader<span class="op">.</span>String<span class="op">(),</span> <span class="st">&quot;must NOT consume any bytes&quot;</span><span class="op">)</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUser_Integration_NonTTY_NoDefault_ErrPropagated<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;NEVER</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> askuser<span class="op">.</span>NewStdinPrompter<span class="op">(</span>askuser<span class="op">.</span>StdinPrompterOptions<span class="op">{</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>        Reader<span class="op">:</span> reader<span class="op">,</span> Writer<span class="op">:</span> <span class="op">&amp;</span>writer<span class="op">,</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span> <span class="op">},</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>        Timeout<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span> MaxRetries<span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> askuser<span class="op">.</span>NewAskUserTool<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;question&quot;</span><span class="op">:</span> <span class="st">&quot;Pick&quot;</span><span class="op">,</span></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;choices&quot;</span><span class="op">:</span> <span class="op">[]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">},</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> askuser<span class="op">.</span>ErrNoTTYNoDefault<span class="op">)</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;interactive terminal&quot;</span><span class="op">)</span></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;NEVER</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> reader<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAskUser_Integration_TwoConsecutivePrompts_ReaderConsumed<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> bytes<span class="op">.</span>NewBufferString<span class="op">(</span><span class="st">&quot;1</span><span class="ch">\n</span><span class="st">2</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> writer bytes<span class="op">.</span>Buffer</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> askuser<span class="op">.</span>NewStdinPrompter<span class="op">(</span>askuser<span class="op">.</span>StdinPrompterOptions<span class="op">{</span></span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>        Reader<span class="op">:</span> reader<span class="op">,</span> Writer<span class="op">:</span> <span class="op">&amp;</span>writer<span class="op">,</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>        IsTTY<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">},</span></span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>        Timeout<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span> MaxRetries<span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> askuser<span class="op">.</span>NewAskUserTool<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>    params <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;question&quot;</span><span class="op">:</span> <span class="st">&quot;Pick&quot;</span><span class="op">,</span></span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;choices&quot;</span><span class="op">:</span> <span class="op">[]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;A&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">},</span></span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;B&quot;</span><span class="op">,</span> <span class="st">&quot;value&quot;</span><span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">},</span></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>    out1<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> params<span class="op">);</span> require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> out1<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})[</span><span class="st">&quot;index&quot;</span><span class="op">])</span></span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>    out2<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> params<span class="op">);</span> require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> out2<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})[</span><span class="st">&quot;index&quot;</span><span class="op">])</span></span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F19-T05): wire ask_user into registry + integration test (always-runs both branches)</code>.</p>
+<hr />
+<h2 id="task-6-challenge-harness-5-phase-positive-evidence">Task 6:
+Challenge harness (5-phase, positive evidence)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p1f19_challenge/main.go</code>,
+new <code>challenges/p1-f19-ask-user-question/CHALLENGE.md</code>, new
+<code>challenges/p1-f19-ask-user-question/run.sh</code>.</p>
+<p>Harness phases (per spec §6.3):</p>
+<ol type="1">
+<li><strong>PHASE-A: STDIN-INPUT (always runs)</strong> — TTY=true;
+reader=<code>&quot;2\n&quot;</code>; assert <code>result[&quot;value&quot;]==&quot;opt-b&quot;</code>,
+<code>result[&quot;index&quot;]==1</code>,
+<code>result[&quot;source&quot;]==&quot;stdin&quot;</code>.</li>
+<li><strong>PHASE-B: NON-TTY-WITH-DEFAULT (always runs)</strong> —
+TTY=false; default=“opt-b”; reader=<code>&quot;NEVER\n&quot;</code>; assert
+<code>result[&quot;source&quot;]==&quot;default&quot;</code>,
+<code>result[&quot;value&quot;]==&quot;opt-b&quot;</code>, reader’s bytes unchanged.</li>
+<li><strong>PHASE-C: NON-TTY-WITHOUT-DEFAULT-ERR (always runs)</strong>
+— TTY=false; no default; reader=<code>&quot;NEVER\n&quot;</code>; assert
+<code>errors.Is(err, ErrNoTTYNoDefault)</code>, error text contains
+“interactive terminal”, reader’s bytes unchanged.</li>
+<li><strong>PHASE-D: PREVIEW-RENDERING (always runs)</strong> —
+TTY=true; 2 choices each with preview; reader=<code>&quot;1\n&quot;</code>; assert
+captured writer contains both preview strings; assert byte offsets put
+each preview BEFORE its choice label.</li>
+<li><strong>PHASE-E: INVALID-INPUT-RETRY (always runs)</strong> —
+TTY=true; reader=<code>&quot;9\n1\n&quot;</code>; assert
+<code>result[&quot;index&quot;]==0</code>, captured writer contains “Invalid
+choice” exactly once. Sub-case: reader=<code>&quot;a\nb\nc\n&quot;</code>; assert
+<code>errors.Is(err, ErrTooManyInvalidAttempts)</code>.</li>
+</ol>
+<p>Output skeleton (verbatim per spec §6.3) ends with:</p>
+<pre><code>SUMMARY: PHASE-A=7/7 PASS; PHASE-B=5/5 PASS; PHASE-C=4/4 PASS; PHASE-D=5/5 PASS; PHASE-E=5/5 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch.
+Absence-of-error is NEVER acceptable. Reader-position invariants (Phases
+B and C) and byte-offset invariants (Phase D) are positive evidence of
+real stdin/render flow. Anti-bluff smoke clean check appended to harness
+output. Verbatim output captured into
+<code>06_phase_1_evidence.md</code>. Dual commit (Challenges submodule +
+meta-repo bump).</p>
+<p>Subject:
+<code>feat(P1-F19-T06): challenge with 5 always-run phases + reader-position + byte-offset positive evidence</code>.</p>
+<hr />
+<h2 id="task-7-close-out-push">Task 7: Close-out + push</h2>
+<p>Tick all 7 items in PROGRESS, advance PROGRESS focus to F20 candidate
+(Theme System per porting doc), run final verification:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  internal/tools/askuser <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/tools/askuser/...</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration ./tests/integration/...</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># go.mod expected change: NONE</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># go.sum expected change: NONE</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--exit-code</span> go.mod go.sum  <span class="co"># MUST be no-op</span></span></code></pre></div>
+<p>Commit
+<code>chore(P1-F19-T07): close out feature 19 — ask user question with previews</code>.
+Push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions). Request explicit user authorization at this step
+(CONST-043).</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types + interface (§3.3), T03 stdinPrompter (§4.2 + §4.3 + §5.2
+(a)–(d) anti-bluff defences), T04 AskUserTool (§3.3) + registry category
+const, T05 registry wire + integration tests (§6.2), T06 Challenge five
+phases (§5.2 + §6.3), T07 close-out (§9).</li>
+<li><strong>TDD:</strong> every code task starts with failing tests.
+Prompter impl tests against real <code>bytes.Buffer</code> reader/writer
++ injected <code>IsTTY</code> closure (real
+<code>io.Reader</code>/<code>io.Writer</code> seams, no mocks of
+stdlib). Tool tests use <code>fakePrompter</code> (the prompter is the
+dependency-under-mock, NOT the system-under-test). Integration tests
+wire up the actual <code>AskUserTool</code> + <code>stdinPrompter</code>
+(production class) via the same <code>bytes.Buffer</code> seams to prove
+the production hot path works in non-TTY mode.</li>
+<li><strong>Type consistency:</strong> <code>Choice</code>,
+<code>Question</code>, <code>Result</code>, <code>Prompter</code>,
+<code>StdinPrompterOptions</code>, error sentinels
+(<code>ErrInvalidQuestion</code>, <code>ErrNoTTYNoDefault</code>,
+<code>ErrUserCancelled</code>, <code>ErrPromptTimeout</code>,
+<code>ErrTooManyInvalidAttempts</code>), constants
+(<code>DefaultTimeout</code>, <code>DefaultMaxRetries</code>,
+<code>SourceStdin</code>, <code>SourceDefault</code>), tool name
+<code>ask_user</code>, category <code>tools.CategoryAskUser</code> — all
+match across spec §3.3 and plan T02–T05.</li>
+<li><strong>Zero new external deps:</strong> stdlib + existing
+testify/zap + <code>golang.org/x/term</code> (already direct dep after
+F18) + F18-internal <code>internal/render</code>.
+<code>go mod tidy</code> after T03 produces NO changes to
+<code>go.mod</code> AND NO new entries in <code>go.sum</code>. T07’s
+verification step asserts this loudly.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has FIVE always-run
+phases. Every phase records positive evidence (Result fields, captured
+byte content, byte offsets, reader-position invariants). The four
+real-execution criteria — (a) Prompt actually reads from injected reader
+(Phase A asserts Result.Index reflects the reader’s first line); (b)
+non-TTY error path tested (Phase C asserts ErrNoTTYNoDefault + reader
+bytes unchanged); (c) production class exercised (Phases B/C/D/E all use
+real <code>stdinPrompter</code>, never a mock); (d) preview text appears
+BEFORE label (Phase D asserts byte-offset ordering) — each have
+dedicated unit + integration + Challenge assertions. Byte-evidence
+mismatch is a hard Challenge failure.</li>
+<li><strong>CONST-042:</strong> the prompter NEVER logs question text,
+preview text, label text, or user input at any level. Source-scan test
+(<code>TestNoLoggerInfoOrDebugTakesQuestionOrInput_CONST042_SourceScan</code>
+in T03) enforces this with a regex. The Challenge’s saved evidence file
+records <code>Result.Value</code> (stable identifier from the agent),
+byte counts, and byte-offset relationships — never the rendered prompt
+text or user’s typed line.</li>
+<li><strong>CONST-043:</strong> stays on <code>main</code>, non-force to
+all four remotes; explicit user authorization is requested at T07 before
+pushing.</li>
+<li><strong>Stdin readline vs library (Q1=A) — non-obvious call</strong>
+(recorded in spec §2 trailer): no new deps + small render surface +
+<code>applications/terminal_ui/</code> already uses
+<code>tview/tcell</code> for the full TUI; adding bubbletea/promptui
+here would be a third paradigm. The prompter is ~150 lines of pure Go; a
+library would be 30 KLOC.</li>
+<li><strong>Tool only, no slash, no cobra (Q5=A) — non-obvious
+call</strong>: <code>ask_user</code> is agent-driven (the LLM emits a
+<code>tool_use</code> block); a <code>/ask</code> slash inverts the
+semantics (user types the question, not the agent). A cobra subcommand
+is debug-only convenience deferred to F19.5.</li>
+<li><strong>5-minute timeout default — non-obvious call</strong>
+(recorded in spec §11 #1): biases toward “agent reports the timeout
+sooner so the user can re-issue the prompt” vs claude-code’s longer
+wait. Configurable via <code>StdinPrompterOptions.Timeout</code>.</li>
+<li><strong>3 retries before <code>ErrTooManyInvalidAttempts</code> —
+non-obvious call</strong> (recorded in spec §11 #2): caps CI
+infinite-loop risk vs typo forgiveness. Configurable via
+<code>StdinPrompterOptions.MaxRetries</code>.</li>
+<li><strong>EOF returns <code>ErrUserCancelled</code> (NOT silent
+default) — non-obvious call</strong> (recorded in spec §11 #3): explicit
+cancellation signal; silent default would mask piped-stdin
+misconfigurations. Distinct from non-TTY-with-default short-circuit
+(which fires BEFORE any read on the basis of
+<code>IsTTY()=false</code>).</li>
+<li><strong><code>FormatQuestion</code> exported as a pure helper —
+non-obvious call</strong> (recorded in spec §11 #5): lets the anti-bluff
+(d) test pin byte order WITHOUT going through <code>Prompt</code>;
+reusable from a future <code>/ask</code> slash command (F19.5).</li>
+<li><strong>Single <code>preview</code> string vs typed previews —
+non-obvious call</strong> (recorded in spec §11 #6): claude-code’s
+<code>QuestionPreview{type, content, title}</code> is collapsed to a
+single string in v1; typed dispatch deferred to F19.5 (would couple F19
+to a markdown library / image protocol).</li>
+<li><strong>Tool returns <code>map[string]interface{}</code> not typed
+<code>Result</code> — non-obvious call</strong> (recorded in spec §11
+#7): matches existing F14/F15/F17 tool return convention; LLM-side JSON
+decoder sees a stable shape.</li>
+<li><strong>Goroutine-leak on cancellation acceptable v1 — non-obvious
+call</strong> (recorded in spec §11 #10):
+<code>bufio.ReadString(&#39;\n&#39;)</code> blocks on the kernel; ctx-cancel
+returns from the prompter but the read goroutine stays parked until the
+next byte. v2 may use <code>os.Stdin.SetReadDeadline</code>.
+Documented.</li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f14-sandboxed-shell-execution-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f14-sandboxed-shell-execution-design</h1>
+</header>
+<h1 id="phase-1-feature-14-sandboxed-shell-execution">Phase 1 / Feature
+14 — Sandboxed Shell Execution</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, kernel-enforced sandbox for shell commands invoked by
+the agent. F14 introduces a NEW agent tool registered as
+<code>shell_sandboxed</code> that wraps every command in a hybrid Linux
+sandbox (bubblewrap when available, native Go <code>Cloneflags</code>
+namespaces otherwise), enforces a default-DENY network policy, applies a
+CONST-033 deny-list BEFORE the command can reach the sandbox, and
+fail-closes loudly when the host kernel cannot offer the required
+isolation primitives.</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong>Agent tool</strong> — <code>shell_sandboxed</code>
+registered via
+<code>internal/tools/registry.go::ToolRegistry.registerAllTools()</code>.
+The agent invokes it like any other tool; arguments include
+<code>command</code>, <code>network</code> (default <code>false</code>),
+<code>timeout</code>, and <code>cwd</code>.</li>
+<li><strong>Slash command <code>/sandbox</code></strong> —
+<code>status</code> (which backend was selected + capability table),
+<code>test</code> (run a deterministic harness command in the sandbox
+and print exit code + first 256 bytes of stdout), <code>policy</code>
+(print the active deny-list and resource limits).</li>
+<li><strong>Config file</strong> —
+<code>~/.config/helixcode/sandbox.yaml</code> (XDG-aware via
+<code>$XDG_CONFIG_HOME</code> with <code>~/.config</code> fallback; mode
+0600; parent dir 0700). The user can extend the deny-list, set
+memory/cpu caps, allow specific outbound hosts, and override defaults. A
+missing file uses built-in defaults (no error).</li>
+</ol>
+<p>Scope is <strong>Linux v1</strong>. macOS Seatbelt and Windows Job
+Object are explicitly deferred to F14.5 (§8). On non-Linux hosts the
+manager fails closed with a clear message — no fallback “noop” sandbox
+is offered, ever.</p>
+<p>The existing <code>helix_code/internal/tools/shell/</code> package
+(which ships its own <code>Command</code> / <code>ShellExecutor</code> /
+<code>Sandbox</code> types and has pre-existing build failures predating
+F09) is <strong>left untouched</strong>. F14 is a parallel, additive
+package at <code>helix_code/internal/tools/sandbox/</code> with its own
+types and its own tool. There is intentionally no shared
+<code>SandboxConfig</code> symbol between the two packages — name reuse
+across packages is fine in Go and avoiding it would mean either fixing
+pre-existing breakage or contorting F14’s API; both are out of
+scope.</p>
+<p>The scope of F14 is <strong>kernel-enforced isolation of a single
+shell command per invocation</strong>. Long-running daemons inside the
+sandbox, persistent named sandbox sessions, in-sandbox interactive TTYs,
+and seccomp-bpf custom filters are explicitly deferred (§8).</p>
+<h2 id="architecture">2. Architecture</h2>
+<p>Five layers, each with a single responsibility, all under
+<code>internal/tools/sandbox/</code>:</p>
+<ul>
+<li><strong><code>SandboxDetector</code></strong> — runs once at
+startup. Probes <code>which bwrap</code>,
+<code>cat /proc/sys/kernel/unprivileged_userns_clone</code>, the
+presence of <code>/sys/fs/cgroup/cgroup.controllers</code> (cgroups v2
+unified hierarchy), <code>runtime.GOOS</code>, and the running user’s
+UID. Emits a <code>SandboxCapabilities</code> struct.</li>
+<li><strong><code>SandboxManager</code></strong> — holds the chosen
+<code>SandboxBackend</code> plus the loaded <code>SandboxConfig</code>.
+Its <code>Execute(ctx, *SandboxRequest)</code> is the only public path.
+Enforces (a) CONST-033 deny-list, (b) user deny-list, (c) network
+gating, (d) timeout, (e) backend dispatch. Fail-closes when no backend
+is viable.</li>
+<li><strong><code>SandboxBackend</code> interface</strong> — two
+implementations:
+<ul>
+<li><code>BubblewrapBackend</code> — wraps every request as a
+<code>bwrap …</code> subprocess invocation. Argv built deterministically
+from <code>SandboxPolicy</code>.</li>
+<li><code>NativeBackend</code> — uses
+<code>syscall.SysProcAttr.Cloneflags</code> to spawn the target with
+<code>CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWUSER</code>,
+plus <code>CLONE_NEWNET</code> when network is denied. Mounts
+<code>/proc</code> inside the new mount namespace via a tiny re-exec
+helper. Best-effort cgroups v2 memory cap when writable.</li>
+</ul></li>
+<li><strong><code>SandboxedShellTool</code></strong> — implements the
+existing <code>Tool</code> interface
+(<code>Name</code>/<code>Description</code>/<code>Schema</code>/<code>Category</code>/<code>Validate</code>/<code>Execute</code>)
+and delegates to the manager. Tool name is the literal string
+<code>shell_sandboxed</code>. Category <code>CategoryShell</code>
+(reused from registry.go).</li>
+<li><strong><code>SandboxConfigLoader</code></strong> — loads
+<code>~/.config/helixcode/sandbox.yaml</code> via
+<code>gopkg.in/yaml.v3</code> (already in <code>go.mod</code>). Parent
+dir created with mode 0700, file written with
+<code>os.OpenFile(O_CREATE|O_WRONLY, 0600)</code> (mirrors F12
+wizard_writer pattern). Missing file → built-in defaults, no error.</li>
+</ul>
+<p>The manager and the slash command both consume
+<code>SandboxCapabilities</code> directly so
+<code>/sandbox status</code> shows the same values the manager used at
+backend-selection time.</p>
+<pre><code>┌──────────────────┐  shell_sandboxed
+│  agent.go (LLM)  │ ─────────────────────► ToolRegistry.Execute
+└──────────────────┘                              │
+                                                   ├─ SandboxedShellTool.Execute
+                                                   │     ├─ SandboxManager.Execute
+                                                   │     │     ├─ CONST-033 deny-list scan
+                                                   │     │     ├─ user deny-list scan
+                                                   │     │     ├─ pick backend
+                                                   │     │     │     ├─ BubblewrapBackend → bwrap argv → exec.CommandContext
+                                                   │     │     │     └─ NativeBackend → SysProcAttr.Cloneflags → exec.CommandContext
+                                                   │     │     ├─ capture stdout/stderr/exit
+                                                   │     │     └─ SandboxResult
+                                                   │     └─ wrap as map[string]interface{}
+                                                   └─ result back to agent</code></pre>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/tools/sandbox/types.go</code> —
+<code>SandboxConfig</code>, <code>SandboxPolicy</code>,
+<code>SandboxCapabilities</code>, <code>SandboxRequest</code>,
+<code>SandboxResult</code>, <code>SandboxBackend</code> interface,
+<code>SandboxBackendKind</code> enum, deny-list constants. No external
+deps.</li>
+<li><code>helix_code/internal/tools/sandbox/types_test.go</code>.</li>
+<li><code>helix_code/internal/tools/sandbox/detector.go</code> —
+<code>Detect() SandboxCapabilities</code> (probes bwrap, userns, cgroups
+v2, GOOS).</li>
+<li><code>helix_code/internal/tools/sandbox/detector_test.go</code> —
+uses an injected <code>Probe</code> interface so unit tests don’t depend
+on the host kernel.</li>
+<li><code>helix_code/internal/tools/sandbox/bubblewrap_backend.go</code>
+— argv builder + Run via <code>os/exec.CommandContext</code>.</li>
+<li><code>helix_code/internal/tools/sandbox/bubblewrap_backend_test.go</code>
+— argv assertions against a fake <code>SubprocessRunner</code>.</li>
+<li><code>helix_code/internal/tools/sandbox/native_backend.go</code> —
+<code>SysProcAttr.Cloneflags</code> setup + Run.</li>
+<li><code>helix_code/internal/tools/sandbox/native_backend_test.go</code>
+— gated unit tests when
+<code>unprivileged_userns_clone == 1</code>.</li>
+<li><code>helix_code/internal/tools/sandbox/manager.go</code> — backend
+selection + policy enforcement.</li>
+<li><code>helix_code/internal/tools/sandbox/manager_test.go</code>.</li>
+<li><code>helix_code/internal/tools/sandbox/sandboxed_shell_tool.go</code>
+— <code>Tool</code> interface implementation; tool name
+<code>shell_sandboxed</code>.</li>
+<li><code>helix_code/internal/tools/sandbox/sandboxed_shell_tool_test.go</code>.</li>
+<li><code>helix_code/internal/tools/sandbox/config_loader.go</code> —
+YAML loader + secret-safe writer (mirrors F12
+<code>wizard_writer.go</code>).</li>
+<li><code>helix_code/internal/tools/sandbox/config_loader_test.go</code>.</li>
+<li><code>helix_code/internal/commands/sandbox_command.go</code> —
+<code>/sandbox</code> slash command (<code>status</code> /
+<code>test</code> / <code>policy</code>).</li>
+<li><code>helix_code/internal/commands/sandbox_command_test.go</code>.</li>
+<li><code>helix_code/tests/integration/sandbox_test.go</code> —
+<code>//go:build integration</code>, gated per §5.</li>
+<li><code>helix_code/tests/integration/cmd/p1f14_challenge/main.go</code>
+— runtime evidence harness.</li>
+<li><code>challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md</code>
++ <code>run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/internal/tools/registry.go</code> — register
+<code>SandboxedShellTool</code> in <code>registerAllTools()</code>. Add
+<code>SetSandboxManager(*sandbox.SandboxManager)</code> in the same
+shape as the existing F13 <code>SetLSPManager</code>. The tool is
+registered lazily from <code>SetSandboxManager</code> (so unit tests of
+the registry that don’t supply a manager don’t see
+<code>shell_sandboxed</code>). NO changes to <code>Execute</code>
+semantics — <code>shell_sandboxed</code> is just another tool, no
+auto-trigger needed.</li>
+<li><code>helix_code/cmd/cli/main.go</code> — call
+<code>sandbox.Detect()</code>, load
+<code>~/.config/helixcode/sandbox.yaml</code>, construct a
+<code>SandboxManager</code>, call
+<code>registry.SetSandboxManager(...)</code>, register
+<code>/sandbox</code> slash command. <strong>No cobra
+subcommand</strong> (Q5=C — keeps surface light).</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/sandbox/types.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxBackendKind <span class="dt">int</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    BackendNone        SandboxBackendKind <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    BackendBubblewrap  SandboxBackendKind <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    BackendNative      SandboxBackendKind <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>k SandboxBackendKind<span class="op">)</span> String<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">// SandboxCapabilities is what the detector found at startup. Read-only</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">// after Detect() returns.</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxCapabilities <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    GOOS                       <span class="dt">string</span>  <span class="co">// runtime.GOOS</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    BubblewrapPath             <span class="dt">string</span>  <span class="co">// &quot;&quot; if not on PATH</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    UnprivilegedUserns         <span class="dt">bool</span>    <span class="co">// /proc/sys/kernel/unprivileged_userns_clone == 1</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    CgroupsV2Mounted           <span class="dt">bool</span>    <span class="co">// /sys/fs/cgroup/cgroup.controllers exists</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    UID                        <span class="dt">int</span>     <span class="co">// os.Getuid()</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    SelectedBackend            SandboxBackendKind</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    SelectionReason            <span class="dt">string</span>  <span class="co">// human-readable why we picked it</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">// SandboxPolicy is the per-invocation isolation policy. Built from</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">// SandboxConfig + per-call request overrides.</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxPolicy <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    AllowNetwork   <span class="dt">bool</span>          <span class="co">// default false</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    ReadOnlyPaths  <span class="op">[]</span><span class="dt">string</span>      <span class="co">// bind-mounted ro</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    ReadWritePaths <span class="op">[]</span><span class="dt">string</span>      <span class="co">// bind-mounted rw (default: cwd only)</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    Cwd            <span class="dt">string</span>        <span class="co">// working directory inside sandbox</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    MaxMemoryMB    <span class="dt">int</span>           <span class="co">// 0 = no cgroup memory cap</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    MaxCPUSeconds  <span class="dt">int</span>           <span class="co">// 0 = no rlimit cpu cap</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    Timeout        time<span class="op">.</span>Duration <span class="co">// ctx-enforced wallclock cap (default 30s, hard ceiling 10m)</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    Env            <span class="op">[]</span><span class="dt">string</span>      <span class="co">// KEY=VAL; empty → minimal default</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    DenyList       <span class="op">[]</span><span class="dt">string</span>      <span class="co">// additional deny-list (CONST-033 always applied)</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co">// SandboxRequest is what SandboxedShellTool builds from agent params.</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    Command <span class="dt">string</span>        <span class="co">// exact shell snippet (run via /bin/sh -c)</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    Policy  SandboxPolicy</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    ExitCode  <span class="dt">int</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    Stdout    <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    Stderr    <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    Backend   SandboxBackendKind</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    Duration  time<span class="op">.</span>Duration</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    Truncated <span class="dt">bool</span>          <span class="co">// true if stdout/stderr were truncated to MaxOutputBytes</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxBackend <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    Kind<span class="op">()</span> SandboxBackendKind</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>SandboxRequest<span class="op">)</span> <span class="op">(*</span>SandboxResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="co">// SandboxConfig is the persisted config (YAML). Loaded once at startup</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="co">// from ~/.config/helixcode/sandbox.yaml.</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>    DefaultPolicy SandboxPolicy <span class="st">`yaml:&quot;default_policy&quot;`</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    DenyList      <span class="op">[]</span><span class="dt">string</span>      <span class="st">`yaml:&quot;deny_list&quot;`</span>        <span class="co">// user-extended; merged with CONST-033 list</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    AllowedHosts  <span class="op">[]</span><span class="dt">string</span>      <span class="st">`yaml:&quot;allowed_hosts&quot;`</span>    <span class="co">// reserved (network=true gating); v1: informational</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>    MaxOutputBytes <span class="dt">int64</span>        <span class="st">`yaml:&quot;max_output_bytes&quot;`</span> <span class="co">// default 10*1024*1024</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="co">// CONST-033 deny-list — always applied, never overridable. Matched against</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="co">// the parsed argv head AND scanned as substring with word-boundary regex</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="co">// on the raw command string. Both checks must pass.</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> ConstitutionalDenyList <span class="op">=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;systemctl suspend&quot;</span><span class="op">,</span> <span class="st">&quot;systemctl hibernate&quot;</span><span class="op">,</span> <span class="st">&quot;systemctl hybrid-sleep&quot;</span><span class="op">,</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;systemctl suspend-then-hibernate&quot;</span><span class="op">,</span> <span class="st">&quot;systemctl poweroff&quot;</span><span class="op">,</span> <span class="st">&quot;systemctl halt&quot;</span><span class="op">,</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;systemctl reboot&quot;</span><span class="op">,</span> <span class="st">&quot;systemctl kexec&quot;</span><span class="op">,</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;shutdown&quot;</span><span class="op">,</span> <span class="st">&quot;halt&quot;</span><span class="op">,</span> <span class="st">&quot;poweroff&quot;</span><span class="op">,</span> <span class="st">&quot;reboot&quot;</span><span class="op">,</span> <span class="st">&quot;kexec&quot;</span><span class="op">,</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;pm-suspend&quot;</span><span class="op">,</span> <span class="st">&quot;pm-hibernate&quot;</span><span class="op">,</span> <span class="st">&quot;pm-suspend-hybrid&quot;</span><span class="op">,</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;loginctl suspend&quot;</span><span class="op">,</span> <span class="st">&quot;loginctl hibernate&quot;</span><span class="op">,</span> <span class="st">&quot;loginctl hybrid-sleep&quot;</span><span class="op">,</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;loginctl poweroff&quot;</span><span class="op">,</span> <span class="st">&quot;loginctl reboot&quot;</span><span class="op">,</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/sandbox/manager.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxManagerOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Capabilities SandboxCapabilities</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    Config       SandboxConfig</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Backend      SandboxBackend            <span class="co">// injectable for unit tests</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    Now          <span class="kw">func</span><span class="op">()</span> time<span class="op">.</span>Time          <span class="co">// injectable; default time.Now</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    Logger       <span class="op">*</span>log<span class="op">.</span>Logger</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    opts SandboxManagerOptions</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    mu   sync<span class="op">.</span>Mutex</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSandboxManager<span class="op">(</span>opts SandboxManagerOptions<span class="op">)</span> <span class="op">*</span>SandboxManager</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SandboxManager<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>SandboxRequest<span class="op">)</span> <span class="op">(*</span>SandboxResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SandboxManager<span class="op">)</span> Capabilities<span class="op">()</span> SandboxCapabilities</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SandboxManager<span class="op">)</span> ActivePolicy<span class="op">()</span> SandboxPolicy</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SandboxManager<span class="op">)</span> DenyList<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span>                             <span class="co">// CONST-033 + user deny-list, deduped</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>SandboxManager<span class="op">)</span> Close<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span>                <span class="co">// no-op in v1; reserved</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/sandbox/sandboxed_shell_tool.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SandboxedShellTool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    manager <span class="op">*</span>SandboxManager</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSandboxedShellTool<span class="op">(</span>m <span class="op">*</span>SandboxManager<span class="op">)</span> <span class="op">*</span>SandboxedShellTool</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SandboxedShellTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;shell_sandboxed&quot;</span> <span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SandboxedShellTool<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;...&quot;</span> <span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SandboxedShellTool<span class="op">)</span> Schema<span class="op">()</span> ToolSchema   <span class="co">// command (string, required), network (bool, default false), timeout_seconds (int, default 30), cwd (string, optional)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SandboxedShellTool<span class="op">)</span> Category<span class="op">()</span> ToolCategory <span class="co">// CategoryShell</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SandboxedShellTool<span class="op">)</span> Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SandboxedShellTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p>The agent tool result is a <code>map[string]interface{}</code> with
+keys <code>exit_code</code>, <code>stdout</code>, <code>stderr</code>,
+<code>backend</code>, <code>duration_ms</code>, <code>truncated</code>.
+Stdout and stderr are strings (UTF-8; invalid sequences replaced) capped
+at <code>MaxOutputBytes</code> total.</p>
+<h3 id="user-surfaces">3.4 User surfaces</h3>
+<p><strong>Agent tool call</strong> (registered with
+<code>ToolRegistry</code>):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool name</th>
+<th>Schema</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shell_sandboxed</code></td>
+<td><code>{command: string, network?: bool=false, timeout_seconds?: int=30, cwd?: string}</code></td>
+<td><code>{exit_code, stdout, stderr, backend, duration_ms, truncated}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Slash command <code>/sandbox</code></strong>: -
+<code>/sandbox status</code> — table: GOOS, bubblewrap path (or “not
+installed”), unprivileged userns yes/no, cgroups v2 yes/no, selected
+backend, selection reason. - <code>/sandbox test</code> — runs
+<code>/bin/echo p1f14-sandbox-ok</code> inside the sandbox with
+<code>network=false</code>; prints exit code, captured stdout, backend
+used. Acts as a one-line live smoke from the user’s prompt. -
+<code>/sandbox policy</code> — prints the active
+<code>SandboxPolicy</code> (default policy + merged deny-list). The
+CONST-033 entries are clearly marked with a <code>[CONST-033]</code>
+prefix so the user can see they cannot be removed.</p>
+<p><strong>No cobra subcommand</strong> (per Q5=C). The slash command is
+sufficient for inspection; agent invocations go through the tool.</p>
+<h3 id="existing-code-constraints">3.5 Existing-code constraints</h3>
+<p><code>helix_code/internal/tools/shell/</code> already defines
+<code>SandboxConfig</code>, <code>SandboxBackend</code>,
+<code>Sandbox</code>, <code>Command</code>,
+<code>ExecutionResult</code>, <code>NetworkMode</code>, etc. <strong>F14
+deliberately does NOT import or modify that package.</strong> Names in
+the new <code>sandbox</code> package are independent (Go scopes types
+per package). The pre-existing build failures in
+<code>internal/tools/shell/</code> predate F09 and are out of scope; the
+<code>shell_sandboxed</code> tool is implemented directly via
+<code>os/exec.CommandContext</code> plus the new backend, without the
+broken <code>ShellExecutor</code>. The existing <code>bash</code> tool
+stays as-is — F14 does not modify it (Q4=B).</p>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup-wiring-cmdclimain.go">4.1 Startup wiring
+(<code>cmd/cli/main.go</code>)</h3>
+<pre><code>NewCLI()
+  ├─ caps := sandbox.Detect()
+  ├─ cfg, err := sandbox.LoadConfig(&quot;&quot;)              // &quot;&quot; → ~/.config/helixcode/sandbox.yaml; missing OK
+  ├─ if err != nil: log WARN, cfg = DefaultSandboxConfig()
+  ├─ backend, selectErr := sandbox.SelectBackend(caps)   // bwrap &gt; native &gt; nil
+  ├─ if selectErr != nil: log INFO once with the install hint; backend = nil
+  ├─ mgr := sandbox.NewSandboxManager(SandboxManagerOptions{
+  │      Capabilities: caps, Config: cfg, Backend: backend,
+  │  })
+  ├─ registry.SetSandboxManager(mgr)        // also registers shell_sandboxed tool
+  ├─ slashRegistry.Register(commands.NewSandboxCommand(mgr))
+  └─ defer mgr.Close(ctx)</code></pre>
+<p>If <code>backend == nil</code>, <code>SetSandboxManager</code> is
+still called — the tool is registered but <code>Execute</code> returns
+the documented fail-closed error so the agent gets a clear message
+rather than a silent unsandboxed run.</p>
+<h3 id="per-command-execute-flow">4.2 Per-command Execute flow</h3>
+<pre><code>SandboxedShellTool.Execute(ctx, params)
+  ├─ req := buildRequest(params, mgr.ActivePolicy())
+  │     ├─ apply per-call overrides (network, timeout_seconds, cwd)
+  │     └─ inherit DenyList, ReadOnly/ReadWrite paths, MaxMemoryMB, MaxCPUSeconds, Env
+  ├─ res, err := mgr.Execute(ctx, req)
+  └─ return map{exit_code, stdout, stderr, backend, duration_ms, truncated}, err
+
+SandboxManager.Execute(ctx, req)
+  ├─ if mgr.opts.Backend == nil:
+  │      return nil, ErrSandboxUnavailable  // see §5.1 for exact text
+  ├─ if matchesAny(req.Command, ConstitutionalDenyList):
+  │      return nil, ErrConstitutionalDeny  // CONST-033; rejected BEFORE sandbox
+  ├─ if matchesAny(req.Command, mgr.opts.Config.DenyList):
+  │      return nil, ErrPolicyDeny
+  ├─ ctx, cancel := context.WithTimeout(ctx, req.Policy.Timeout)
+  ├─ defer cancel()
+  ├─ res, err := mgr.opts.Backend.Run(ctx, req)
+  └─ return res, err</code></pre>
+<p><code>matchesAny</code> runs each deny-list entry through both (a)
+tokenised argv-head match against the parsed command
+(<code>shellwords</code> style, no eval), and (b) word-boundary regex on
+the raw command. Both share the same denylist. This catches
+<code>systemctl   suspend</code> (whitespace),
+<code>systemctl suspend; ls</code> (chained),
+<code>bash -c &#39;systemctl suspend&#39;</code> (nested shell).</p>
+<h3 id="bubblewrap-argv-construction">4.3 Bubblewrap argv
+construction</h3>
+<pre><code>bwrap
+  --die-with-parent
+  --new-session
+  --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup
+  --unshare-net                                  # only when AllowNetwork=false
+  --proc /proc
+  --dev /dev
+  --tmpfs /tmp
+  --ro-bind / /                                  # default ro filesystem view
+  --bind &lt;cwd&gt; &lt;cwd&gt;                             # writable: only the cwd
+  --chdir &lt;cwd&gt;
+  --setenv PATH /usr/local/bin:/usr/bin:/bin
+  --                                             # end of bwrap args
+  /bin/sh -c &lt;command&gt;</code></pre>
+<p><code>ReadOnlyPaths</code> and <code>ReadWritePaths</code> from the
+policy add <code>--ro-bind</code> / <code>--bind</code> pairs. Memory
+cap is best-effort cgroups v2 via <code>--cgroup</code> when the unified
+hierarchy is writable; otherwise we rely on per-process rlimits set via
+<code>cmd.SysProcAttr</code> after the bwrap process forks (rlimits
+inherit). Argv is built deterministically, sorted, and unit-tested
+without invoking bwrap.</p>
+<h3 id="native-backend-cloneflags">4.4 Native backend cloneflags</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cmd<span class="op">.</span>SysProcAttr <span class="op">=</span> <span class="op">&amp;</span>syscall<span class="op">.</span>SysProcAttr<span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    Cloneflags<span class="op">:</span>   syscall<span class="op">.</span>CLONE_NEWPID <span class="op">|</span> syscall<span class="op">.</span>CLONE_NEWNS <span class="op">|</span> syscall<span class="op">.</span>CLONE_NEWUTS <span class="op">|</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                  syscall<span class="op">.</span>CLONE_NEWIPC <span class="op">|</span> syscall<span class="op">.</span>CLONE_NEWUSER<span class="op">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    UidMappings<span class="op">:</span>  <span class="op">[]</span>syscall<span class="op">.</span>SysProcIDMap<span class="op">{{</span>ContainerID<span class="op">:</span> <span class="dv">0</span><span class="op">,</span> HostID<span class="op">:</span> os<span class="op">.</span>Getuid<span class="op">(),</span> Size<span class="op">:</span> <span class="dv">1</span><span class="op">}},</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    GidMappings<span class="op">:</span>  <span class="op">[]</span>syscall<span class="op">.</span>SysProcIDMap<span class="op">{{</span>ContainerID<span class="op">:</span> <span class="dv">0</span><span class="op">,</span> HostID<span class="op">:</span> os<span class="op">.</span>Getgid<span class="op">(),</span> Size<span class="op">:</span> <span class="dv">1</span><span class="op">}},</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    Pdeathsig<span class="op">:</span>    syscall<span class="op">.</span>SIGKILL<span class="op">,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">!</span>req<span class="op">.</span>Policy<span class="op">.</span>AllowNetwork <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    cmd<span class="op">.</span>SysProcAttr<span class="op">.</span>Cloneflags <span class="op">|=</span> syscall<span class="op">.</span>CLONE_NEWNET</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>A tiny re-exec helper inside the new mount namespace remounts
+<code>/proc</code>, then <code>execve</code>s
+<code>/bin/sh -c &lt;command&gt;</code>. The helper is a separate small
+binary built from
+<code>internal/tools/sandbox/cmd/native_helper/main.go</code> and
+located by absolute path captured at startup via
+<code>os.Executable()</code> + sibling lookup; if absent, the native
+backend fail-closes.</p>
+<p>Resource caps: <code>cmd.SysProcAttr</code> carries
+<code>Rlimit</code> for <code>RLIMIT_AS</code> (memory) and
+<code>RLIMIT_CPU</code>. Cgroups v2 memory cap is best-effort via
+writing <code>memory.max</code> under a per-invocation
+<code>helixcode-sandbox-&lt;pid&gt;</code> slice when
+<code>/sys/fs/cgroup/cgroup.subtree_control</code> is writable;
+otherwise rlimits are the fallback.</p>
+<h3 id="network-deny-enforcement">4.5 Network-deny enforcement</h3>
+<p><strong>Default DENY</strong> (Q3=A). The policy sets
+<code>AllowNetwork=false</code> unless the agent explicitly passes
+<code>network: true</code> in the tool params. With <code>false</code>:
+- bubblewrap: <code>--unshare-net</code> adds an empty network namespace
+(no interfaces, no DNS). - native: <code>CLONE_NEWNET</code> does the
+same.</p>
+<p>A test phase verifies that <code>curl https://example.com</code>
+fails with a connection / DNS error in the default-deny mode, and
+succeeds (HTTP 2xx) when <code>network: true</code> is passed. Both
+checks gated on a working backend.</p>
+<h3 id="const-033-deny-list-flow">4.6 CONST-033 deny-list flow</h3>
+<p>The deny-list is checked <strong>before</strong> any subprocess is
+spawned. The check is in <code>SandboxManager.Execute</code>, not in the
+backend. Both backends therefore inherit it for free. The check is
+non-overridable: <code>SandboxConfig.DenyList</code> may only ADD to it,
+never subtract. <code>/sandbox policy</code> shows the merged list with
+<code>[CONST-033]</code> markers.</p>
+<h2 id="error-handling-edge-cases-and-anti-bluff">5. Error handling,
+edge cases, and anti-bluff</h2>
+<h3 id="error-paths">5.1 Error paths</h3>
+<ul>
+<li><p><strong>No backend available</strong> (no bwrap + no userns +
+non-Linux) — <code>SandboxManager.Execute</code> returns
+<code>ErrSandboxUnavailable</code> whose <code>.Error()</code> is
+exactly:</p>
+<pre><code>sandboxing unavailable: install bubblewrap (apt install bubblewrap; dnf install bubblewrap; brew/macos deferred to F14.5) OR enable unprivileged user namespaces (echo 1 &gt; /proc/sys/kernel/unprivileged_userns_clone)</code></pre>
+<p>The agent tool surfaces this verbatim. <strong>No silent unsandboxed
+run, ever.</strong></p></li>
+<li><p><strong>Non-Linux host</strong> —
+<code>runtime.GOOS != &quot;linux&quot;</code> short-circuits backend selection to
+nil; same <code>ErrSandboxUnavailable</code> with platform
+note.</p></li>
+<li><p><strong>Constitutional deny-list hit</strong> —
+<code>ErrConstitutionalDeny</code>:
+<code>&quot;command rejected: &lt;token&gt; matches CONST-033 power-management ban&quot;</code>.
+Returns BEFORE sandbox spawn.</p></li>
+<li><p><strong>User deny-list hit</strong> — <code>ErrPolicyDeny</code>:
+<code>&quot;command rejected: &lt;token&gt; matches sandbox.yaml deny_list&quot;</code>.</p></li>
+<li><p><strong>Timeout</strong> — <code>context.DeadlineExceeded</code>
+is wrapped into a
+<code>SandboxResult{ExitCode: -1, Stderr: &quot;sandbox timeout after Xs&quot;, Truncated: false}</code>;
+tool returns the result (NOT err) so the agent sees the timeout
+cleanly.</p></li>
+<li><p><strong>OOM</strong> — backend reports exit signal
+<code>SIGKILL</code> from cgroups OOM killer (or <code>RLIMIT_AS</code>
+failure); <code>SandboxResult.ExitCode = -9</code> and
+<code>Stderr</code> carries
+<code>&quot;sandbox out-of-memory: hit MaxMemoryMB=&lt;n&gt;&quot;</code>.</p></li>
+<li><p><strong>bwrap missing user-mapping caps</strong> — bwrap exits
+with a specific diagnostic; manager surfaces
+<code>bubblewrap setup failed: &lt;stderr&gt;</code> and the user is
+pointed at unprivileged-userns + setuid bwrap docs.</p></li>
+<li><p><strong>Concurrent invocations</strong> — manager is safe for
+concurrent <code>Execute</code> calls; no shared mutable state in the
+per-call request path. Each invocation gets its own backend
+<code>Run</code> goroutine and its own subprocess.</p></li>
+<li><p><strong>Stdout/stderr exceeds MaxOutputBytes</strong> — captured
+to byte-bounded <code>bytes.Buffer</code>, <code>Truncated=true</code>,
+the tail beyond the cap is discarded.</p></li>
+<li><p><strong>Manager <code>Close</code> while an Execute is in
+flight</strong> — Close is a no-op in v1; in-flight calls finish under
+their own ctx. Reserved for future cgroup cleanup work.</p></li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9-loud">5.2 Anti-bluff (CONST-035 /
+§11.9) — LOUD</h3>
+<p><strong>The single largest bluff vector for F14 is “sandbox test
+passed” with no real bubblewrap or userns available, and the test
+silently degrading to an unsandboxed <code>os/exec.Run</code>.</strong>
+The gating policy below is non-negotiable.</p>
+<ol type="1">
+<li><p><strong>Detector accuracy is the load-bearing primitive.</strong>
+The <code>Detect()</code> function MUST be honest. It probes:</p>
+<ul>
+<li><code>which bwrap</code> via <code>exec.LookPath(&quot;bwrap&quot;)</code> —
+non-empty path means bubblewrap usable.</li>
+<li><code>cat /proc/sys/kernel/unprivileged_userns_clone</code> — value
+<code>1</code> means unprivileged userns is enabled. Older kernels (pre
+5.10) without this sysctl and with userns enabled by default count as
+enabled.</li>
+<li><code>stat /sys/fs/cgroup/cgroup.controllers</code> — file exists
+means cgroups v2 unified hierarchy is mounted.</li>
+<li><code>runtime.GOOS</code> — non-<code>linux</code> short-circuits to
+no-backend.</li>
+<li><code>os.Getuid()</code> — captured for diagnostics; unprivileged
+userns is the primary gate. The detector emits
+<code>SandboxCapabilities</code> with <strong>no defaults
+guessed</strong> — every field reflects an actual probe, and
+<code>SelectionReason</code> is a one-line human-readable string
+captured by the manager so <code>/sandbox status</code> cannot lie.</li>
+</ul></li>
+<li><p><strong>Backend selection</strong> in
+<code>SelectBackend(caps SandboxCapabilities) (SandboxBackend, error)</code>:</p>
+<ul>
+<li>bubblewrap path non-empty →
+<code>BubblewrapBackend{Path: caps.BubblewrapPath}</code>, reason
+<code>&quot;bubblewrap (preferred)&quot;</code>.</li>
+<li>else: <code>caps.UnprivilegedUserns == true</code> AND
+<code>caps.GOOS == &quot;linux&quot;</code> → <code>NativeBackend{...}</code>,
+reason <code>&quot;native userns fallback (no bwrap)&quot;</code>.</li>
+<li>else: returns <code>(nil, ErrSandboxUnavailable)</code>.
+<strong>Fail closed.</strong> Manager records the capability gap in its
+diagnostic state for <code>/sandbox status</code>.</li>
+</ul></li>
+<li><p><strong>Unit tests</strong> — mocks OK ONLY at the
+<code>SubprocessRunner</code> boundary (an interface with
+<code>Run(ctx, *exec.Cmd) ([]byte, []byte, int, error)</code>). This
+lets us validate command-line construction (full bwrap argv, native
+cloneflags + uid/gid maps) without spawning real subprocesses. NO mocks
+of the manager. NO mocks of policy enforcement — those are tested by
+direct calls to <code>SandboxManager.Execute</code> with a fake backend
+that returns a canned <code>SandboxResult</code>.</p></li>
+<li><p><strong>Integration tests</strong>
+(<code>-tags=integration</code>) — gated on real kernel features:</p>
+<ul>
+<li><code>TestSandbox_Bubblewrap_RunsEcho</code> — gated on
+<code>exec.LookPath(&quot;bwrap&quot;) == nil</code>. When absent:
+<code>t.Skip(&quot;SKIP-OK: P1-F14 bubblewrap not on PATH (install: apt install bubblewrap OR dnf install bubblewrap)&quot;)</code>.</li>
+<li><code>TestSandbox_Bubblewrap_NetworkDeniedByDefault</code> — same
+gate. Asserts <code>curl --max-time 2 https://example.com</code> exits
+non-zero.</li>
+<li><code>TestSandbox_Bubblewrap_NetworkAllowedWhenOptedIn</code> — same
+gate; gated additionally on outbound network to a controlled host (skip
+if offline).</li>
+<li><code>TestSandbox_Native_RunsEcho</code> — gated on
+<code>unprivileged_userns_clone == 1</code>; on disabled:
+<code>t.Skip(&quot;SKIP-OK: P1-F14 unprivileged user namespaces disabled (echo 1 &gt; /proc/sys/kernel/unprivileged_userns_clone)&quot;)</code>.</li>
+<li><code>TestSandbox_Native_NetworkDeniedByDefault</code> — same
+gate.</li>
+<li><code>TestSandbox_FailsClosedWhenNoBackend</code> — runs ALWAYS;
+constructs a manager with a synthetic <code>SandboxCapabilities{}</code>
+(zero values), asserts <code>ErrSandboxUnavailable</code> with the exact
+documented message. <strong>This test proves fail-closed semantics
+regardless of host capabilities.</strong></li>
+<li><code>TestSandbox_RejectsConstitutionalDenyList</code> — runs
+ALWAYS; calls <code>Execute</code> with
+<code>command: &quot;systemctl suspend&quot;</code>, asserts
+<code>ErrConstitutionalDeny</code> and that NO subprocess was spawned
+(uses fake backend with a counter).</li>
+</ul>
+<p><code>SKIP-OK:</code> is the canonical marker required by
+<code>make no-silent-skips</code>. Bare <code>t.Skip()</code> is
+forbidden.</p></li>
+<li><p><strong>Challenge harness</strong> — exercises three phases, two
+gated:</p>
+<ul>
+<li><strong>Phase A — detector + fail-closed (always runs)</strong> —
+probes capabilities, prints them, builds a manager with a forced empty
+<code>SandboxCapabilities</code>, calls
+<code>Execute(&quot;/bin/echo hi&quot;)</code>, asserts
+<code>ErrSandboxUnavailable</code> with documented text. Then asserts
+<code>Execute(&quot;systemctl suspend&quot;)</code> returns
+<code>ErrConstitutionalDeny</code> even when a working backend IS
+available. ~6 [PASS] lines.</li>
+<li><strong>Phase B — bubblewrap (gated)</strong> —
+<code>[skipped: bubblewrap not on PATH (apt install bubblewrap)]</code>
+if absent. Otherwise: 4 [PASS] lines (runs echo, network denied, network
+allowed, deny-list rejected before spawn).</li>
+<li><strong>Phase C — native (gated)</strong> —
+<code>[skipped: unprivileged userns disabled (echo 1 &gt; /proc/sys/kernel/unprivileged_userns_clone)]</code>
+if absent. Otherwise: 3 [PASS] lines (runs echo, network denied,
+deny-list rejected). Final summary:
+<code>DETECTOR=6/6 PASS; BWRAP=&lt;n&gt;/4 PASS; NATIVE=&lt;n&gt;/3 PASS</code>.</li>
+</ul></li>
+<li><p><strong>Anti-bluff rule for the Challenge:</strong> the harness
+MUST present three clearly separated sections. A reader of the output
+cannot confuse “fail-closed semantics work” with “bubblewrap actually
+sandboxed a real command.” The Challenge MUST exit non-zero on any
+assertion failure within phases that did run, and explicitly note
+skipped phases.</p></li>
+<li><p><strong>Concrete forbidden phrases</strong> (anti-bluff smoke
+clean check, applied to every new file):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/sandbox internal/commands/sandbox_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p></li>
+<li><p><strong>No silent unsandboxed fallback.</strong> Under no
+codepath does F14 fall back to running a command outside the sandbox.
+The only paths are: real sandbox, deny-list rejection, or
+<code>ErrSandboxUnavailable</code>. If we ever change this, it requires
+a constitutional amendment because the entire user-trust model around
+<code>shell_sandboxed</code> rests on this.</p></li>
+</ol>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-mocks-ok-subprocessrunner-boundary-only">6.1 Unit (mocks
+OK, SubprocessRunner boundary only)</h3>
+<ul>
+<li><code>TestSandboxCapabilities_AllFieldsPopulatedFromProbes</code>.</li>
+<li><code>TestSelectBackend_PrefersBubblewrap_WhenPresent</code>.</li>
+<li><code>TestSelectBackend_FallsBackToNative_WhenNoBwrapButUserns</code>.</li>
+<li><code>TestSelectBackend_FailsClosed_WhenNeither</code>.</li>
+<li><code>TestSelectBackend_FailsClosed_WhenNonLinux</code> (force
+<code>caps.GOOS = &quot;darwin&quot;</code>).</li>
+<li><code>TestBubblewrapBackend_ArgvShape_DefaultDenyNetwork</code> —
+asserts presence of <code>--unshare-net</code>.</li>
+<li><code>TestBubblewrapBackend_ArgvShape_NetworkAllowed</code> —
+asserts absence of <code>--unshare-net</code> when policy allows.</li>
+<li><code>TestBubblewrapBackend_ArgvShape_BindsCwdRW</code>.</li>
+<li><code>TestBubblewrapBackend_ArgvShape_RootBindIsReadOnly</code>.</li>
+<li><code>TestNativeBackend_Cloneflags_IncludeUserns</code> — asserts
+the <code>Cloneflags</code> bitmap.</li>
+<li><code>TestNativeBackend_Cloneflags_AddsNewnetWhenNetDenied</code>.</li>
+<li><code>TestSandboxManager_RejectsConstitutionalDenyList_BeforeSpawn</code>
+— counter on fake backend stays at 0.</li>
+<li><code>TestSandboxManager_RejectsUserDenyList_BeforeSpawn</code>.</li>
+<li><code>TestSandboxManager_AppliesTimeout</code>.</li>
+<li><code>TestSandboxManager_TruncatesOutputAtMaxBytes</code>.</li>
+<li><code>TestSandboxManager_FailsClosed_WhenBackendNil</code>.</li>
+<li><code>TestSandboxedShellTool_BuildsRequestFromParams</code>.</li>
+<li><code>TestSandboxedShellTool_NetworkDefaultsFalse</code>.</li>
+<li><code>TestSandboxedShellTool_ResultMapShape</code>.</li>
+<li><code>TestSandboxConfigLoader_LoadsYAML</code>.</li>
+<li><code>TestSandboxConfigLoader_MissingFile_ReturnsDefaults_NoError</code>.</li>
+<li><code>TestSandboxConfigLoader_WriterEnforcesMode0600</code>.</li>
+<li><code>TestSandboxCommand_Status_RendersTable</code>.</li>
+<li><code>TestSandboxCommand_Test_RunsEchoAndPrintsExit</code>.</li>
+<li><code>TestSandboxCommand_Policy_PrintsConstitutionalEntriesWithPrefix</code>.</li>
+</ul>
+<h3 id="integration--tagsintegration-gated-per-5.2">6.2 Integration
+(<code>-tags=integration</code>, gated per §5.2)</h3>
+<ul>
+<li><code>TestSandbox_Bubblewrap_RunsEcho</code> —
+<code>SKIP-OK: P1-F14 bubblewrap not on PATH (install: apt install bubblewrap OR dnf install bubblewrap)</code>.</li>
+<li><code>TestSandbox_Bubblewrap_NetworkDeniedByDefault</code> — same
+skip.</li>
+<li><code>TestSandbox_Bubblewrap_NetworkAllowedWhenOptedIn</code> — same
+skip; additional offline-skip with
+<code>SKIP-OK: P1-F14 host has no outbound HTTPS connectivity</code>.</li>
+<li><code>TestSandbox_Native_RunsEcho</code> —
+<code>SKIP-OK: P1-F14 unprivileged user namespaces disabled (echo 1 &gt; /proc/sys/kernel/unprivileged_userns_clone)</code>.</li>
+<li><code>TestSandbox_Native_NetworkDeniedByDefault</code> — same
+skip.</li>
+<li><code>TestSandbox_FailsClosedWhenNoBackend</code> — never
+skipped.</li>
+<li><code>TestSandbox_RejectsConstitutionalDenyList</code> — never
+skipped.</li>
+</ul>
+<h3 id="challenge">6.3 Challenge</h3>
+<ul>
+<li><strong>Phase A — detector + fail-closed (always runs)</strong> — 6
+[PASS] lines including the CONST-033 rejection check that runs even when
+a backend is available (so the deny-list path is exercised on hosts that
+have bwrap).</li>
+<li><strong>Phase B — bubblewrap (gated)</strong> — 4 [PASS] lines or
+<code>[skipped: bubblewrap not on PATH (install: apt install bubblewrap)]</code>.</li>
+<li><strong>Phase C — native (gated)</strong> — 3 [PASS] lines or
+<code>[skipped: unprivileged userns disabled (echo 1 &gt; /proc/sys/kernel/unprivileged_userns_clone)]</code>.</li>
+<li>Final summary line:
+<code>DETECTOR=6/6 PASS; BWRAP=&lt;n&gt;/4 PASS; NATIVE=&lt;n&gt;/3 PASS</code>.</li>
+<li>The Challenge MUST exit non-zero on any assertion failure within
+phases that did run.</li>
+</ul>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>Linux only for v1. Concretely: - <code>runtime.GOOS != &quot;linux&quot;</code>
+→ <code>SelectBackend</code> returns
+<code>(nil, ErrSandboxUnavailable)</code> with the message:
+<code>&quot;sandboxing unavailable: F14 v1 supports Linux only (macOS Seatbelt + Windows Job Object deferred to F14.5)&quot;</code>.
+- The manager always loads on every platform (so
+<code>/sandbox status</code> works everywhere and reports the gap). -
+<code>shell_sandboxed</code> tool is registered on every platform (so
+the agent sees the tool and gets the documented error rather than a
+“tool not found” surprise). - Build tags are NOT used on the public API
+(<code>types.go</code>, <code>manager.go</code>,
+<code>sandboxed_shell_tool.go</code>, <code>config_loader.go</code>,
+<code>detector.go</code> all build on every GOOS). Only
+<code>native_backend.go</code> carries <code>//go:build linux</code>; on
+non-Linux it has a stub <code>native_backend_other.go</code> with
+<code>//go:build !linux</code> that returns the platform error from
+<code>Run</code>.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li><strong>macOS Seatbelt sandbox profile</strong> — F14.5 (separate
+spec). Will use <code>sandbox-exec</code> and a generated
+<code>.sb</code> policy file.</li>
+<li><strong>Windows Job Object + ACL sandbox</strong> — F14.5. Job
+Object via <code>kernel32.dll</code> syscalls; AppContainer integration
+optional.</li>
+<li><strong>seccomp-bpf custom filter</strong> — F14.5. v1 uses
+bubblewrap’s default seccomp policy (which already blocks the most
+dangerous syscalls); custom filters require either
+<code>libseccomp</code> cgo bindings or hand-rolled BPF — both out of
+scope for v1.</li>
+<li><strong>IO bandwidth quotas</strong> — v1 has memory + CPU only.
+cgroups v2 io.max requires writable cgroup hierarchy and is
+host-config-dependent.</li>
+<li><strong>Persistent named sandbox sessions</strong> — v1 is one-shot
+per <code>Execute</code> call. Long-running sandboxed shells /
+interactive TTYs are deferred.</li>
+<li><strong>Custom seccomp policy upload via sandbox.yaml</strong> — v1
+only allows deny-list extension; full seccomp programs deferred.</li>
+<li><strong>Privileged-mode escape hatch</strong> — explicitly NOT
+supported. There is no flag to disable the sandbox; users who want
+unsandboxed shell run the existing <code>bash</code> tool.</li>
+<li><strong>Non-Linux fallback to a “noop” sandbox</strong> — explicitly
+NOT supported. Per §7, non-Linux fail-closes.</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>§11.9 / CONST-035</strong> — Challenge has THREE sections
+(detector/fail-closed, bwrap, native), the first always runs against
+real subprocesses + the real fail-closed path, the latter two are
+explicitly gated and never claim PASS without a runtime call.
+<code>[skipped: …]</code> lines name the missing capability AND the
+install command. Detector accuracy is itself a tested invariant.</li>
+<li><strong>CONST-033 (Host Power Management ban)</strong> —
+<code>ConstitutionalDenyList</code> in <code>types.go</code> enumerates
+<code>systemctl suspend|hibernate|hybrid-sleep|suspend-then-hibernate|poweroff|halt|reboot|kexec</code>,
+bare <code>shutdown|halt|poweroff|reboot|kexec</code>,
+<code>pm-suspend|pm-hibernate|pm-suspend-hybrid</code>, and the
+<code>loginctl</code> equivalents. The check runs in
+<code>SandboxManager.Execute</code> BEFORE any subprocess is spawned
+(asserted by
+<code>TestSandboxManager_RejectsConstitutionalDenyList_BeforeSpawn</code>
+with a spawn-counter on the fake backend). Matching is tokenised +
+word-boundary regex — both pass to handle whitespace, chained commands,
+and nested <code>bash -c &#39;…&#39;</code>.</li>
+<li><strong>CONST-039</strong> — F14 ships with a Challenge in
+<code>challenges/p1-f14-sandboxed-shell-execution/</code> and an
+evidence harness at
+<code>tests/integration/cmd/p1f14_challenge/main.go</code>.</li>
+<li><strong>CONST-042 (No-Secret-Leak)</strong> —
+<code>~/.config/helixcode/sandbox.yaml</code> is written via
+<code>os.OpenFile(path, O_CREATE|O_WRONLY|O_EXCL, 0o600)</code> with
+parent dir created at <code>0o700</code>. The Challenge verifies file
+mode (≤ 0600) and parent dir mode (≤ 0700). Loader rejects files with
+broader perms with <code>ErrInsecurePerms</code>.</li>
+<li><strong>CONST-043 (No-Force-Push)</strong> — close-out task pushes
+to all four remotes non-force.</li>
+<li><strong>No-Mocks-In-Production (Universal Rule 2)</strong> —
+<code>SandboxManager</code>, both backends, and the agent tool are real,
+talking to real subprocesses. Mocks live only in <code>_test.go</code>
+files at the <code>SubprocessRunner</code> boundary. The fake
+<code>SandboxBackend</code> used in deny-list tests is a unit-test
+artifact only and is never compiled into the production binary.</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: platform scope</td>
+<td>(B) Linux first</td>
+<td>cgroups v2 + PID/mount/network/user namespaces; macOS Seatbelt +
+Windows Job Object deferred to F14.5</td>
+</tr>
+<tr>
+<td>Q2: backend implementation</td>
+<td>(C) hybrid</td>
+<td>prefer bubblewrap (<code>bwrap</code>) when on PATH; else native Go
+via <code>syscall.SysProcAttr.Cloneflags</code>; both detected at
+startup; backend reported via <code>/sandbox status</code></td>
+</tr>
+<tr>
+<td>Q3: network policy</td>
+<td>(A) default DENY</td>
+<td>sandboxed commands have no network unless agent passes
+<code>network: true</code> per call; both backends enforce via NEWNET /
+<code>--unshare-net</code></td>
+</tr>
+<tr>
+<td>Q4: tool integration</td>
+<td>(B) NEW tool</td>
+<td>new <code>SandboxedShellTool</code> registered as
+<code>shell_sandboxed</code>; existing
+<code>internal/tools/shell/</code> left untouched (pre-existing build
+failures predate F09 and are out of scope)</td>
+</tr>
+<tr>
+<td>Q5: user surface</td>
+<td>(C) config + slash</td>
+<td>primary config at <code>~/.config/helixcode/sandbox.yaml</code>
+(XDG-aware, mode 0600); <code>/sandbox</code> slash with
+<code>status</code>/<code>test</code>/<code>policy</code>; <strong>no
+cobra subcommand</strong></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

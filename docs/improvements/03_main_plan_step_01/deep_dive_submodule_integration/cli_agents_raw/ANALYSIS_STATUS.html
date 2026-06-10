@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ANALYSIS_STATUS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ANALYSIS_STATUS</h1>
+</header>
+<h1 id="cli-agents-analysis---complete-status">CLI Agents Analysis -
+Complete Status</h1>
+<blockquote>
+<p><strong>Date</strong>: 2026-04-04 <strong>Total Agents
+Analyzed</strong>: 20+ <strong>Status</strong>: Tier 1 &amp; 2 Complete
+✅</p>
+</blockquote>
+<h2 id="summary">Summary</h2>
+<p>All major CLI agents have been analyzed, with git fetch/pull
+performed for each.</p>
+<h2 id="tier-1-agents-10---complete">Tier 1 Agents (10) - COMPLETE
+✅</h2>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Analysis</th>
+<th>Git Pull</th>
+<th>Doc Created</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-code-source</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>aider</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>codex</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>openhands</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>cline</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>continue</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>gemini-cli</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>roo-code</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>swe-agent</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>vtcode</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tier-2-agents-9---complete">Tier 2 Agents (9) - COMPLETE ✅</h2>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Analysis</th>
+<th>Git Pull</th>
+<th>Doc Created</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gptme</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>gpt-engineer</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>kilo-code</td>
+<td>✅</td>
+<td>⚠️ divergent</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>junie</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>forge</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>deepseek-cli</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>agent-deck</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>zeroshot</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>spec-kit</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h2 id="documents-created">Documents Created</h2>
+<ol type="1">
+<li><code>AIDER_ANALYSIS.md</code> - Git-native pair programming</li>
+<li><code>CODEX_ANALYSIS.md</code> - OpenAI official, sandboxed</li>
+<li><code>OPENHANDS_ANALYSIS.md</code> - Autonomous SWE</li>
+<li><code>CLINE_ANALYSIS.md</code> - Browser automation</li>
+<li><code>CONTINUE_ANALYSIS.md</code> - Universal IDE</li>
+<li><code>GEMINI_CLI_ANALYSIS.md</code> - Google official</li>
+<li><code>ROO_CODE_ANALYSIS.md</code> - Multi-file editing</li>
+<li><code>SWE_AGENT_ANALYSIS.md</code> - SWE-bench focused</li>
+<li><code>VTCODE_ANALYSIS.md</code> - Minimal Swift</li>
+<li><code>TIER_1_SUMMARY.md</code> - Comprehensive summary</li>
+</ol>
+<p>Plus 9 Tier 2 analysis documents.</p>
+<h2 id="key-features-to-port-prioritized">Key Features to Port
+(Prioritized)</h2>
+<h3 id="critical-from-tier-1">Critical (From Tier 1)</h3>
+<ol type="1">
+<li>✅ Tool system with 30+ tools</li>
+<li>✅ Permission system with rules</li>
+<li>✅ Plan Mode with verification</li>
+<li>✅ Team management</li>
+<li>✅ KAIROS background service</li>
+<li>✅ Dream system</li>
+<li>⏳ Repository mapping (tree-sitter)</li>
+<li>⏳ Sandboxed execution</li>
+<li>⏳ Browser automation</li>
+<li>⏳ Edit block format</li>
+</ol>
+<h3 id="important-from-tier-1-2">Important (From Tier 1-2)</h3>
+<ol start="11" type="1">
+<li>⏳ Voice commands</li>
+<li>⏳ Auto-commit workflow</li>
+<li>⏳ Evaluation framework</li>
+<li>⏳ Context providers</li>
+<li>⏳ Agent modes</li>
+</ol>
+<h2 id="next-steps">Next Steps</h2>
+<ol type="1">
+<li>✅ Analyze all Tier 1 agents</li>
+<li>✅ Analyze all Tier 2 agents</li>
+<li>⏳ Analyze remaining agents (Tier 3-5)</li>
+<li>⏳ Create master integration plan</li>
+<li>⏳ Implement Phase 2 features</li>
+</ol>
+<h2 id="commits-made">Commits Made</h2>
+<p>All analysis work committed and pushed to: - github
+(vasic-digital/SuperAgent) - githubhelixdevelopment
+(HelixDevelopment/HelixAgent) - origin - upstream</p>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>kiro-cli submodule has broken remote (repository not found)</li>
+<li>kilo-code has divergent branches (needs manual resolution)</li>
+<li>All other agents fetched/pulled successfully</li>
+</ul>
+</body>
+</html>

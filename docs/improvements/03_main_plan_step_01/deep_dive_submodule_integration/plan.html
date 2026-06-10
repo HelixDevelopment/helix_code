@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">plan</h1>
+</header>
+<h1 id="helix-ecosystem-deep-analysis-integration-master-plan">Helix
+Ecosystem Deep Analysis &amp; Integration Master Plan</h1>
+<h2 id="objective">Objective</h2>
+<p>Perform exhaustive analysis of all Helix repositories and CLI agent
+codebases, create comprehensive integration plans, technical
+documentation, and testing strategies for complete incorporation of all
+power features into HelixAgent and HelixCode.</p>
+<h2 id="stage-1-repository-discovery-structure-mapping">Stage 1:
+Repository Discovery &amp; Structure Mapping</h2>
+<p><strong>Skill</strong>: <code>deep-research-swarm</code> (Route A -
+Wide Search + File Analysis)</p>
+<h3 id="main-project-submodule-cloning">1.1 Main Project &amp; Submodule
+Cloning</h3>
+<ul>
+<li>Clone <code>HelixCode</code> main repository</li>
+<li>Identify ALL submodules (declared in .gitmodules)</li>
+<li>Recursively initialize ALL submodules via SSH</li>
+<li>Map complete repository tree and dependency graph</li>
+</ul>
+<h3 id="submodule-integration-audit">1.2 Submodule Integration
+Audit</h3>
+<ul>
+<li>Check which submodules are already integrated</li>
+<li>Identify missing submodules from the required list</li>
+<li>Verify SSH vs HTTPS usage</li>
+<li>Document submodule relationships and interdependencies</li>
+</ul>
+<h3 id="cli-agent-discovery">1.3 CLI Agent Discovery</h3>
+<ul>
+<li>Explore <code>helix_agent/cli_agents</code> directory
+completely</li>
+<li>Identify ALL CLI agent implementations</li>
+<li>Map features, APIs, optimizations per agent</li>
+<li>Priority: <code>claude-code-source</code> first</li>
+</ul>
+<h2 id="stage-2-deep-codebase-analysis-parallel-swarm">Stage 2: Deep
+Codebase Analysis (Parallel Swarm)</h2>
+<p><strong>Skill</strong>: <code>deep-research-swarm</code> (Route B -
+Focused Deep Dive)</p>
+<h3 id="main-projects-analysis-parallel-agents">2.1 Main Projects
+Analysis (Parallel Agents)</h3>
+<ul>
+<li><strong>Agent A1</strong>: HelixCode - Main orchestrator,
+architecture, entry points</li>
+<li><strong>Agent A2</strong>: HelixAgent - Core agent framework,
+cli_agents directory</li>
+<li><strong>Agent A3</strong>: HelixLLM - LLM integration layer,
+providers, APIs</li>
+<li><strong>Agent A4</strong>: HelixMemory - Memory systems, storage,
+retrieval</li>
+<li><strong>Agent A5</strong>: HelixSpecifier - Spec parsing,
+requirements engineering</li>
+<li><strong>Agent A6</strong>: helix_qa - Testing framework, test banks,
+QA sessions</li>
+</ul>
+<h3 id="supporting-infrastructure-analysis-parallel-agents">2.2
+Supporting Infrastructure Analysis (Parallel Agents)</h3>
+<ul>
+<li><strong>Agent B1</strong>: LLMsVerifier - Verification logic, model
+evaluation</li>
+<li><strong>Agent B2</strong>: Challenges - Test challenges,
+benchmarking suite</li>
+<li><strong>Agent B3</strong>: containers - Containerization,
+deployment, runtime</li>
+</ul>
+<h3 id="cli-agent-deep-dive-priority-pipeline">2.3 CLI Agent Deep Dive
+(Priority Pipeline)</h3>
+<ul>
+<li><strong>Agent C1</strong>: claude-code-source - PRIMARY
+(architecture, features, APIs, hacks)</li>
+<li><strong>Agent C2-Cn</strong>: All other CLI agents in cli_agents
+directory</li>
+<li>Feature extraction: power features, innovations, optimizations,
+workarounds</li>
+<li>Performance analysis: what each does better than Helix</li>
+<li>Gap analysis: missing features in Helix ecosystem</li>
+</ul>
+<h2 id="stage-3-cross-reference-gap-analysis">Stage 3: Cross-Reference
+&amp; Gap Analysis</h2>
+<p><strong>Skill</strong>: Orchestrator synthesis (no external
+skill)</p>
+<h3 id="feature-matrix-construction">3.1 Feature Matrix
+Construction</h3>
+<ul>
+<li>Build comprehensive feature comparison tables</li>
+<li>Map Helix ecosystem capabilities vs CLI agent capabilities</li>
+<li>Identify ALL gaps, missing features, performance differences</li>
+</ul>
+<h3 id="integration-point-mapping">3.2 Integration Point Mapping</h3>
+<ul>
+<li>Where each CLI agent feature fits in Helix architecture</li>
+<li>Submodule extension requirements</li>
+<li>API compatibility analysis</li>
+<li>Dependency resolution</li>
+</ul>
+<h2 id="stage-4-integration-planning-documentation">Stage 4: Integration
+Planning &amp; Documentation</h2>
+<p><strong>Skill</strong>: <code>report-writing</code></p>
+<h3 id="master-integration-plan">4.1 Master Integration Plan</h3>
+<ul>
+<li>Phased approach with dependencies</li>
+<li>Fine-grained tasks and subtasks</li>
+<li>Risk assessment per phase</li>
+<li>Rollback strategies</li>
+</ul>
+<h3 id="technical-documentation">4.2 Technical Documentation</h3>
+<ul>
+<li>Architecture diagrams</li>
+<li>API schemas and wireframes</li>
+<li>Step-by-step integration guides</li>
+<li>Submodule wiring documentation</li>
+</ul>
+<h3 id="testing-strategy">4.3 Testing Strategy</h3>
+<ul>
+<li>Test coverage requirements (100%)</li>
+<li>Challenges integration</li>
+<li>helix_qa test suite expansion</li>
+<li>QA session protocols</li>
+</ul>
+<h2 id="stage-5-submodule-integration-verification">Stage 5: Submodule
+Integration &amp; Verification</h2>
+<p><strong>Skill</strong>: <code>vibecoding-general-swarm</code> +
+custom scripts</p>
+<h3 id="ssh-submodule-integration">5.1 SSH Submodule Integration</h3>
+<ul>
+<li>Convert/add ALL submodules via SSH</li>
+<li>Recursive initialization</li>
+<li>Verification of complete tree</li>
+</ul>
+<h3 id="build-test-verification">5.2 Build &amp; Test Verification</h3>
+<ul>
+<li>Build system verification</li>
+<li>Test execution across all submodules</li>
+<li>Challenges execution</li>
+<li>helix_qa sessions</li>
+</ul>
+<h2 id="stage-6-final-documentation-assembly">Stage 6: Final
+Documentation Assembly</h2>
+<p><strong>Skill</strong>: <code>report-writing</code> +
+<code>docx</code>/<code>pdf</code></p>
+<h3 id="complete-documentation-package">6.1 Complete Documentation
+Package</h3>
+<ul>
+<li>Executive summary</li>
+<li>Technical deep-dive per component</li>
+<li>Integration guides</li>
+<li>Testing protocols</li>
+<li>Diagrams and visual materials</li>
+</ul>
+<h3 id="delivery">6.2 Delivery</h3>
+<ul>
+<li>Markdown version</li>
+<li>Word document (.docx)</li>
+<li>PDF for distribution</li>
+</ul>
+<hr />
+<h2 id="agent-deployment-strategy">Agent Deployment Strategy</h2>
+<h3 id="phase-0-discovery-sequential">Phase 0: Discovery
+(Sequential)</h3>
+<ul>
+<li>Clone and map repositories</li>
+<li>Identify all components</li>
+</ul>
+<h3 id="phase-1-analysis-maximum-parallelism">Phase 1: Analysis (Maximum
+Parallelism)</h3>
+<ul>
+<li>Deploy 9+ analysis agents simultaneously</li>
+<li>Each agent focuses on 1-2 repositories</li>
+<li>Extract: architecture, features, APIs, gaps</li>
+</ul>
+<h3 id="phase-2-synthesis-sequential-with-parallel-reviewers">Phase 2:
+Synthesis (Sequential with parallel reviewers)</h3>
+<ul>
+<li>Cross-reference all findings</li>
+<li>Build feature matrices</li>
+<li>Identify integration points</li>
+</ul>
+<h3 id="phase-3-planning-documentation-parallel-writers">Phase 3:
+Planning &amp; Documentation (Parallel writers)</h3>
+<ul>
+<li>Integration plan document</li>
+<li>Technical documentation</li>
+<li>Testing strategy</li>
+<li>Visual diagrams</li>
+</ul>
+<h3 id="phase-4-integration-verification-sequential">Phase 4:
+Integration &amp; Verification (Sequential)</h3>
+<ul>
+<li>Actual submodule integration</li>
+<li>Build verification</li>
+<li>Test execution</li>
+</ul>
+<h3 id="phase-5-assembly-sequential">Phase 5: Assembly (Sequential)</h3>
+<ul>
+<li>Final documentation compilation</li>
+<li>Format conversion</li>
+<li>Delivery</li>
+</ul>
+<h2 id="output-artifacts">Output Artifacts</h2>
+<ol type="1">
+<li><code>repository_map.md</code> - Complete tree of all repos</li>
+<li><code>feature_matrix.md</code> - Comparison of all CLI agents</li>
+<li><code>gap_analysis.md</code> - Missing features and gaps</li>
+<li><code>integration_plan.md</code> - Phased integration plan</li>
+<li><code>technical_documentation.md</code> - Deep technical docs</li>
+<li><code>testing_strategy.md</code> - Complete testing approach</li>
+<li><code>architecture_diagrams/</code> - Visual materials</li>
+<li><code>submodule_integration_log.md</code> - Integration steps
+executed</li>
+<li><code>Helix_Master_Documentation.docx</code> - Final compiled
+document</li>
+<li><code>Helix_Master_Documentation.pdf</code> - PDF version</li>
+</ol>
+<h2 id="critical-constraints">Critical Constraints</h2>
+<ul>
+<li>ALL submodules MUST use SSH (not HTTPS)</li>
+<li>100% test coverage requirement</li>
+<li>No feature omissions - every power feature must be documented</li>
+<li>claude-code-source is PRIMARY but ALL agents must be processed</li>
+<li>No skipping, omitting, or relativizing any component</li>
+</ul>
+</body>
+</html>

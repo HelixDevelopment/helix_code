@@ -1,0 +1,5876 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage3_gap_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage3_gap_analysis</h1>
+</header>
+<h1 id="helixcode-comprehensive-gap-analysis">HelixCode Comprehensive
+Gap Analysis</h1>
+<h2 id="stage-3-feature-matrix-gap-categories-impact-assessment-integration-readiness-risk-assessment">Stage
+3: Feature Matrix, Gap Categories, Impact Assessment, Integration
+Readiness &amp; Risk Assessment</h2>
+<p><strong>Date:</strong> May 2026<br />
+<strong>Scope:</strong> HelixCode vs 10 Leading CLI AI Coding Agents
+(137 Features)<br />
+<strong>Methodology:</strong> Architecture analysis, binary string
+extraction, documentation review, capability mapping</p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<h3 id="critical-findings">Critical Findings</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total Features Analyzed</strong></td>
+<td>137</td>
+</tr>
+<tr>
+<td><strong>HelixCode Fully Implemented (✅)</strong></td>
+<td>42 (31%)</td>
+</tr>
+<tr>
+<td><strong>Partially Implemented (⚠️)</strong></td>
+<td>35 (26%)</td>
+</tr>
+<tr>
+<td><strong>In Progress (🚧)</strong></td>
+<td>6 (4%)</td>
+</tr>
+<tr>
+<td><strong>Completely Missing (❌)</strong></td>
+<td>54 (39%)</td>
+</tr>
+<tr>
+<td><strong>P0 Gaps (Critical)</strong></td>
+<td>18</td>
+</tr>
+<tr>
+<td><strong>P1 Gaps (High)</strong></td>
+<td>24</td>
+</tr>
+<tr>
+<td><strong>P2 Gaps (Medium)</strong></td>
+<td>47</td>
+</tr>
+</tbody>
+</table>
+<h3 id="top-20-gaps-to-close-priority-order">Top 20 Gaps to Close
+(Priority Order)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 25%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>Category</th>
+<th>Priority</th>
+<th>Complexity</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>OS-Native Sandboxed Execution</strong>
+(Seatbelt/Docker/iptables)</td>
+<td>Security</td>
+<td>P0</td>
+<td>Very High</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Auto-Compaction System</strong> with thrashing
+detection</td>
+<td>Context</td>
+<td>P0</td>
+<td>High</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Permission Rule System</strong> with 5 modes +
+wildcards</td>
+<td>Security</td>
+<td>P0</td>
+<td>High</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>LSP Integration</strong> with diagnostics feedback loop</td>
+<td>Tool Use</td>
+<td>P0</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>4-Layer Fuzzy Matching</strong> for search/replace</td>
+<td>Edit Format</td>
+<td>P0</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Cumulative Diff Review Sandbox</strong></td>
+<td>Edit Format</td>
+<td>P0</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Subagent Delegation System</strong> with named agents</td>
+<td>Multi-Agent</td>
+<td>P0</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>MCP Full Lifecycle</strong> (4 transports + OAuth +
+reconnection)</td>
+<td>MCP</td>
+<td>P0</td>
+<td>Very High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Tool Result Persistence Layer</strong> (&gt;50K auto-save to
+disk)</td>
+<td>Context</td>
+<td>P0</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Git Worktree Agent Isolation</strong></td>
+<td>Git</td>
+<td>P0</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Shadow Git Checkpoints</strong> independent snapshots</td>
+<td>Security</td>
+<td>P0</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>Hook-Based Extensibility</strong> (9+ event types)</td>
+<td>Tool Use</td>
+<td>P0</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>Background Task System</strong> (Ctrl+B)</td>
+<td>UI/UX</td>
+<td>P1</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>Smart File Editing</strong> (edit without separate
+Read)</td>
+<td>Edit Format</td>
+<td>P1</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>Session Transcript Resume</strong> cross-project</td>
+<td>Context</td>
+<td>P1</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>16</td>
+<td><strong>6 Orchestration Patterns</strong> (Sequential→Kanban)</td>
+<td>Multi-Agent</td>
+<td>P1</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>17</td>
+<td><strong>Architect/Editor Dual-Model</strong> separate reasoning</td>
+<td>Multi-Agent</td>
+<td>P1</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>18</td>
+<td><strong>Interactive Clarification Loop</strong> bidirectional</td>
+<td>Multi-Agent</td>
+<td>P1</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>19</td>
+<td><strong>No-Flicker Rendering Mode</strong> alt-screen compat</td>
+<td>UI/UX</td>
+<td>P1</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>20</td>
+<td><strong>OpenTelemetry Integration</strong> full tracing</td>
+<td>Performance</td>
+<td>P1</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="feature-matrix-table">1. Feature Matrix Table</h2>
+<h3 id="legend">Legend</h3>
+<ul>
+<li>✅ <strong>Fully Implemented</strong> - Feature exists and is
+production-ready</li>
+<li>⚠️ <strong>Partially Implemented</strong> - Feature exists but
+incomplete or limited</li>
+<li>🚧 <strong>In Progress</strong> - Feature under active
+development</li>
+<li>❌ <strong>Missing</strong> - Feature does not exist</li>
+</ul>
+<h3 id="core-tool-use-18-features">1.1 Core Tool Use (18 Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File Read Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>File Write Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>File Edit Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Notebook Edit Tool</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Grep Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Glob Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Bash Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>TaskOutput Tool</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>TaskStop Tool</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>WebSearch Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>WebFetch Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Mcp Tool</td>
+<td style="text-align: center;">🚧</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>ListMcpResources</td>
+<td style="text-align: center;">🚧</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>ReadMcpResource</td>
+<td style="text-align: center;">🚧</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Agent Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>TodoWrite Tool</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>AskUserQuestion</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Git Worktree Enter/Exit</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="context-management-15-features">1.2 Context Management (15
+Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto-Compaction System</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Context Window Monitoring</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Thrashing Detection</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Tool Result Persistence</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Prompt Caching</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Massive Context Window</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Tree-sitter Indexing</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Vector Search</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Cross-Session Memory</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Incremental Indexing</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Repo Map</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Session Transcript Resume</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Hierarchical Settings</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Focus Chain</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Manual Context Control</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+</tbody>
+</table>
+<h3 id="edit-format-12-features">1.3 Edit Format (12 Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Search/Replace Blocks</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Unified Diff</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Whole File Rewrite</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Patch Apply</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>4-Layer Fuzzy Matching</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Cumulative Diff Sandbox</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Diff Display System</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Smart File Editing</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Architect Format</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Editor-Diff/Editor-Whole</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Batch Multi-Edit</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Sandboxed Review</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="uiux-20-features">1.4 UI/UX (20 Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fullscreen TUI Mode</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>No-Flicker Rendering Mode</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Focus View Toggle</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Streaming Output</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Slash Command Picker</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Model Picker</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Skills Picker</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Agents View</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Resume Picker</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Vim Mode</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Custom Keybindings</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Theme System</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Spinner System</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Status Line</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Paste Handling</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>IDE Extension</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Web Dashboard</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Headless/CI Mode</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Fig-Style Terminal Intellisense</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="securitysandboxing-15-features">1.5 security/Sandboxing (15
+Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Permission Rule System</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Tiered Approval</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>OS-Native Sandbox (macOS)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>OS-Native Sandbox (Linux)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>OS-Native Sandbox (Windows)</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Seccomp Syscall Filtering</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Network Restrictions</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Unix Socket Blocking</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Command Filtering</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Shadow Git Checkpoints</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Protected Paths</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>ZDR Compliance</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Archive TOCTOU Protection</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>PowerShell Hardening</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Subprocess Env Scrub</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="git-integration-10-features">1.6 Git Integration (10
+Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Git-Native Workflow</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Git Worktree Isolation</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Auto Commit Messages</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Git Status Awareness</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Branch Management</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>PR Integration</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>GitHub API Rate Limit</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Git Diff Output</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Cumulative Diff Review</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Rollback Support</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mcp-10-features">1.7 MCP (10 Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>stdio Transport</td>
+<td style="text-align: center;">🚧</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>SSE Transport</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>HTTP Transport</td>
+<td style="text-align: center;">🚧</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>WebSocket Transport</td>
+<td style="text-align: center;">🚧</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>OAuth 2.0 Support</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Auto-Reconnection</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Resource Mentions</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Non-Blocking Connections</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Tool Annotations</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Serve as MCP Server</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="multi-agentorchestration-15-features">1.8
+Multi-Agent/Orchestration (15 Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subagent Delegation</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Named Addressable Agents</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Agent Hierarchy</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>6 Orchestration Patterns</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Plan/Act Mode Split</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Architect/Editor Dual-Model</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Mode-Specific Agents</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Quality Scoring</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>A/B Testing</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Auto Triage</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Auto Code Review</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>App Builder</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Gas Town Platform</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Skill System</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Interactive Clarification</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-12-features">1.9 Performance (12 Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt Caching Optimization</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Context Compaction</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Lazy Loading</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Streaming Resilience</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+</tr>
+<tr>
+<td>Background Tasks</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Model Switching</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Rust Implementation</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+</tr>
+<tr>
+<td>Go Implementation</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Parallel Loading</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Edit Tool Optimization</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Bounded File Descriptors</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Memory Leak Prevention</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="testingqa-10-features">1.10 Testing/QA (10 Features)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+<col style="width: 9%" />
+<col style="width: 7%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th style="text-align: center;">HelixCode</th>
+<th style="text-align: center;">Claude Code</th>
+<th style="text-align: center;">Aider</th>
+<th style="text-align: center;">Cline</th>
+<th style="text-align: center;">Codex</th>
+<th style="text-align: center;">Plandex</th>
+<th style="text-align: center;">Forge</th>
+<th style="text-align: center;">Kilo</th>
+<th style="text-align: center;">OpenCode</th>
+<th style="text-align: center;">Gemini</th>
+<th style="text-align: center;">Amazon Q</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto Test/Lint-Fix Loop</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Test-Driven Development</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Benchmark Runner</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Screenshot Testing</td>
+<td style="text-align: center;">✅</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Autonomous QA Session</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Crash/ANR Detection</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Coverage Tracking</td>
+<td style="text-align: center;">⚠️</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Challenge Framework</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>ACP Protocol Tests</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+<tr>
+<td>Anti-Bluff Detection</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: center;">❌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="gap-categories">2. Gap Categories</h2>
+<h3 id="tool-use-gaps-18-features-7-missing">2.1 Tool Use Gaps (18
+Features, 7 Missing)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Notebook Edit Tool</td>
+<td>❌ Missing</td>
+<td>Jupyter cell CRUD</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>TaskOutput Tool</td>
+<td>❌ Missing</td>
+<td>Background task output reading</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>TaskStop Tool</td>
+<td>❌ Missing</td>
+<td>Background task cancellation</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>MCP Tool (full lifecycle)</td>
+<td>🚧 In Progress</td>
+<td>Dynamic schema execution</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ListMcpResources</td>
+<td>🚧 In Progress</td>
+<td>MCP resource listing</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>ReadMcpResource</td>
+<td>🚧 In Progress</td>
+<td>MCP resource reading</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Git Worktree Enter/Exit</td>
+<td>❌ Missing</td>
+<td>Worktree isolation for subagents</td>
+<td>P0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode has solid basic tools (File
+Read/Write/Edit, Bash, Grep, Glob, Web) but lacks advanced tooling. The
+MCP implementation is partial (only WebSocket server exists). Background
+task management is completely absent. Git worktree tools - critical for
+subagent isolation - are missing despite having 8 agent types.</p>
+<hr />
+<h3 id="context-management-gaps-15-features-8-missingpartial">2.2
+Context Management Gaps (15 Features, 8 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Auto-Compaction System</td>
+<td>❌ Missing</td>
+<td>Infinite conversation via summarization</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Thrashing Detection</td>
+<td>❌ Missing</td>
+<td>Detect compaction loops</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Tool Result Persistence</td>
+<td>❌ Missing</td>
+<td>Auto-save &gt;50K outputs to disk</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Prompt Caching</td>
+<td>⚠️ Partial</td>
+<td>Prefix preservation, linear performance</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Massive Context Window</td>
+<td>⚠️ Partial</td>
+<td>1M-2M token handling</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Vector Search</td>
+<td>⚠️ Partial</td>
+<td>Embeddings + semantic retrieval</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Incremental Indexing</td>
+<td>❌ Missing</td>
+<td>Update index as files change</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Session Transcript Resume</td>
+<td>⚠️ Partial</td>
+<td>Cross-project –resume</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode has Tree-sitter-based repo
+mapping and cross-session memory (via 11+ memory providers) but lacks
+intelligent context compaction. The memory system uses Mem0/Zep/ChromaDB
+but doesn’t implement automatic summarization. The 100K token default
+limit is far below Plandex’s 2M or Gemini’s 1M. No thrashing detection
+means long sessions may burn API calls in compaction loops.</p>
+<hr />
+<h3 id="edit-format-gaps-12-features-7-missingpartial">2.3 Edit Format
+Gaps (12 Features, 7 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>4-Layer Fuzzy Matching</td>
+<td>❌ Missing</td>
+<td>Exact→Whitespace→Indentation→difflib</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Cumulative Diff Sandbox</td>
+<td>❌ Missing</td>
+<td>ALL changes accumulate before ANY apply</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Diff Display System</td>
+<td>⚠️ Partial</td>
+<td>Word-level diff, GitHub-style patches</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Smart File Editing</td>
+<td>❌ Missing</td>
+<td>Edit files viewed via Bash without Read</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Editor-Diff/Editor-Whole</td>
+<td>⚠️ Partial</td>
+<td>Streamlined architect mode formats</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Sandboxed Review</td>
+<td>⚠️ Partial</td>
+<td>Review interface before application</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Notebook Edit</td>
+<td>❌ Missing</td>
+<td>Jupyter cell editing</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode has 7 edit formats including
+Search/Replace, Unified Diff, Whole File, and Architect format. However,
+it lacks Aider’s proven 4-layer fuzzy matching that achieves 85% pass
+rates. The cumulative diff sandbox - unique to Plandex - is entirely
+absent. Smart file editing (editing files viewed via Bash without
+separate Read) would reduce token usage significantly.</p>
+<hr />
+<h3 id="uiux-gaps-20-features-13-missingpartial">2.4 UI/UX Gaps (20
+Features, 13 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>No-Flicker Rendering Mode</td>
+<td>❌ Missing</td>
+<td>Alt-screen compatibility</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Focus View Toggle</td>
+<td>❌ Missing</td>
+<td>Ctrl+O prompt+summary+response</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Skills Picker</td>
+<td>❌ Missing</td>
+<td>Type-to-filter skill search</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Resume Picker</td>
+<td>❌ Missing</td>
+<td>Cross-project session resume</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Vim Mode</td>
+<td>❌ Missing</td>
+<td>NORMAL/INSERT, visual mode</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Custom Keybindings</td>
+<td>❌ Missing</td>
+<td>User-configurable JSON</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Status Line</td>
+<td>⚠️ Partial</td>
+<td>Custom command with refresh</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Paste Handling</td>
+<td>❌ Missing</td>
+<td>Bracketed paste, image downscale</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>IDE Extension</td>
+<td>❌ Missing</td>
+<td>VS Code/JetBrains sidebar</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Web Dashboard</td>
+<td>❌ Missing</td>
+<td>HTML monitoring with charts</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Headless/CI Mode</td>
+<td>⚠️ Partial</td>
+<td>JSON output, -y mode</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Fig-Style Terminal Intellisense</td>
+<td>❌ Missing</td>
+<td>Command autocomplete</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Slash Command Picker</td>
+<td>⚠️ Partial</td>
+<td>Type-to-filter with namespace</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode has terminal TUI (tview) and
+desktop (Fyne) applications plus mobile platforms, but the CLI itself
+lacks rich interactive features. The Cobra CLI is basic - no streaming
+TUI, no inline editing, no file watch. Separate terminal-ui app exists
+but isn’t integrated into the main CLI workflow. No IDE extension
+despite having OpenAPI API.</p>
+<hr />
+<h3 id="securitysandboxing-gaps-15-features-11-missingpartial">2.5
+security/Sandboxing Gaps (15 Features, 11 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>OS-Native Sandbox (macOS)</td>
+<td>❌ Missing</td>
+<td>Seatbelt profiles</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>OS-Native Sandbox (Linux)</td>
+<td>❌ Missing</td>
+<td>Docker + iptables + PID namespaces</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>OS-Native Sandbox (Windows)</td>
+<td>❌ Missing</td>
+<td>Windows native sandbox</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Seccomp Syscall Filtering</td>
+<td>❌ Missing</td>
+<td>BPF-based restrictions</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Network Restrictions</td>
+<td>⚠️ Partial</td>
+<td>Domain allowlists, proxy config</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Unix Socket Blocking</td>
+<td>❌ Missing</td>
+<td>Block unix domain sockets</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Shadow Git Checkpoints</td>
+<td>❌ Missing</td>
+<td>Independent Git snapshots</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>8</td>
+<td>ZDR Compliance</td>
+<td>❌ Missing</td>
+<td>Zero Data Retention architecture</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Archive TOCTOU Protection</td>
+<td>❌ Missing</td>
+<td>Time-of-check-time-of-use</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>10</td>
+<td>PowerShell Hardening</td>
+<td>❌ Missing</td>
+<td>Argument-splitting hardening</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Subprocess Env Scrub</td>
+<td>❌ Missing</td>
+<td>Environment variable scrubbing</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Permission Rule System</td>
+<td>⚠️ Partial</td>
+<td>5 modes + wildcard rules</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Command Filtering</td>
+<td>⚠️ Partial</td>
+<td>Dangerous rm detection</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Protected Paths</td>
+<td>⚠️ Partial</td>
+<td>Auto-protect .git, shell configs</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Tiered Approval</td>
+<td>⚠️ Partial</td>
+<td>Suggest/Auto-Edit/Full Auto</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> This is HelixCode’s biggest weakness.
+While it has JWT auth, Bcrypt, confirmation policies, and basic sandbox
+concepts, it completely lacks OS-level sandboxing. Codex’s
+Seatbelt/Docker/iptables approach is the gold standard. The permission
+system exists but doesn’t have Claude Code’s 5-mode granularity or
+wildcard rule syntax. No ZDR compliance means enterprise deployments
+face regulatory hurdles.</p>
+<hr />
+<h3 id="git-integration-gaps-10-features-7-missingpartial">2.6 Git
+Integration Gaps (10 Features, 7 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Git Worktree Isolation</td>
+<td>❌ Missing</td>
+<td>Parallel subagents in worktrees</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Auto Commit Messages</td>
+<td>❌ Missing</td>
+<td>Meaningful messages per AI action</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Git Status Awareness</td>
+<td>⚠️ Partial</td>
+<td>Startup logo shows git status</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Branch Management</td>
+<td>❌ Missing</td>
+<td>Auto-create branch if on main</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>PR Integration</td>
+<td>❌ Missing</td>
+<td>–from-pr accepts PR URLs</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>GitHub API Rate Limit</td>
+<td>❌ Missing</td>
+<td>Detection with contextual hints</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Cumulative Diff Review</td>
+<td>❌ Missing</td>
+<td>Review ALL before applying ANY</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Git-Native Workflow</td>
+<td>⚠️ Partial</td>
+<td>Every change auto-committed</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Git Diff Output</td>
+<td>⚠️ Partial</td>
+<td>Structured patch with line numbers</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Rollback Support</td>
+<td>⚠️ Partial</td>
+<td>Granular rollback without pollution</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode has git tools in the tool
+framework but lacks deep git integration. Aider’s git-native workflow
+(every change auto-committed) is a proven pattern for auditability. Git
+worktree isolation - critical for parallel subagents - is completely
+absent. Cline’s shadow Git checkpoints provide a safety net that
+HelixCode lacks.</p>
+<hr />
+<h3 id="mcp-gaps-10-features-8-missingpartial">2.7 MCP Gaps (10
+Features, 8 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>stdio Transport</td>
+<td>🚧 In Progress</td>
+<td>Local process stdin/stdout</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>SSE Transport</td>
+<td>❌ Missing</td>
+<td>Server-Sent Events</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>HTTP Transport</td>
+<td>🚧 In Progress</td>
+<td>Streamable HTTP</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>WebSocket Transport</td>
+<td>🚧 In Progress</td>
+<td>WebSocket communication</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>OAuth 2.0 Support</td>
+<td>❌ Missing</td>
+<td>Authorization Server discovery</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Auto-Reconnection</td>
+<td>❌ Missing</td>
+<td>SSE reconnect on disconnect</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Resource Mentions</td>
+<td>❌ Missing</td>
+<td>@ typeahead for resources</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Non-Blocking Connections</td>
+<td>❌ Missing</td>
+<td>Background MCP startup</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Tool Annotations</td>
+<td>❌ Missing</td>
+<td>Titles in /mcp view</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Serve as MCP Server</td>
+<td>❌ Missing</td>
+<td>Expose tools to MCP clients</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode has an MCP server struct with
+WebSocket handler but the implementation is minimal. Only WebSocket
+transport exists. Claude Code supports 4 transports (stdio, SSE, HTTP,
+WebSocket) plus OAuth and auto-reconnection. The HelixCode MCP can’t
+serve as an MCP server (claude mcp serve), limiting ecosystem
+integration. 32+ MCP servers in HelixAgent ecosystem are
+inaccessible.</p>
+<hr />
+<h3 id="multi-agentorchestration-gaps-15-features-9-missingpartial">2.8
+Multi-Agent/Orchestration Gaps (15 Features, 9 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Subagent Delegation</td>
+<td>⚠️ Partial</td>
+<td>Agents spawn isolated children</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Named Addressable Agents</td>
+<td>⚠️ Partial</td>
+<td>SendMessage({to: name})</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Agent Hierarchy</td>
+<td>⚠️ Partial</td>
+<td>Parent-child team context</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>6 Orchestration Patterns</td>
+<td>❌ Missing</td>
+<td>Sequential→Kanban patterns</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Architect/Editor Dual-Model</td>
+<td>⚠️ Partial</td>
+<td>Separate reasoning + editing</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Quality Scoring</td>
+<td>✅ Present</td>
+<td>100pt automated gates</td>
+<td>-</td>
+</tr>
+<tr>
+<td>7</td>
+<td>A/B Testing</td>
+<td>❌ Missing</td>
+<td>Data-driven optimization</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Auto Triage</td>
+<td>❌ Missing</td>
+<td>Issue classification</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Auto Code Review</td>
+<td>⚠️ Partial</td>
+<td>Automated PR review</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>App Builder</td>
+<td>❌ Missing</td>
+<td>Full app from prompts</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Gas Town Platform</td>
+<td>❌ Missing</td>
+<td>Cloudflare state machine</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Skill System</td>
+<td>❌ Missing</td>
+<td>Auto-invocation + variables</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Interactive Clarification</td>
+<td>⚠️ Partial</td>
+<td>Ask clarifying questions</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Plan/Act Mode Split</td>
+<td>✅ Present</td>
+<td>Read-only Plan vs Act</td>
+<td>-</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Mode-Specific Agents</td>
+<td>✅ Present</td>
+<td>8 types with own prompts</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode has 8 agent types (Planning,
+Coding, Testing, Debugging, Review, Refactoring, Documentation,
+Coordinator) with built-in collaboration patterns (coding→review,
+coding→testing, debugging→verification). However, subagent delegation is
+limited - no named addressable agents, no SendMessage routing. The 6
+orchestration patterns from Forge would dramatically expand capability.
+Aider’s Architect/Editor dual-model exists in format support but not in
+the agent workflow.</p>
+<hr />
+<h3 id="performance-gaps-12-features-8-missingpartial">2.9 Performance
+Gaps (12 Features, 8 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Prompt Caching Optimization</td>
+<td>⚠️ Partial</td>
+<td>Prefix preservation</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Context Compaction</td>
+<td>❌ Missing</td>
+<td>Auto-summarize with latent understanding</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Background Tasks</td>
+<td>❌ Missing</td>
+<td>Ctrl+B with progress tracking</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Bounded File Descriptors</td>
+<td>❌ Missing</td>
+<td>Safe find on large trees</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Memory Leak Prevention</td>
+<td>⚠️ Partial</td>
+<td>Bounded growth</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Parallel Loading</td>
+<td>⚠️ Partial</td>
+<td>Resume picker parallel loads</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Edit Tool Optimization</td>
+<td>⚠️ Partial</td>
+<td>60% faster diff computation</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Lazy Loading</td>
+<td>⚠️ Partial</td>
+<td>Repo map on demand</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Streaming Resilience</td>
+<td>⚠️ Partial</td>
+<td>Stalled fallback, retry backoff</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Model Switching</td>
+<td>✅ Present</td>
+<td>Cheap/expensive model routing</td>
+<td>-</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Go Implementation</td>
+<td>✅ Present</td>
+<td>Fast startup, low memory</td>
+<td>-</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Rust Implementation</td>
+<td>❌ Missing</td>
+<td>Performance-critical core</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode is Go-based (fast startup, low
+memory) with model switching and load balancing. However, it lacks
+prompt caching optimization (critical for cost reduction) and context
+compaction (enables long sessions). Background tasks are missing
+entirely. The compression system in
+<code>internal/llm/compression/</code> exists but isn’t integrated with
+automatic thrashing detection.</p>
+<hr />
+<h3 id="testingqa-gaps-10-features-9-missingpartial">2.10 Testing/QA
+Gaps (10 Features, 9 Missing/Partial)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>HelixCode Status</th>
+<th>Target State</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Auto Test/Lint-Fix Loop</td>
+<td>⚠️ Partial</td>
+<td>Auto-trigger after edits</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Test-Driven Development</td>
+<td>❌ Missing</td>
+<td>2:1 test ratio enforcement</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Autonomous QA Session</td>
+<td>❌ Missing</td>
+<td>4-phase LLM-powered QA</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Crash/ANR Detection</td>
+<td>❌ Missing</td>
+<td>Real-time detection</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Coverage Tracking</td>
+<td>⚠️ Partial</td>
+<td>Per-platform measurement</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Challenge Framework</td>
+<td>❌ Missing</td>
+<td>193+ validation scripts</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>ACP Protocol Tests</td>
+<td>❌ Missing</td>
+<td>JSON-RPC verification</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Anti-Bluff Detection</td>
+<td>❌ Missing</td>
+<td>Fake/test code detection</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Benchmark Runner</td>
+<td>✅ Present</td>
+<td>Standard objectives</td>
+<td>-</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Screenshot Testing</td>
+<td>✅ Present</td>
+<td>Multi-platform engines</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong> HelixCode has benchmark infrastructure and
+screenshot testing (via helix_qa submodule) but the submodules are
+EMPTY. LLMsVerifier (25+ providers, ACP protocol), helix_qa (235 tests,
+47-agent test bank), Challenges (209 tests, 16 evaluators), and
+containers (6 runtimes) all exist as uninitialized directories. The
+testing gap is primarily about activating existing infrastructure, not
+building from scratch.</p>
+<hr />
+<h2 id="impact-assessment">3. Impact Assessment</h2>
+<h3 id="scoring-methodology">3.1 Scoring Methodology</h3>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 28%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Definition</th>
+<th>Action Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P0</strong></td>
+<td>Critical gap blocking production deployment or core
+functionality</td>
+<td>Must close before release</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>High-impact gap significantly reducing competitiveness</td>
+<td>Close within 1-2 sprints</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>Medium-impact gap affecting UX or secondary features</td>
+<td>Close within 1 quarter</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 28%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr>
+<th>Complexity</th>
+<th>Definition</th>
+<th>Effort Estimate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Low</strong></td>
+<td>Can leverage existing infrastructure, minimal new code</td>
+<td>1-3 days</td>
+</tr>
+<tr>
+<td><strong>Medium</strong></td>
+<td>Requires moderate extension of existing systems</td>
+<td>1-2 weeks</td>
+</tr>
+<tr>
+<td><strong>High</strong></td>
+<td>Requires new subsystem or significant architecture change</td>
+<td>3-6 weeks</td>
+</tr>
+<tr>
+<td><strong>Very High</strong></td>
+<td>Requires novel architecture, external dependencies, or major
+refactoring</td>
+<td>6-12 weeks</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 59%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Business Impact</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Critical</strong></td>
+<td>Blocks enterprise adoption, security compliance, or core
+workflow</td>
+</tr>
+<tr>
+<td><strong>High</strong></td>
+<td>Major competitive disadvantage, significantly reduced user
+satisfaction</td>
+</tr>
+<tr>
+<td><strong>Medium</strong></td>
+<td>Noticeable gap compared to competitors, affects power users</td>
+</tr>
+<tr>
+<td><strong>Low</strong></td>
+<td>Minor convenience feature, niche use case</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="p0-critical-gaps-18-gaps">3.2 P0 Critical Gaps (18 gaps)</h3>
+<table>
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 6%" />
+<col style="width: 13%" />
+<col style="width: 14%" />
+<col style="width: 22%" />
+<col style="width: 10%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>Category</th>
+<th>Complexity</th>
+<th>Business Impact</th>
+<th>Effort</th>
+<th>Integration Readiness</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>OS-Native Sandboxed Execution</strong></td>
+<td>Security</td>
+<td>Very High</td>
+<td>Critical</td>
+<td>8 weeks</td>
+<td>containers submodule (6 runtimes) provides foundation</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Auto-Compaction System</strong></td>
+<td>Context</td>
+<td>High</td>
+<td>Critical</td>
+<td>4 weeks</td>
+<td>LLM compression system exists in
+<code>internal/llm/compression/</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Permission Rule System</strong> (5 modes + wildcards)</td>
+<td>Security</td>
+<td>High</td>
+<td>Critical</td>
+<td>4 weeks</td>
+<td>Confirmation coordinator exists in
+<code>internal/tools/confirmation/</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>LSP Integration</strong> with diagnostics</td>
+<td>Tool Use</td>
+<td>High</td>
+<td>High</td>
+<td>4 weeks</td>
+<td>No existing LSP client; OpenCode is Go-based reference</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>4-Layer Fuzzy Matching</strong></td>
+<td>Edit Format</td>
+<td>High</td>
+<td>High</td>
+<td>3 weeks</td>
+<td>Diff editor exists in
+<code>internal/editor/diff_editor.go</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Cumulative Diff Review Sandbox</strong></td>
+<td>Edit Format</td>
+<td>High</td>
+<td>High</td>
+<td>4 weeks</td>
+<td>MultiEdit transaction system provides atomic foundation</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Subagent Delegation System</strong></td>
+<td>Multi-Agent</td>
+<td>High</td>
+<td>High</td>
+<td>5 weeks</td>
+<td>8 agent types exist with collaboration patterns</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>MCP Full Lifecycle</strong> (4 transports)</td>
+<td>MCP</td>
+<td>Very High</td>
+<td>High</td>
+<td>8 weeks</td>
+<td>WebSocket MCP server exists; needs stdio/SSE/HTTP clients</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Tool Result Persistence</strong></td>
+<td>Context</td>
+<td>Medium</td>
+<td>High</td>
+<td>2 weeks</td>
+<td>File system tools exist; needs persistence layer</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Git Worktree Agent Isolation</strong></td>
+<td>Git</td>
+<td>High</td>
+<td>High</td>
+<td>3 weeks</td>
+<td>Git tools exist; needs worktree management wrapper</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Shadow Git Checkpoints</strong></td>
+<td>Security</td>
+<td>High</td>
+<td>Critical</td>
+<td>4 weeks</td>
+<td>Session manager exists; needs shadow git integration</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>Hook-Based Extensibility</strong></td>
+<td>Tool Use</td>
+<td>High</td>
+<td>High</td>
+<td>5 weeks</td>
+<td>Hook system exists in <code>internal/hooks/</code> but is
+minimal</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>Context Compaction</strong> with encrypted latent</td>
+<td>Context</td>
+<td>High</td>
+<td>High</td>
+<td>5 weeks</td>
+<td>Compression system exists; needs compaction orchestration</td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>Architect/Editor Dual-Model</strong></td>
+<td>Multi-Agent</td>
+<td>High</td>
+<td>Medium</td>
+<td>4 weeks</td>
+<td>Architect format exists in
+<code>internal/editor/formats/</code></td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>Network Restrictions</strong> (iptables)</td>
+<td>Security</td>
+<td>High</td>
+<td>Critical</td>
+<td>3 weeks</td>
+<td>Docker networking exists; needs iptables integration</td>
+</tr>
+<tr>
+<td>16</td>
+<td><strong>Seccomp Syscall Filtering</strong></td>
+<td>Security</td>
+<td>High</td>
+<td>Critical</td>
+<td>4 weeks</td>
+<td>Linux-only; requires BPF knowledge</td>
+</tr>
+<tr>
+<td>17</td>
+<td><strong>Command Filtering</strong> (dangerous op detection)</td>
+<td>Security</td>
+<td>Medium</td>
+<td>High</td>
+<td>2 weeks</td>
+<td>Can build on confirmation system</td>
+</tr>
+<tr>
+<td>18</td>
+<td><strong>Protected Paths</strong> (auto-protect)</td>
+<td>Security</td>
+<td>Medium</td>
+<td>High</td>
+<td>1 week</td>
+<td>File system tools can add guards</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="p1-high-gaps-24-gaps">3.3 P1 High Gaps (24 gaps)</h3>
+<table>
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 6%" />
+<col style="width: 13%" />
+<col style="width: 14%" />
+<col style="width: 22%" />
+<col style="width: 10%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>Category</th>
+<th>Complexity</th>
+<th>Business Impact</th>
+<th>Effort</th>
+<th>Integration Readiness</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>19</td>
+<td><strong>Background Task System</strong> (Ctrl+B)</td>
+<td>UI/UX</td>
+<td>Medium</td>
+<td>High</td>
+<td>2 weeks</td>
+<td>Task manager exists with queue + checkpoints</td>
+</tr>
+<tr>
+<td>20</td>
+<td><strong>Smart File Editing</strong> (edit without Read)</td>
+<td>Edit Format</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Bash tool output tracking needed</td>
+</tr>
+<tr>
+<td>21</td>
+<td><strong>Session Transcript Resume</strong> cross-project</td>
+<td>Context</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Session manager + JSONL persistence exists</td>
+</tr>
+<tr>
+<td>22</td>
+<td><strong>6 Orchestration Patterns</strong></td>
+<td>Multi-Agent</td>
+<td>High</td>
+<td>Medium</td>
+<td>5 weeks</td>
+<td>Actor model provides foundation</td>
+</tr>
+<tr>
+<td>23</td>
+<td><strong>Interactive Clarification Loop</strong></td>
+<td>Multi-Agent</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>AskUserQuestion tool exists</td>
+</tr>
+<tr>
+<td>24</td>
+<td><strong>No-Flicker Rendering Mode</strong></td>
+<td>UI/UX</td>
+<td>High</td>
+<td>Medium</td>
+<td>3 weeks</td>
+<td>tview terminal UI exists</td>
+</tr>
+<tr>
+<td>25</td>
+<td><strong>OpenTelemetry Integration</strong></td>
+<td>Performance</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Event bus exists; needs OTEL SDK</td>
+</tr>
+<tr>
+<td>26</td>
+<td><strong>Skill System</strong> with auto-invocation</td>
+<td>Multi-Agent</td>
+<td>High</td>
+<td>Medium</td>
+<td>4 weeks</td>
+<td>No existing skill registry</td>
+</tr>
+<tr>
+<td>27</td>
+<td><strong>IDE Extension</strong> (VS Code/JetBrains)</td>
+<td>UI/UX</td>
+<td>High</td>
+<td>High</td>
+<td>6 weeks</td>
+<td>OpenAPI 3.0 API (60+ endpoints) ready</td>
+</tr>
+<tr>
+<td>28</td>
+<td><strong>Prompt Caching Optimization</strong></td>
+<td>Performance</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Model manager exists; needs cache-aware selection</td>
+</tr>
+<tr>
+<td>29</td>
+<td><strong>Vector Search</strong></td>
+<td>Context</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>11 memory providers include ChromaDB/FAISS/Pinecone</td>
+</tr>
+<tr>
+<td>30</td>
+<td><strong>Incremental Indexing</strong></td>
+<td>Context</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Tree-sitter mapper exists</td>
+</tr>
+<tr>
+<td>31</td>
+<td><strong>Auto Test/Lint-Fix Loop</strong></td>
+<td>Testing</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Workflow engine exists with test step</td>
+</tr>
+<tr>
+<td>32</td>
+<td><strong>Massive Context Window</strong> (1M-2M)</td>
+<td>Context</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Model selection supports maxTokens criteria</td>
+</tr>
+<tr>
+<td>33</td>
+<td><strong>Diff Display System</strong> (word-level)</td>
+<td>Edit Format</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Diff engine exists; needs word-level extension</td>
+</tr>
+<tr>
+<td>34</td>
+<td><strong>Headless/CI Mode</strong></td>
+<td>UI/UX</td>
+<td>Medium</td>
+<td>High</td>
+<td>2 weeks</td>
+<td>Server mode exists; needs JSON output formatting</td>
+</tr>
+<tr>
+<td>35</td>
+<td><strong>Streaming Resilience</strong></td>
+<td>Performance</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Streaming exists; needs fallback + retry</td>
+</tr>
+<tr>
+<td>36</td>
+<td><strong>MCP stdio Transport</strong></td>
+<td>MCP</td>
+<td>High</td>
+<td>High</td>
+<td>3 weeks</td>
+<td>WebSocket server exists; needs stdio client</td>
+</tr>
+<tr>
+<td>37</td>
+<td><strong>Auto Commit Messages</strong></td>
+<td>Git</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>1 week</td>
+<td>Git tools exist; needs commit message generation</td>
+</tr>
+<tr>
+<td>38</td>
+<td><strong>Git-Native Workflow</strong></td>
+<td>Git</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Git tools exist; needs auto-commit integration</td>
+</tr>
+<tr>
+<td>39</td>
+<td><strong>Subprocess Env Scrub</strong></td>
+<td>Security</td>
+<td>Low</td>
+<td>Medium</td>
+<td>3 days</td>
+<td>Bash tool can add env filtering</td>
+</tr>
+<tr>
+<td>40</td>
+<td><strong>Challenge Framework</strong> activation</td>
+<td>Testing</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>Challenges submodule empty; needs initialization</td>
+</tr>
+<tr>
+<td>41</td>
+<td><strong>ACP Protocol Tests</strong></td>
+<td>Testing</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>2 weeks</td>
+<td>LLMsVerifier submodule empty; needs initialization</td>
+</tr>
+<tr>
+<td>42</td>
+<td><strong>Autonomous QA Session</strong></td>
+<td>Testing</td>
+<td>High</td>
+<td>Medium</td>
+<td>4 weeks</td>
+<td>helix_qa submodule empty; needs initialization</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="p2-medium-gaps-47-gaps---summary-of-top-15">3.4 P2 Medium Gaps
+(47 gaps - summary of top 15)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>Category</th>
+<th>Complexity</th>
+<th>Business Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>43</td>
+<td>Theme System enhancement</td>
+<td>UI/UX</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>44</td>
+<td>Status Line custom commands</td>
+<td>UI/UX</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>45</td>
+<td>Notifications improvement</td>
+<td>UI/UX</td>
+<td>Low</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>46</td>
+<td>Slash Command Picker refinement</td>
+<td>UI/UX</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>47</td>
+<td>Model Picker enhancement</td>
+<td>UI/UX</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>48</td>
+<td>Spinner System enhancement</td>
+<td>UI/UX</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>49</td>
+<td>Vim Mode</td>
+<td>UI/UX</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>50</td>
+<td>Custom Keybindings</td>
+<td>UI/UX</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>51</td>
+<td>Paste Handling</td>
+<td>UI/UX</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>52</td>
+<td>Web Dashboard</td>
+<td>UI/UX</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>53</td>
+<td>Fig-Style Terminal Intellisense</td>
+<td>UI/UX</td>
+<td>High</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>54</td>
+<td>Notebook Edit Tool</td>
+<td>Tool Use</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>55</td>
+<td>Resource Mentions (@ typeahead)</td>
+<td>MCP</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>56</td>
+<td>Tool Annotations</td>
+<td>MCP</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>57</td>
+<td>Non-Blocking MCP Connections</td>
+<td>MCP</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>58</td>
+<td>SSE Transport</td>
+<td>MCP</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>59</td>
+<td>HTTP Transport</td>
+<td>MCP</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>60</td>
+<td>OAuth 2.0 Support</td>
+<td>MCP</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>61</td>
+<td>Auto-Reconnection</td>
+<td>MCP</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>62</td>
+<td>Serve as MCP Server</td>
+<td>MCP</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>63</td>
+<td>A/B Testing Framework</td>
+<td>Multi-Agent</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>64</td>
+<td>Auto Triage</td>
+<td>Multi-Agent</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>65</td>
+<td>Auto Code Review enhancement</td>
+<td>Multi-Agent</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>66</td>
+<td>App Builder</td>
+<td>Multi-Agent</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>67</td>
+<td>Gas Town Platform</td>
+<td>Multi-Agent</td>
+<td>Very High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>68</td>
+<td>Named Addressable Agents</td>
+<td>Multi-Agent</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>69</td>
+<td>Agent Hierarchy</td>
+<td>Multi-Agent</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>70</td>
+<td>Editor-Diff/Editor-Whole</td>
+<td>Edit Format</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>71</td>
+<td>Sandboxed Review</td>
+<td>Edit Format</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>72</td>
+<td>Thrashing Detection</td>
+<td>Context</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>73</td>
+<td>Manual Context Control</td>
+<td>Context</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>74</td>
+<td>Hierarchical Settings enhancement</td>
+<td>Context</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>75</td>
+<td>Focus Chain enhancement</td>
+<td>Context</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>76</td>
+<td>Cross-Session Memory enhancement</td>
+<td>Context</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>77</td>
+<td>Lazy Loading enhancement</td>
+<td>Performance</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>78</td>
+<td>Parallel Loading</td>
+<td>Performance</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>79</td>
+<td>Edit Tool Optimization</td>
+<td>Performance</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>80</td>
+<td>Memory Leak Prevention</td>
+<td>Performance</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>81</td>
+<td>Bounded File Descriptors</td>
+<td>Performance</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>82</td>
+<td>Rust Implementation</td>
+<td>Performance</td>
+<td>Very High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>83</td>
+<td>ZDR Compliance</td>
+<td>Security</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>84</td>
+<td>Unix Socket Blocking</td>
+<td>Security</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>85</td>
+<td>Archive TOCTOU Protection</td>
+<td>Security</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>86</td>
+<td>PowerShell Hardening</td>
+<td>Security</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>87</td>
+<td>PR Integration</td>
+<td>Git</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>88</td>
+<td>GitHub API Rate Limit</td>
+<td>Git</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>89</td>
+<td>Branch Management</td>
+<td>Git</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>90</td>
+<td>Test-Driven Development</td>
+<td>Testing</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>91</td>
+<td>Crash/ANR Detection</td>
+<td>Testing</td>
+<td>High</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>92</td>
+<td>Coverage Tracking</td>
+<td>Testing</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>93</td>
+<td>Anti-Bluff Detection</td>
+<td>Testing</td>
+<td>High</td>
+<td>Low</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="integration-readiness">4. Integration Readiness</h2>
+<h3 id="what-helixcode-already-has-that-makes-integration-easier">4.1
+What HelixCode Already Has That Makes Integration Easier</h3>
+<h4 id="a.-foundation-infrastructure-high-readiness">A. Foundation
+Infrastructure (High Readiness)</h4>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 40%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>Existing Capability</th>
+<th>How It Helps Gap Closure</th>
+<th>Readiness Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Actor Model with 8 Agent Types</strong></td>
+<td>Subagent delegation, orchestration patterns, agent hierarchy can
+build on existing types</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>29+ LLM Provider Factory+Strategy</strong></td>
+<td>Model switching, Architect/Editor dual-model, provider routing
+already supported</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Tool Framework with 20+ Tools</strong></td>
+<td>MCP tool execution, hook events, new tools can register via existing
+interface</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Atomic MultiFileEditor</strong></td>
+<td>Cumulative diff sandbox can extend existing transaction system</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Tree-sitter Code Mapping</strong></td>
+<td>Repo map, incremental indexing, vector search can use existing AST
+data</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>OpenAPI 3.0 REST API (60+ endpoints)</strong></td>
+<td>IDE extension, web dashboard, headless mode can use existing
+API</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Viper Config + Env Binding</strong></td>
+<td>Hierarchical settings, managed settings, permission rules can extend
+config</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>6-Platform UI</strong></td>
+<td>Terminal TUI (tview), Desktop (Fyne), Android, iOS, Aurora OS,
+Harmony OS</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>PostgreSQL + Redis</strong></td>
+<td>Session persistence, transcript storage, checkpoint data</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>JWT Auth + Security Middleware</strong></td>
+<td>Authentication foundation for permission system, sandbox
+policies</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="b.-partial-implementations-medium-readiness">B. Partial
+Implementations (Medium Readiness)</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 40%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Existing Capability</th>
+<th>Gap It Partially Closes</th>
+<th>What’s Missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLM Compression System</strong>
+(<code>internal/llm/compression/</code>)</td>
+<td>Auto-compaction, context compaction</td>
+<td>Thrashing detection, automatic trigger, encrypted latent</td>
+</tr>
+<tr>
+<td><strong>Confirmation Coordinator</strong>
+(<code>internal/tools/confirmation/</code>)</td>
+<td>Permission rule system, tiered approval</td>
+<td>5-mode granularity, wildcard rules, compound command handling</td>
+</tr>
+<tr>
+<td><strong>Hook System</strong> (<code>internal/hooks/</code>)</td>
+<td>Hook-based extensibility</td>
+<td>9+ event types, blocking hooks, MCP tool invocation from hooks</td>
+</tr>
+<tr>
+<td><strong>MCP Server</strong> (<code>internal/mcp/</code>)</td>
+<td>MCP full lifecycle</td>
+<td>stdio/SSE/HTTP clients, OAuth, auto-reconnection</td>
+</tr>
+<tr>
+<td><strong>Session Manager</strong>
+(<code>internal/session/</code>)</td>
+<td>Session transcript resume, shadow git</td>
+<td>Cross-project search, JSONL persistence, PR URL finding</td>
+</tr>
+<tr>
+<td><strong>Task Manager</strong> (<code>internal/task/</code>)</td>
+<td>Background task system, checkpoint system</td>
+<td>Ctrl+B interaction, progress streaming, task output reading</td>
+</tr>
+<tr>
+<td><strong>Workflow Engine</strong>
+(<code>internal/workflow/</code>)</td>
+<td>Plan/Act mode, auto test loop</td>
+<td>Plan approval workflow, test auto-trigger, lint integration</td>
+</tr>
+<tr>
+<td><strong>Context Builder</strong>
+(<code>internal/context/builder.go</code>)</td>
+<td>Context management, manual control</td>
+<td>/add /drop commands, token count display</td>
+</tr>
+<tr>
+<td><strong>Diff Editor</strong>
+(<code>internal/editor/diff_editor.go</code>)</td>
+<td>4-layer fuzzy matching, diff display</td>
+<td>Fuzzy matching layers, word-level diff</td>
+</tr>
+<tr>
+<td><strong>Model Manager</strong>
+(<code>internal/llm/model_manager.go</code>)</td>
+<td>Prompt caching, model switching</td>
+<td>Cache-aware selection, prefix preservation</td>
+</tr>
+<tr>
+<td><strong>Event Bus</strong> (<code>internal/event/</code>)</td>
+<td>OpenTelemetry, hook events</td>
+<td>OTEL SDK integration, typed event propagation</td>
+</tr>
+<tr>
+<td><strong>HelixQA Submodule</strong> (EMPTY)</td>
+<td>Autonomous QA, screenshot testing</td>
+<td>Submodule initialization, CLI agent test bank execution</td>
+</tr>
+<tr>
+<td><strong>LLMsVerifier Submodule</strong> (EMPTY)</td>
+<td>ACP protocol tests, challenge framework</td>
+<td>Submodule initialization, CLI agent verification mode</td>
+</tr>
+<tr>
+<td><strong>Challenges Submodule</strong> (EMPTY)</td>
+<td>Challenge framework, evaluators</td>
+<td>Submodule initialization, CLI agent adapter</td>
+</tr>
+<tr>
+<td><strong>Containers Submodule</strong> (EMPTY)</td>
+<td>OS sandbox, container isolation</td>
+<td>Submodule initialization, sandbox profiles</td>
+</tr>
+</tbody>
+</table>
+<h4 id="c.-missing-foundation-low-readiness---must-build-first">C.
+Missing Foundation (Low Readiness - Must Build First)</h4>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 40%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Why Low Readiness</th>
+<th>Required Foundation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS-Native Sandboxing</td>
+<td>No OS-level integration exists</td>
+<td>containers submodule + seccomp/Seatbelt/iptables knowledge</td>
+</tr>
+<tr>
+<td>LSP Integration</td>
+<td>No LSP client exists</td>
+<td>New LSP client subsystem + language server connections</td>
+</tr>
+<tr>
+<td>IDE Extension</td>
+<td>No extension framework</td>
+<td>VS Code Extension API or Language Server Protocol</td>
+</tr>
+<tr>
+<td>Web Dashboard</td>
+<td>No web frontend</td>
+<td>React/Vue + Chart.js or similar dashboard framework</td>
+</tr>
+<tr>
+<td>Fig-Style Intellisense</td>
+<td>No shell completion integration</td>
+<td>Shell integration framework (bash/zsh/fish plugins)</td>
+</tr>
+<tr>
+<td>Rust Core</td>
+<td>No Rust code exists</td>
+<td>Rust/Go FFI or full Rust rewrite</td>
+</tr>
+<tr>
+<td>ZDR Compliance</td>
+<td>No stateless architecture</td>
+<td>Request-level state management instead of session state</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="submodule-activation-roadmap">4.2 Submodule Activation
+Roadmap</h3>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 26%" />
+<col style="width: 37%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Current Status</th>
+<th>Activation Effort</th>
+<th>Unlocks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLMsVerifier</strong></td>
+<td>Empty directory</td>
+<td>1 week</td>
+<td>ACP protocol tests, 25+ provider verification, CLI agent
+scoring</td>
+</tr>
+<tr>
+<td><strong>HelixQA</strong></td>
+<td>Empty directory</td>
+<td>1 week</td>
+<td>235 tests, autonomous QA, 47-agent test bank, screenshot
+testing</td>
+</tr>
+<tr>
+<td><strong>Challenges</strong></td>
+<td>Empty directory</td>
+<td>1 week</td>
+<td>209 tests, 16 evaluators, plugin system, 19 challenge templates</td>
+</tr>
+<tr>
+<td><strong>Containers</strong></td>
+<td>Empty directory</td>
+<td>1 week</td>
+<td>6 container runtimes, sandbox isolation, remote distribution</td>
+</tr>
+<tr>
+<td><strong>HelixAgent</strong></td>
+<td>NOT DECLARED</td>
+<td>4-6 weeks</td>
+<td>47+ providers, 32 MCP servers, AI debate, ensemble responses</td>
+</tr>
+<tr>
+<td><strong>HelixLLM</strong></td>
+<td>NOT DECLARED</td>
+<td>2-3 weeks</td>
+<td>HTTP/3 gateway, local inference, RAG, ReAct agents</td>
+</tr>
+<tr>
+<td><strong>HelixMemory</strong></td>
+<td>NOT DECLARED</td>
+<td>1-2 weeks</td>
+<td>4 memory backends, fusion engine, temporal reasoning</td>
+</tr>
+<tr>
+<td><strong>HelixSpecifier</strong></td>
+<td>NOT DECLARED</td>
+<td>1-2 weeks</td>
+<td>7-phase SDD, auto-ceremony, debate architecture</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Critical Path:</strong> Initialize 4 present submodules FIRST
+(1 week), then add 4 missing submodules (6-8 weeks). Without submodules,
+54% of testing infrastructure and 70% of advanced multi-agent
+capabilities are inaccessible.</p>
+<hr />
+<h3 id="go-module-path-issues-blocking-integration">4.3 Go Module Path
+Issues Blocking Integration</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Current hardcoded relative paths in go.mod:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>containers <span class="op">=&gt;</span> <span class="op">../</span>Containers        <span class="co">// PRESENT but EMPTY</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>helixqa <span class="op">=&gt;</span> <span class="op">../</span>HelixQA               <span class="co">// PRESENT but EMPTY</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>challenges <span class="op">=&gt;</span> <span class="op">../</span>Challenges         <span class="co">// PRESENT but EMPTY</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>docprocessor <span class="op">=&gt;</span> <span class="op">../</span>submodules<span class="op">/</span>doc_processor</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>llmorchestrator <span class="op">=&gt;</span> <span class="op">../</span>submodules<span class="op">/</span>llm_orchestrator</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>digital<span class="op">.</span>vasic<span class="op">.</span>llmprovider <span class="op">=&gt;</span> <span class="op">../</span>submodules<span class="op">/</span>llm_provider</span></code></pre></div>
+<p><strong>Problem:</strong> All paths are <code>../</code> relative.
+Build fails if submodules not present at exact relative locations.</p>
+<p><strong>Solution:</strong> 1. Use <code>go.work</code> workspace file
+for local development 2. Pin to actual GitHub URLs for CI/CD:
+<code>github.com/vasic-digital/Containers@v1.x.x</code> 3. Provide
+<code>replace</code> directives in development, remove for release
+builds</p>
+<hr />
+<h2 id="risk-assessment">5. Risk Assessment</h2>
+<h3 id="technical-risk-matrix">5.1 Technical Risk Matrix</h3>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 7%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 20%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>Risk Level</th>
+<th>Risk Type</th>
+<th>Description</th>
+<th>Mitigation Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>OS-Native Sandboxing</td>
+<td><strong>CRITICAL</strong></td>
+<td>Security, Platform</td>
+<td>Seccomp/Seatbelt/iptables require root/kernel-level access. Mistakes
+cause system instability. Platform differences (macOS/Linux/Windows)
+multiply complexity.</td>
+<td>Use proven libraries (libseccomp, Docker SDK). containers submodule
+has 6 runtime configs. Start with Docker-based sandbox.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>MCP Full Lifecycle</td>
+<td><strong>HIGH</strong></td>
+<td>Architecture, Compatibility</td>
+<td>4 transports + OAuth + auto-reconnection is a moving target.
+Anthropic updates spec frequently. Breaking changes likely.</td>
+<td>Abstract behind interfaces. Implement stdio first (simplest). Add
+SSE/HTTP incrementally. Monitor MCP spec repo for changes.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Auto-Compaction System</td>
+<td><strong>HIGH</strong></td>
+<td>Performance, Cost</td>
+<td>Bad summarization loses critical context. Over-aggressive compaction
+= broken code. Under-aggressive = API cost blowout.</td>
+<td>Implement conservative thresholds. Require user confirmation for
+compaction. Test with real codebase scenarios. Add “undo compaction”
+feature.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Subagent Delegation</td>
+<td><strong>HIGH</strong></td>
+<td>Architecture, Coordination</td>
+<td>Race conditions between parent/child agents. Git worktree conflicts.
+Message routing complexity.</td>
+<td>Use existing Actor model mailbox. Implement worktree-based
+isolation. Add timeout/cancellation propagation.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>LSP Integration</td>
+<td><strong>HIGH</strong></td>
+<td>Complexity, Maintenance</td>
+<td>LSP protocol is large (~120 methods). Each language server behaves
+differently. Version mismatches common.</td>
+<td>Use gopls as reference implementation. Start with diagnostics only.
+Abstract LSP client behind interface.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>4-Layer Fuzzy Matching</td>
+<td><strong>MEDIUM</strong></td>
+<td>Algorithm, Edge Cases</td>
+<td>Difflib can produce incorrect matches on heavily modified files.
+Indentation matching fails with mixed tabs/spaces.</td>
+<td>Extensive test suite with real-world examples. Aider’s test corpus
+available. Fallback to whole-file rewrite on match failure.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Context Compaction</td>
+<td><strong>MEDIUM</strong></td>
+<td>Data Loss, User Trust</td>
+<td>Encrypted latent understanding can’t be verified. Users won’t trust
+“invisible” summarization.</td>
+<td>Add visible compaction log. Show before/after token counts. Allow
+manual compaction override.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Cumulative Diff Sandbox</td>
+<td><strong>MEDIUM</strong></td>
+<td>UX, Complexity</td>
+<td>Users confused by staged vs applied changes. Large PRs create
+overwhelming review UI.</td>
+<td>Clear visual separation (staged/applied). Pagination for large
+changes. One-click apply-all/reject-all.</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Git Worktree Isolation</td>
+<td><strong>MEDIUM</strong></td>
+<td>Git, Cleanup</td>
+<td>Orphaned worktrees if process crashes. Disk usage grows unbounded.
+Worktree cleanup on agent exit.</td>
+<td>Implement worktree tracking in session manager. Auto-cleanup on
+session end. Add <code>claude worktree cleanup</code> command.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Permission Rule System</td>
+<td><strong>MEDIUM</strong></td>
+<td>Security, UX</td>
+<td>Complex rules confuse users. Wildcard misconfiguration allows
+dangerous operations.</td>
+<td>Simple default rules (allow common, block dangerous). Rule
+validation on save. Visual rule builder UI.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Hook-Based Extensibility</td>
+<td><strong>MEDIUM</strong></td>
+<td>Security, Stability</td>
+<td>Hooks can crash the agent. Untrusted hooks = code execution.
+Performance degradation from slow hooks.</td>
+<td>Hook timeout (5s default). Sandboxed hook execution. Hook
+performance metrics.</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Background Tasks</td>
+<td><strong>MEDIUM</strong></td>
+<td>UX, State Management</td>
+<td>Users forget background tasks. Tasks fail silently. Resource
+exhaustion from too many tasks.</td>
+<td>Task notification system. Auto-show on completion. Resource limits
+(max 3 concurrent).</td>
+</tr>
+<tr>
+<td>13</td>
+<td>IDE Extension</td>
+<td><strong>MEDIUM</strong></td>
+<td>Maintenance, API Churn</td>
+<td>VS Code API changes quarterly. JetBrains plugin requires Kotlin. Two
+separate codebases to maintain.</td>
+<td>Start with VS Code only. Use webview-based UI to share code with
+terminal app. OpenAPI API already ready.</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Submodule Activation</td>
+<td><strong>MEDIUM</strong></td>
+<td>Dependencies, Build</td>
+<td>Empty submodules break builds. Hardcoded paths break on different
+directory layouts.</td>
+<td>Make submodules optional with build tags. Replace relative paths
+with go.work. CI builds without submodules first.</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Architect/Editor Dual-Model</td>
+<td><strong>LOW</strong></td>
+<td>UX, Complexity</td>
+<td>Two-model coordination adds latency. Model switching costs. Context
+duplication between models.</td>
+<td>Implement as single model call with structured response. Cache
+editor model context.</td>
+</tr>
+<tr>
+<td>16</td>
+<td>6 Orchestration Patterns</td>
+<td><strong>LOW</strong></td>
+<td>Complexity</td>
+<td>Pattern selection logic is tricky. Wrong pattern = inefficiency, not
+failure.</td>
+<td>Start with Sequential + Parallel. Add others based on user feedback.
+Pattern recommendation based on task type.</td>
+</tr>
+<tr>
+<td>17</td>
+<td>OpenTelemetry Integration</td>
+<td><strong>LOW</strong></td>
+<td>Performance</td>
+<td>Tracing adds overhead. W3C propagation complexity. OTEL SDK bloats
+binary.</td>
+<td>Make optional via build tag. Sampling (1% default). Exclude from
+release builds.</td>
+</tr>
+<tr>
+<td>18</td>
+<td>Test Infrastructure Activation</td>
+<td><strong>LOW</strong></td>
+<td>Dependencies</td>
+<td>Submodule code may be outdated. Docker images may not exist.
+Network-dependent tests fail offline.</td>
+<td>Pin submodule to specific commits. Cache Docker images in CI. Mock
+network-dependent tests.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="dependency-risk-assessment">5.2 Dependency Risk Assessment</h3>
+<table>
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 25%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>External Dependency</th>
+<th>Risk Level</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anthropic MCP Spec</strong></td>
+<td>HIGH</td>
+<td>Abstract behind internal interfaces. Track spec changes. Support
+multiple spec versions.</td>
+</tr>
+<tr>
+<td><strong>Docker SDK</strong></td>
+<td>MEDIUM</td>
+<td>Use Docker API directly as fallback. Support Podman. Container
+runtime abstraction.</td>
+</tr>
+<tr>
+<td><strong>Tree-sitter Grammars</strong></td>
+<td>LOW</td>
+<td>20+ languages supported. Grammars rarely change.</td>
+</tr>
+<tr>
+<td><strong>gopls / LSP Servers</strong></td>
+<td>HIGH</td>
+<td>Version pinning. Multiple gopls versions support. Graceful
+degradation on LSP failure.</td>
+</tr>
+<tr>
+<td><strong>LLM Provider APIs</strong></td>
+<td>MEDIUM</td>
+<td>29+ providers = some API changes always happening. Provider-agnostic
+abstraction layer exists.</td>
+</tr>
+<tr>
+<td><strong>Viper Config</strong></td>
+<td>LOW</td>
+<td>Stable library. Version-based migration system exists.</td>
+</tr>
+<tr>
+<td><strong>tview / Fyne UI</strong></td>
+<td>LOW</td>
+<td>Terminal UIs are stable. Fyne may have breaking changes but is
+well-maintained.</td>
+</tr>
+<tr>
+<td><strong>PostgreSQL / Redis</strong></td>
+<td>LOW</td>
+<td>Standard infrastructure. Connection pooling, failover standard
+practice.</td>
+</tr>
+<tr>
+<td><strong>OAuth 2.0 Providers</strong></td>
+<td>HIGH</td>
+<td>Provider-specific flows (GitHub, Google, Azure). Use
+golang.org/x/oauth2.</td>
+</tr>
+<tr>
+<td><strong>Seccomp BPF</strong></td>
+<td>HIGH</td>
+<td>Kernel-specific. Test on multiple kernel versions. Fallback to
+ptrace-based sandbox.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="security-risk-assessment">5.3 Security Risk Assessment</h3>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 26%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Security Concern</th>
+<th>Current State</th>
+<th>Target State</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bash tool unrestricted</td>
+<td>⚠️ Partial protection</td>
+<td>Full sandboxed execution</td>
+<td><strong>CRITICAL</strong></td>
+</tr>
+<tr>
+<td>No OS-level sandbox</td>
+<td>❌ Missing</td>
+<td>Seatbelt/Docker/iptables</td>
+<td><strong>CRITICAL</strong></td>
+</tr>
+<tr>
+<td>File tool unrestricted</td>
+<td>⚠️ Partial protection</td>
+<td>Protected paths + permission rules</td>
+<td><strong>HIGH</strong></td>
+</tr>
+<tr>
+<td>No ZDR compliance</td>
+<td>❌ Missing</td>
+<td>Stateless per-request</td>
+<td><strong>HIGH</strong></td>
+</tr>
+<tr>
+<td>JWT token management</td>
+<td>✅ Implemented</td>
+<td>-</td>
+<td><strong>LOW</strong></td>
+</tr>
+<tr>
+<td>Bcrypt password hashing</td>
+<td>✅ Implemented</td>
+<td>-</td>
+<td><strong>LOW</strong></td>
+</tr>
+<tr>
+<td>Subprocess env scrub</td>
+<td>❌ Missing</td>
+<td>Scrubbed environment</td>
+<td><strong>MEDIUM</strong></td>
+</tr>
+<tr>
+<td>Command filtering</td>
+<td>⚠️ Partial</td>
+<td>Dangerous op detection</td>
+<td><strong>HIGH</strong></td>
+</tr>
+<tr>
+<td>Network restrictions</td>
+<td>⚠️ Partial</td>
+<td>iptables + domain allowlist</td>
+<td><strong>HIGH</strong></td>
+</tr>
+<tr>
+<td>Archive TOCTOU</td>
+<td>❌ Missing</td>
+<td>Time-of-check-time-of-use</td>
+<td><strong>MEDIUM</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Security is HelixCode’s highest-risk area. 11/15 security
+features are missing or partial. Enterprise adoption is blocked without
+OS sandboxing and ZDR compliance.</strong></p>
+<hr />
+<h3 id="business-risk-assessment">5.4 Business Risk Assessment</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 31%" />
+<col style="width: 21%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Probability</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Competitors release major features before gap closure</td>
+<td>HIGH</td>
+<td>HIGH</td>
+<td>Prioritize P0 gaps. Release incrementally.</td>
+</tr>
+<tr>
+<td>OS sandboxing too complex for Go implementation</td>
+<td>MEDIUM</td>
+<td>CRITICAL</td>
+<td>Use Docker as primary sandbox. Native as enhancement.</td>
+</tr>
+<tr>
+<td>MCP spec changes break implementation</td>
+<td>HIGH</td>
+<td>MEDIUM</td>
+<td>Abstract transport layer. Version negotiation.</td>
+</tr>
+<tr>
+<td>Submodule code quality issues</td>
+<td>MEDIUM</td>
+<td>MEDIUM</td>
+<td>Code review submodule activation. Add tests before merge.</td>
+</tr>
+<tr>
+<td>Performance regression from new features</td>
+<td>MEDIUM</td>
+<td>HIGH</td>
+<td>Benchmark regression suite. Performance gates in CI.</td>
+</tr>
+<tr>
+<td>Build complexity from submodules</td>
+<td>MEDIUM</td>
+<td>MEDIUM</td>
+<td>Make submodules optional. Clear build documentation.</td>
+</tr>
+<tr>
+<td>User confusion from Architect/Editor dual-model</td>
+<td>LOW</td>
+<td>MEDIUM</td>
+<td>Default to single model. Dual-model as opt-in.</td>
+</tr>
+<tr>
+<td>API cost blowout from context compaction failures</td>
+<td>LOW</td>
+<td>HIGH</td>
+<td>Cost limits, alerts, conservative thresholds.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="gap-closure-roadmap">6. Gap Closure Roadmap</h2>
+<h3 id="phase-1-foundation-weeks-1-4">Phase 1: Foundation (Weeks
+1-4)</h3>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 17%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Week</th>
+<th>Focus</th>
+<th>Gaps Closed</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Submodule Activation</td>
+<td>8 P1 gaps</td>
+<td>All 4 present submodules initialized and building</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Security Foundation</td>
+<td>4 P0 gaps</td>
+<td>Permission rules, protected paths, command filtering, env scrub</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Context Foundation</td>
+<td>2 P0 gaps</td>
+<td>Tool result persistence, prompt caching optimization</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Edit Foundation</td>
+<td>2 P0 gaps</td>
+<td>Smart file editing, diff display enhancement</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-2-core-capabilities-weeks-5-10">Phase 2: Core Capabilities
+(Weeks 5-10)</h3>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 17%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Week</th>
+<th>Focus</th>
+<th>Gaps Closed</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5-6</td>
+<td>MCP Implementation</td>
+<td>5 P0/P1 gaps</td>
+<td>stdio + SSE transport, auto-reconnection, resource mentions</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>Context Management</td>
+<td>3 P0 gaps</td>
+<td>Auto-compaction (basic), thrashing detection, context
+compaction</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>Git Integration</td>
+<td>4 P0/P1 gaps</td>
+<td>Worktree isolation, shadow checkpoints, auto-commit, git-native
+workflow</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-3-advanced-features-weeks-11-16">Phase 3: Advanced
+Features (Weeks 11-16)</h3>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 17%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Week</th>
+<th>Focus</th>
+<th>Gaps Closed</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11-12</td>
+<td>OS Sandboxing</td>
+<td>3 P0 gaps</td>
+<td>Docker sandbox (Linux), Seatbelt profile (macOS)</td>
+</tr>
+<tr>
+<td>13-14</td>
+<td>Multi-Agent</td>
+<td>3 P0/P1 gaps</td>
+<td>Named agents, delegation, architect/editor dual-model</td>
+</tr>
+<tr>
+<td>15-16</td>
+<td>UI/UX</td>
+<td>4 P1 gaps</td>
+<td>Background tasks, resume picker, headless mode, IDE extension
+scaffold</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-4-polish-enterprise-weeks-17-24">Phase 4: Polish &amp;
+Enterprise (Weeks 17-24)</h3>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 17%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Week</th>
+<th>Focus</th>
+<th>Gaps Closed</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>17-18</td>
+<td>Performance</td>
+<td>2 P1 gaps</td>
+<td>OTEL integration, streaming resilience</td>
+</tr>
+<tr>
+<td>19-20</td>
+<td>Testing</td>
+<td>3 P1 gaps</td>
+<td>Challenge framework, ACP tests, autonomous QA</td>
+</tr>
+<tr>
+<td>21-22</td>
+<td>UI Polish</td>
+<td>3 P2 gaps</td>
+<td>Vim mode, custom keybindings, theme enhancement</td>
+</tr>
+<tr>
+<td>23-24</td>
+<td>Enterprise</td>
+<td>2 P0 gaps</td>
+<td>ZDR compliance, Windows sandbox</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="competitive-position-after-gap-closure">7. Competitive Position
+After Gap Closure</h2>
+<h3 id="current-competitive-position">7.1 Current Competitive
+Position</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 50%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>HelixCode Rank (of 11)</th>
+<th>Gap to Leader</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool Use</td>
+<td>7th</td>
+<td>Missing Notebook, Task tools, Git worktrees</td>
+</tr>
+<tr>
+<td>Context Management</td>
+<td>6th</td>
+<td>Missing auto-compaction, thrashing detection</td>
+</tr>
+<tr>
+<td>Edit Format</td>
+<td>6th</td>
+<td>Missing fuzzy matching, cumulative diff</td>
+</tr>
+<tr>
+<td>UI/UX</td>
+<td>8th</td>
+<td>Missing skills picker, resume, vim, keybindings</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>10th</td>
+<td>Missing OS sandboxing, seccomp, ZDR</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>8th</td>
+<td>Missing worktree isolation, shadow checkpoints</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>8th</td>
+<td>Only WebSocket transport</td>
+</tr>
+<tr>
+<td>Multi-Agent</td>
+<td>6th</td>
+<td>Missing orchestration patterns, named agents</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>7th</td>
+<td>Missing prompt caching, context compaction</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>7th</td>
+<td>Submodules inactive</td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td><strong>7th</strong></td>
+<td><strong>54 missing features</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="target-competitive-position-after-phase-1-3">7.2 Target
+Competitive Position (After Phase 1-3)</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 37%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Target Rank</th>
+<th>Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool Use</td>
+<td>4th</td>
+<td>Close 7 gaps, MCP full lifecycle</td>
+</tr>
+<tr>
+<td>Context Management</td>
+<td>3rd</td>
+<td>Auto-compaction, persistence, massive context</td>
+</tr>
+<tr>
+<td>Edit Format</td>
+<td>3rd</td>
+<td>Fuzzy matching, cumulative diff, smart editing</td>
+</tr>
+<tr>
+<td>UI/UX</td>
+<td>5th</td>
+<td>Background tasks, resume picker, headless mode</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>5th</td>
+<td>Docker sandbox, permission rules, protected paths</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>4th</td>
+<td>Worktree isolation, shadow checkpoints, auto-commit</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>3rd</td>
+<td>All 4 transports + OAuth</td>
+</tr>
+<tr>
+<td>Multi-Agent</td>
+<td>3rd</td>
+<td>Named agents, orchestration, dual-model</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>4th</td>
+<td>Prompt caching, compaction, streaming resilience</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>3rd</td>
+<td>Activate submodules, challenge framework</td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td><strong>4th</strong></td>
+<td><strong>Top 4 of 11 agents</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="target-competitive-position-full-gap-closure">7.3 Target
+Competitive Position (Full Gap Closure)</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 32%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Target Rank</th>
+<th>Differentiator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool Use</td>
+<td>3rd</td>
+<td>29+ LLM provider routing, tool framework extensibility</td>
+</tr>
+<tr>
+<td>Context Management</td>
+<td>2nd</td>
+<td>Tree-sitter + vector search + 11 memory providers</td>
+</tr>
+<tr>
+<td>Edit Format</td>
+<td>2nd</td>
+<td>7 formats + fuzzy matching + cumulative diff</td>
+</tr>
+<tr>
+<td>UI/UX</td>
+<td>3rd</td>
+<td>6-platform (unique: mobile, Aurora, Harmony)</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>4th</td>
+<td>Go-based sandbox (lighter than Docker)</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>3rd</td>
+<td>Worktree + shadow + auto-commit</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>2nd</td>
+<td>Full 4-transport + serve as server</td>
+</tr>
+<tr>
+<td>Multi-Agent</td>
+<td>2nd</td>
+<td>8 agent types + 6 patterns + quality scoring</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>3rd</td>
+<td>Go startup speed + Rust hot paths</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>1st</td>
+<td>4 submodules = 500+ tests, autonomous QA</td>
+</tr>
+<tr>
+<td><strong>Overall</strong></td>
+<td><strong>3rd</strong></td>
+<td><strong>Top 3 of 11 - behind Claude Code and Forge</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="summary-recommendations">8. Summary &amp; Recommendations</h2>
+<h3 id="top-5-immediate-actions">8.1 Top 5 Immediate Actions</h3>
+<ol type="1">
+<li><p><strong>Activate Submodules (Week 1)</strong> - Initialize
+LLMsVerifier, HelixQA, Challenges, Containers. Fix go.mod paths. This
+unblocks 20+ testing/sandboxing features.</p></li>
+<li><p><strong>Implement Docker Sandbox (Week 2-3)</strong> - Build
+Linux sandbox first using Docker + iptables. This is the foundation for
+all security features.</p></li>
+<li><p><strong>Build Auto-Compaction (Week 3-4)</strong> - Extend
+existing LLM compression system with automatic trigger and thrashing
+detection. Critical for long sessions.</p></li>
+<li><p><strong>Complete MCP Transports (Week 5-6)</strong> - Add stdio
+and SSE transport clients. Enables 32+ MCP servers in HelixAgent
+ecosystem.</p></li>
+<li><p><strong>Implement Fuzzy Matching (Week 4-5)</strong> - Add
+4-layer fuzzy matching to diff editor. Immediate user experience
+improvement.</p></li>
+</ol>
+<h3 id="key-differentiators-to-maintain">8.2 Key Differentiators to
+Maintain</h3>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 28%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Differentiator</th>
+<th>Why It Matters</th>
+<th>Protect At All Costs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>29+ LLM Provider Support</td>
+<td>Widest model coverage in market</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>6-Platform UI</td>
+<td>Unique mobile/embedded OS support</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Score-Augmented Model Selection</td>
+<td>Intelligent provider routing</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>8 Agent Types with Collaboration</td>
+<td>Purpose-built agents</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Atomic MultiFileEditor</td>
+<td>Transaction safety for multi-file ops</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Go-Based Implementation</td>
+<td>Fast startup, low memory, single binary</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-gaps-that-block-enterprise-adoption">8.3 Key Gaps That Block
+Enterprise Adoption</h3>
+<table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Enterprise Blocker</th>
+<th>Compliance Need</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS-Native Sandboxing</td>
+<td>Security audit requirement</td>
+<td>SOC 2, ISO 27001</td>
+</tr>
+<tr>
+<td>ZDR Compliance</td>
+<td>Data residency laws</td>
+<td>GDPR, HIPAA</td>
+</tr>
+<tr>
+<td>Permission Rule System</td>
+<td>Principle of least access</td>
+<td>SOC 2</td>
+</tr>
+<tr>
+<td>Shadow Git Checkpoints</td>
+<td>Audit trail requirement</td>
+<td>SOX, PCI-DSS</td>
+</tr>
+<tr>
+<td>Auto-Compaction</td>
+<td>Cost control at scale</td>
+<td>CFO approval</td>
+</tr>
+<tr>
+<td>Headless/CI Mode</td>
+<td>CI/CD integration</td>
+<td>DevOps adoption</td>
+</tr>
+<tr>
+<td>IDE Extension</td>
+<td>Developer workflow integration</td>
+<td>User adoption</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Document generated from comprehensive analysis of HelixCode
+architecture, binary strings, and comparison with 10 leading CLI AI
+coding agents (Claude Code, Aider, Cline, Codex, Plandex, Forge, Kilo
+Code, OpenCode, Gemini CLI, Amazon Q).</em></p>
+<p><em>Total features analyzed: 137 | P0 gaps: 18 | P1 gaps: 24 | P2
+gaps: 47</em></p>
+<p><em>Estimated total gap closure effort: 24 weeks (6 months) with 3-4
+engineers</em></p>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-051-helix_llm-helix_memory-go.mod-const-052-build-breaks">HXC-051
+— helix_llm + helix_memory go.mod CONST-052 build-breaks</h1>
+<p><strong>Captured:</strong> 2026-06-09T14:54:03Z · Bug · Fixed (→
+Fixed.md) ## helix_llm 36 capitalised
+<code>replace =&gt; ../../vasic-digital/&lt;Cap&gt;</code> directives
+repointed to flat lowercase siblings (e.g. <code>=&gt; ../config</code>,
+<code>=&gt; ../event_bus</code>, <code>=&gt; ../mcp_module</code>,
+<code>=&gt; ../vector_db</code>). Resolving paths exposed a missing toon
+go.sum entry → <code>go mod download</code>+<code>tidy</code> (1
+indirect require added). <code>go build ./...</code> → exit 0
+(LLM_BUILD_OK). Commit <code>72a1fdf</code>, pushed ff
+<code>32334d5..72a1fdf</code> (github+gitlab tips confirmed). ##
+helix_memory
+<code>digital.vasic.memory =&gt; ../../vasic-digital/Memory</code> →
+<code>=&gt; ../memory</code>. <code>go build ./...</code> → exit 0
+(MEMORY_BUILD_OK). Commit <code>a677adc</code>, pushed ff
+<code>5f1dcb6..a677adc</code>.</p>
+</body>
+</html>

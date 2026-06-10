@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f06-mcp-full-lifecycle-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f06-mcp-full-lifecycle-design</h1>
+</header>
+<h1 id="phase-1-feature-6-mcp-full-lifecycle-4-transports-oauth">Phase 1
+/ Feature 6 — MCP Full Lifecycle (4 Transports + OAuth)</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Status:</strong> Approved
+(brainstorming) <strong>Programme:</strong> CLI-Agent Fusion — Phase 1
+port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Add client-side Model Context Protocol (MCP) capability to HelixCode
+so it can connect to external MCP servers across four transports (stdio,
+HTTP, SSE, WebSocket) with full OAuth 2.0 support (RFC 8414
+Authorization Server discovery, PKCE, token refresh). External MCP
+servers’ tools become first-class agent tools alongside built-in
+tools.</p>
+<p>The existing server-side <code>internal/mcp/</code> package
+(HelixCode-as-MCP-server) is untouched.</p>
+<h2 id="architecture">2. Architecture</h2>
+<p>Extend <code>internal/mcp/</code> with client-side files alongside
+<code>server.go</code>. Reuse existing
+<code>MCPMessage</code>/<code>MCPError</code>/<code>Tool</code> JSON-RPC
+primitives (already exported from <code>server.go</code>). Client and
+server share the same package; role-prefixed file names keep them
+separable in review.</p>
+<p>A single <code>Transport</code> interface is the only seam transports
+plug in through. <code>Client</code> per server holds transport, state
+machine, and pending-RPC bookkeeping. <code>Manager</code> aggregates
+clients across configured servers and exposes them to
+<code>internal/tools/registry.go</code> as agent-callable tools.</p>
+<p>Configuration is YAML-first (project + user, project overrides). CLI
+mutation commands (<code>mcp add/remove</code>) round-trip the YAML so
+the file remains the single source of truth.</p>
+<p><strong>Boundary discipline:</strong> - Client code never imports
+anything from server-side beyond
+<code>MCPMessage</code>/<code>MCPError</code>/<code>Tool</code>. - No
+back-references from <code>server.go</code> into client code. - Adding a
+5th transport later is one file under the same <code>Transport</code>
+interface.</p>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files-in-internalmcp">3.1 New files in
+<code>internal/mcp/</code></h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transport.go</code></td>
+<td><code>Transport</code> interface, <code>TransportType</code> enum,
+<code>BackoffSchedule</code> helper</td>
+</tr>
+<tr>
+<td><code>transport_stdio.go</code></td>
+<td>Subprocess via <code>os/exec</code>; stdin/stdout newline-delimited
+JSON-RPC</td>
+</tr>
+<tr>
+<td><code>transport_stdio_unix.go</code></td>
+<td>Setpgid + SIGKILL(-pid) for process-group cleanup
+(<code>//go:build unix</code>)</td>
+</tr>
+<tr>
+<td><code>transport_stdio_windows.go</code></td>
+<td>Job-object cleanup via <code>golang.org/x/sys/windows</code>
+(<code>//go:build windows</code>)</td>
+</tr>
+<tr>
+<td><code>transport_http.go</code></td>
+<td>JSON-RPC over POST request/response; OAuth bearer header</td>
+</tr>
+<tr>
+<td><code>transport_sse.go</code></td>
+<td>POST out, SSE in; auto-reconnect with
+<code>BackoffSchedule</code></td>
+</tr>
+<tr>
+<td><code>transport_ws.go</code></td>
+<td>WebSocket via <code>gorilla/websocket</code> (already in deps)</td>
+</tr>
+<tr>
+<td><code>oauth.go</code></td>
+<td>RFC 8414 discovery, PKCE auth-code flow, token cache, refresh</td>
+</tr>
+<tr>
+<td><code>lifecycle.go</code></td>
+<td><code>Client</code> struct, state machine, handshake, RPC
+dispatch</td>
+</tr>
+<tr>
+<td><code>registry.go</code></td>
+<td><code>Manager</code> aggregating clients; tool merging;
+lifecycle</td>
+</tr>
+<tr>
+<td><code>config.go</code></td>
+<td>YAML loader/saver for <code>mcp.yml</code> (project + user)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="new-files-outside-internalmcp">3.2 New files outside
+<code>internal/mcp/</code></h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd/cli/mcp_cmd.go</code></td>
+<td>Cobra subcommands: <code>add</code>, <code>list</code>,
+<code>remove</code>, <code>test</code>, <code>auth</code>,
+<code>logs</code></td>
+</tr>
+<tr>
+<td><code>internal/commands/mcp_command.go</code></td>
+<td><code>/mcp</code> slash command for interactive CLI</td>
+</tr>
+</tbody>
+</table>
+<h3 id="modified-files">3.3 Modified files</h3>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/tools/registry.go</code></td>
+<td>On init/refresh, query <code>mcp.Manager.Tools()</code> and register
+each as a <code>Tool</code> with handler routing to
+<code>Manager.CallTool</code>; tool names prefixed
+<code>&lt;server&gt;:&lt;tool&gt;</code> to avoid collisions</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code></td>
+<td>Wire <code>mcp.Manager.Start(ctx)</code> into startup; register
+<code>mcp_cmd</code> cobra command</td>
+</tr>
+<tr>
+<td><code>internal/commands/builtin/register.go</code></td>
+<td>Register <code>/mcp</code> slash command (mirrors
+<code>/permissions</code>, <code>/worktree</code>,
+<code>/hooks</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="transport-interface">3.4 Transport interface</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Transport <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Open<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Send<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> msg <span class="op">*</span>MCPMessage<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Recv<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>MCPMessage<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="co">// blocks; io.EOF on clean close</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    Close<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Type<span class="op">()</span> TransportType</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TransportType <span class="dt">string</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    TransportStdio TransportType <span class="op">=</span> <span class="st">&quot;stdio&quot;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    TransportHTTP  TransportType <span class="op">=</span> <span class="st">&quot;http&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    TransportSSE   TransportType <span class="op">=</span> <span class="st">&quot;sse&quot;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    TransportWS    TransportType <span class="op">=</span> <span class="st">&quot;ws&quot;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p><code>BackoffSchedule</code>: exponential 1s → 2s → 4s → 8s → 16s →
+30s cap, ±20% jitter. Reset on successful handshake.</p>
+<h3 id="client-state-machine">3.5 Client state machine</h3>
+<pre><code>disconnected → connecting → initializing → ready
+       ↑                                     ↓
+       └────── reconnecting ←──── (transport error)
+       ↑                                     ↓
+       └─────────── closed (terminal) ←──────┘</code></pre>
+<p>State stored as <code>atomic.Int32</code> for cheap <code>/mcp</code>
+status reads.</p>
+<h3 id="manager-api">3.6 Manager API</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    clients <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Client</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    config  <span class="op">*</span>Config</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    mu      sync<span class="op">.</span>RWMutex</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Start<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Tools<span class="op">()</span> <span class="op">[]</span>ExternalTool</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CallTool<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> server<span class="op">,</span> tool <span class="dt">string</span><span class="op">,</span> args <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(*</span>CallResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Reload<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Status<span class="op">()</span> <span class="op">[]</span>ClientStatus</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Test<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Logs<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="op">[]</span>Event<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span></span></code></pre></div>
+<h3 id="yaml-schema">3.7 YAML schema</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">servers</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> brave-search</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">transport</span><span class="kw">:</span><span class="at"> stdio</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">command</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;npx&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;-y&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;@modelcontextprotocol/server-brave-search&quot;</span><span class="kw">]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">BRAVE_API_KEY</span><span class="kw">:</span><span class="at"> ${BRAVE_API_KEY}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">alwaysLoad</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> cloudflare</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">transport</span><span class="kw">:</span><span class="at"> sse</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">url</span><span class="kw">:</span><span class="at"> https://mcp.cloudflare.com/sse</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">oauth</span><span class="kw">:</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">alwaysLoad</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span></code></pre></div>
+<p><code>alwaysLoad: true</code> connects at startup.
+<code>alwaysLoad: false</code> lazy-connects on first tool call.</p>
+<h3 id="cli-surface">3.8 CLI surface</h3>
+<pre><code>helixcode mcp add &lt;name&gt; --transport=stdio --command=&quot;npx ...&quot;
+helixcode mcp add &lt;name&gt; --transport=sse --url=https://... [--oauth]
+helixcode mcp list                       # name, transport, status, tool count
+helixcode mcp remove &lt;name&gt;
+helixcode mcp test &lt;name&gt;                # connect → initialize → tools/list → close
+helixcode mcp auth &lt;name&gt;                # OAuth PKCE flow, persist token
+helixcode mcp logs &lt;name&gt;                # last 64KB stderr (stdio) + lifecycle events</code></pre>
+<p><code>/mcp</code> slash command: list current clients with state and
+tool count; supports <code>/mcp test &lt;name&gt;</code>,
+<code>/mcp logs &lt;name&gt;</code>, <code>/mcp reload</code>.</p>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup">4.1 Startup</h3>
+<pre><code>helixcode launch
+  └─ mcp.Manager.Start(ctx)
+       ├─ load YAML (user, then project overrides)
+       ├─ for each alwaysLoad=true server (parallel):
+       │    ├─ build Transport from config
+       │    └─ Client.Connect()
+       │         ├─ transport.Open
+       │         ├─ send initialize request
+       │         ├─ recv response, store capabilities
+       │         ├─ send notifications/initialized
+       │         ├─ send tools/list, store tools
+       │         └─ state = ready
+       └─ tools.Registry.Refresh() picks up Manager.Tools()</code></pre>
+<p>Lazy-load servers connect on first <code>CallTool</code>.</p>
+<h3 id="tool-invocation">4.2 Tool invocation</h3>
+<pre><code>agent picks &quot;brave-search:search&quot;
+  └─ tools.Registry → mcp.Manager.CallTool(&quot;brave-search&quot;, &quot;search&quot;, args)
+       ├─ if not ready → Connect (lazy) or wait for reconnect
+       ├─ assign rpc id, register pending channel
+       ├─ transport.Send(tools/call)
+       ├─ wait on pending channel (ctx-cancellable)
+       └─ return result.content / result.isError</code></pre>
+<p><code>ErrReconnect</code> returned if mid-reconnect; tool layer can
+retry.</p>
+<h3 id="reconnect-sse-ws">4.3 Reconnect (SSE / WS)</h3>
+<pre><code>Recv loop sees transport error
+  └─ state = reconnecting
+       ├─ fail all pending RPCs with ErrReconnect
+       └─ backoff loop:
+            ├─ wait BackoffSchedule.Next()
+            ├─ transport.Close, recreate
+            ├─ transport.Open
+            ├─ handshake (initialize → initialized → tools/list)
+            └─ state = ready, resume</code></pre>
+<h3 id="oauth-flow-mcp-auth-name">4.4 OAuth flow
+(<code>mcp auth &lt;name&gt;</code>)</h3>
+<pre><code>1. Read server config; require transport=http|sse, oauth.enabled
+2. oauth.Discover(ctx, baseURL) → AS metadata
+3. Generate PKCE verifier+challenge, state, port
+4. Spin one-shot http.Server on 127.0.0.1:&lt;port&gt;/callback
+5. Open browser to authorization_endpoint?...
+6. User authenticates; AS redirects to callback with code
+7. Exchange code at token_endpoint (with verifier)
+8. Persist tokens to ~/.config/helixcode/mcp/tokens/&lt;name&gt;.json (mode 0600)
+9. Tokens flow into transport via oauth2.TokenSource on next connect</code></pre>
+<p>On 401 mid-call: <code>oauth2.TokenSource</code> auto-refreshes;
+persist new token.</p>
+<h3 id="reload">4.5 Reload</h3>
+<p><code>Manager.Reload(ctx)</code>: - Re-read YAML, diff against
+current config. - Removed: <code>Client.Close()</code>, drop from map. -
+Added: build Client; Connect if alwaysLoad. - Changed: Close old, build
+new, Connect if alwaysLoad. - <code>tools.Registry.Refresh()</code>.</p>
+<h3 id="shutdown">4.6 Shutdown</h3>
+<p><code>Manager.Close()</code> calls <code>Client.Close()</code> for
+every client in parallel (10s timeout); each cancels backoff loop,
+closes transport, drops pending channels.</p>
+<h2 id="error-handling">5. Error handling</h2>
+<h3 id="error-taxonomy">5.1 Error taxonomy</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    ErrServerNotFound  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: server not found&quot;</span><span class="op">)</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    ErrNotReady        <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: client not ready&quot;</span><span class="op">)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    ErrReconnect       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: transport reconnecting&quot;</span><span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    ErrInitFailed      <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: initialize handshake failed&quot;</span><span class="op">)</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    ErrTransportClosed <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: transport closed&quot;</span><span class="op">)</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    ErrOAuthRequired   <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: oauth token missing or invalid; run &#39;helixcode mcp auth&#39;&quot;</span><span class="op">)</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    ErrToolNotFound    <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: tool not found on server&quot;</span><span class="op">)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    ErrProtocol        <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: protocol violation&quot;</span><span class="op">)</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    ErrTooManyPending  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;mcp: too many pending requests&quot;</span><span class="op">)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>JSON-RPC error responses (<code>MCPError</code>) are wrapped with
+<code>fmt.Errorf(&quot;mcp call %s: %w&quot;, method, err)</code> preserving
+code/message/data.</p>
+<h3 id="transport-specific-failure-modes">5.2 Transport-specific failure
+modes</h3>
+<ul>
+<li><strong>stdio</strong>: subprocess exits non-zero →
+state=disconnected; last 64KB stderr surfaced via <code>mcp logs</code>.
+SIGKILL on process group (Unix) or job object (Windows). No
+reconnect.</li>
+<li><strong>http</strong>: non-2xx → wrap as <code>MCPError</code>; 401
+→ <code>ErrOAuthRequired</code> if <code>oauth.enabled</code>, else
+<code>ErrProtocol</code>. No reconnect.</li>
+<li><strong>sse</strong>: stream EOF/error → reconnect loop. POST 4xx →
+<code>ErrProtocol</code>; 401 → token refresh + retry once.</li>
+<li><strong>ws</strong>: ping/pong timeout (30s) or close frame →
+reconnect. 401 handling matches SSE.</li>
+</ul>
+<h3 id="oauth-edge-cases">5.3 OAuth edge cases</h3>
+<ul>
+<li>Discovery missing → fall back to config-provided endpoints;
+otherwise <code>ErrOAuthRequired</code>.</li>
+<li>Token expired mid-call → auto-refresh; refresh failure →
+<code>ErrOAuthRequired</code>, mark disconnected.</li>
+<li>Headless <code>mcp auth</code> → print authorization URL; 5-min
+callback timeout; documented limitation.</li>
+<li>Token cache mode != 0600 → refuse to read; refuse to start
+client.</li>
+<li>Tokens never logged.</li>
+</ul>
+<h3 id="concurrency-invariants">5.4 Concurrency invariants</h3>
+<ul>
+<li>One <code>Recv</code> loop per client (single goroutine per
+transport).</li>
+<li><code>pending</code> map: <code>sync.Mutex</code>-guarded, channels
+buffered size 1.</li>
+<li><code>Manager.clients</code>: <code>sync.RWMutex</code>;
+<code>Tools()</code>/<code>CallTool</code> read lock;
+<code>Reload</code> write lock.</li>
+<li><code>Client.state</code>: <code>atomic.Int32</code>.</li>
+<li><code>BackoffSchedule.Next()</code>: monotonic; reset on successful
+handshake.</li>
+</ul>
+<h3 id="anti-bluff-const-035-article-xi-11.9">5.5 Anti-bluff (CONST-035,
+Article XI §11.9)</h3>
+<ul>
+<li><code>mcp test &lt;name&gt;</code> PASSes only on real connect →
+initialize → tools/list → close with non-empty server capabilities.</li>
+<li>Challenge spawns a real reference MCP server
+(<code>@modelcontextprotocol/server-everything</code> from npm),
+connects via stdio, calls a tool, verifies response. Pasted runtime
+evidence required.</li>
+<li>No transport returns PASS on metadata absence. SSE reconnect tests
+use a real test server that drops mid-stream.</li>
+<li>Anti-bluff smoke
+<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/mcp</code>
+must return empty.</li>
+</ul>
+<h3 id="resource-limits">5.6 Resource limits</h3>
+<ul>
+<li><code>pending</code> map cap: 1024 in-flight per client →
+<code>ErrTooManyPending</code>.</li>
+<li>Stdio stderr ring: 64KB, drops oldest.</li>
+<li>HTTP/SSE response body cap: 32MB.</li>
+<li>WebSocket message cap: 16MB.</li>
+</ul>
+<h3 id="logging">5.7 Logging</h3>
+<ul>
+<li>State transitions logged via existing
+<code>internal/logging</code>.</li>
+<li>JSON-RPC payloads at DEBUG only, with auth headers redacted.</li>
+<li>Lifecycle events emit on <code>onEvent</code> callback for
+<code>/mcp</code> and <code>mcp logs</code>.</li>
+</ul>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-tests-mocks-allowed">6.1 Unit tests (mocks allowed)</h3>
+<ul>
+<li><code>transport_test.go</code> — backoff sequence + jitter; type
+validation; JSON round-trip for client methods.</li>
+<li><code>transport_stdio_test.go</code> — fake subprocess via Go test
+helper; framing; stderr capture; SIGKILL on Close; exit-code
+surfacing.</li>
+<li><code>transport_http_test.go</code> — <code>httptest.Server</code>;
+request shape; auth header; 4xx → <code>ErrProtocol</code>; 401 →
+<code>ErrOAuthRequired</code>.</li>
+<li><code>transport_sse_test.go</code> — SSE parser handles multi-line
+<code>data:</code>, comments; reconnect after server closes
+mid-stream.</li>
+<li><code>transport_ws_test.go</code> — read/write pumps; ping timeout →
+reconnect; close frame.</li>
+<li><code>oauth_test.go</code> — discovery; PKCE verifier ≥43 chars +
+SHA256-base64url challenge; auth-code exchange; mode-0600 persistence;
+refresh on 401; refusal on bad mode.</li>
+<li><code>lifecycle_test.go</code> — fake <code>Transport</code>; state
+machine; pending cap; <code>ErrReconnect</code> during reconnect.</li>
+<li><code>registry_test.go</code> — fake clients; parallel Start; tool
+merging with name prefix; Reload diff; shutdown timeout.</li>
+<li><code>config_test.go</code> — YAML parse; project-overrides-user;
+env-var expansion; validation errors.</li>
+</ul>
+<h3 id="integration-tests--tagsintegration-real-subprocess-real-http">6.2
+Integration tests (<code>-tags=integration</code>, real subprocess +
+real HTTP)</h3>
+<ul>
+<li><code>tests/integration/mcp_stdio_test.go</code> — spawn
+<code>@modelcontextprotocol/server-everything</code> via npx; full
+Connect → tools/list → tools/call → Close; assert non-empty tools, real
+output.</li>
+<li><code>tests/integration/mcp_http_test.go</code> — small Go HTTP MCP
+server in-test; full handshake + tool call.</li>
+<li><code>tests/integration/mcp_sse_test.go</code> — Go MCP server with
+SSE; reconnect by tearing server mid-stream.</li>
+<li><code>tests/integration/mcp_ws_test.go</code> — WS variant.</li>
+<li><code>tests/integration/mcp_oauth_test.go</code> — local OAuth AS
+implementing RFC 8414 + PKCE; full flow + refresh.</li>
+</ul>
+<p>All <code>-tags=integration</code>-gated.
+<code>make test-integration-full</code> runs them. No bare
+<code>t.Skip()</code>.</p>
+<h3 id="challenge">6.3 Challenge</h3>
+<p><code>challenges/p1-f06-mcp-full-lifecycle/</code> (mirrors
+F02–F05):</p>
+<ol type="1">
+<li>Build <code>bin/helixcode</code>.</li>
+<li>Write <code>.helixcode/mcp.yml</code> with one stdio server
+(<code>@modelcontextprotocol/server-everything</code>).</li>
+<li><code>helixcode mcp test everything</code> → exit 0, “ready” + tool
+count &gt; 0.</li>
+<li><code>helixcode mcp list</code> → table includes the server.</li>
+<li>Trigger one tool call via agent loop → real response (no
+“simulated”, no “for now”).</li>
+<li>Anti-bluff smoke clean.</li>
+<li>Cross-compile to Windows (<code>GOOS=windows go build ./...</code>)
+— proves cross-platform stdio compiles.</li>
+</ol>
+<p>Pasted runtime evidence committed to
+<code>docs/improvements/06_phase_1_evidence.md</code> per Article XI
+§11.9.</p>
+<h3 id="cli-tests">6.4 CLI tests</h3>
+<ul>
+<li><code>cmd/cli/mcp_cmd_test.go</code> — cobra parsing:
+<code>add</code> writes YAML, <code>remove</code> mutates,
+<code>list</code> reads, <code>test</code> invokes
+<code>Manager.Test</code>, <code>auth</code> runs flow with mocked
+browser opener, <code>logs</code> reads ring buffer.</li>
+<li><code>internal/commands/mcp_command_test.go</code> —
+<code>/mcp</code> formatting; <code>/mcp reload</code> invokes
+<code>Manager.Reload</code>.</li>
+</ul>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p><code>shell_runner_unix.go</code> /
+<code>shell_runner_windows.go</code> pattern from F05 applied to stdio
+process-group control:</p>
+<ul>
+<li><code>transport_stdio_unix.go</code> — <code>Setpgid</code> +
+<code>syscall.Kill(-pid, SIGKILL)</code>
+(<code>//go:build unix</code>).</li>
+<li><code>transport_stdio_windows.go</code> — job objects via
+<code>golang.org/x/sys/windows</code>
+(<code>//go:build windows</code>).</li>
+</ul>
+<p>Each has a build tag and minimal platform-specific surface.
+Compile-tested on both platforms.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li><strong>Sampling</strong> (<code>sampling/createMessage</code>) —
+protocol exists; defer to F06.5 if needed.</li>
+<li><strong>Roots</strong> (<code>roots/list</code>) — publish working
+dir as the only root in initialize capabilities; full negotiation
+deferred.</li>
+<li><strong>Server-initiated tool calls</strong> — handlers wired but no
+agent surface yet.</li>
+<li><strong>HelixAgent submodule auto-discovery</strong> — registry of
+40+ MCP submodules under <code>helix_agent/MCP/submodules</code> not
+auto-loaded; users opt in via YAML.</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>CONST-033</strong> (no power management): stdio transport
+never invokes shutdown/reboot; <code>Close</code> only kills the process
+group it started.</li>
+<li><strong>CONST-035 / Article XI §11.9</strong> (anti-bluff): every
+PASS carries runtime evidence; challenge spawns a real MCP server and
+verifies real tool output.</li>
+<li><strong>CONST-036</strong> (LLMsVerifier single source of truth):
+MCP server lists are user-configured YAML and CLI-managed; this feature
+does not introduce a separate model registry. Tool capabilities flow
+from <code>tools/list</code> JSON-RPC responses, not hardcoded.</li>
+<li><strong>CONST-039</strong> (all-providers integration): MCP is
+orthogonal to LLM provider integration; this feature does not affect
+provider coverage.</li>
+<li><strong>CONST-042</strong> (no-secret-leak): OAuth tokens persisted
+at mode 0600 under <code>~/.config/helixcode/mcp/tokens/</code>;
+<code>.gitignore</code> updated; tokens never logged.</li>
+<li><strong>CONST-043</strong> (no-force-push): branch is
+<code>main</code>; commits pushed non-force to all four remotes per
+programme convention.</li>
+</ul>
+<h2 id="open-questions-resolved-during-brainstorming">10. Open questions
+resolved during brainstorming</h2>
+<table>
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: extend existing vs new sub-package vs scope down</td>
+<td>(A) Extend <code>internal/mcp/</code> with client-side files</td>
+</tr>
+<tr>
+<td>Q2: which transports + OAuth</td>
+<td>(A) All 4 transports + OAuth</td>
+</tr>
+<tr>
+<td>Q3: config source</td>
+<td>(C) YAML + CLI (YAML is source of truth, CLI round-trips)</td>
+</tr>
+<tr>
+<td>Q4: CLI surface</td>
+<td>(A) Full parity: <code>add</code>, <code>list</code>,
+<code>remove</code>, <code>test</code>, <code>auth</code>,
+<code>logs</code>, <code>/mcp</code> slash</td>
+</tr>
+<tr>
+<td>Q5: JSON-RPC + transport implementation</td>
+<td>(A) Hand-roll on stdlib + existing primitives, no new SDK</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

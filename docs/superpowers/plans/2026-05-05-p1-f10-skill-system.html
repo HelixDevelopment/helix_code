@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f10-skill-system</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f10-skill-system</h1>
+</header>
+<h1 id="p1-f10-skill-system-implementation-plan">P1-F10 — Skill System
+Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Add agent-invoked Skills
+(<code>.helix/skills/*.md</code> with frontmatter
+<code>description/triggers/variables/requires_isolation</code>).
+Auto-invocation: agent loop checks user input against compiled trigger
+regexes, first match wins; rendered body injected as system message.
+Skills with <code>requires_isolation: true</code> run in F04 worktree.
+Surfaces: <code>/skills</code> slash + <code>helixcode skills</code>
+cobra.</p>
+<p><strong>Architecture:</strong> New
+<code>internal/commands/markdown_skills.go</code> (same package as F09 —
+reuses substRegex/tokenResolver). New <code>Skill</code> type,
+<code>SkillRegistry</code> (with <code>FindMatching</code>),
+<code>SkillLoader</code> (mirrors F09 MarkdownLoader). New
+<code>internal/agent/skill_dispatcher.go</code> with
+<code>Match(input) → (skill, captures, ok)</code>. Hot-reload via
+fsnotify (extend or sibling F09 watcher). Isolation routes through F04’s
+<code>worktree.WorktreeManager</code>.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11,
+gopkg.in/yaml.v3, fsnotify, cobra, zap. <strong>No new external
+deps.</strong></p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-05-p1-f10-skill-system-design.md</code>
+(commit <code>5b80058</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/commands/markdown_skills.go internal/commands/skills_watcher.go <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  internal/commands/skills_command.go cmd/cli/skills_cmd.go <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  internal/agent/skill_dispatcher.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>P1-F10-T01 — bootstrap evidence +
+advance PROGRESS</label></li>
+<li><label><input type="checkbox"></input>P1-F10-T02 — markdown_skills.go:
+Skill + SkillRegistry + parser + Render (TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F10-T03 — SkillLoader: scan dirs
++ register/unregister (TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F10-T04 — skills_watcher.go:
+fsnotify + debounce (TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F10-T05 —
+agent/skill_dispatcher.go: Match + injection + isolation routing
+(TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F10-T06 — /skills slash +
+helixcode skills cobra (TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F10-T07 — main.go startup wiring
++ integration test (real fs, real triggers)</label></li>
+<li><label><input type="checkbox"></input>P1-F10-T08 — Challenge with runtime
+evidence + cross-compile check</label></li>
+<li><label><input type="checkbox"></input>P1-F10-T09 — Feature 10 close-out +
+push to 4 remotes</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap-evidence-advance-progress">Task 1: Bootstrap
+evidence + advance PROGRESS</h2>
+<p>Append F10 evidence section header (spec <code>5b80058</code>, plan
+<code>&lt;this commit&gt;</code>, started 2026-05-05, status active).
+Replace current focus to F10. Insert F10 task list block (9 items) after
+F09 block (all 8 ticked). Commit
+<code>docs(P1-F10-T01): bootstrap Phase 1 / Feature 10 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-markdown_skills.go-skill-skillregistry-parser-render-tdd">Task
+2: markdown_skills.go — Skill + SkillRegistry + parser + Render
+(TDD)</h2>
+<p><strong>Files:</strong> create
+<code>helix_code/internal/commands/markdown_skills.go</code>,
+<code>helix_code/internal/commands/markdown_skills_test.go</code>.</p>
+<p>Test cases (write FAILING first):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParseSkillFile_Valid<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> <span class="st">`---</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">description: Refactor a React component</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">triggers:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">  - &quot;(?i)^refactor (.+) component$&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">  - &quot;(?i)^extract hook from (.+)&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="st">variables:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="st">  default_style: functional</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="st">requires_isolation: false</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="st">---</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="st">You are refactoring {{ARG1}}.`</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    skill<span class="op">,</span> err <span class="op">:=</span> parseSkillFile<span class="op">(</span><span class="st">&quot;refactor-button&quot;</span><span class="op">,</span> body<span class="op">,</span> <span class="st">&quot;/tmp/skill.md&quot;</span><span class="op">)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;refactor-button&quot;</span><span class="op">,</span> skill<span class="op">.</span>Name<span class="op">())</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Refactor a React component&quot;</span><span class="op">,</span> skill<span class="op">.</span>Description<span class="op">())</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> skill<span class="op">.</span>triggers<span class="op">,</span> <span class="dv">2</span><span class="op">)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> skill<span class="op">.</span>RequiresIsolation<span class="op">())</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> skill<span class="op">.</span>body<span class="op">,</span> <span class="st">&quot;You are refactoring&quot;</span><span class="op">)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParseSkillFile_BadRegexSkipped<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> <span class="st">`---</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="st">description: bad regex skill</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="st">triggers:</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="st">  - &quot;[unclosed&quot;</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="st">---</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="st">body`</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    skill<span class="op">,</span> err <span class="op">:=</span> parseSkillFile<span class="op">(</span><span class="st">&quot;bad&quot;</span><span class="op">,</span> body<span class="op">,</span> <span class="st">&quot;/tmp/bad.md&quot;</span><span class="op">)</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Bad regex is logged + skipped; skill still loads with valid triggers (here zero).</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> skill<span class="op">.</span>triggers<span class="op">)</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSkill_Render_PositionalFromCapture<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> <span class="st">`---</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="st">description: x</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="st">triggers:</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="st">  - &quot;^refactor (.+) component$&quot;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="st">---</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="st">Got: {{ARG1}}`</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    skill<span class="op">,</span> err <span class="op">:=</span> parseSkillFile<span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">,</span> <span class="st">&quot;/tmp/x.md&quot;</span><span class="op">)</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> skill<span class="op">.</span>Render<span class="op">([]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;LoginButton&quot;</span><span class="op">},</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Got: LoginButton&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSkill_Render_NamedCapture<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> <span class="st">`---</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="st">description: x</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="st">triggers:</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="st">  - &quot;(?P&lt;component&gt;[A-Z][A-Za-z0-9]+) refactor&quot;</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="st">variables:</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="st">  default_style: functional</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="st">---</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="st">Component: {{ARG.component}}, Style: {{ARG.default_style}}`</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    skill<span class="op">,</span> err <span class="op">:=</span> parseSkillFile<span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">,</span> <span class="st">&quot;/tmp/x.md&quot;</span><span class="op">)</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>    <span class="co">// captures supplied directly (the dispatcher does the regex extraction)</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    captures <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;component&quot;</span><span class="op">:</span> <span class="st">&quot;MyButton&quot;</span><span class="op">}</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> skill<span class="op">.</span>RenderWithCaptures<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> captures<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;Component: MyButton&quot;</span><span class="op">)</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;Style: functional&quot;</span><span class="op">)</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSkillRegistry_FindMatching_FirstWins<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewSkillRegistry<span class="op">()</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    s1<span class="op">,</span> _ <span class="op">:=</span> parseSkillFile<span class="op">(</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="st">&quot;---</span><span class="ch">\n</span><span class="st">triggers:</span><span class="ch">\n</span><span class="st">  - </span><span class="ch">\&quot;</span><span class="st">^foo</span><span class="ch">\&quot;\n</span><span class="st">---</span><span class="ch">\n</span><span class="st">A&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    s2<span class="op">,</span> _ <span class="op">:=</span> parseSkillFile<span class="op">(</span><span class="st">&quot;b&quot;</span><span class="op">,</span> <span class="st">&quot;---</span><span class="ch">\n</span><span class="st">triggers:</span><span class="ch">\n</span><span class="st">  - </span><span class="ch">\&quot;</span><span class="st">^foo</span><span class="ch">\&quot;\n</span><span class="st">---</span><span class="ch">\n</span><span class="st">B&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    reg<span class="op">.</span>Add<span class="op">(</span>s1<span class="op">)</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    reg<span class="op">.</span>Add<span class="op">(</span>s2<span class="op">)</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>    matched<span class="op">,</span> _<span class="op">,</span> ok <span class="op">:=</span> reg<span class="op">.</span>FindMatching<span class="op">(</span><span class="st">&quot;foobar&quot;</span><span class="op">)</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>    <span class="co">// First-registered (sorted by name) wins → &quot;a&quot;</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;a&quot;</span><span class="op">,</span> matched<span class="op">.</span>Name<span class="op">())</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSkillRegistry_FindMatching_NamedCaptures<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewSkillRegistry<span class="op">()</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> _ <span class="op">:=</span> parseSkillFile<span class="op">(</span><span class="st">&quot;rc&quot;</span><span class="op">,</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;---</span><span class="ch">\n</span><span class="st">triggers:</span><span class="ch">\n</span><span class="st">  - </span><span class="ch">\&quot;</span><span class="st">refactor (?P&lt;comp&gt;[A-Z][A-Za-z]+) component</span><span class="ch">\&quot;\n</span><span class="st">---</span><span class="ch">\n</span><span class="st">body {{ARG.comp}}&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>    reg<span class="op">.</span>Add<span class="op">(</span>s<span class="op">)</span></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>    matched<span class="op">,</span> captures<span class="op">,</span> ok <span class="op">:=</span> reg<span class="op">.</span>FindMatching<span class="op">(</span><span class="st">&quot;please refactor LoginButton component now&quot;</span><span class="op">)</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;rc&quot;</span><span class="op">,</span> matched<span class="op">.</span>Name<span class="op">())</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;LoginButton&quot;</span><span class="op">,</span> captures<span class="op">[</span><span class="st">&quot;comp&quot;</span><span class="op">])</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSkillRegistry_AddRemove<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewSkillRegistry<span class="op">()</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> _ <span class="op">:=</span> parseSkillFile<span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">,</span> <span class="st">&quot;---</span><span class="ch">\n</span><span class="st">triggers:</span><span class="ch">\n</span><span class="st">  - </span><span class="ch">\&quot;</span><span class="st">^x</span><span class="ch">\&quot;\n</span><span class="st">---</span><span class="ch">\n</span><span class="st">body&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>    reg<span class="op">.</span>Add<span class="op">(</span>s<span class="op">)</span></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">:=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">)</span></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>    reg<span class="op">.</span>Remove<span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">)</span></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;x&quot;</span><span class="op">)</span></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Implementation (uses F09’s <code>substRegex</code>,
+<code>tokenResolver</code> indirectly via a Skill-specific render):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> commands</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;regexp&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;sort&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;sync&quot;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;gopkg.in/yaml.v3&quot;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Skill <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    name              <span class="dt">string</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    description       <span class="dt">string</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    body              <span class="dt">string</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    variables         <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    triggerPatterns   <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    triggers          <span class="op">[]*</span>regexp<span class="op">.</span>Regexp</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    requiresIsolation <span class="dt">bool</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    sourcePath        <span class="dt">string</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> skillFrontmatter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    Description       <span class="dt">string</span>            <span class="st">`yaml:&quot;description&quot;`</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    Triggers          <span class="op">[]</span><span class="dt">string</span>          <span class="st">`yaml:&quot;triggers&quot;`</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    Variables         <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`yaml:&quot;variables&quot;`</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    RequiresIsolation <span class="dt">bool</span>              <span class="st">`yaml:&quot;requires_isolation&quot;`</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>                  <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>name <span class="op">}</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>           <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>description <span class="op">}</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> SourcePath<span class="op">()</span> <span class="dt">string</span>            <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>sourcePath <span class="op">}</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> RequiresIsolation<span class="op">()</span> <span class="dt">bool</span>       <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>requiresIsolation <span class="op">}</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> Body<span class="op">()</span> <span class="dt">string</span>                  <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>body <span class="op">}</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">// parseSkillFile parses a Markdown file (with required frontmatter) into a Skill.</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">// Bad regex patterns are logged and skipped; the skill loads with the remaining</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">// valid triggers.</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> parseSkillFile<span class="op">(</span>name<span class="op">,</span> raw<span class="op">,</span> sourcePath <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Skill<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>Skill<span class="op">{</span>name<span class="op">:</span> name<span class="op">,</span> sourcePath<span class="op">:</span> sourcePath<span class="op">,</span> variables<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}}</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> raw</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>raw<span class="op">,</span> <span class="st">&quot;---</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        end <span class="op">:=</span> strings<span class="op">.</span>Index<span class="op">(</span>raw<span class="op">[</span><span class="dv">4</span><span class="op">:],</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">---&quot;</span><span class="op">)</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> end <span class="op">==</span> <span class="op">-</span><span class="dv">1</span> <span class="op">{</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;skill %s: unterminated frontmatter&quot;</span><span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>        fm <span class="op">:=</span> raw<span class="op">[</span><span class="dv">4</span> <span class="op">:</span> <span class="dv">4</span><span class="op">+</span>end<span class="op">]</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>        body <span class="op">=</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>raw<span class="op">[</span><span class="dv">4</span><span class="op">+</span>end<span class="op">+</span><span class="dv">4</span><span class="op">:],</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> meta skillFrontmatter</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> yaml<span class="op">.</span>Unmarshal<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>fm<span class="op">),</span> <span class="op">&amp;</span>meta<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;skill %s: parse frontmatter: %w&quot;</span><span class="op">,</span> name<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>        s<span class="op">.</span>description <span class="op">=</span> meta<span class="op">.</span>Description</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>        s<span class="op">.</span>triggerPatterns <span class="op">=</span> meta<span class="op">.</span>Triggers</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>        s<span class="op">.</span>requiresIsolation <span class="op">=</span> meta<span class="op">.</span>RequiresIsolation</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> meta<span class="op">.</span>Variables <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>            s<span class="op">.</span>variables <span class="op">=</span> meta<span class="op">.</span>Variables</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> p <span class="op">:=</span> <span class="kw">range</span> meta<span class="op">.</span>Triggers <span class="op">{</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>            re<span class="op">,</span> err <span class="op">:=</span> regexp<span class="op">.</span>Compile<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span> <span class="co">// bad regex skipped (logged at loader level)</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>            s<span class="op">.</span>triggers <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>s<span class="op">.</span>triggers<span class="op">,</span> re<span class="op">)</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>    s<span class="op">.</span>body <span class="op">=</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span>body<span class="op">)</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a><span class="co">// Render fills the body using positional args + Skill.variables.</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> Render<span class="op">(</span>args <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> selection<span class="op">,</span> currentFile <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>    cc <span class="op">:=</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> args<span class="op">,</span> Selection<span class="op">:</span> selection<span class="op">,</span> CurrentFile<span class="op">:</span> currentFile<span class="op">}</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> s<span class="op">.</span>name<span class="op">,</span> body<span class="op">:</span> s<span class="op">.</span>body<span class="op">,</span> variables<span class="op">:</span> s<span class="op">.</span>variables<span class="op">}).</span>render<span class="op">(</span>cc<span class="op">)</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="co">// RenderWithCaptures renders with named captures (override variables map).</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> RenderWithCaptures<span class="op">(</span>args <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> captures <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> selection<span class="op">,</span> currentFile <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    merged <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>s<span class="op">.</span>variables<span class="op">)+</span><span class="bu">len</span><span class="op">(</span>captures<span class="op">))</span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k<span class="op">,</span> v <span class="op">:=</span> <span class="kw">range</span> s<span class="op">.</span>variables <span class="op">{</span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>        merged<span class="op">[</span>k<span class="op">]</span> <span class="op">=</span> v</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k<span class="op">,</span> v <span class="op">:=</span> <span class="kw">range</span> captures <span class="op">{</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>        merged<span class="op">[</span>k<span class="op">]</span> <span class="op">=</span> v</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>    cc <span class="op">:=</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> args<span class="op">,</span> Selection<span class="op">:</span> selection<span class="op">,</span> CurrentFile<span class="op">:</span> currentFile<span class="op">}</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> s<span class="op">.</span>name<span class="op">,</span> body<span class="op">:</span> s<span class="op">.</span>body<span class="op">,</span> variables<span class="op">:</span> merged<span class="op">}).</span>render<span class="op">(</span>cc<span class="op">)</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a><span class="co">// SkillRegistry stores skills and matches user input to triggers.</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SkillRegistry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>    mu     sync<span class="op">.</span>RWMutex</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>    skills <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Skill</span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSkillRegistry<span class="op">()</span> <span class="op">*</span>SkillRegistry <span class="op">{</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>SkillRegistry<span class="op">{</span>skills<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Skill<span class="op">{}}</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> Add<span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>skills<span class="op">[</span>s<span class="op">.</span>Name<span class="op">()]</span> <span class="op">=</span> s</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> Remove<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>    <span class="bu">delete</span><span class="op">(</span>r<span class="op">.</span>skills<span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> Get<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Skill<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>RLock<span class="op">()</span></span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>RUnlock<span class="op">()</span></span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> ok <span class="op">:=</span> r<span class="op">.</span>skills<span class="op">[</span>name<span class="op">]</span></span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">,</span> ok</span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> List<span class="op">()</span> <span class="op">[]*</span>Skill <span class="op">{</span></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>RLock<span class="op">()</span></span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>RUnlock<span class="op">()</span></span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a>    names <span class="op">:=</span> <span class="bu">make</span><span class="op">([]</span><span class="dt">string</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>r<span class="op">.</span>skills<span class="op">))</span></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> n <span class="op">:=</span> <span class="kw">range</span> r<span class="op">.</span>skills <span class="op">{</span></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a>        names <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>names<span class="op">,</span> n<span class="op">)</span></span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>    sort<span class="op">.</span>Strings<span class="op">(</span>names<span class="op">)</span></span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> <span class="bu">make</span><span class="op">([]*</span>Skill<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>names<span class="op">))</span></span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> n <span class="op">:=</span> <span class="kw">range</span> names <span class="op">{</span></span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>out<span class="op">,</span> r<span class="op">.</span>skills<span class="op">[</span>n<span class="op">])</span></span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out</span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a><span class="co">// FindMatching returns the first skill (lex-sorted by name) whose trigger</span></span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a><span class="co">// regex matches input, plus the named-capture groups extracted from the</span></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a><span class="co">// match. Positional capture groups (numbered 1..N) become args at indexes 1-N.</span></span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> FindMatching<span class="op">(</span>input <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Skill<span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>RLock<span class="op">()</span></span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>RUnlock<span class="op">()</span></span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a>    names <span class="op">:=</span> <span class="bu">make</span><span class="op">([]</span><span class="dt">string</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>r<span class="op">.</span>skills<span class="op">))</span></span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> n <span class="op">:=</span> <span class="kw">range</span> r<span class="op">.</span>skills <span class="op">{</span></span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a>        names <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>names<span class="op">,</span> n<span class="op">)</span></span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a>    sort<span class="op">.</span>Strings<span class="op">(</span>names<span class="op">)</span></span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> n <span class="op">:=</span> <span class="kw">range</span> names <span class="op">{</span></span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a>        s <span class="op">:=</span> r<span class="op">.</span>skills<span class="op">[</span>n<span class="op">]</span></span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> re <span class="op">:=</span> <span class="kw">range</span> s<span class="op">.</span>triggers <span class="op">{</span></span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a>            m <span class="op">:=</span> re<span class="op">.</span>FindStringSubmatch<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> m <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a>            caps <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}</span></span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i<span class="op">,</span> name <span class="op">:=</span> <span class="kw">range</span> re<span class="op">.</span>SubexpNames<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> name <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">||</span> i <span class="op">&gt;=</span> <span class="bu">len</span><span class="op">(</span>m<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a>                caps<span class="op">[</span>name<span class="op">]</span> <span class="op">=</span> m<span class="op">[</span>i<span class="op">]</span></span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> s<span class="op">,</span> caps<span class="op">,</span> <span class="ot">true</span></span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> <span class="ot">false</span></span>
+<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Run TDD cycle. Subject:
+<code>feat(P1-F10-T02): Skill + SkillRegistry + parser + Render</code>.</p>
+<hr />
+<h2 id="task-3-skillloader-scan-dirs-registerunregister-tdd">Task 3:
+SkillLoader — scan dirs + register/unregister (TDD)</h2>
+<p>Mirror F09’s <code>MarkdownLoader</code> pattern. Tests:
+<code>LoadProjectAndUser</code> (project overrides user),
+<code>ReloadDiff</code> (added/removed/updated),
+<code>BadFrontmatterSkipped</code>, <code>NonExistentDirsSkipped</code>,
+<code>Loaded</code> snapshot. Implementation appended to
+<code>markdown_skills.go</code>. Subject:
+<code>feat(P1-F10-T03): SkillLoader scans .helix/skills dirs and registers/unregisters</code>.</p>
+<hr />
+<h2 id="task-4-skills_watcher.go-fsnotify-debounce-tdd">Task 4:
+skills_watcher.go — fsnotify + debounce (TDD)</h2>
+<p>Mirror F09’s <code>MarkdownWatcher</code> pattern. Implementation in
+<code>internal/commands/skills_watcher.go</code>. Tests:
+<code>DebouncesAndReloads</code>, <code>StopsOnContextCancel</code>,
+<code>HandlesMissingDirGracefully</code>. Subject:
+<code>feat(P1-F10-T04): skills_watcher.go fsnotify + debounced reload</code>.</p>
+<hr />
+<h2 id="task-5-agentskill_dispatcher.go-match-injection-isolation-routing-tdd">Task
+5: agent/skill_dispatcher.go — Match + injection + isolation routing
+(TDD)</h2>
+<p><strong>Files:</strong> create
+<code>helix_code/internal/agent/skill_dispatcher.go</code>,
+<code>helix_code/internal/agent/skill_dispatcher_test.go</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> agent</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;dev.helix.code/internal/commands&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;dev.helix.code/internal/tools/worktree&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">// SkillDispatcher routes user input to skills via trigger matching.</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SkillDispatcher <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    registry <span class="op">*</span>commands<span class="op">.</span>SkillRegistry</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    wtMgr    <span class="op">*</span>worktree<span class="op">.</span>Manager <span class="co">// optional; nil disables isolation</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSkillDispatcher<span class="op">(</span>reg <span class="op">*</span>commands<span class="op">.</span>SkillRegistry<span class="op">,</span> wtMgr <span class="op">*</span>worktree<span class="op">.</span>Manager<span class="op">)</span> <span class="op">*</span>SkillDispatcher <span class="op">{</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>SkillDispatcher<span class="op">{</span>registry<span class="op">:</span> reg<span class="op">,</span> wtMgr<span class="op">:</span> wtMgr<span class="op">}</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">// Match looks up a skill matching the user input. Returns the rendered system</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">// message to inject (empty if no match), whether isolation is required, and</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">// the matched skill (nil on no match).</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>d <span class="op">*</span>SkillDispatcher<span class="op">)</span> Match<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> input<span class="op">,</span> selection<span class="op">,</span> currentFile <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>rendered <span class="dt">string</span><span class="op">,</span> matched <span class="op">*</span>commands<span class="op">.</span>Skill<span class="op">,</span> captures <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> ok <span class="dt">bool</span><span class="op">,</span> err <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> d<span class="op">.</span>registry <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    skill<span class="op">,</span> caps<span class="op">,</span> found <span class="op">:=</span> d<span class="op">.</span>registry<span class="op">.</span>FindMatching<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>found <span class="op">{</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> rerr <span class="op">:=</span> skill<span class="op">.</span>RenderWithCaptures<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> caps<span class="op">,</span> selection<span class="op">,</span> currentFile<span class="op">)</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> rerr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;&quot;</span><span class="op">,</span> skill<span class="op">,</span> caps<span class="op">,</span> <span class="ot">false</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;skill %s render: %w&quot;</span><span class="op">,</span> skill<span class="op">.</span>Name<span class="op">(),</span> rerr<span class="op">)</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out<span class="op">,</span> skill<span class="op">,</span> caps<span class="op">,</span> <span class="ot">true</span><span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Tests: - <code>TestSkillDispatcher_Match_Injects</code> — registry
+with a real skill, Match returns the rendered body with captures
+substituted. - <code>TestSkillDispatcher_NoMatch</code> — registry but
+input doesn’t match → <code>ok=false</code>, empty rendered. -
+<code>TestSkillDispatcher_RegistryNil</code> — <code>ok=false</code>, no
+error. -
+<code>TestSkillDispatcher_RequiresIsolation_FlaggedInResult</code> —
+assert returned skill exposes <code>RequiresIsolation()</code> so caller
+can route to worktree.</p>
+<p>Subject:
+<code>feat(P1-F10-T05): agent/skill_dispatcher.go Match + capture extraction</code>.</p>
+<hr />
+<h2 id="task-6-skills-slash-helixcode-skills-cobra-tdd">Task 6: /skills
+slash + helixcode skills cobra (TDD)</h2>
+<p>Files: <code>internal/commands/skills_command.go</code>,
+<code>cmd/cli/skills_cmd.go</code>, plus <code>_test.go</code> siblings
++ <code>internal/commands/builtin/skills_register_test.go</code>.</p>
+<p><code>/skills</code>: list / show / invoke / reload / unknown.
+<code>helixcode skills</code>: list / show / invoke / reload.</p>
+<p><code>invoke</code> runs the skill explicitly (bypassing trigger
+matching) —
+<code>cmd.Execute(ctx, &amp;CommandContext{Args: args})</code>. Mirror
+F09’s pattern exactly.</p>
+<p>Subject:
+<code>feat(P1-F10-T06): /skills slash + helixcode skills cobra</code>.</p>
+<hr />
+<h2 id="task-7-cmdclimain.go-startup-wiring-integration-test">Task 7:
+cmd/cli/main.go startup wiring + integration test</h2>
+<p>Add to main.go after F09 wiring:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// F10: Skills</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>skillReg <span class="op">:=</span> commands<span class="op">.</span>NewSkillRegistry<span class="op">()</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>skillProjectDir <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span><span class="st">&quot;.&quot;</span><span class="op">,</span> <span class="st">&quot;.helix&quot;</span><span class="op">,</span> <span class="st">&quot;skills&quot;</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> skillUserDir <span class="dt">string</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> userCfg<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>UserConfigDir<span class="op">();</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    skillUserDir <span class="op">=</span> filepath<span class="op">.</span>Join<span class="op">(</span>userCfg<span class="op">,</span> <span class="st">&quot;helixcode&quot;</span><span class="op">,</span> <span class="st">&quot;skills&quot;</span><span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>skillLoader <span class="op">:=</span> commands<span class="op">.</span>NewSkillLoader<span class="op">(</span>skillReg<span class="op">,</span> skillProjectDir<span class="op">,</span> skillUserDir<span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> logger <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> skillLoader<span class="op">.</span>SetLogger<span class="op">(</span>logger<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">:=</span> skillLoader<span class="op">.</span>Load<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;skills: load failed: %v&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> w<span class="op">,</span> err <span class="op">:=</span> commands<span class="op">.</span>NewSkillsWatcher<span class="op">(</span>skillLoader<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span>skillProjectDir<span class="op">,</span> skillUserDir<span class="op">});</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> logger <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> w<span class="op">.</span>SetLogger<span class="op">(</span>logger<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> w<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> w<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>skillDispatcher <span class="op">:=</span> agent<span class="op">.</span>NewSkillDispatcher<span class="op">(</span>skillReg<span class="op">,</span> worktreeMgr<span class="op">)</span> <span class="co">// worktreeMgr from F04</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">// pass skillDispatcher to baseAgent (existing wiring point)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">:=</span> cmdRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewSkillsCommand<span class="op">(</span>skillLoader<span class="op">,</span> skillReg<span class="op">));</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;skills: register slash failed: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Cobra dispatcher block (mirrors F09’s pattern, keyed on
+<code>os.Args[1] == &quot;skills&quot;</code>).</p>
+<p>Integration test <code>tests/integration/skills_test.go</code>
+(<code>//go:build integration</code>): -
+<code>TestSkills_LoadAndAutoMatch</code> — write
+<code>.helix/skills/refactor.md</code> with trigger
+<code>^refactor (.+) component$</code>; FindMatching(“refactor
+LoginButton component”) returns skill + capture
+<code>LoginButton</code>; Render produces body containing
+<code>LoginButton</code>. -
+<code>TestSkills_RequiresIsolation_FlagPresent</code> — confirm
+<code>RequiresIsolation()=true</code> skill is exposed correctly to
+caller.</p>
+<p>Subject:
+<code>feat(P1-F10-T07): wire skills loader + watcher + dispatcher into main.go + integration test</code>.</p>
+<hr />
+<h2 id="task-8-challenge-with-runtime-evidence-cross-compile-check">Task
+8: Challenge with runtime evidence + cross-compile check</h2>
+<p>Harness <code>tests/integration/cmd/p1f10_challenge/main.go</code>:
+1. Create tempdir <code>.helix/skills/refactor.md</code> with
+frontmatter
+<code>triggers: [&quot;^refactor (?P&lt;comp&gt;[A-Z][A-Za-z]+) component$&quot;]</code>,
+body <code>Refactoring {{ARG.comp}}</code> 2. Construct registry +
+loader + dispatcher 3. Call
+<code>dispatcher.Match(&quot;refactor LoginButton component&quot;)</code> → assert
+match, capture group <code>comp=LoginButton</code>, rendered body
+<code>Refactoring LoginButton</code> 4. Mutate file: change body to
+<code>Now: {{ARG.comp}}</code>, reload, re-match, assert new body 5.
+Anti-bluff smoke clean 6. Cross-compile linux clean</p>
+<p>run.sh + CHALLENGE.md in <code>challenges/p1-f10-skills/</code>. Dual
+commit (submodule + meta-repo). Append verbatim run log to
+<code>06_phase_1_evidence.md</code>.</p>
+<p>Subject:
+<code>feat(P1-F10-T08): challenge with runtime evidence + cross-compile check</code>.</p>
+<hr />
+<h2 id="task-9-feature-10-close-out-push-to-4-remotes">Task 9: Feature
+10 close-out + push to 4 remotes</h2>
+<p>Tick 9 task items. Advance PROGRESS to idle (F11 candidate). Final
+unit + integration + smoke + cross-compile + go vet + challenge re-run.
+Commit
+<code>chore(P1-F10-T09): Feature 10 (Skill System) close-out</code>.
+Push origin/github/gitlab/upstream non-force.</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li>Spec coverage: all 10 spec sections mapped to tasks (T02
+types/render, T03 loader, T04 watcher, T05 dispatcher/isolation, T06
+surfaces, T07 wiring, T08 challenge, T09 close-out).</li>
+<li>Type consistency: <code>Skill</code>, <code>SkillRegistry</code>,
+<code>SkillLoader</code>, <code>SkillsWatcher</code>,
+<code>SkillDispatcher</code>, <code>parseSkillFile</code>,
+<code>FindMatching</code>, <code>RequiresIsolation</code> consistent
+across tasks.</li>
+<li>Cross-platform: pure Go; fsnotify cross-platform.</li>
+<li>Anti-bluff: full 4-term smoke + Challenge captures real Match →
+Render output.</li>
+<li>No new external deps.</li>
+<li>Branch + push: stays on <code>main</code>, non-force to all four
+remotes.</li>
+</ol>
+</body>
+</html>

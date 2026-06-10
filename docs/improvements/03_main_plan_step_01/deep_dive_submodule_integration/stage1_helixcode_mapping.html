@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage1_helixcode_mapping</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage1_helixcode_mapping</h1>
+</header>
+<h1 id="helixcode-repository---stage-1-complete-mapping-report">HelixCode
+Repository - Stage 1 Complete Mapping Report</h1>
+<p><strong>Generated:</strong> 2026-05-04<br />
+<strong>Repository:</strong>
+https://github.com/HelixDevelopment/HelixCode.git<br />
+<strong>Mapping Method:</strong> GitHub API (git clone failed due to
+HTTP/2 framing layer network errors)<br />
+<strong>Branch:</strong> main</p>
+<hr />
+<h2 id="clone-status">1. CLONE STATUS</h2>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attempt</th>
+<th>Method</th>
+<th>Result</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>HTTPS full clone</td>
+<td>FAILED</td>
+<td><code>fatal: write error: Input/output error</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>HTTPS shallow clone</td>
+<td>FAILED</td>
+<td>Same I/O error</td>
+</tr>
+<tr>
+<td>3</td>
+<td>HTTP/1.1 forced</td>
+<td>FAILED</td>
+<td><code>curl 16 Error in the HTTP2 framing layer</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>SSH</td>
+<td>NOT ATTEMPTED</td>
+<td>No SSH key configured in environment</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resolution:</strong> Complete repository mapping achieved via
+GitHub REST API (<code>api.github.com</code>) and raw content access
+(<code>raw.githubusercontent.com</code>). All submodule and directory
+data successfully extracted.</p>
+<hr />
+<h2 id="repository-overview">2. REPOSITORY OVERVIEW</h2>
+<table>
+<colgroup>
+<col style="width: 58%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Primary Language</strong></td>
+<td>Go</td>
+</tr>
+<tr>
+<td><strong>Go Module</strong></td>
+<td><code>dev.helix.code</code></td>
+</tr>
+<tr>
+<td><strong>Go Version</strong></td>
+<td><code>1.25.2</code></td>
+</tr>
+<tr>
+<td><strong>Root Items</strong></td>
+<td>162 (mix of files and directories)</td>
+</tr>
+<tr>
+<td><strong>Total Submodules Declared</strong></td>
+<td>87</td>
+</tr>
+<tr>
+<td><strong>Submodule Protocol</strong></td>
+<td>85 SSH (<code>git@github.com</code>), 2 org-specific SSH</td>
+</tr>
+<tr>
+<td><strong>Docker Support</strong></td>
+<td>Yes (Dockerfile + docker-compose + specialized configs)</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>GitHub Actions (1 workflow)</td>
+</tr>
+<tr>
+<td><strong>Makefile</strong></td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complete-directory-tree-top-3-levels">3. COMPLETE DIRECTORY TREE
+(Top 3 Levels)</h2>
+<pre><code>helix_code/
+├── .env.example
+├── .github/
+│   └── workflows/
+│       └── notification-tests.yml
+├── .gitignore
+├── .gitmodules
+├── .gitmodules.bak.https-to-ssh
+├── AGENTS.md                              (41KB - agent definitions)
+├── AIDER_CLINE_IMPLEMENTATION_ROADMAP.md
+├── AI_MEMORY_INTEGRATION_PROGRESS.md
+├── ANALYSIS_README.md
+├── ANALYSIS_SOURCES.md
+├── APPLICATION_CHALLENGE_STATUS.md
+├── AUDIT_IMPLEMENTATION_TRACKER.md
+├── AUDIT_TRACKER_2026.md
+├── assets/
+│   ├── AGENTS.md
+│   ├── CLAUDE.md
+│   ├── CONSTITUTION.md
+│   ├── Logo.png
+│   └── Wide_Black.png
+├── CLAUDE.md
+├── COMPLETE_IMPLEMENTATION_TRACKER.md
+├── COMPLETION_STATUS_AND_REMAINING_WORK.md
+├── COMPREHENSIVE_ANALYSIS_REPORT.md
+├── COMPREHENSIVE_AUDIT_REPORT.md
+├── COMPREHENSIVE_COMPLETION_PLAN.md
+├── COMPREHENSIVE_COMPLETION_REPORT.md
+├── COMPREHENSIVE_FEATURE_MATRIX.md
+├── COMPREHENSIVE_PROJECT_AUDIT_2026.md
+├── COMPREHENSIVE_PROJECT_REPORT_AND_IMPLEMENTATION_PLAN.md
+├── COMPREHENSIVE_UNFINISHED_WORK_AND_IMPLEMENTATION_PLAN.md
+├── COMPREHENSIVE_UNFINISHED_WORK_REPORT.md
+├── CONSTITUTION.md
+├── CONTINUE_HERE.md
+├── CRUSH.md
+├── challenges/                            ← SUBMODULE (vasic-digital/Challenges)
+├── containers/                            ← SUBMODULE (vasic-digital/Containers)
+├── DETAILED_IMPLEMENTATION_PLAN.md
+├── DETAILED_IMPLEMENTATION_TRACKER.md
+├── DOCKER_COMPLETION_SUMMARY.md
+├── DOCKER_SETUP.md
+├── DOCUMENTATION_COMPLETION_PLAN.md
+├── Dockerfile
+├── Dockerfile.test
+├── Dockerfile.worker
+├── dependencies/
+│   ├── HelixDevelopment/
+│   │   ├── DocProcessor/                  ← SUBMODULE
+│   │   ├── LLMOrchestrator/               ← SUBMODULE
+│   │   ├── LLMProvider/                   ← SUBMODULE
+│   │   ├── LLMsVerifier/                  ← SUBMODULE (REQUIRED ✓)
+│   │   └── VisionEngine/                  ← SUBMODULE
+│   ├── HuggingFace_Hub/                   ← SUBMODULE
+│   ├── LLama_CPP/                         ← SUBMODULE
+│   └── Ollama/                            ← SUBMODULE
+├── Documentation/
+│   ├── General/
+│   │   ├── FEATURE_IMPLEMENTATION_COMPLETE.md
+│   │   ├── MENTIONS_USER_GUIDE.md
+│   │   ├── PROVIDER_FEATURES.md
+│   │   ├── PROVIDER_UPDATE_SUMMARY.md
+│   │   └── SLASH_COMMANDS_USER_GUIDE.md
+│   ├── Materials/
+│   │   ├── Encryption_Algs.md
+│   │   └── LLMs_Optimization.md
+│   └── User_Manual/
+│       ├── INDEX.md
+│       ├── README.md
+│       ├── SUMMARY.md
+│       ├── USER_MANUAL_EXPANSION_PLAN.md
+│       ├── examples/
+│       └── tutorials/
+├── E2E_TEST_SPECIFICATION.md
+├── EXAMPLE_PROJECTS_ANALYSIS.md
+├── EXAMPLE_PROJECTS_INDEX.md
+├── EXAMPLE_PROJECTS_QUICK_REFERENCE.md
+├── Example_Projects/
+│   ├── Agent-Deck/                        ← SUBMODULE
+│   ├── Aider/                             ← SUBMODULE
+│   ├── Amazon-Q-Developer-CLI/            ← SUBMODULE
+│   ├── Bridle/                            ← SUBMODULE
+│   ├── Cheshire-Cat-Ai/
+│   │   ├── CC-AA-LLMs/                    ← SUBMODULE
+│   │   ├── CC-AI-Core/                    ← SUBMODULE
+│   │   ├── CC-AI-Plugins/                 ← SUBMODULE
+│   │   ├── model-plugins/                 ← SUBMODULE
+│   │   ├── plugin-template/               ← SUBMODULE
+│   │   └── plugins-backend/               ← SUBMODULE
+│   ├── Claude-Code-Plugins-And-Skills/    ← SUBMODULE
+│   ├── Claude-Squad/                      ← SUBMODULE
+│   ├── Claude_Code/                       ← SUBMODULE
+│   ├── Cline/                             ← SUBMODULE
+│   ├── Codai/                             ← SUBMODULE
+│   ├── Codename_Goose/                    ← SUBMODULE
+│   ├── Codex/                             ← SUBMODULE (org-14957082@github.com)
+│   ├── Codex-Skills/                      ← SUBMODULE
+│   ├── Conduit/                           ← SUBMODULE
+│   ├── DeepSeek_CLI/                      ← SUBMODULE
+│   ├── Emdash/                            ← SUBMODULE
+│   ├── FauxPilot/                         ← SUBMODULE
+│   ├── Forge/                             ← SUBMODULE
+│   ├── GPT_Engineer/                      ← SUBMODULE
+│   ├── Gemini_CLI/                        ← SUBMODULE
+│   ├── Get-Shit-Done/                     ← SUBMODULE
+│   ├── GitHub-Copilot-CLI/                ← SUBMODULE
+│   ├── GitHub-Spec-Kit/                   ← SUBMODULE
+│   ├── GitMCP/                            ← SUBMODULE
+│   ├── Kilo-Code/                         ← SUBMODULE
+│   ├── Mistral_Code/                      ← SUBMODULE
+│   ├── MobileAgent/                       ← SUBMODULE
+│   ├── Multiagent-Coding-System/          ← SUBMODULE
+│   ├── Nanocoder/                         ← SUBMODULE
+│   ├── Noi/                               ← SUBMODULE
+│   ├── Octogen/                           ← SUBMODULE
+│   ├── Ollama_Code/                       ← SUBMODULE
+│   ├── OpenCode/
+│   │   ├── Homebrew-Tap/                  ← SUBMODULE
+│   │   └── OpenCode/                      ← SUBMODULE
+│   ├── OpenHands/
+│   │   ├── OpenHands/                     ← SUBMODULE
+│   │   ├── OpenHands-Docs/                ← SUBMODULE
+│   │   ├── OpenHands-Server/              ← SUBMODULE
+│   │   ├── agent-analysis/                ← SUBMODULE
+│   │   ├── agentic-code-search-oss/       ← SUBMODULE
+│   │   ├── litellm/                       ← SUBMODULE
+│   │   ├── open-operator/                 ← SUBMODULE
+│   │   ├── skills/                        ← SUBMODULE
+│   │   ├── software-agent-sdk/            ← SUBMODULE
+│   │   └── OpenHands-Docs/                ← SUBMODULE
+│   ├── Plandex/                           ← SUBMODULE
+│   ├── Postgres-MCP/                      ← SUBMODULE
+│   ├── Qwen_Code/                         ← SUBMODULE
+│   ├── Shai/                              ← SUBMODULE
+│   ├── SnowCLI/                           ← SUBMODULE
+│   ├── Stark-Kitty-Kiro-Cli/              ← SUBMODULE
+│   ├── Superset/                          ← SUBMODULE
+│   ├── TaskWeaver/                        ← SUBMODULE
+│   ├── Warp/                              ← SUBMODULE
+│   ├── gptme/
+│   │   ├── gptme/                         ← SUBMODULE
+│   │   ├── gptme-agent-template/        ← SUBMODULE
+│   │   ├── gptme-contrib/                 ← SUBMODULE
+│   │   ├── gptme-lessons/                 ← SUBMODULE
+│   │   ├── gptme-pitch-deck/              ← SUBMODULE
+│   │   ├── gptme-rag/                     ← SUBMODULE
+│   │   ├── gptme-tauri/                   ← SUBMODULE
+│   │   └── gptme-webui/                   ← SUBMODULE
+│   ├── ui-ux-pro-max-skill/               ← SUBMODULE
+│   └── vtcode/                            ← SUBMODULE
+├── Example_Resources/
+│   ├── Awesome-AI-Agents/                 ← SUBMODULE
+│   ├── Awesome-AI-GPTs/                   ← SUBMODULE
+│   ├── Cheshire-Cat-Ai/
+│   │   └── CC-AI-Docs/                    ← SUBMODULE
+│   ├── GitHub-Awesome-Copilot/            ← SUBMODULE
+│   ├── OpenAI-Cookbook/                   ← SUBMODULE (org-14957082@github.com)
+│   └── Taches-CC-Resources/               ← SUBMODULE
+├── FEATURE_COMPARISON_MATRIX.md
+├── FINAL_COMPLETION.md
+├── FINAL_COMPLETION_REPORT.md
+├── FINAL_COMPLETION_SUCCESS_REPORT.md
+├── FINAL_SESSION_SUMMARY.md
+├── GAP_ANALYSIS.md
+├── GAP_ANALYSIS_SUMMARY.md
+├── github_pages_website/                  ← SUBMODULE (HelixDevelopment-Code/Welcome)
+├── HELIXCODE_*.md                          (30+ architecture/audit docs)
+├── helix_code/                              ← NESTED PROJECT STRUCTURE
+│   ├── .env.example
+│   ├── .env.full-test
+│   ├── .github/workflows/
+│   ├── .gitignore
+│   ├── AUDIT_ISSUE_REGISTRY.md
+│   ├── BUILD_INTEGRATION_SUMMARY.md
+│   ├── CLINE_RULES_COMPLETION_SUMMARY.md
+│   ├── COMPLETE_IMPLEMENTATION_REPORT.md
+│   ├── COMPLETION_ANALYSIS.md
+│   ├── COMPLETION_REPORT.md
+│   ├── COMPREHENSIVE_IMPLEMENTATION_PLAN.md
+│   ├── COMPREHENSIVE_TEST_EXECUTION_REPORT.md
+│   ├── CONTEXT_BUILDER_COMPLETION_SUMMARY.md
+│   ├── DOCKER_CICD_COMPLETION_REPORT.md
+│   ├── DOCKER_DEPLOYMENT.md
+│   ├── DOCUMENTATION_SYSTEM_SUMMARY.md
+│   ├── Documentation/
+│   │   ├── AUDIT_IMPLEMENTATION_PLAN.md
+│   │   ├── Architecture/
+│   │   ├── COMPREHENSIVE_AUDIT_REPORT.md
+│   │   ├── General/
+│   │   ├── Testing/
+│   │   └── User_Manual/
+│   ├── EDIT_FORMATS_COMPLETION_SUMMARY.md
+│   ├── ENTERPRISE_DEPLOYMENT_GUIDE.md
+│   ├── ENTERPRISE_USER_MANUAL.md
+│   ├── EXECUTIVE_TEST_SUMMARY.md
+│   ├── FINAL_COMPLETION.md
+│   ├── FINAL_COMPLETION_CERTIFICATE.md
+│   ├── FINAL_COMPLETION_REPORT.md
+│   ├── FINAL_COMPLETION_SUMMARY.md
+│   ├── FINAL_COMPREHENSIVE_COMPLETION_REPORT.md
+│   ├── FINAL_ENTERPRISE_COMPLETION_REPORT.md
+│   ├── FINAL_ENTERPRISE_DEPLOYMENT_SUMMARY.md
+│   ├── FINAL_PHASE1_SUMMARY.md
+│   ├── FINAL_SUMMARY.md
+│   ├── FOCUS_CHAIN_COMPLETION_SUMMARY.md
+│   ├── HARMONY_AURORA_COMPLETION_REPORT.md
+│   ├── HOOKS_SYSTEM_COMPLETION_SUMMARY.md
+│   ├── IMPLEMENTATION_LOG.txt
+│   ├── IMPLEMENTATION_ROADMAP.md
+│   ├── IMPLEMENTATION_SUMMARY.md
+│   ├── INTEGRATION_CHECKLIST.md
+│   ├── LOCAL_LLM_ARCHITECTURE.md
+│   ├── LOCAL_LLM_GETTING_STARTED.md
+│   ├── Makefile
+│   ├── MEMORY_SYSTEM_COMPLETION_SUMMARY.md
+│   ├── NEW_FEATURES.md
+│   ├── NEXT_STEPS.md
+│   ├── NEXT_STEPS_ENTERPRISE_DEPLOYMENT.md
+│   ├── PHASE5_VALIDATION_REPORT.md
+│   ├── PHASE_*.md                          (30+ phase reports)
+│   ├── PROJECT_COMPLETION_CERTIFICATE.md
+│   ├── PROJECT_FINALIZATION.md
+│   ├── PROJECT_SUMMARY.md
+│   ├── QUICK_REFERENCE_MANUAL_SYSTEM.md
+│   ├── README.md
+│   ├── README.pdf
+│   ├── REPO_VERSION.md
+│   ├── SESSION_MANAGER_COMPLETION_SUMMARY.md
+│   ├── SESSION_SUMMARY.md
+│   ├── STATE_PERSISTENCE_COMPLETION_SUMMARY.md
+│   ├── TEMPLATE_SYSTEM_COMPLETION_SUMMARY.md
+│   ├── TESTING_STATUS_UPDATE.md
+│   ├── TEST_COVERAGE.md
+│   ├── TEST_IMPLEMENTATION_SUMMARY.md
+│   ├── TEST_RESULTS.md
+│   ├── UPDATE_REPORT.md
+│   ├── api/
+│   │   └── openapi.yaml
+│   ├── applications/
+│   │   ├── README.md
+│   │   ├── android/
+│   │   ├── aurora-os/
+│   │   ├── desktop/
+│   │   ├── harmony-os/
+│   │   ├── ios/
+│   │   └── terminal-ui/
+│   ├── assets/
+│   │   ├── colors/
+│   │   ├── icons/
+│   │   └── images/
+│   ├── aurora-os/
+│   ├── benchmark-reports/
+│   ├── benchmarks/
+│   ├── bin/
+│   │   └── helixcode
+│   ├── cleanup.sh
+│   ├── cmd/
+│   │   ├── cli/
+│   │   ├── config-test/
+│   │   ├── helix-config/
+│   │   ├── local-llm-advanced.go
+│   │   ├── local-llm.go
+│   │   ├── main_commands.go
+│   │   ├── other_commands.go
+│   │   ├── performance-optimization/
+│   │   ├── performance-optimization-standalone/
+│   │   ├── root.go
+│   │   ├── security-fix/
+│   │   ├── security-fix-standalone/
+│   │   ├── security-test/
+│   │   └── server/
+│   ├── config/
+│   │   ├── azure_example.yaml
+│   │   ├── config.yaml
+│   │   ├── fixed-config.yaml
+│   │   ├── grafana/
+│   │   ├── minimal-config.yaml
+│   │   ├── minimal-test-config.yaml
+│   │   ├── model-aliases.example.yaml
+│   │   ├── production-config.yaml
+│   │   ├── test-config.yaml
+│   │   └── working-config.yaml
+│   ├── config-test
+│   ├── demo_cross_provider_sharing.go
+│   ├── demo_model_management.go
+│   ├── desktop
+│   ├── dev.helix.code
+│   ├── doc-reports/
+│   ├── docker/
+│   │   ├── docker-compose.yml
+│   │   └── entrypoint-worker.sh
+│   ├── docker-compose-simple.yml
+│   ├── docker-compose.aurora-os.yml
+│   ├── docker-compose.builder.yml
+│   ├── docker-compose.full-test.yml
+│   ├── docker-compose.harmony-os.yml
+│   ├── docker-compose.specialized-platforms.yml
+│   ├── docker-compose.test.yml
+│   ├── docker-compose.yml
+│   ├── examples/
+│   │   ├── multi-agent-system/
+│   │   ├── phase3/
+│   │   └── qa-integration/
+│   ├── go.mod
+│   ├── go.sum
+│   ├── harmony-os
+│   ├── helix
+│   ├── helix-code
+│   ├── helix-config
+│   ├── internal/
+│   │   ├── adapters/
+│   │   ├── agent/
+│   │   ├── auth/
+│   │   ├── cognee/
+│   │   ├── commands/
+│   │   ├── config/
+│   │   ├── context/
+│   │   ├── database/
+│   │   ├── deployment/
+│   │   ├── discovery/
+│   │   ├── editor/
+│   │   ├── event/
+│   │   ├── fix/
+│   │   ├── focus/
+│   │   ├── hardware/
+│   │   ├── helixqa/
+│   │   ├── hooks/
+│   │   ├── llm/
+│   │   ├── logging/
+│   │   └── logo/
+│   ├── local-llm-test.go
+│   ├── main
+│   ├── main.go
+│   ├── multi-agent-system
+│   ├── performance-optimization
+│   ├── qa-integration
+│   ├── rebuild_script.sh
+│   ├── reports/
+│   │   ├── performance/
+│   │   └── security/
+│   ├── run_all_tests.sh
+│   ├── run_integration_tests.sh
+│   ├── run_tests.sh
+│   ├── scripts/
+│   │   ├── README.md
+│   │   ├── assets/
+│   │   ├── benchmark.sh
+│   │   ├── build.sh
+│   │   ├── containers/
+│   │   ├── coverage.sh
+│   │   ├── deploy-aurora-os.sh
+│   │   ├── deploy-harmony-os.sh
+│   │   ├── deploy-specialized-platforms.sh
+│   │   ├── docs-validate.sh
+│   │   ├── generate-manual.sh
+│   │   ├── generate-test-catalog/
+│   │   ├── generate-test-keys.sh
+│   │   ├── logo/
+│   │   ├── md-to-html
+│   │   ├── md-to-html.go
+│   │   ├── pre-commit.template
+│   │   ├── run-all-tests.sh
+│   │   └── run-docker-tests.sh
+│   ├── security/
+│   │   └── security_test.go
+│   ├── security-test
+│   ├── server
+│   ├── shared/
+│   │   └── mobile-core/
+│   ├── simple_test_runner.go
+│   ├── standalone_tests/
+│   │   ├── cli_test.go
+│   │   └── test_suite.go
+│   ├── terminal-ui
+│   ├── test/
+│   │   ├── automation/
+│   │   ├── config/
+│   │   ├── e2e/
+│   │   ├── generate-ssh-keys.sh
+│   │   ├── init.sql
+│   │   ├── integration/
+│   │   ├── load/
+│   │   ├── test_plan.md
+│   │   ├── worker-init.sh
+│   │   └── workers/
+│   ├── test-programs/
+│   │   ├── test-server-shutdown.go
+│   │   ├── test-server.go
+│   │   └── test_db_connection.go
+│   ├── test-reports/
+│   │   └── unit_coverage_20251114_090040.out
+│   ├── test_build.sh
+│   ├── test_model_management.go
+│   ├── test_runner.go
+│   ├── test_*.go                          (various test files)
+│   └── (extensive Go source tree)
+├── helix_qa/                               ← SUBMODULE (REQUIRED ✓)
+├── IMPLEMENTATION_COMPLETE.md
+├── IMPLEMENTATION_COMPLETION_PLAN.md
+├── IMPLEMENTATION_PLAN.md
+├── IMPLEMENTATION_ROADMAP.md
+├── IMPLEMENTATION_SUCCESS.md
+├── IMPLEMENTATION_TRACKER.md
+├── INTEGRATION_IMPLEMENTATION_SUMMARY.md
+├── ISSUES_FIXED.md
+├── LICENSE
+├── Makefile
+├── MASTER_IMPLEMENTATION_PLAN.md
+├── NOTIFICATION_INTEGRATION_REPORT.md
+├── PENPOT_INTEGRATION.md
+├── PHASED_IMPLEMENTATION_PLAN.md
+├── PHASE_0_*.md
+├── PHASE_1_*.md
+├── PHASE_2_*.md
+├── PHASE_3_*.md
+├── Phase2_Implementation_Summary.md
+├── Phase4_Implementation_Summary.md
+├── Phase5_Implementation_Summary.md
+├── PLANDEX_ANALYSIS.md
+├── PLANDEX_INDEX.md
+├── PLANDEX_PORTING_CHECKLIST.md
+├── PLANDEX_QUICK_REFERENCE.md
+├── PRODUCTION_DEPLOYMENT_READINESS_REPORT.md
+├── PROJECT_COMPLETION_ANALYSIS.md
+├── PROJECT_EXECUTION_SUMMARY.md
+├── QUICK_START_IMPLEMENTATION.md
+├── QUICK_START_TOMORROW.md
+├── QWEN.md
+├── README.md
+├── README.pdf
+├── README_DOCKER.md
+├── REQUEST.md
+├── SECURITY_IMPLEMENTATION.md
+├── SECURITY_INFRASTRUCTURE_COMPLETION_REPORT.md
+├── SESSION_PROGRESS_SUMMARY.md
+├── SESSION_SUMMARY_2025-11-10.md
+├── SKIPPED_TESTS_ANALYSIS.md
+├── SONARQUBE_SNYK_IMPLEMENTATION.md
+├── START_HERE.md
+├── security/                              ← DIRECTORY
+├── TEAM_DEVELOPMENT_BREAKDOWN.md
+├── TESTING_PLAN.md
+├── UNFINISHED_WORK_REPORT.md
+├── VERIFICATION_REPORT.md
+├── VERIFICATION_SUMMARY.md
+├── VIDEO_COURSE_CURRICULUM.md
+├── WEBSITE_UPDATE_SUMMARY.md
+├── website/                               ← DIRECTORY
+├── awesome-ai-memory/                     ← SUBMODULE
+├── challenges/                            ← DIRECTORY (lowercase)
+├── cmd/
+│   └── security-test/
+├── configs/
+│   └── verifier.yaml
+├── core.test
+├── coverage.out
+├── docker-compose.helix.yml
+├── docker-compose.test.yml
+├── docker-entrypoint.sh
+├── docs/                                  ← DIRECTORY
+├── go.mod
+├── go.sum
+├── helix                                  ← BINARY/EXECUTABLE
+├── helix.security.json
+├── install_missing_libs.sh
+├── internal/
+│   ├── fix/
+│   ├── security/
+│   └── testing/
+├── isolated_files/                        ← DIRECTORY
+├── penpot-integration.sh
+├── postgres-init.sql
+├── scripts/                               ← DIRECTORY
+├── security/
+│   └── (security configs)
+├── security-test                          ← DIRECTORY
+├── setup.sh
+├── test-config.yaml
+├── test-docker-quick.sh
+├── test-docker-setup.sh
+├── test/                                  ← DIRECTORY
+└── tests/                                 ← DIRECTORY</code></pre>
+<hr />
+<h2 id="all-87-submodules---complete-inventory">4. ALL 87 SUBMODULES -
+COMPLETE INVENTORY</h2>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 40%" />
+<col style="width: 15%" />
+<col style="width: 12%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Submodule Name</th>
+<th>Path</th>
+<th>URL</th>
+<th>Protocol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Example_Projects/OpenCode/OpenCode</td>
+<td>Example_Projects/OpenCode/OpenCode</td>
+<td>git@github.com:opencode-ai/opencode.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Example_Projects/OpenCode/Homebrew-Tap</td>
+<td>Example_Projects/OpenCode/Homebrew-Tap</td>
+<td>git@github.com:opencode-ai/homebrew-tap.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Example_Projects/Ollama_Code</td>
+<td>Example_Projects/Ollama_Code</td>
+<td>git@github.com:tcsenpai/ollama-code.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Example_Projects/Qwen_Code</td>
+<td>Example_Projects/Qwen_Code</td>
+<td>git@github.com:QwenLM/qwen-code.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Example_Projects/Codename_Goose</td>
+<td>Example_Projects/Codename_Goose</td>
+<td>git@github.com:jgenerali/codename-goose.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Example_Projects/Claude_Code</td>
+<td>Example_Projects/Claude_Code</td>
+<td>git@github.com:anthropics/claude-code.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>7</td>
+<td>dependencies/LLama_CPP</td>
+<td>dependencies/LLama_CPP</td>
+<td>git@github.com:ggml-org/llama.cpp.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>8</td>
+<td>dependencies/Ollama</td>
+<td>dependencies/Ollama</td>
+<td>git@github.com:ollama/ollama.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>9</td>
+<td>dependencies/HuggingFace_Hub</td>
+<td>dependencies/HuggingFace_Hub</td>
+<td>git@github.com:huggingface/huggingface_hub.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Example_Projects/DeepSeek_CLI</td>
+<td>Example_Projects/DeepSeek_CLI</td>
+<td>git@github.com:holasoymalva/deepseek-cli.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Example_Projects/Mistral_Code</td>
+<td>Example_Projects/Mistral_Code</td>
+<td>git@github.com:Wylgrif/Mistral-code.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>12</td>
+<td>github_pages_website</td>
+<td>github_pages_website</td>
+<td>git@github.com:HelixDevelopment-Code/Welcome.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Example_Projects/Gemini_CLI</td>
+<td>Example_Projects/Gemini_CLI</td>
+<td>git@github.com:google-gemini/gemini-cli.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Example_Projects/Forge</td>
+<td>Example_Projects/Forge</td>
+<td>git@github.com:antinomyhq/forge.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Example_Projects/Plandex</td>
+<td>Example_Projects/Plandex</td>
+<td>git@github.com:plandex-ai/plandex.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Example_Projects/GPT_Engineer</td>
+<td>Example_Projects/GPT_Engineer</td>
+<td>git@github.com:AntonOsika/gpt-engineer.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Example_Projects/Aider</td>
+<td>Example_Projects/Aider</td>
+<td>git@github.com:Aider-AI/aider.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>18</td>
+<td>Example_Projects/Cline</td>
+<td>Example_Projects/Cline</td>
+<td>git@github.com:cline/cline.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>19</td>
+<td>awesome-ai-memory</td>
+<td>awesome-ai-memory</td>
+<td>git@github.com:topoteretes/awesome-ai-memory.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>20</td>
+<td>Example_Projects/Stark-Kitty-Kiro-Cli</td>
+<td>Example_Projects/Stark-Kitty-Kiro-Cli</td>
+<td>git@github.com:stark1tty/kiro-cli.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>21</td>
+<td>Example_Projects/Kilo-Code</td>
+<td>Example_Projects/Kilo-Code</td>
+<td>git@github.com:Kilo-Org/kilocode.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>22</td>
+<td>Example_Projects/Amazon-Q-Developer-CLI</td>
+<td>Example_Projects/Amazon-Q-Developer-CLI</td>
+<td>git@github.com:aws/amazon-q-developer-cli.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>23</td>
+<td>Example_Projects/OpenHands/software-agent-sdk</td>
+<td>Example_Projects/OpenHands/software-agent-sdk</td>
+<td>git@github.com:OpenHands/software-agent-sdk.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>24</td>
+<td>Example_Projects/OpenHands/OpenHands</td>
+<td>Example_Projects/OpenHands/OpenHands</td>
+<td>git@github.com:OpenHands/OpenHands.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>25</td>
+<td>Example_Projects/OpenHands/agentic-code-search-oss</td>
+<td>Example_Projects/OpenHands/agentic-code-search-oss</td>
+<td>git@github.com:OpenHands/agentic-code-search-oss.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>26</td>
+<td>Example_Projects/OpenHands/skills</td>
+<td>Example_Projects/OpenHands/skills</td>
+<td>git@github.com:OpenHands/skills.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>27</td>
+<td>Example_Projects/OpenHands/litellm</td>
+<td>Example_Projects/OpenHands/litellm</td>
+<td>git@github.com:OpenHands/litellm.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>28</td>
+<td>Example_Projects/OpenHands/OpenHands-Server</td>
+<td>Example_Projects/OpenHands/OpenHands-Server</td>
+<td>git@github.com:OpenHands/OpenHands-Server.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>29</td>
+<td>Example_Projects/OpenHands/open-operator</td>
+<td>Example_Projects/OpenHands/open-operator</td>
+<td>git@github.com:OpenHands/open-operator.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>30</td>
+<td>Example_Projects/OpenHands/OpenHands-Docs</td>
+<td>Example_Projects/OpenHands/OpenHands-Docs</td>
+<td>git@github.com:OpenHands/docs.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>31</td>
+<td>Example_Projects/OpenHands/agent-analysis</td>
+<td>Example_Projects/OpenHands/agent-analysis</td>
+<td>git@github.com:OpenHands/agent-analysis.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>32</td>
+<td>Example_Resources/GitHub-Awesome-Copilot</td>
+<td>Example_Resources/GitHub-Awesome-Copilot</td>
+<td>git@github.com:github/awesome-copilot.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>33</td>
+<td>Example_Projects/Superset</td>
+<td>Example_Projects/Superset</td>
+<td>git@github.com:superset-sh/superset.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>34</td>
+<td>Example_Projects/ui-ux-pro-max-skill</td>
+<td>Example_Projects/ui-ux-pro-max-skill</td>
+<td>git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>35</td>
+<td>Example_Projects/Warp</td>
+<td>Example_Projects/Warp</td>
+<td>git@github.com:warpdotdev/Warp.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>36</td>
+<td>Example_Projects/GitHub-Copilot-CLI</td>
+<td>Example_Projects/GitHub-Copilot-CLI</td>
+<td>git@github.com:github/copilot-cli.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>37</td>
+<td>Example_Projects/Codex</td>
+<td>Example_Projects/Codex</td>
+<td>org-14957082@github.com:openai/codex.git</td>
+<td>OTHER</td>
+</tr>
+<tr>
+<td>38</td>
+<td>Example_Projects/Octogen</td>
+<td>Example_Projects/Octogen</td>
+<td>git@github.com:dbpunk-labs/octogen.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>39</td>
+<td>Example_Projects/TaskWeaver</td>
+<td>Example_Projects/TaskWeaver</td>
+<td>git@github.com:microsoft/TaskWeaver.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>40</td>
+<td>Example_Projects/Cheshire-Cat-Ai/CC-AI-Core</td>
+<td>Example_Projects/Cheshire-Cat-Ai/CC-AI-Core</td>
+<td>git@github.com:cheshire-cat-ai/core.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>41</td>
+<td>Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs</td>
+<td>Example_Resources/Cheshire-Cat-Ai/CC-AI-Docs</td>
+<td>git@github.com:cheshire-cat-ai/docs.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>42</td>
+<td>Example_Projects/Cheshire-Cat-Ai/CC-AA-LLMs</td>
+<td>Example_Projects/Cheshire-Cat-Ai/CC-AA-LLMs</td>
+<td>git@github.com:cheshire-cat-ai/llms.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>43</td>
+<td>Example_Projects/Cheshire-Cat-Ai/CC-AI-Plugins</td>
+<td>Example_Projects/Cheshire-Cat-Ai/CC-AI-Plugins</td>
+<td>git@github.com:cheshire-cat-ai/plugins.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>44</td>
+<td>Example_Projects/Cheshire-Cat-Ai/plugin-template</td>
+<td>Example_Projects/Cheshire-Cat-Ai/plugin-template</td>
+<td>git@github.com:cheshire-cat-ai/plugin_template.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>45</td>
+<td>Example_Projects/Cheshire-Cat-Ai/model-plugins</td>
+<td>Example_Projects/Cheshire-Cat-Ai/model-plugins</td>
+<td>git@github.com:cheshire-cat-ai/models-plugin.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>46</td>
+<td>Example_Projects/Cheshire-Cat-Ai/plugins-backend</td>
+<td>Example_Projects/Cheshire-Cat-Ai/plugins-backend</td>
+<td>git@github.com:cheshire-cat-ai/plugins-backend.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>47</td>
+<td>Example_Resources/Awesome-AI-GPTs</td>
+<td>Example_Resources/Awesome-AI-GPTs</td>
+<td>git@github.com:EmbraceAGI/Awesome-AI-GPTs.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>48</td>
+<td>Example_Projects/Multiagent-Coding-System</td>
+<td>Example_Projects/Multiagent-Coding-System</td>
+<td>git@github.com:Danau5tin/multi-agent-coding-system.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>49</td>
+<td>Example_Resources/OpenAI-Cookbook</td>
+<td>Example_Resources/OpenAI-Cookbook</td>
+<td>org-14957082@github.com:openai/openai-cookbook.git</td>
+<td>OTHER</td>
+</tr>
+<tr>
+<td>50</td>
+<td>Example_Projects/Codai</td>
+<td>Example_Projects/Codai</td>
+<td>git@github.com:meysamhadeli/codai.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>51</td>
+<td>Example_Projects/FauxPilot</td>
+<td>Example_Projects/FauxPilot</td>
+<td>git@github.com:fauxpilot/fauxpilot.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>52</td>
+<td>Example_Projects/vtcode</td>
+<td>Example_Projects/vtcode</td>
+<td>git@github.com:vinhnx/vtcode.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>53</td>
+<td>Example_Projects/MobileAgent</td>
+<td>Example_Projects/MobileAgent</td>
+<td>git@github.com:X-PLUG/MobileAgent.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>54</td>
+<td>Example_Projects/gptme/gptme</td>
+<td>Example_Projects/gptme/gptme</td>
+<td>git@github.com:gptme/gptme.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>55</td>
+<td>Example_Projects/gptme/gptme-contrib</td>
+<td>Example_Projects/gptme/gptme-contrib</td>
+<td>git@github.com:gptme/gptme-contrib.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>56</td>
+<td>Example_Projects/gptme/gptme-agent-template</td>
+<td>Example_Projects/gptme/gptme-agent-template</td>
+<td>git@github.com:gptme/gptme-agent-template.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>57</td>
+<td>Example_Projects/gptme/gptme-pitch-deck</td>
+<td>Example_Projects/gptme/gptme-pitch-deck</td>
+<td>git@github.com:gptme/gptme-pitch-deck.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>58</td>
+<td>Example_Projects/gptme/gptme-rag</td>
+<td>Example_Projects/gptme/gptme-rag</td>
+<td>git@github.com:gptme/gptme-rag.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>59</td>
+<td>Example_Projects/gptme/gptme-webui</td>
+<td>Example_Projects/gptme/gptme-webui</td>
+<td>git@github.com:gptme/gptme-webui.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>60</td>
+<td>Example_Projects/gptme/gptme-lessons</td>
+<td>Example_Projects/gptme/gptme-lessons</td>
+<td>git@github.com:gptme/gptme-lessons.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>61</td>
+<td>Example_Projects/gptme/gptme-tauri</td>
+<td>Example_Projects/gptme/gptme-tauri</td>
+<td>git@github.com:gptme/gptme-tauri.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>62</td>
+<td>Example_Projects/Conduit</td>
+<td>Example_Projects/Conduit</td>
+<td>git@github.com:lostintangent/conduit-release.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>63</td>
+<td>Example_Projects/Shai</td>
+<td>Example_Projects/Shai</td>
+<td>git@github.com:ovh/shai.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>64</td>
+<td>Example_Projects/SnowCLI</td>
+<td>Example_Projects/SnowCLI</td>
+<td>git@github.com:MayDay-wpf/snow-cli.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>65</td>
+<td>Example_Projects/GitMCP</td>
+<td>Example_Projects/GitMCP</td>
+<td>git@github.com:idosal/git-mcp</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>66</td>
+<td>Example_Projects/Claude-Code-Plugins-And-Skills</td>
+<td>Example_Projects/Claude-Code-Plugins-And-Skills</td>
+<td>git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>67</td>
+<td>Example_Projects/Bridle</td>
+<td>Example_Projects/Bridle</td>
+<td>git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>68</td>
+<td>Example_Projects/Agent-Deck</td>
+<td>Example_Projects/Agent-Deck</td>
+<td>git@github.com:asheshgoplani/agent-deck.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>69</td>
+<td>Example_Projects/Nanocoder</td>
+<td>Example_Projects/Nanocoder</td>
+<td>git@github.com:Nano-Collective/nanocoder.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>70</td>
+<td>Example_Resources/Awesome-AI-Agents</td>
+<td>Example_Resources/Awesome-AI-Agents</td>
+<td>git@github.com:e2b-dev/awesome-ai-agents.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>71</td>
+<td>Example_Projects/Postgres-MCP</td>
+<td>Example_Projects/Postgres-MCP</td>
+<td>git@github.com:timescale/pg-aiguide.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>72</td>
+<td>Example_Projects/Noi</td>
+<td>Example_Projects/Noi</td>
+<td>git@github.com:lencx/Noi.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>73</td>
+<td>Example_Projects/Claude-Squad</td>
+<td>Example_Projects/Claude-Squad</td>
+<td>git@github.com:smtg-ai/claude-squad.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>74</td>
+<td>Example_Projects/Emdash</td>
+<td>Example_Projects/Emdash</td>
+<td>git@github.com:generalaction/emdash.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>75</td>
+<td>Example_Projects/Codex-Skills</td>
+<td>Example_Projects/Codex-Skills</td>
+<td>git@github.com:anthropics/codex-skills.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>76</td>
+<td>Example_Projects/GitHub-Spec-Kit</td>
+<td>Example_Projects/GitHub-Spec-Kit</td>
+<td>git@github.com:github/spec-kit.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>77</td>
+<td>Example_Projects/Get-Shit-Done</td>
+<td>Example_Projects/Get-Shit-Done</td>
+<td>git@github.com:holasoymalva/get-shit-done-cli.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>78</td>
+<td>submodules/doc_processor</td>
+<td>submodules/doc_processor</td>
+<td>git@github.com:HelixDevelopment/DocProcessor.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>79</td>
+<td>submodules/llm_orchestrator</td>
+<td>submodules/llm_orchestrator</td>
+<td>git@github.com:HelixDevelopment/LLMOrchestrator.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>80</td>
+<td>submodules/llm_provider</td>
+<td>submodules/llm_provider</td>
+<td>git@github.com:HelixDevelopment/LLMProvider.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>81</td>
+<td>submodules/llms_verifier</td>
+<td>submodules/llms_verifier</td>
+<td>git@github.com:vasic-digital/LLMsVerifier.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>82</td>
+<td>submodules/vision_engine</td>
+<td>submodules/vision_engine</td>
+<td>git@github.com:HelixDevelopment/VisionEngine.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>83</td>
+<td>Challenges</td>
+<td>Challenges</td>
+<td>git@github.com:vasic-digital/Challenges.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>84</td>
+<td>containers</td>
+<td>containers</td>
+<td>git@github.com:vasic-digital/Containers.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>85</td>
+<td>Example_Resources/Taches-CC-Resources</td>
+<td>Example_Resources/Taches-CC-Resources</td>
+<td>git@github.com:tachescode/resources.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>86</td>
+<td>helix_qa</td>
+<td>helix_qa</td>
+<td>git@github.com:HelixDevelopment/HelixQA.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>87</td>
+<td>(additional submodule beyond listed 86)</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Protocol Summary:</strong> - SSH
+(<code>git@github.com</code>): 85 submodules (97.7%) - Org-specific SSH
+(<code>org-14957082@github.com</code>): 2 submodules (2.3%) - HTTPS: 0
+submodules (0%)</p>
+<hr />
+<h2 id="required-submodules-status">5. REQUIRED SUBMODULES STATUS</h2>
+<h3 id="present-4-of-8">5.1 PRESENT (4 of 8)</h3>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 14%" />
+<col style="width: 10%" />
+<col style="width: 21%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th>Required Submodule</th>
+<th>Status</th>
+<th>Path</th>
+<th>Actual URL</th>
+<th>Protocol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLMsVerifier</strong></td>
+<td>PRESENT ✓</td>
+<td>submodules/llms_verifier</td>
+<td>git@github.com:vasic-digital/LLMsVerifier.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td><strong>HelixQA</strong></td>
+<td>PRESENT ✓</td>
+<td>helix_qa (root)</td>
+<td>git@github.com:HelixDevelopment/HelixQA.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td><strong>Challenges</strong></td>
+<td>PRESENT ✓</td>
+<td>Challenges (root)</td>
+<td>git@github.com:vasic-digital/Challenges.git</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td><strong>Containers</strong></td>
+<td>PRESENT ✓</td>
+<td>containers (root)</td>
+<td>git@github.com:vasic-digital/Containers.git</td>
+<td>SSH</td>
+</tr>
+</tbody>
+</table>
+<h3 id="missing-4-of-8">5.2 MISSING (4 of 8)</h3>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 13%" />
+<col style="width: 19%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Required Submodule</th>
+<th>Status</th>
+<th>Expected URL</th>
+<th>Recommended SSH URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HelixAgent</strong></td>
+<td>MISSING ✗</td>
+<td>github.com/HelixDevelopment/HelixAgent</td>
+<td><code>git@github.com:HelixDevelopment/HelixAgent.git</code></td>
+</tr>
+<tr>
+<td><strong>HelixLLM</strong></td>
+<td>MISSING ✗</td>
+<td>github.com/HelixDevelopment/HelixLLM</td>
+<td><code>git@github.com:HelixDevelopment/HelixLLM.git</code></td>
+</tr>
+<tr>
+<td><strong>HelixMemory</strong></td>
+<td>MISSING ✗</td>
+<td>github.com/HelixDevelopment/HelixMemory</td>
+<td><code>git@github.com:HelixDevelopment/HelixMemory.git</code></td>
+</tr>
+<tr>
+<td><strong>HelixSpecifier</strong></td>
+<td>MISSING ✗</td>
+<td>github.com/HelixDevelopment/HelixSpecifier</td>
+<td><code>git@github.com:HelixDevelopment/HelixSpecifier.git</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="missing-submodules-analysis">5.3 MISSING SUBMODULES
+ANALYSIS</h3>
+<p><strong>HelixAgent:</strong> - The <code>AGENTS.md</code> file at
+root explicitly states: “Derived from HelixAgent AGENTS.md with
+HelixCode-specific enhancements” - This indicates HelixAgent was an
+ancestor/related project whose concepts were ported into HelixCode -
+HelixAgent is NOT listed in <code>.gitmodules</code> at all -
+<strong>cli_agents directory status:</strong> CANNOT BE DETERMINED -
+HelixAgent submodule does not exist in this repository - Recommendation:
+Either HelixAgent was intentionally excluded (functionality merged into
+HelixCode), or it needs to be added as a submodule</p>
+<p><strong>HelixLLM:</strong> - Not present in <code>.gitmodules</code>
+- No references found in root-level documentation - Likely a core LLM
+integration module that should be present</p>
+<p><strong>HelixMemory:</strong> - Not present in
+<code>.gitmodules</code> - The repository DOES contain
+<code>AI_MEMORY_INTEGRATION_PROGRESS.md</code> and a submodule
+<code>awesome-ai-memory</code> (external resource) - Memory
+functionality may be partially implemented in HelixCode directly</p>
+<p><strong>HelixSpecifier:</strong> - Not present in
+<code>.gitmodules</code> - No references found at root level - Likely a
+specification/contract module that should be present</p>
+<hr />
+<h2 id="configuration-files-inventory">6. CONFIGURATION FILES
+INVENTORY</h2>
+<h3 id="root-level-configuration-files">6.1 Root-Level Configuration
+Files</h3>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Type</th>
+<th>Size</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.gitmodules</code></td>
+<td>Git Submodules</td>
+<td>11,824 bytes</td>
+<td>Defines 87 submodules</td>
+</tr>
+<tr>
+<td><code>.gitmodules.bak.https-to-ssh</code></td>
+<td>Git Submodules Backup</td>
+<td>10,637 bytes</td>
+<td>HTTPS-to-SSH migration backup</td>
+</tr>
+<tr>
+<td><code>.gitignore</code></td>
+<td>Git Ignore</td>
+<td>1,510 bytes</td>
+<td>Git exclusion patterns</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td>Environment Template</td>
+<td>1,925 bytes</td>
+<td>Environment variable template</td>
+</tr>
+<tr>
+<td><code>go.mod</code></td>
+<td>Go Module</td>
+<td>~150 bytes</td>
+<td>Go module <code>dev.helix.code</code> at Go 1.25.2</td>
+</tr>
+<tr>
+<td><code>go.sum</code></td>
+<td>Go Checksums</td>
+<td>~1KB</td>
+<td>Go dependency checksums</td>
+</tr>
+<tr>
+<td><code>Makefile</code></td>
+<td>Build Automation</td>
+<td>~300 bytes</td>
+<td>Build targets (demo, validate, ci)</td>
+</tr>
+<tr>
+<td><code>Dockerfile</code></td>
+<td>Docker Image</td>
+<td>Unknown</td>
+<td>Main application container</td>
+</tr>
+<tr>
+<td><code>Dockerfile.test</code></td>
+<td>Docker Image</td>
+<td>Unknown</td>
+<td>Test container</td>
+</tr>
+<tr>
+<td><code>Dockerfile.worker</code></td>
+<td>Docker Image</td>
+<td>Unknown</td>
+<td>Worker container</td>
+</tr>
+<tr>
+<td><code>docker-compose.helix.yml</code></td>
+<td>Docker Compose</td>
+<td>~2KB</td>
+<td>Main compose with PostgreSQL + Redis</td>
+</tr>
+<tr>
+<td><code>docker-compose.test.yml</code></td>
+<td>Docker Compose</td>
+<td>Unknown</td>
+<td>Test compose</td>
+</tr>
+<tr>
+<td><code>test-config.yaml</code></td>
+<td>YAML Config</td>
+<td>Unknown</td>
+<td>Test configuration</td>
+</tr>
+<tr>
+<td><code>postgres-init.sql</code></td>
+<td>SQL</td>
+<td>Unknown</td>
+<td>PostgreSQL initialization</td>
+</tr>
+<tr>
+<td><code>helix.security.json</code></td>
+<td>JSON Security</td>
+<td>Unknown</td>
+<td>Security configuration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="nested-configuration-files-helix_code-subdirectory">6.2 Nested
+Configuration Files (helix_code/ subdirectory)</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 28%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/go.mod</code></td>
+<td>Go Module</td>
+<td>Nested Go module</td>
+</tr>
+<tr>
+<td><code>helix_code/go.sum</code></td>
+<td>Go Checksums</td>
+<td>Nested dependency checksums</td>
+</tr>
+<tr>
+<td><code>helix_code/Makefile</code></td>
+<td>Build Automation</td>
+<td>Nested build targets</td>
+</tr>
+<tr>
+<td><code>helix_code/config/config.yaml</code></td>
+<td>YAML</td>
+<td>Main configuration</td>
+</tr>
+<tr>
+<td><code>helix_code/config/azure_example.yaml</code></td>
+<td>YAML</td>
+<td>Azure example config</td>
+</tr>
+<tr>
+<td><code>helix_code/config/minimal-config.yaml</code></td>
+<td>YAML</td>
+<td>Minimal config</td>
+</tr>
+<tr>
+<td><code>helix_code/config/production-config.yaml</code></td>
+<td>YAML</td>
+<td>Production config</td>
+</tr>
+<tr>
+<td><code>helix_code/config/test-config.yaml</code></td>
+<td>YAML</td>
+<td>Test config</td>
+</tr>
+<tr>
+<td><code>helix_code/config/model-aliases.example.yaml</code></td>
+<td>YAML</td>
+<td>Model aliases example</td>
+</tr>
+<tr>
+<td><code>helix_code/docker/docker-compose.yml</code></td>
+<td>Docker Compose</td>
+<td>Docker orchestration</td>
+</tr>
+<tr>
+<td><code>helix_code/api/openapi.yaml</code></td>
+<td>OpenAPI</td>
+<td>API specification</td>
+</tr>
+<tr>
+<td><code>helix_code/.env.example</code></td>
+<td>Environment</td>
+<td>Extended env template (2,998 bytes)</td>
+</tr>
+<tr>
+<td><code>helix_code/.env.full-test</code></td>
+<td>Environment</td>
+<td>Full test env (4,607 bytes)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="github-actions-ci">6.3 GitHub Actions / CI</h3>
+<table>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.github/workflows/notification-tests.yml</code></td>
+<td>Notification test automation (3,249 bytes)</td>
+</tr>
+<tr>
+<td><code>helix_code/.github/workflows/</code></td>
+<td>Additional workflows in nested project</td>
+</tr>
+</tbody>
+</table>
+<h3 id="configuration-summary-by-technology">6.4 Configuration Summary
+by Technology</h3>
+<table>
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Files Found</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Go</strong></td>
+<td><code>go.mod</code>, <code>go.sum</code> (root + helix_code/)</td>
+</tr>
+<tr>
+<td><strong>Docker</strong></td>
+<td><code>Dockerfile</code>, <code>Dockerfile.test</code>,
+<code>Dockerfile.worker</code>, <code>docker-compose.helix.yml</code>,
+<code>docker-compose.test.yml</code></td>
+</tr>
+<tr>
+<td><strong>YAML</strong></td>
+<td><code>test-config.yaml</code>, <code>configs/verifier.yaml</code>,
+<code>helix_code/config/*.yaml</code>,
+<code>helix_code/api/openapi.yaml</code></td>
+</tr>
+<tr>
+<td><strong>Shell</strong></td>
+<td><code>setup.sh</code>, <code>docker-entrypoint.sh</code>,
+<code>install_missing_libs.sh</code>,
+<code>penpot-integration.sh</code>, <code>test-docker-quick.sh</code>,
+<code>test-docker-setup.sh</code></td>
+</tr>
+<tr>
+<td><strong>JSON</strong></td>
+<td><code>helix.security.json</code></td>
+</tr>
+<tr>
+<td><strong>SQL</strong></td>
+<td><code>postgres-init.sql</code></td>
+</tr>
+<tr>
+<td><strong>Markdown</strong></td>
+<td>50+ documentation files</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="helixagent-cli_agents-directory-status">7. HELIXAGENT CLI_AGENTS
+DIRECTORY STATUS</h2>
+<table>
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HelixAgent Submodule Present</strong></td>
+<td>NO</td>
+</tr>
+<tr>
+<td><strong>cli_agents Directory Accessible</strong></td>
+<td>NO - Cannot check a submodule that does not exist</td>
+</tr>
+<tr>
+<td><strong>References in AGENTS.md</strong></td>
+<td>YES - “Derived from HelixAgent AGENTS.md with HelixCode-specific
+enhancements”</td>
+</tr>
+<tr>
+<td><strong>Conclusion</strong></td>
+<td>HelixAgent was either merged into HelixCode directly or is an
+external dependency that was never added as a submodule. The
+<code>cli_agents</code> directory status is UNKNOWN because the
+submodule is not present.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="dependency-graph">8. DEPENDENCY GRAPH</h2>
+<pre><code>HelixCode (root)
+├── Go Module: dev.helix.code
+│   └── github.com/google/uuid v1.6.0
+│   └── github.com/pkg/errors v0.9.1
+│   └── gopkg.in/yaml.v2 v2.4.0
+│
+├── Docker Infrastructure
+│   ├── PostgreSQL 15
+│   ├── Redis
+│   └── Main HelixCode Container (3GB mem limit)
+│
+├── Core Dependencies (submodules)
+│   ├── LLama_CPP (ggml-org/llama.cpp)
+│   ├── Ollama (ollama/ollama)
+│   ├── HuggingFace_Hub (huggingface/huggingface_hub)
+│   ├── DocProcessor (HelixDevelopment/DocProcessor)
+│   ├── LLMOrchestrator (HelixDevelopment/LLMOrchestrator)
+│   ├── LLMProvider (HelixDevelopment/LLMProvider)
+│   ├── LLMsVerifier (vasic-digital/LLMsVerifier) ✓
+│   └── VisionEngine (HelixDevelopment/VisionEngine)
+│
+├── Quality Assurance (submodules)
+│   ├── helix_qa (HelixDevelopment/HelixQA) ✓
+│   ├── Challenges (vasic-digital/Challenges) ✓
+│   └── containers (vasic-digital/Containers) ✓
+│
+├── Missing Core Components
+│   ├── HelixAgent (MISSING)
+│   ├── HelixLLM (MISSING)
+│   ├── HelixMemory (MISSING)
+│   └── HelixSpecifier (MISSING)
+│
+├── Website
+│   └── github_pages_website (HelixDevelopment-Code/Welcome)
+│
+├── External AI CLI Examples (30+ submodules)
+│   ├── Anthropic: Claude_Code, Codex, Codex-Skills
+│   ├── OpenAI: Codex (org-specific)
+│   ├── Google: Gemini_CLI
+│   ├── Microsoft: TaskWeaver
+│   ├── AWS: Amazon-Q-Developer-CLI
+│   └── ... (many more)
+│
+└── External AI Resources
+    ├── awesome-ai-memory
+    ├── Awesome-AI-Agents
+    ├── Awesome-AI-GPTs
+    └── OpenAI-Cookbook</code></pre>
+<hr />
+<h2 id="submodule-initialization-notes">9. SUBMODULE INITIALIZATION
+NOTES</h2>
+<h3 id="ssh-vs-https">SSH vs HTTPS</h3>
+<ul>
+<li><strong>ALL submodules use SSH URLs</strong>
+(<code>git@github.com:...</code>)</li>
+<li>This means <code>git submodule update --init --recursive</code> will
+<strong>FAIL</strong> without SSH keys configured</li>
+<li>Two options for initialization:
+<ol type="1">
+<li><strong>SSH Setup:</strong> Configure <code>~/.ssh/id_rsa</code> or
+<code>~/.ssh/id_ed25519</code> with GitHub access</li>
+<li><strong>HTTPS Rewrite:</strong> Run
+<code>git config --global url.&quot;https://github.com/&quot;.insteadOf &quot;git@github.com:&quot;</code>
+before submodule init</li>
+</ol></li>
+<li>The <code>.gitmodules.bak.https-to-ssh</code> file suggests the
+repository was migrated FROM HTTPS TO SSH at some point</li>
+</ul>
+<h3 id="submodule-organization">Submodule Organization</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+<th>Paths</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Example Projects (AI CLI tools)</td>
+<td>~35</td>
+<td><code>Example_Projects/</code></td>
+</tr>
+<tr>
+<td>Example Resources</td>
+<td>~5</td>
+<td><code>Example_Resources/</code></td>
+</tr>
+<tr>
+<td>Core Dependencies</td>
+<td>8</td>
+<td><code>dependencies/</code> + root</td>
+</tr>
+<tr>
+<td>Website</td>
+<td>1</td>
+<td><code>github_pages_website/</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="recommended-actions">10. RECOMMENDED ACTIONS</h2>
+<h3 id="immediate">Immediate</h3>
+<ol type="1">
+<li><p><strong>Configure SSH keys</strong> or set HTTPS rewrite before
+running <code>git submodule update --init --recursive</code></p></li>
+<li><p><strong>Add missing submodules</strong> if they are required:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add git@github.com:HelixDevelopment/HelixAgent.git submodules/helix_agent</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add git@github.com:HelixDevelopment/HelixLLM.git submodules/helix_llm</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add git@github.com:HelixDevelopment/HelixMemory.git submodules/helix_memory</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add git@github.com:HelixDevelopment/HelixSpecifier.git submodules/helix_specifier</span></code></pre></div></li>
+<li><p><strong>Investigate HelixAgent relationship</strong> - Determine
+if HelixAgent functionality was intentionally merged into HelixCode or
+if it’s a missing dependency</p></li>
+</ol>
+<h3 id="for-full-clone">For Full Clone</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 1: SSH (recommended for submodule URLs)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:HelixDevelopment/HelixCode.git</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 2: HTTPS with URL rewrite for submodules</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/HelixDevelopment/HelixCode.git</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config url.<span class="st">&quot;https://github.com/&quot;</span>.insteadOf <span class="st">&quot;git@github.com:&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span></span></code></pre></div>
+<hr />
+<h2 id="appendix-raw-data">11. APPENDIX: RAW DATA</h2>
+<h3 id="gitmodules-sha">.gitmodules SHA</h3>
+<ul>
+<li>SHA: <code>26980b463c02e5a2a127f778215413e7937202e7</code></li>
+<li>Size: 11,824 bytes</li>
+</ul>
+<h3 id="go-module-root">Go Module (root)</h3>
+<pre><code>module dev.helix.code
+
+go 1.25.2
+
+require (
+    github.com/google/uuid v1.6.0 // indirect
+    github.com/pkg/errors v0.9.1 // indirect
+    gopkg.in/yaml.v2 v2.4.0 // indirect
+)</code></pre>
+<h3 id="docker-compose.helix.yml-services">docker-compose.helix.yml
+Services</h3>
+<ul>
+<li><code>helixcode</code> - Main application (ports 8080, 2222,
+3000)</li>
+<li><code>postgres</code> - PostgreSQL 15 (4GB mem limit)</li>
+<li><code>redis</code> - Redis cache</li>
+</ul>
+<hr />
+<p><em>Report generated via GitHub API analysis. Repository clone failed
+due to HTTP/2 network framing errors in the target environment.</em></p>
+</body>
+</html>

@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage2_present_submodules_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage2_present_submodules_analysis</h1>
+</header>
+<h1 id="stage-2-present-submodules-analysis-for-helixcode-cli-agent-integration">Stage
+2: PRESENT Submodules Analysis for HelixCode CLI Agent Integration</h1>
+<p><strong>Date:</strong> May 4, 2026<br />
+<strong>Analyst:</strong> AI Codebase Analysis System<br />
+<strong>Scope:</strong> 4 PRESENT submodules in HelixCode<br />
+<strong>Methodology:</strong> Local repo analysis + GitHub API context +
+source code inspection</p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This report analyzes the four PRESENT submodules that comprise the
+testing and verification backbone of HelixCode:</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 14%" />
+<col style="width: 26%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Status</th>
+<th>Test Coverage</th>
+<th>Integration Readiness</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLMsVerifier</strong></td>
+<td>✅ Mature, 25+ providers, ACP protocol</td>
+<td>95%+</td>
+<td>Needs CLI agent-specific verification mode</td>
+</tr>
+<tr>
+<td><strong>HelixQA</strong></td>
+<td>✅ Mature, 235 tests, autonomous QA</td>
+<td>235 tests passing</td>
+<td>Already has CLI agent test bank (47 agents)</td>
+</tr>
+<tr>
+<td><strong>Challenges</strong></td>
+<td>✅ Mature, 209+ tests, plugin architecture</td>
+<td>209+</td>
+<td>Needs CLI agent challenge templates</td>
+</tr>
+<tr>
+<td><strong>Containers</strong></td>
+<td>✅ Mature, 6 runtimes, remote distribution</td>
+<td>Comprehensive</td>
+<td>Ready for CLI agent sandboxing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Critical Finding:</strong> All four submodules exist as
+<strong>uninitialized Git submodules</strong> in HelixCode (empty
+directories). They are defined in <code>.gitmodules</code> but have not
+been populated. The standalone repositories at
+<code>github.com/vasic-digital/*</code> and
+<code>github.com/HelixDevelopment/HelixQA</code> contain the actual
+code.</p>
+<hr />
+<h2 id="llmsverifier-github.comvasic-digitalllmsverifier">1.
+LLMsVerifier (<code>github.com/vasic-digital/LLMsVerifier</code>)</h2>
+<h3 id="architecture-key-components">1.1 Architecture &amp; Key
+Components</h3>
+<p>LLMsVerifier is an enterprise-grade LLM verification platform built
+in Go 1.21+ with a modular, event-driven architecture:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                        Client Interfaces                            │
+│  CLI │ TUI │ Web (Angular) │ API (Gin/REST) │ Mobile (React Native)│
+├─────────────────────────────────────────────────────────────────────┤
+│                        Core Processing Layer                        │
+│  Verifier Engine │ Reporter Engine │ Configuration Manager         │
+├─────────────────────────────────────────────────────────────────────┤
+│                        Advanced Features Layer                      │
+│  Supervisor/Worker │ Context Management │ Checkpoint │ Failover    │
+├─────────────────────────────────────────────────────────────────────┤
+│                        Infrastructure Layer                         │
+│  Events │ Scheduling │ Pricing Detection │ Limits │ Issues │ Vector │
+├─────────────────────────────────────────────────────────────────────┤
+│                        Storage &amp; Communication                      │
+│  SQLite+SQLCipher │ Event Bus │ Redis Cache │ API Clients           │
+├─────────────────────────────────────────────────────────────────────┤
+│                        External Integrations                        │
+│  OpenAI │ Anthropic │ Cloud Providers │ Vector DB                 │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="provider-adapters-25-implementations">1.2 Provider Adapters (25+
+Implementations)</h3>
+<p>The README states “12 Provider Adapters” but source code analysis
+reveals <strong>25+ provider implementations</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 16%" />
+<col style="width: 21%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>File</th>
+<th>Status</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td><code>providers/openai.go</code> +
+<code>openai_endpoints.go</code></td>
+<td>Core</td>
+<td>GPT-4, streaming, functions, vision, ACP</td>
+</tr>
+<tr>
+<td><strong>Anthropic</strong></td>
+<td><code>providers/anthropic.go</code></td>
+<td>Core</td>
+<td>Claude 3, tool use, multimodal</td>
+</tr>
+<tr>
+<td><strong>Cohere</strong></td>
+<td><code>providers/cohere.go</code></td>
+<td>Core</td>
+<td>Command, Embed</td>
+</tr>
+<tr>
+<td><strong>Groq</strong></td>
+<td><code>providers/groq.go</code></td>
+<td>Core</td>
+<td>Fast inference, Llama, Mixtral</td>
+</tr>
+<tr>
+<td><strong>Mistral</strong></td>
+<td><code>providers/mistral.go</code></td>
+<td>Core</td>
+<td>Mixtral, Mistral Large</td>
+</tr>
+<tr>
+<td><strong>DeepSeek</strong></td>
+<td><code>providers/deepseek.go</code></td>
+<td>Core</td>
+<td>DeepSeek-chat, Coder</td>
+</tr>
+<tr>
+<td><strong>Cloudflare Workers AI</strong></td>
+<td><code>providers/cloudflare.go</code></td>
+<td>Core</td>
+<td>Edge deployment</td>
+</tr>
+<tr>
+<td><strong>SiliconFlow</strong></td>
+<td><code>providers/siliconflow.go</code></td>
+<td>Core</td>
+<td>Chinese models</td>
+</tr>
+<tr>
+<td><strong>Cerebras</strong></td>
+<td><code>providers/cerebras.go</code></td>
+<td>Extended</td>
+<td>Wafer-scale</td>
+</tr>
+<tr>
+<td><strong>Replicate</strong></td>
+<td><code>providers/</code> (implied)</td>
+<td>Extended</td>
+<td>Model hosting</td>
+</tr>
+<tr>
+<td><strong>xAI</strong></td>
+<td><code>providers/</code> (implied)</td>
+<td>Extended</td>
+<td>Grok</td>
+</tr>
+<tr>
+<td><strong>Together AI</strong></td>
+<td><code>providers/</code> (implied)</td>
+<td>Extended</td>
+<td>Inference</td>
+</tr>
+<tr>
+<td><strong>Kimi</strong></td>
+<td><code>providers/kimi.go</code></td>
+<td>Extended</td>
+<td>Moonshot AI</td>
+</tr>
+<tr>
+<td><strong>KimiCode</strong></td>
+<td><code>providers/kimicode.go</code></td>
+<td>Extended</td>
+<td>Code-specific</td>
+</tr>
+<tr>
+<td><strong>Kilo</strong></td>
+<td><code>providers/kilo.go</code></td>
+<td>Extended</td>
+<td>Kilo-Org</td>
+</tr>
+<tr>
+<td><strong>Qwen</strong></td>
+<td><code>providers/qwen.go</code></td>
+<td>Extended</td>
+<td>Alibaba</td>
+</tr>
+<tr>
+<td><strong>Hyperbolic</strong></td>
+<td><code>providers/hyperbolic.go</code></td>
+<td>Extended</td>
+<td>GPU cloud</td>
+</tr>
+<tr>
+<td><strong>Modal</strong></td>
+<td><code>providers/modal.go</code></td>
+<td>Extended</td>
+<td>Serverless</td>
+</tr>
+<tr>
+<td><strong>NIA</strong></td>
+<td><code>providers/nia.go</code></td>
+<td>Extended</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Novita</strong></td>
+<td><code>providers/novita.go</code></td>
+<td>Extended</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NLP Cloud</strong></td>
+<td><code>providers/nlpcloud.go</code></td>
+<td>Extended</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>PublicAI</strong></td>
+<td><code>providers/publicai.go</code></td>
+<td>Extended</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Sarvam</strong></td>
+<td><code>providers/sarvam.go</code></td>
+<td>Extended</td>
+<td>Indian languages</td>
+</tr>
+<tr>
+<td><strong>Upstage</strong></td>
+<td><code>providers/upstage.go</code></td>
+<td>Extended</td>
+<td>Korean</td>
+</tr>
+<tr>
+<td><strong>Vulavula</strong></td>
+<td><code>providers/vulavula.go</code></td>
+<td>Extended</td>
+<td>African languages</td>
+</tr>
+<tr>
+<td><strong>Zhipu</strong></td>
+<td><code>providers/zhipu.go</code></td>
+<td>Extended</td>
+<td>Chinese (GLM)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="acp-protocol-implementation">1.3 ACP Protocol
+Implementation</h3>
+<p><strong>ACP = AI Coding Protocol</strong> - A standardized JSON-RPC
+2.0 based protocol for testing AI coding assistant capabilities.</p>
+<p><strong>Implementation Details:</strong> - Location:
+<code>llm-verifier/tests/acp_*.go</code> (5 test files) - CLI tool:
+<code>acp-cli</code> with <code>verify</code>, <code>batch</code>,
+<code>monitor</code> subcommands - Scoring: 5-component weighted score
+(0.0-1.0) - Protocol Comprehension: 25% - Tool Calling: 25% - Context
+Handling: 20% - Code Quality: 20% - Error Handling: 10% - Integration
+tests cover: detection, scoring, API validation, E2E workflow,
+performance, security, automation</p>
+<p><strong>ACP Test Flow:</strong></p>
+<pre><code>1. JSON-RPC request sent to model
+2. Model must understand textDocument/completion, tool invocation
+3. Verifier checks: context maintenance, code quality, error detection
+4. Score calculated and stored
+5. Config exports include ACP flag for verified models</code></pre>
+<h3 id="brotli-compression-usage">1.4 Brotli Compression Usage</h3>
+<p><strong>Status: Detection implemented, zero CLI agents actually use
+it</strong></p>
+<ul>
+<li>Brotli is tracked as a capability in the compression detection
+system</li>
+<li>Config generator produces <code>brotli</code> flags but no known CLI
+agent enables it</li>
+<li>The capability matrix shows: <code>brotli</code> - “None discovered”
+among agents</li>
+<li>Actual compression used by agents: <code>gzip</code> (Amazon Q,
+Plandex, Kiro), <code>semantic</code> (Forge), <code>chat</code>
+(OllamaCode, GeminiCLI)</li>
+</ul>
+<p><strong>Brotli Metrics Available:</strong> -
+<code>llm_verifier_brotli_tests_performed</code> -
+<code>llm_verifier_brotli_supported_models</code> -
+<code>llm_verifier_brotli_support_rate_percent</code> -
+<code>llm_verifier_brotli_cache_hits/misses</code></p>
+<h3 id="kubernetes-deployment-patterns">1.5 Kubernetes Deployment
+Patterns</h3>
+<p><strong>Deployment Options:</strong> - Docker Compose (single host) -
+Kubernetes (multi-container, production) - Binary deployment - Cloud
+native (serverless)</p>
+<p><strong>K8s Manifests Structure:</strong></p>
+<pre><code>k8s-manifests/
+  ├── deployment.yaml        # 3-replica Deployment
+  ├── service.yaml           # ClusterIP/LoadBalancer
+  ├── configmap.yaml         # Config injection
+  ├── secret.yaml            # API keys (encrypted)
+  ├── hpa.yaml               # Horizontal Pod Autoscaler
+  └── ingress.yaml           # TLS termination</code></pre>
+<p><strong>Helm Charts:</strong> <code>helm/</code> directory with
+production values including verification-enabled mode.</p>
+<h3 id="verification-algorithms">1.6 Verification Algorithms</h3>
+<p><strong>Mandatory Model Verification:</strong> 1. <strong>Code
+Visibility Test</strong>: “Do you see my code?” - models must respond
+affirmatively 2. <strong>Scoring System</strong>: 0.0-1.0 based on
+response quality 3. <strong>Feature Detection</strong>: 20+ capability
+tests across coding, reasoning, multimodal 4. <strong>LLMSVD
+Suffix</strong>: All verified models get <code>(llmsvd)</code> branding
+suffix 5. <strong>Strict Mode</strong>: Only verified models included in
+exports</p>
+<p><strong>Verification Pipeline:</strong></p>
+<pre><code>Registry.Register(challenges) -&gt; Runner.RunAll(ctx, config)
+  -&gt; topological sort by dependencies
+  -&gt; challenge.Configure() -&gt; Validate() -&gt; Execute(ctx)
+  -&gt; ProgressReporter -&gt; Liveness Monitor
+  -&gt; Result + Assertions -&gt; assertion.Engine.Evaluate()
+  -&gt; report.Reporter.Generate()</code></pre>
+<h3 id="integration-with-helixcode">1.7 Integration with HelixCode</h3>
+<p><strong>Current Status:</strong> ❌ <strong>NOT INTEGRATED</strong>
+(submodule directory empty)</p>
+<ul>
+<li>Defined in <code>.gitmodules</code>:
+<code>url = git@github.com:vasic-digital/LLMsVerifier.git</code></li>
+<li>Directory exists but is empty (submodule not initialized)</li>
+<li>HelixQA’s autonomous QA session imports
+<code>digital.vasic.llmsverifier</code> as a Go module</li>
+<li>Capability Detection system already catalogs 47 CLI agents and their
+features</li>
+<li><strong>Integration Gap</strong>: No verifier.yaml config exists in
+HelixCode; config is typically in <code>config.yaml</code> in
+LLMsVerifier</li>
+</ul>
+<h3 id="whats-working-vs-missing">1.8 What’s Working vs Missing</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Working</th>
+<th>Missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>25+ provider adapters</td>
+<td>CLI agent-specific verification mode</td>
+</tr>
+<tr>
+<td>ACP protocol tests</td>
+<td>Direct HelixCode integration (submodule empty)</td>
+</tr>
+<tr>
+<td>Brotli detection</td>
+<td>Brotli not used by any CLI agent</td>
+</tr>
+<tr>
+<td>K8s deployment manifests</td>
+<td>verifier.yaml not present in HelixCode</td>
+</tr>
+<tr>
+<td>Capability detection for 18+ CLI agents</td>
+<td>Auto-configuration generation for HelixCode specifically</td>
+</tr>
+<tr>
+<td>Model scoring with verification</td>
+<td>Real-time model quality monitoring for CLI agents</td>
+</tr>
+</tbody>
+</table>
+<h3 id="extension-requirements-for-cli-agent-testing">1.9 Extension
+Requirements for CLI Agent Testing</h3>
+<ol type="1">
+<li><strong>Add CLI agent verification mode</strong>: Extend
+<code>TestACPs()</code> to test CLI agents as endpoints (not just LLM
+models)</li>
+<li><strong>Create <code>verifier.yaml</code> in HelixCode</strong>:
+Define HelixCode-specific verification rules</li>
+<li><strong>Bridge LLMsVerifier scoring to HelixQA</strong>: Use
+<code>StrategyScore</code> -&gt; <code>ModelInfo</code> -&gt; test bank
+selection</li>
+<li><strong>Add MCP tool verification</strong>: Test that CLI agents
+correctly use HelixAgent’s 45+ MCP tools</li>
+<li><strong>Ensemble verification</strong>: Verify that multiple models
+in ensemble produce correct outputs</li>
+</ol>
+<hr />
+<h2 id="helix_qa-github.comhelixdevelopmenthelixqa">2. helix_qa
+(<code>github.com/HelixDevelopment/HelixQA</code>)</h2>
+<h3 id="architecture-key-components-1">2.1 Architecture &amp; Key
+Components</h3>
+<p>HelixQA is a QA orchestration engine built on Go 1.24+ that composes
+Challenges and Containers:</p>
+<pre><code>HelixQA (Orchestration Layer)
+├── pkg/orchestrator      ── Main QA brain
+├── pkg/testbank          ── YAML test bank management
+├── pkg/detector          ── Real-time crash/ANR detection
+├── pkg/validator         ── Step-by-step validation
+├── pkg/evidence          ── Evidence collection (screenshots, logs, video)
+├── pkg/ticket            ── Markdown ticket generation
+├── pkg/reporter          ── QA report generation (MD, HTML, JSON)
+├── pkg/config            ── Configuration types
+├── pkg/autonomous        ── LLM-powered autonomous QA (4-phase session)
+├── pkg/navigator         ── NavigationEngine + ActionExecutor
+├── pkg/issuedetector       ── LLM-powered bug detection
+├── pkg/session           ── SessionRecorder + Timeline + VideoManager
+├── pkg/llm               ── LLM provider bridge (Anthropic, OpenAI, Google, Ollama, Astica)
+├── pkg/screenshot        ── Multi-platform screenshot engines
+└── cmd/helixqa           ── CLI entry point</code></pre>
+<h3 id="test-bank-architecture">2.2 Test Bank Architecture</h3>
+<p><strong>Dual Format Support:</strong> - <strong>YAML</strong>
+(preferred): QA-specific with platform targeting, priority,
+documentation refs - <strong>JSON</strong>: Challenge-compatible
+format</p>
+<p><strong>Test Bank Example:</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0&quot;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Yole Core Tests&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">test_cases</span><span class="kw">:</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> TC-001</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Create new document&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span><span class="co">  # critical|high|medium|low</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">android</span><span class="kw">,</span><span class="at"> web</span><span class="kw">,</span><span class="at"> desktop</span><span class="kw">]</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Open app&quot;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Launch application&quot;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Main editor screen visible&quot;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">core</span><span class="kw">,</span><span class="at"> smoke</span><span class="kw">]</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">documentation_refs</span><span class="kw">:</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">type</span><span class="kw">:</span><span class="at"> user_guide</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">section</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;3.1&quot;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;docs/USER_MANUAL.md&quot;</span></span></code></pre></div>
+<p><strong>Bank Files Inventory:</strong> | Bank File | Format | Purpose
+| |———–|——–|———| | <code>cli-agents-test-helixagent.json</code> | JSON |
+<strong>47 CLI agents as system validators</strong> | |
+<code>nexus-mobile-android.yaml</code> | YAML | Mobile Android testing |
+| <code>full-qa-*.json</code> | JSON | Full QA cross-platform | |
+<code>security-validation.*</code> | Both | Security tests | |
+<code>ocu-*.json</code> | JSON | OCU automation tests | |
+<code>fixes-validation-*.yaml</code> | YAML | Fix validation tests | |
+<code>app-navigation.yaml</code> | YAML | Navigation flow tests | |
+<code>image-quality-gate.yaml</code> | YAML | Image quality tests |</p>
+<h3 id="dockerkubernetesopencv-integration">2.3 Docker/Kubernetes/OpenCV
+Integration</h3>
+<p><strong>Docker Integration:</strong> - Dockerfile present for
+containerized QA - <code>docker-compose.stack.yml</code> for
+multi-service QA stack - Uses containers module for orchestration</p>
+<p><strong>OpenCV Integration:</strong> - Document:
+<code>OPENCV_INTEGRATION_ARCHITECTURE.md</code> - GoCV-based mechanical
+vision analysis - VisionEngine integration for screen analysis -
+Screenshot engines: Android (ADB), Web (Playwright), Desktop (X11),
+Linux, macOS, Windows, iOS, TUI</p>
+<p><strong>Kubernetes:</strong> - Not directly deployed to K8s, but can
+test K8s-deployed applications - Container orchestration via
+digital.vasic.containers module</p>
+<h3 id="qa-session-framework">2.4 QA Session Framework</h3>
+<p><strong>Autonomous QA Session (4-Phase Lifecycle):</strong></p>
+<pre class="mermaid"><code>graph LR
+    P1[Phase 1: Setup] --&gt; P2[Phase 2: Doc-Driven]
+    P2 --&gt; P3[Phase 3: Curiosity]
+    P3 --&gt; P4[Phase 4: Report]
+    
+    P1 --&gt; LLMsVerifier[Model Selection]
+    P1 --&gt; DocProcessor[Feature Map]
+    P1 --&gt; LLMOrchestrator[Agent Pool]
+    P1 --&gt; VisionEngine[Analyzer]
+    
+    P2 --&gt; PlatformWorker[Parallel Workers]
+    P3 --&gt; PlatformWorker[Exploration]
+    P4 --&gt; SessionRecorder[Evidence Aggregation]</code></pre>
+<p><strong>Resilience Architecture (5 Degradation Levels):</strong> 1.
+Full capability (LLM + Vision working) 2. Degraded vision (GoCV-only) 3.
+Degraded navigation (partial evidence) 4. Session abort (clean shutdown)
+5. Per-agent circuit breaker (3 failures = replacement)</p>
+<h3 id="test-types-supported">2.5 Test Types Supported</h3>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>Package</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cross-platform functional</td>
+<td><code>pkg/testbank</code></td>
+<td>YAML-defined steps</td>
+</tr>
+<tr>
+<td>Android crash/ANR detection</td>
+<td><code>pkg/detector/android.go</code></td>
+<td>ADB logcat, pidof</td>
+</tr>
+<tr>
+<td>Web browser monitoring</td>
+<td><code>pkg/detector/web.go</code></td>
+<td>pgrep, console errors</td>
+</tr>
+<tr>
+<td>Desktop process monitoring</td>
+<td><code>pkg/detector/desktop.go</code></td>
+<td>JVM/process checks</td>
+</tr>
+<tr>
+<td>Autonomous exploration</td>
+<td><code>pkg/autonomous</code></td>
+<td>LLM + Vision</td>
+</tr>
+<tr>
+<td>Screenshot comparison</td>
+<td><code>pkg/screenshot</code></td>
+<td>SSIM, pixel diff</td>
+</tr>
+<tr>
+<td>Video recording validation</td>
+<td><code>pkg/session</code></td>
+<td>ffmpeg, timeline</td>
+</tr>
+<tr>
+<td>Security validation</td>
+<td><code>banks/security-validation.*</code></td>
+<td>Auth, permissions</td>
+</tr>
+<tr>
+<td>CLI agent integration</td>
+<td><code>banks/cli-agents-test-helixagent.json</code></td>
+<td>47 agents</td>
+</tr>
+</tbody>
+</table>
+<h3 id="coverage-measurement">2.6 Coverage Measurement</h3>
+<ul>
+<li><strong>Target</strong>: 90% coverage
+(<code>CoverageTarget: 0.90</code>)</li>
+<li><strong>Tracking</strong>: <code>coverage.CoverageTracker</code> per
+platform</li>
+<li><strong>Feature map</strong>: Built from project docs via
+DocProcessor</li>
+<li><strong>Navigation graph</strong>: Tracks visited
+screens/states</li>
+<li><strong>235 tests</strong>, all passing with <code>-race</code>
+flag</li>
+</ul>
+<h3 id="how-it-should-test-cli-agent-integrations">2.7 How It Should
+Test CLI Agent Integrations</h3>
+<p><strong>Existing CLI Agent Test Bank
+(<code>cli-agents-test-helixagent.json</code>):</strong> Already defines
+test cases for 47 CLI agents including: - Claude Code (terminal
+integration, bash tools, git workflow) - Aider (code editing, architect
+mode, repo map) - OpenHands (Docker integration, sandbox, multi-agent) -
+Codex (agent mode, tool use, file operations) - Cline (IDE integration,
+auto-approve, checkpoint) - Cursor (tab completion, inline editing,
+composer) - Continue (open source models, privacy) - Kiro (context
+engine, intent detection) - Gemini CLI (multi-modal, document
+processing) - Amazon Q (enterprise, security, compliance)</p>
+<p><strong>Each test case includes:</strong> -
+<code>executor_agent</code>: Which CLI agent runs the test -
+<code>config_file</code>: Exported HelixAgent config for the agent -
+<code>helixagent_features_tested</code>: Feature matrix -
+<code>steps</code>: Action/expected pairs -
+<code>_conversion_note</code>: Manual review required flag</p>
+<h3 id="current-integration-status-in-helixcode">2.8 Current Integration
+Status in HelixCode</h3>
+<p><strong>Status:</strong> ❌ <strong>NOT INTEGRATED</strong>
+(submodule directory empty)</p>
+<ul>
+<li>Defined in <code>.gitmodules</code>:
+<code>url = git@github.com:HelixDevelopment/HelixQA.git</code></li>
+<li>Directory exists but is empty</li>
+<li>HelixCode’s <code>README.md</code> references helix_qa for
+testing</li>
+<li><code>helixqa-final</code> binary (21MB) present in repo but not
+wired to CI</li>
+</ul>
+<h3 id="whats-working-vs-missing-1">2.9 What’s Working vs Missing</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Working</th>
+<th>Missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>235 tests, race-safe</td>
+<td>CLI agent challenge execution runner</td>
+</tr>
+<tr>
+<td>47-agent test bank defined</td>
+<td>Automated execution of CLI agent tests</td>
+</tr>
+<tr>
+<td>4-phase autonomous QA</td>
+<td>CLI agent sandbox isolation integration</td>
+</tr>
+<tr>
+<td>Multi-platform evidence</td>
+<td>Real CLI agent binary orchestration</td>
+</tr>
+<tr>
+<td>Crash/ANR detection</td>
+<td>Agent-to-agent interaction testing</td>
+</tr>
+<tr>
+<td>LLM provider bridge (5 providers)</td>
+<td>Dynamic model selection for CLI agent tests</td>
+</tr>
+</tbody>
+</table>
+<h3 id="extension-requirements">2.10 Extension Requirements</h3>
+<ol type="1">
+<li><strong>CLI Agent Execution Engine</strong>: Extend
+<code>pkg/autonomous</code> with CLI agent-specific
+<code>ActionExecutor</code></li>
+<li><strong>Sandbox Integration</strong>: Connect
+<code>Containers</code> module to run each CLI agent in isolated
+container</li>
+<li><strong>Config Injection</strong>: Auto-generate and inject
+HelixAgent configs for each of 47 agents</li>
+<li><strong>MCP Tool Testing</strong>: Verify each agent can use all 45+
+MCP tools via HelixAgent</li>
+<li><strong>Metrics Collection</strong>: Add Prometheus metrics for CLI
+agent test duration, success rate, feature coverage</li>
+</ol>
+<hr />
+<h2 id="challenges-github.comvasic-digitalchallenges">3. Challenges
+(<code>github.com/vasic-digital/Challenges</code>)</h2>
+<h3 id="architecture-key-components-2">3.1 Architecture &amp; Key
+Components</h3>
+<p>Generic, reusable Go module for structured test scenarios:</p>
+<pre><code>pkg/
+  challenge/     Core types: Challenge interface, Config, Result, BaseChallenge
+  registry/      Challenge registration + dependency ordering (Kahn&#39;s topological sort)
+  runner/        Execution engine (sequential, parallel, pipeline), liveness monitoring
+  assertion/     Assertion engine with 16 built-in evaluators + custom evaluator support
+  report/        Report generation: Markdown, JSON, HTML
+  logging/       Structured logging: JSON, Console, Multi, Redacting
+  env/           Environment variable handling with redaction
+  httpclient/    Generic REST API client with JWT auth
+  bank/          Challenge bank (load definitions from JSON/YAML)
+  monitor/       Live monitoring with WebSocket dashboard
+  metrics/       Prometheus-compatible challenge metrics
+  plugin/        Plugin system for custom challenge types and assertions
+  infra/         Infrastructure bridge to digital.vasic.containers
+  panoptic/      8 panoptic-specific evaluators + CLI adapter
+  userflow/      Multi-platform automation: 8 interfaces, 21 implementations, 19 templates
+cmd/
+  userflow-runner/  CLI runner for user flow challenges</code></pre>
+<h3 id="plugin-architecture-for-challenges">3.2 Plugin Architecture for
+Challenges</h3>
+<p><strong>Plugin System (<code>pkg/plugin</code>):</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Plugin <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    Version<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    Init<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    RegisterChallenge<span class="op">(</span>registry<span class="op">.</span>Registry<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    RegisterAssertion<span class="op">(</span>engine <span class="op">*</span>assertion<span class="op">.</span>Engine<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Loader supports:</strong> - Go plugin <code>.so</code> files
+(dynamic loading) - Built-in plugins (compiled in) -
+Configuration-driven plugin registration</p>
+<p><strong>Extension Points:</strong> 1. Custom challenge types
+(implement <code>challenge.Challenge</code>) 2. Custom assertion
+evaluators (register with <code>assertion.Engine</code>) 3. Custom
+adapters (implement <code>userflow.Adapter</code> interfaces) 4. Custom
+reporters (extend <code>report.Reporter</code>)</p>
+<h3 id="test-types-and-validators">3.3 Test Types and Validators</h3>
+<p><strong>16 Built-in Assertion Evaluators:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Evaluator</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>not_empty</code></td>
+<td>Value is non-nil and non-empty</td>
+</tr>
+<tr>
+<td><code>not_mock</code></td>
+<td>Response is not mocked/placeholder</td>
+</tr>
+<tr>
+<td><code>contains</code></td>
+<td>String contains substring</td>
+</tr>
+<tr>
+<td><code>contains_any</code></td>
+<td>String contains any of given values</td>
+</tr>
+<tr>
+<td><code>min_length</code></td>
+<td>String length meets minimum</td>
+</tr>
+<tr>
+<td><code>quality_score</code></td>
+<td>Numeric score meets threshold</td>
+</tr>
+<tr>
+<td><code>reasoning_present</code></td>
+<td>Response contains reasoning indicators</td>
+</tr>
+<tr>
+<td><code>code_valid</code></td>
+<td>Response contains valid code patterns</td>
+</tr>
+<tr>
+<td><code>min_count</code></td>
+<td>Count meets minimum</td>
+</tr>
+<tr>
+<td><code>exact_count</code></td>
+<td>Count matches exactly</td>
+</tr>
+<tr>
+<td><code>max_latency</code></td>
+<td>Response time within limit</td>
+</tr>
+<tr>
+<td><code>all_valid</code></td>
+<td>All array items are valid</td>
+</tr>
+<tr>
+<td><code>no_duplicates</code></td>
+<td>No duplicate items in array</td>
+</tr>
+<tr>
+<td><code>all_pass</code></td>
+<td>All sub-assertions pass</td>
+</tr>
+<tr>
+<td><code>no_mock_responses</code></td>
+<td>No mocked responses in array</td>
+</tr>
+<tr>
+<td><code>min_score</code></td>
+<td>Numeric minimum score</td>
+</tr>
+</tbody>
+</table>
+<p><strong>12 Userflow-Specific Evaluators:</strong> -
+<code>http_status_ok</code>, <code>http_status_created</code>,
+<code>http_status_unauthorized</code> - <code>http_json_valid</code>,
+<code>browser_element_visible</code>, <code>browser_url_matches</code> -
+<code>mobile_activity_visible</code>,
+<code>mobile_element_exists</code>, <code>build_success</code> -
+<code>test_pass_rate</code>, and more</p>
+<p><strong>8 panoptic Evaluators:</strong> -
+<code>screenshot_exists</code>, <code>video_exists</code>,
+<code>no_ui_errors</code> - <code>ai_confidence_above</code>,
+<code>all_apps_passed</code> - <code>max_duration</code>,
+<code>report_exists</code>, <code>app_count</code></p>
+<h3 id="challenge-definitions">3.4 Challenge Definitions</h3>
+<p><strong>19 Challenge Templates:</strong> -
+<code>APIFlowChallenge</code> - HTTP API flow testing -
+<code>BrowserFlowChallenge</code> - Browser automation -
+<code>MobileFlowChallenge</code> - Mobile app testing -
+<code>DesktopFlowChallenge</code> - Desktop app testing -
+<code>GRPCFlowChallenge</code> - gRPC service testing -
+<code>WebSocketFlowChallenge</code> - WebSocket flow testing -
+<code>BuildChallenge</code> - Build tool integration -
+<code>TestRunnerChallenge</code> - Test execution -
+<code>LintChallenge</code> - Code quality -
+<code>MultiPlatformChallenge</code> - Cross-platform - Plus Recorded
+variants with video verification</p>
+<p><strong>Challenge Lifecycle:</strong></p>
+<pre><code>Registry.Register(challenges)
+  -&gt; Runner.RunAll(ctx, config)
+    -&gt; topological sort by dependencies
+    -&gt; for each challenge:
+      -&gt; Configure() -&gt; Validate() -&gt; Execute(ctx)
+        -&gt; ProgressReporter -&gt; Liveness Monitor
+        -&gt; Result + Assertions
+          -&gt; assertion.Engine.Evaluate()
+            -&gt; report.Reporter.Generate()</code></pre>
+<h3 id="how-it-verifies-ai-capabilities">3.5 How It Verifies AI
+Capabilities</h3>
+<p><strong>panoptic System (<code>pkg/panoptic</code>):</strong> -
+Integrates with vision AI for UI analysis - Captures screenshots and
+videos as evidence - Evaluates AI confidence scores - Detects UI errors
+via AI analysis - CLI adapter for running panoptic challenges</p>
+<p><strong>Anti-Bluff System:</strong> -
+<code>scripts/anti-bluff/bluff-scanner.sh</code> - Detects fake/test
+code - Fixture tests for bluff detection scenarios - Go mutation testing
+(<code>.go-mutesting.yml</code>)</p>
+<h3 id="extension-mechanisms">3.6 Extension Mechanisms</h3>
+<p><strong>Adapter Pattern (8 Interfaces, 21
+Implementations):</strong></p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 42%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Implementations</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BrowserAdapter</code></td>
+<td>PlaywrightCLI, PlaywrightHTTP, Selenium, Cypress, Puppeteer</td>
+<td>CDP, WebDriver</td>
+</tr>
+<tr>
+<td><code>MobileAdapter</code></td>
+<td>ADB, Appium, Maestro, Espresso</td>
+<td>ADB, Appium 2.0, Gradle</td>
+</tr>
+<tr>
+<td><code>DesktopAdapter</code></td>
+<td>TauriCLI</td>
+<td>Tauri WebDriver</td>
+</tr>
+<tr>
+<td><code>APIAdapter</code></td>
+<td>HTTPAPIAdapter</td>
+<td>REST + JWT</td>
+</tr>
+<tr>
+<td><code>GRPCAdapter</code></td>
+<td>GRPCCLIAdapter</td>
+<td>grpcurl</td>
+</tr>
+<tr>
+<td><code>WebSocketFlowAdapter</code></td>
+<td>GorillaWebSocket</td>
+<td>gorilla/websocket</td>
+</tr>
+<tr>
+<td><code>BuildAdapter</code></td>
+<td>Gradle, Cargo, NPM, Robolectric</td>
+<td>Build tools</td>
+</tr>
+<tr>
+<td><code>RecorderAdapter</code></td>
+<td>panopticRecorder, ADBRecorder</td>
+<td>CDP screencast, ADB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Custom Adapter Development:</strong> Docs in
+<code>docs/userflow/writing-adapters.md</code> guide adapter
+creation.</p>
+<h3 id="current-integration-status-in-helixcode-1">3.7 Current
+Integration Status in HelixCode</h3>
+<p><strong>Status:</strong> ❌ <strong>NOT INTEGRATED</strong>
+(submodule directory empty)</p>
+<ul>
+<li>Defined in <code>.gitmodules</code>:
+<code>url = git@github.com:vasic-digital/Challenges.git</code></li>
+<li>Directory exists but is empty</li>
+<li>HelixCode contains its own <code>challenges/</code> directory with
+results, not the module</li>
+</ul>
+<h3 id="whats-working-vs-missing-2">3.8 What’s Working vs Missing</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Working</th>
+<th>Missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>209+ tests across userflow</td>
+<td>CLI agent-specific challenge templates</td>
+</tr>
+<tr>
+<td>16 built-in evaluators</td>
+<td>MCP tool use challenge evaluator</td>
+</tr>
+<tr>
+<td>21 adapter implementations</td>
+<td>CLI agent adapter (e.g., <code>claude-code</code>,
+<code>aider</code>)</td>
+</tr>
+<tr>
+<td>Plugin system with <code>.so</code> loading</td>
+<td>Dynamic challenge loading from HelixCode</td>
+</tr>
+<tr>
+<td>panoptic AI vision integration</td>
+<td>AI agent behavior verification</td>
+</tr>
+<tr>
+<td>Anti-bluff detection</td>
+<td>Bluff detection for AI-generated tests</td>
+</tr>
+</tbody>
+</table>
+<h3 id="extension-requirements-1">3.9 Extension Requirements</h3>
+<ol type="1">
+<li><strong>CLI Agent Adapters</strong>: Create
+<code>CLIAgentAdapter</code> interface with implementations for major
+agents</li>
+<li><strong>MCP Challenge Template</strong>:
+<code>MCPFlowChallenge</code> for testing MCP server interactions</li>
+<li><strong>Agent Behavior Evaluator</strong>:
+<code>agent_response_valid</code>,
+<code>agent_tool_use_correct</code></li>
+<li><strong>HelixCode Challenge Bank</strong>: Load HelixCode-specific
+challenges from submodule</li>
+<li><strong>Dynamic Plugin Loading</strong>: Load challenge plugins from
+HelixCode’s <code>challenges/</code> directory</li>
+</ol>
+<hr />
+<h2 id="containers-github.comvasic-digitalcontainers">4. containers
+(<code>github.com/vasic-digital/Containers</code>)</h2>
+<h3 id="architecture-key-components-3">4.1 Architecture &amp; Key
+Components</h3>
+<p>Generic, runtime-agnostic container orchestration module:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────┐
+│                              Application Layer                                 │
+│  boot.BootManager (High-Level Orchestration)                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  compose.Orchestrator │ health.HealthChecker │ lifecycle.LifecycleManager   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  runtime.ContainerRuntime                                                     │
+│  ├── DockerRuntime                                                             │
+│  ├── PodmanRuntime                                                             │
+│  ├── KubernetesRuntime                                                         │
+│  ├── RemoteRuntime (over SSH)                                                 │
+│  ├── LXDRuntime                                                               │
+│  ├── CRIORuntime                                                              │
+│  └── NerdctlRuntime                                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  distribution.Distributor                                                     │
+│  ├── scheduler.Scheduler (5 strategies)                                       │
+│  ├── remote.HostManager                                                       │
+│  ├── remote.SSHExecutor (ControlMaster pooling)                               │
+│  ├── network.TunnelManager                                                    │
+│  └── volume.VolumeManager (SSHFS/NFS/rsync)                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Foundation: logging │ event │ metrics │ endpoint │ envconfig               │
+└─────────────────────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="dockerpodmankubernetes-abstraction">4.2 Docker/Podman/Kubernetes
+Abstraction</h3>
+<p><strong>Runtime Interface
+(<code>pkg/runtime/runtime.go</code>):</strong></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ContainerRuntime <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    Version<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    IsAvailable<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    Start<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> opts <span class="op">...</span>StartOption<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    Stop<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> opts <span class="op">...</span>StopOption<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    Remove<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> opts <span class="op">...</span>RemoveOption<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    Status<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ContainerStatus<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    List<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> filter ListFilter<span class="op">)</span> <span class="op">([]</span>ContainerInfo<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    Stats<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ContainerStats<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    Exec<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> cmd <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ExecResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    Logs<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> opts <span class="op">...</span>LogOption<span class="op">)</span> <span class="op">(</span>io<span class="op">.</span>ReadCloser<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>6 Runtime Implementations:</strong> 1.
+<strong>Docker</strong> (<code>docker.go</code>) - Full Docker API 2.
+<strong>Podman</strong> (<code>podman.go</code>) - Podman API (preferred
+for rootless) 3. <strong>Kubernetes</strong>
+(<code>kubernetes.go</code>) - K8s API via client-go 4.
+<strong>LXD</strong> (<code>lxd.go</code>) - LXD containers 5.
+<strong>CRI-O</strong> (<code>crio.go</code>) - Kubernetes CRI 6.
+<strong>nerdctl</strong> (<code>nerdctl.go</code>) - Containerd CLI</p>
+<p><strong>Auto-Detection (<code>detect.go</code>):</strong></p>
+<pre><code>Try: podman-compose -&gt; docker compose -&gt; podman compose -&gt; docker-compose</code></pre>
+<h3 id="container-lifecycle-management">4.3 Container Lifecycle
+Management</h3>
+<p><strong>LifecycleManager (<code>pkg/lifecycle/</code>):</strong> -
+<strong>LazyBooter</strong>: Start container on first
+<code>Acquire()</code> - <strong>IdleShutdown</strong>: Stop after
+inactivity timeout - <strong>ConcurrencySemaphore</strong>: Limit
+parallel users</p>
+<p><strong>Boot Sequence:</strong> 1. Discovery Phase - Probe endpoints
+2. Grouping Phase - Group by compose file + profile 3. Start Phase
+(Local) - <code>docker compose up -d</code> 4. Deploy Phase (Remote) -
+SSH copy + <code>podman-compose up -d</code> 5. Health Check Phase -
+TCP/HTTP/gRPC checks 6. Summary Phase - Aggregate results</p>
+<h3 id="runtime-detection">4.4 Runtime Detection</h3>
+<p><strong>Compose Detection Flow:</strong></p>
+<pre><code>podman-compose version --short
+  -&gt; Success: use podman-compose
+  -&gt; Fail: docker compose version --short
+    -&gt; Success: use docker compose
+    -&gt; Fail: podman compose version --short
+      -&gt; Success: use podman compose
+      -&gt; Fail: docker-compose version --short
+        -&gt; Success: use docker-compose
+        -&gt; Fail: ERROR - No compose found</code></pre>
+<p><strong>Why podman-compose is preferred:</strong> -
+<code>podman compose</code> delegates to docker-compose v1
+(incompatible) - <code>docker-compose</code> v1 incompatible with Podman
+- <code>podman-compose</code> has native Podman support</p>
+<h3 id="resource-management">4.5 Resource Management</h3>
+<p><strong>5 Scheduling Strategies:</strong></p>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 35%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Algorithm</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RESOURCE_AWARE</strong> (default)</td>
+<td>CPU(40%) + Memory(40%) + Disk(10%) + Network(10%)</td>
+<td>Mixed workloads</td>
+</tr>
+<tr>
+<td><strong>ROUND_ROBIN</strong></td>
+<td>Rotate through hosts</td>
+<td>Simple load balancing</td>
+</tr>
+<tr>
+<td><strong>AFFINITY</strong></td>
+<td>Match labels</td>
+<td>GPU workloads, storage</td>
+</tr>
+<tr>
+<td><strong>SPREAD</strong></td>
+<td>Fewest containers</td>
+<td>High availability</td>
+</tr>
+<tr>
+<td><strong>BIN_PACK</strong></td>
+<td>Fill hosts in order</td>
+<td>Minimize active hosts</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resource Monitoring:</strong> - Container list: ~5ms every
+10s - Container inspect: ~2ms per container every 10s - System metrics:
+~1ms every 10s - Remote probe: ~50ms every 60s</p>
+<p><strong>SSH Connection Pooling (ControlMaster):</strong> - Without:
+~500ms per command - With: ~50ms per command (60% faster)</p>
+<h3 id="how-it-provides-test-isolation">4.6 How It Provides Test
+Isolation</h3>
+<p><strong>Per-Test Container Isolation:</strong></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Each test gets its own container namespace</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>compose<span class="op">.</span>NewOrchestrator<span class="op">().</span>Up<span class="op">(</span>ctx<span class="op">,</span> composeFile<span class="op">,</span> profile<span class="op">)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Run test</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Tear down</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span>ComposeOrchestrator<span class="op">().</span>Down<span class="op">(</span>ctx<span class="op">,</span> composeFile<span class="op">,</span> profile<span class="op">)</span></span></code></pre></div>
+<p><strong>Features for Test Isolation:</strong> - <strong>Lazy
+boot</strong>: containers start only when test needs them - <strong>Idle
+shutdown</strong>: Auto-cleanup after test completion - <strong>Network
+isolation</strong>: Each compose stack gets isolated network -
+<strong>Volume management</strong>: SSHFS/NFS/rsync for shared test data
+- <strong>Remote execution</strong>: Distribute tests across hosts to
+avoid resource contention - <strong>ctop monitoring</strong>: Real-time
+resource usage tracking</p>
+<p><strong>Error Handling for Isolation:</strong> | Error Type | Action
+| Recovery | |————|——–|———-| | Runtime unavailable | Warn, continue |
+Fall back to compose | | Compose fail | Log, continue | Mark service
+failed | | Health check fail | Retry backoff | Mark unhealthy | | SSH
+connection fail | Retry backoff | Mark offline, try next |</p>
+<h3 id="current-integration-status-in-helixcode-2">4.7 Current
+Integration Status in HelixCode</h3>
+<p><strong>Status:</strong> ❌ <strong>NOT INTEGRATED</strong>
+(submodule directory empty)</p>
+<ul>
+<li>Defined in <code>.gitmodules</code>:
+<code>url = git@github.com:vasic-digital/Containers.git</code></li>
+<li>Directory exists but is empty</li>
+<li>HelixCode has extensive docker-compose files in
+<code>.container-caps-backup-20260425-151947/</code></li>
+<li>No direct use of <code>digital.vasic.containers</code> Go module in
+HelixCode</li>
+</ul>
+<h3 id="whats-working-vs-missing-3">4.8 What’s Working vs Missing</h3>
+<table>
+<thead>
+<tr>
+<th>Working</th>
+<th>Missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6 runtime implementations</td>
+<td>CLI agent container profiles</td>
+</tr>
+<tr>
+<td>Remote distribution via SSH</td>
+<td>Per-agent container definitions</td>
+</tr>
+<tr>
+<td>5 scheduling strategies</td>
+<td>GPU scheduling for AI model containers</td>
+</tr>
+<tr>
+<td>Lazy boot + idle shutdown</td>
+<td>Agent workspace volume management</td>
+</tr>
+<tr>
+<td>ctop TUI monitoring</td>
+<td>Containerized CLI agent test runner</td>
+</tr>
+<tr>
+<td>Health check (TCP/HTTP/gRPC)</td>
+<td>Agent health endpoint verification</td>
+</tr>
+</tbody>
+</table>
+<h3 id="extension-requirements-2">4.9 Extension Requirements</h3>
+<ol type="1">
+<li><strong>CLI Agent Container Profiles</strong>: Define Dockerfiles
+for each of 47 CLI agents</li>
+<li><strong>Sandbox Mode</strong>: Extend <code>lifecycle</code> with
+agent sandbox isolation</li>
+<li><strong>Workspace Volume</strong>: Mount host workspace into agent
+container for file operations</li>
+<li><strong>GPU Scheduling</strong>: Add GPU-aware scheduling for AI
+model containers</li>
+<li><strong>Agent Health Checks</strong>: Define custom health checks
+for CLI agent containers</li>
+<li><strong>Network Isolation</strong>: Ensure agents can’t interfere
+with each other’s network</li>
+</ol>
+<hr />
+<h2 id="cross-submodule-integration-analysis">5. Cross-Submodule
+Integration Analysis</h2>
+<h3 id="dependency-graph">5.1 Dependency Graph</h3>
+<pre><code>HelixQA (orchestration)
+  ├── Challenges (test execution)
+  │     └── containers (infrastructure)
+  ├── LLMsVerifier (model selection)
+  ├── LLMOrchestrator (agent management)
+  ├── VisionEngine (computer vision)
+  └── DocProcessor (documentation)
+
+Challenges (standalone)
+  └── containers (optional infrastructure bridge)
+
+LLMsVerifier (standalone)
+  └── External: OpenAI, Anthropic, etc.</code></pre>
+<h3 id="integration-gaps">5.2 Integration Gaps</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 32%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All submodules empty in HelixCode</td>
+<td>Cannot build/test</td>
+<td><code>git submodule update --init --recursive</code></td>
+</tr>
+<tr>
+<td>No <code>verifier.yaml</code> in HelixCode</td>
+<td>No LLM verification config</td>
+<td>Create from LLMsVerifier template</td>
+</tr>
+<tr>
+<td>No CLI agent container definitions</td>
+<td>Can’t isolate agent tests</td>
+<td>Add to containers profiles</td>
+</tr>
+<tr>
+<td>No automated CLI agent test runner</td>
+<td>Manual test execution only</td>
+<td>Build into helix_qa autonomous</td>
+</tr>
+<tr>
+<td>No MCP tool challenge evaluator</td>
+<td>Can’t verify MCP functionality</td>
+<td>Add to Challenges evaluators</td>
+</tr>
+<tr>
+<td>Test banks have
+<code>_conversion_note: manual-review-required</code></td>
+<td>Not fully automated</td>
+<td>Build automated adapters</td>
+</tr>
+</tbody>
+</table>
+<h3 id="recommended-integration-wiring">5.3 Recommended Integration
+Wiring</h3>
+<div class="sourceCode" id="cb17"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># helixcode-integration.yaml</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">integration</span><span class="kw">:</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">submodules</span><span class="kw">:</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">LLMsVerifier</span><span class="kw">:</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">path</span><span class="kw">:</span><span class="at"> LLMsVerifier</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">config_source</span><span class="kw">:</span><span class="at"> config.yaml</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">verifier_mode</span><span class="kw">:</span><span class="at"> cli_agents</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">HelixQA</span><span class="kw">:</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">path</span><span class="kw">:</span><span class="at"> HelixQA</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">test_banks</span><span class="kw">:</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> banks/cli-agents-test-helixagent.json</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">autonomous</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">desktop</span><span class="kw">,</span><span class="at"> web</span><span class="kw">]</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">Challenges</span><span class="kw">:</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">path</span><span class="kw">:</span><span class="at"> Challenges</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">challenge_dirs</span><span class="kw">:</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> challenges/baselines</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> challenge-results</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">Containers</span><span class="kw">:</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">path</span><span class="kw">:</span><span class="at"> Containers</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">profiles</span><span class="kw">:</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> cli-agents</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> monitoring</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> qa-stack</span></span></code></pre></div>
+<hr />
+<h2 id="summary-what-each-submodule-needs-for-cli-agent-integration">6.
+Summary: What Each Submodule Needs for CLI Agent Integration</h2>
+<h3 id="llmsverifier">LLMsVerifier</h3>
+<p><strong>Needs:</strong> 1. Initialize submodule in HelixCode 2.
+Create <code>verifier.yaml</code> config specific to CLI agent
+verification 3. Extend ACP protocol tests to cover CLI agent endpoints
+(not just LLM models) 4. Add MCP tool verification scoring 5. Bridge
+<code>StrategyScore</code> to helix_qa test bank selection 6. Add
+ensemble verification for multi-model outputs</p>
+<p><strong>Deliverable:</strong> CLI agent-aware verification
+pipeline</p>
+<h3 id="helixqa">HelixQA</h3>
+<p><strong>Needs:</strong> 1. Initialize submodule in HelixCode 2. Build
+automated <code>ActionExecutor</code> for CLI agents (currently manual)
+3. Connect to <code>Containers</code> module for agent sandboxing 4.
+Auto-generate and inject HelixAgent configs for all 47 agents 5. Remove
+<code>manual-review-required</code> from test banks via adapter
+implementation 6. Add metrics collection for CLI agent test
+campaigns</p>
+<p><strong>Deliverable:</strong> Automated CLI agent QA pipeline with
+evidence collection</p>
+<h3 id="challenges">Challenges</h3>
+<p><strong>Needs:</strong> 1. Initialize submodule in HelixCode 2.
+Create <code>CLIAgentAdapter</code> interface + implementations for
+major agents 3. Add <code>MCPFlowChallenge</code> for MCP server
+interaction testing 4. Create <code>agent_behavior</code> evaluator set
+5. Load HelixCode-specific challenges from submodule 6. Enable dynamic
+plugin loading from HelixCode’s challenge directories</p>
+<p><strong>Deliverable:</strong> CLI agent challenge framework with
+plugin extensibility</p>
+<h3 id="containers">Containers</h3>
+<p><strong>Needs:</strong> 1. Initialize submodule in HelixCode 2.
+Define container profiles for each CLI agent (Dockerfiles, compose
+files) 3. Add GPU scheduling for AI model inference containers 4.
+Implement workspace volume mounting for agent file operations 5. Add
+agent-specific health checks 6. Build containerized test runner for
+isolated agent execution</p>
+<p><strong>Deliverable:</strong> Containerized CLI agent test isolation
+infrastructure</p>
+<hr />
+<h2 id="test-coverage-gaps">7. Test Coverage Gaps</h2>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 44%" />
+<col style="width: 13%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Area</th>
+<th>Current Coverage</th>
+<th>Gap</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI agent installation</td>
+<td>None</td>
+<td>Need install/verify for 47 agents</td>
+<td>High</td>
+</tr>
+<tr>
+<td>CLI agent config loading</td>
+<td>Test bank defined</td>
+<td>Need automated execution</td>
+<td>High</td>
+</tr>
+<tr>
+<td>MCP tool use per agent</td>
+<td>None</td>
+<td>Need challenge templates</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Ensemble output quality</td>
+<td>LLM verification</td>
+<td>Need agent-specific scoring</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Containerized agent execution</td>
+<td>None</td>
+<td>Need containers integration</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Cross-agent interaction</td>
+<td>None</td>
+<td>Need multi-agent challenges</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Agent checkpoint/rollback</td>
+<td>None</td>
+<td>Need stateful challenges</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Streaming compatibility</td>
+<td>Capability detection</td>
+<td>Need runtime tests</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="action-items-for-integration">8. Action Items for
+Integration</h2>
+<ol type="1">
+<li><strong>Immediate (Week 1):</strong>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Initialize all 4 submodules:
+<code>git submodule update --init --recursive</code></label></li>
+<li><label><input type="checkbox"></input>Verify submodules compile
+independently</label></li>
+<li><label><input type="checkbox"></input>Create integration test that imports
+all 4 modules</label></li>
+</ul></li>
+<li><strong>Short-term (Week 2-3):</strong>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Create <code>verifier.yaml</code> in
+HelixCode referencing LLMsVerifier</label></li>
+<li><label><input type="checkbox"></input>Build CLI agent
+<code>ActionExecutor</code> in HelixQA</label></li>
+<li><label><input type="checkbox"></input>Define container profiles for top 10
+CLI agents in Containers</label></li>
+<li><label><input type="checkbox"></input>Add <code>CLIAgentAdapter</code>
+skeleton in Challenges</label></li>
+</ul></li>
+<li><strong>Medium-term (Month 1):</strong>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Automate execution of
+<code>cli-agents-test-helixagent.json</code> test bank</label></li>
+<li><label><input type="checkbox"></input>Add MCP tool challenge
+evaluator</label></li>
+<li><label><input type="checkbox"></input>Implement sandbox isolation for
+agent tests</label></li>
+<li><label><input type="checkbox"></input>Add Prometheus metrics for agent
+test campaigns</label></li>
+</ul></li>
+<li><strong>Long-term (Month 2+):</strong>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Full 47-agent automated test
+suite</label></li>
+<li><label><input type="checkbox"></input>Cross-agent interaction
+testing</label></li>
+<li><label><input type="checkbox"></input>Performance benchmarking across
+agents</label></li>
+<li><label><input type="checkbox"></input>Continuous integration with nightly
+agent compatibility checks</label></li>
+</ul></li>
+</ol>
+<hr />
+<p><em>Report generated from analysis of local repository copies at
+<code>/mnt/agents/repos/</code></em> <em>Submodule repositories:
+LLMsVerifier, HelixQA, Challenges, Containers</em> <em>HelixCode main
+repo:
+<code>/mnt/agents/repos/HelixDevelopment-HelixAgent-fe3f69e/</code></em></p>
+</body>
+</html>

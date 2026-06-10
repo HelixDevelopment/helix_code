@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-046-generatethreadid-non-unique-under-fast-back-to-back-calls-uniqueness-contract-violated">HXC-046
+— generateThreadID() non-unique under fast back-to-back calls
+(uniqueness contract violated)</h1>
+<p>internal/memory/providers TestGenerateThreadID —
+zep_provider_test.go:628: Should not be: “thread-1781003815158614000” —
+two consecutive generateThreadID() calls returned IDENTICAL IDs because
+the generator derives the ID purely from a nanosecond timestamp; on fast
+Apple Silicon both landed in the same nanosecond. Fix: add a monotonic
+counter / entropy suffix. Deterministically reproducible. (HEAD
+54ab4e95)</p>
+<h2 id="fixed-redgreen">FIXED — RED→GREEN</h2>
+<p>RED (S4 capture): TestGenerateThreadID zep_provider_test.go:628
+“Should not be: thread-1781003815158614000” (two calls identical). FIX:
+added package-level <code>var threadIDCounter atomic.Uint64</code>;
+generateThreadID now returns “thread-%d-%d” (UnixNano,
+threadIDCounter.Add(1)) — unique even within the same nanosecond.
++import sync/atomic. GREEN (this session):
+<code>go test -count=1 -run TestGenerateThreadID ./internal/memory/providers/</code>
+→ ok 1.094s; package build OK.</p>
+</body>
+</html>

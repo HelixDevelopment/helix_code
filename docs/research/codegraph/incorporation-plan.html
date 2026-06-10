@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>incorporation-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">incorporation-plan</h1>
+</header>
+<!--
+================================================================================
+Document:      CodeGraph Incorporation Plan
+Revision:      1
+Last modified: 2026-05-20T13:06:13Z
+Authority:     Cascaded from HelixCode root CLAUDE.md / CONSTITUTION.md.
+               Subordinate to constitution/ submodule (CONST-035, §11.4.8
+               deep-research mandate, §11.4.44 metadata-header mandate,
+               §11.4.74 submodule-catalogue-first, CONST-047 recursive
+               application, CONST-050 no-fakes-beyond-unit-tests,
+               CONST-051 decoupling, CONST-053 .gitignore hygiene).
+Status:        Research + plan only. NO installation performed. NO commit.
+Task ID:       CG1 (research + incorporation plan)
+================================================================================
+-->
+<h1 id="codegraph-incorporation-plan">CodeGraph Incorporation Plan</h1>
+<h2 id="scope-non-goals">0. Scope &amp; non-goals</h2>
+<p>This document is the <strong>research deliverable for task
+CG1</strong>. It plans the incorporation of the third-party tool
+<strong>CodeGraph</strong>
+(<code>https://github.com/colbymchenry/codegraph</code>) into the
+HelixCode project so that it is installed and verifiably working for
+<strong>five CLI coding agents</strong>:</p>
+<ol type="1">
+<li><strong>Claude Code</strong> (primary)</li>
+<li><strong>OpenCode</strong></li>
+<li><strong>Kimi CLI</strong></li>
+<li><strong>Crush</strong></li>
+<li><strong>Qwen Code</strong></li>
+</ol>
+<p>No software is installed and no commit is made by CG1. CG1 produces
+only this plan. The implementation phases (CG2…) follow this
+document.</p>
+<hr />
+<h2 id="what-codegraph-is">1. What CodeGraph is</h2>
+<p>CodeGraph is a <strong>pre-indexed code knowledge-graph
+engine</strong> for AI coding agents. It parses a codebase into a local
+graph of symbols (functions, classes, methods) and edges (calls,
+imports, inheritance), stores that graph in a local SQLite database, and
+serves it to AI agents over the <strong>Model Context Protocol
+(MCP)</strong> — so an agent queries the graph instantly instead of
+spawning grep/glob/Read scans. The project’s headline claim is “92%
+fewer tool calls · 71% faster · 100% local”.</p>
+<p>Sources (fetched 2026-05-20): - README:
+<code>https://github.com/colbymchenry/codegraph</code> (repo
+description: <em>“Pre-indexed code knowledge graph for Claude Code,
+Codex, Cursor, and OpenCode — fewer tokens, fewer tool calls, 100%
+local”</em>). - npm package:
+<code>https://www.npmjs.com/package/@colbymchenry/codegraph</code>
+(version <code>0.7.11</code> at research time). - Repo file tree via
+<code>gh api repos/colbymchenry/codegraph/contents</code> —
+<code>package.json</code>,
+<code>src/{installer,mcp,bin,extraction,...}</code>, <code>docs/</code>,
+<code>scripts/local-install.sh</code>.</p>
+<h3 id="technology-runtime">1.1 Technology &amp; runtime</h3>
+<ul>
+<li><strong>Language</strong>: TypeScript (~94%), compiled to
+<code>dist/</code> JavaScript.</li>
+<li><strong>Runtime</strong>: Node.js <code>&gt;=18 &lt;25</code>
+(<code>package.json</code> <code>engines</code>). HelixCode host has
+Node <code>v22.19.0</code> / npm <code>10.9.3</code> — compatible.</li>
+<li><strong>Parsing</strong>: <code>web-tree-sitter</code> +
+<code>tree-sitter-wasms</code> (WASM tree-sitter; no native compile
+needed). Native <code>better-sqlite3</code> is an <em>optional</em>
+dependency; <code>node-sqlite3-wasm</code> is the always-present
+fallback — so install works without a C toolchain.</li>
+<li><strong>Storage</strong>: SQLite DB at
+<code>&lt;project&gt;/.codegraph/codegraph.db</code>, FTS5 index.</li>
+<li><strong>License</strong>: MIT.</li>
+</ul>
+<h3 id="languages-frameworks-indexed">1.2 Languages &amp; frameworks
+indexed</h3>
+<p>19+ languages including <strong>Go</strong> (HelixCode’s primary
+language), TypeScript, JavaScript, Python, Rust, Java, C#, PHP, Ruby, C,
+C++, Swift, Kotlin, Dart. Framework routing recognition for 13
+frameworks including <strong>Gin</strong> (the HelixCode HTTP framework)
+— so CodeGraph can map HelixCode’s Gin routes to their handlers.</p>
+<h3 id="install-init-scan-query-model">1.3 Install / init / scan / query
+model</h3>
+<ul>
+<li><strong>Install</strong>: <code>npx @colbymchenry/codegraph</code>
+(interactive installer) or
+<code>npm install -g @colbymchenry/codegraph</code> (global
+<code>codegraph</code> binary). The installer auto-detects agents and
+writes their MCP config.</li>
+<li><strong>Initialize a project</strong>:
+<code>cd &lt;project&gt; &amp;&amp; codegraph init -i</code> — creates
+<code>.codegraph/</code> (DB + <code>config.json</code>);
+<code>-i</code> runs the first index immediately.</li>
+<li><strong>Scan</strong>: tree-sitter extraction → SQLite storage →
+reference resolution → filesystem-watch auto-sync (2 s debounce).</li>
+<li><strong>Query (CLI)</strong>:
+<code>codegraph query &lt;search&gt;</code>,
+<code>codegraph context &lt;task&gt;</code>,
+<code>codegraph affected [files]</code>,
+<code>codegraph status [path]</code>, <code>codegraph files</code>,
+<code>codegraph index</code>, <code>codegraph sync</code>,
+<code>codegraph serve --mcp</code>.</li>
+<li><strong>Query (MCP tools exposed to agents)</strong>:
+<code>codegraph_search</code>, <code>codegraph_context</code>,
+<code>codegraph_callers</code>, <code>codegraph_callees</code>,
+<code>codegraph_impact</code>, <code>codegraph_node</code>,
+<code>codegraph_files</code>, <code>codegraph_status</code>.</li>
+</ul>
+<h3 id="per-agent-mcp-server-config-shape-from-srcinstaller">1.4
+Per-agent MCP server config shape (from
+<code>src/installer/</code>)</h3>
+<p>The shared stdio server entry
+(<code>src/installer/targets/shared.ts</code>
+<code>getMcpServerConfig()</code>):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;stdio&quot;</span><span class="fu">,</span> <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;codegraph&quot;</span><span class="fu">,</span> <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">,</span> <span class="st">&quot;--mcp&quot;</span><span class="ot">]</span> <span class="fu">}</span></span></code></pre></div>
+<p>OpenCode variant (<code>src/installer/targets/opencode.ts</code>)
+collapses binary+args into one array:
+<code>{ &quot;type&quot;: &quot;local&quot;, &quot;command&quot;: [&quot;codegraph&quot;,&quot;serve&quot;,&quot;--mcp&quot;], &quot;enabled&quot;: true }</code>
+under an <code>mcp.&lt;name&gt;</code> wrapper.</p>
+<hr />
+<h2 id="recommended-incorporation-approach">2. Recommended incorporation
+approach</h2>
+<p><strong>Recommendation: vendored npm install pinned + thin wrapper,
+NOT a git submodule.</strong></p>
+<p>Rationale (constitution-aligned):</p>
+<ul>
+<li><strong>§11.4.74 submodule-catalogue-first / CONST-050
+no-reimplementation</strong>: CodeGraph is a third-party MIT tool. It is
+<em>incorporated as an external dependency</em>, never reimplemented.
+✔</li>
+<li><strong>Not a submodule</strong>: CodeGraph publishes to npm and
+ships pre-built <code>dist/</code>. Adding the GitHub repo as a git
+submodule would require building TypeScript in-tree and tracking
+upstream churn for zero benefit — HelixCode does not modify CodeGraph
+source. CONST-051(B) also forbids injecting HelixCode context into a
+dependency; a submodule invites exactly that. A pinned npm install keeps
+CodeGraph fully decoupled and project-not-aware.</li>
+<li><strong>CONST-038 project-tightening / Git-remote policy</strong>: a
+submodule must be a <code>vasic-digital/*</code> or
+<code>HelixDevelopment/*</code> remote;
+<code>colbymchenry/codegraph</code> is neither. A submodule is therefore
+<em>not permitted</em> anyway. npm install sidesteps the constraint
+cleanly.</li>
+<li><strong>CONST-045-style host independence</strong>: pin the version
+in a manifest so the install is reproducible and not a moving
+target.</li>
+</ul>
+<h3 id="location-in-the-helixcode-tree">2.1 Location in the HelixCode
+tree</h3>
+<p>Create a new top-level tooling directory (lowercase snake_case per
+CONST-052):</p>
+<pre><code>HelixCode/
+└── tools/
+    └── codegraph/
+        ├── README.md              # what it is, how HelixCode uses it
+        ├── codegraph.version      # pinned version string, e.g. 0.7.11
+        ├── install.sh             # idempotent installer (see §3)
+        ├── verify.sh              # anti-bluff end-to-end proof (see §5)
+        └── agents/                # per-agent registration helpers
+            ├── register-claude.sh
+            ├── register-opencode.sh
+            ├── register-kimi.sh
+            ├── register-crush.sh
+            └── register-qwen.sh</code></pre>
+<ul>
+<li><code>tools/</code> is new; it does not collide with the root
+<code>internal/</code> / <code>cmd/security_test/</code> helpers
+described in CLAUDE.md §3.2.</li>
+<li>The CodeGraph runtime itself is installed into a project-local
+<code>tools/codegraph/node_modules/</code> (via
+<code>npm install --prefix</code>) so nothing leaks into the host’s
+global npm and the install is reproducible.</li>
+<li>The scanned-graph artefact <code>.codegraph/</code> is created at
+the <strong>HelixCode repo root</strong> (and inside
+<code>helix_code/</code> for the inner Go module — see §3.4).</li>
+</ul>
+<h3 id="gitignore-obligations-const-053">2.2 <code>.gitignore</code>
+obligations (CONST-053)</h3>
+<p>The following MUST be added to the relevant <code>.gitignore</code>
+files <strong>before</strong> any implementation commit: -
+<code>tools/codegraph/node_modules/</code> — build/dependency artefact,
+forbidden. - <code>.codegraph/</code> — generated SQLite DB + index,
+fully recreatable by <code>codegraph init -i</code>, forbidden from
+version control. - <code>tools/codegraph/codegraph.version</code> and
+the <code>.sh</code> scripts ARE committed (they are the
+generator/source per CONST-053 recreatable-content test).</p>
+<hr />
+<h2 id="install-initialize-scan-procedure">3. Install + initialize +
+scan procedure</h2>
+<p>All steps are codified into <code>tools/codegraph/install.sh</code>
+(idempotent) during implementation. Procedure:</p>
+<h3 id="preconditions">3.1 Preconditions</h3>
+<ul>
+<li>Node.js <code>&gt;=18 &lt;25</code> on <code>PATH</code> (host has
+<code>v22.19.0</code> ✔).</li>
+<li>npm on <code>PATH</code> (host has <code>10.9.3</code> ✔).</li>
+</ul>
+<h3 id="install-codegraph-pinned">3.2 Install CodeGraph (pinned)</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode/tools/codegraph</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">--prefix</span> . @colbymchenry/codegraph@<span class="va">$(</span><span class="fu">cat</span> codegraph.version<span class="va">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># exposes ./node_modules/.bin/codegraph</span></span></code></pre></div>
+<p>Do <strong>not</strong> use the upstream interactive
+<code>npx @colbymchenry/codegraph</code> installer for the agent wiring
+— it only knows Claude/Cursor/Codex/OpenCode and would write configs
+HelixCode wants to control explicitly. Use it (if at all) only for the
+binary install; do the five-agent wiring with HelixCode’s own
+<code>agents/register-*.sh</code> scripts (§4).</p>
+<h3 id="make-the-binary-discoverable">3.3 Make the binary
+discoverable</h3>
+<p>The MCP entries reference the bare command <code>codegraph</code>.
+Two options — pick one in implementation: - <strong>(a)</strong> symlink
+<code>tools/codegraph/node_modules/.bin/codegraph</code> into a
+directory already on the operator’s <code>PATH</code>; or -
+<strong>(b)</strong> use an <strong>absolute path</strong> to
+<code>node_modules/.bin/codegraph</code> as the <code>command</code> in
+every agent’s MCP config (more reproducible, no PATH mutation —
+<strong>preferred</strong>).</p>
+<h3 id="initialize-scan-helixcode">3.4 Initialize + scan HelixCode</h3>
+<p>HelixCode is a meta-repo with an inner Go module. Initialize
+<strong>both</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meta-repo root</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">codegraph</span> init <span class="at">-i</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># inner Go application</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode/helix_code <span class="kw">&amp;&amp;</span> <span class="ex">codegraph</span> init <span class="at">-i</span></span></code></pre></div>
+<p><code>config.json</code> <code>languages</code> should include
+<code>go</code> (auto-detected). <code>exclude</code> should list
+<code>node_modules/**</code>, <code>bin/**</code>, <code>dist/**</code>,
+<code>dependencies/**</code>, <code>cli_agents_resources/**</code> to
+keep the index focused on first-party code.</p>
+<h3 id="verify-the-scan-produced-real-data">3.5 Verify the scan produced
+real data</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> status .            <span class="co"># expect non-zero node/edge/file counts</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> query Provider      <span class="co"># expect real HelixCode symbols (e.g. the</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                              <span class="co"># llm.Provider interface) — non-empty</span></span></code></pre></div>
+<p>Captured output of these two commands is the CONST-035 runtime
+evidence that the scan worked (not just “init ran”).</p>
+<hr />
+<h2 id="per-agent-integration-sub-plans">4. Per-agent integration
+sub-plans</h2>
+<p>CodeGraph is registered with each agent as an <strong>MCP stdio
+server</strong>. The MCP server is the same process
+(<code>codegraph serve --mcp</code>) for all five; only the config file
+location and JSON/TOML shape differ. Below, <code>&lt;CG&gt;</code>
+denotes the absolute path chosen in §3.3(b).</p>
+<h3 id="claude-code-primary">4.1 Claude Code (primary)</h3>
+<ul>
+<li><p><strong>Config file</strong>: project-local
+<code>HelixCode/.mcp.json</code> (preferred for a shared,
+version-controllable project config) — CodeGraph’s own installer uses
+<code>~/.claude.json</code> / <code>./.claude.json</code>, but the
+modern Claude Code project convention is
+<code>.mcp.json</code>.</p></li>
+<li><p><strong>Registration (CLI, preferred)</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">claude</span> mcp add codegraph <span class="at">--scope</span> project <span class="at">--</span> <span class="op">&lt;</span>CG<span class="op">&gt;</span> serve <span class="at">--mcp</span></span></code></pre></div></li>
+<li><p><strong>Equivalent JSON</strong> (<code>.mcp.json</code>):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;codegraph&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;stdio&quot;</span><span class="fu">,</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;CG&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">,</span><span class="st">&quot;--mcp&quot;</span><span class="ot">]</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">}</span></span></code></pre></div></li>
+<li><p><strong>Permissions</strong>: add <code>mcp__codegraph__*</code>
+to <code>.claude/settings.json</code> <code>permissions.allow</code> so
+the eight tools run without prompts.</p></li>
+<li><p>Source: <code>src/installer/targets/claude.ts</code>
+(<code>~/.claude.json</code> ↔︎ <code>./.claude.json</code>,
+<code>settings.json</code> permission shape
+<code>mcp__codegraph__&lt;tool&gt;</code>).</p></li>
+</ul>
+<h3 id="opencode">4.2 OpenCode</h3>
+<ul>
+<li><p><strong>Config file</strong>: project-local
+<code>HelixCode/opencode.jsonc</code> (OpenCode reads
+<code>.jsonc</code>; global is
+<code>~/.config/opencode/opencode.jsonc</code>).</p></li>
+<li><p><strong>Shape</strong> (note: <code>mcp.&lt;name&gt;</code>,
+<code>command</code> is an array, <code>enabled</code> flag):</p>
+<pre class="jsonc"><code>{ &quot;$schema&quot;: &quot;https://opencode.ai/config.json&quot;,
+  &quot;mcp&quot;: { &quot;codegraph&quot;: { &quot;type&quot;: &quot;local&quot;,
+    &quot;command&quot;: [&quot;&lt;CG&gt;&quot;,&quot;serve&quot;,&quot;--mcp&quot;], &quot;enabled&quot;: true } } }</code></pre></li>
+<li><p>Source: <code>src/installer/targets/opencode.ts</code>,
+<code>https://opencode.ai/docs/config</code>.</p></li>
+</ul>
+<h3 id="kimi-cli">4.3 Kimi CLI</h3>
+<ul>
+<li><p><strong>Config file</strong>: <code>~/.kimi/mcp.json</code>
+(Claude-Desktop-compatible <code>mcpServers</code> shape).
+Project-scoped alternative: a dedicated file passed with
+<code>kimi --mcp-config-file &lt;path&gt;</code>.</p></li>
+<li><p><strong>Registration (CLI)</strong>: <code>kimi mcp add</code>
+(interactive), or write directly:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;codegraph&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;CG&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">,</span><span class="st">&quot;--mcp&quot;</span><span class="ot">]</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">}</span></span></code></pre></div></li>
+<li><p>Sources:
+<code>https://moonshotai.github.io/kimi-cli/en/customization/mcp.html</code>,
+<code>https://deepwiki.com/MoonshotAI/kimi-cli/6.7-mcp-integration</code>,
+<code>https://github.com/MoonshotAI/kimi-cli</code>.</p></li>
+</ul>
+<h3 id="crush">4.4 Crush</h3>
+<ul>
+<li><p><strong>Config file</strong>: project-local
+<code>HelixCode/.crush.json</code> (load priority
+<code>.crush.json</code> → <code>crush.json</code> →
+<code>~/.config/crush/crush.json</code>).</p></li>
+<li><p><strong>Shape</strong> (Crush uses an <code>mcp</code> wrapper,
+<code>type: &quot;stdio&quot;</code>):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;$schema&quot;</span><span class="fu">:</span> <span class="st">&quot;https://charm.land/crush.json&quot;</span><span class="fu">,</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcp&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;codegraph&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;stdio&quot;</span><span class="fu">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;CG&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">,</span><span class="st">&quot;--mcp&quot;</span><span class="ot">]</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">}</span></span></code></pre></div></li>
+<li><p>Security note: Crush treats <code>crush.json</code> as trusted
+code (<code>$(...)</code> runs at load time) — use a literal absolute
+path, no shell expansion.</p></li>
+<li><p>Sources: <code>https://github.com/charmbracelet/crush</code>,
+<code>https://brightdata.com/blog/ai/crush-cli-with-web-mcp</code>.</p></li>
+</ul>
+<h3 id="qwen-code">4.5 Qwen Code</h3>
+<ul>
+<li><p><strong>Config file</strong>: project scope
+<code>HelixCode/.qwen/settings.json</code> (user scope
+<code>~/.qwen/settings.json</code>).</p></li>
+<li><p><strong>Shape</strong> (top-level <code>mcpServers</code>,
+stdio):</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;codegraph&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;CG&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;serve&quot;</span><span class="ot">,</span><span class="st">&quot;--mcp&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;timeout&quot;</span><span class="fu">:</span> <span class="dv">15000</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">}</span></span></code></pre></div></li>
+<li><p><strong>Registration (CLI)</strong>: <code>qwen mcp</code> manage
+command.</p></li>
+<li><p>Sources:
+<code>https://qwenlm.github.io/qwen-code-docs/en/developers/tools/mcp-server/</code>,
+<code>https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/mcp.md</code>.</p></li>
+</ul>
+<h3 id="cross-agent-summary-table">4.6 Cross-agent summary table</h3>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 42%" />
+<col style="width: 17%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Config file (project scope)</th>
+<th>Wrapper key</th>
+<th>command form</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td><code>.mcp.json</code></td>
+<td><code>mcpServers</code></td>
+<td>command + args</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>opencode.jsonc</code></td>
+<td><code>mcp</code></td>
+<td><code>command[]</code> array</td>
+</tr>
+<tr>
+<td>Kimi CLI</td>
+<td><code>~/.kimi/mcp.json</code></td>
+<td><code>mcpServers</code></td>
+<td>command + args</td>
+</tr>
+<tr>
+<td>Crush</td>
+<td><code>.crush.json</code></td>
+<td><code>mcp</code></td>
+<td>command + args</td>
+</tr>
+<tr>
+<td>Qwen Code</td>
+<td><code>.qwen/settings.json</code></td>
+<td><code>mcpServers</code></td>
+<td>command + args</td>
+</tr>
+</tbody>
+</table>
+<p>All five share the same stdio server process:
+<code>&lt;CG&gt; serve --mcp</code>.</p>
+<hr />
+<h2 id="anti-bluff-test-plan-const-035-every-pass-carries-runtime-evidence">5.
+Anti-bluff test plan (CONST-035 — every PASS carries runtime
+evidence)</h2>
+<p>“Installed” is <strong>not</strong> “working”. Per CONST-035 /
+Article XI §11.9, every PASS below MUST capture and paste real runtime
+output. Three layers:</p>
+<h3 id="layer-a-codegraph-itself-works-on-the-real-helixcode-repo">5.1
+Layer A — CodeGraph itself works on the real HelixCode repo</h3>
+<p>Challenge <code>CG-CHALLENGE-01</code> (<code>challenges/</code> bank
+or <code>helix_code/tests/e2e/challenges/</code>): 1. Run
+<code>codegraph status .</code> at the HelixCode root. <strong>PASS only
+if</strong> the JSON reports <code>initialized:true</code> AND
+<code>files &gt; 0</code> AND <code>nodes &gt; 0</code> AND
+<code>edges &gt; 0</code>. Capture the JSON. 2. Run
+<code>codegraph query Provider</code>. <strong>PASS only if</strong> the
+result set is non-empty AND contains a real HelixCode symbol path
+(e.g. a hit under <code>helix_code/internal/llm</code> or
+<code>internal/provider</code>). Capture the output. 3. Run
+<code>codegraph context &quot;add a new LLM provider&quot;</code>. <strong>PASS
+only if</strong> the built context references real HelixCode files.
+Capture the output. - <strong>Anti-bluff guard</strong>: assert the
+output does NOT contain <code>simulated</code>,
+<code>placeholder</code>, <code>TODO</code>, or an empty/zero result. A
+zero-node graph is a FAIL, not a PASS.</p>
+<h3 id="layer-b-the-mcp-server-responds-transport-level">5.2 Layer B —
+the MCP server responds (transport-level)</h3>
+<p>Challenge <code>CG-CHALLENGE-02</code>: - Launch
+<code>&lt;CG&gt; serve --mcp</code>, send a JSON-RPC
+<code>initialize</code> then a <code>tools/list</code> request over
+stdio, assert the response lists all eight <code>codegraph_*</code>
+tools. - Send a <code>tools/call</code> for
+<code>codegraph_search</code> with <code>{&quot;query&quot;:&quot;Provider&quot;}</code> and
+assert a non-empty real result. Capture the JSON-RPC wire exchange —
+this is the captured-wire-evidence CONST-050(B) requires.</p>
+<h3 id="layer-c-each-of-the-five-agents-actually-reaches-codegraph">5.3
+Layer C — each of the five agents actually reaches CodeGraph</h3>
+<p>One Challenge per agent (<code>CG-CHALLENGE-03..07</code>). For each
+agent: 1. Register CodeGraph via §4’s procedure into a throwaway copy of
+the agent config. 2. Start the agent and run its “list MCP tools / list
+MCP servers” command (<code>claude mcp list</code>,
+<code>qwen mcp</code>, <code>kimi mcp list</code>, OpenCode/Crush
+startup MCP log). <strong>PASS only if</strong> <code>codegraph</code>
+appears AND its tools are listed. 3. Drive the agent (non-interactively
+where the agent supports it) with a prompt that can only be answered
+from the graph — e.g. <em>“Using the codegraph tools, list the callers
+of <a real HelixCode function>”</em> — and assert the agent’s answer
+contains the real caller(s). Capture the transcript. -
+<strong>Anti-bluff guard</strong>: a config file that merely
+<em>contains</em> the <code>codegraph</code> entry is NOT a PASS. The
+PASS bar is the agent invoking a <code>codegraph_*</code> tool and
+returning real graph data. Config-only / absence-of-error PASS is a
+CONST-035 critical defect.</p>
+<h3 id="helix_qa-integration-const-050b">5.4 helix_qa integration
+(CONST-050(B))</h3>
+<p>Register <code>CG-CHALLENGE-01..07</code> as a test bank in
+<code>helix_qa</code> so an autonomous QA session executes them with
+per-check wire evidence. Coverage-ledger entry (CONST-048): feature =
+“CodeGraph integration”, platform-axis = the five agents, invariants
+1–6.</p>
+<hr />
+<h2 id="phased-task-breakdown-subagent-sized">6. Phased task breakdown
+(subagent-sized)</h2>
+<p>CG1 (this document) is <strong>done</strong> on write. Implementation
+follows:</p>
+<h3 id="phase-a-incorporation-scaffolding">Phase A — incorporation
+scaffolding</h3>
+<ul>
+<li><strong>CG2</strong>: Create <code>tools/codegraph/</code> skeleton
+(<code>README.md</code>, <code>codegraph.version</code> pinned to
+<code>0.7.11</code>, empty
+<code>install.sh</code>/<code>verify.sh</code>, <code>agents/</code>
+dir). Add <code>.gitignore</code> rules for
+<code>tools/codegraph/node_modules/</code> and <code>.codegraph/</code>
+(CONST-053).</li>
+<li><strong>CG3</strong>: Write <code>tools/codegraph/install.sh</code>
+— idempotent pinned <code>npm install --prefix</code>, Node-version
+precheck, absolute-path resolution for the binary (§3.2–3.3). Run it;
+capture output.</li>
+<li><strong>CG4</strong>: Initialize + scan — run
+<code>codegraph init -i</code> at repo root and in
+<code>helix_code/</code>; tune <code>.codegraph/config.json</code>
+<code>exclude</code> list (§3.4). Capture <code>codegraph status</code>
+JSON as evidence.</li>
+</ul>
+<h3 id="phase-b-per-agent-registration">Phase B — per-agent
+registration</h3>
+<ul>
+<li><strong>CG5</strong>: <code>agents/register-claude.sh</code> + write
+<code>.mcp.json</code> entry + <code>mcp__codegraph__*</code>
+permission. Capture <code>claude mcp list</code>.</li>
+<li><strong>CG6</strong>: <code>agents/register-opencode.sh</code> +
+<code>opencode.jsonc</code> entry.</li>
+<li><strong>CG7</strong>: <code>agents/register-kimi.sh</code> +
+<code>~/.kimi/mcp.json</code> entry.</li>
+<li><strong>CG8</strong>: <code>agents/register-crush.sh</code> +
+<code>.crush.json</code> entry.</li>
+<li><strong>CG9</strong>: <code>agents/register-qwen.sh</code> +
+<code>.qwen/settings.json</code> entry.</li>
+</ul>
+<h3 id="phase-c-anti-bluff-verification">Phase C — anti-bluff
+verification</h3>
+<ul>
+<li><strong>CG10</strong>: Write <code>tools/codegraph/verify.sh</code>
++ Challenge <code>CG-CHALLENGE-01</code> (Layer A — CodeGraph works on
+real repo). Capture evidence.</li>
+<li><strong>CG11</strong>: Challenge <code>CG-CHALLENGE-02</code> (Layer
+B — MCP transport / JSON-RPC wire test). Capture evidence.</li>
+<li><strong>CG12</strong>: Challenges <code>CG-CHALLENGE-03..07</code>
+(Layer C — one per agent, end-to-end agent → codegraph tool call).
+Capture five transcripts.</li>
+<li><strong>CG13</strong>: Register the seven Challenges as a
+<code>helix_qa</code> test bank; run an autonomous QA session; capture
+per-check wire evidence (CONST-050(B)).</li>
+</ul>
+<h3 id="phase-d-governance-documentation">Phase D — governance &amp;
+documentation</h3>
+<ul>
+<li><strong>CG14</strong>: QWEN.md anti-bluff covenant gap fix (see
+§7).</li>
+<li><strong>CG15</strong>: Document CodeGraph in HelixCode docs —
+<code>tools/codegraph/README.md</code>
+<ul>
+<li>a reference in <code>docs/COMPLETE_CLI_REFERENCE.md</code>; update
+<code>docs/CONTINUATION.md</code> (CONST-044) and the coverage ledger
+(CONST-048).</li>
+</ul></li>
+<li><strong>CG16</strong>: CONST-047 recursive sweep — assess whether
+any owned submodule (<code>helix_qa</code>, <code>challenges</code>,
+<code>containers</code>, …) also benefits from a CodeGraph config and,
+if so, apply the same wiring; otherwise record the assessment.</li>
+</ul>
+<p><strong>Implementation task count: 15 tasks (CG2…CG16).</strong></p>
+<hr />
+<h2 id="anti-bluff-covenant-cascade-qwen.md-gap-assessment">7.
+Anti-bluff covenant cascade — QWEN.md gap assessment</h2>
+<p>The operator requires the anti-bluff covenant to be present in the
+project’s <code>Constitution.md</code>, <code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, <code>QWEN.md</code>, and all submodules.</p>
+<p>Assessment from the current tree: - <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.md</code> at the HelixCode root all
+carry the anti-bluff covenant (CONST-035, Article XI §11.9, CONST-050)
+and the full CONST-0xx cascade — <strong>present</strong>. -
+<code>CRUSH.md</code> is present at the root (per CLAUDE.md §1.1
+peer-governance list) — needs a content check during CG14 to confirm the
+covenant text is current. - <code>QWEN.md</code> <strong>exists</strong>
+at the root (<code>/run/media/.../HelixCode/QWEN.md</code>, 24 971
+bytes, last modified 2026-05-16) but is <strong>older</strong> than
+<code>CLAUDE.md</code> / <code>AGENTS.md</code> (both 2026-05-20). It is
+therefore the <strong>likely cascade gap</strong> — it may pre-date the
+most recent CONST-0xx anchors. CG14 MUST diff QWEN.md (and CRUSH.md)
+against the current <code>CLAUDE.md</code>/<code>AGENTS.md</code>
+anti-bluff and CONST-0xx sections and bring them into sync. - The
+constitution submodule (<code>constitution/</code>) §11.4 covenant is
+already cascaded into submodules per the existing close-out history;
+CG16’s recursive sweep MUST still re-verify with
+<code>scripts/verify-governance-cascade.sh</code> after the CodeGraph
+work lands.</p>
+<p><strong>Conclusion</strong>: the covenant is broadly cascaded;
+<strong>QWEN.md is the most probable gap</strong> and CRUSH.md needs a
+confirmation diff. Both are handled in CG14, gated by the cascade
+verifier in CG16.</p>
+<hr />
+<h2 id="risks-open-questions">8. Risks &amp; open questions</h2>
+<ol type="1">
+<li><strong>PATH vs absolute path</strong> — §3.3: prefer absolute paths
+in MCP config to avoid mutating the operator’s shell profile
+(CONST-053-adjacent hygiene).</li>
+<li><strong>Cursor’s <code>--path</code> workaround</strong> —
+<code>src/installer/targets/cursor.ts</code> shows Cursor needs an
+explicit <code>--path</code> arg because it does not pass
+<code>workspaceFolders</code>. None of HelixCode’s five target agents is
+Cursor, but if any of the five also omits the workspace root in the MCP
+<code>initialize</code> call, CodeGraph’s <code>process.cwd()</code>
+fallback may miss <code>.codegraph/</code>. CG5–CG9 MUST verify each
+agent’s working directory and add <code>--path &lt;repo-root&gt;</code>
+to <code>args</code> if a “not initialized” error appears.</li>
+<li><strong>Inner-module duality</strong> — HelixCode has two graphs
+(root + <code>helix_code/</code>). Decide in CG4 whether agents point at
+the root graph, the inner graph, or both (multiple registered MCP
+servers). Recommendation: index the inner Go module (the real domain
+code) as the primary; index root for governance tooling if useful.</li>
+<li><strong>Upstream version drift</strong> — pin in
+<code>codegraph.version</code>; bumping it is an explicit, reviewed
+change (re-run all CG-CHALLENGE-* on bump).</li>
+</ol>
+<hr />
+<h2 id="sources-all-fetched-2026-05-20">9. Sources (all fetched
+2026-05-20)</h2>
+<ul>
+<li>CodeGraph repo:
+<code>https://github.com/colbymchenry/codegraph</code></li>
+<li>CodeGraph npm:
+<code>https://www.npmjs.com/package/@colbymchenry/codegraph</code></li>
+<li>CodeGraph source inspected via
+<code>gh api repos/colbymchenry/codegraph/contents</code> —
+<code>package.json</code>,
+<code>src/installer/targets/{claude,opencode,codex,cursor,shared}.ts</code>,
+<code>src/bin/codegraph.ts</code>,
+<code>scripts/local-install.sh</code>.</li>
+<li>Kimi CLI MCP:
+<code>https://moonshotai.github.io/kimi-cli/en/customization/mcp.html</code>,
+<code>https://deepwiki.com/MoonshotAI/kimi-cli/6.7-mcp-integration</code>,
+<code>https://github.com/MoonshotAI/kimi-cli</code></li>
+<li>Qwen Code MCP:
+<code>https://qwenlm.github.io/qwen-code-docs/en/developers/tools/mcp-server/</code>,
+<code>https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/mcp.md</code></li>
+<li>Crush MCP: <code>https://github.com/charmbracelet/crush</code>,
+<code>https://brightdata.com/blog/ai/crush-cli-with-web-mcp</code></li>
+<li>OpenCode config: <code>https://opencode.ai/docs/config</code></li>
+</ul>
+</body>
+</html>

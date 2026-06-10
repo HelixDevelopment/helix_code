@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-031-deferred-long-tail-const-052-renames-codexcline-reference-agent-ports">HXC-031
+— Deferred long-tail: CONST-052 renames + Codex/Cline reference-agent
+ports</h1>
+<p><strong>Captured:</strong> 2026-06-09T15:23:48Z · Task · Completed (→
+Fixed.md) ## Sub-part 1: CONST-052 renames — RESOLVED D-6 discovery
+sweep enumerated all 63 Go submodules for capitalised go.mod replace
+paths. All remaining CONST-052 build-breaks were fixed + closed this
+session: HXC-052 background_tasks, HXC-053 conversation, HXC-051
+helix_llm+helix_memory, HXC-056
+(auto_temp/claritas/gandalf_solutions/hyper_tune/leak_hub/ouroborous/veritas
+→ ../plinius_common), HXC-057 recovery. No capitalised-replace go.mod
+breaks remain (enumerated coverage §11.4.118). ## Sub-part 2: Codex +
+Cline reference-agent ports — PRESENT Both incorporated as reference
+CLI-agent submodules under cli_agents/ (alongside aider/plandex/etc): -
+cli_agents/codex → submodule openai/codex (.gitmodules), 4803 files /
+55M, tracked - cli_agents/cline → submodule cline/cline (.gitmodules),
+3486 files / 72M, tracked <code>git config -f .gitmodules</code>
+confirms both path+url entries; <code>git ls-files</code> confirms both
+tracked. ## Determination Both sub-parts complete with captured
+evidence; Task closeable.</p>
+</body>
+</html>

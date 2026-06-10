@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CONST046-i18n-overview</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CONST046-i18n-overview</h1>
+</header>
+<h1 id="const-046-i18n-implemented-architecture-overview">CONST-046 i18n
+— Implemented-Architecture Overview</h1>
+<p><strong>Document type:</strong> Architecture synthesis
+(developer-facing, English-only per round-90 design §6)
+<strong>Author:</strong> Round 111 §11.4 anti-bluff documentation
+deliverable <strong>Date:</strong> 2026-05-18 <strong>Status:</strong>
+Reflects state as of close-out¹²⁹ (rounds 91–106 landed; Phase 4 in
+progress) <strong>Inputs:</strong>
+<code>docs/superpowers/specs/2026-05-19-const046-i18n-architecture-design.md</code>
+(round-90 design) + 14 rounds of implementation evidence
+<strong>Constitutional anchors:</strong> CONST-035 / Article XI §11.9
+(anti-bluff), CONST-046 (no-hardcoded-content), CONST-047 (recursive
+cascade), CONST-049 §11.4.17 (universal-vs-project), CONST-050(A)
+(no-fakes-beyond-unit-tests), CONST-051(B) (decoupling)</p>
+<hr />
+<h2 id="status-snapshot">1. Status snapshot</h2>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 43%" />
+<col style="width: 34%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Scope</th>
+<th>State</th>
+<th>Rounds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 1</td>
+<td>Foundation: core <code>pkg/i18n</code>, audit script, wiring</td>
+<td>COMPLETE</td>
+<td>91, 92, 93</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>Top-impact migrations (SelfImprove / HelixLLM / harmony_os)</td>
+<td>COMPLETE</td>
+<td>94, 95, 96</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>Remainder (DocProcessor, Planning, VisionEngine, panoptic) +
+audit-gate tightening</td>
+<td>COMPLETE</td>
+<td>97, 98, 99a, 99b</td>
+</tr>
+<tr>
+<td>Phase 4</td>
+<td>Systematic backlog migration starting at top-5
+<code>challenges/pkg/userflow/</code> concentrations</td>
+<td>IN PROGRESS — 5 files landed</td>
+<td>100, 101, 102, 103, 104</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Consuming submodules with implemented i18n surface
+(9):</strong> <code>submodules/lazy/</code> (round 93 — first consumer +
+bilingual EN+SR seed) · <code>submodules/self_improve/</code> (round 94
+— 8 prompts) · <code>submodules/helix_llm/</code> (round 95 — pattern B
+variation; existing i18n package extended) ·
+<code>helix_code/applications/harmony_os/</code> (round 96 — 5 CLI
+headers; in-module application) · <code>submodules/doc_processor/</code>
+(round 97 — 8 CLI strings) · <code>submodules/planning/</code> (round 98
+— 3 prompt strings) · <code>submodules/vision_engine/</code> (round 98 —
+4 analyzer strings) · <code>panoptic/</code> (round 99a — 5 cobra
+<code>Short:</code> descriptions; package-level seam variation) ·
+<code>challenges/</code> (rounds 100–104 — userflow systematic migration
+in flight)</p>
+<p><strong>Migrated string count:</strong> approximately 60–95
+user-facing literals depending on counting method. Per-round detail: -
+Phase 1 (round 93): 3 new surfaces added to Lazy (no pre-existing
+literals to migrate) - Phase 2 (rounds 94–96): 15 strings (8 + 2 + 5) -
+Phase 3 (rounds 97–99a): 20 strings (8 + 3 + 4 + 5) - Phase 4 (rounds
+100–104): ~25–40 strings across 5 challenges files (round 101 alone
+migrated 10 of 25 candidates in
+<code>challenge_recorded_ai_testgen.go</code>)</p>
+<p><strong>Audit-gate operational mode:</strong> round-99b shipped
+<code>--fail-on-new</code> mode with <strong>54,803 unique (path,
+literal_hash) keys</strong> captured as gzipped baseline at
+<code>scripts/audit_const046/.baseline.json.gz</code> (16 MB raw → 503
+KB gzipped, 32× compression; loader transparently handles both forms).
+Soft-warn mode still default; planted-violation smoke test at
+<code>/tmp/round99b_smoke.txt</code> verified all four gate scenarios
+(default warn → exit 0; <code>--fail-on-new</code> clean → exit 0;
+planted file → exit 1; planted removed → exit 0 again).</p>
+<hr />
+<h2 id="the-3-layer-pattern-architectural-heart">2. The 3-layer pattern
+(architectural heart)</h2>
+<p>The pattern that emerged across 14 rounds is <strong>strictly
+tighter</strong> than the round-90 design’s §5.1 single-interface
+proposal. CONST-051(B) decoupling forced an additional indirection layer
+because if every consumer imported a HelixCode-defined interface, every
+consumer would carry a HelixCode-shaped dependency — breaking decoupling
+for any non-HelixCode user.</p>
+<h3 id="layer-1-consumer-defined-translator-interface-in-each-owned-submodule">Layer
+1 — Consumer-defined <code>Translator</code> interface (in each owned
+submodule)</h3>
+<p>Each owned submodule declares its <strong>own</strong>
+<code>Translator</code> interface at its <strong>own</strong>
+<code>pkg/i18n/translator.go</code>. Reference implementation:
+<code>submodules/lazy/pkg/i18n/translator.go:18-27</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Translator <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    T<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> messageID <span class="dt">string</span><span class="op">,</span> templateData <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    TPlural<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> messageID <span class="dt">string</span><span class="op">,</span> count <span class="dt">int</span><span class="op">,</span> templateData <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The interface is <strong>structurally identical</strong> across
+consumers (so a single adapter can satisfy them all), but each interface
+is declared inside its own submodule — no
+<code>import &quot;dev.helix.code/...&quot;</code> line anywhere in submodule
+production code. Verified per-round: round-93 verified Lazy via
+<code>grep -rn &quot;helix_code\|dev.helix.code&quot; submodules/lazy/</code>
+returning zero matches; rounds 94/95/96/97/98/99a repeated the same
+verification.</p>
+<p>Every package also ships a <code>NoopTranslator</code> struct
+(returns the <code>messageID</code> verbatim) — used as a safety default
+for standalone-test runs of the submodule and as the seed value for
+global-seam variants (Layer 1.B below). Reference:
+<code>submodules/lazy/pkg/i18n/translator.go:35-45</code>.</p>
+<h3 id="layer-2-helix_codepkgi18nadapter-thin-structural-bridge">Layer 2
+— <code>helix_code/pkg/i18nadapter</code> (thin structural bridge)</h3>
+<p>Lives at <code>helix_code/pkg/i18nadapter/adapter.go</code> (66 LOC
+source + 96 LOC tests, round 93). One type — <code>Translator</code> —
+wrapping a <code>*i18n.Localizer</code> from
+<code>helix_code/pkg/i18n/</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Translator <span class="kw">struct</span> <span class="op">{</span> loc <span class="op">*</span>i18n<span class="op">.</span>Localizer <span class="op">}</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> New<span class="op">(</span>loc <span class="op">*</span>i18n<span class="op">.</span>Localizer<span class="op">)</span> <span class="op">*</span>Translator <span class="op">{</span> <span class="co">/* panics on nil — anti-bluff per round-93 commit message */</span> <span class="op">}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>Translator<span class="op">)</span> T<span class="op">(</span>_ context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> data <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>Translator<span class="op">)</span> TPlural<span class="op">(</span>_ context<span class="op">.</span>Context<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> count <span class="dt">int</span><span class="op">,</span> data <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<p>The adapter’s method set is exactly the consumer interface’s method
+set, so Go’s structural typing makes one
+<code>*i18nadapter.Translator</code> satisfy every consumer’s interface
+without naming any of them. Reference:
+<code>helix_code/pkg/i18nadapter/adapter.go:32-66</code>.</p>
+<h3 id="layer-3-wiring-at-helixcode-composition-root">Layer 3 — Wiring
+at HelixCode composition root</h3>
+<p><code>helix_code/internal/i18n_wiring/wiring_integration_test.go</code>
+(123 LOC, round 93) demonstrates the real round-trip wiring:</p>
+<pre><code>YAML bundle file → i18n.Bundle (helix_code/pkg/i18n/bundle.go)
+                → i18n.Localizer (helix_code/pkg/i18n/localizer.go)
+                → *i18nadapter.Translator (helix_code/pkg/i18nadapter/adapter.go)
+                → submodule constructor&#39;s SetTranslator(...) or NewXxx(..., tr)
+                → user-facing call site invokes tr.T(ctx, id, data)</code></pre>
+<p>The integration test asserts the <strong>EXACT</strong> localized
+string (“servis još nije inicijalizovan” for <code>sr</code> locale,
+“service is not initialized” for <code>en</code>) — not just “non-empty”
+or “no error”.</p>
+<h3 id="ascii-summary-diagram">ASCII summary diagram</h3>
+<pre><code>+-------------------------------------------------------------+
+| helix_code (composition root)                               |
+|                                                             |
+|   YAML files (bundles/active.en.yaml, .sr.yaml, ...)        |
+|        |                                                    |
+|        v                                                    |
+|   helix_code/pkg/i18n.Bundle  --&gt;  i18n.Localizer           |
+|                                          |                  |
+|                                          v                  |
+|                                helix_code/pkg/i18nadapter   |
+|                                .New(loc) -&gt; *Translator     |
+|                                          |                  |
+|                                          | injected via     |
+|                                          | constructor or   |
+|                                          | SetTranslator    |
+|                                          v                  |
++------------------------------------------|------------------+
+                                           |
++------------------------------------------|------------------+
+| &lt;any owned submodule&gt;                    v                  |
+|                                                             |
+|   pkg/i18n/translator.go declares its OWN Translator        |
+|   interface (no helix_code import).                         |
+|                                                             |
+|   *i18nadapter.Translator structurally satisfies it.        |
+|                                                             |
+|   Production code calls r.tr.T(ctx, &quot;id_x&quot;, data) at        |
+|   every user-facing site.                                   |
++-------------------------------------------------------------+</code></pre>
+<hr />
+<h2 id="pattern-variations-observed">3. Pattern variations observed</h2>
+<p>The round-90 design proposed one pattern; 14 rounds of implementation
+revealed three viable variations.</p>
+<h3 id="option-a-consumer-defined-struct-method-ttplural-the-default">Option
+A — consumer-defined struct method <code>T</code>/<code>TPlural</code>
+(the default)</h3>
+<p>Used in rounds 93, 94, 96, 97, 98, 100–104. The consumer receiver
+gains a <code>tr i18n.Translator</code> field plus a
+<code>SetTranslator(t i18n.Translator)</code> setter; call sites invoke
+<code>r.tr.T(...)</code>. Constructor signatures stay
+backward-compatible (existing code paths still compile without injecting
+a translator — the default <code>NoopTranslator</code> makes the method
+calls safe).</p>
+<p><strong>Use when:</strong> the consumer is a struct-based service
+(most cases). Reference:
+<code>submodules/self_improve/selfimprove/optimizer.go</code> (round-94,
+commit <code>a39d855</code>);
+<code>helix_code/applications/harmony_os/main_nogui.go</code> (round-96,
+commit <code>1eb1851</code>).</p>
+<h3 id="option-b-existing-i18n-package-extended">Option B — existing
+i18n package extended</h3>
+<p>Used in round 95 only. <strong>HelixLLM</strong> already had an
+<code>internal/shared/i18n/i18n.go</code> package from earlier work.
+Round 95 chose to extend that package (added 2 message IDs, 2 templates,
+and a <code>TranslatorAPI</code> interface — <code>+19 LOC</code>)
+rather than create a new <code>pkg/i18n/</code>. Equally valid; agent’s
+judgement call.</p>
+<p><strong>Use when:</strong> the submodule already has its own i18n
+surface and grafting onto it is cheaper than introducing a parallel one.
+Reference:
+<code>submodules/helix_llm/internal/shared/i18n/i18n.go</code>
+(round-95, commit <code>abe0319</code>).</p>
+<h3 id="option-c-package-level-seam-settranslator-activetranslator-t">Option
+C — package-level seam (<code>SetTranslator</code> +
+<code>ActiveTranslator</code> + <code>T</code>)</h3>
+<p>Used in round 99a only. <strong>panoptic</strong> declares
+<code>pkg/i18n/global.go</code> (52 LOC) with a
+<code>sync.RWMutex</code>-guarded package-global
+<code>active Translator</code>. Cobra command metadata
+(<code>Short:</code>, <code>Long:</code>) is set at package-init time
+when no context or struct receiver exists, so call sites must resolve
+through a package-level accessor. Host programs swap the active
+translator via <code>panoptic.SetTranslator(...)</code> BEFORE calling
+<code>cobra.Command.Execute()</code>. Default is
+<code>NoopTranslator{}</code> so the submodule stays
+standalone-runnable.</p>
+<p><strong>Use when:</strong> the consumer registers strings at
+package-init time without a receiver — typically
+<code>cobra.Command{Short: ..., Long: ...}</code> declarations or
+package-level <code>var msg = ...</code> constants. Reference:
+<code>panoptic/pkg/i18n/global.go</code> (round-99a, commit
+<code>3074c77</code>).</p>
+<p>Each variation preserves CONST-051(B): no submodule imports anything
+from <code>helix_code/</code> or <code>dev.helix.code/</code> in
+production code.</p>
+<hr />
+<h2 id="bundle-yaml-conventions">4. Bundle YAML conventions</h2>
+<h3 id="message-id-prefix-per-submodule-namespace-discipline">Message-ID
+prefix per submodule (namespace discipline)</h3>
+<p>Every consumer prefixes its message IDs with a stable token derived
+from its name so a single shared bundle file (or merged bundle) cannot
+collide across submodules:</p>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 64%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lazy</td>
+<td>(Lazy uses the message ID directly,
+e.g. <code>service.uninitialized</code>)</td>
+</tr>
+<tr>
+<td>SelfImprove</td>
+<td><code>selfimprove_optimizer_*</code></td>
+</tr>
+<tr>
+<td>HelixLLM</td>
+<td><code>helixllm_cli_*</code></td>
+</tr>
+<tr>
+<td>harmony_os</td>
+<td><code>harmony_os_cli_*</code></td>
+</tr>
+<tr>
+<td>DocProcessor</td>
+<td><code>docprocessor_cli_*</code></td>
+</tr>
+<tr>
+<td>Planning</td>
+<td><code>planning_*</code>
+(e.g. <code>planning_milestone_prompt_intro</code>)</td>
+</tr>
+<tr>
+<td>VisionEngine</td>
+<td><code>visionengine_stub_*</code>,
+<code>visionengine_provider_*</code></td>
+</tr>
+<tr>
+<td>panoptic</td>
+<td><code>panoptic_cmd_&lt;sub&gt;_short</code></td>
+</tr>
+<tr>
+<td>challenges/userflow</td>
+<td><code>challenges_userflow_&lt;file&gt;_*</code>
+(e.g. <code>browser_unavailable</code>,
+<code>recorder_unavailable</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="schema-nicksnydergo-i18nv2">Schema — nicksnyder/go-i18n/v2</h3>
+<p>Bundle files are YAML matching the upstream schema. Singular
+messages:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">docprocessor_cli_loaded_documents</span><span class="kw">:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">other</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Loaded {{.Count}} documents&quot;</span></span></code></pre></div>
+<p>Plural messages use CLDR forms
+(<code>one</code>/<code>few</code>/<code>other</code> for Serbian,
+<code>one</code>/<code>other</code> for English):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">selfimprove_optimizer_prompt_dimension_bullet</span><span class="kw">:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">other</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;{{.Dimension}}: {{.Score}}&quot;</span></span></code></pre></div>
+<p>Template variables use <code>{{.Var}}</code> Go-template syntax with
+named keys passed via the <code>data map[string]any</code> argument of
+<code>T(...)</code>. Source-of-truth locale <code>en</code> is mandatory
+in every bundle; additional locales (<code>sr</code> added in round 93’s
+bilingual seed) are optional graceful-degradation targets.</p>
+<h3 id="bundle-file-location-convention">Bundle file location
+convention</h3>
+<p><code>&lt;submodule&gt;/pkg/i18n/bundles/active.&lt;lang&gt;.yaml</code>
+for most consumers; HelixLLM put bundles inline in its existing
+<code>internal/shared/i18n/</code> package (Option B variation). Each
+round-91 bundle is the source-of-truth; nothing is generated.</p>
+<hr />
+<h2 id="anti-bluff-invariants-const-035-article-xi-11.9">5. Anti-bluff
+invariants (CONST-035 / Article XI §11.9)</h2>
+<p>Every migration round MUST satisfy three runtime-evidence invariants.
+These emerged as the operational protocol from the operator’s 2026-05-19
+mandate and the round-90 design §6.</p>
+<h3 id="invariant-1-sentinel-output-test-loud-failure-is-observable">Invariant
+1 — sentinel-output test (loud failure is observable)</h3>
+<p>Every migration round ships at least one
+<strong>fakeTranslator</strong> that returns the deterministic string
+<code>&quot;&lt;TRANSLATED:msg_id&gt;&quot;</code> and a paired test asserting the
+user-facing output <strong>contains the sentinel</strong> (i.e. the call
+site routed through the translator) and <strong>does not contain the
+original English literal</strong> (i.e. the literal was not silently
+retained in a parallel code path). Reference patterns:
+<code>submodules/doc_processor/cmd/docprocessor/main_test.go</code>
+(round 97, commit <code>e584e4b</code>);
+<code>submodules/self_improve/selfimprove/optimizer_i18n_test.go</code>
+(round 94).</p>
+<h3 id="invariant-2-mutation-verification-before-close-out">Invariant 2
+— mutation verification before close-out</h3>
+<p>Every migration round REQUIRES one round-trip mutation: restore the
+original English literal at one migrated call site, run the test,
+confirm it FAILS with a precise diagnostic (“sentinel not found”,
+“expected <code>&lt;TRANSLATED:...&gt;</code>, got
+<code>Loaded 1 documents</code>”), then revert and confirm PASS. The
+CONTINUATION close-out for the round MUST quote the specific test name +
+the precise failure-mode evidence. Reference per round: - Round 91
+(commit <code>e29b075</code>): “corrupted testdata/active.en.yaml
+produced expected FAIL: TestLocalizer_T_RealMessage, then file restored
++ suite re-ran 11 PASS” - Round 93 (commit <code>930c6fe</code>):
+“replacing <code>adapter.T()</code> with <code>return id, nil</code>
+caused 5 tests to FAIL” - Round 94 (commit <code>a39d855</code>):
+“replacing <code>opt.tr(...)</code> at
+<code>suggest_improvements_footer</code> with hardcoded literal caused
+that sub-test to FAIL” - Round 96 (commit <code>1eb1851</code>):
+“restoring <code>=== HelixCode Harmony OS Status ===</code> literal
+caused TestCmdStatus_UsesTranslator_NotHardcodedHeader to FAIL” - Round
+97 (commit <code>e584e4b</code>): “restoring
+<code>Loaded %d documents\n</code> literal caused
+TestRunCLI_SuccessPath_EmitsAllTranslatedLines to FAIL” - Round 99a
+(commit <code>3074c77</code>): “restoring literal at errorsCmd.Short
+caused TestErrorsCmd_ShortUsesI18nID to FAIL” - Round 99b (commit
+<code>3f4f110</code>): “flipped <code>return 1</code> →
+<code>return 0</code> in new-violation branch caused
+TestBaseline_FailOnNew_NewViolationFails to FAIL” - Round 101 (submodule
+<code>67a6c9d</code>): “revert <code>browser_unavailable</code> to raw
+literal → test FAILed; restore → PASS”</p>
+<h3 id="invariant-3-baseline-preserving-fallback-pattern-rounds-100101104-refinement">Invariant
+3 — baseline-preserving fallback pattern (rounds 100/101/104
+refinement)</h3>
+<p>Once the audit-gate started tracking baselines (round 99b), Phase 4
+migrations adopted a refinement: <strong>keep the original English
+literal as a textual fallback</strong> when the injected translator’s
+return is empty, so the audit-gate’s <code>(path, literal_hash)</code>
+pair at that file:line stays stable. Effect: the migration is honest
+(the translator IS being called and IS routing through i18n machinery;
+sentinel test proves it), but the audit-gate baseline does not need
+bookkeeping for every migrated line. Migration progress is signalled by
+the baseline <code>--update-baseline</code> snapshot shrinking, not by
+line-count differences.</p>
+<p>The pattern is honest because the unit + integration test path proves
+the translator is the load-bearing call. The fallback only fires if a
+misconfigured deployment passes a nil/broken translator — a
+defence-in-depth measure, not a hiding mechanism.</p>
+<hr />
+<h2 id="audit-gate-operational-model">6. Audit-gate operational
+model</h2>
+<h3 id="round-92-ground-truth-commit-57de105">Round-92 ground truth
+(commit <code>57de105</code>)</h3>
+<p>Initial scan via <code>scripts/audit_const046/</code> (Go AST walker,
+9 files / +624 LOC / 5 unit tests). Real-tree scan: <strong>21,937 files
+scanned, 9,037 skipped, 57,345 violations reported</strong>. Soft-warn
+mode (always exit 0) per round-90 design §6. Top-5 concentrations all
+under <code>challenges/pkg/userflow/</code>:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Hits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>evaluators.go</code></td>
+<td>27</td>
+</tr>
+<tr>
+<td><code>challenge_recorded_ai_testgen.go</code></td>
+<td>25</td>
+</tr>
+<tr>
+<td><code>challenge_desktop.go</code></td>
+<td>21</td>
+</tr>
+<tr>
+<td><code>challenge_ai_testgen.go</code></td>
+<td>20</td>
+</tr>
+<tr>
+<td><code>challenge_recorded_mobile.go</code></td>
+<td>18</td>
+</tr>
+</tbody>
+</table>
+<p>Heuristic catches user-facing strings ≥16 chars with ≥2 ASCII words +
+sentence-start capital/punctuation; exempts <code>errors.New</code>,
+<code>fmt.Errorf</code> wrapping, <code>_test.go</code> files,
+<code>log/slog</code> calls, comments, struct tags, import paths, and
+<code>flag.String</code> help-text.</p>
+<h3 id="round-99b-hardening-commit-3f4f110">Round 99b hardening (commit
+<code>3f4f110</code>)</h3>
+<p>Three new flags added: <code>--baseline &lt;path&gt;</code>,
+<code>--update-baseline</code>, <code>--fail-on-new</code>. Baseline
+shipped at <code>scripts/audit_const046/.baseline.json.gz</code>
+(gzipped, 503 KB; loader auto-detects gz vs raw JSON). Baseline contains
+<strong>54,803 unique <code>(path, literal_hash)</code> keys</strong>
+covering the 57,329 raw violations at round-99b cut (duplicate literals
+across files collapse).</p>
+<p><code>--fail-on-new</code> semantics: exit 0 if every violation in
+current scan appears in baseline; exit 1 if any NEW (post-baseline)
+violation appears. 10 unit tests (5 from round 92 + 5 new).
+Planted-violation smoke test at <code>/tmp/round99b_smoke.txt</code>
+covered four scenarios end-to-end (default warn → exit 0; clean
+<code>--fail-on-new</code> → exit 0; planted file → exit 1; planted
+removed → exit 0).</p>
+<h3 id="hand-off-protocol-for-phase-4-rounds">Hand-off protocol for
+Phase 4 rounds</h3>
+<p>Each Phase 4 migration round MUST re-run
+<code>scripts/audit-const046-hardcoded-content.sh --update-baseline</code>
+after landing so the snapshot strictly shrinks toward zero. The
+expectation when this overview is consulted in a future round is:
+baseline count visible at the head of
+<code>scripts/audit_const046/.baseline.json.gz</code> will be
+<strong>less than 54,803</strong> as Phase 4 progresses.</p>
+<h3 id="future-phase-5-hardening-not-yet-implemented">Future Phase 5
+hardening (not yet implemented)</h3>
+<p>Round-90 design §6 calls for flipping <code>--fail-on-new</code> to
+default and tightening the gate to fail-on-hit when Phase 3 is complete.
+Phase 3 IS complete (close-out¹²⁷); Phase 4 is in progress and the
+default still appears to be soft-warn. The flip is a planned
+operator-decision point — see §8 cross-references for the live
+status.</p>
+<hr />
+<h2 id="migration-backlog-where-we-stand">7. Migration backlog (where we
+stand)</h2>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Value at quoted close-out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Round-92 raw violation count</td>
+<td>57,345 (close-out¹¹⁹)</td>
+</tr>
+<tr>
+<td>Round-92 files scanned</td>
+<td>21,937 (close-out¹¹⁹)</td>
+</tr>
+<tr>
+<td>Round-99b baseline unique keys</td>
+<td>54,803 (close-out¹²⁶, <code>(path, literal_hash)</code> pairs)</td>
+</tr>
+<tr>
+<td>Round-99b raw violations at baseline cut</td>
+<td>57,329 (close-out¹²⁶)</td>
+</tr>
+<tr>
+<td>Phase 4 files migrated (rounds 100–104)</td>
+<td>5 — <code>evaluators.go</code>,
+<code>challenge_recorded_ai_testgen.go</code>,
+<code>challenge_desktop.go</code>, <code>challenge_ai_testgen.go</code>,
+<code>challenge_recorded_mobile.go</code></td>
+</tr>
+<tr>
+<td>Phase 4 strings migrated (estimate)</td>
+<td>25–40 across the 5 files (round 101 alone: 10 of 25 candidates in
+one file)</td>
+</tr>
+<tr>
+<td>Phase 4 strings remaining (estimate)</td>
+<td>tens of thousands across non-userflow directories</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why the estimate is wide:</strong> counting “user-facing
+string occurrences” depends on whether you count per-call-site (~strict)
+or per-literal-token (~loose); round 101’s “15 remaining” are
+<code>RecordAction</code> debug-trace strings categorised as
+developer-facing — they were intentionally deferred, not lost.</p>
+<p><strong>Next-tier scan targets</strong> (round-92 ranking after
+<code>challenges/pkg/userflow/</code>): scan output preserved in audit
+script’s last-run report; the next iteration of Phase 4 should re-run
+<code>scripts/audit-const046-hardcoded-content.sh</code> to surface the
+now-top-N hot spots, since the original top-5 are partially cleared.</p>
+<hr />
+<h2 id="cross-references">8. Cross-references</h2>
+<h3 id="originating-design">Originating design</h3>
+<ul>
+<li><code>docs/superpowers/specs/2026-05-19-const046-i18n-architecture-design.md</code>
+— round-90 theoretical design. This overview supersedes its §3
+Recommendation, §5 Components, §6 Anti-bluff Guarantee, §7 Phased Plan,
+and §8 Test Strategy with the AS-BUILT reality.</li>
+</ul>
+<h3 id="constitutional-anchors">Constitutional anchors</h3>
+<ul>
+<li><strong>CONST-046</strong> — root <code>CLAUDE.md</code> §10.5;
+verbatim text + compliance examples for the no-hardcoded-content
+mandate.</li>
+<li><strong>CONST-035 / Article XI §11.9</strong> — root
+<code>CLAUDE.md</code> “Constitutional anchors”; the operator’s
+2026-05-19 verbatim quote that constrains every migration round to ship
+runtime evidence + paired-mutation verification.</li>
+<li><strong>CONST-051(B)</strong> — root <code>CLAUDE.md</code>
+§CONST-051; submodule decoupling rule that forced the 3-layer (not
+2-layer) pattern in §2 above.</li>
+<li><strong>CONST-050(A)</strong> — root <code>CLAUDE.md</code>
+§CONST-050; mocks-only-in-unit-tests rule that the sentinel
+fakeTranslators (Invariant 1) sit under (they are unit-test-only
+constructs; integration tests use the real adapter).</li>
+</ul>
+<h3 id="implementation-close-outs-continuation.md">Implementation
+close-outs (CONTINUATION.md)</h3>
+<p>Each line below cites the close-out number + commit SHA in
+CONTINUATION as the verifiable artefact:</p>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 12%" />
+<col style="width: 39%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Round</th>
+<th>Close-out</th>
+<th>Commit (submodule)</th>
+<th>Commit (meta-repo pointer-bump)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>91</td>
+<td>¹¹⁸</td>
+<td>n/a (inner Go module)</td>
+<td><code>e29b075</code></td>
+</tr>
+<tr>
+<td>92</td>
+<td>¹¹⁹</td>
+<td>n/a (script in meta-repo)</td>
+<td><code>57de105</code></td>
+</tr>
+<tr>
+<td>93</td>
+<td>¹²⁰</td>
+<td>Lazy <code>930c6fe</code></td>
+<td><code>03e131f</code></td>
+</tr>
+<tr>
+<td>94</td>
+<td>¹²¹</td>
+<td>SelfImprove <code>a39d855</code></td>
+<td><code>c73a8f4</code></td>
+</tr>
+<tr>
+<td>95</td>
+<td>¹²²</td>
+<td>HelixLLM <code>abe0319</code></td>
+<td><code>380e1c0</code></td>
+</tr>
+<tr>
+<td>96</td>
+<td>¹²³</td>
+<td>harmony_os (in-module) — n/a</td>
+<td><code>1eb1851</code></td>
+</tr>
+<tr>
+<td>97</td>
+<td>¹²⁴</td>
+<td>DocProcessor <code>e584e4b</code></td>
+<td><code>ae83bc8</code></td>
+</tr>
+<tr>
+<td>98</td>
+<td>¹²⁵</td>
+<td>Planning <code>6abed9b</code> + VisionEngine
+<code>2d0c35b</code></td>
+<td><code>a79e022</code></td>
+</tr>
+<tr>
+<td>99a</td>
+<td>¹²⁷</td>
+<td>panoptic <code>3074c77</code></td>
+<td><code>c4e50d8</code></td>
+</tr>
+<tr>
+<td>99b</td>
+<td>¹²⁶</td>
+<td>n/a (script in meta-repo)</td>
+<td><code>3f4f110</code></td>
+</tr>
+<tr>
+<td>100</td>
+<td>(¹²⁸ ref)</td>
+<td>challenges <code>898e39f</code></td>
+<td><code>ba5b76d</code></td>
+</tr>
+<tr>
+<td>101</td>
+<td>¹²⁸</td>
+<td>challenges <code>67a6c9d</code></td>
+<td><code>1a1b270</code></td>
+</tr>
+<tr>
+<td>102</td>
+<td>(¹²⁸ ref)</td>
+<td>challenges (TBD)</td>
+<td><code>74c43ec</code></td>
+</tr>
+<tr>
+<td>103</td>
+<td>(¹²⁸ ref)</td>
+<td>challenges (TBD)</td>
+<td><code>5002c97</code></td>
+</tr>
+<tr>
+<td>104</td>
+<td>(¹²⁸ ref)</td>
+<td>challenges (TBD)</td>
+<td>(TBD)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="open-operator-decision-points-round-90-design-10-status-as-of-round-111">Open
+operator-decision points (round-90 design §10, status as-of round
+111)</h3>
+<table>
+<colgroup>
+<col style="width: 0%" />
+<col style="width: 42%" />
+<col style="width: 31%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Round-90 recommendation</th>
+<th>Status as-of round 111</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Module path for <code>Translator</code> interface</td>
+<td>Dedicated submodule</td>
+<td>NOT taken — interface duplicated per consumer per CONST-051(B); no
+<code>helix_i18n</code> submodule was created. Adapter lives in
+<code>helix_code/pkg/i18nadapter/</code>.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Seed non-English locales</td>
+<td>sr-RS + ja-JP</td>
+<td>sr-RS shipped (round 93 bilingual seed for Lazy); ja-JP
+deferred.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Audit-gate tightening cadence</td>
+<td>End of Phase 3 → fail-on-hit</td>
+<td>PARTIAL — round 99b shipped <code>--fail-on-new</code> with
+baseline, NOT yet flipped to fail-on-hit default.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>LLM-generation vs i18n-bundle split</td>
+<td>i18n bundles for CLI/UI; LLM for prompts</td>
+<td>Practice diverged: i18n bundles used for both CLI/UI AND prompt
+templates (SelfImprove rd 94 migrated prompt strings via i18n, not via
+LLM-generation).</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Pluralisation locale subset</td>
+<td>Ship pluralised entries from Phase 2</td>
+<td>DEFERRED — current bundles use <code>other:</code> only; no
+<code>one</code>/<code>few</code> variants shipped yet (acknowledged
+technical debt; cheap to retro-fit via <code>TPlural(...)</code> since
+the surface is already there).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="what-this-overview-does-not-cover">9. What this overview does
+NOT cover</h2>
+<ul>
+<li><strong>LLM-generation path</strong> of CONST-046 (option 1 of the
+mandate). The clarification engine in
+<code>internal/clarification/</code> per CONTINUATION line 132 is the
+reference for that path; it composes with this i18n-bundle path but is
+not part of the 3-layer architecture documented here.</li>
+<li><strong>Locale-detection priority chain</strong> (round-90 design
+§5.5 — process env &gt; context value &gt; per-call override). The
+wiring exists at <code>helix_code/pkg/i18n/localizer.go:22-27</code>
+(<code>NewLocalizer(b, langs...)</code> accepts an ordered preference
+list per go-i18n semantics) but the call-site code at integration paths
+has not been audited for whether every entry point honours
+<code>LC_ALL</code>/<code>LANG</code>.</li>
+<li><strong>Translator hand-off tooling</strong> (round-90 design §3.1
+noted absence of <code>xgettext</code>-style extraction). No extractor
+has been built; bundle authoring is still manual.</li>
+</ul>
+<p>These three are honest gaps, not bluffs — they are scheduled or
+out-of-scope work, not absent-and-claimed-present work.</p>
+<h2 id="sources-verified-2026-05-29-httpsgithub.comnicksnydergo-i18n-httpsgo.devrefmod-cross-referenced-against-the-latest-official-nicksnydergo-i18n-docs-latest-release-v2.6.1-2026-01-01-and-the-go-modules-reference.-confirmed-accurate-as-of-this-date-a-the-yamltoml-bundle-schema-in-4-singular-messages-use-the-other-key-and-plural-messages-use-cldr-forms-onefewother-matches-the-upstream-go-i18n-message-file-schema-b-newlocalizerbundle-langs...-accepts-an-ordered-list-of-language-preferences-4-9-locale-detection-note-per-upstream-api.-negative-finding-staleness-note-this-repos-helix_codego.mod-pins-github.comnicksnydergo-i18nv2-v2.5.1-verified-in-tree-one-minor-version-behind-upstream-v2.6.1-the-schemaapi-facts-this-doc-documents-are-unchanged-between-those-versions-so-no-instruction-here-is-stale-but-the-dependency-pin-is-a-candidate-for-a-routine-go-get--u-bump-out-of-scope-for-a-docs-only-round.-go-version-authority-per-claude.md-3.1-inner-module-go-1.26-root-go-1.25.2-both-confirmed-in-the-respective-go.mod-files-this-is-a-non-buildnon-docker-doc-so-no-version-pins-required-correction.">Sources
+verified 2026-05-29: https://github.com/nicksnyder/go-i18n ,
+https://go.dev/ref/mod — Cross-referenced against the latest official
+<code>nicksnyder/go-i18n</code> docs (latest release
+<strong>v2.6.1</strong>, 2026-01-01) and the Go modules reference.
+Confirmed accurate as of this date: (a) the YAML/TOML bundle schema in
+§4 — singular messages use the <code>other:</code> key and plural
+messages use CLDR forms
+(<code>one</code>/<code>few</code>/<code>other</code>) — matches the
+upstream go-i18n message-file schema; (b)
+<code>NewLocalizer(bundle, langs...)</code> accepts an ordered list of
+language preferences (§4 / §9 locale-detection note) per upstream API.
+Negative finding / staleness note: this repo’s
+<code>helix_code/go.mod</code> pins
+<code>github.com/nicksnyder/go-i18n/v2 v2.5.1</code> (verified in-tree),
+one minor version behind upstream v2.6.1 — the schema/API facts this doc
+documents are unchanged between those versions, so no instruction here
+is stale, but the dependency pin is a candidate for a routine
+<code>go get -u</code> bump (out of scope for a docs-only round). Go
+version authority per CLAUDE.md §3.1: inner module <code>go 1.26</code>,
+root <code>go 1.25.2</code> (both confirmed in the respective
+<code>go.mod</code> files); this is a non-build/non-Docker doc so no
+version pins required correction.</h2>
+</body>
+</html>

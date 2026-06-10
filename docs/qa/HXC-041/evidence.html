@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-041-helixqa-standalone-http-bank-runner-helixqa-http-live-proof">HXC-041
+— helixqa standalone HTTP bank-runner (<code>helixqa http</code>) + live
+proof</h1>
+<p>New subcommand
+<code>helixqa http -bank &lt;yaml&gt; -base-url &lt;url&gt;</code>
+(helix_qa cmd/helixqa/http.go +281, http_test.go +285). Drives a bank’s
+http: cases through pkg/autonomous HTTPExecutor — NO Playwright, NO LLM.
+- go build exit 0 (bin/helixqa 29.7M); go test ./pkg/autonomous/…
+./cmd/helixqa/… → ok (8/8, incl. 2 §1.1 mutation tests that correctly
+FAIL). - LIVE vs booted helix_code/bin/helixcode (port 18081, db=nil
+graceful): helixcode-auth.yaml → 16 cases: 15 PASS, 1 FAIL, exit 1 (the
+1 FAIL = real bug HXC-043). helix_qa commit d6c084d6 (3 files, no git
+add -A).</p>
+</body>
+</html>

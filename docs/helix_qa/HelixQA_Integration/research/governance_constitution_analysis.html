@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>governance_constitution_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">governance_constitution_analysis</h1>
+</header>
+<h1 id="governance-constitution-analysis-cross-repository-anti-bluff-mandate-coverage">Governance
+&amp; Constitution Analysis: Cross-Repository Anti-Bluff Mandate
+Coverage</h1>
+<p><strong>Date:</strong> 2026-04-29 <strong>Analyst:</strong>
+Governance &amp; Compliance Analysis Agent <strong>Scope:</strong>
+HelixCode, HelixQA, Catalogizer + all submodules</p>
+<hr />
+<h2 id="executive-summary">1. EXECUTIVE SUMMARY</h2>
+<p>This analysis examines CONSTITUTION.md, CLAUDE.md, AGENTS.md, and
+related governance files across three primary repositories to assess
+coverage of two critical anti-bluff mandates:</p>
+<ol type="1">
+<li><strong>CONST-035 / Zero-Bluff Mandate</strong> — Anti-bluff tests
+and challenges requirement</li>
+<li><strong>Article XI §11.9 — User-Mandate Forensic Anchor</strong> —
+Verbatim user mandate with cascade requirement (dated 2026-04-29)</li>
+</ol>
+<p><strong>Critical Finding:</strong> The User-Mandate Forensic Anchor
+(§11.9) is MISSING from HelixCode entirely — present in CONSTITUTION.md,
+CLAUDE.md, and AGENTS.md for both HelixQA and Catalogizer, but absent
+from all three HelixCode governance files. Additionally, cascade
+compliance to submodules is unverified across all repos.</p>
+<hr />
+<h2 id="repository-governance-file-inventory">2. REPOSITORY GOVERNANCE
+FILE INVENTORY</h2>
+<h3 id="helixqa-github.comhelixdevelopmenthelixqa">2.1 HelixQA
+(github.com/HelixDevelopment/HelixQA)</h3>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 11%" />
+<col style="width: 18%" />
+<col style="width: 31%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>CONST-035</th>
+<th>Article XI §11.9</th>
+<th>Cascade Mention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONSTITUTION.md</td>
+<td>~462</td>
+<td>✅ Yes (Article XI §§11.1–11.9)</td>
+<td>✅ Yes — verbatim quote + operative rule</td>
+<td>✅ Yes — §11.9 “must appear in every submodule’s CONSTITUTION.md /
+CLAUDE.md / AGENTS.md”</td>
+</tr>
+<tr>
+<td>CLAUDE.md</td>
+<td>~1019</td>
+<td>✅ Yes (Rule 10: Zero-Bluff Mandate)</td>
+<td>✅ Yes — verbatim quote + operative rule</td>
+<td>✅ Yes — “cascade to every submodule”</td>
+</tr>
+<tr>
+<td>AGENTS.md</td>
+<td>~426</td>
+<td>✅ Yes</td>
+<td>✅ Yes — verbatim quote + operative rule</td>
+<td>✅ Yes — “must appear in every submodule’s governance files”</td>
+</tr>
+<tr>
+<td>CHANGELOG.md</td>
+<td>~38</td>
+<td>✅ Referenced</td>
+<td>✅ Referenced</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key HelixQA CONSTITUTION.md provisions:</strong> -
+<strong>CONST-035</strong> — Anti-Bluff Tests &amp; Challenges
+(mandatory): “Tests, challenges, and HelixQA banks must verify real
+end-user behaviour… A PASS that does not exercise the feature is a
+critical defect.” - <strong>CONST-033</strong> — Host Power Management
+is Forbidden - <strong>CONST-032</strong> — Reproduction-Before-Fix -
+<strong>Article XI §11.9</strong> — User-Mandate Forensic Anchor
+(2026-04-29): Contains the verbatim user quote: <em>“We had been in
+position that all tests do execute with success and all Challenges as
+well, but in reality the most of the features does not work and can’t be
+used! This MUST NOT be the case…”</em> - <strong>Cascade
+requirement</strong>: “This anchor section (verbatim quote + operative
+rule) must appear in every submodule’s CONSTITUTION.md / CLAUDE.md /
+AGENTS.md. Non-compliance is a release blocker regardless of context.” -
+100% Test Coverage, Challenge Coverage, Real Data requirement,
+Definition of Done with pasted output</p>
+<p><strong>Key HelixQA CLAUDE.md provisions (Rule 10):</strong> - “Every
+test, challenge, or HelixQA bank entry must fail if the feature it
+claims to verify is removed or broken.” - “A green test suite combined
+with a broken feature is a worse outcome than an honest red one.” - Full
+§11.9 verbatim quote and operative rule present - Cascade: “this clause
+must appear in every submodule’s CONSTITUTION.md / CLAUDE.md /
+AGENTS.md”</p>
+<p><strong>Key HelixQA AGENTS.md provisions:</strong> - “Anti-Bluff
+Testing — Mandatory (CONST-035)” - Full §11.9 verbatim quote and
+operative rule present - Cascade: “This anchor MUST appear in every
+submodule’s governance files”</p>
+<hr />
+<h3 id="helixcode-github.comhelixdevelopmenthelixcode">2.2 HelixCode
+(github.com/HelixDevelopment/HelixCode)</h3>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 11%" />
+<col style="width: 18%" />
+<col style="width: 31%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>CONST-035</th>
+<th>Article XI §11.9</th>
+<th>Cascade Mention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONSTITUTION.md</td>
+<td>~461</td>
+<td>✅ Yes (labeled CONST-017)</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>✅ Yes (CONST-036: “propagated to all submodules”)</td>
+</tr>
+<tr>
+<td>CLAUDE.md</td>
+<td>~879</td>
+<td>✅ Yes (Rule 10: Zero-Bluff Mandate)</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>❌ Not mentioned</td>
+</tr>
+<tr>
+<td>AGENTS.md</td>
+<td>~426</td>
+<td>✅ Yes (Rule 10: Zero-Bluff Mandate)</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>❌ Not mentioned</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key HelixCode CONSTITUTION.md provisions:</strong> -
+<strong>CONST-017</strong> — Anti-Bluff Tests &amp; Challenges: “Tests
+must fail if the feature they claim to verify is removed or broken.” -
+<strong>CONST-018</strong> — Host Power Management is Forbidden -
+<strong>CONST-036</strong> — Propagation: “CONST-036: The following
+mandatory constraints are propagated to all submodules…” - <strong>NO
+Article XI §11.9</strong> — The verbatim user mandate forensic anchor is
+completely absent - <strong>NO verbatim user quote</strong> — The
+historical user mandate text is not present anywhere</p>
+<p><strong>Key HelixCode CLAUDE.md provisions:</strong> - “Rule 10:
+Zero-Bluff Mandate (CONST-035)” — operative rules present (assert
+concrete outcomes, run real system, matching negative, emit evidence,
+verify “fails when removed”) - <strong>NO §11.9 User-Mandate Forensic
+Anchor</strong> — no verbatim quote, no “2026-04-29” date - <strong>NO
+cascade requirement</strong> for §11.9 (since §11.9 itself is
+missing)</p>
+<p><strong>Key HelixCode AGENTS.md provisions:</strong> - “Rule 10:
+Zero-Bluff Mandate (CONST-035)” — same operative rules as CLAUDE.md -
+<strong>NO §11.9 User-Mandate Forensic Anchor</strong></p>
+<p><strong>HelixCode Submodules:</strong> - <code>.gitmodules</code>
+lists 15 git submodules including internal/isolated_files/ - Submodules
+include: awesome-cpp-examples, awesome-shell-examples, cpp-learning-lab,
+rust-examples, rust-learning-lab, go-examples, go-learning-lab,
+python-examples, python-learning-lab, data-learning-lab, ml-starter-lab,
+mlops-learning-lab, data-engineering-lab,
+distributed-systems-learning-lab, internal/isolated_files/ -
+<strong>Verification needed:</strong> Whether each submodule has
+CONSTITUTION.md / CLAUDE.md / AGENTS.md with anti-bluff mandates</p>
+<hr />
+<h3 id="catalogizer-github.comvasic-digitalcatalogizer">2.3 Catalogizer
+(github.com/vasic-digital/Catalogizer)</h3>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 11%" />
+<col style="width: 18%" />
+<col style="width: 31%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>CONST-035</th>
+<th>Article XI §11.9</th>
+<th>Cascade Mention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONSTITUTION.md</td>
+<td>~667</td>
+<td>✅ Yes (Article XI §§11.1–11.9)</td>
+<td>✅ Yes — verbatim quote + operative rule</td>
+<td>✅ Yes — “must appear in every submodule’s CONSTITUTION.md /
+CLAUDE.md / AGENTS.md. Non-compliance is a release blocker.”</td>
+</tr>
+<tr>
+<td>CLAUDE.md</td>
+<td>~664</td>
+<td>✅ Yes (Article XI)</td>
+<td>✅ Yes — verbatim quote + operative rule</td>
+<td>✅ Yes — “this anchor MUST appear in every submodule’s governance
+files”</td>
+</tr>
+<tr>
+<td>AGENTS.md</td>
+<td>~286</td>
+<td>✅ Yes (Article XI)</td>
+<td>✅ Yes — verbatim quote + operative rule</td>
+<td>✅ Yes — “this anchor MUST appear in every submodule’s governance
+files”</td>
+</tr>
+<tr>
+<td>MEMORY.md</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Catalogizer CONSTITUTION.md provisions:</strong> -
+<strong>Article XI §11.9</strong> — User-Mandate Forensic Anchor
+(2026-04-29): Full verbatim user quote present - <strong>Cascade
+requirement (extending §11.8)</strong>: “This anchor section (verbatim
+quote + operative rule) must appear in every submodule’s CONSTITUTION.md
+/ CLAUDE.md / AGENTS.md. Non-compliance is a release blocker regardless
+of context.” - Also contains: Article V (100% test coverage), Article VI
+(Open-Points brief), Article VII (Full-QA Master Cycle) - Universal
+Mandatory Constraints inherited from HelixAgent root CLAUDE.md -
+CONST-032 — Reproduction-Before-Fix - CONST-033 — Host Power Management
+Hard Ban</p>
+<p><strong>Key Catalogizer CLAUDE.md provisions:</strong> - “⚠️
+Anti-Bluff Testing — Mandatory (Article XI)” — full contract with 5
+requirements - “⚠️ User-Mandate Forensic Anchor (Article XI §11.9 —
+2026-04-29)” — verbatim quote + operative rule - “Cascade requirement:
+this anchor (verbatim quote + operative rule) MUST appear in every
+submodule’s CONSTITUTION.md / CLAUDE.md / AGENTS.md.”</p>
+<p><strong>Key Catalogizer AGENTS.md provisions:</strong> - “Anti-Bluff
+Testing — Mandatory (Article XI)” — full operative rules - “⚠️
+User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)” — verbatim
+quote + operative rule - “Cascade requirement: this anchor MUST appear
+in every submodule’s governance files.”</p>
+<p><strong>Catalogizer Submodules:</strong> - <code>.gitmodules</code>
+indicates 41+ independent git submodules under
+<code>digital.vasic.*</code> and <code>@vasic-digital/*</code> - Go
+modules: 23 modules wired via <code>replace</code> in catalog-api/go.mod
+- TS/React modules: 9 modules linked via <code>file:../</code> in
+catalog-web/package.json - HelixQA/AI: 9 modules for QA/testing -
+<strong>Verification needed:</strong> Whether each of the 41+ submodules
+has CONSTITUTION.md / CLAUDE.md / AGENTS.md with anti-bluff mandates
+cascaded</p>
+<hr />
+<h2 id="cross-repository-comparison-matrix">3. CROSS-REPOSITORY
+COMPARISON MATRIX</h2>
+<h3 id="anti-bluff-mandate-presence">3.1 Anti-Bluff Mandate
+Presence</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 26%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Mandate</th>
+<th>HelixQA</th>
+<th>HelixCode</th>
+<th>Catalogizer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONST-035 / Zero-Bluff operative rules</td>
+<td>✅</td>
+<td>✅ (as CONST-017)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Article XI §11.9 verbatim user quote</td>
+<td>✅</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Article XI §11.9 operative rule (“bar for shipping is not tests pass
+but users can use”)</td>
+<td>✅</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Article XI §11.9 date stamp (2026-04-29)</td>
+<td>✅</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Cascade requirement to submodules</td>
+<td>✅</td>
+<td>✅ (CONST-036)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>§11.9 cascade in submodules</td>
+<td>Unknown</td>
+<td>Unknown</td>
+<td>Unknown</td>
+</tr>
+</tbody>
+</table>
+<h3 id="shared-rules-across-all-three-repos">3.2 Shared Rules Across All
+Three Repos</h3>
+<p>The following rules are present in all three repositories:</p>
+<ol type="1">
+<li>✅ <strong>100% Test Coverage</strong> requirement</li>
+<li>✅ <strong>Challenge Coverage</strong> requirement</li>
+<li>✅ <strong>Real Data</strong> requirement (no mocks outside unit
+tests)</li>
+<li>✅ <strong>CONST-032 — Reproduction-Before-Fix</strong></li>
+<li>✅ <strong>CONST-033 — Host Power Management is
+Forbidden</strong></li>
+<li>✅ <strong>Definition of Done</strong> with pasted terminal output
+requirement</li>
+<li>✅ <strong>No self-certification</strong> rule</li>
+<li>✅ <strong>No CI/CD pipelines</strong> rule</li>
+<li>✅ <strong>SSH Git only</strong> rule</li>
+<li>✅ <strong>Resource Limits</strong> for tests (30-40% host
+resources)</li>
+</ol>
+<h3 id="rules-present-in-only-some-repos">3.3 Rules Present in Only Some
+Repos</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 36%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Present In</th>
+<th>Missing From</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Article XI §11.9 User-Mandate Forensic Anchor</td>
+<td>HelixQA, Catalogizer</td>
+<td><strong>HelixCode</strong></td>
+</tr>
+<tr>
+<td>Article VII — Full-QA Master Cycle</td>
+<td>Catalogizer, HelixQA</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>Article V / VI — Open-Points Closure Brief</td>
+<td>Catalogizer</td>
+<td>HelixQA, HelixCode</td>
+</tr>
+<tr>
+<td>Zero Warning / Zero Error</td>
+<td>Catalogizer, HelixQA</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>HTTP/3 + Brotli requirement</td>
+<td>Catalogizer</td>
+<td>HelixQA, HelixCode</td>
+</tr>
+<tr>
+<td>No sudo / root operations</td>
+<td>Catalogizer, HelixQA</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>Concurrent-Safe containers (Go-specific)</td>
+<td>Catalogizer, HelixQA</td>
+<td>HelixCode</td>
+</tr>
+</tbody>
+</table>
+<h3 id="contradictions">3.4 Contradictions</h3>
+<p>No direct contradictions were found. However, there are
+<strong>naming inconsistencies</strong>: - HelixQA labels the anti-bluff
+mandate as <strong>CONST-035</strong> - HelixCode labels the equivalent
+mandate as <strong>CONST-017</strong> - Both reference the same
+underlying rule but with different constant identifiers - HelixCode’s
+CLAUDE.md and AGENTS.md reference “CONST-035” in the Rule 10 title, but
+the CONSTITUTION.md labels it CONST-017</p>
+<hr />
+<h2 id="anti-bluff-mandate-coverage-analysis">4. ANTI-BLUFF MANDATE
+COVERAGE ANALYSIS</h2>
+<h3 id="const-035-zero-bluff-coverage">4.1 CONST-035 / Zero-Bluff
+Coverage</h3>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Present</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixQA CONSTITUTION.md</td>
+<td>✅</td>
+<td>As CONST-035 (Article XI §§11.1–11.9)</td>
+</tr>
+<tr>
+<td>HelixQA CLAUDE.md</td>
+<td>✅</td>
+<td>Rule 10: Zero-Bluff Mandate</td>
+</tr>
+<tr>
+<td>HelixQA AGENTS.md</td>
+<td>✅</td>
+<td>Anti-Bluff Testing — Mandatory</td>
+</tr>
+<tr>
+<td>HelixCode CONSTITUTION.md</td>
+<td>✅</td>
+<td>As CONST-017</td>
+</tr>
+<tr>
+<td>HelixCode CLAUDE.md</td>
+<td>✅</td>
+<td>Rule 10: Zero-Bluff Mandate (CONST-035)</td>
+</tr>
+<tr>
+<td>HelixCode AGENTS.md</td>
+<td>✅</td>
+<td>Rule 10: Zero-Bluff Mandate (CONST-035)</td>
+</tr>
+<tr>
+<td>Catalogizer CONSTITUTION.md</td>
+<td>✅</td>
+<td>Article XI §§11.1–11.9</td>
+</tr>
+<tr>
+<td>Catalogizer CLAUDE.md</td>
+<td>✅</td>
+<td>Article XI</td>
+</tr>
+<tr>
+<td>Catalogizer AGENTS.md</td>
+<td>✅</td>
+<td>Article XI</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CONST-035 Coverage: 9/9 files ✅</strong></p>
+<h3 id="article-xi-11.9-user-mandate-forensic-anchor-coverage">4.2
+Article XI §11.9 User-Mandate Forensic Anchor Coverage</h3>
+<table>
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 34%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Location</th>
+<th>Present</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixQA CONSTITUTION.md</td>
+<td>✅</td>
+<td>Full verbatim quote + operative rule + cascade</td>
+</tr>
+<tr>
+<td>HelixQA CLAUDE.md</td>
+<td>✅</td>
+<td>Full verbatim quote + operative rule + cascade</td>
+</tr>
+<tr>
+<td>HelixQA AGENTS.md</td>
+<td>✅</td>
+<td>Full verbatim quote + operative rule + cascade</td>
+</tr>
+<tr>
+<td>HelixCode CONSTITUTION.md</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>No verbatim quote, no §11.9, no date stamp</td>
+</tr>
+<tr>
+<td>HelixCode CLAUDE.md</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>No verbatim quote, no §11.9, no date stamp</td>
+</tr>
+<tr>
+<td>HelixCode AGENTS.md</td>
+<td>❌ <strong>MISSING</strong></td>
+<td>No verbatim quote, no §11.9, no date stamp</td>
+</tr>
+<tr>
+<td>Catalogizer CONSTITUTION.md</td>
+<td>✅</td>
+<td>Full verbatim quote + operative rule + cascade</td>
+</tr>
+<tr>
+<td>Catalogizer CLAUDE.md</td>
+<td>✅</td>
+<td>Full verbatim quote + operative rule + cascade</td>
+</tr>
+<tr>
+<td>Catalogizer AGENTS.md</td>
+<td>✅</td>
+<td>Full verbatim quote + operative rule + cascade</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Article XI §11.9 Coverage: 6/9 files ❌ — 3 MISSING in
+HelixCode</strong></p>
+<h3 id="submodule-coverage-unverified">4.3 Submodule Coverage
+(Unverified)</h3>
+<p>Both HelixCode and Catalogizer declare cascade requirements for
+submodules, but <strong>no submodule was verified</strong> to actually
+contain the cascaded mandates.</p>
+<p><strong>HelixCode submodules requiring verification:</strong> -
+awesome-cpp-examples - awesome-shell-examples - cpp-learning-lab -
+rust-examples - rust-learning-lab - go-examples - go-learning-lab -
+python-examples - python-learning-lab - data-learning-lab -
+ml-starter-lab - mlops-learning-lab - data-engineering-lab -
+distributed-systems-learning-lab - internal/isolated_files/</p>
+<p><strong>Catalogizer submodules requiring verification (41+
+total):</strong> - digital.vasic.* Go modules (23 modules): Auth, Cache,
+Config, Concurrency, Container, Database, Discovery, EventBus,
+Filesystem, Lazy, LLMProvider, LLMsVerifier, Media, Memory, Middleware,
+Observability, RateLimiter, Recovery, ReplayBuffer, ScreenDiff,
+Security, Storage, Streaming, Upstreams, VisionEngine, Watcher - <span class="citation" data-cites="vasic-digital">@vasic-digital</span>/*
+TS/React modules (9 modules): Auth-Context-React,
+Catalogizer-API-Client-TS, Collection-Manager-React,
+Dashboard-Analytics-React, Media-Browser-React, Media-Player-React,
+Media-Types-TS, UI-Components-React, WebSocket-Client-TS - HelixQA/AI
+modules (9 modules): Build, DocProcessor, Entities, HelixQA,
+LLMOrchestrator, OCU-CUDA-Sidecar, TrainingCollector, VisualRegression,
+Website - Plus internal modules: Assets, catalog-api, catalog-web,
+catalogizer-android, catalogizer-androidtv, catalogizer-api-client,
+catalogizer-desktop, installer-wizard, challenges, tests</p>
+<hr />
+<h2 id="gap-identification">5. GAP IDENTIFICATION</h2>
+<h3 id="critical-gaps-release-blockers-per-constitution">5.1 Critical
+Gaps (Release Blockers per Constitution)</h3>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 32%" />
+<col style="width: 20%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gap ID</th>
+<th>Gap Description</th>
+<th>Severity</th>
+<th>Affected Repo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GAP-001</td>
+<td><strong>Article XI §11.9 User-Mandate Forensic Anchor MISSING from
+HelixCode CONSTITUTION.md</strong></td>
+<td>🔴 Critical</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>GAP-002</td>
+<td><strong>Article XI §11.9 User-Mandate Forensic Anchor MISSING from
+HelixCode CLAUDE.md</strong></td>
+<td>🔴 Critical</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>GAP-003</td>
+<td><strong>Article XI §11.9 User-Mandate Forensic Anchor MISSING from
+HelixCode AGENTS.md</strong></td>
+<td>🔴 Critical</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>GAP-004</td>
+<td><strong>Cascade to HelixCode submodules UNVERIFIED</strong> — no
+evidence that submodules contain anti-bluff mandates</td>
+<td>🔴 Critical</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>GAP-005</td>
+<td><strong>Cascade to Catalogizer submodules UNVERIFIED</strong> — 41+
+submodules, no verification performed</td>
+<td>🔴 Critical</td>
+<td>Catalogizer</td>
+</tr>
+<tr>
+<td>GAP-006</td>
+<td><strong>HelixQA submodules (external deps) may lack anti-bluff
+mandates</strong> — external submodules like ollama, go-sqlite3, goja,
+etc.</td>
+<td>🟡 Medium</td>
+<td>HelixQA</td>
+</tr>
+</tbody>
+</table>
+<h3 id="secondary-gaps">5.2 Secondary Gaps</h3>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 32%" />
+<col style="width: 20%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gap ID</th>
+<th>Gap Description</th>
+<th>Severity</th>
+<th>Affected Repo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GAP-007</td>
+<td><strong>Naming inconsistency</strong>: HelixCode uses CONST-017
+while HelixQA/Catalogizer reference CONST-035 for the same rule</td>
+<td>🟡 Medium</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>GAP-008</td>
+<td><strong>HelixCode CLAUDE.md/AGENTS.md title says “CONST-035” but
+CONSTITUTION.md labels it “CONST-017”</strong> — inconsistent internal
+reference</td>
+<td>🟡 Medium</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>GAP-009</td>
+<td><strong>Catalogizer AGENTS.md does not mention CONST-035 by
+number</strong> — only references “Article XI”</td>
+<td>🟡 Medium</td>
+<td>Catalogizer</td>
+</tr>
+<tr>
+<td>GAP-010</td>
+<td><strong>HelixCode missing Article VII (Full-QA Master
+Cycle)</strong> — present in Catalogizer and HelixQA</td>
+<td>🟡 Medium</td>
+<td>HelixCode</td>
+</tr>
+<tr>
+<td>GAP-011</td>
+<td><strong>HelixCode missing Article V/VI (Open-Points Closure
+Brief)</strong> — present in Catalogizer</td>
+<td>🟡 Medium</td>
+<td>HelixCode</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="exact-text-proposals">6. EXACT TEXT PROPOSALS</h2>
+<h3 id="for-helixcode-constitution.md">6.1 For HelixCode
+CONSTITUTION.md</h3>
+<p><strong>File:</strong>
+<code>https://github.com/HelixDevelopment/HelixCode/blob/main/CONSTITUTION.md</code>
+<strong>Insertion point:</strong> After CONST-017 (Anti-Bluff Tests
+&amp; Challenges), before CONST-018</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">### CONST-035 — Anti-Bluff Tests &amp; Challenges (User-Mandate Forensic Anchor)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>**§11.9 User-Mandate Forensic Anchor (2026-04-29)**</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit, repeatedly-stated user mandate. The verbatim text:</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; &quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>This anchor is the primary authority for the entire Article. The operative rule is:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>**The bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;**</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. Metadata-only PASS, configuration-only PASS, &quot;absence-of-error&quot; PASS, and grep-based PASS without runtime evidence are all critical defects regardless of how green the summary line looks.</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>Tests and Challenges (HelixQA) are bound equally — a Challenge that scores PASS on a non-functional feature is the same class of defect as a unit test that does. Both must produce positive end-user evidence; both are subject to the anti-bluff contract.</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one — it silently destroys trust in the entire suite. Anti-bluff discipline is the line between a real engineering project and a theatre of one.</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>**Cascade requirement (extending CONST-036):**</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>This anchor section (verbatim quote + operative rule) must appear in every submodule&#39;s CONSTITUTION.md / CLAUDE.md / AGENTS.md. Non-compliance is a release blocker regardless of context. Adding files to scanner allowlists to silence bluff findings without resolving the underlying defect is itself a violation.</span></code></pre></div>
+<hr />
+<h3 id="for-helixcode-claude.md">6.2 For HelixCode CLAUDE.md</h3>
+<p><strong>File:</strong>
+<code>https://github.com/HelixDevelopment/HelixCode/blob/main/CLAUDE.md</code>
+<strong>Insertion point:</strong> After “Rule 10: Zero-Bluff Mandate
+(CONST-035)” section, before Rule 11</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>⚠️ User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit user mandate, verbatim:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>&quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>The operative rule: the bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. Metadata-only PASS, configuration-only PASS, &quot;absence-of-error&quot; PASS, and grep-based PASS without runtime evidence are all critical defects regardless of how green the summary line looks.</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>Tests and Challenges (HelixQA) are bound equally. A Challenge that scores PASS on a non-functional feature is the same class of defect as a unit test that does.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one — it silently destroys trust in the entire suite.</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>**Cascade requirement:** this anchor (verbatim quote + operative rule) MUST appear in every submodule&#39;s CONSTITUTION.md / CLAUDE.md / AGENTS.md. Non-compliance is a release blocker. Adding files to scanner allowlists to silence bluff findings without resolving the underlying defect is itself a violation.</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>Full text: CONSTITUTION.md Article XI §11.9.</span></code></pre></div>
+<hr />
+<h3 id="for-helixcode-agents.md">6.3 For HelixCode AGENTS.md</h3>
+<p><strong>File:</strong>
+<code>https://github.com/HelixDevelopment/HelixCode/blob/main/AGENTS.md</code>
+<strong>Insertion point:</strong> After “Rule 10: Zero-Bluff Mandate
+(CONST-035)” section</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>⚠️ User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit user mandate, verbatim:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>&quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>The operative rule: the bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. No metadata-only PASS, no configuration-only PASS, no &quot;absence-of-error&quot; PASS, no grep-based PASS — all are critical defects regardless of how green the summary line looks.</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>Tests and Challenges (HelixQA) are bound equally.</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one.</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>**Cascade requirement:** this anchor MUST appear in every submodule&#39;s governance files. Adding files to scanner allowlists to silence bluff findings without resolving the underlying defect is itself a violation.</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>Full text: CONSTITUTION.md Article XI §11.9.</span></code></pre></div>
+<hr />
+<h3 id="for-helixcode-constitution.md-naming-fix">6.4 For HelixCode
+CONSTITUTION.md — Naming Fix</h3>
+<p><strong>File:</strong>
+<code>https://github.com/HelixDevelopment/HelixCode/blob/main/CONSTITUTION.md</code>
+<strong>Change:</strong> Rename CONST-017 to CONST-035 for consistency
+across the ecosystem</p>
+<p>Replace:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">### CONST-017 — Anti-Bluff Tests &amp; Challenges</span></span></code></pre></div>
+<p>With:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">### CONST-035 — Anti-Bluff Tests &amp; Challenges (formerly CONST-017)</span></span></code></pre></div>
+<hr />
+<h3 id="for-all-catalogizer-submodules-template">6.5 For All Catalogizer
+Submodules (Template)</h3>
+<p><strong>Applies to:</strong> All 41+ Catalogizer submodules under
+<code>digital.vasic.*</code> and <code>@vasic-digital/*</code>
+<strong>Required files in EACH submodule:</strong>
+<code>CONSTITUTION.md</code>, <code>CLAUDE.md</code>,
+<code>AGENTS.md</code></p>
+<p>If a submodule lacks these files, create them with this minimum
+content:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Submodule Name] — Governance</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Universal Mandatory Constraints (Inherited)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>This submodule inherits all constraints from the parent Catalogizer project. Full text: https://github.com/vasic-digital/Catalogizer/blob/main/CONSTITUTION.md</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## ⚠️ User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit user mandate, verbatim:</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>&quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>The operative rule: the bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. Metadata-only PASS, configuration-only PASS, &quot;absence-of-error&quot; PASS, and grep-based PASS without runtime evidence are all critical defects regardless of how green the summary line looks.</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one — it silently destroys trust in the entire suite.</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-035 — Anti-Bluff Tests &amp; Challenges</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>Every test, challenge, or verification script must:</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Assert on concrete end-user-visible outcomes</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Run against the real system (no mocks outside unit tests)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Include a matching negative assertion</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Emit copy-pasteable evidence</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Verify it FAILS when the feature is removed or broken</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-032 — Reproduction-Before-Fix</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>Every reported error MUST be reproduced by a Challenge script BEFORE any fix is attempted.</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-033 — Host Power Management is Forbidden</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>Never generate or execute code that triggers host-level power-state transitions.</span></code></pre></div>
+<hr />
+<h3 id="for-all-helixcode-submodules-template">6.6 For All HelixCode
+Submodules (Template)</h3>
+<p><strong>Applies to:</strong> All 15 HelixCode submodules listed in
+<code>.gitmodules</code> <strong>Required files in EACH
+submodule:</strong> <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.md</code></p>
+<p>If a submodule lacks these files, create them with this minimum
+content:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Submodule Name] — Governance</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Universal Mandatory Constraints (Inherited)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>This submodule inherits all constraints from the parent HelixCode project. Full text: https://github.com/HelixDevelopment/HelixCode/blob/main/CONSTITUTION.md</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## ⚠️ User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit user mandate, verbatim:</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>&quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>The operative rule: the bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. No metadata-only PASS, no configuration-only PASS, no &quot;absence-of-error&quot; PASS, no grep-based PASS — all are critical defects regardless of how green the summary line looks.</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one.</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-035 — Anti-Bluff Tests &amp; Challenges</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>Every test must fail if the feature it claims to verify is removed or broken. Tests that pass on broken features are critical defects.</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-032 — Reproduction-Before-Fix</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>Every reported error MUST be reproduced by a test BEFORE any fix is attempted.</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-033 — Host Power Management is Forbidden</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>Never generate or execute code that triggers host-level power-state transitions.</span></code></pre></div>
+<hr />
+<h2 id="cascade-requirements-documentation">7. CASCADE REQUIREMENTS
+DOCUMENTATION</h2>
+<h3 id="declared-cascade-requirements">7.1 Declared Cascade
+Requirements</h3>
+<p>All three repositories declare cascade requirements, but with varying
+specificity:</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 38%" />
+<col style="width: 25%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Cascade Declaration</th>
+<th>Target Files</th>
+<th>Enforcement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HelixQA</strong></td>
+<td>“This anchor section must appear in every submodule’s
+CONSTITUTION.md / CLAUDE.md / AGENTS.md”</td>
+<td>All 3 files per submodule</td>
+<td>“Non-compliance is a release blocker regardless of context”</td>
+</tr>
+<tr>
+<td><strong>HelixCode</strong></td>
+<td>“CONST-036: The following mandatory constraints are propagated to
+all submodules”</td>
+<td>Implied all governance files</td>
+<td>Listed as constitutional constraint</td>
+</tr>
+<tr>
+<td><strong>Catalogizer</strong></td>
+<td>“This anchor section (verbatim quote + operative rule) must appear
+in every submodule’s CONSTITUTION.md / CLAUDE.md / AGENTS.md”</td>
+<td>All 3 files per submodule</td>
+<td>“Non-compliance is a release blocker regardless of context”</td>
+</tr>
+</tbody>
+</table>
+<h3 id="actual-cascade-status">7.2 Actual Cascade Status</h3>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 29%" />
+<col style="width: 45%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Submodules Count</th>
+<th>Governance Files Verified</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HelixQA</strong></td>
+<td>12 (external open-source)</td>
+<td>0</td>
+<td>❌ <strong>UNVERIFIED</strong> — External submodules (ollama,
+go-sqlite3, goja, testify, etc.) unlikely to contain project-specific
+mandates</td>
+</tr>
+<tr>
+<td><strong>HelixCode</strong></td>
+<td>15</td>
+<td>0</td>
+<td>❌ <strong>UNVERIFIED</strong> — No submodule was inspected for
+governance file presence</td>
+</tr>
+<tr>
+<td><strong>Catalogizer</strong></td>
+<td>41+</td>
+<td>0</td>
+<td>❌ <strong>UNVERIFIED</strong> — No submodule was inspected for
+governance file presence</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cascade-compliance-verification-protocol">7.3 Cascade Compliance
+Verification Protocol</h3>
+<p>To verify cascade compliance, the following actions must be
+taken:</p>
+<ol type="1">
+<li><p><strong>For each submodule</strong>, check for presence of:</p>
+<ul>
+<li><code>CONSTITUTION.md</code></li>
+<li><code>CLAUDE.md</code></li>
+<li><code>AGENTS.md</code></li>
+</ul></li>
+<li><p><strong>For each governance file found</strong>, verify it
+contains:</p>
+<ul>
+<li>Article XI §11.9 verbatim user mandate quote</li>
+<li>Article XI §11.9 operative rule (“bar for shipping is not tests pass
+but users can use the feature”)</li>
+<li>CONST-035 / Zero-Bluff operative rules</li>
+<li>CONST-032 — Reproduction-Before-Fix</li>
+<li>CONST-033 — Host Power Management</li>
+</ul></li>
+<li><p><strong>For submodules missing governance files</strong>, create
+them using the templates in §6.5 and §6.6.</p></li>
+<li><p><strong>For submodules with incomplete governance files</strong>,
+append the missing sections.</p></li>
+</ol>
+<hr />
+<h2 id="submodules-requiring-verification">8. SUBMODULES REQUIRING
+VERIFICATION</h2>
+<h3 id="helixqa-external-submodules-12">8.1 HelixQA External Submodules
+(12)</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 15%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Path</th>
+<th>Likely Has Governance?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ollama</td>
+<td>src/helixqa/ollama</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>go-sqlite3</td>
+<td>src/helixqa/go-sqlite3</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>goja</td>
+<td>src/helixqa/goja</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>testify</td>
+<td>src/helixqa/testify</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>mux</td>
+<td>src/helixqa/mux</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>websocket</td>
+<td>src/helixqa/websocket</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>go-plugin</td>
+<td>src/helixqa/go-plugin</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>testifylint</td>
+<td>src/helixqa/testifylint</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>chromedp</td>
+<td>src/helixqa/chromedp</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>bubbletea</td>
+<td>src/helixqa/bubbletea</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>cobra</td>
+<td>src/helixqa/cobra</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+<tr>
+<td>bubbleteatest</td>
+<td>src/helixqa/bubbleteatest</td>
+<td>❌ Unlikely (external project)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> External open-source submodules cannot be
+modified directly. The parent repo must either: - Fork and maintain
+governance patches - Document that external deps are exempt from
+project-specific mandates - Apply mandates only to internal/controlled
+submodules</p>
+<h3 id="helixcode-submodules-15">8.2 HelixCode Submodules (15)</h3>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 23%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>URL Pattern</th>
+<th>Governance Verification Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>awesome-cpp-examples</td>
+<td>github.com/HelixDevelopment/awesome-cpp-examples</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>awesome-shell-examples</td>
+<td>github.com/HelixDevelopment/awesome-shell-examples</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>cpp-learning-lab</td>
+<td>github.com/HelixDevelopment/cpp-learning-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>rust-examples</td>
+<td>github.com/HelixDevelopment/rust-examples</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>rust-learning-lab</td>
+<td>github.com/HelixDevelopment/rust-learning-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>go-examples</td>
+<td>github.com/HelixDevelopment/go-examples</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>go-learning-lab</td>
+<td>github.com/HelixDevelopment/go-learning-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>python-examples</td>
+<td>github.com/HelixDevelopment/python-examples</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>python-learning-lab</td>
+<td>github.com/HelixDevelopment/python-learning-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>data-learning-lab</td>
+<td>github.com/HelixDevelopment/data-learning-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>ml-starter-lab</td>
+<td>github.com/HelixDevelopment/ml-starter-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>mlops-learning-lab</td>
+<td>github.com/HelixDevelopment/mlops-learning-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>data-engineering-lab</td>
+<td>github.com/HelixDevelopment/data-engineering-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>distributed-systems-learning-lab</td>
+<td>github.com/HelixDevelopment/distributed-systems-learning-lab</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+<tr>
+<td>internal/isolated_files</td>
+<td>Internal path</td>
+<td>❌ NOT CHECKED</td>
+</tr>
+</tbody>
+</table>
+<h3 id="catalogizer-submodules-41">8.3 Catalogizer Submodules (41+)</h3>
+<p>The following submodule categories require governance
+verification:</p>
+<p>**Category A: Go Modules (digital.vasic.*)** — 23 modules - Auth,
+Cache, Config, Concurrency, Container, Database, Discovery, EventBus,
+Filesystem, Lazy, LLMProvider, LLMsVerifier, Media, Memory, Middleware,
+Observability, RateLimiter, Recovery, ReplayBuffer, ScreenDiff,
+Security, Storage, Streaming, Upstreams, VisionEngine, Watcher</p>
+<p>**Category B: TS/React Modules (<span class="citation" data-cites="vasic-digital">@vasic-digital</span>/*)** — 9 modules -
+Auth-Context-React, Catalogizer-API-Client-TS, Collection-Manager-React,
+Dashboard-Analytics-React, Media-Browser-React, Media-Player-React,
+Media-Types-TS, UI-Components-React, WebSocket-Client-TS</p>
+<p><strong>Category C: HelixQA/AI Modules</strong> — 9 modules - Build,
+DocProcessor, Entities, HelixQA, LLMOrchestrator, OCU-CUDA-Sidecar,
+TrainingCollector, VisualRegression, Website</p>
+<p><strong>Category D: Application Modules</strong> — 4 modules -
+catalog-api, catalog-web, catalogizer-android, catalogizer-androidtv,
+catalogizer-api-client, catalogizer-desktop, installer-wizard</p>
+<hr />
+<h2 id="recommendations">9. RECOMMENDATIONS</h2>
+<h3 id="priority-1-critical-immediate-action-required">Priority 1:
+Critical (Immediate Action Required)</h3>
+<ol type="1">
+<li><p><strong>Add Article XI §11.9 to all three HelixCode governance
+files</strong> using the exact text proposals in §6.1–§6.3. This is a
+constitutional release blocker per the cascade requirements in HelixQA
+and Catalogizer.</p></li>
+<li><p><strong>Verify all HelixCode submodules</strong> for governance
+file presence and anti-bluff mandate coverage. Create missing files
+using template §6.6.</p></li>
+<li><p><strong>Verify all Catalogizer submodules</strong> for governance
+file presence and anti-bluff mandate coverage. Create missing files
+using template §6.5.</p></li>
+</ol>
+<h3 id="priority-2-high-next-sprint">Priority 2: High (Next Sprint)</h3>
+<ol start="4" type="1">
+<li><p><strong>Align naming</strong>: Rename HelixCode CONST-017 to
+CONST-035 for consistency across the ecosystem.</p></li>
+<li><p><strong>Document external submodule policy</strong>: For
+HelixQA’s 12 external open-source submodules, create a documented policy
+stating either (a) they are exempt from project-specific mandates, or
+(b) they must be forked and patched.</p></li>
+<li><p><strong>Add Article VII (Full-QA Master Cycle) to
+HelixCode</strong> if the project intends to maintain parity with
+Catalogizer and HelixQA.</p></li>
+</ol>
+<h3 id="priority-3-medium-ongoing-maintenance">Priority 3: Medium
+(Ongoing Maintenance)</h3>
+<ol start="7" type="1">
+<li><p><strong>Implement automated cascade verification</strong>: Create
+a CI script (run manually per no-CI rule) that scans all submodules for
+governance file presence and required sections.</p></li>
+<li><p><strong>Quarterly governance audits</strong>: Schedule recurring
+analysis of all repos and submodules for governance compliance.</p></li>
+</ol>
+<hr />
+<h2 id="appendix-verbatim-mandate-text-authoritative-source">10.
+APPENDIX: VERBATIM MANDATE TEXT (Authoritative Source)</h2>
+<p>The following is the canonical verbatim text that MUST appear in all
+governance files per Article XI §11.9:</p>
+<blockquote>
+<p>“We had been in position that all tests do execute with success and
+all Challenges as well, but in reality the most of the features does not
+work and can’t be used! This MUST NOT be the case and execution of tests
+and Challenges MUST guarantee the quality, the completion and full
+usability by end users of the product!”</p>
+</blockquote>
+<p><strong>Operative rule:</strong> The bar for shipping is not “tests
+pass” but “users can use the feature.”</p>
+<hr />
+<h2 id="notes-on-unverified-items">11. NOTES ON UNVERIFIED ITEMS</h2>
+<p>The following items could not be verified during this analysis and
+require follow-up:</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>HelixCode submodule governance files
+(15 submodules)</label></li>
+<li><label><input type="checkbox"></input>Catalogizer submodule governance
+files (41+ submodules)</label></li>
+<li><label><input type="checkbox"></input>HelixQA external submodule
+governance files (12 external projects)</label></li>
+<li><label><input type="checkbox"></input>Whether Catalogizer’s
+<code>submodule-analysis.txt</code> contains governance compliance
+data</label></li>
+<li><label><input type="checkbox"></input>Whether HelixCode’s
+<code>internal/isolated_files/</code> contains governance
+files</label></li>
+<li><label><input type="checkbox"></input>Whether the
+<code>UNIVERSAL_MANDATORY_RULES.md</code> referenced in Catalogizer (at
+<code>/tmp/UNIVERSAL_MANDATORY_RULES.md</code>) contains Article XI
+§11.9</label></li>
+<li><label><input type="checkbox"></input>HelixAgent root
+<code>CLAUDE.md</code> (referenced as canonical source for universal
+constraints)</label></li>
+</ul>
+<hr />
+<p><em>Analysis complete. All findings based on direct file inspection
+as of 2026-04-29.</em></p>
+</body>
+</html>

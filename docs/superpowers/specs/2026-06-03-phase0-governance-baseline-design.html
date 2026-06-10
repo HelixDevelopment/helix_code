@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-03-phase0-governance-baseline-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-03-phase0-governance-baseline-design</h1>
+</header>
+<h1 id="phase-0-governance-baseline-safety-net-design-spec">Phase 0 —
+Governance Baseline &amp; Safety Net (Design / Spec)</h1>
+<p><strong>Date:</strong> 2026-06-03 <strong>Programme:</strong> Own-org
+submodule sync → flatten → rebuild → test → fix (HelixCode CLI-Agent
+Fusion) <strong>Status:</strong> Approved (operator: 2026-06-03) —
+execution authorized, subagent-driven, autonomous loop.</p>
+<h2 id="context">Context</h2>
+<p>The operator requested a full programme: sync every own-org submodule
+to latest main/master + merge local work, flatten all
+<code>vasic-digital</code> / <code>HelixDevelopment</code> submodules to
+a flat <code>HelixCode/submodules/&lt;snake_case&gt;</code> layout,
+rewrite all references, run <code>install_upstreams</code> everywhere,
+clean git configs, rebuild everything via the <code>containers</code>
+submodule, boot infra, run all tests + Challenges in anti-bluff mode,
+and fix every issue found. The work is decomposed into sequenced phases;
+this spec covers <strong>Phase 0</strong> only.</p>
+<h3 id="discovered-state-read-only-probe-2026-06-03">Discovered state
+(read-only probe, 2026-06-03)</h3>
+<ul>
+<li><code>.gitmodules</code> declares <strong>70 own-org
+submodules</strong> (of 131 top-level); ~64 are nested under
+<code>dependencies/{vasic-digital,HelixDevelopment}/…</code>.</li>
+<li>HelixConstitution submodule <strong>is wired &amp; checked
+out</strong> at <code>d90ab87</code> on <code>main</code>, up to date
+with its tracking upstream; working tree clean.</li>
+<li>The anti-bluff mandate (“…most of the features does not work… MUST
+guarantee quality, completion, full usability…”) is <strong>already
+present</strong> in root <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>QWEN.md</code>
+<strong>and</strong> in the HelixConstitution submodule’s own files. No
+insertion required — verify only.</li>
+<li>Four submodules carry forbidden GitFlic/GitVerse push remotes:
+<code>constitution</code>, <code>submodules/models</code>,
+<code>submodules/models</code> (own-org), and
+<code>cli_agents/claude-code-source</code> (third-party, not
+pushed).</li>
+<li>Operator decision: <strong>push to ALL upstreams including GitFlic +
+GitVerse.</strong> This contradicts CONST-038 as written → reconcile the
+rule (item 2).</li>
+</ul>
+<h2 id="goal">Goal</h2>
+<p>A verified, self-consistent governance source-of-truth and a
+reversible safety baseline, established <strong>before</strong> any
+70-repo mutation phase.</p>
+<h2 id="scope-in">Scope — IN</h2>
+<ol type="1">
+<li><strong>Governance verification (no insertion).</strong> Run
+<code>scripts/verify-governance-cascade.sh</code>; capture output as
+evidence under <code>docs/migration/</code>. Confirm the anti-bluff
+mandate is present across root + constitution submodule + owned
+submodules. If an owned submodule is missing it, add it there (and
+cascade per CONST-047).</li>
+<li><strong>Reconcile CONST-038 to operator remote policy.</strong> Edit
+HelixCode root <code>CONSTITUTION.md</code>, <code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, <code>QWEN.md</code>, <code>CRUSH.md</code> so
+the CONST-038 / §6.W note permits GitHub + GitLab + GitFlic + GitVerse
+for the affected own-org repos, removing the doc-vs-practice
+contradiction. Keep all five peer governance docs in sync (root “keep in
+sync” rule).</li>
+<li><strong>Safety backup (reversibility).</strong> Generate a restore
+manifest capturing every submodule’s current commit SHA + full remote
+set, plus a snapshot of <code>.gitmodules</code>, under
+<code>docs/migration/phase0-restore-manifest-2026-06-03.txt</code>.
+Validate it round-trips (re-reading reproduces current SHAs).</li>
+</ol>
+<h2 id="scope-out-later-phases">Scope — OUT (later phases)</h2>
+<ul>
+<li>Submodule sync-to-latest + merge (Phase 1)</li>
+<li>Flatten layout + rewrite references (Phase 2)</li>
+<li>Rebuild everything (Phase 3)</li>
+<li>Boot infra + run all tests/Challenges (Phase 4)</li>
+<li>Fix every issue, anti-bluff (Phase 5)</li>
+</ul>
+<h2 id="execution">Execution</h2>
+<p>Subagent-driven (§11.4.70). Parallelizable read-only units (cascade
+audit, backup manifest) dispatched as concurrent subagents; the
+CONST-038 reconciliation edit + all git commit/push operations run
+serially in the conductor thread to preserve working-tree quiescence
+(§11.4.84). Pushes background-detached after commit (§11.4.88), to
+<strong>all</strong> upstreams per operator policy.</p>
+<h2 id="done-criteria-anti-bluff-evidence-backed">Done criteria
+(anti-bluff, evidence-backed)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><code>verify-governance-cascade.sh</code> output
+captured showing mandate present everywhere (path
+recorded).</label></li>
+<li><label><input type="checkbox"></input>CONST-038 reconciled across all 5
+root governance docs; committed; pushed to all upstreams; cascade
+re-verified (no contradiction remains).</label></li>
+<li><label><input type="checkbox"></input>Restore manifest written + validated
+(round-trip check passes).</label></li>
+<li><label><input type="checkbox"></input>Main repo + any touched owned
+submodule committed &amp; pushed to all upstreams.</label></li>
+</ul>
+<h2 id="risk-rollback">Risk / rollback</h2>
+<ul>
+<li>Phase 0 mutations are limited to documentation + a manifest file →
+low blast radius, reversible via git revert. The restore manifest itself
+is the rollback anchor for the higher-risk Phases 1–2.</li>
+</ul>
+</body>
+</html>

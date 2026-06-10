@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f19-ask-user-question-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f19-ask-user-question-design</h1>
+</header>
+<h1 id="phase-1-feature-19-askuserquestion-with-previews">Phase 1 /
+Feature 19 — AskUserQuestion with Previews</h1>
+<p><strong>Date:</strong> 2026-05-06 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, end-to-end <strong><code>ask_user</code> tool</strong>
+for the HelixCode CLI agent so that the agent can pause its loop,
+present a multiple-choice question with optional inline previews to the
+human operator, read a numeric choice from stdin, and resume with the
+chosen value. When stdin is not an interactive terminal (CI runs, piped
+input, redirected output), the tool MUST gracefully fall back to a
+caller-supplied default value or — if none was supplied — return a clear
+error rather than hang waiting for input that will never arrive.</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong><code>ask_user</code> tool</strong>
+(<code>helix_code/internal/tools/askuser/</code>) — a
+<code>tools.Tool</code> impl registered under the stable name
+<code>ask_user</code> (HelixCode snake_case convention; Q3=A) and
+category <code>tools.CategoryAskUser</code> (new). Argument shape:
+<code>question string</code> (required),
+<code>choices []map[string]string</code> (required; each entry has
+<code>label</code>, <code>value</code>, optional <code>preview</code>),
+<code>default string</code> (optional choice value). Result shape:
+<code>{value string, label string, index int, source string}</code>
+where <code>source ∈ {&quot;stdin&quot;, &quot;default&quot;}</code>.</li>
+<li><strong>Stdin readline UI</strong> (Q1=A) — plain stdin readline, NO
+arrow-key cursor library, NO bubbletea, NO promptui. The renderer from
+F18 (<code>render.RenderTextBlock</code> / <code>RenderLines</code>)
+formats the question, the optional per-choice preview, the numbered menu
+(<code>&quot;1. &lt;label&gt;&quot;</code>, <code>&quot;2. &lt;label&gt;&quot;</code>, …),
+and the prompt line. The user types <code>1</code>, <code>2</code>, … +
+Enter; pressing ENTER alone with <code>default</code> set picks the
+default; invalid input re-prompts up to 3 times then errors.</li>
+<li><strong>Non-interactive fallback</strong> (Q4=B) — at Execute time,
+the tool calls <code>term.IsTerminal(int(stdinFd))</code> (the same
+<code>golang.org/x/term</code> already promoted to a direct dep in F18).
+If false: if <code>default</code> is set and matches a choice value →
+return that choice immediately with <code>source=&quot;default&quot;</code>; else
+→ return <code>ErrNoTTYNoDefault</code>
+(<code>&quot;ask_user requires interactive terminal AND no default specified&quot;</code>).
+NEVER block on a stdin read in non-TTY mode.</li>
+</ol>
+<p>The non-TTY path (Q4=B) is <strong>structurally enforced</strong>:
+the <code>Prompter</code> interface used by the tool exposes a single
+<code>Prompt(ctx, q Question) (Choice, error)</code> method, and the
+production <code>stdinPrompter</code> impl probes <code>IsTTY</code>
+<em>before</em> it ever calls
+<code>bufio.NewReader(stdin).ReadString(&#39;\n&#39;)</code>. A unit test
+injects a fake <code>bufio.Reader</code> AND <code>IsTTY=false</code>
+AND no default → the prompter MUST return <code>ErrNoTTYNoDefault</code>
+without consuming any bytes from the reader. A second test with
+<code>IsTTY=false</code> AND <code>default=&quot;opt-b&quot;</code> → the prompter
+MUST return the matching choice with <code>source=&quot;default&quot;</code> and
+again zero bytes consumed.</p>
+<p>The previews (Q2=A) are inline <code>preview</code> strings per
+choice (claude-code’s structured
+<code>QuestionPreview{type, content, title}</code> is collapsed to a
+single <code>preview string</code> field for v1; multi-type previews are
+a F19.5 candidate). When a choice has a non-empty preview, the renderer
+emits the preview text on its own line(s) BEFORE the numbered choice
+label, using F18’s <code>render.RenderTextBlock</code> for non-flicker
+output. Tool only — NO slash command, NO cobra subcommand (Q5=A).</p>
+<p>The single largest bluff vector for F19 is <strong>“the tool says the
+user picked X but never actually read stdin”</strong> — a fabricated
+choice that appears to work in tests but in production silently returns
+the same answer for every call. §5.2 enumerates four such patterns and
+pins each with a positive-evidence test + Challenge phase. The Challenge
+MUST exit non-zero on any byte-level mismatch (e.g., the synthesized
+stdin “2” is fed and the tool returns the index-2 choice value; the
+harness fails if the tool returns anything else, including the index-0
+choice or the default).</p>
+<p>Out of scope for v1: multi-select / “pick any subset” mode
+(claude-code’s <code>multiSelect: true</code>), free-text answers,
+per-choice typed annotations beyond the single <code>preview</code>
+string, image / markdown / code-block previews (only plain text in v1),
+arrow-key navigation, mouse input, edit-and-resubmit semantics, “ask the
+agent to clarify” recursion, validation hints (e.g., “must be a valid
+email”). See §8.</p>
+<p>Anti-bluff hot zone (loud): a tool that passes its tests by
+short-circuiting to the default while the test only checks “did it
+return a non-error”, a tool that prints the menu but reads from
+<code>os.Stdin</code> (the real file descriptor) instead of the injected
+reader (so unit tests that “wire up a bytes.Buffer” never observe the
+real production read path), a tool that emits the preview AFTER the
+choice label so the user sees the menu before the context, OR a tool
+that re-prompts on invalid input forever (no retry cap; turns into a
+“spinner” in CI) — each is a critical defect (§5.2).</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>Two layers under <code>helix_code/internal/tools/askuser/</code>,
+plus thin wiring at the registry call site:</p>
+<ul>
+<li><p><strong><code>AskUserTool</code></strong>
+(<code>ask_user_tool.go</code>) — implements <code>tools.Tool</code>.
+Wraps a <code>Prompter</code>. <code>Execute</code> parses args →
+<code>Question</code> → calls <code>prompter.Prompt(ctx, q)</code> →
+returns the resolved <code>Choice</code> as
+<code>map[string]interface{}</code> (so the LLM-side JSON-decoder sees a
+stable shape). Validation: ≥2 choices, every choice has non-empty
+<code>label</code> and <code>value</code>, if <code>default</code> is
+set it MUST match a choice value (validation-time error, not
+Prompt-time).</p></li>
+<li><p><strong><code>Prompter</code> interface</strong>
+(<code>types.go</code>) — single method:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Prompter <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Prompt<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> q Question<span class="op">)</span> <span class="op">(</span>Choice<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Hexagonal seam: production code injects <code>stdinPrompter</code>;
+tests inject a fake (<code>fakePrompter</code> recording calls +
+returning canned answers). Two more constructor seams exist on
+<code>stdinPrompter</code> itself (<code>Reader io.Reader</code>,
+<code>Writer io.Writer</code>, <code>IsTTY func() bool</code>) so unit
+tests exercise the real production class with <code>bytes.Buffer</code>
+reader + writer + injectable IsTTY closure — no mocking of
+stdin/stdout.</p></li>
+<li><p><strong><code>stdinPrompter</code></strong>
+(<code>stdin_prompter.go</code>) — production impl. Holds
+<code>Reader io.Reader</code> (default <code>os.Stdin</code>),
+<code>Writer io.Writer</code> (default <code>os.Stdout</code>),
+<code>IsTTY func() bool</code> (default
+<code>term.IsTerminal(int(os.Stdin.Fd()))</code>),
+<code>Renderer render.Renderer</code> (default factory-constructed via
+<code>render.NewRenderer(render.FactoryOptions{Writer: &lt;Writer&gt;})</code>),
+<code>Timeout time.Duration</code> (default 5 minutes),
+<code>MaxRetries int</code> (default 3). <code>Prompt</code>:</p>
+<ol type="1">
+<li>Validate <code>q</code> (≥2 choices; default if set matches a choice
+value). Return <code>ErrInvalidQuestion</code> on failure.</li>
+<li>If <code>!IsTTY()</code>:
+<ul>
+<li>If <code>q.Default == &quot;&quot;</code> → return
+<code>ErrNoTTYNoDefault</code>.</li>
+<li>Else find the choice with <code>value == q.Default</code> → return
+that choice with <code>source=&quot;default&quot;</code>. (Validation step has
+already verified the default is matchable.)</li>
+</ul></li>
+<li>TTY path:
+<ul>
+<li>Render the question + per-choice previews + numbered menu via
+<code>render.RenderLines(r, &quot;ask-user&quot;, lines)</code>. The lines slice
+is built via <code>formatQuestion(q)</code> (pure function, exported as
+<code>FormatQuestion</code> for the unit test that pins the byte order
+of preview-then-label).</li>
+<li>Emit the prompt line
+(<code>&quot;Enter choice [1-N] (or press Enter for default &lt;label&gt;): &quot;</code>)
+without a trailing <code>\n</code>.</li>
+<li>Read a line from
+<code>bufio.NewReader(Reader).ReadString(&#39;\n&#39;)</code> with a
+<code>time.AfterFunc(Timeout, cancel)</code> watchdog and
+<code>ctx</code>-cancellation wired through a goroutine + select.</li>
+<li>Parse the trimmed line:
+<ul>
+<li>Empty + <code>q.Default != &quot;&quot;</code> → return the default choice
+with <code>source=&quot;default&quot;</code>.</li>
+<li>Empty + no default → “Empty input; please enter a number 1-N.” →
+re-prompt (counts toward MaxRetries).</li>
+<li>Non-numeric or out-of-range <code>[1, N]</code> → “Invalid choice;
+please enter a number 1-N.” → re-prompt (counts toward MaxRetries).</li>
+<li>Valid → return that choice with <code>source=&quot;stdin&quot;</code>.</li>
+</ul></li>
+<li>If <code>MaxRetries</code> reached → return
+<code>ErrTooManyInvalidAttempts</code>.</li>
+<li>If EOF / <code>io.EOF</code> → return <code>ErrUserCancelled</code>
+(treat as cancellation, NOT as “use default” — the user explicitly
+closed the stream).</li>
+<li>If <code>ctx</code> cancelled / timeout fired → return
+<code>ctx.Err()</code> (likely <code>context.DeadlineExceeded</code>)
+wrapped as <code>ErrPromptTimeout</code>.</li>
+</ul></li>
+</ol></li>
+</ul>
+<pre><code>                              ┌──── AskUserTool.Execute ────┐
+                              │  parse args → Question      │
+                              │  validate                   │
+                              └────────────────┬────────────┘
+                                               │
+                                               ▼
+                                       ┌─ Prompter ─┐
+                                       │  Prompt    │
+                                       └─────┬──────┘
+                                             │
+                              ┌──────────────┼──────────────┐
+                              ▼                             ▼
+                  ┌── stdinPrompter ──┐         ┌── fakePrompter ──┐
+                  │  IsTTY?           │         │   tests only     │
+                  │  ├─ false:        │         │   canned answer  │
+                  │  │  default? →    │         └──────────────────┘
+                  │  │   source=def   │
+                  │  │  no default? → │
+                  │  │   ErrNoTTY...  │
+                  │  └─ true:         │
+                  │     render menu   │
+                  │     read line     │
+                  │     parse + retry │
+                  │     ≤ MaxRetries  │
+                  │     timeout watch │
+                  └──────┬────────────┘
+                         │
+                         ▼
+                  ┌── Result ──┐
+                  │  value     │
+                  │  label     │
+                  │  index     │
+                  │  source    │
+                  └────────────┘</code></pre>
+<p><strong>Wire points</strong> (existing code; one addition each):</p>
+<ul>
+<li><p><strong>Tool registration</strong>:
+<code>internal/tools/registry.go::buildToolList</code> (where F14
+sandbox + F15 task + F17 smartedit + LSP tools are registered). F19
+adds:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> cfg<span class="op">.</span>AskUserPrompter <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>tools<span class="op">[</span><span class="st">&quot;ask_user&quot;</span><span class="op">]</span> <span class="op">=</span> askuser<span class="op">.</span>NewAskUserTool<span class="op">(</span>cfg<span class="op">.</span>AskUserPrompter<span class="op">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>tools<span class="op">[</span><span class="st">&quot;ask_user&quot;</span><span class="op">]</span> <span class="op">=</span> askuser<span class="op">.</span>NewAskUserTool<span class="op">(</span>askuser<span class="op">.</span>NewStdinPrompter<span class="op">(</span>askuser<span class="op">.</span>StdinPrompterOptions<span class="op">{}))</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The registry config grows a single
+<code>AskUserPrompter askuser.Prompter</code> field (zero value =
+production <code>stdinPrompter</code>). Adds
+<code>tools.CategoryAskUser ToolCategory = &quot;ask-user&quot;</code> to the
+const block.</p></li>
+<li><p><strong>Main wiring</strong> (<code>cmd/cli/main.go</code>): no
+changes needed — registry construction already happens at startup; the
+new tool gets picked up automatically once registered. The renderer
+constructed in F18 (<code>c.renderer</code>) is passed via
+<code>StdinPrompterOptions.Renderer</code> so the prompt menu reuses the
+same renderer (no double-construction of factory + viewport
+state).</p></li>
+</ul>
+<p>Why a stdin readline (Q1=A) and not bubbletea / promptui /
+charmbracelet/huh: - <strong>Zero new external deps</strong> is a hard
+programme rule for F18+ (matches F18’s anti-drift discipline); we
+already have <code>bufio</code> + <code>os.Stdin</code> +
+<code>golang.org/x/term</code>. - The render surface is one numbered
+menu with optional preview blocks — far less than what a TUI library
+brings (state machines, focus, keystroke routing). bubbletea’s
+Elm-Architecture is overkill for “read one line, validate, retry up to 3
+times”. - The full-screen TUI in <code>applications/terminal_ui/</code>
+already uses <code>tview</code>/<code>tcell</code>. Adding bubbletea
+here would be a third paradigm. The CLI is line-oriented; a tiny
+purpose-built prompter matches the surface. - Simplest fallback story: a
+<code>bufio.Reader</code> over <code>bytes.Buffer</code> IS the
+unit-test seam. No fake-terminal harness, no test-only event-loop, no
+goroutine-leak hazard.</p>
+<p>Why tool-only (Q5=A) and not slash + cobra: - <code>ask_user</code>
+is <em>agent-driven</em>: the LLM emits a <code>tool_use</code> block
+with <code>name=&quot;ask_user&quot;</code>; the user does not invoke it directly.
+Surfacing it as <code>/ask</code> would imply the user types the
+question, which inverts the semantics (the agent asks the user, not vice
+versa). - A cobra subcommand
+<code>helixcode ask-user --question &quot;...&quot; --choice &quot;a:Apple&quot; --choice &quot;b:Banana&quot;</code>
+is a debug-only convenience; F19.5 may add it if user demand emerges. v1
+keeps the surface minimal.</p>
+<hr />
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/tools/askuser/types.go</code> —
+<code>Choice{Label, Value, Preview}</code>,
+<code>Question{Question, Choices, Default}</code>,
+<code>Result{Value, Label, Index, Source}</code>, <code>Prompter</code>
+interface, sentinel errors (<code>ErrInvalidQuestion</code>,
+<code>ErrNoTTYNoDefault</code>, <code>ErrUserCancelled</code>,
+<code>ErrPromptTimeout</code>, <code>ErrTooManyInvalidAttempts</code>),
+constants (<code>DefaultTimeout = 5 * time.Minute</code>,
+<code>DefaultMaxRetries = 3</code>, <code>SourceStdin = &quot;stdin&quot;</code>,
+<code>SourceDefault = &quot;default&quot;</code>).</li>
+<li><code>helix_code/internal/tools/askuser/types_test.go</code>.</li>
+<li><code>helix_code/internal/tools/askuser/stdin_prompter.go</code> —
+<code>stdinPrompter</code> impl with
+<code>Reader / Writer / IsTTY / Renderer / Timeout / MaxRetries</code>
+constructor seams. Uses F18’s <code>render.RenderLines</code> for menu
+output. Stdlib only (<code>bufio</code>, <code>context</code>,
+<code>errors</code>, <code>fmt</code>, <code>io</code>, <code>os</code>,
+<code>strconv</code>, <code>strings</code>, <code>time</code>).</li>
+<li><code>helix_code/internal/tools/askuser/stdin_prompter_test.go</code>
+— unit tests with <code>bytes.Buffer</code> reader + writer + injectable
+<code>IsTTY</code> closure. NO mocks (constructor injection only).</li>
+<li><code>helix_code/internal/tools/askuser/ask_user_tool.go</code> —
+<code>AskUserTool</code> (<code>tools.Tool</code> impl).
+<code>Name() == &quot;ask_user&quot;</code>;
+<code>Category() == tools.CategoryAskUser</code>; <code>Schema()</code>
+returns the JSON schema; <code>Execute</code> parses args, builds
+<code>Question</code>, calls <code>prompter.Prompt</code>, returns
+<code>Result</code> as <code>map[string]interface{}</code>.</li>
+<li><code>helix_code/internal/tools/askuser/ask_user_tool_test.go</code>.</li>
+<li><code>helix_code/tests/integration/askuser_test.go</code> —
+<code>//go:build integration</code>. Always-runs both branches
+(TTY-with-input + non-TTY-with-default + non-TTY-without-default error
+path) using real <code>bytes.Buffer</code> readers/writers + injected
+<code>IsTTY</code>. Asserts byte content on the captured prompt and the
+parsed result.</li>
+<li><code>helix_code/tests/integration/cmd/p1f19_challenge/main.go</code>
+— runtime evidence harness.</li>
+<li><code>challenges/p1-f19-ask-user-question/CHALLENGE.md</code> +
+<code>run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/internal/tools/registry.go</code> — add
+<code>CategoryAskUser ToolCategory = &quot;ask-user&quot;</code> to the const
+block; add optional <code>AskUserPrompter askuser.Prompter</code> to
+<code>RegistryConfig</code>; register
+<code>askuser.NewAskUserTool(...)</code> in <code>buildToolList</code>
+(or equivalent). One new import:
+<code>dev.helix.code/internal/tools/askuser</code>.</li>
+<li><code>helix_code/cmd/cli/main.go</code> — no changes needed beyond
+passing <code>c.renderer</code> via
+<code>RegistryConfig.AskUserPrompter</code> if the CLI wants the
+prompter to share the renderer (optional polish; default construction
+works without it).</li>
+</ul>
+<p><strong>No new external dependencies</strong> (§3.5).</p>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/askuser/types.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Choice is one option presented to the user.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Choice <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Label   <span class="dt">string</span> <span class="co">// what the user sees on the menu line (required)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Value   <span class="dt">string</span> <span class="co">// what the tool returns (required; stable identifier)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Preview <span class="dt">string</span> <span class="co">// optional inline context shown ABOVE the choice line</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Question is the parsed argument shape passed to Prompter.Prompt.</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Question <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Question <span class="dt">string</span>   <span class="co">// the prompt text shown to the user (required)</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    Choices  <span class="op">[]</span>Choice <span class="co">// ordered list (required; len ≥ 2)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    Default  <span class="dt">string</span>   <span class="co">// optional; if set, MUST equal one Choice.Value</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">// Result is what AskUserTool.Execute returns to the agent.</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    Value  <span class="dt">string</span> <span class="co">// chosen Choice.Value</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    Label  <span class="dt">string</span> <span class="co">// chosen Choice.Label</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    Index  <span class="dt">int</span>    <span class="co">// 0-based index into Question.Choices</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    Source <span class="dt">string</span> <span class="co">// &quot;stdin&quot; or &quot;default&quot;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">// Prompter is the hexagonal seam. Production: stdinPrompter. Tests: fakes.</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Prompter <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    Prompt<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> q Question<span class="op">)</span> <span class="op">(</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">// Sentinel errors. Tests compare via errors.Is.</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    ErrInvalidQuestion        <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;askuser: invalid question&quot;</span><span class="op">)</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    ErrNoTTYNoDefault         <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;ask_user requires interactive terminal AND no default specified&quot;</span><span class="op">)</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    ErrUserCancelled          <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;askuser: user cancelled (EOF on stdin)&quot;</span><span class="op">)</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    ErrPromptTimeout          <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;askuser: prompt timed out&quot;</span><span class="op">)</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    ErrTooManyInvalidAttempts <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;askuser: too many invalid input attempts&quot;</span><span class="op">)</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    DefaultTimeout    <span class="op">=</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Minute</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    DefaultMaxRetries <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    SourceStdin       <span class="op">=</span> <span class="st">&quot;stdin&quot;</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    SourceDefault     <span class="op">=</span> <span class="st">&quot;default&quot;</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/askuser/stdin_prompter.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StdinPrompterOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    Reader     io<span class="op">.</span>Reader        <span class="co">// default os.Stdin</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    Writer     io<span class="op">.</span>Writer        <span class="co">// default os.Stdout</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    IsTTY      <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span>      <span class="co">// default term.IsTerminal(int(os.Stdin.Fd()))</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    Renderer   render<span class="op">.</span>Renderer  <span class="co">// default render.NewRenderer(...).Renderer</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    Timeout    time<span class="op">.</span>Duration    <span class="co">// default DefaultTimeout (5 min)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    MaxRetries <span class="dt">int</span>              <span class="co">// default DefaultMaxRetries (3)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> stdinPrompter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    reader     io<span class="op">.</span>Reader</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    writer     io<span class="op">.</span>Writer</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    isTTY      <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    renderer   render<span class="op">.</span>Renderer</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    timeout    time<span class="op">.</span>Duration</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    maxRetries <span class="dt">int</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewStdinPrompter<span class="op">(</span>opts StdinPrompterOptions<span class="op">)</span> <span class="op">*</span>stdinPrompter</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">// implements Prompter</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co">// FormatQuestion is a pure helper exported for tests. Returns the lines that</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co">// make up the question + previews + numbered menu, in display order.</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co">// Order: 1) question text, 2) blank line, 3) for each choice i: optional</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="co">// preview lines (if Choice.Preview != &quot;&quot;), then &quot;&lt;i+1&gt;. &lt;Choice.Label&gt;&quot;.</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">// 4) blank line. The prompt line (&quot;Enter choice [1-N]: ...&quot;) is emitted by</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="co">// the prompter itself, NOT by FormatQuestion (so tests can pin the menu</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co">// shape independently of the prompt).</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> FormatQuestion<span class="op">(</span>q Question<span class="op">)</span> <span class="op">[]</span><span class="dt">string</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/askuser/ask_user_tool.go</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AskUserTool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    prompter Prompter</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewAskUserTool<span class="op">(</span>p Prompter<span class="op">)</span> <span class="op">*</span>AskUserTool</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">// implements tools.Tool (Name, Description, Category, Schema, Validate, Execute)</span></span></code></pre></div>
+<h3 id="user-surface">3.4 User surface</h3>
+<p><strong>Tool only</strong> (Q5=A). The agent invokes
+<code>ask_user</code> via a <code>tool_use</code> block:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;tool_use&quot;</span><span class="fu">,</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;ask_user&quot;</span><span class="fu">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;input&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;question&quot;</span><span class="fu">:</span> <span class="st">&quot;Which package manager should I use for the new Node.js project?&quot;</span><span class="fu">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;choices&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span><span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;npm&quot;</span><span class="fu">,</span>  <span class="dt">&quot;value&quot;</span><span class="fu">:</span> <span class="st">&quot;npm&quot;</span><span class="fu">,</span>  <span class="dt">&quot;preview&quot;</span><span class="fu">:</span> <span class="st">&quot;Standard, ships with Node.js. Slowest install.&quot;</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span><span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;pnpm&quot;</span><span class="fu">,</span> <span class="dt">&quot;value&quot;</span><span class="fu">:</span> <span class="st">&quot;pnpm&quot;</span><span class="fu">,</span> <span class="dt">&quot;preview&quot;</span><span class="fu">:</span> <span class="st">&quot;Symlink-based, fast, disk-efficient.</span><span class="ch">\n</span><span class="st">Requires global install.&quot;</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span><span class="dt">&quot;label&quot;</span><span class="fu">:</span> <span class="st">&quot;yarn&quot;</span><span class="fu">,</span> <span class="dt">&quot;value&quot;</span><span class="fu">:</span> <span class="st">&quot;yarn&quot;</span><span class="fu">,</span> <span class="dt">&quot;preview&quot;</span><span class="fu">:</span> <span class="st">&quot;Fast, mature, large ecosystem.&quot;</span><span class="fu">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;default&quot;</span><span class="fu">:</span> <span class="st">&quot;pnpm&quot;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The tool returns
+<code>{&quot;value&quot;: &quot;pnpm&quot;, &quot;label&quot;: &quot;pnpm&quot;, &quot;index&quot;: 1, &quot;source&quot;: &quot;stdin&quot;}</code>
+(or <code>&quot;source&quot;: &quot;default&quot;</code> if non-TTY + default + no
+input).</p>
+<p><strong>No slash command</strong> (Q5=A). <strong>No cobra
+subcommand</strong> (Q5=A). The user never types <code>/ask</code> — the
+agent issues the tool call and the user answers via stdin in their
+interactive session.</p>
+<p>The prompt as shown to the user (TTY mode):</p>
+<pre><code>Which package manager should I use for the new Node.js project?
+
+Standard, ships with Node.js. Slowest install.
+1. npm
+Symlink-based, fast, disk-efficient.
+Requires global install.
+2. pnpm
+Fast, mature, large ecosystem.
+3. yarn
+
+Enter choice [1-3] (or press Enter for default: pnpm): _</code></pre>
+<p>Empty input + default <code>pnpm</code> set → returns
+<code>pnpm</code>. Input <code>2</code> + Enter → returns
+<code>pnpm</code>. Input <code>9</code> + Enter → “Invalid choice;
+please enter a number 1-3.” → re-prompt (attempt 1/3). Input
+<code>garbage</code> + Enter → “Invalid choice; please enter a number
+1-3.” → re-prompt (attempt 2/3). Three failed attempts →
+<code>ErrTooManyInvalidAttempts</code>.</p>
+<h3 id="new-external-dependencies">3.5 New external dependencies</h3>
+<p><strong>None.</strong> F19 is built entirely on the Go standard
+library (<code>bufio</code>, <code>context</code>, <code>errors</code>,
+<code>fmt</code>, <code>io</code>, <code>os</code>,
+<code>strconv</code>, <code>strings</code>, <code>sync</code>,
+<code>time</code>) plus <code>golang.org/x/term</code> (already a direct
+dep after F18) plus the F18-internal
+<code>dev.helix.code/internal/render</code> package. Brief
+justification:</p>
+<ul>
+<li>Stdin readline is <code>bufio.NewReader(r).ReadString(&#39;\n&#39;)</code> —
+one stdlib call.</li>
+<li>TTY detection is <code>term.IsTerminal(int)</code> — already in
+<code>go.sum</code> at v0.41.0 (verified in F18-T06).</li>
+<li>Menu rendering reuses F18’s <code>render.RenderLines</code> —
+already shipped and tested.</li>
+<li>No prompt library, no event loop, no fancy keystroke routing.</li>
+</ul>
+<p><code>go mod tidy</code> after T02 must produce <strong>zero new
+entries in <code>go.sum</code></strong> AND <strong>zero changes to
+<code>go.mod</code></strong> (no new direct deps; F18 already promoted
+<code>golang.org/x/term</code>). T07’s verification step asserts
+this.</p>
+<h3 id="existing-code-constraints">3.6 Existing-code constraints</h3>
+<ul>
+<li><code>internal/tools/registry.go</code> adds a single category
+constant + a single config field + a single registration call. The
+<code>Tool</code> interface is unchanged.</li>
+<li>The renderer (<code>internal/render/</code>) is unchanged —
+<code>ask_user</code> consumes its existing <code>RenderLines</code>
+API.</li>
+<li>The agent loop (<code>internal/agent/base_agent.go</code>) is
+unchanged — <code>ask_user</code> flows through the standard
+<code>Tool.Execute</code> path; the agent already serializes tool calls
+(one tool at a time per agent turn), so the synchronous blocking read in
+<code>stdinPrompter.Prompt</code> does not need any new “pause the loop”
+hook.</li>
+<li><code>cmd/cli/main.go</code> does not need changes for the tool to
+function. Optional polish: pass <code>c.renderer</code> into
+<code>RegistryConfig.AskUserPrompter</code> so the prompter shares the
+renderer instance (avoids double-factory cost; not required for
+correctness).</li>
+</ul>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="tool-invocation-arg-parse-question">4.1 Tool invocation → arg
+parse → Question</h3>
+<pre><code>AskUserTool.Execute(ctx, params):
+  ├─ q.Question = params[&quot;question&quot;].(string)            // required; type-assert
+  ├─ q.Choices  = parseChoices(params[&quot;choices&quot;])        // []map[string]string → []Choice
+  ├─ q.Default  = params[&quot;default&quot;].(string)             // optional
+  ├─ if err := q.Validate(); err != nil:
+  │     return nil, fmt.Errorf(&quot;ask_user: %w&quot;, err)      // wraps ErrInvalidQuestion
+  ├─ res, err := t.prompter.Prompt(ctx, q)
+  │     // dispatch to stdinPrompter (or fake)
+  ├─ if err != nil: return nil, err
+  └─ return map[string]interface{}{
+        &quot;value&quot;:  res.Value,
+        &quot;label&quot;:  res.Label,
+        &quot;index&quot;:  res.Index,
+        &quot;source&quot;: res.Source,
+     }, nil</code></pre>
+<h3 id="prompter-non-tty-branch-q4b">4.2 Prompter — non-TTY branch
+(Q4=B)</h3>
+<pre><code>stdinPrompter.Prompt(ctx, q):
+  ├─ if !p.isTTY():
+  │     ├─ if q.Default == &quot;&quot;:
+  │     │     return Result{}, ErrNoTTYNoDefault
+  │     ├─ for i, c := range q.Choices:
+  │     │     if c.Value == q.Default:
+  │     │         return Result{Value: c.Value, Label: c.Label, Index: i, Source: SourceDefault}, nil
+  │     └─ // unreachable: validation already checked default matches
+  │        return Result{}, fmt.Errorf(&quot;askuser: default %q does not match any choice (validation bug)&quot;, q.Default)
+  └─ // TTY branch — see 4.3</code></pre>
+<h3 id="prompter-tty-branch-with-retries">4.3 Prompter — TTY branch with
+retries</h3>
+<pre><code>stdinPrompter.Prompt(ctx, q):
+  ├─ // (TTY branch entered)
+  ├─ lines := FormatQuestion(q)
+  ├─ p.renderer.RenderLines(p.renderer, &quot;ask-user&quot;, lines)  // F18 menu render
+  ├─ promptText := fmt.Sprintf(&quot;Enter choice [1-%d]%s: &quot;, len(q.Choices), defaultHint(q))
+  │     // defaultHint = &quot;&quot; if no default; &quot; (or press Enter for default: &lt;label&gt;)&quot; otherwise
+  ├─ ctx, cancel := context.WithTimeout(ctx, p.timeout)
+  ├─ defer cancel()
+  ├─ br := bufio.NewReader(p.reader)
+  ├─ for attempt := 0; attempt &lt; p.maxRetries; attempt++:
+  │     ├─ fmt.Fprint(p.writer, promptText)
+  │     ├─ // read line in goroutine to honour ctx cancellation
+  │     ├─ lineCh := make(chan readResult, 1)
+  │     ├─ go func() { line, err := br.ReadString(&#39;\n&#39;); lineCh &lt;- readResult{line, err} }()
+  │     ├─ select {
+  │     │     case &lt;-ctx.Done():
+  │     │         return Result{}, ErrPromptTimeout    // wraps ctx.Err()
+  │     │     case rr := &lt;-lineCh:
+  │     │         if rr.err == io.EOF:
+  │     │             return Result{}, ErrUserCancelled
+  │     │         if rr.err != nil:
+  │     │             return Result{}, fmt.Errorf(&quot;askuser: read stdin: %w&quot;, rr.err)
+  │     │         line := strings.TrimRight(rr.line, &quot;\r\n&quot;)
+  │     │         if line == &quot;&quot;:
+  │     │             if q.Default != &quot;&quot;:
+  │     │                 // resolve default
+  │     │                 for i, c := range q.Choices:
+  │     │                     if c.Value == q.Default: return Result{... Source: SourceDefault}, nil
+  │     │             // empty + no default → re-prompt
+  │     │             fmt.Fprintln(p.writer, &quot;Empty input; please enter a number 1-N.&quot;)
+  │     │             continue
+  │     │         n, err := strconv.Atoi(line)
+  │     │         if err != nil || n &lt; 1 || n &gt; len(q.Choices):
+  │     │             fmt.Fprintf(p.writer, &quot;Invalid choice; please enter a number 1-%d.\n&quot;, len(q.Choices))
+  │     │             continue
+  │     │         c := q.Choices[n-1]
+  │     │         return Result{Value: c.Value, Label: c.Label, Index: n-1, Source: SourceStdin}, nil
+  │     │   }
+  └─ return Result{}, ErrTooManyInvalidAttempts</code></pre>
+<h3 id="mode-resolution-truth-table">4.4 Mode-resolution truth
+table</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th><code>IsTTY()</code></th>
+<th><code>q.Default</code></th>
+<th>stdin input</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>true</td>
+<td>“”</td>
+<td>“1”</td>
+<td>Result{Index:0, Source:“stdin”}</td>
+</tr>
+<tr>
+<td>true</td>
+<td>“”</td>
+<td>“2”</td>
+<td>Result{Index:1, Source:“stdin”}</td>
+</tr>
+<tr>
+<td>true</td>
+<td>“”</td>
+<td>“” (Enter)</td>
+<td>Re-prompt; counts toward MaxRetries</td>
+</tr>
+<tr>
+<td>true</td>
+<td>“v2”</td>
+<td>“1”</td>
+<td>Result{Index:0, Source:“stdin”} (user override)</td>
+</tr>
+<tr>
+<td>true</td>
+<td>“v2”</td>
+<td>“” (Enter)</td>
+<td>Result{matching v2, Source:“default”}</td>
+</tr>
+<tr>
+<td>true</td>
+<td>*</td>
+<td>“9” (out of range)</td>
+<td>Re-prompt; counts toward MaxRetries</td>
+</tr>
+<tr>
+<td>true</td>
+<td>*</td>
+<td>“abc”</td>
+<td>Re-prompt; counts toward MaxRetries</td>
+</tr>
+<tr>
+<td>true</td>
+<td>*</td>
+<td>EOF (Ctrl-D)</td>
+<td>ErrUserCancelled</td>
+</tr>
+<tr>
+<td>true</td>
+<td>*</td>
+<td>(no input, 5 min)</td>
+<td>ErrPromptTimeout</td>
+</tr>
+<tr>
+<td>true</td>
+<td>*</td>
+<td>3× invalid</td>
+<td>ErrTooManyInvalidAttempts</td>
+</tr>
+<tr>
+<td>false</td>
+<td>“”</td>
+<td>*</td>
+<td>ErrNoTTYNoDefault (no read)</td>
+</tr>
+<tr>
+<td>false</td>
+<td>“v2”</td>
+<td>*</td>
+<td>Result{matching v2, Source:“default”} (no read)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="eof-semantics-explicit-choice">4.5 EOF semantics — explicit
+choice</h3>
+<p>EOF on stdin (<code>Ctrl-D</code> in TTY; pipe-end in
+non-TTY-but-IsTTY-says-true) is <strong>NOT</strong> silently treated as
+“use default”. Reason: a closed stream is the user’s explicit
+cancellation signal; if we silently picked the default, a piped
+invocation that erroneously claimed <code>IsTTY=true</code> would
+silently succeed with a fabricated answer. v1 returns
+<code>ErrUserCancelled</code> and lets the agent decide what to do. (The
+non-TTY-with-default branch in §4.2 <em>does</em> return the default —
+but that path is taken BEFORE any read, on the basis of
+<code>IsTTY()=false</code> alone. The two are distinct.)</p>
+<h3 id="context-cancellation-ctrl-c-and-timeout">4.6 Context
+cancellation — Ctrl-C and timeout</h3>
+<p>Ctrl-C in TTY mode raises SIGINT, which propagates via the agent
+loop’s signal handler to the <code>ctx</code> passed into
+<code>Tool.Execute</code>. The prompter’s <code>select</code> observes
+<code>ctx.Done()</code> and returns <code>ErrPromptTimeout</code>
+(despite the name; the error carries <code>ctx.Err()</code> which is
+<code>context.Canceled</code> for Ctrl-C and
+<code>context.DeadlineExceeded</code> for the 5-minute timeout — callers
+can <code>errors.Is(err, context.Canceled)</code> to distinguish). The
+goroutine doing <code>br.ReadString(&#39;\n&#39;)</code> is
+<strong>leaked</strong> on cancellation (it stays blocked on the kernel
+read until the next byte arrives, then exits via the buffered chan);
+this is acceptable v1 behaviour because <code>os.Stdin</code> is
+process-lifetime anyway. v2 may use
+<code>os.Stdin.SetReadDeadline</code> on platforms that support it.</p>
+<h2 id="error-handling-edge-cases-and-anti-bluff">5. Error handling,
+edge cases, and anti-bluff</h2>
+<h3 id="error-paths">5.1 Error paths</h3>
+<ul>
+<li><strong>Invalid args</strong> — <code>Validate(params)</code>
+returns a clear error before <code>Execute</code> is called (matches
+existing F14/F15/F17 pattern).</li>
+<li><strong>Validation failures</strong> in
+<code>Question.Validate</code>:
+<ul>
+<li>Empty <code>Question</code> text →
+<code>fmt.Errorf(&quot;%w: empty question&quot;, ErrInvalidQuestion)</code>.</li>
+<li><code>len(Choices) &lt; 2</code> →
+<code>fmt.Errorf(&quot;%w: need at least 2 choices, got %d&quot;, ErrInvalidQuestion, n)</code>.</li>
+<li>Empty <code>Label</code> or <code>Value</code> in any choice →
+<code>fmt.Errorf(&quot;%w: choice %d has empty label or value&quot;, ErrInvalidQuestion, i)</code>.</li>
+<li>Duplicate <code>Value</code> across choices →
+<code>fmt.Errorf(&quot;%w: duplicate choice value %q&quot;, ErrInvalidQuestion, v)</code>.</li>
+<li><code>Default != &quot;&quot;</code> AND no choice has matching
+<code>Value</code> →
+<code>fmt.Errorf(&quot;%w: default %q does not match any choice value&quot;, ErrInvalidQuestion, q.Default)</code>.</li>
+</ul></li>
+<li><strong>EOF on stdin</strong> — <code>ErrUserCancelled</code> (NOT
+silently default). The agent decides whether to retry, abort the turn,
+or prompt with a different question.</li>
+<li><strong>Timeout</strong> (5 min default) —
+<code>ErrPromptTimeout</code> wrapping <code>ctx.Err()</code>.</li>
+<li><strong>Ctrl-C</strong> — propagated via <code>ctx</code>; surfaces
+as <code>ErrPromptTimeout</code> with
+<code>ctx.Err() == context.Canceled</code> (Go’s
+<code>context.Canceled</code> sentinel).</li>
+<li><strong>3 invalid attempts</strong> —
+<code>ErrTooManyInvalidAttempts</code>. The retry counter resets on
+every fresh <code>Prompt</code> call (i.e., the agent re-asking is
+allowed; only consecutive invalids within one Prompt count).</li>
+<li><strong>Reader returns non-EOF non-cancellation error</strong>
+(e.g., <code>os.Stdin.Close()</code> before read) — wrapped as
+<code>fmt.Errorf(&quot;askuser: read stdin: %w&quot;, err)</code>; the underlying
+error is preserved for <code>errors.Is/As</code>.</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9-loud">5.2 Anti-bluff (CONST-035 /
+§11.9) — LOUD</h3>
+<p><strong>The single largest bluff vector for F19 is “the tool says the
+user picked X but never actually read stdin.”</strong> This compiles,
+passes naive unit tests (which only assert “no error returned”), and
+silently fabricates answers in production. Common bluff variants:</p>
+<ol type="1">
+<li><strong>(a) Tool short-circuits to the default without checking
+IsTTY</strong> — <code>Prompt</code> returns
+<code>q.Choices[indexOf(q.Default)]</code> regardless of
+<code>IsTTY()</code>; tests that pass IsTTY=false + default don’t catch
+this. <strong>Defence</strong>: a unit test with <code>IsTTY=true</code>
++ <code>default=&quot;opt-b&quot;</code> + injected reader containing
+<code>&quot;1\n&quot;</code> MUST return <code>index=0</code> (the user’s
+<code>1</code>, NOT the default <code>opt-b</code>). A second test with
+<code>IsTTY=true</code> + <code>default=&quot;opt-b&quot;</code> + injected reader
+containing <code>&quot;&quot;</code> (empty after trim — i.e. just
+<code>\n</code>) MUST return the default with
+<code>Source=&quot;default&quot;</code>. The two together pin the IsTTY branch
+correctly.</li>
+<li><strong>(b) Non-TTY error path is never tested</strong> — the tool
+errors on non-TTY but no test exercises it; a regression where the tool
+<em>blocks</em> in non-TTY mode (waiting for <code>os.Stdin</code> that
+never arrives) is not caught. <strong>Defence</strong>: a Challenge
+phase (“Phase C”) constructs <code>stdinPrompter</code> with
+<code>IsTTY=false</code> + no default + a <code>bytes.Buffer</code>
+reader containing <code>&quot;1\n&quot;</code>; calls <code>Prompt</code>; asserts
+(i) the returned error is
+<code>errors.Is(err, ErrNoTTYNoDefault)</code>, (ii) the reader’s
+position is at byte 0 (i.e., NO bytes were consumed). The byte-0
+assertion is the kicker — it proves the prompter short-circuited before
+reading.</li>
+<li><strong>(c) Default-pick behavior is tested only with mocks</strong>
+— a <code>mockPrompter</code> fake returns the default without ever
+instantiating <code>stdinPrompter</code>. <strong>Defence</strong>: the
+integration tests AND the Challenge use the real production
+<code>stdinPrompter</code> with <code>bytes.Buffer</code> reader/writer
++ injected <code>IsTTY</code> closure. Mock prompters are confined to
+<code>ask_user_tool_test.go</code> (which tests the TOOL, not the
+prompter). The prompter’s own tests use real readers/writers
+exclusively.</li>
+<li><strong>(d) Preview text is rendered AFTER the choice label</strong>
+(or not at all) — the user sees the menu before the context, defeating
+the entire point of inline previews. <strong>Defence</strong>:
+<code>FormatQuestion(q)</code> is a pure exported function; a unit test
+passes a question with a 2-line preview on choice index 0 + a 1-line
+preview on choice index 1, captures the returned <code>[]string</code>,
+and asserts the byte order:
+<code>[question, &quot;&quot;, preview-line-1, preview-line-2, &quot;1. label-1&quot;, preview-line-1-of-2, &quot;2. label-2&quot;, &quot;&quot;]</code>.
+A Challenge phase (“Phase D”) additionally renders the question through
+the real <code>stdinPrompter</code> to a <code>bytes.Buffer</code>
+writer (with <code>IsTTY=true</code> + reader containing
+<code>&quot;1\n&quot;</code>) and asserts the captured bytes contain
+<code>&quot;preview&quot;</code> BEFORE <code>&quot;1. &quot;</code> AND
+<code>&quot;another preview&quot;</code> BEFORE <code>&quot;2. &quot;</code> — measured by
+byte offset
+(<code>bytes.Index(captured, []byte(&quot;preview&quot;)) &lt; bytes.Index(captured, []byte(&quot;1. &quot;))</code>).</li>
+</ol>
+<p><strong>Required real-execution criteria</strong> (these define what
+“ask_user works” means in F19):</p>
+<ol type="1">
+<li><p><strong>Unit tests</strong> — inject <code>io.Reader</code> +
+<code>io.Writer</code> + <code>IsTTY</code> closure on the production
+<code>stdinPrompter</code>; exercise every row of §4.4’s truth table;
+pin byte order of <code>FormatQuestion</code> output.</p></li>
+<li><p><strong>Integration tests</strong>
+(<code>-tags=integration</code>, ALWAYS-runs; no infrastructure dep) —
+exercise both TTY-with-input AND non-TTY-with-default branches via real
+<code>bytes.Buffer</code> readers/writers; assert (i) the returned
+<code>Result</code> matches the expected choice, (ii) the captured
+prompt-output bytes contain the expected preview-then-label ordering,
+(iii) the reader’s remaining bytes are exactly what was NOT consumed (so
+a “1” + “2” reader fed to ONE prompt leaves “2” available for a
+follow-up prompt — proves real read).</p></li>
+<li><p><strong>Challenge harness</strong> — exercises:</p>
+<ul>
+<li><strong>Phase A (always runs)</strong> — synthesized stdin input
+<code>&quot;2\n&quot;</code> → assert tool returns
+<code>Result{Value: &lt;choice-2-value&gt;, Index: 1, Source: &quot;stdin&quot;}</code>.
+Capture <code>Result.Value</code> byte-for-byte and assert.</li>
+<li><strong>Phase B (always runs)</strong> — non-TTY
+(<code>IsTTY=false</code>) + <code>default=&quot;opt-b&quot;</code> + reader
+contains <code>&quot;NEVER\n&quot;</code> (sentinel — should never be read) →
+assert (i) returned <code>Result.Source == &quot;default&quot;</code>, (ii)
+<code>Result.Value == &quot;opt-b&quot;</code>, (iii) reader’s remaining bytes
+equal <code>&quot;NEVER\n&quot;</code> (proves zero reads).</li>
+<li><strong>Phase C (always runs)</strong> — non-TTY + no default +
+reader contains <code>&quot;NEVER\n&quot;</code> → assert (i) returned err
+<code>errors.Is ErrNoTTYNoDefault</code>, (ii) error message contains
+<code>&quot;interactive terminal&quot;</code>, (iii) reader’s remaining bytes
+equal <code>&quot;NEVER\n&quot;</code>.</li>
+<li><strong>Phase D (always runs)</strong> — TTY + 2 choices each with
+non-empty <code>preview</code> + reader contains <code>&quot;1\n&quot;</code> →
+render to <code>bytes.Buffer</code> writer; assert capture contains both
+preview strings; assert byte offset of preview-1 &lt; byte offset of
+“1.” &lt; byte offset of preview-2 &lt; byte offset of “2.”.</li>
+<li><strong>Phase E (always runs)</strong> — TTY + reader contains
+<code>&quot;9\n1\n&quot;</code> (out-of-range, then valid) → assert (i) prompter
+consumes both lines, (ii) returned <code>Result.Index == 0</code>, (iii)
+captured writer output contains <code>&quot;Invalid choice&quot;</code> exactly
+once. A second sub-case feeds <code>&quot;abc\n9\n0\n&quot;</code> (3 invalids) →
+assert err <code>errors.Is ErrTooManyInvalidAttempts</code>.</li>
+</ul>
+<p>The Challenge MUST run all five always-run phases regardless of TTY
+availability (CI compatibility) — none of the phases need a real
+terminal because the production class is exercised with injected
+readers/writers.</p></li>
+<li><p><strong>Challenge MUST exit non-zero on any byte-evidence
+mismatch.</strong> “prompter ran without error” is NEVER acceptable. The
+Challenge asserts positive evidence (Result fields, captured byte
+content, byte offsets, reader-position invariants) for every
+phase.</p></li>
+</ol>
+<p><strong>Concrete forbidden phrases</strong> (anti-bluff smoke):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/askuser <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>CONST-042 secret-content protection</strong> (mandatory):</p>
+<p>The <code>question</code> string + per-choice <code>preview</code>
+strings + per-choice <code>label</code> strings are all
+<em>user-supplied</em> (the agent built them from its prompt context).
+They MAY contain secret material the user is asking the agent about
+(e.g., “Which API key do you want me to rotate?” with previews showing
+key prefixes). The mechanism:</p>
+<ul>
+<li><strong>No question text, choice text, preview text, or user input
+at INFO level.</strong> A unit test scans
+<code>internal/tools/askuser/*.go</code> for any
+<code>logger.Info(.*\(question\|preview\|label\|input\)</code> match and
+FAILS on any hit. The prompter’s own writer (which IS the user’s stdout)
+sees the text by design — the user typed the question or the agent built
+it from context the user gave; rendering it back is the entire point of
+an interactive prompt.</li>
+<li><strong>Per-call evidence file</strong> — the Challenge harness
+records (i) the resolved <code>Result.Value</code> (treated as a stable
+identifier, not secret content; the agent supplied it), (ii) byte
+counts, (iii) byte-offset relationships — NOT the rendered prompt text
+or user’s typed line. The harness’s stdout (which the maintainer runs)
+is treated as transient.</li>
+<li><strong>No telemetry of question content</strong> — F16 telemetry
+instrumentation, when present, MAY record
+<code>tool_name=ask_user</code>,
+<code>result_source=stdin|default</code>, <code>result_index=N</code>,
+<code>duration_ms</code> — NOT the question text, preview text, label
+text, or chosen value. A unit test asserts the F16 span’s attributes do
+NOT include any user-text key.</li>
+</ul>
+<h3 id="concurrency">5.3 Concurrency</h3>
+<p><code>Prompt</code> is <strong>synchronously blocking</strong> (it
+reads from stdin). The agent loop calls one tool at a time per turn, so
+concurrent invocation is not a v1 concern. Two parallel agent loops both
+calling <code>ask_user</code> would race for stdin — undefined
+behaviour, NOT a bug we fix in v1 (the entire agent architecture assumes
+one stdin per process). Documented limitation.</p>
+<p><code>AskUserTool.Execute</code> is itself thread-safe in the sense
+that the wrapper is stateless; only the embedded <code>Prompter</code>
+carries state, and the production <code>stdinPrompter</code> is unsafe
+for concurrent calls (a <code>sync.Mutex</code> on the prompter could be
+added in v2 to serialise concurrent calls; v1 does not).</p>
+<h3 id="long-previews-no-special-handling">5.4 Long previews — no
+special handling</h3>
+<p>v1 does NOT wrap or truncate long preview lines. F18’s renderer
+passes them through verbatim; the terminal soft-wraps. If a preview
+spans 50 lines, the user sees 50 lines before the choice label — by
+design (the user asked for inline context). v2 may add a
+<code>max_preview_lines</code> config knob.</p>
+<h3 id="empty-choices.preview-no-menu-cluttering">5.5 Empty
+Choices.Preview — no menu cluttering</h3>
+<p>If a choice has <code>Preview == &quot;&quot;</code>, NO blank lines or
+sentinel text is emitted for that choice’s preview slot. The numbered
+label appears directly. This keeps short menus tight (e.g., a 2-choice
+yes/no question with no previews renders as just
+<code>1. Yes\n2. No</code>).</p>
+<h3 id="multi-line-previews">5.6 Multi-line previews</h3>
+<p>A preview MAY contain <code>\n</code> characters.
+<code>FormatQuestion</code> splits on <code>\n</code> and emits each as
+its own line in the output slice. The renderer (F18) handles each line
+as a discrete entry in the frame.</p>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-real-bytes.buffer-for-stdinstdout-constructor-injected-istty-no-mocks-of-stdlib">6.1
+Unit (real <code>bytes.Buffer</code> for stdin/stdout;
+constructor-injected IsTTY; no mocks of stdlib)</h3>
+<p><strong>Types</strong> (<code>types_test.go</code>): -
+<code>TestChoice_FieldsZeroValueOK</code>. -
+<code>TestQuestion_Validate_OK</code>. -
+<code>TestQuestion_Validate_EmptyText_Err</code>. -
+<code>TestQuestion_Validate_TooFewChoices_Err</code>. -
+<code>TestQuestion_Validate_EmptyLabel_Err</code>. -
+<code>TestQuestion_Validate_EmptyValue_Err</code>. -
+<code>TestQuestion_Validate_DuplicateValue_Err</code>. -
+<code>TestQuestion_Validate_DefaultNotInChoices_Err</code>. -
+<code>TestErrorSentinels_DistinctErrorsIs</code>. -
+<code>TestConstants_DefaultTimeoutAndRetries</code>.</p>
+<p><strong>FormatQuestion</strong> (<code>stdin_prompter_test.go</code>
+or <code>format_test.go</code>): -
+<code>TestFormatQuestion_NoPreview_NumberedMenuOnly</code>. -
+<code>TestFormatQuestion_OnePreviewPerChoice_PreviewBeforeLabel</code>.
+- <code>TestFormatQuestion_MultiLinePreview_LinesPreserved</code>. -
+<code>TestFormatQuestion_ByteOrderPinned_AntiBluff_PreviewBeforeLabelByOffset</code>.</p>
+<p><strong>stdinPrompter</strong> (<code>stdin_prompter_test.go</code>):
+-
+<code>TestStdinPrompter_NonTTY_Default_ReturnsDefault_NoBytesConsumed</code>
+— <code>IsTTY=false</code> + default + reader has <code>&quot;NEVER\n&quot;</code>
+→ Result.Source=“default” + reader unchanged. -
+<code>TestStdinPrompter_NonTTY_NoDefault_ReturnsErrNoTTY_NoBytesConsumed</code>
+— <code>IsTTY=false</code> + no default + reader has
+<code>&quot;NEVER\n&quot;</code> → ErrNoTTYNoDefault + reader unchanged. -
+<code>TestStdinPrompter_TTY_ValidInput_ReturnsChoice</code> —
+<code>IsTTY=true</code> + reader <code>&quot;2\n&quot;</code> → Index=1. -
+<code>TestStdinPrompter_TTY_EmptyInput_WithDefault_ReturnsDefault</code>
+— <code>IsTTY=true</code> + default + reader <code>&quot;\n&quot;</code> →
+Source=“default”. -
+<code>TestStdinPrompter_TTY_EmptyInput_NoDefault_RePrompts</code> —
+<code>IsTTY=true</code> + no default + reader <code>&quot;\n1\n&quot;</code> →
+Index=0; writer contains “Empty input” once. -
+<code>TestStdinPrompter_TTY_OutOfRange_RePrompts</code> — reader
+<code>&quot;9\n1\n&quot;</code> → Index=0; writer contains “Invalid choice” once.
+- <code>TestStdinPrompter_TTY_NonNumeric_RePrompts</code> — reader
+<code>&quot;abc\n1\n&quot;</code> → Index=0. -
+<code>TestStdinPrompter_TTY_ThreeInvalids_ErrTooManyInvalidAttempts</code>
+— reader <code>&quot;a\nb\nc\n&quot;</code> → ErrTooManyInvalidAttempts. -
+<code>TestStdinPrompter_TTY_EOF_ErrUserCancelled</code> — reader
+exhausted → ErrUserCancelled (NOT silently default). -
+<code>TestStdinPrompter_TTY_CtxCancel_ErrPromptTimeout</code> — cancel
+ctx mid-prompt → wraps context.Canceled. -
+<code>TestStdinPrompter_TTY_TimeoutExpires_ErrPromptTimeout</code> —
+Timeout=10ms + reader blocks → wraps context.DeadlineExceeded. -
+<code>TestStdinPrompter_TTY_PreviewRenderedBeforeLabel_ByteOffset</code>
+— capture writer; assert
+<code>bytes.Index(cap, []byte(&quot;prev&quot;)) &lt; bytes.Index(cap, []byte(&quot;1. &quot;))</code>.
+-
+<code>TestStdinPrompter_TTY_RetryCounter_ResetsAcrossPromptCalls</code>
+— first Prompt fails 2x then succeeds; second Prompt has fresh
+counter.</p>
+<p><strong>AskUserTool</strong> (<code>ask_user_tool_test.go</code>): -
+<code>TestAskUserTool_Name_Description_Category_Schema</code>. -
+<code>TestAskUserTool_Validate_OK_AllRequiredFields</code>. -
+<code>TestAskUserTool_Validate_MissingQuestion_Err</code>. -
+<code>TestAskUserTool_Validate_MissingChoices_Err</code>. -
+<code>TestAskUserTool_Validate_ChoicesWrongType_Err</code> —
+<code>choices</code> is a string instead of
+<code>[]map[string]string</code>. -
+<code>TestAskUserTool_Execute_DispatchToFakePrompter_ReturnsResult</code>.
+- <code>TestAskUserTool_Execute_PrompterError_PropagatedVerbatim</code>.
+- <code>TestAskUserTool_Execute_ResultMapShape</code> — assert
+<code>map[string]interface{}{&quot;value&quot;:..., &quot;label&quot;:..., &quot;index&quot;:..., &quot;source&quot;:...}</code>
+exactly.</p>
+<p><strong>Anti-bluff source-scan</strong>: -
+<code>TestNoLoggerInfoOrDebugTakesQuestionOrInput_CONST042</code> — grep
+<code>internal/tools/askuser/*.go</code> for
+<code>logger\.\b(Info|Debug)\b.*\b(question|preview|label|input|answer)\b</code>
+→ zero matches.</p>
+<h3 id="integration-gobuild-integration">6.2 Integration
+(<code>//go:build integration</code>)</h3>
+<p><code>tests/integration/askuser_test.go</code> (ALWAYS-runs; no
+infrastructure dep):</p>
+<ul>
+<li><code>TestAskUser_Integration_TTY_RealRender_OutputContainsPreviewBeforeLabel</code>
+— wires <code>AskUserTool</code> + <code>stdinPrompter</code> (real
+production) with <code>bytes.Buffer</code> reader + writer + injected
+<code>IsTTY=true</code>; reader <code>&quot;1\n&quot;</code>; asserts captured
+writer bytes contain preview text BEFORE label text.</li>
+<li><code>TestAskUser_Integration_NonTTY_Default_ReturnsDefault_ZeroReads</code>
+— same wiring, <code>IsTTY=false</code>; reader <code>&quot;NEVER\n&quot;</code>;
+default set; asserts <code>Result.Source==&quot;default&quot;</code> AND reader
+bytes unchanged.</li>
+<li><code>TestAskUser_Integration_NonTTY_NoDefault_ErrPropagated</code>
+— <code>IsTTY=false</code>; no default; asserts
+<code>errors.Is(err, ErrNoTTYNoDefault)</code>.</li>
+<li><code>TestAskUser_Integration_TwoConsecutivePrompts_ReaderConsumesCorrectly</code>
+— feeds <code>&quot;1\n2\n&quot;</code> to ONE reader; calls <code>Execute</code>
+twice; asserts first returns Index=0, second returns Index=1, reader
+fully drained.</li>
+</ul>
+<h3 id="challenge-challengesp1-f19-ask-user-question">6.3 Challenge
+(<code>challenges/p1-f19-ask-user-question/</code>)</h3>
+<p>Five-phase output skeleton (all always-run):</p>
+<pre><code>=== ASK-USER-PHASE-A: STDIN-INPUT (always runs) ===
+[PASS] tempdir created at /tmp/p1f19-XXXX
+[PASS] constructed stdinPrompter with bytes.Buffer reader = &quot;2\n&quot; + IsTTY=true
+[PASS] AskUserTool.Execute returned no error
+[PASS] result[&quot;value&quot;] == &quot;opt-b&quot; (matches choices[1].value)
+[PASS] result[&quot;label&quot;] == &quot;Option B&quot;
+[PASS] result[&quot;index&quot;] == 1
+[PASS] result[&quot;source&quot;] == &quot;stdin&quot;
+
+=== ASK-USER-PHASE-B: NON-TTY-WITH-DEFAULT (always runs) ===
+[PASS] constructed stdinPrompter with IsTTY=false + default=&quot;opt-b&quot; + reader=&quot;NEVER\n&quot;
+[PASS] AskUserTool.Execute returned no error
+[PASS] result[&quot;value&quot;] == &quot;opt-b&quot;
+[PASS] result[&quot;source&quot;] == &quot;default&quot;
+[PASS] reader&#39;s remaining bytes == &quot;NEVER\n&quot; (zero bytes consumed)
+
+=== ASK-USER-PHASE-C: NON-TTY-WITHOUT-DEFAULT-ERR (always runs) ===
+[PASS] constructed stdinPrompter with IsTTY=false + no default + reader=&quot;NEVER\n&quot;
+[PASS] AskUserTool.Execute returned errors.Is(err, ErrNoTTYNoDefault)
+[PASS] error message contains &quot;interactive terminal&quot;
+[PASS] reader&#39;s remaining bytes == &quot;NEVER\n&quot; (zero bytes consumed)
+
+=== ASK-USER-PHASE-D: PREVIEW-RENDERING (always runs) ===
+[PASS] constructed stdinPrompter with IsTTY=true + 2 choices each with preview + writer=bytes.Buffer
+[PASS] reader = &quot;1\n&quot;; AskUserTool.Execute returned no error
+[PASS] captured writer contains both preview strings
+[PASS] byte offset of &quot;preview-1&quot; (12) &lt; byte offset of &quot;1. &quot; (35)
+[PASS] byte offset of &quot;preview-2&quot; (52) &lt; byte offset of &quot;2. &quot; (74)
+
+=== ASK-USER-PHASE-E: INVALID-INPUT-RETRY (always runs) ===
+[PASS] constructed stdinPrompter with IsTTY=true + reader=&quot;9\n1\n&quot;
+[PASS] AskUserTool.Execute returned no error
+[PASS] result[&quot;index&quot;] == 0 (the 1 after the rejected 9)
+[PASS] captured writer contains &quot;Invalid choice&quot; exactly 1 time
+[PASS] sub-case: reader=&quot;a\nb\nc\n&quot; returned errors.Is(err, ErrTooManyInvalidAttempts)
+
+SUMMARY: PHASE-A=7/7 PASS; PHASE-B=5/5 PASS; PHASE-C=4/4 PASS; PHASE-D=5/5 PASS; PHASE-E=5/5 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch.
+Absence-of-error is NEVER acceptable. Reader-position invariants (Phases
+B and C) and byte-offset invariants (Phase D) are positive evidence of
+real stdin/render flow.</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p><code>bufio</code> + <code>os.Stdin</code> +
+<code>golang.org/x/term.IsTerminal</code> work on Linux/macOS/Windows.
+Pure Go (no CGO).</p>
+<p><code>os.Stdin.Fd()</code> returns a <code>uintptr</code> on all
+platforms; <code>int(fd)</code> cast for <code>term.IsTerminal</code> is
+portable. Windows console: <code>IsTerminal</code> correctly identifies
+cmd / PowerShell consoles as TTYs (verified upstream by
+<code>golang.org/x/term</code>’s test suite).</p>
+<p>The cross-compile <code>make prod</code> target (linux/macos/windows)
+is exercised in T07. No platform-specific code in F19.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li><strong>Multi-select</strong> (<code>multiSelect: true</code>) —
+picking multiple choices. F19.5 candidate.</li>
+<li><strong>Free-text answers</strong> — agent prompts “What is your
+name?” without choices. F19.5.</li>
+<li><strong>Typed previews</strong> — claude-code’s
+<code>QuestionPreview{type: &quot;diff&quot;|&quot;image&quot;|&quot;markdown&quot;|&quot;code&quot;}</code>
+with type-specific rendering (syntax highlighting, image rendering in
+iTerm2, etc.). F19.5.</li>
+<li><strong>Validation hints per choice</strong> — e.g., “must be a
+valid email” with regex check. F19.5.</li>
+<li><strong>Annotations</strong> — claude-code’s optional per-choice
+typed metadata beyond a single <code>preview</code> string. F19.5.</li>
+<li><strong>Arrow-key navigation</strong> — vim-like <code>j/k</code> or
+up/down arrow to move between choices. Requires raw-mode terminal
+handling; a TUI library; an event loop. F19.5 if user demand
+emerges.</li>
+<li><strong>Mouse input</strong> — F19.5.</li>
+<li><strong>Bracketed paste</strong> — F19.5.</li>
+<li><strong>Edit-and-resubmit</strong> — user picks a choice, sees the
+consequences, picks a different one. v1 is one-shot; F19.5 may add a
+“press ‘b’ to go back” affordance.</li>
+<li><strong>Slash command</strong> <code>/ask</code> — debug-only
+convenience. F19.5 if user demand emerges.</li>
+<li><strong>Cobra subcommand</strong>
+<code>helixcode ask-user --question ... --choice ...</code> — debug-only
+convenience. F19.5.</li>
+<li><strong>Per-platform stdin deadline</strong> —
+<code>os.Stdin.SetReadDeadline</code> on platforms that support it,
+replacing the goroutine-leak-on-timeout pattern. F19.5.</li>
+<li><strong>Concurrent prompter calls</strong> — <code>sync.Mutex</code>
+on <code>stdinPrompter</code> to serialise concurrent agent loops
+sharing one stdin. v1 documents the limitation; F19.5 may add the
+lock.</li>
+<li><strong>Image / markdown rendering</strong> — claude-code can show
+inline images in iTerm2 / Kitty via OSC sequences; HelixCode v1 sticks
+to plain text. F19.5.</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>§11.9 / CONST-035</strong> — Challenge has FIVE always-run
+phases. Every phase records positive runtime evidence (Result fields,
+captured byte content, byte offsets, reader-position invariants).
+Mismatch is a hard failure. The four anti-bluff criteria (§5.2) each map
+to a unit + integration + Challenge assertion.</li>
+<li><strong>CONST-039</strong> — Challenge at
+<code>challenges/p1-f19-ask-user-question/</code> + evidence harness at
+<code>tests/integration/cmd/p1f19_challenge/main.go</code>. Every phase
+asserts byte content with positive evidence.</li>
+<li><strong>CONST-042 (No-Secret-Leak)</strong> — the prompter NEVER
+logs question text, preview text, label text, or user input at any
+level. A unit test scans the source files and FAILS on any matching
+<code>logger.Info</code>/<code>logger.Debug</code> call. F16 telemetry,
+when wired, records only <code>tool_name</code>,
+<code>result_source</code>, <code>result_index</code>,
+<code>duration_ms</code> — never user-supplied text. The Challenge’s
+saved evidence file records <code>Result.Value</code> (stable identifier
+from the agent), byte counts, and byte-offset relationships — never the
+rendered prompt text or user’s typed line.</li>
+<li><strong>CONST-043 (No-Force-Push)</strong> — close-out task pushes
+to all four remotes non-force; explicit user authorization is requested
+at T07 before pushing.</li>
+<li><strong>No-Mocks-In-Production (Universal Rule 2)</strong> — the
+prompter’s only test seams are constructor-injection
+(<code>Reader</code>, <code>Writer</code>, <code>IsTTY</code>,
+<code>Renderer</code>, <code>Timeout</code>, <code>MaxRetries</code> on
+<code>StdinPrompterOptions</code>); no filesystem abstraction, no mocked
+stdin. Production code uses <code>os.Stdin</code>,
+<code>os.Stdout</code>, <code>term.IsTerminal</code>. Unit tests use
+real <code>bytes.Buffer</code> for I/O capture. Mock prompters
+(<code>fakePrompter</code>) appear only in the <em>tool</em> tests
+(<code>ask_user_tool_test.go</code>) where the prompter is the
+dependency-under-mock, NOT the system-under-test.</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: UI technology</td>
+<td>(A) plain stdin readline</td>
+<td>F18 renderer formats menu; numbered choices; user types number +
+Enter; ENTER alone with default specified picks default</td>
+</tr>
+<tr>
+<td>Q2: preview shape</td>
+<td>(A) inline <code>preview</code> string per choice</td>
+<td>Single string field; multi-line via <code>\n</code>; rendered ABOVE
+the label via F18’s <code>RenderLines</code></td>
+</tr>
+<tr>
+<td>Q3: tool name</td>
+<td>(A) <code>ask_user</code></td>
+<td>HelixCode snake_case convention; matches F14
+<code>shell_sandboxed</code>, F17 <code>smart_edit</code> style</td>
+</tr>
+<tr>
+<td>Q4: non-interactive fallback</td>
+<td>(B) auto-pick default if specified, else error</td>
+<td><code>term.IsTerminal=false</code> → return default OR
+<code>ErrNoTTYNoDefault</code>; NEVER block on non-TTY read</td>
+</tr>
+<tr>
+<td>Q5: surface</td>
+<td>(A) tool only, no slash, no cobra</td>
+<td>Agent-driven; <code>/ask</code> would invert semantics; cobra is
+F19.5 debug-only candidate</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="non-obvious-decisions-recorded-for-plan-time-review">11.
+Non-obvious decisions (recorded for plan-time review)</h2>
+<ol type="1">
+<li><strong>5-minute timeout is the v1 default</strong> — long enough
+that a user reading a multi-line preview, switching tabs, and coming
+back to type isn’t penalised; short enough that a forgotten prompt
+doesn’t pin the agent loop forever. Configurable via
+<code>StdinPrompterOptions.Timeout</code>. Rationale: claude-code uses
+~10 minutes; we pick 5 to bias toward “agent reports the timeout sooner”
+so the user can re-issue the prompt. Documented as a v1 tradeoff; no
+user-facing knob in v1.</li>
+<li><strong>3 retries before
+<code>ErrTooManyInvalidAttempts</code></strong> — prevents both
+“infinite loop in CI” and “user gives up after one typo”. Configurable
+via <code>StdinPrompterOptions.MaxRetries</code>. Rationale: balances UX
+(forgiving of typos) vs anti-DoS (capped). v2 may make this
+per-Question.</li>
+<li><strong>EOF returns <code>ErrUserCancelled</code>, NOT
+silent-default</strong> — distinct from non-TTY-with-default (which is
+the <code>IsTTY()=false</code> short-circuit BEFORE any read). EOF
+mid-read means the user explicitly closed the stream; silently picking
+the default would mask a piped-stdin misconfiguration. Documented in
+§4.5.</li>
+<li><strong>Empty input + default → returns default; empty input + no
+default → re-prompts (counts toward retries)</strong> — empty input has
+TWO meanings depending on context. The retry counter ticks on the
+no-default branch so a CI run with stdin closed can’t infinite-loop on
+<code>\n\n\n...</code>. (In practice that branch hits EOF first; the
+“empty without default” path is reached only when
+<code>bufio.ReadString(&#39;\n&#39;)</code> returns <code>\n</code> itself
+before EOF.)</li>
+<li><strong><code>FormatQuestion</code> is exported</strong> — pure
+function; tests pin byte order. Rationale: lets the anti-bluff (d) test
+(preview before label) check the function output WITHOUT going through
+<code>Prompt</code> — keeps the test focused. The function is also
+reusable from a future <code>/ask</code> slash command (F19.5) if
+added.</li>
+<li><strong>Single <code>preview</code> string vs claude-code’s
+<code>QuestionPreview{type, content, title}</code></strong> — v1
+collapses the typed preview to a single string. Rationale: typed
+previews require a renderer that knows about diff / image / markdown
+rendering; F19’s renderer (F18’s <code>render.RenderLines</code>) is
+plain-text-only. Adding type dispatch would couple F19 to a markdown
+library / image protocol negotiation. Deferred to F19.5.</li>
+<li><strong>Tool returns <code>map[string]interface{}</code> not
+<code>Result</code> struct</strong> — matches existing tool return
+convention (F14 <code>shell_sandboxed</code> returns
+<code>map[string]interface{}</code>; F15 <code>task</code> returns
+<code>map[string]interface{}</code>; F17 <code>smart_edit</code> returns
+<code>map[string]interface{}</code>). Lets the LLM-side JSON decoder see
+a stable shape without the agent needing to know about
+<code>askuser.Result</code>. The internal <code>Result</code> struct is
+for type-safety inside the prompter.</li>
+<li><strong>Non-TTY short-circuit is BEFORE any read</strong> — proven
+by the byte-0-reader-position assertion in §5.2 (b) and Challenge Phase
+B/C. A bluffy alternative (read first, then validate) would block in
+non-TTY mode; the assertion catches it.</li>
+<li><strong>Retry counter resets on each <code>Prompt</code>
+call</strong> — three invalids on one prompt = error; the agent
+re-asking with a new prompt gets a fresh budget. Rationale: the budget
+is per-question, not per-session. A user who fat-fingered three times on
+one question deserves a fresh budget on the next question.
+Documented.</li>
+<li><strong>Goroutine-leak on cancellation is acceptable v1</strong> —
+<code>bufio.ReadString(&#39;\n&#39;)</code> blocks on the kernel; ctx-cancel
+returns from the prompter but the read goroutine stays parked until the
+next byte. Rationale: <code>os.Stdin</code> is process-lifetime; the
+leaked goroutine exits on process exit. v2 may use
+<code>os.Stdin.SetReadDeadline</code> on supported platforms
+(linux/macos via the <code>*os.File.SetReadDeadline</code> method).
+Documented in §4.6.</li>
+<li><strong>Renderer is shared with F18</strong> —
+<code>StdinPrompterOptions.Renderer</code> defaults to a fresh
+factory-constructed renderer, but the CLI can pass
+<code>c.renderer</code> to share. Rationale: a single renderer instance
+keeps the F18 viewport state coherent (so a tool-result-block render
+before the prompt doesn’t get clobbered by the prompter’s own
+RenderLines call). Documented as polish; correctness does not depend on
+it in v1.</li>
+<li><strong>ANSI / <code>\r</code> handling is delegated to F18</strong>
+— the prompter calls <code>render.RenderLines</code>; the renderer’s
+plain-mode strips <code>\r</code> and the fancy-mode emits ANSI. F19
+does NOT re-implement either. Rationale: F18 already passes the
+zero-CR-in-plain-mode invariant; F19 reuses it via composition.</li>
+</ol>
+</body>
+</html>

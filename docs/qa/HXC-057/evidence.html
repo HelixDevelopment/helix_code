@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-057-recovery-wire-unwired-digital.vasic.concurrency-requirereplace">HXC-057
+— recovery: wire unwired digital.vasic.concurrency require+replace</h1>
+<p><strong>Captured:</strong> 2026-06-09T15:06:50Z · Bug · Fixed (→
+Fixed.md) ## Defect recovery/pkg/breaker/breaker.go imports
+digital.vasic.concurrency/pkg/breaker (existing code, never wired per
+§11.4.124) but recovery/go.mod had no require/replace → go build ./…
+failed: “no required module provides package
+digital.vasic.concurrency/pkg/breaker”. ## Fix (wire-in, not delete
+§11.4.124) Added <code>require digital.vasic.concurrency v0.0.0</code> +
+<code>replace digital.vasic.concurrency =&gt; ../concurrency</code>; go
+mod tidy settled go.sum. ## Captured runtime evidence
+<code>go build ./...</code> → RECOVERY_BUILD_OK ;
+<code>go test ./pkg/breaker</code> → ok 0.754s ## Commit recovery
+105d0b4 (go.mod+go.sum), pushed ff c7efbcb..105d0b4 to all remotes.</p>
+</body>
+</html>

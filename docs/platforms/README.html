@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="helixcode-supported-platforms-manifest">HelixCode
+Supported-Platforms Manifest</h1>
+<p>This directory is the single source of truth for which operating
+systems HelixCode supports, in service of <strong>Constitution §11.4.81
+— Cross-Platform-Parity Mandate</strong> (tracker item
+<strong>HXC-015</strong>).</p>
+<h2 id="files">Files</h2>
+<table>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>supported_platforms.yaml</code></td>
+<td>Machine-readable manifest of OS targets, their <code>uname -s</code>
+strings, whether they are host-shell targets, and whether CI/test
+hardware exists.</td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>This file.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-11.4.81-requires">What §11.4.81 requires</h2>
+<p>For every platform-specific primitive, a multi-platform project must
+ship a <strong>per-OS equivalent chosen at runtime</strong> via
+<code>uname -s</code> (or equivalent), with an <strong>honest kernel-gap
+citation</strong> wherever a Linux primitive has no portable equivalent
+(canonical example: XNU does not enforce <code>RLIMIT_AS</code> for
+unprivileged processes).</p>
+<h2 id="how-the-manifest-is-consumed">How the manifest is consumed</h2>
+<p><code>scripts/gates/cross_platform_parity_gate.sh</code> (the
+<code>CM-CROSS-PLATFORM-PARITY</code> gate) reads
+<code>supported_platforms.yaml</code>, computes the set of
+<strong>host-shell platforms</strong>
+(<code>host_shell_target: true</code> → Linux, macOS, Windows), and
+scans the repo’s shell scripts:</p>
+<ul>
+<li>A script that does <strong><code>case &quot;$(uname -s)&quot;</code>
+dispatch</strong> must cover every host-shell platform’s
+<code>uname -s</code> value with a non-SKIP branch <strong>or</strong>
+carry a documented honest-kernel-gap citation for the missing platform.
+A script claiming multi-platform dispatch but <strong>silently
+missing</strong> a manifest platform’s branch (no gap citation) is a
+hard <strong>FAIL</strong>.</li>
+<li>A script that is intentionally Linux-only may declare itself so with
+a <code># PARITY: linux-only — &lt;reason&gt;</code> marker; the gate
+then treats it as compliant (this is the pragmatic policy while the
+phased rename/rewrite is in progress — see the gate header).</li>
+<li>A script that uses platform-specific primitives
+<strong>without</strong> either a dispatch block or a
+<code># PARITY:</code> marker is a <strong>soft finding</strong>
+(reported, non-fatal).</li>
+</ul>
+<p>Cross-compiled, non-host-shell targets (iOS, Android, Aurora OS,
+Harmony OS) carry <code>host_shell_target: false</code> and impose
+<strong>no</strong> <code>uname -s</code> branch obligation — they are
+built <em>from</em> a desktop host and have no host shell of their
+own.</p>
+<h2 id="citest-hardware-honesty">CI/test-hardware honesty</h2>
+<p><code>ci_test_hardware: false</code> for macOS and Windows is an
+<strong>honest</strong> statement: no macOS/Windows CI hardware is
+currently enrolled. Per §11.4.81(B), a platform-dependent test may
+<code>SKIP</code>-with-reason (<code>hardware_not_present</code> /
+<code>operator_attended</code>) on those platforms until hardware is
+enrolled — that is not a bluff, it is a documented gap. Linux is the
+canonical dev + CI host (<code>ci_test_hardware: true</code>).</p>
+<hr />
+<h2 id="sources-verified-2026-05-29-project-go.mod-claude.md-3.1-no-third-party-operator-instructions">Sources
+verified 2026-05-29: project go.mod + CLAUDE.md §3.1 (no third-party
+operator instructions)</h2>
+<p>Reviewed against Constitution §11.4.99. This is an internal
+supported-platforms manifest README: it documents the
+<code>supported_platforms.yaml</code> schema, the
+<code>CM-CROSS-PLATFORM-PARITY</code> gate behaviour, and the §11.4.81
+<code>uname -s</code> dispatch policy. It contains <strong>no
+third-party service setup instructions, no external API guidance, and no
+externally-pinned version numbers</strong> to cross-reference against an
+online source — the OS targets and their <code>uname -s</code> strings
+(Linux/Darwin/ Windows, plus cross-compiled iOS/Android/Aurora
+OS/Harmony OS) live in <code>supported_platforms.yaml</code>, not here.
+Toolchain/version authority for this repo is <code>go.mod</code> +
+CLAUDE.md §3.1 (Go 1.26 / go1.26.3 latest, root 1.25.2). Negative
+finding: nothing in this file required (or could be) verified against a
+vendor doc this run.</p>
+</body>
+</html>

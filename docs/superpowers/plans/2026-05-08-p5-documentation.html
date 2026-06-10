@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-08-p5-documentation</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-08-p5-documentation</h1>
+</header>
+<h1 id="phase-5-full-documentation-suite-implementation-plan">Phase 5 —
+Full Documentation Suite — Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development or superpowers:executing-plans.
+Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Create 6 standalone guides, add Go doc
+comments to every exported symbol, update all existing materials, final
+anti-bluff sweep, final push.</p>
+<p><strong>Architecture:</strong> All guides under
+<code>docs/guides/</code>. Each guide is self-contained. Go doc comments
+added inline to all exported symbols. Existing materials updated to
+reflect Phase 1-5 completions.</p>
+<p><strong>Tech Stack:</strong> Markdown, Go doc comments, bash</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-08-helixcode-zero-bluff-completion-design.md</code></p>
+<hr />
+<h2 id="file-structure-map">File Structure Map</h2>
+<pre><code>docs/guides/user-manual.md                 — create
+docs/guides/developer-guide.md             — create
+docs/guides/api-reference.md               — create
+docs/guides/deployment-guide.md            — create
+docs/guides/troubleshooting.md             — create
+docs/guides/challenge-authoring.md         — create
+helix_code/internal/**/*.go                 — modify (add doc comments)
+helix_code/cmd/**/*.go                      — modify (add doc comments)
+helix_code/applications/**/*.go             — modify (add doc comments)
+GAP_ANALYSIS.md                            — modify
+HELIXCODE_FEATURE_GAP_ANALYSIS.md          — modify
+HELIXCODE_GAP_ANALYSIS.md                  — modify
+AGENTS.md                                  — modify
+docs/improvements/PROGRESS.md              — modify
+docs/CONTINUATION.md                       — modify</code></pre>
+<hr />
+<h3 id="task-p5-t01-user-manual">Task P5-T01: User Manual</h3>
+<p><strong>Files:</strong> Create
+<code>docs/guides/user-manual.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step: Write the guide
+covering:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># HelixCode User Manual</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## 1. Installation</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Linux (apt, yum, snap, AppImage)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>macOS (Homebrew)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Windows (NSIS installer)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Aurora OS / Harmony OS</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>From source</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## 2. Getting Started</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>First project: <span class="in">`helix start`</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>First AI session: <span class="in">`helix auto &quot;build a todo CLI&quot;`</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Project structure overview</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## 3. CLI Reference</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">### `helix` commands</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`start`</span> — start a new AI development session</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`auto`</span> — autonomous development</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`server`</span> — start the HTTP server</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`generate`</span> — one-shot code generation</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`test`</span> — run the test suite</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`worker`</span> — manage distributed workers</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`notify`</span> — send notifications</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`permissions`</span> — manage permission rules</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`worktree`</span> — manage git worktrees</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`hooks`</span> — manage hook-based extensibility</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`lsp`</span> — LSP server status</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`sandbox`</span> — sandboxed shell execution</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/subagents`</span> — manage subagent teams</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/telemetry`</span> — OTel status</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/sessions`</span> — session transcripts</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/plantree`</span> — plan trees</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/openhands`</span> — workspace management</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/git_auto_commit`</span> — auto-commit control</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/browser`</span> — chrome browser automation</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/memory`</span> — project memory management</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/commands`</span> — markdown slash commands</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/skills`</span> — skill system</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/theme`</span> — color theme control</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`/edit`</span> — smart file editing</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="fu">### `helix-config` commands</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`show`</span> — display current configuration</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`set`</span> — set a configuration value</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`delete`</span> — delete a configuration key</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`validate`</span> — validate configuration</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`export`</span> — export to file</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`import`</span> — import from file</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`backup`</span> — create backup</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`restore`</span> — restore from backup</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`reset`</span> — reset to defaults</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`reload`</span> — hot-reload config</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`watch`</span> — watch for changes</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`templates`</span> — list/use templates</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`history`</span> — configuration history</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`schema`</span> — generate JSON schema</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="fu">## 4. Terminal UI (TUI)</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Navigation: tab between panels, enter to select</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Session list: current and past sessions</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Stats panel: tokens, cost, time</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>QA integration: run/view/cancel QA sessions</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="fu">## 5. Configuration</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Server settings (address, port, timeouts)</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Database (PostgreSQL, optional)</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Redis (optional)</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Auth (JWT, sessions)</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Worker pool settings</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Task management settings</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>LLM provider settings</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Logging</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Notifications</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Environment variables reference</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="fu">## 6. LLM Providers</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>OpenAI, Anthropic, Gemini, Ollama</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Azure, Bedrock, VertexAI</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Groq, Mistral, Cohere</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>xAI, DeepSeek, Qwen</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>OpenRouter, HuggingFace</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Llama.cpp, Replicate, Together.ai</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>How to configure each</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>API key setup</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Model selection</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="fu">## 7. Workflows</span></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Planning: <span class="in">`PlanStep`</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Building: <span class="in">`BuildStep`</span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Testing: <span class="in">`TestStep`</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Refactoring: <span class="in">`RefactorStep`</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="fu">## 8. FAQ</span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Common issues and solutions</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Commit:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/guides/user-manual.md</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P5-T01): add user manual covering installation, CLI, TUI, config, providers</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 5  Task: P5-T01&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p5-t02-developer-guide">Task P5-T02: Developer Guide</h3>
+<p><strong>Files:</strong> Create
+<code>docs/guides/developer-guide.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Write the guide
+covering:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># HelixCode Developer Guide</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Architecture Overview</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Package dependency map</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Data flow: API → server → agent → LLM → tools</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Client architecture: REST, CLI, TUI, Desktop, Mobile, WebSocket</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## Building from Source</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Prerequisites: Go 1.24, gcc, make</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`make setup-deps`</span>, <span class="in">`make build`</span>, <span class="in">`make logo-assets`</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Containerized build: <span class="in">`make container-build`</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cross-compilation targets</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Code Organization</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`cmd/`</span> — entry points</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`internal/`</span> — all packages</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`auth/`</span> — authentication</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`llm/`</span> — LLM providers + litellm</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`server/`</span> — HTTP server</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`tools/`</span> — tool ecosystem</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`worker/`</span> — distributed workers</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`task/`</span> — task management</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`workflow/`</span> — workflow engine</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`memory/`</span> — memory providers</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`notification/`</span> — notifications</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`mcp/`</span> — MCP protocol</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`config/`</span> — configuration</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`verifier/`</span> — LLMsVerifier integration</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`repomap/`</span> — codebase mapping</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`quality/`</span> — quality scoring</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`clarification/`</span> — ambiguity resolution</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`plugins/`</span> — plugin system</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`sandbox/`</span> — sandboxed execution</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`session/`</span> — session management</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`hooks/`</span> — hook system</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`rules/`</span> — rules engine</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`project/`</span> — project management</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`template/`</span> — template system</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`performance/`</span> — performance optimization</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`security/`</span> — security scanning</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="fu">## Adding a New LLM Provider</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Create <span class="in">`internal/llm/providers/&lt;name&gt;/client.go`</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Implement <span class="in">`Provider`</span> interface</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Add to <span class="in">`providers/registry.go`</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Add config to <span class="in">`config/config.go`</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Write unit test + integration test + challenge</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Add to user manual provider list</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="fu">## Adding a New Tool</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Create tool file in <span class="in">`internal/tools/&lt;tool&gt;.go`</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Implement <span class="in">`tools.Tool`</span> interface</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Register in <span class="in">`tools/registry.go`</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Add slash command in <span class="in">`internal/commands/`</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Write tests + challenge</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="fu">## Contributing</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Conventional commits format: <span class="in">`type(scope): message`</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Phase: N  Task: TNN format</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Evidence links required</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Anti-bluff: every test carries runtime evidence</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Pull request process</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Commit</strong></label></li>
+</ul>
+<hr />
+<h3 id="task-p5-t03-api-reference">Task P5-T03: API Reference</h3>
+<p><strong>Files:</strong> Create
+<code>docs/guides/api-reference.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Write the guide based on
+<code>api/openapi.yaml</code></strong></label></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># HelixCode API Reference</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Authentication</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Bearer JWT token</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Header: Authorization: Bearer <span class="dt">&lt;</span><span class="kw">token</span><span class="dt">&gt;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Token expiry: configurable</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## REST Endpoints</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">### Health</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /health — service health (no auth)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/health — detailed health with DB/Redis</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="fu">### Auth</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/auth/register — user registration</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/auth/login — login, returns JWT</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/auth/refresh — refresh token</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/auth/logout — invalidate session</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="fu">### LLM</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/llm/generate — generate text</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/llm/generate-stream — streaming generation</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/llm/models — list available models</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/llm/providers — list providers</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/llm/providers/{id}/status — provider health</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="fu">### Projects</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/projects — create</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/projects — list</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/projects/{id} — get</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>DELETE /api/v1/projects/{id} — delete</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="fu">### Tasks</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/tasks — create task</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/tasks — list</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/tasks/{id} — get</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>PUT /api/v1/tasks/{id} — update</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="fu">### Workers</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/workers — list</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/workers — register</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>DELETE /api/v1/workers/{id} — remove</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="fu">### QA</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>POST /api/v1/qa/session — start QA session</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/qa/session/{id}/status</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/qa/session/{id}/report</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/qa/session/{id}/screenshot/{name}</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>DELETE /api/v1/qa/session/{id}</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a><span class="fu">### Metrics</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/metrics — runtime metrics</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="fu">## WebSocket (MCP)</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>ws://host:port/api/v1/mcp</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>JSON-RPC-like message format</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Tool execution dispatch</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## Error Codes</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>400 Bad Request</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>401 Unauthorized</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>403 Forbidden</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>404 Not Found</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>429 Rate Limited</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>500 Internal Server Error</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="fu">## Rate Limiting</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Configurable per-route limits</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Headers: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Commit</strong></label></li>
+</ul>
+<hr />
+<h3 id="task-p5-t04-deployment-guide">Task P5-T04: Deployment Guide</h3>
+<p><strong>Files:</strong> Create
+<code>docs/guides/deployment-guide.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Write
+covering:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># HelixCode Deployment Guide</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Docker Compose (Recommended)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>docker-compose.yml: production stack</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>docker-compose-simple.yml: minimal dev</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>docker-compose.test.yml: test infrastructure</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>docker-compose.full-test.yml: full test infrastructure</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## Kubernetes</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Helm chart (if exists)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Manifests: deployment, service, configmap, secrets</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Persistent volumes for DB + Redis</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Environment Variables</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>Complete reference of all HELIX_* variables</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">## SSL/TLS</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Nginx reverse proxy configuration</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Let&#39;s Encrypt integration</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Self-signed certs (dev only)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## Monitoring</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Prometheus metrics endpoint</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Grafana dashboards</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Health check endpoint</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Alerting rules</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="fu">## Backup &amp; Restore</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>PostgreSQL backup: pg_dump</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Redis backup: BGSAVE</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Config backup: helix-config backup</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Scaling</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Horizontal scaling with multiple server instances</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Redis session store for shared state</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Database connection pooling</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Worker pool sizing</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## Security</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>JWT secret rotation</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>API key management (CONST-042)</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Firewall rules</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Audit logging</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Commit</strong></label></li>
+</ul>
+<hr />
+<h3 id="task-p5-t05-troubleshooting-guide">Task P5-T05: Troubleshooting
+Guide</h3>
+<p><strong>Files:</strong> Create
+<code>docs/guides/troubleshooting.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Write
+covering:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># HelixCode Troubleshooting Guide</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common Errors</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">### &quot;Failed to connect to PostgreSQL&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Check database.host in config</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Verify PostgreSQL is running</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Check credentials in HELIX_DATABASE_PASSWORD</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">### &quot;Redis connection refused&quot;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Set redis.enabled: false to disable</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Check HELIX_REDIS_PASSWORD</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">### &quot;LLM provider timeout&quot;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Increase llm.timeout</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Check provider status endpoint</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Fall back to another provider</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">### &quot;Permission denied (publickey)&quot; (SSH workers)</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Verify SSH key setup</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Check worker host reachability</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Run: ssh -T user@host</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="fu">### &quot;Build fails with logo-assets error&quot;</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Run: make logo-assets</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Debug Logging</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Set logging.level: debug</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>HELIX_LOG_LEVEL=debug</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## Health Check</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /health — quick check</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>GET /api/v1/health — detailed with DB/Redis status</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Performance Profiling</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>pprof endpoints (if enabled)</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>metrics endpoint</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Go runtime metrics</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="fu">## Diagnostic Commands</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>helix-config validate — check configuration</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>helix worker status — check workers</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>/sandbox test — test sandbox capability</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>/lsp status — check LSP servers</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Commit</strong></label></li>
+</ul>
+<hr />
+<h3 id="task-p5-t06-challenge-authoring-guide">Task P5-T06: Challenge
+Authoring Guide</h3>
+<p><strong>Files:</strong> Create
+<code>docs/guides/challenge-authoring.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Write
+covering:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># HelixCode Challenge Authoring Guide</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Challenge Structure</span></span></code></pre></div>
+<p>challenges/<challenge-name>/ challenge.go — main entry point
+(runnable with <code>go run</code>) expected.json — expected results and
+evidence assertions README.md — challenge description (optional)</p>
+<pre><code>
+## challenge.go Template
+```go
+package main
+
+import (
+    &quot;crypto/sha256&quot;
+    &quot;encoding/hex&quot;
+    &quot;fmt&quot;
+    &quot;os&quot;
+)
+
+func main() {
+    // 1. Execute the feature being tested
+    // 2. Collect runtime evidence
+    // 3. Verify against expected.json assertions
+    // 4. Exit 0 on PASS, non-zero on FAIL
+
+    passed := true
+
+    // ... test logic ...
+
+    if passed {
+        fmt.Println(&quot;PASS&quot;)
+        os.Exit(0)
+    }
+    fmt.Println(&quot;FAIL&quot;)
+    os.Exit(1)
+}</code></pre>
+<h2 id="expected.json-format">expected.json Format</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;expected_result&quot;</span><span class="fu">:</span> <span class="st">&quot;PASS&quot;</span><span class="fu">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;evidence_type&quot;</span><span class="fu">:</span> <span class="st">&quot;sha256|runtime_output|compilation&quot;</span><span class="fu">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;assertions&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;compilation_pass&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;test_pass&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;output_hash&quot;</span><span class="fu">:</span> <span class="st">&quot;abc123...&quot;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;skip_conditions&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;requires&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;ANTHROPIC_API_KEY&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;skip_message&quot;</span><span class="fu">:</span> <span class="st">&quot;SKIP-OK: #ticket&quot;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="the-5-validation-layers">The 5 Validation Layers</h2>
+<ol type="1">
+<li>Directory structure — files exist in expected locations</li>
+<li>Code quality — lint checks pass</li>
+<li>Compilation — project builds</li>
+<li>Testing — generated tests pass</li>
+<li>Runtime validation — output matches expected</li>
+</ol>
+<h2 id="anti-bluff-requirements">Anti-Bluff Requirements</h2>
+<ul>
+<li>Every assertion must produce positive runtime evidence</li>
+<li>No absence-of-error passes</li>
+<li>No metadata-only assertions</li>
+<li>No grep-based PASS without execution</li>
+<li>Every t.Skip() must have SKIP-OK: #<ticket></li>
+</ul>
+<h2 id="provider-gating">Provider Gating</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> apiKey <span class="op">:=</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;ANTHROPIC_API_KEY&quot;</span><span class="op">);</span> apiKey <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Println<span class="op">(</span><span class="st">&quot;SKIP-OK: #constitution-gate ANTHROPIC_API_KEY not set&quot;</span><span class="op">)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span>Exit<span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="co">// pass, not fail</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="checklist">Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>challenge.go is self-contained
+runnable</label></li>
+<li><label><input type="checkbox"></input>expected.json has evidence
+assertions</label></li>
+<li><label><input type="checkbox"></input>All assertions produce real
+output</label></li>
+<li><label><input type="checkbox"></input>SKIP-OK markers for gated
+tests</label></li>
+<li><label><input type="checkbox"></input>Exit 0 = PASS, non-zero =
+FAIL</label></li>
+</ul>
+<pre><code>
+- [ ] **Commit**
+
+---
+
+### Task P5-T07: Inline Go Documentation
+
+- [ ] **Step 1: Audit current doc comment coverage**
+
+```bash
+cd /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode
+go doc -all ./... 2&gt;&amp;1 | grep &quot;no Go files\|undefined\|no exported&quot; | wc -l</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Add doc comments to
+all exported symbols</strong></label></li>
+</ul>
+<p>For every exported type, function, method, constant, variable in: -
+<code>internal/</code> packages - <code>cmd/</code> entry points -
+<code>applications/</code> platform code</p>
+<p>Format: <code>// Name does X. ...</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Verify
+coverage</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Count exported symbols vs documented</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> doc <span class="at">-all</span> ./internal/... <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;func \|type \|var \|const &quot;</span></span></code></pre></div>
+<p>All must have doc comments.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Commit
+batch-by-batch (one package at a time)</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> pkg <span class="kw">in</span> internal/auth internal/llm internal/server internal/tools internal/worker internal/task internal/memory internal/config internal/verifier<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> add <span class="st">&quot;helix_code/</span><span class="va">$pkg</span><span class="st">/&quot;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P5-T07): add Go doc comments to </span><span class="va">$pkg</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 5  Task: P5-T07&quot;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<hr />
+<h3 id="task-p5-t08-update-gap_analysis.md">Task P5-T08: Update
+GAP_ANALYSIS.md</h3>
+<p><strong>Files:</strong> Modify <code>GAP_ANALYSIS.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Mark all Phase 3 features as
+COMPLETE with evidence links:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">### ✅ LiteLLM Abstraction Layer (COMPLETED — P3-T01)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>File: internal/llm/litellm/</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Evidence: go test ./internal/llm/litellm/ PASS</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">### ✅ RepoMap (COMPLETED — P3-T02)</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>File: internal/repomap/</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Evidence: go test ./internal/repomap/ PASS</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">### ✅ Quality Scoring (COMPLETED — P3-T03)</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>File: internal/quality/</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Evidence: go test ./internal/quality/ PASS</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="fu">### ✅ Interactive Clarification (COMPLETED — P3-T04)</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>File: internal/clarification/</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Evidence: go test ./internal/clarification/ PASS</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="fu">### ✅ Plugin System (COMPLETED — P3-T05)</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>File: internal/plugins/</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Evidence: go test ./internal/plugins/ PASS</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="fu">### ✅ Cohere Provider (COMPLETED — P3-T06)</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="fu">### ✅ Replicate Provider (COMPLETED — P3-T07)</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="fu">### ✅ Together.ai Provider (COMPLETED — P3-T08)</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Update provider count from
+12 to 15</strong></label></li>
+<li><label><input type="checkbox"></input><strong>Commit</strong></label></li>
+</ul>
+<hr />
+<h3 id="task-p5-t09p5-t10p5-t11p5-t12p5-t13-update-all-remaining-docs">Task
+P5-T09/P5-T10/P5-T11/P5-T12/P5-T13: Update all remaining docs</h3>
+<ul class="task-list">
+<li><p><label><input type="checkbox"></input><strong>P5-T09</strong>: Update
+<code>HELIXCODE_FEATURE_GAP_ANALYSIS.md</code> (mirror
+T08)</label></p></li>
+<li><p><label><input type="checkbox"></input><strong>P5-T10</strong>: Update
+<code>PROGRESS.md</code> — document Phase 1-5 completion, close all
+tasks, set “Active phase” to none</label></p></li>
+<li><p><label><input type="checkbox"></input><strong>P5-T11</strong>: Update
+<code>CONTINUATION.md</code> — set current state to “Phases 1-5
+complete”, list any deferred items</label></p></li>
+<li><p><label><input type="checkbox"></input><strong>P5-T12</strong>: Update
+<code>AGENTS.md</code> — mark all BLUFF/STUB as FIXED, add verified real
+features, remove old references</label></p></li>
+<li><p><label><input type="checkbox"></input><strong>P5-T13</strong>: Update
+<code>HELIXCODE_GAP_ANALYSIS.md</code> — sync with
+T08/T09</label></p></li>
+<li><p><label><input type="checkbox"></input><strong>Commit as one
+batch:</strong></label></p></li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add GAP_ANALYSIS.md HELIXCODE_FEATURE_GAP_ANALYSIS.md HELIXCODE_GAP_ANALYSIS.md <span class="dt">\</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>        AGENTS.md docs/improvements/PROGRESS.md docs/CONTINUATION.md</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P5-T08-T13): update all existing materials for Phase 1-5 completion</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 5  Tasks: P5-T08 through P5-T13&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p5-t14-documentation-completeness-check">Task P5-T14:
+Documentation completeness check</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Verify every
+documented feature has a working challenge</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># For each guide, verify referenced features exist in tree</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> guide <span class="kw">in</span> docs/guides/<span class="pp">*</span>.md<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;=== </span><span class="va">$guide</span><span class="st"> ===&quot;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;✅\|COMPLETE\|PASS&quot;</span> <span class="st">&quot;</span><span class="va">$guide</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;no markers&quot;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Verify no stale
+references</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;\.bak\|\.old\|Example_Projects&quot;</span> docs/ <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;STALE REFERENCES&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>Expected: <code>clean</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P5-T14): documentation completeness verification</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 5  Task: P5-T14&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p5-t15-final-anti-bluff-sweep">Task P5-T15: Final
+anti-bluff sweep</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Complete anti-bluff
+grep across all source</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Simulated ===&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|Simulated&quot;</span> internal/ cmd/ applications/ <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;_test.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;doc.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;faiss_fallback&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;PASS&quot;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Placeholder ===&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;placeholder\|Placeholder&quot;</span> internal/ cmd/ <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;_test.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;doc.go&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;PASS&quot;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Stub ===&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;stub\|Stub&quot;</span> internal/ cmd/ <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;_test.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;doc.go&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;PASS&quot;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== TODO ===&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;TODO&quot;</span> internal/ cmd/ <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;_test.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;doc.go&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;PASS&quot;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== FIXME ===&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;FIXME&quot;</span> internal/ cmd/ <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;_test.go&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;PASS&quot;</span></span></code></pre></div>
+<p>Expected: PASS (clean) for all five</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Skip markers
+audit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&#39;t\.Skip(&#39;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*_test.go&quot;</span> . <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;SKIP-OK&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;//.*SKIP&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;MISSING MARKERS&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;PASS: all have SKIP-OK&quot;</span></span></code></pre></div>
+<p>Expected: <code>PASS: all have SKIP-OK</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Build + test +
+vet</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> vet ./... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test <span class="at">-short</span> ./...</span></code></pre></div>
+<p>All must pass.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add <span class="at">-A</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P5-T15): final anti-bluff sweep — ALL CLEAN</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 5  Task: P5-T15  Evidence: zero hits on all 5 patterns&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p5-t16-final-push-to-all-remotes">Task P5-T16: Final push
+to all remotes</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Verify clean
+status</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status  <span class="co"># must be clean</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> HelixAgent status  <span class="co"># must be clean</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> helix_qa status  <span class="co"># must be clean</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> HelixCode status  <span class="co"># must be clean</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Push to all
+remotes</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github main <span class="kw">&amp;&amp;</span> <span class="fu">git</span> push gitlab main <span class="kw">&amp;&amp;</span> <span class="fu">git</span> push origin main <span class="kw">&amp;&amp;</span> <span class="fu">git</span> push upstream main</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Final governance
+verification</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/verify-governance-cascade.sh</span></code></pre></div>
+<p>Expected: <code>PASS</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Run anti-bluff
+verifier challenge</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> helix_code/tests/e2e/challenges/anti_bluff_verifier <span class="kw">&amp;&amp;</span> <span class="ex">go</span> run challenge.go</span></code></pre></div>
+<p>Expected: <code>ANTI-BLUFF: ALL CLEAN</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Phase 5 close-out
+commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb28"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">--allow-empty</span> <span class="at">-m</span> <span class="st">&quot;chore(P5-T16): Phase 5 complete — HelixCode Zero-Bluff Completion DONE</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 5  Task: P5-T16</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="st">Evidence: final anti-bluff sweep CLEAN, governance cascade PASS, all tests PASS&quot;</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github main</span></code></pre></div>
+<hr />
+<h2 id="phase-5-completion-checklist">Phase 5 Completion Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>6 standalone guides written and
+committed</label></li>
+<li><label><input type="checkbox"></input>Go doc comments on all exported
+symbols</label></li>
+<li><label><input type="checkbox"></input>GAP_ANALYSIS, PROGRESS,
+CONTINUATION, AGENTS updated</label></li>
+<li><label><input type="checkbox"></input>Documentation completeness
+verified</label></li>
+<li><label><input type="checkbox"></input>Final anti-bluff sweep: zero hits on
+all patterns</label></li>
+<li><label><input type="checkbox"></input>All skip markers
+present</label></li>
+<li><label><input type="checkbox"></input><code>go build ./...</code> +
+<code>go vet ./...</code> + <code>go test -short ./...</code> all
+pass</label></li>
+<li><label><input type="checkbox"></input>Anti-bluff verifier challenge: ALL
+CLEAN</label></li>
+<li><label><input type="checkbox"></input>Governance cascade:
+PASS</label></li>
+<li><label><input type="checkbox"></input>Pushed to all 4 remotes</label></li>
+<li><label><input type="checkbox"></input>git status clean across all
+repos</label></li>
+</ul>
+<p><strong>PROGRAMME COMPLETE.</strong></p>
+</body>
+</html>

@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec06</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec06</h1>
+</header>
+<h1 id="phase-5-catalogizer-example-integration">6. Phase 5: Catalogizer
+Example Integration</h1>
+<p>This chapter applies the HelixQA integration methodology to the
+Catalogizer multi-platform media management system — a production-scale
+target with five client applications, 39 Git submodules, and an OCU
+(OpenClaw Ultimate) autonomous QA pipeline. The analysis proceeds in
+four stages: current-state assessment, submodule bump and
+synchronization, new test bank creation, and client-application
+validation. Every command, file path, and commit hash is extracted from
+the live repository state as of 2026-04-30.</p>
+<hr />
+<h2 id="current-state-assessment">6.1 Current State Assessment</h2>
+<h3 id="helixqa-at-35deb43-two-phases-behind-upstream">6.1.1 HelixQA at
+<code>35deb43</code> — Two Phases Behind Upstream</h3>
+<p>Catalogizer pins HelixQA at commit <code>35deb43</code> (Phase 27.7,
+“visionnav Provider interface + NopProvider”), landed via parent commit
+<code>e1307bd</code> with the message
+<code>chore(submodules): bump HelixQA to 35deb43 (Phase 27.7 visionnav Provider…)</code>
+<a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+Upstream main has advanced to <code>0bca023</code> (Phase 29, “§12.6
+Memory-Budget Ceiling”), a two-phase delta [<sup>2</sup>]. Phase 29
+introduces a 60 % RAM cap (<code>HOST_SAFETY_MAX_MEM_PCT=60</code>)
+enforced through <code>bounded_run()</code> scope wrapping, three new
+pre-build covenant gates (<code>CM-COVENANT-CONSTITUTION-126</code>,
+<code>CM-MEM-COVENANT-PROPAGATION</code>,
+<code>CM-MEMBUDGET-METATEST</code>), and propagation of the §12.6 clause
+to 39 governance files across all submodules [<sup>2</sup>]. Catalogizer
+therefore lacks both the runtime safety protections and the governance
+synchronization Phase 29 mandates. The triggering incident was three
+consecutive session-loss SIGKILLs during an unbounded <code>m -j5</code>
+AOSP build on a 62 GB host [<sup>2</sup>]; without the
+<code>bounded_run()</code> wrapper, a parallel Full-QA Master Cycle
+exposing 60+ banks to the same failure mode.</p>
+<p>DocProcessor (<code>5f1e58a</code>), LLMOrchestrator
+(<code>1b95823</code>), and LLMProvider (<code>0720b6e</code>) are at
+their latest upstream commits
+[<sup>3</sup>][<sup>4</sup>][<sup>5</sup>]. VisionEngine is unpinned —
+no commit hash is recorded in <code>.gitmodules</code>, and the latest
+upstream is <code>77765aef</code> [<sup>6</sup>]. The bump strategy
+therefore focuses on HelixQA while treating the remaining
+HelixDevelopment submodules as a lighter synchronization pass.</p>
+<h3 id="existing-qa-artifacts-60-banks-5-session-archives-206-pass-1-skip">6.1.2
+Existing QA Artifacts: 60+ Banks, 5 Session Archives, 206 PASS / 1
+SKIP</h3>
+<p>Catalogizer maintains QA archives under
+<code>docs/reports/qa-sessions/</code> containing five dated sessions:
+<code>2026-04-18-T2158</code> (Full-QA Master Cycle baseline),
+<code>2026-04-21-T</code> (KeyPress Android-9 fallback),
+<code>2026-04-21-T-v2</code> (Run5 ticket-persistence triage),
+<code>2026-04-22-T16-28</code> (auto-committed session), and
+<code>2026-04-22-T17-16/helixqa</code> (Android TV challenge validation
+closure) <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+Each session holds a <code>FINAL-REPORT.md</code>, <code>logs/</code>,
+<code>challenges/</code> JSON results, <code>helixqa/</code> bank and
+autonomous results, <code>videos/</code> MP4 recordings,
+<code>screenshots/</code> pre/post per action, and <code>tickets/</code>
+markdown tickets with evidence <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<p>The most recent audit baseline at commit <code>f9c7781</code> reports
+<code>0 FAIL / 206 PASS / 1 SKIP</code> <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The single SKIP is a constitutionally-mandated exclusion:
+<code>full-qa-android</code> and <code>full-qa-androidtv</code> banks
+are SKIPPED in autonomous mode because the only available ADB devices
+are ATMOSphere instances, permanently excluded per
+<code>.devignore</code> under Constitution Article VII §7.1 <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The 206 PASS count covers non-Android banks (API, web, desktop,
+cross-platform) and internal HelixQA unit tests. This baseline is the
+regression checkpoint against which any bump must be compared.</p>
+<h3 id="integration-gaps-android-blocked-installer-wizard-and-api-client-uncovered-cuda-sidecar-not-deployed">6.1.3
+Integration Gaps: Android Blocked, Installer-Wizard and API Client
+Uncovered, CUDA Sidecar Not Deployed</h3>
+<p>Three critical deficiencies persist. First, Android and Android TV
+autonomous QA is a <strong>fatal blocker</strong> — the
+<code>full-qa-android</code> and <code>full-qa-androidtv</code> banks
+exist but cannot execute because no non-ATMOSphere Android device is
+connected via <code>adb connect</code> <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+Second, the <code>installer-wizard</code> (Tauri-based SMB configuration
+wizard) and <code>catalogizer-api-client</code> (TypeScript library
+distributed as <code>@catalogizer/api-client</code>) have <strong>no
+identified HelixQA bank coverage</strong>; they rely on manual testing
+and internal unit-test suites (installer-wizard claims 93 % coverage
+with 30/30 tests passing) <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+Third, <code>OCU-CUDA-Sidecar/</code> exists in the repository but the
+sidecar container is <strong>not deployed</strong> on
+<code>thinker.local</code>, leaving NVENC encoding and CUDA-accelerated
+vision inference stubbed rather than exercised <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<p>Table 1 consolidates these findings.</p>
+<p><strong>Table 1. Catalogizer HelixQA Integration — Current State
+Assessment</strong></p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 37%" />
+<col style="width: 12%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Current Status</th>
+<th>Gap</th>
+<th>Target State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixQA submodule</td>
+<td>Pinned at <code>35deb43</code> (Phase 27.7)</td>
+<td>Missing Phase 28–29 (memory budget, covenant propagation, 3 new
+pre-build gates)</td>
+<td>Pinned at <code>0bca023</code> (Phase 29) with all gates green</td>
+</tr>
+<tr>
+<td>DocProcessor submodule</td>
+<td><code>5f1e58a</code> (latest)</td>
+<td>None</td>
+<td>Maintain at tip</td>
+</tr>
+<tr>
+<td>LLMOrchestrator submodule</td>
+<td><code>1b95823</code> (latest)</td>
+<td>None</td>
+<td>Maintain at tip</td>
+</tr>
+<tr>
+<td>LLMProvider submodule</td>
+<td><code>0720b6e</code> (latest)</td>
+<td>None</td>
+<td>Maintain at tip</td>
+</tr>
+<tr>
+<td>VisionEngine submodule</td>
+<td>Unpinned (no commit)</td>
+<td>No version lock; latest is <code>77765aef</code></td>
+<td>Pin to <code>77765aef</code> or latest verified tip</td>
+</tr>
+<tr>
+<td>Existing bank suite</td>
+<td>60+ banks, 206 PASS / 1 SKIP</td>
+<td>Cannot assess Phase 29 behavior until bump completes</td>
+<td>206 PASS / 0 SKIP or documented SKIP rationale</td>
+</tr>
+<tr>
+<td>Android autonomous QA</td>
+<td><code>full-qa-android</code> bank exists but SKIPPED</td>
+<td><code>.devignore</code> excludes ATMOSphere ADB devices</td>
+<td>Connect non-ATMOSphere phone; add to <code>.devconnect</code></td>
+</tr>
+<tr>
+<td>Android TV autonomous QA</td>
+<td><code>full-qa-androidtv</code> bank exists but SKIPPED</td>
+<td>Same ADB device exclusion as phone</td>
+<td>Connect non-ATMOSphere Android TV; add to
+<code>.devconnect</code></td>
+</tr>
+<tr>
+<td>Installer-wizard coverage</td>
+<td>30/30 unit tests passing, 93 % claimed</td>
+<td>No HelixQA bank; no E2E coverage</td>
+<td><code>catalogizer-desktop-e2e</code> bank covering wizard launch and
+SMB discovery</td>
+</tr>
+<tr>
+<td>API client coverage</td>
+<td>Vitest + Jest dual config</td>
+<td>No HelixQA bank; no contract tests against real HTTP</td>
+<td><code>catalogizer-api-contract</code> bank with real endpoint
+calls</td>
+</tr>
+<tr>
+<td>CUDA sidecar deployment</td>
+<td><code>OCU-CUDA-Sidecar/</code> exists in tree</td>
+<td>Not deployed on <code>thinker.local</code></td>
+<td>Docker image built and running; NVENC path exercised</td>
+</tr>
+</tbody>
+</table>
+<p>The table reveals that the Catalogizer–HelixQA integration is
+structurally mature — the framework is wired, orchestration scripts
+exist, and the baseline is stable — but operationally incomplete in four
+dimensions: version currency, device availability, client coverage, and
+sidecar deployment. The bump to Phase 29 is the prerequisite for all
+subsequent work because the new memory-budget protections affect how the
+Full-QA Master Cycle schedules parallel bank execution.</p>
+<hr />
+<h2 id="bump-and-synchronization-steps">6.2 Bump and Synchronization
+Steps</h2>
+<p>The bump procedure assumes Go 1.24, GNU Make 4.3+, and Docker Engine
+25.x or Podman 4.x, matching the build environment in
+<code>catalog-api/ARCHITECTURE.md</code> and the
+<code>containers/</code> submodule documentation <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<h3 id="step-1-update-helixqa-to-latest-upstream">6.2.1 Step 1: Update
+HelixQA to Latest Upstream</h3>
+<p>From the Catalogizer repository root, execute a single command to
+fetch the upstream HelixQA <code>main</code> branch and advance the
+submodule pointer.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/Catalogizer</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--remote</span> HelixQA</span></code></pre></div>
+<p>The <code>--remote</code> flag fetches
+<code>git@github.com:HelixDevelopment/HelixQA.git</code> and checks out
+the tip commit, <code>0bca023</code> at the time of writing
+[<sup>2</sup>]. After execution,
+<code>git -C HelixQA log --oneline -1</code> must emit
+<code>0bca0234bab37b5ebdb28e22fd04350b51847883</code>. The parent
+working tree now shows <code>HelixQA</code> as modified. Do not commit
+yet; verification must complete first.</p>
+<h3 id="step-2-verify-helixqa-builds-and-tests">6.2.2 Step 2: Verify
+HelixQA Builds and Tests</h3>
+<p>Enter the submodule and run its build and test targets.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixQA</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span></code></pre></div>
+<p>Expected output for <code>make build</code>: all <code>cmd/</code>
+binaries compile without <code>go vet</code> or <code>gofmt</code>
+errors. Expected output for <code>make test</code>: 49
+anti-bluff-compliant tests PASS across <code>pkg/audio</code> (17
+tests), <code>cmd/qa-audio-probe</code> (7 tests), and
+<code>pkg/visionnav</code> (25 tests) [<sup>2</sup>]. The Phase 29
+pre-build gates — <code>CM-COVENANT-CONSTITUTION-126</code>,
+<code>CM-MEM-COVENANT-PROPAGATION</code>,
+<code>CM-MEMBUDGET-METATEST</code> — must report green. The
+<code>CM-MEMBUDGET-METATEST</code> gate runs
+<code>scripts/testing/test_memory_budget_covenant.sh</code> and
+validates 15 invariants, including
+<code>HOST_SAFETY_MAX_MEM_PCT default = 60</code> and
+<code>build.sh wraps m-j in bounded_run scope</code> [<sup>2</sup>].</p>
+<h3 id="step-3-synchronize-remaining-helixdevelopment-submodules">6.2.3
+Step 3: Synchronize Remaining HelixDevelopment Submodules</h3>
+<p>DocProcessor, LLMOrchestrator, and LLMProvider are already at their
+latest commits. VisionEngine is unpinned and must be locked to a
+known-good commit.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> DocProcessor log <span class="at">--oneline</span> <span class="at">-1</span>      <span class="co"># expect 5f1e58a</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> LLMOrchestrator log <span class="at">--oneline</span> <span class="at">-1</span>   <span class="co"># expect 1b95823</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> LLMProvider log <span class="at">--oneline</span> <span class="at">-1</span>       <span class="co"># expect 0720b6e</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> VisionEngine log <span class="at">--oneline</span> <span class="at">-1</span>      <span class="co"># may be empty or detached</span></span></code></pre></div>
+<p>If VisionEngine reports no commit, initialize and pin it:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> VisionEngine</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> VisionEngine</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout 77765aef6d103a3d2b3358df8007205f5b35143a</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add VisionEngine</span></code></pre></div>
+<p>VisionEngine is a computer-vision/OCR engine consumed by HelixQA for
+autonomous QA screenshot analysis, not a runtime dependency of the media
+server, but pinning ensures reproducibility of the QA toolchain.</p>
+<h3 id="step-4-run-the-catalogizer-full-qa-master-cycle">6.2.4 Step 4:
+Run the Catalogizer Full-QA Master Cycle</h3>
+<p>With HelixQA at Phase 29, trigger the complete QA campaign through
+the top-level <code>Makefile</code> entry point, which delegates to
+<code>scripts/helixqa-orchestrator.sh</code> <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/Catalogizer</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> qa-all</span></code></pre></div>
+<p>The <code>qa-all</code> target executes the 10-phase Full-QA Master
+Plan mandated by
+<code>docs/plans/2026-04-18-full-qa-cycle-master-plan.md</code> under
+Constitution Article VII (§7.1–§7.11) <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>:
+(1) governance and session directory creation, (2) clean rebuild of all
+apps and services, (3) unit and integration tests for every submodule,
+(4) challenges bank run, (5) HelixQA bank tests for non-Android
+platforms, (6) HelixQA autonomous QA for non-Android platforms, (7)
+video and screenshot post-session review, (8) fix loop with root-cause
+analysis and regression tests, (9) version bump and release artefact
+generation, and (10) final session report assembly <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+Non-Android banks (<code>full-qa-api</code>, <code>full-qa-web</code>,
+<code>full-qa-desktop</code>, <code>full-qa-cross-platform</code>)
+execute against the running stack brought up by
+<code>docker-compose.qa.yml</code> and
+<code>docker-compose.qa-robot.yml</code> <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<h3 id="step-5-verify-no-regressions-against-the-206-pass-1-skip-baseline">6.2.5
+Step 5: Verify No Regressions Against the 206 PASS / 1 SKIP
+Baseline</h3>
+<p>The final step is strict regression comparison against the
+<code>f9c7781</code> baseline (<code>0 FAIL / 206 PASS / 1 SKIP</code>)
+<a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+Acceptable outcomes: zero new FAILs (any new failure indicates a Phase
+28–29 breaking change requiring triage before commit), zero unexpected
+SKIPs (the single Android SKIP is constitutionally mandated and
+expected), and PASS count ≥ 206 (new banks may increase the count, but
+it must never decrease).</p>
+<p>Table 2 enumerates the bump steps with exact commands, expected
+outputs, and verification criteria.</p>
+<p><strong>Table 2. HelixQA Bump Procedure — Commands, Expected Output,
+and Verification</strong></p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 19%" />
+<col style="width: 36%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Step</th>
+<th>Command</th>
+<th>Expected Output</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Fetch latest HelixQA</td>
+<td><code>git submodule update --remote HelixQA</code></td>
+<td>Submodule advances to <code>0bca023</code>; <code>git status</code>
+shows <code>HelixQA</code> modified</td>
+<td><code>git -C HelixQA log --oneline -1</code> returns
+<code>0bca023</code></td>
+</tr>
+<tr>
+<td>2. Build HelixQA</td>
+<td><code>cd HelixQA &amp;&amp; make build</code></td>
+<td>All <code>cmd/</code> binaries compile; <code>go vet</code> clean;
+<code>gofmt -l</code> empty</td>
+<td>Exit code 0; no vet/format errors</td>
+</tr>
+<tr>
+<td>3. Test HelixQA</td>
+<td><code>cd HelixQA &amp;&amp; make test</code></td>
+<td>49/49 PASS across <code>pkg/audio</code>,
+<code>cmd/qa-audio-probe</code>, <code>pkg/visionnav</code>; 3 pre-build
+gates green</td>
+<td><code>echo $?</code> returns 0; gate logs show
+<code>PASS</code></td>
+</tr>
+<tr>
+<td>4. Sync VisionEngine</td>
+<td><code>git submodule update --init VisionEngine &amp;&amp; cd VisionEngine &amp;&amp; git checkout 77765aef</code></td>
+<td>VisionEngine pinned to <code>77765aef</code>; others unchanged</td>
+<td><code>git -C VisionEngine log --oneline -1</code> returns
+<code>77765aef</code></td>
+</tr>
+<tr>
+<td>5. Run Full-QA Master Cycle</td>
+<td><code>cd .. &amp;&amp; make qa-all</code></td>
+<td>10-phase plan executes; non-Android banks run against Docker QA
+stack</td>
+<td>Session directory created under
+<code>docs/reports/qa-sessions/</code> with timestamp</td>
+</tr>
+<tr>
+<td>6. Regression comparison</td>
+<td><code>cat docs/reports/qa-sessions/*/FINAL-REPORT.md</code></td>
+<td>PASS ≥ 206; FAIL = 0; SKIP ≤ 1 (Android only)</td>
+<td>Manual review against <code>f9c7781</code> baseline; operator signs
+off</td>
+</tr>
+<tr>
+<td>7. Commit bump</td>
+<td><code>git add HelixQA VisionEngine &amp;&amp; git commit -m &quot;chore(submodules): bump HelixQA to 0bca023 (Phase 29) + pin VisionEngine&quot;</code></td>
+<td>Commit hash generated; tree shows updated submodule pointers</td>
+<td><code>git log --oneline -1</code> contains <code>0bca023</code> and
+<code>Phase 29</code></td>
+</tr>
+</tbody>
+</table>
+<p>The procedure is sequential because each step gates the next. Running
+<code>make qa-all</code> before <code>make test</code> in HelixQA risks
+propagating a broken upstream commit into the baseline. The regression
+comparison in Step 6 is not fully automated — it requires operator
+judgment because the cycle generates video recordings, screenshots, and
+ticket artefacts that a numeric diff cannot assess.</p>
+<hr />
+<h2 id="new-test-bank-creation">6.3 New Test Bank Creation</h2>
+<p>The existing 60+ HelixQA banks cover generic Catalogizer surfaces
+(API, web, desktop, Android, Android TV) and OCU program phases (P0–P7)
+<a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+What they do not cover are the two client applications lacking any
+HelixQA bank — <code>installer-wizard</code> and
+<code>catalogizer-api-client</code> — and the translation-specific
+workflows (subtitle management, Cyrillic/Unicode handling, multilingual
+language settings). This section defines five new banks and provides two
+complete YAML implementations.</p>
+<h3 id="web-functional-bank-bankscatalogizer-web-functional.yaml">6.3.1
+Web Functional Bank:
+<code>banks/catalogizer-web-functional.yaml</code></h3>
+<p>This bank covers the Collection-Manager-React web application’s
+primary user journeys: login, media browsing, search, favorites
+management, and settings modification. The web client is built with
+Vite, Tailwind CSS, and React 18; it connects to the Go backend via
+<code>Catalogizer-API-Client-TS</code> and receives real-time updates
+over <code>WebSocket-Client-TS</code> <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The bank asserts both HTTP REST correctness and WebSocket state
+propagation.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="an">SPDX-FileCopyrightText:</span><span class="co"> 2026 Milos Vasic</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="an">SPDX-License-Identifier:</span><span class="co"> Apache-2.0</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Catalogizer Web Functional Test Bank&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;End-to-end functional tests for the Collection-Manager-React web client&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;vasic-digital&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">app</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Catalogizer&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2.3.0&quot;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">client</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;catalog-web&quot;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">build_tool</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;vite&quot;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">test_cases</span><span class="kw">:</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> WEB-001</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;User login with valid credentials&quot;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">web</span><span class="kw">]</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Navigate to login page&quot;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;navigate /login&quot;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Login form rendered with email and password fields&quot;</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Enter credentials&quot;</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;input [data-testid=login-email] user@example.com; input [data-testid=login-password] secret&quot;</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Both fields populated&quot;</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Submit form&quot;</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;click [data-testid=login-submit]&quot;</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;200 OK from POST /api/v1/auth/login; JWT stored in localStorage&quot;</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Verify redirect&quot;</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;waitForNavigation&quot;</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;URL is /dashboard; auth context populated&quot;</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">auth</span><span class="kw">,</span><span class="at"> login</span><span class="kw">,</span><span class="at"> web</span><span class="kw">]</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;15s&quot;</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Authenticated session established; WebSocket connection opened&quot;</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> WEB-002</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Media browsing with pagination&quot;</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">web</span><span class="kw">]</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Load media grid&quot;</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;navigate /media&quot;</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GET /api/v1/media?page=1 returns 200 with items array&quot;</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Scroll to trigger pagination&quot;</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;scrollToBottom&quot;</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GET /api/v1/media?page=2 fired; new items appended to grid&quot;</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Verify item rendering&quot;</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;assert [data-testid=media-card] count &gt;= 20&quot;</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;At least 20 media cards visible across both pages&quot;</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">media</span><span class="kw">,</span><span class="at"> pagination</span><span class="kw">,</span><span class="at"> ui</span><span class="kw">]</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;20s&quot;</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Media grid paginates correctly; no duplicate items&quot;</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> WEB-003</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Search with Cyrillic query&quot;</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> high</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">web</span><span class="kw">]</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Focus search input&quot;</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;click [data-testid=search-input]&quot;</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Input focused; placeholder text visible&quot;</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Type Cyrillic term&quot;</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;input [data-testid=search-input] фильм&quot;</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Text &#39;фильм&#39; entered; debounced search fires after 300ms&quot;</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Assert results&quot;</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;assert [data-testid=search-result] count &gt; 0&quot;</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Search results contain Cyrillic metadata; no mojibake&quot;</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">search</span><span class="kw">,</span><span class="at"> i18n</span><span class="kw">,</span><span class="at"> cyrillic</span><span class="kw">,</span><span class="at"> unicode</span><span class="kw">]</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;15s&quot;</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Cyrillic search returns relevant results; response encoding UTF-8&quot;</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> WEB-004</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Add and remove favorite with WebSocket broadcast&quot;</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> high</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">web</span><span class="kw">]</span></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Toggle favorite on first item&quot;</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;click [data-testid=favorite-btn]:first&quot;</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;POST /api/v1/favorites returns 201; heart icon active&quot;</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Verify WebSocket broadcast&quot;</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;waitForWebSocketEvent favorite:updated&quot;</span></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;WS message received with updated favorite list&quot;</span></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Toggle off&quot;</span></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;click [data-testid=favorite-btn]:first&quot;</span></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;DELETE /api/v1/favorites/:id returns 204; heart icon inactive&quot;</span></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">favorites</span><span class="kw">,</span><span class="at"> websocket</span><span class="kw">,</span><span class="at"> realtime</span><span class="kw">]</span></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;15s&quot;</span></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Favorite state persists and broadcasts via WebSocket&quot;</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> WEB-005</span></span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Dark mode toggle with responsive breakpoint&quot;</span></span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> medium</span></span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">web</span><span class="kw">]</span></span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Set viewport to mobile&quot;</span></span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;setViewport 375x667&quot;</span></span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Layout switches to mobile grid&quot;</span></span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Open settings menu&quot;</span></span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;click [data-testid=settings-menu]&quot;</span></span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Settings drawer visible&quot;</span></span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Toggle dark mode&quot;</span></span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;click [data-testid=dark-mode-toggle]&quot;</span></span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;html element gains class &#39;dark&#39;; CSS variables updated&quot;</span></span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Assert contrast&quot;</span></span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;assertContrastRatio [data-testid=media-card] 4.5&quot;</span></span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;WCAG AA contrast ratio &gt;= 4.5:1&quot;</span></span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">a11y</span><span class="kw">,</span><span class="at"> responsive</span><span class="kw">,</span><span class="at"> dark-mode</span><span class="kw">,</span><span class="at"> theme</span><span class="kw">]</span></span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;15s&quot;</span></span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Dark mode applied at all breakpoints with accessible contrast&quot;</span></span></code></pre></div>
+<p>The bank follows the HelixQA YAML schema from the upstream
+<code>admin-operations.yaml</code> bank [<sup>7</sup>]: a
+<code>version</code> field, <code>name</code>, <code>description</code>,
+<code>metadata</code> block with <code>author</code>, <code>app</code>,
+and <code>version</code>, and a <code>test_cases</code> array where each
+case carries <code>id</code>, <code>name</code>, <code>category</code>,
+<code>priority</code>, <code>platforms</code>, <code>steps</code> (with
+<code>name</code>, <code>action</code>, <code>expected</code>),
+<code>tags</code>, <code>estimated_duration</code>, and
+<code>expected_result</code>. The <code>action</code> syntax uses
+HelixQA’s domain-specific command language — <code>navigate</code>,
+<code>input</code>, <code>click</code>, <code>scrollToBottom</code>,
+<code>assert</code>, <code>waitForNavigation</code>,
+<code>waitForWebSocketEvent</code>, <code>setViewport</code>, and
+<code>assertContrastRatio</code> — primitives resolved through the
+chromedp-based web/CDP interactor backend <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<h3 id="desktop-e2e-bank-bankscatalogizer-desktop-e2e.yaml">6.3.2
+Desktop E2E Bank: <code>banks/catalogizer-desktop-e2e.yaml</code></h3>
+<p>This bank targets the <code>catalogizer-desktop</code> Tauri
+application and the <code>installer-wizard</code> SMB configuration
+wizard. Both are built with Tauri 2.0 (Rust backend), React 18,
+TypeScript, and Vite <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The bank exercises window management, protocol connection dialogs (SMB
+discovery via the <code>Discovery</code> submodule), and offline/online
+transitions.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="an">SPDX-FileCopyrightText:</span><span class="co"> 2026 Milos Vasic</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="an">SPDX-License-Identifier:</span><span class="co"> Apache-2.0</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Catalogizer Desktop E2E Test Bank&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;End-to-end tests for catalogizer-desktop and installer-wizard&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;vasic-digital&quot;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">app</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Catalogizer&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2.3.0&quot;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">clients</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;catalogizer-desktop&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;installer-wizard&quot;</span><span class="kw">]</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">build_tool</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;tauri-cli&quot;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">test_cases</span><span class="kw">:</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> DSK-001</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Tauri app launches and main window visible&quot;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> e2e</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">desktop_linux</span><span class="kw">,</span><span class="at"> desktop_macos</span><span class="kw">,</span><span class="at"> desktop_windows</span><span class="kw">]</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Launch binary&quot;</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;exec ./target/release/catalogizer-desktop&quot;</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Process starts; stdout contains &#39;ready&#39;&quot;</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Wait for window&quot;</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;waitForWindow Catalogizer 5000&quot;</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Window title &#39;Catalogizer&#39; visible on screen&quot;</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Capture screenshot&quot;</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;screenshot /tmp/helixqa/dsk-001-launch.png&quot;</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;PNG file written; dimensions &gt; 0x0&quot;</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">launch</span><span class="kw">,</span><span class="at"> window</span><span class="kw">,</span><span class="at"> smoke</span><span class="kw">]</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;10s&quot;</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Application window renders within 5 seconds&quot;</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> DSK-002</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Installer wizard discovers SMB share&quot;</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> e2e</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">desktop_linux</span><span class="kw">,</span><span class="at"> desktop_macos</span><span class="kw">,</span><span class="at"> desktop_windows</span><span class="kw">]</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Launch installer-wizard&quot;</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;exec ./target/release/installer-wizard&quot;</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Wizard window visible&quot;</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Click network discovery&quot;</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;click [data-testid=discover-network]&quot;</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Discovery scan initiated; loading spinner visible&quot;</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Wait for SMB result&quot;</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;waitForElement [data-testid=smb-result] 30000&quot;</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;At least one SMB share listed with name, host, and path&quot;</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Select first share&quot;</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;click [data-testid=smb-result]:first&quot;</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Share selected; &#39;Continue&#39; button enabled&quot;</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">installer</span><span class="kw">,</span><span class="at"> smb</span><span class="kw">,</span><span class="at"> discovery</span><span class="kw">,</span><span class="at"> network</span><span class="kw">]</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;45s&quot;</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;SMB share discovered and selectable within 30 seconds&quot;</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> DSK-003</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Offline mode caches API responses&quot;</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> e2e</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> high</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">desktop_linux</span><span class="kw">]</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Navigate to media page while online&quot;</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;navigate /media&quot;</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Media list loaded from API&quot;</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Disconnect network&quot;</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;exec nmcli networking off&quot;</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Network down; app detects offline state&quot;</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Reload media page&quot;</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;navigate /media&quot;</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Media list served from cache; no API error toast&quot;</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Restore network&quot;</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;exec nmcli networking on&quot;</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;App reconnects; WebSocket re-established&quot;</span></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">offline</span><span class="kw">,</span><span class="at"> cache</span><span class="kw">,</span><span class="at"> resilience</span><span class="kw">,</span><span class="at"> network</span><span class="kw">]</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;30s&quot;</span></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Cached data available offline; seamless reconnection&quot;</span></span></code></pre></div>
+<p>The desktop bank uses <code>desktop_linux</code>,
+<code>desktop_macos</code>, and <code>desktop_windows</code> platform
+tags, matching the existing
+<code>nexus-desktop-{linux,macos,windows}</code> banks in HelixQA <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The <code>exec</code> action spawns the Tauri binary directly;
+<code>waitForWindow</code>, <code>screenshot</code>, and
+<code>click</code> resolve through the Linux X11 or macOS/Windows native
+interactor backends delivered by OCU P3 Interact <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<h3 id="api-contract-bank-bankscatalogizer-api-contract.yaml">6.3.3 API
+Contract Bank: <code>banks/catalogizer-api-contract.yaml</code></h3>
+<p>This bank exercises every REST endpoint in <code>catalog-api/</code>
+with real HTTP requests, JWT authentication, and strict response
+validation. The Go backend defines 22+ domain handlers under
+<code>catalog-api/handlers/</code> <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>,
+so the bank is organized by handler category.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> API-001</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;JWT auth flow returns valid token&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> contract</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">api</span><span class="kw">]</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Request token&quot;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;http POST /api/v1/auth/login {username,password}&quot;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;200 OK; body contains token string; Expires-In header present&quot;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Verify token structure&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;assert jwt.token matches /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/&quot;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Token is three Base64URL segments&quot;</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">auth</span><span class="kw">,</span><span class="at"> jwt</span><span class="kw">,</span><span class="at"> contract</span><span class="kw">]</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;5s&quot;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Valid JWT with standard claims returned&quot;</span></span></code></pre></div>
+<p>The API bank uses the <code>api</code> platform tag and the
+<code>http</code> action primitive, which HelixQA resolves through its
+HTTP interactor backend against the running <code>catalog-api</code>
+server.</p>
+<h3 id="android-tv-bank-bankscatalogizer-android-tv.yaml">6.3.4 Android
+TV Bank: <code>banks/catalogizer-android-tv.yaml</code></h3>
+<p>This bank targets <code>catalogizer-androidtv</code>. It covers
+channel browsing, media playback with ExoPlayer, and deep-link handling.
+The Android TV app uses Jetpack Compose for TV (Leanback), D-pad
+navigation, and the same Retrofit HTTP client as the phone app <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The bank is currently blocked by the ADB device exclusion documented in
+§6.1.3; it is defined here so that when a non-ATMOSphere Android TV is
+connected, the operator has a ready-to-run bank.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> ATV-001</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Browse channels with D-pad navigation&quot;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">androidtv</span><span class="kw">]</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Focus first channel row&quot;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;adb shell input keyevent KEYCODE_DPAD_DOWN&quot;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Focus highlight moves to first channel card&quot;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Select channel&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;adb shell input keyevent KEYCODE_ENTER&quot;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Channel detail screen visible; backdrop image loaded&quot;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">androidtv</span><span class="kw">,</span><span class="at"> dpad</span><span class="kw">,</span><span class="at"> navigation</span><span class="kw">,</span><span class="at"> leanback</span><span class="kw">]</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;20s&quot;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;D-pad navigation functional; focus management correct&quot;</span></span></code></pre></div>
+<p>The <code>androidtv</code> platform tag aligns with existing
+<code>full-qa-androidtv</code> and <code>nexus-mobile-android</code>
+banks <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The <code>adb shell input keyevent</code> syntax is the ADB command that
+HelixQA’s Android interactor backend translates into <code>input</code>
+events on the device.</p>
+<h3 id="translation-workflow-bank-bankscatalogizer-translation-workflow.yaml">6.3.5
+Translation Workflow Bank:
+<code>banks/catalogizer-translation-workflow.yaml</code></h3>
+<p>This bank covers subtitle management, language settings, and
+Cyrillic/Unicode text handling. Catalogizer supports multilingual
+metadata sourced from TMDB, MusicBrainz, and OpenLibrary, and the web
+client renders Cyrillic, CJK, and RTL scripts <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The bank validates subtitle file parsing (SRT, ASS, VTT), language
+setting persistence, and Unicode string round-tripping through the
+API.</p>
+<p>Table 3 consolidates the five new banks.</p>
+<p><strong>Table 3. New HelixQA Test Banks for Catalogizer</strong></p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 17%" />
+<col style="width: 26%" />
+<col style="width: 17%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Bank Name</th>
+<th>Platform</th>
+<th>Coverage Scope</th>
+<th>Priority</th>
+<th>File Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>catalogizer-web-functional</code></td>
+<td>Web (Chrome/CDP)</td>
+<td>Login, media browse, Cyrillic search, favorites, dark mode,
+responsive breakpoints, WebSocket updates</td>
+<td>Critical</td>
+<td><code>HelixQA/banks/catalogizer-web-functional.yaml</code></td>
+</tr>
+<tr>
+<td><code>catalogizer-desktop-e2e</code></td>
+<td>Desktop (Linux/macOS/Windows)</td>
+<td>Tauri launch, window management, SMB discovery in installer-wizard,
+offline/online transitions</td>
+<td>Critical</td>
+<td><code>HelixQA/banks/catalogizer-desktop-e2e.yaml</code></td>
+</tr>
+<tr>
+<td><code>catalogizer-api-contract</code></td>
+<td>API (HTTP REST)</td>
+<td>All 22+ handlers with real JWT auth, response schema validation,
+rate-limit headers, WebSocket subscription lifecycle</td>
+<td>Critical</td>
+<td><code>HelixQA/banks/catalogizer-api-contract.yaml</code></td>
+</tr>
+<tr>
+<td><code>catalogizer-android-tv</code></td>
+<td>Android TV (ADB)</td>
+<td>Channel browsing, D-pad navigation, playback, deep links, ExoPlayer
+state</td>
+<td>High</td>
+<td><code>HelixQA/banks/catalogizer-android-tv.yaml</code></td>
+</tr>
+<tr>
+<td><code>catalogizer-translation-workflow</code></td>
+<td>Web + API</td>
+<td>Subtitle upload/parse (SRT/ASS/VTT), language settings persistence,
+Cyrillic/Unicode round-trip, RTL rendering</td>
+<td>High</td>
+<td><code>HelixQA/banks/catalogizer-translation-workflow.yaml</code></td>
+</tr>
+</tbody>
+</table>
+<p>Priority reflects end-user criticality: web and desktop are primary
+daily-use surfaces; the API is the backbone for all clients; Android TV
+is the secondary living-room surface; and translation workflows are a
+differentiated feature requiring Unicode correctness. All five banks
+should be committed to <code>HelixQA/banks/</code> and registered in
+<code>scripts/helixqa-orchestrator.sh</code> <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<hr />
+<h2 id="client-app-validation">6.4 Client App Validation</h2>
+<p>Each client requires a distinct validation strategy because the
+underlying interactor technology differs. HelixQA abstracts these
+differences through the OCU P1–P6 pipeline, but the operator must still
+configure the correct backend for each target <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<h3 id="web-client-collection-manager-react-playwright-automation">6.4.1
+Web Client (Collection-Manager-React): Playwright Automation</h3>
+<p>The web client validation uses Playwright E2E tests already present
+in <code>catalog-web/e2e/</code> <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+HelixQA integrates by invoking Playwright programmatically and attaching
+trace, screenshot, and video artefacts to its evidence sink. The
+operator adds the following test to
+<code>catalog-web/e2e/helixqa-web-smoke.spec.ts</code>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { test<span class="op">,</span> expect } <span class="im">from</span> <span class="st">&#39;@playwright/test&#39;</span><span class="op">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>test<span class="op">.</span><span class="fu">describe</span>(<span class="st">&#39;HelixQA Web Smoke&#39;</span><span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> API_BASE <span class="op">=</span> <span class="bu">process</span><span class="op">.</span><span class="at">env</span><span class="op">.</span><span class="at">VITE_API_BASE_URL</span> <span class="op">||</span> <span class="st">&#39;http://localhost:8080&#39;</span><span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">test</span>(<span class="st">&#39;login at mobile breakpoint + dark mode toggle&#39;</span><span class="op">,</span> <span class="kw">async</span> ({ page }) <span class="kw">=&gt;</span> {</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">setViewportSize</span>({ width<span class="op">:</span> <span class="dv">375</span><span class="op">,</span> height<span class="op">:</span> <span class="dv">667</span> })<span class="op">;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">goto</span>(<span class="st">&#39;/login&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">fill</span>(<span class="st">&#39;[data-testid=&quot;login-email&quot;]&#39;</span><span class="op">,</span> <span class="st">&#39;qa-user@catalogizer.local&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">fill</span>(<span class="st">&#39;[data-testid=&quot;login-password&quot;]&#39;</span><span class="op">,</span> <span class="st">&#39;qa-password-2026&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">click</span>(<span class="st">&#39;[data-testid=&quot;login-submit&quot;]&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">waitForURL</span>(<span class="st">&#39;/dashboard&#39;</span><span class="op">,</span> { timeout<span class="op">:</span> <span class="dv">10000</span> })<span class="op">;</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> <span class="fu">expect</span>(page<span class="op">.</span><span class="fu">locator</span>(<span class="st">&#39;[data-testid=&quot;media-grid&quot;]&#39;</span>))<span class="op">.</span><span class="fu">toBeVisible</span>()<span class="op">;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">click</span>(<span class="st">&#39;[data-testid=&quot;settings-menu&quot;]&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">click</span>(<span class="st">&#39;[data-testid=&quot;dark-mode-toggle&quot;]&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> htmlClass <span class="op">=</span> <span class="cf">await</span> page<span class="op">.</span><span class="fu">evaluate</span>(() <span class="kw">=&gt;</span> <span class="bu">document</span><span class="op">.</span><span class="at">documentElement</span><span class="op">.</span><span class="at">className</span>)<span class="op">;</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expect</span>(htmlClass)<span class="op">.</span><span class="fu">toContain</span>(<span class="st">&#39;dark&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">test</span>(<span class="st">&#39;WebSocket receives favorite update in real time&#39;</span><span class="op">,</span> <span class="kw">async</span> ({ page }) <span class="kw">=&gt;</span> {</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> wsMessages<span class="op">:</span> <span class="dt">string</span>[] <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    page<span class="op">.</span><span class="fu">on</span>(<span class="st">&#39;websocket&#39;</span><span class="op">,</span> ws <span class="kw">=&gt;</span> {</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>      ws<span class="op">.</span><span class="fu">on</span>(<span class="st">&#39;framereceived&#39;</span><span class="op">,</span> frame <span class="kw">=&gt;</span> wsMessages<span class="op">.</span><span class="fu">push</span>(frame<span class="op">.</span><span class="at">payload</span> <span class="im">as</span> <span class="dt">string</span>))<span class="op">;</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">goto</span>(<span class="st">&#39;/login&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">fill</span>(<span class="st">&#39;[data-testid=&quot;login-email&quot;]&#39;</span><span class="op">,</span> <span class="st">&#39;qa-user@catalogizer.local&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">fill</span>(<span class="st">&#39;[data-testid=&quot;login-password&quot;]&#39;</span><span class="op">,</span> <span class="st">&#39;qa-password-2026&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">click</span>(<span class="st">&#39;[data-testid=&quot;login-submit&quot;]&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">waitForURL</span>(<span class="st">&#39;/dashboard&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">click</span>(<span class="st">&#39;[data-testid=&quot;favorite-btn&quot;]:first-child&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> page<span class="op">.</span><span class="fu">waitForTimeout</span>(<span class="dv">1000</span>)<span class="op">;</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expect</span>(wsMessages<span class="op">.</span><span class="fu">some</span>(m <span class="kw">=&gt;</span> m<span class="op">.</span><span class="fu">includes</span>(<span class="st">&#39;favorite:updated&#39;</span>)))<span class="op">.</span><span class="fu">toBe</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<p>The <code>data-testid</code> attributes are the stable selectors
+required by both Playwright and the HelixQA CDP interactor. The
+WebSocket assertion validates the real-time channel the
+<code>Streaming</code> submodule provides <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The operator runs the test with:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> catalog-web</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> playwright test e2e/helixqa-web-smoke.spec.ts <span class="at">--project</span><span class="op">=</span>chromium <span class="at">--trace</span><span class="op">=</span>on <span class="at">--video</span><span class="op">=</span>on</span></code></pre></div>
+<p>HelixQA’s <code>pkg/visionnav</code> evidence sink consumes the
+Playwright trace ZIP, per-test video MP4, and screenshots from
+<code>test-results/</code>.</p>
+<h3 id="desktop-client-tauri-window-capture-and-protocol-dialogs">6.4.2
+Desktop Client (Tauri): Window Capture and Protocol Dialogs</h3>
+<p>Desktop validation uses the OCU P1 Capture and P3 Interact backends.
+For Linux, HelixQA uses <code>xwd</code> + <code>convert</code> for
+screenshots and <code>xdotool</code>/<code>ydotool</code> for input
+injection <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The operator runs the following manual validation sequence before
+trusting the autonomous pipeline:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build and launch the Tauri release binary</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> catalogizer-desktop</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run tauri build</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./src-tauri/target/release/catalogizer-desktop</span> <span class="kw">&amp;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="va">PID</span><span class="op">=</span><span class="va">$!</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify window appearance</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 2</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="ex">xdotool</span> search <span class="at">--name</span> <span class="st">&quot;Catalogizer&quot;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: numeric window ID, e.g., 8388609</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Capture window screenshot</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="ex">xwd</span> <span class="at">-id</span> <span class="va">$(</span><span class="ex">xdotool</span> search <span class="at">--name</span> <span class="st">&quot;Catalogizer&quot;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span><span class="va">)</span> <span class="at">-out</span> /tmp/catalogizer-window.xwd</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="ex">convert</span> /tmp/catalogizer-window.xwd /tmp/catalogizer-window.png</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: PNG file &gt; 0 bytes with window dimensions</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate menu interaction (Ctrl+O for protocol dialog)</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="ex">xdotool</span> key <span class="at">--window</span> <span class="va">$(</span><span class="ex">xdotool</span> search <span class="at">--name</span> <span class="st">&quot;Catalogizer&quot;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span><span class="va">)</span> ctrl+o</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 1</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="ex">xdotool</span> search <span class="at">--name</span> <span class="st">&quot;Open&quot;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: numeric window ID for the &quot;Open&quot; dialog</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="bu">kill</span> <span class="va">$PID</span></span></code></pre></div>
+<p>This sequence confirms that <code>xdotool</code> resolves the Tauri
+window by title, injects keystrokes, and observes dialog spawn. Once
+confirmed, HelixQA’s autonomous engine composes these primitives into
+the <code>DSK-002</code> test case from
+<code>catalogizer-desktop-e2e.yaml</code> (§6.3.2) without further
+operator intervention.</p>
+<h3 id="android-client-kotlin-adb-based-navigation-and-media-playback">6.4.3
+Android Client (Kotlin): ADB-Based Navigation and Media Playback</h3>
+<p>Android validation is currently blocked, but the ADB command surface
+is well-defined. The operator connects a non-ATMOSphere Android phone
+and adds it to the <code>.devconnect</code> allowlist. The exact ADB
+sequence for <code>catalogizer-android</code> is:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect and verify device</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> connect 192.168.1.105:5555</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;192.168.1.105&quot;</span> .devconnect <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;ALLOWED&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;BLOCKED&quot;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: ALLOWED</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Install and launch</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 install <span class="at">-r</span> catalogizer-android/app/build/outputs/apk/debug/app-debug.apk</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 shell am start <span class="at">-n</span> com.vasicdigital.catalogizer/.MainActivity</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Navigate with D-pad</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 shell input keyevent KEYCODE_DPAD_DOWN</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 shell input keyevent KEYCODE_ENTER</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 2</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Capture screenshot for evidence</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 shell screencap <span class="at">-p</span> /sdcard/helixqa-android-nav.png</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 pull /sdcard/helixqa-android-nav.png /tmp/</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Type Cyrillic search term via broadcast</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 shell am broadcast <span class="at">-a</span> ADB_INPUT_TEXT <span class="at">--es</span> text <span class="st">&quot;фильм&quot;</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify media playback via ExoPlayer state</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 shell input keyevent KEYCODE_DPAD_DOWN</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 shell input keyevent KEYCODE_ENTER</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 5</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> 192.168.1.105:5555 shell dumpsys media_session <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;state=PlaybackState.*PLAYING&quot;</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: at least one line showing PLAYING state</span></span></code></pre></div>
+<p>The <code>adb shell am broadcast -a ADB_INPUT_TEXT</code> command is
+an alternative to the <code>input keyevent</code> stream for text entry;
+it relies on the Catalogizer Android app registering a broadcast
+receiver for the <code>ADB_INPUT_TEXT</code> action. The
+<code>dumpsys media_session</code> check validates ExoPlayer state
+without UI instrumentation, matching the pattern used by the existing
+<code>full-qa-android</code> bank <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<h3 id="api-client-go-contract-testing-with-real-http-calls">6.4.4 API
+Client (Go): Contract Testing with Real HTTP Calls</h3>
+<p>The API contract validation is implemented as a Go table-driven test
+in <code>catalog-api/tests/helixqa_api_contract_test.go</code>. It uses
+the constructor-injection pattern already established in handler tests,
+allowing the test to spin up an in-memory SQLite-backed server or target
+the running Dockerized PostgreSQL stack <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The test below exercises the JWT auth flow, a protected endpoint, and a
+WebSocket subscription lifecycle.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> tests</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;bytes&quot;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;encoding/json&quot;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/http&quot;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/http/httptest&quot;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/url&quot;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/gin-gonic/gin&quot;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/gorilla/websocket&quot;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/assert&quot;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/vasic-digital/catalog-api/handlers&quot;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/vasic-digital/catalog-api/models&quot;</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestHelixQA_APIContract_JWTAuthAndWebSocket<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    gin<span class="op">.</span>SetMode<span class="op">(</span>gin<span class="op">.</span>TestMode<span class="op">)</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    router <span class="op">:=</span> gin<span class="op">.</span>New<span class="op">()</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    db <span class="op">:=</span> setupTestDB<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    authHandler <span class="op">:=</span> handlers<span class="op">.</span>NewAuthHandler<span class="op">(</span>db<span class="op">)</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    mediaHandler <span class="op">:=</span> handlers<span class="op">.</span>NewMediaHandler<span class="op">(</span>db<span class="op">)</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    router<span class="op">.</span>POST<span class="op">(</span><span class="st">&quot;/api/v1/auth/login&quot;</span><span class="op">,</span> authHandler<span class="op">.</span>Login<span class="op">)</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    router<span class="op">.</span>GET<span class="op">(</span><span class="st">&quot;/api/v1/media&quot;</span><span class="op">,</span> authHandler<span class="op">.</span>RequireAuth<span class="op">(),</span> mediaHandler<span class="op">.</span>List<span class="op">)</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    router<span class="op">.</span>GET<span class="op">(</span><span class="st">&quot;/api/v1/ws&quot;</span><span class="op">,</span> authHandler<span class="op">.</span>RequireAuth<span class="op">(),</span> handlers<span class="op">.</span>WebSocketUpgrade<span class="op">)</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Step 1: Login returns valid JWT</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    loginBody<span class="op">,</span> _ <span class="op">:=</span> json<span class="op">.</span>Marshal<span class="op">(</span>models<span class="op">.</span>LoginRequest<span class="op">{</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>        Username<span class="op">:</span> <span class="st">&quot;qa-user&quot;</span><span class="op">,</span> Password<span class="op">:</span> <span class="st">&quot;qa-password-2026&quot;</span><span class="op">,</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    req <span class="op">:=</span> httptest<span class="op">.</span>NewRequest<span class="op">(</span>http<span class="op">.</span>MethodPost<span class="op">,</span> <span class="st">&quot;/api/v1/auth/login&quot;</span><span class="op">,</span> bytes<span class="op">.</span>NewReader<span class="op">(</span>loginBody<span class="op">))</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;application/json&quot;</span><span class="op">)</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> httptest<span class="op">.</span>NewRecorder<span class="op">()</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    router<span class="op">.</span>ServeHTTP<span class="op">(</span>w<span class="op">,</span> req<span class="op">)</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusOK<span class="op">,</span> w<span class="op">.</span>Code<span class="op">)</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> loginResp models<span class="op">.</span>LoginResponse</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> json<span class="op">.</span>Unmarshal<span class="op">(</span>w<span class="op">.</span>Body<span class="op">.</span>Bytes<span class="op">(),</span> <span class="op">&amp;</span>loginResp<span class="op">))</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> loginResp<span class="op">.</span>Token<span class="op">)</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Regexp<span class="op">(</span>t<span class="op">,</span> <span class="st">`^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$`</span><span class="op">,</span> loginResp<span class="op">.</span>Token<span class="op">)</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Step 2: Protected endpoint rejects missing token</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    req2 <span class="op">:=</span> httptest<span class="op">.</span>NewRequest<span class="op">(</span>http<span class="op">.</span>MethodGet<span class="op">,</span> <span class="st">&quot;/api/v1/media?page=1&quot;</span><span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>    w2 <span class="op">:=</span> httptest<span class="op">.</span>NewRecorder<span class="op">()</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>    router<span class="op">.</span>ServeHTTP<span class="op">(</span>w2<span class="op">,</span> req2<span class="op">)</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusUnauthorized<span class="op">,</span> w2<span class="op">.</span>Code<span class="op">)</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Step 3: Protected endpoint accepts valid token</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>    req3 <span class="op">:=</span> httptest<span class="op">.</span>NewRequest<span class="op">(</span>http<span class="op">.</span>MethodGet<span class="op">,</span> <span class="st">&quot;/api/v1/media?page=1&quot;</span><span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>    req3<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer &quot;</span><span class="op">+</span>loginResp<span class="op">.</span>Token<span class="op">)</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>    w3 <span class="op">:=</span> httptest<span class="op">.</span>NewRecorder<span class="op">()</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>    router<span class="op">.</span>ServeHTTP<span class="op">(</span>w3<span class="op">,</span> req3<span class="op">)</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusOK<span class="op">,</span> w3<span class="op">.</span>Code<span class="op">)</span></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Step 4: WebSocket connection lifecycle</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>    ts <span class="op">:=</span> httptest<span class="op">.</span>NewServer<span class="op">(</span>router<span class="op">)</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> ts<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>    wsURL <span class="op">:=</span> <span class="st">&quot;ws&quot;</span> <span class="op">+</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>ts<span class="op">.</span>URL<span class="op">,</span> <span class="st">&quot;http&quot;</span><span class="op">)</span> <span class="op">+</span> <span class="st">&quot;/api/v1/ws&quot;</span></span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>    wsHeader <span class="op">:=</span> http<span class="op">.</span>Header<span class="op">{}</span></span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>    wsHeader<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer &quot;</span><span class="op">+</span>loginResp<span class="op">.</span>Token<span class="op">)</span></span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>    ws<span class="op">,</span> resp<span class="op">,</span> err <span class="op">:=</span> websocket<span class="op">.</span>DefaultDialer<span class="op">.</span>Dial<span class="op">(</span>wsURL<span class="op">,</span> wsHeader<span class="op">)</span></span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> ws<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusSwitchingProtocols<span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a>    subMsg <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;action&quot;</span><span class="op">:</span> <span class="st">&quot;subscribe&quot;</span><span class="op">,</span> <span class="st">&quot;topic&quot;</span><span class="op">:</span> <span class="st">&quot;favorites&quot;</span><span class="op">}</span></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>    subBytes<span class="op">,</span> _ <span class="op">:=</span> json<span class="op">.</span>Marshal<span class="op">(</span>subMsg<span class="op">)</span></span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> ws<span class="op">.</span>WriteMessage<span class="op">(</span>websocket<span class="op">.</span>TextMessage<span class="op">,</span> subBytes<span class="op">))</span></span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>    ws<span class="op">.</span>SetReadDeadline<span class="op">(</span>time<span class="op">.</span>Now<span class="op">().</span>Add<span class="op">(</span><span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">))</span></span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ackBytes<span class="op">,</span> err <span class="op">:=</span> ws<span class="op">.</span>ReadMessage<span class="op">()</span></span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>ackBytes<span class="op">),</span> <span class="st">&quot;subscribed&quot;</span><span class="op">)</span></span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>    ws<span class="op">.</span>WriteMessage<span class="op">(</span>websocket<span class="op">.</span>CloseMessage<span class="op">,</span></span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>        websocket<span class="op">.</span>FormatCloseMessage<span class="op">(</span>websocket<span class="op">.</span>CloseNormalClosure<span class="op">,</span> <span class="st">&quot;qa-done&quot;</span><span class="op">))</span></span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The test uses <code>httptest.NewRecorder</code> and
+<code>httptest.NewServer</code> for deterministic local execution
+without requiring the Docker stack. The <code>setupTestDB(t)</code>
+helper, present in <code>catalog-api/tests/</code>, creates an in-memory
+SQLite database via <code>database.WrapDB(sqlDB, DialectSQLite)</code>
+<a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The <code>models.LoginRequest</code>, <code>models.LoginResponse</code>,
+and <code>models.MediaListResponse</code> types are shared entity
+definitions from the <code>Entities</code> submodule <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+The <code>gorilla/websocket</code> client validates the WebSocket
+upgrade path the <code>Streaming</code> submodule exposes <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.</p>
+<p>The operator runs this contract test with:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> catalog-api</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="va">GOMAXPROCS</span><span class="op">=</span>3 <span class="ex">go</span> test ./tests/ <span class="at">-run</span> TestHelixQA_APIContract_JWTAuthAndWebSocket <span class="at">-v</span> <span class="at">-race</span> <span class="at">-count</span><span class="op">=</span>1</span></code></pre></div>
+<p>The <code>GOMAXPROCS=3</code>, <code>-race</code>, and
+<code>-count=1</code> flags mirror the resource-limit and race-detection
+discipline enforced across all Catalogizer Go tests <a href="%60catalogizer_integration.md%60%20—%20Integration%20analysis%20report,%202026-04-30.%20Repository:%20%60https://github.com/vasic-digital/Catalogizer%60,%20commit%20%60e1307bd%60."><sup>1</sup></a>.
+A PASS confirms that the API contract is stable at the new HelixQA
+phase, providing the regression signal required by Step 5 of the bump
+procedure (§6.2.5).</p>
+<hr />
+<p>The integration sequence — assess, bump, extend banks, validate
+clients — is the operational template HelixQA applies to any
+multi-platform project. Catalogizer’s gaps (Android device exclusion,
+installer-wizard and API-client coverage holes, CUDA sidecar
+non-deployment) represent the friction that occurs when a QA framework
+outpaces operational readiness. The 206 PASS / 1 SKIP baseline, the
+exact commit delta from <code>35deb43</code> to <code>0bca023</code>,
+and the five new bank definitions provide the concrete artefacts the
+next chapter — the anti-bluff framework — will use to distinguish
+genuine functional coverage from metadata-only greenwashing.</p>
+<p>[<sup>2</sup>]: HelixDevelopment/HelixQA commit
+<code>0bca0234bab37b5ebdb28e22fd04350b51847883</code> — “cascade:
+1.1.5-dev: Phase 29 — §12.6 Memory-Budget Ceiling”, 2026-04-30.
+[<sup>3</sup>]: HelixDevelopment/DocProcessor commit
+<code>5f1e58a2289a3e3f8f125ee8612fcea12d76db6b</code> — “test:
+bluff-scan annotations for must-not-panic / lifecycle / null-impl smoke
+tests”. [<sup>4</sup>]: HelixDevelopment/LLMOrchestrator commit
+<code>1b9582362d6c713d52de77bef0de087e33a24fc3</code> — “test:
+bluff-scan annotations — final pass for stress / context / race /
+lifecycle smokes”. [<sup>5</sup>]: HelixDevelopment/LLMProvider commit
+<code>0720b6e6fba0f47675cef40161ec5355d326343a</code> — “test:
+bluff-scan annotations — final pass for stress / context / race /
+lifecycle smokes”. [<sup>6</sup>]: HelixDevelopment/VisionEngine commit
+<code>77765aef6d103a3d2b3358df8007205f5b35143a</code> — “test:
+bluff-scan annotations for must-not-panic / lifecycle / null-impl smoke
+tests”. [<sup>7</sup>]: HelixDevelopment/HelixQA
+<code>banks/admin-operations.yaml</code> — upstream YAML bank format,
+commit <code>0bca023</code>.</p>
+</body>
+</html>

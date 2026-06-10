@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-D-cli-bridge</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-D-cli-bridge</h1>
+</header>
+<h1 id="workstream-d-cli-agent-bridge-as-model-providers">Workstream D —
+CLI-agent bridge as model providers</h1>
+<p><strong>Date:</strong> 2026-06-10 <strong>Phase:</strong> PLANNING
+(read-only analysis) <strong>Author:</strong> analysis subagent
+<strong>Scope:</strong> Make each working CLI coding agent (Claude Code,
+Qwen Code, OpenCode, Gemini CLI, Crush, aider, codex, plandex, …) its
+OWN HelixCode model-provider that proxies prompts via the agent’s CLI
+and surfaces power-features (Vision, Generative, RAG, Memory, MCP, LSP,
+ACP). Primary path = system-installed binary; fallback = locally-built
+submodule.</p>
+<blockquote>
+<p>Evidence rule: every claim below cites a real <code>file:line</code>
+or real command output captured read-only this session. Items not found
+are marked <strong>ABSENT</strong>. No code was modified.</p>
+</blockquote>
+<hr />
+<h2 id="inventory-of-cli_agents-submodules">1. Inventory of
+<code>cli_agents/*</code> submodules</h2>
+<p><code>ls cli_agents/</code> returned <strong>51 entries</strong> (all
+are git submodules per <code>.gitmodules</code>; cross-checked
+<code>.gitmodules:64-164+</code>). Classified by whether they are actual
+CLI <strong>coding agents</strong> (bridgeable) vs
+tooling/MCP/infra:</p>
+<p><strong>Actual CLI coding agents (bridge candidates):</strong>
+<code>aider</code>, <code>claude-code</code>,
+<code>claude-code-source</code>, <code>codex</code>,
+<code>codex-skills</code>, <code>crush</code>, <code>forge</code>,
+<code>gemini-cli</code>, <code>qwen-code</code>, <code>plandex</code>,
+<code>codename-goose</code>, <code>cline</code>, <code>aiagent</code>,
+<code>aichat</code>, <code>aichat-llm-functions</code>,
+<code>amazon-q</code>, <code>copilot-cli</code>,
+<code>deepseek-cli</code>, <code>deepseek-cli-youkpan</code>,
+<code>mistral-code</code>, <code>gpt-engineer</code>,
+<code>gptme</code>, <code>junie</code>, <code>nanocoder</code>,
+<code>octogen</code>, <code>open-interpreter</code>, <code>shai</code>,
+<code>swe-agent</code>, <code>vtcode</code>, <code>warp</code>,
+<code>xela-cli</code>, <code>zeroshot</code>, <code>codai</code>,
+<code>get-shit-done</code>, <code>bridle</code>, <code>snow-cli</code>,
+<code>multiagent-coding</code>, <code>taskweaver</code>,
+<code>ui-ux-pro-max</code>, <code>agent-deck</code>, <code>noi</code>,
+<code>superset</code>, <code>x-cmd</code>.</p>
+<p><strong>Orchestration / harness / not a direct coding-CLI:</strong>
+<code>claude-squad</code> (multiplexer), <code>cli-agent</code>,
+<code>conduit</code>, <code>spec-kit</code> (workflow),
+<code>git-mcp</code>, <code>postgres-mcp</code> (MCP servers, not
+agents), <code>fauxpilot</code> (server).</p>
+<p><strong>Resources (NOT agents)</strong> —
+<code>cli_agents_resources/</code> (<code>.gitmodules:16-32</code>):
+<code>Awesome-AI-Agents</code>, <code>Awesome-AI-GPTs</code>,
+<code>Cheshire-Cat-Ai</code>, <code>GitHub-Awesome-Copilot</code>,
+<code>OpenAI-Cookbook</code>, <code>Taches-CC-Resources</code>.
+Documentation/cookbooks only — exclude from bridging.</p>
+<hr />
+<h2 id="system-installed-detection-read-only-command--v---version">2.
+System-installed detection (read-only <code>command -v</code> +
+<code>--version</code>)</h2>
+<p>Captured this session (<code>command -v &lt;tool&gt;</code> + cheap
+<code>&lt;tool&gt; --version</code>):</p>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 29%" />
+<col style="width: 19%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>Agent</th>
+<th>On PATH</th>
+<th>Path</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude (Claude Code)</td>
+<td>✅</td>
+<td><code>/Users/milosvasic/.local/bin/claude</code></td>
+<td><code>2.1.170 (Claude Code)</code></td>
+</tr>
+<tr>
+<td>qwen (Qwen Code)</td>
+<td>✅</td>
+<td><code>/opt/homebrew/bin/qwen</code></td>
+<td><code>0.5.0</code></td>
+</tr>
+<tr>
+<td>opencode</td>
+<td>✅</td>
+<td><code>/Users/milosvasic/.opencode/bin/opencode</code></td>
+<td><code>1.16.2</code></td>
+</tr>
+<tr>
+<td>gemini (Gemini CLI)</td>
+<td>✅</td>
+<td><code>/opt/homebrew/bin/gemini</code></td>
+<td><code>0.1.9</code></td>
+</tr>
+<tr>
+<td>crush</td>
+<td>✅</td>
+<td><code>/opt/homebrew/bin/crush</code></td>
+<td><code>v0.22.2</code></td>
+</tr>
+<tr>
+<td>codex</td>
+<td>✅</td>
+<td><code>/opt/homebrew/bin/codex</code></td>
+<td>(no output to <code>--version</code>; binary present)</td>
+</tr>
+<tr>
+<td>goose</td>
+<td>✅</td>
+<td><code>/Users/milosvasic/.local/bin/goose</code></td>
+<td><code>1.8.0</code></td>
+</tr>
+<tr>
+<td>copilot (GitHub Copilot CLI)</td>
+<td>✅</td>
+<td><code>/Users/milosvasic/.local/bin/copilot</code></td>
+<td><code>GitHub Copilot CLI 1.0.46.</code></td>
+</tr>
+<tr>
+<td>aider</td>
+<td>❌ ABSENT</td>
+<td>—</td>
+<td>(fallback to submodule build)</td>
+</tr>
+<tr>
+<td>plandex</td>
+<td>❌ ABSENT</td>
+<td>—</td>
+<td>(fallback to submodule build)</td>
+</tr>
+<tr>
+<td>forge</td>
+<td>❌ ABSENT</td>
+<td>—</td>
+<td>(fallback to submodule build)</td>
+</tr>
+<tr>
+<td>q / amazon-q</td>
+<td>❌ ABSENT</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>cursor / cody</td>
+<td>❌ ABSENT</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>continue</td>
+<td>⚠️ FALSE POSITIVE</td>
+<td>—</td>
+<td><code>command -v continue</code> matched the <strong>shell
+builtin</strong> <code>continue</code>, not a binary. Treat as
+ABSENT.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>8 agents are bridgeable via the PRIMARY (system-installed)
+path today:</strong> claude, qwen, opencode, gemini, crush, codex,
+goose, copilot. aider/plandex/forge require the FALLBACK
+(submodule-build) path.</p>
+<hr />
+<h2 id="existing-bridge-code">3. Existing bridge code</h2>
+<h3 id="helix_codeinternalllm-httpapi-providers-only-no-cli-exec-bridge">3.1
+<code>helix_code/internal/llm</code> — HTTP/API providers only, NO
+CLI-exec bridge</h3>
+<ul>
+<li>The <code>Provider</code> interface lives at
+<code>helix_code/internal/llm/missing_types.go:356</code> — methods:
+<code>GetType</code>, <code>GetName</code>, <code>GetModels</code>,
+<code>GetCapabilities</code>, <code>Generate</code>,
+<code>GenerateStream</code>, <code>IsAvailable</code>,
+<code>GetHealth</code>, <code>Close</code>,
+<code>GetContextWindow</code>, <code>CountTokens</code>. This is the
+contract a per-CLI-agent provider must satisfy.</li>
+<li><code>helix_code/internal/llm/copilot_provider.go</code> is
+<strong>NOT a CLI bridge</strong> — it is HTTP/token-based: it loads a
+GitHub token (<code>loadGitHubCLIToken</code> <code>:108</code>),
+exchanges it (<code>exchangeGitHubToken</code> <code>:151</code>), and
+makes OpenAI-style HTTP requests (<code>makeOpenAIRequest</code>
+<code>:447</code>). No <code>exec.Command</code> of the
+<code>copilot</code> binary.</li>
+<li><code>grep &quot;exec.Command|os/exec&quot; helix_code/internal/llm/*.go</code>
+hits only <code>auto_llm_manager.go</code>,
+<code>local_llm_manager.go</code>, <code>model_converter.go</code>,
+<code>model_download_manager.go</code> — all for local-model/process
+management, <strong>not</strong> CLI-agent proxying.</li>
+<li><code>grep &quot;opencode|qwen-code|claude-code|cli_agent&quot;</code> over
+<code>helix_code/internal/llm/*.go</code> → <strong>empty</strong>.
+<strong>There is no CLI-agent provider in
+<code>helix_code/internal/llm</code> today.</strong></li>
+</ul>
+<h3 id="submoduleshelix_agentinternalclis-the-real-cli-exec-orchestration-layer-separate-go-module-dev.helix.agent">3.2
+<code>submodules/helix_agent/internal/clis</code> — the REAL CLI-exec
+orchestration layer (separate Go module
+<code>dev.helix.agent</code>)</h3>
+<p>This is where CLI bridging actually exists: -
+<code>agents/registry.go:107</code>
+<code>AgentInfo{Type,Name,Description,Vendor,Version,Capabilities,IsEnabled,Priority}</code>;
+<code>:118</code> <code>AgentIntegration</code> interface:
+<code>Info / Initialize / Start / Stop / Execute(ctx, command, params) / Health / IsAvailable</code>.
+- <code>agents/base/base.go:120</code> <code>IsAvailable()</code> does a
+<strong>real</strong> <code>exec.LookPath(string(b.info.Type))</code>;
+<code>:127</code> <code>ExecuteCommand</code> runs
+<code>exec.CommandContext</code>. This is the genuine binary-detect +
+exec primitive. - <strong>~70 per-agent packages</strong> under
+<code>agents/</code> (incl. <code>claude_code</code>,
+<code>qwencode</code>, <code>gemini</code>, <code>crush</code>,
+<code>aider</code>, <code>codex</code>, <code>opencodecli</code>,
+<code>plandex</code>, <code>copilotcli</code>,
+<code>codenamegoose</code>, <code>forge</code>, <code>cline</code>,
+<code>openhands</code>, <code>continueagent</code>, <code>kiro</code>,
+…) — see <code>ls agents/</code>. -
+<code>clis/instance_manager.go</code> (38 KB) is a pooled lifecycle
+manager: <code>CreateInstance:83</code>,
+<code>AcquireInstance:167</code>, <code>SendRequest:290</code>,
+<code>performHealthCheck:852</code>, plus per-agent
+<code>executeAider:906</code>, <code>executeClaudeCode:915</code>,
+<code>executeCodex:924</code>, … (one dispatch method per agent type).
+Backed by <code>pool.go</code>, <code>event_bus.go</code>, SQLite
+persistence (<code>persistInstance:517</code>). - The richer
+<code>CLIAgent</code> interface (<code>clis/types.go:537</code>) adds
+<code>ExecuteTask</code>/<code>GetCapabilities</code>;
+<code>Capabilities</code> struct (<code>:555</code>) =
+<code>SupportsRepoMap/GitOps/DiffEditing/ToolUse/Browser/Sandbox/Interpreter/SupportedTools</code>;
+<code>DefaultCapabilities(:567)</code> hardcodes per-agent caps
+(e.g. ClaudeCode tools <code>Bash/Read/Write/Edit/Glob/Grep</code>).</p>
+<h3 id="two-anti-bluff-decoupling-problems-found">3.3 ⚠️ Two anti-bluff
+/ decoupling problems found</h3>
+<ol type="1">
+<li><strong>Many concrete agents are STUBS, not real exec
+bridges.</strong> <code>agents/qwencode/qwencode.go</code>
+<code>generate()</code> (<code>:101</code>) returns the hardcoded string
+<code>&quot;// Generated by Qwen\n// %s&quot;</code>; <code>chat()</code>
+(<code>:115</code>) returns
+<code>fmt.Sprintf(&quot;Qwen: %s&quot;, message)</code>;
+<code>IsAvailable()</code> (<code>:137</code>) checks
+<code>config.APIKey != &quot;&quot;</code> — it never execs the <code>qwen</code>
+binary. This is a BLUFF surface (§Rule 2 / §11.4) that Workstream D must
+replace with a real <code>exec</code> to the installed <code>qwen</code>
+CLI. Each of the ~70 agents must be audited individually —
+<code>base.go</code> is honest, but per-agent overrides may not be.
+(<code>claude_code/claude_code.go</code> is more real:
+<code>Start:151</code> checks <code>exec.LookPath(&quot;node&quot;)</code>,
+<code>handleBash:276</code> / <code>handleGit:310</code> actually
+exec.)</li>
+<li><strong><code>helix_code</code> does NOT consume
+<code>dev.helix.agent</code>.</strong>
+<code>grep &quot;helix.agent&quot; helix_code/go.mod</code> → NONE. The
+<code>helix_code/go.mod</code> replace block (<code>:194-206</code>)
+wires
+containers/helixqa/docprocessor/llm_orchestrator/vision_engine/challenges/security
+but <strong>not</strong> <code>dev.helix.agent</code>. So the CLI-exec
+layer is in a module HelixCode’s LLM provider registry can’t currently
+import. Workstream D must either (a) add a
+<code>replace dev.helix.agent =&gt; ../submodules/helix_agent</code> +
+adapter, or (b) port the bridge into
+<code>helix_code/internal/llm</code> as
+<code>cli_agent_provider.go</code> (CONST-051 decoupling favors keeping
+the generic bridge in the submodule and writing a thin HelixCode
+adapter).</li>
+</ol>
+<hr />
+<h2 id="existing-cli-configs-cli_agents_configs-direction-is-reversed-from-workstream-d">4.
+Existing CLI configs (<code>cli_agents_configs/</code>) — direction is
+REVERSED from Workstream D</h2>
+<ul>
+<li><p><code>cli_agents_configs/</code> holds <strong>109 files</strong>
+(<code>ls | wc -l</code>) — <code>&lt;agent&gt;.json</code> +
+<code>&lt;agent&gt;.yaml</code> pairs for ~50 agents, plus
+<code>README.md</code>.</p></li>
+<li><p><code>README.md:3</code> states these are “exported configuration
+files for all 47 CLI agents that integrate with HelixAgent.”</p></li>
+<li><p><strong>Shape (<code>claude-code.json:1-40</code>, identical in
+<code>qwen-code.json:1-30</code>):</strong> each config points the CLI
+agent <strong>AT HelixAgent</strong> as an OpenAI-compatible
+backend:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;provider&quot;</span><span class="er">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;openai-compatible&quot;</span><span class="fu">,</span> <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;helixagent&quot;</span><span class="fu">,</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>              <span class="dt">&quot;base_url&quot;</span><span class="fu">:</span> <span class="st">&quot;http://localhost:7061/v1&quot;</span><span class="fu">,</span> <span class="dt">&quot;api_key_env&quot;</span><span class="fu">:</span> <span class="st">&quot;HELIXAGENT_API_KEY&quot;</span> <span class="fu">}</span><span class="er">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;models&quot;</span><span class="er">:</span> <span class="ot">[</span><span class="fu">{</span> <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;helixagent-debate&quot;</span><span class="fu">,</span> <span class="dt">&quot;capabilities&quot;</span><span class="fu">:</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="ot">[</span><span class="st">&quot;vision&quot;</span><span class="ot">,</span><span class="st">&quot;streaming&quot;</span><span class="ot">,</span><span class="st">&quot;function_calls&quot;</span><span class="ot">,</span><span class="st">&quot;embeddings&quot;</span><span class="ot">,</span><span class="st">&quot;mcp&quot;</span><span class="ot">,</span><span class="st">&quot;acp&quot;</span><span class="ot">,</span><span class="st">&quot;lsp&quot;</span><span class="ot">]</span> <span class="fu">}</span><span class="ot">]</span><span class="er">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;mcp&quot;</span><span class="er">:</span> <span class="fu">{</span> <span class="dt">&quot;helixagent-acp&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;url&quot;</span><span class="fu">:</span><span class="st">&quot;.../v1/acp&quot;</span><span class="fu">},</span> <span class="dt">&quot;helixagent-cognee&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">},</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>         <span class="dt">&quot;helixagent-embeddings&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">},</span> <span class="dt">&quot;helixagent-lsp&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">}</span> <span class="fu">}</span></span></code></pre></div>
+<p>⚠️ This is the <strong>opposite</strong> direction of Workstream D:
+today’s configs make <em>CLI agent → HelixAgent</em>. Workstream D wants
+<em>HelixCode → CLI agent</em>. The two can coexist (a CLI agent can
+both serve HelixCode AND be backed by HelixAgent), but the re-export
+loop here is for the existing direction.</p></li>
+</ul>
+<h3 id="the-re-exportinstallvalidate-machinery-already-exists-in-helix_agent">4.1
+The re-export/install/validate machinery ALREADY EXISTS (in
+<code>helix_agent</code>)</h3>
+<ul>
+<li>Generator entry point:
+<code>submodules/helix_agent/cmd/helixagent/main.go:107</code> flag
+<code>--generate-all-agents</code>, <code>:108</code>
+<code>--all-agents-output-dir</code>; handler
+<code>handleGenerateAllAgents:4522</code> loops agents and
+<code>os.WriteFile(outputPath, jsonData, 0644)</code>
+(<code>:4594</code>). Per-agent handlers exist too:
+<code>handleGenerateOpenCode:2378</code>,
+<code>handleGenerateCrush:3734</code>,
+<code>handleGenerateAgentConfig:4348</code>.</li>
+<li>A <strong>unified generator + validator</strong> lives at
+<code>submodules/helix_agent/challenges/codebase/go_files/unified_cli_generator/unified_cli_generator.go</code>:
+<code>GenerateAll():76</code>, <code>Generate(agentType):97</code>,
+<code>saveConfig():212</code> (<code>os.WriteFile:244</code>), and
+crucially <code>Validate(agentType, config):263</code> returning a
+<code>ValidationResult{Valid}</code> — this is the
+<strong>validate</strong> leg of the re-export+install+validate loop.
+Per-agent generators also exist (<code>crush_generator/</code>,
+<code>opencode_generator/</code>,
+<code>kilocode_generator/</code>).</li>
+<li><strong>README quotes the operator workflow</strong>
+(<code>README.md</code>):
+<code>./bin/helixagent --generate-all-agents --all-agents-output-dir=./cli_agents_configs</code>.</li>
+<li><strong>ABSENT:</strong> an <em>install</em> step that copies a
+generated config to each agent’s real config location
+(e.g. <code>~/.claude.json</code>, <code>~/.qwen/</code>,
+<code>~/.config/opencode/</code>, <code>~/.config/crush/</code>) and
+then re-runs the agent to validate. Generation + in-memory validation
+exist; <strong>filesystem install + post-install live validation is the
+gap.</strong> Also ABSENT: any config that re-exports HelixCode as a
+<em>consumer-of-CLI-agent</em> (the Workstream-D direction).</li>
+</ul>
+<hr />
+<h2 id="design-per-cli-agent-provider-contract-sketch">5. Design —
+per-CLI-agent provider contract (sketch)</h2>
+<h3 id="new-provider-in-helix_codeinternalllm-one-per-cli-agent-or-one-parametrized-cliagentprovider">5.1
+New provider in <code>helix_code/internal/llm</code> (one per CLI agent,
+or one parametrized <code>CLIAgentProvider</code>)</h3>
+<p>Implement <code>llm.Provider</code>
+(<code>missing_types.go:356</code>). Recommended: a single
+<code>CLIAgentProvider</code> struct parametrized by an
+<code>AgentSpec</code> (so adding an agent = a registry row, not a new
+file), satisfying: - <code>GetType()</code> → new
+<code>ProviderType</code> per agent (extend
+<code>missing_types.go:39-46</code> set,
+e.g. <code>ProviderTypeClaudeCodeCLI</code>,
+<code>ProviderTypeQwenCodeCLI</code>,
+<code>ProviderTypeOpenCodeCLI</code>…). - <code>GetName()</code> → agent
+display name. - <strong><code>IsAvailable(ctx)</code></strong> → real
+<code>exec.LookPath(primaryBinary)</code>; if absent, resolve FALLBACK
+submodule build path (see 5.3). Mirror <code>base.go:120</code>,
+<strong>never</strong> the qwencode <code>APIKey != &quot;&quot;</code> bluff
+(§3.3). - <strong><code>Generate(ctx, req)</code></strong> →
+<code>exec.CommandContext(ctx, binary, nonInteractiveArgs...)</code>,
+write prompt to stdin or <code>--prompt</code>, capture stdout, parse,
+surface real exit code. Pattern source: <code>base.go:127</code> +
+<code>claude_code.go:276/310</code>. -
+<strong><code>GenerateStream</code></strong> → stream stdout
+line-buffered into the channel. -
+<strong><code>GetModels()</code></strong> → DYNAMIC per agent
+(CONST-036, no hardcoded lists): exec the agent’s model-list subcommand
+and parse (TODO-research exact flags per agent — see 5.4). -
+<strong><code>GetCapabilities()</code></strong> → map the agent’s
+<code>clis.Capabilities</code> (<code>types.go:555</code>) into
+power-feature flags (Vision/Generative/RAG/Memory/MCP/LSP/ACP). Per
+CONST-040 these SHOULD ultimately come from LLMsVerifier
+<code>VerificationResult</code>, not hardcoded
+<code>DefaultCapabilities</code> (<code>types.go:567</code>). -
+<code>GetHealth</code> → reuse <code>clis.performHealthCheck</code>
+semantics; <code>CountTokens</code>/<code>GetContextWindow</code> →
+char-fallback like <code>copilot_provider.go:312</code>.</p>
+<h3 id="reuse-vs-reimplement-const-051-11.4.74">5.2 Reuse vs reimplement
+(CONST-051 / §11.4.74)</h3>
+<p>Prefer <strong>adapting the existing
+<code>submodules/helix_agent/internal/clis</code> layer</strong> (real
+exec + pool + lifecycle + registry of ~70 agents) over writing fresh
+exec in <code>helix_code</code>. Action: add
+<code>replace dev.helix.agent =&gt; ../submodules/helix_agent</code> to
+<code>helix_code/go.mod</code> and write a thin
+<code>cli_agent_provider.go</code> adapter that wraps
+<code>clis.InstanceManager</code> / <code>agents.AgentIntegration</code>
+behind <code>llm.Provider</code>. BUT first audit each agent package for
+stubs (§3.3 item 1) and replace bluff bodies with real <code>exec</code>
+to the installed CLI.</p>
+<h3 id="primary-vs-fallback-selection">5.3 Primary-vs-fallback
+selection</h3>
+<ol type="1">
+<li>PRIMARY: <code>exec.LookPath(&lt;agentBinary&gt;)</code> → if found,
+use system-installed (the 8 in §2).</li>
+<li>FALLBACK: if absent, resolve the submodule-built binary under
+<code>cli_agents/&lt;agent&gt;/</code> (e.g. built artifact in the
+submodule’s <code>bin/</code>/<code>dist/</code>/<code>target/</code>,
+or a documented build target). aider/plandex/forge will need this
+today.</li>
+<li>Record which path was chosen in <code>GetHealth</code> details
+(anti-bluff evidence).</li>
+</ol>
+<h3 id="re-export-install-validate-loop-workstream-d-direction">5.4
+Re-export + install + validate loop (Workstream-D direction)</h3>
+<ol type="1">
+<li><strong>Re-export:</strong> extend the helix-agent generator
+(<code>unified_cli_generator.go</code>) — or add a HelixCode-side
+exporter — to emit each agent’s config (generation already proven,
+<code>:76/:212</code>).</li>
+<li><strong>Install:</strong> NEW — copy the generated config into the
+agent’s real config dir, backing up/replacing existing (this is the
+ABSENT step in §4.1).</li>
+<li><strong>Validate:</strong> call
+<code>UnifiedCLIGenerator.Validate(:263)</code> for static validation,
+THEN run the installed agent end-to-end (real exec, captured output) to
+prove the install works (§11.4.5 runtime evidence).</li>
+</ol>
+<h3 id="todo-research-items-require-official-docs-verification-per-11.4.99">5.5
+TODO-research items (require official-docs verification per
+§11.4.99)</h3>
+<ul>
+<li><strong>OpenCode incl. Zen provider models:</strong> exact
+non-interactive invocation (<code>opencode run</code>?), model-list
+command, and how OpenCode “Zen” provider models are enumerated/selected.
+(opencode 1.16.2 present.)</li>
+<li><strong>Claude Code:</strong> non-interactive/print mode flags
+(<code>claude -p</code>/<code>--print</code>/<code>--output-format json</code>?),
+model selection, MCP wiring, session reuse — confirm against Claude Code
+2.1.170 docs.</li>
+<li><strong>Qwen Code:</strong> real CLI invocation + model list
+(current <code>qwencode.go</code> is a stub — must be rebuilt against
+<code>qwen 0.5.0</code>).</li>
+<li><strong>Gemini CLI / Crush / codex / goose / copilot:</strong>
+per-agent non-interactive flags, JSON output mode, and dynamic
+model-list subcommands.</li>
+<li>Power-feature surfacing (Vision/RAG/Memory/MCP/LSP/ACP) per agent —
+which agents expose which, and how to probe them at runtime for
+CONST-040 compliance.</li>
+</ul>
+<hr />
+<h2 id="executive-summary-12-lines">Executive summary (12 lines)</h2>
+<ol type="1">
+<li><strong>System-installed NOW (PRIMARY path ready, 8):</strong>
+claude 2.1.170, qwen 0.5.0, opencode 1.16.2, gemini 0.1.9, crush
+v0.22.2, codex, goose 1.8.0, copilot 1.0.46.</li>
+<li><strong>ABSENT (need FALLBACK submodule build):</strong> aider,
+plandex, forge, amazon-q/q, cursor, cody.</li>
+<li><code>continue</code> was a FALSE POSITIVE (shell builtin, not a
+binary) — treat as absent.</li>
+<li><code>cli_agents/</code> has 51 agent submodules (~43 are real
+coding-CLI bridge candidates); <code>cli_agents_resources/</code> 6
+entries are docs only.</li>
+<li><strong>No CLI-exec provider exists in
+<code>helix_code/internal/llm</code></strong> —
+<code>copilot_provider.go</code> is HTTP/token-based, not a CLI bridge;
+the <code>Provider</code> contract is
+<code>missing_types.go:356</code>.</li>
+<li><strong>The real CLI-exec layer is
+<code>submodules/helix_agent/internal/clis</code></strong> (module
+<code>dev.helix.agent</code>): <code>AgentIntegration</code> registry,
+<code>base.go</code> real
+<code>exec.LookPath</code>+<code>exec.CommandContext</code>, ~70
+per-agent pkgs, pooled <code>instance_manager.go</code>.</li>
+<li>⚠️ <strong>Many per-agent packages are STUBS</strong> —
+<code>qwencode.go</code> returns hardcoded strings and gates on
+<code>APIKey!=&quot;&quot;</code>, never exec’ing the CLI (a §11.4 bluff to
+fix).</li>
+<li>⚠️ <strong><code>helix_code</code> does not depend on
+<code>dev.helix.agent</code></strong> (<code>helix_code/go.mod</code>
+has no such replace) — a wiring gap to close.</li>
+<li><strong><code>cli_agents_configs/</code> (109 files) points each CLI
+agent AT HelixAgent</strong> (openai-compatible
+<code>localhost:7061/v1</code>) — the REVERSE of Workstream D’s
+direction.</li>
+<li><strong>Re-export + static-validate machinery already
+exists</strong> in helix_agent (<code>--generate-all-agents</code>
+<code>main.go:4522</code>; <code>unified_cli_generator.go</code>
+<code>GenerateAll/saveConfig/Validate</code>); <strong>filesystem
+INSTALL + live post-install validation is ABSENT.</strong></li>
+<li><strong>Provider-contract sketch:</strong> one parametrized
+<code>CLIAgentProvider</code> implementing <code>llm.Provider</code>,
+real <code>exec.LookPath</code>→primary / submodule→fallback, dynamic
+<code>GetModels</code> via agent subcommand (CONST-036), capabilities
+from LLMsVerifier (CONST-040), reusing the helix_agent <code>clis</code>
+layer via a thin adapter (CONST-051/§11.4.74).</li>
+<li><strong>Next steps:</strong> audit &amp; de-bluff each agent pkg;
+add <code>replace dev.helix.agent</code>; build the HelixCode→CLI
+provider + install/validate loop; research per-agent non-interactive
+flags (OpenCode Zen, Claude Code <code>-p</code>, Qwen) per
+§11.4.99.</li>
+</ol>
+</body>
+</html>

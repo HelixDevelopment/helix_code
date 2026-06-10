@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f07-background-task-system-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f07-background-task-system-design</h1>
+</header>
+<h1 id="phase-1-feature-7-background-task-system-ctrlb">Phase 1 /
+Feature 7 — Background Task System (Ctrl+B)</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Status:</strong> Approved
+(brainstorming) <strong>Programme:</strong> CLI-Agent Fusion — Phase 1
+port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Add background-task execution to HelixCode so the agent (and user)
+can fire long-running tools — shell builds, test suites, package
+installs — into goroutines without blocking the conversation. Tools
+invoked with <code>run_in_background: true</code> return a task ID
+immediately and continue executing asynchronously. New
+<code>TaskOutput</code> and <code>TaskStop</code> agent tools let the
+agent inspect tail output and cancel tasks. A <code>/tasks</code> slash
+command exposes the same view to users in interactive sessions.</p>
+<p>This ports claude-code’s Ctrl+B background pattern into HelixCode,
+scoped to in-memory ephemeral execution with line-oriented progress
+streaming for shell-style tools.</p>
+<h2 id="architecture">2. Architecture</h2>
+<p>Extend <code>internal/workflow/</code> with a new
+<code>background.go</code> file holding <code>BackgroundManager</code>
+and <code>BackgroundTask</code> (sibling to the existing multi-step
+<code>Executor</code>/<code>Workflow</code> machinery). Tools that
+produce line-oriented output opt into a new <code>BackgroundAware</code>
+interface; everything else falls back to “final result only” semantics —
+no <code>Tool</code> interface changes for tools that don’t opt in. The
+<code>ToolRegistry.Execute</code> dispatcher (already the central hook
+point post-F05) detects <code>run_in_background: true</code> in params,
+strips the flag, and routes to <code>BackgroundManager.StartTask</code>.
+A sweeper goroutine inside <code>BackgroundManager</code> reaps
+completed tasks older than 1h every 5 minutes.</p>
+<p><strong>Boundary discipline:</strong> -
+<code>BackgroundManager</code> knows about generic
+<code>func(ctx, args, sink) (any, error)</code> executors — no
+dependency on <code>tools.Tool</code>. The registry adapts. The workflow
+package stays orthogonal to the tools package. -
+<code>BackgroundAware</code> is a small additive interface in
+<code>internal/tools/</code>; tools that don’t implement it work
+unchanged. - <code>/tasks</code> slash command and the
+<code>TaskOutput</code>/<code>TaskStop</code> agent tools are sibling
+consumers of the same <code>BackgroundManager</code>. Neither calls the
+other.</p>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/internal/workflow/background.go</code></td>
+<td><code>BackgroundManager</code>, <code>BackgroundTask</code>,
+<code>TaskState</code>, <code>ManagerConfig</code>, sweeper</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/workflow/background_test.go</code></td>
+<td>Unit tests for the manager + task</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/tools/task_tools.go</code></td>
+<td><code>TaskOutputTool</code>, <code>TaskStopTool</code>
+(agent-callable)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/tools/task_tools_test.go</code></td>
+<td>Unit tests for the agent tools</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/tools/shell/background.go</code></td>
+<td><code>BackgroundAware</code> adapter for the shell tool</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/tools/shell/background_test.go</code></td>
+<td>Unit tests for the shell adapter</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/commands/tasks_command.go</code></td>
+<td><code>/tasks</code> slash command</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/commands/tasks_command_test.go</code></td>
+<td>Unit tests for the slash command</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/integration/background_shell_test.go</code></td>
+<td>Real-subprocess integration tests
+(<code>//go:build integration</code>)</td>
+</tr>
+<tr>
+<td><code>challenges/p1-f07-background-tasks/CHALLENGE.md</code></td>
+<td>Runtime-evidence Challenge spec</td>
+</tr>
+<tr>
+<td><code>challenges/p1-f07-background-tasks/run.sh</code></td>
+<td>Challenge runner</td>
+</tr>
+</tbody>
+</table>
+<h3 id="modified-files">3.2 Modified files</h3>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/internal/tools/registry.go</code></td>
+<td><code>Execute</code> detects <code>run_in_background: true</code>,
+calls <code>BackgroundManager.StartTask</code>; new
+<code>SetBackgroundManager(*workflow.BackgroundManager)</code> and
+<code>RegisterTaskTools(*workflow.BackgroundManager)</code> methods</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/commands/builtin/register.go</code></td>
+<td>New <code>RegisterBuiltinCommandsWithTasks(registry, mgr)</code>
+mirroring the Hooks/MCP pattern</td>
+</tr>
+<tr>
+<td><code>helix_code/cmd/cli/main.go</code></td>
+<td>Construct <code>BackgroundManager</code>, wire into ToolRegistry +
+RegisterBuiltinCommandsWithTasks</td>
+</tr>
+</tbody>
+</table>
+<h3 id="backgroundaware-interface-internaltools">3.3
+<code>BackgroundAware</code> interface
+(<code>internal/tools/</code>)</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LineSink <span class="kw">func</span><span class="op">(</span>line <span class="dt">string</span><span class="op">)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BackgroundAware <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Tool</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    ExecuteWithProgress<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">,</span> sink LineSink<span class="op">)</span> <span class="op">(</span><span class="dt">any</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Implementations call <code>sink(line)</code> for each line of
+progress output. The non-streaming <code>Execute</code> path remains as
+the fallback for foreground use. Tools that don’t implement
+<code>BackgroundAware</code> get final-result-only behavior under
+<code>run_in_background: true</code>.</p>
+<h3 id="backgroundtask-and-backgroundmanager">3.4
+<code>BackgroundTask</code> and <code>BackgroundManager</code></h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskState <span class="dt">string</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    TaskPending   TaskState <span class="op">=</span> <span class="st">&quot;pending&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    TaskRunning   TaskState <span class="op">=</span> <span class="st">&quot;running&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    TaskCompleted TaskState <span class="op">=</span> <span class="st">&quot;completed&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    TaskFailed    TaskState <span class="op">=</span> <span class="st">&quot;failed&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    TaskCancelled TaskState <span class="op">=</span> <span class="st">&quot;cancelled&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BackgroundTask <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    ID        <span class="dt">string</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    ToolName  <span class="dt">string</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    Args      <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    StartedAt time<span class="op">.</span>Time</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    EndedAt   <span class="op">*</span>time<span class="op">.</span>Time</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// private: state (atomic.Int32), output ring, result, err, ctx, cancel, mu</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bt <span class="op">*</span>BackgroundTask<span class="op">)</span> State<span class="op">()</span> TaskState</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bt <span class="op">*</span>BackgroundTask<span class="op">)</span> LastLines<span class="op">(</span>n <span class="dt">int</span><span class="op">)</span> <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bt <span class="op">*</span>BackgroundTask<span class="op">)</span> AppendOutput<span class="op">(</span>line <span class="dt">string</span><span class="op">)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bt <span class="op">*</span>BackgroundTask<span class="op">)</span> Result<span class="op">()</span> <span class="op">(</span><span class="dt">any</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ManagerConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    OutputCap     <span class="dt">int</span>           <span class="co">// per-task ring; default 256</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    SweepInterval time<span class="op">.</span>Duration <span class="co">// default 5*time.Minute</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    MaxAge        time<span class="op">.</span>Duration <span class="co">// default 1*time.Hour</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    MaxConcurrent <span class="dt">int</span>           <span class="co">// default 64</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    LineBytesMax  <span class="dt">int</span>           <span class="co">// per line; default 4096</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BackgroundManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// tasks map, mu, sweeper closeCh, closed, cfg, log</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewBackgroundManager<span class="op">(</span>log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">,</span> cfg ManagerConfig<span class="op">)</span> <span class="op">*</span>BackgroundManager</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bm <span class="op">*</span>BackgroundManager<span class="op">)</span> StartTask<span class="op">(</span>toolName <span class="dt">string</span><span class="op">,</span> args <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    exec <span class="kw">func</span><span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> args <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">,</span> sink LineSink<span class="op">)</span> <span class="op">(</span><span class="dt">any</span><span class="op">,</span> <span class="dt">error</span><span class="op">))</span> <span class="op">(*</span>BackgroundTask<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bm <span class="op">*</span>BackgroundManager<span class="op">)</span> GetTask<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>BackgroundTask<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bm <span class="op">*</span>BackgroundManager<span class="op">)</span> StopTask<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bm <span class="op">*</span>BackgroundManager<span class="op">)</span> ListTasks<span class="op">()</span> <span class="op">[]*</span>BackgroundTask</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bm <span class="op">*</span>BackgroundManager<span class="op">)</span> Status<span class="op">(</span>id <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>TaskState<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bm <span class="op">*</span>BackgroundManager<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span></span></code></pre></div>
+<p>The <code>exec</code> closure passed to <code>StartTask</code>
+receives a sink. The registry’s adapter constructs that closure from a
+<code>tools.Tool</code>: if the tool implements
+<code>BackgroundAware</code>, the closure calls
+<code>ExecuteWithProgress</code>; otherwise it calls
+<code>Execute</code> and writes the formatted result as a single sink
+line at the end.</p>
+<h3 id="registry-dispatch-path">3.5 Registry dispatch path</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In ToolRegistry.Execute, near the top:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> bg<span class="op">,</span> ok <span class="op">:=</span> params<span class="op">[</span><span class="st">&quot;run_in_background&quot;</span><span class="op">].(</span><span class="dt">bool</span><span class="op">);</span> ok <span class="op">&amp;&amp;</span> bg <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r<span class="op">.</span>bgManager <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrNoBackgroundMgr</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    cleanArgs <span class="op">:=</span> stripBackgroundFlag<span class="op">(</span>params<span class="op">)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    tool<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>Get<span class="op">(</span>name<span class="op">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    bgExec <span class="op">:=</span> r<span class="op">.</span>adaptToolForBackground<span class="op">(</span>tool<span class="op">)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    task<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>bgManager<span class="op">.</span>StartTask<span class="op">(</span>name<span class="op">,</span> cleanArgs<span class="op">,</span> bgExec<span class="op">)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">{</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;task_id&quot;</span><span class="op">:</span> task<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;state&quot;</span><span class="op">:</span>   <span class="dt">string</span><span class="op">(</span>task<span class="op">.</span>State<span class="op">()),</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;message&quot;</span><span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;Task started in background. ID: %s — use TaskOutput to check progress.&quot;</span><span class="op">,</span> task<span class="op">.</span>ID<span class="op">),</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="agent-tools">3.6 Agent tools</h3>
+<ul>
+<li><code>TaskOutputTool</code> — reads <code>task_id</code> (required)
++ <code>lines</code> (optional, default 5); returns
+<code>{task_id, state, output, line_count, total_lines}</code>.</li>
+<li><code>TaskStopTool</code> — reads <code>task_id</code>; cancels the
+task; returns <code>{task_id, status: &quot;stopped&quot;}</code>.</li>
+</ul>
+<p>Both implement the standard <code>tools.Tool</code> interface.</p>
+<h3 id="shell-backgroundaware-adapter">3.7 Shell
+<code>BackgroundAware</code> adapter</h3>
+<p>Wraps the existing shell tool. Uses
+<code>exec.Cmd.StdoutPipe</code>/<code>StderrPipe</code>, scans
+line-by-line via <code>bufio.Scanner</code>, calls
+<code>sink(line)</code> for each. Final result mirrors the foreground
+shell tool. Sandbox/security checks reused unchanged.</p>
+<h3 id="tasks-slash-command">3.8 <code>/tasks</code> slash command</h3>
+<p>Subcommands: - <code>/tasks</code> or <code>/tasks list</code> —
+table NAME / ID / STATE / TOOL / STARTED. -
+<code>/tasks output &lt;id&gt;</code> — last 20 lines. -
+<code>/tasks stop &lt;id&gt;</code> — cancels the task.</p>
+<p>Mirrors <code>/permissions</code>, <code>/worktree</code>,
+<code>/hooks</code>, <code>/mcp</code> patterns.</p>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="foreground-call-default-backward-compatible">4.1 Foreground call
+(default — backward-compatible)</h3>
+<pre><code>agent calls &quot;Bash&quot; with params={&quot;command&quot;: &quot;ls&quot;}
+  └─ ToolRegistry.Execute(ctx, &quot;Bash&quot;, params)
+       ├─ no run_in_background flag → existing path
+       ├─ fireBefore (hooks)
+       ├─ tool.Execute(ctx, params)
+       ├─ fireAfter
+       └─ return result</code></pre>
+<h3 id="background-call">4.2 Background call</h3>
+<pre><code>agent calls &quot;Bash&quot; with params={&quot;command&quot;: &quot;go test ./...&quot;, &quot;run_in_background&quot;: true}
+  └─ ToolRegistry.Execute(ctx, &quot;Bash&quot;, params)
+       ├─ detects run_in_background=true; strips flag
+       ├─ tool := r.Get(&quot;Bash&quot;)
+       ├─ exec := r.adaptToolForBackground(tool)
+       │     ├─ implements BackgroundAware → wraps tool.ExecuteWithProgress
+       │     └─ otherwise → wraps tool.Execute, sink called once at completion
+       ├─ task := bgMgr.StartTask(&quot;Bash&quot;, cleanArgs, exec)
+       │     ├─ state=Pending
+       │     └─ goroutine: state=Running → exec(ctx, args, AppendOutput) → state=Completed/Failed
+       └─ return {task_id, state: &quot;pending&quot;, message}  immediately</code></pre>
+<h3 id="polling-taskoutput">4.3 Polling (<code>TaskOutput</code>)</h3>
+<pre><code>TaskOutputTool.Execute({task_id, lines=10})
+  └─ task := bgMgr.GetTask(id)
+  └─ output := task.LastLines(10)
+  └─ return {task_id, state, output (newline-joined), line_count, total_lines}</code></pre>
+<h3 id="cancellation-taskstop-or-tasks-stop">4.4 Cancellation
+(<code>TaskStop</code> or <code>/tasks stop</code>)</h3>
+<pre><code>bgMgr.StopTask(id)
+  ├─ if state ∉ {Running, Pending} → ErrTaskNotRunning
+  ├─ task.cancel()  // ctx propagates to executor
+  ├─ shell exec sees ctx.Done → SIGKILL (via exec.CommandContext)
+  └─ executor goroutine sets state=Cancelled, EndedAt=now</code></pre>
+<p><code>StopTask</code> returns once cancel is called; the goroutine
+writes the terminal state independently to avoid races on
+<code>task.state</code>.</p>
+<h3 id="sweeper">4.5 Sweeper</h3>
+<pre><code>ticker every cfg.SweepInterval
+  └─ for each task:
+       if state ∈ {Completed, Failed, Cancelled} and now &gt; *EndedAt + cfg.MaxAge:
+           delete tasks[id]</code></pre>
+<p>In-flight tasks are never reaped.</p>
+<h3 id="shutdown-close">4.6 Shutdown (<code>Close</code>)</h3>
+<pre><code>mu.Lock; if closed → return nil; closed=true; close(closeCh); snapshot in-flight; mu.Unlock
+for each in-flight: task.cancel()
+wait briefly (5s) for goroutines to drain</code></pre>
+<h3 id="hooks">4.7 Hooks</h3>
+<p>Foreground: <code>fireBefore</code>/<code>fireAfter</code> already
+wrap <code>tool.Execute</code>. Background: hooks fire only on the
+dispatch event (the synchronous <code>Execute</code> call that returns
+<code>task_id</code>). Completion runs in a goroutine outside the hooks’
+scope. A future feature could add <code>OnBackgroundTaskComplete</code>
+hooks; deferred.</p>
+<h2 id="error-handling">5. Error handling</h2>
+<h3 id="error-sentinels">5.1 Error sentinels</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    ErrTaskNotFound    <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;workflow: background task not found&quot;</span><span class="op">)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    ErrTaskNotRunning  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;workflow: task is not running&quot;</span><span class="op">)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    ErrManagerClosed   <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;workflow: background manager closed&quot;</span><span class="op">)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    ErrNoBackgroundMgr <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;tools: run_in_background requested but no BackgroundManager wired&quot;</span><span class="op">)</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    ErrTooManyTasks    <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;workflow: too many concurrent background tasks&quot;</span><span class="op">)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="failure-modes">5.2 Failure modes</h3>
+<ul>
+<li><strong>Panic in goroutine</strong>: recovered via
+<code>defer recover()</code>; converted to error; state=Failed;
+AppendOutput(“panic: …”).</li>
+<li><strong>Tool returns (nil, nil)</strong>: state=Completed;
+Result()=(nil, nil).</li>
+<li><strong>ctx cancelled mid-execution</strong>: executor exits with
+ctx.Err(); state=Cancelled.</li>
+<li><strong>Tool not in registry</strong>: errors before StartTask; no
+phantom task created.</li>
+<li><strong>Sweeper deletes a task with a held reference</strong>:
+pointer remains valid (Go GC); subsequent <code>GetTask(id)</code>
+returns <code>ErrTaskNotFound</code>.</li>
+</ul>
+<h3 id="concurrency-invariants">5.3 Concurrency invariants</h3>
+<ul>
+<li>One executor goroutine per task; state writes serialised through
+<code>BackgroundTask.SetState</code> under <code>bt.mu</code>.
+<code>State()</code> reads via <code>atomic.Int32</code>.</li>
+<li><code>BackgroundManager.mu</code> (sync.RWMutex) guards
+<code>tasks</code> map. <code>StartTask</code> write-locks;
+<code>GetTask</code>/<code>ListTasks</code>/<code>Status</code>
+read-lock; sweeper write-locks.</li>
+<li><code>task.AppendOutput</code> takes <code>bt.mu</code> for slice
+mutation. Output ring bounded at <code>cfg.OutputCap</code>; appends
+past the cap drop the oldest line; each line trimmed to
+<code>cfg.LineBytesMax</code>.</li>
+<li>Sweeper, executor, and <code>Close</code> coordinated via
+<code>closeCh</code> + per-task ctx. No deadlock paths (manager → task
+lock direction only).</li>
+</ul>
+<h3 id="resource-limits-defaults">5.4 Resource limits (defaults)</h3>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OutputCap (lines per task)</td>
+<td>256</td>
+</tr>
+<tr>
+<td>LineBytesMax</td>
+<td>4096</td>
+</tr>
+<tr>
+<td>MaxConcurrent</td>
+<td>64</td>
+</tr>
+<tr>
+<td>SweepInterval</td>
+<td>5 min</td>
+</tr>
+<tr>
+<td>MaxAge</td>
+<td>1 hour</td>
+</tr>
+</tbody>
+</table>
+<p>Per-task memory upper bound: 256 × 4 KB = 1 MB. Manager upper bound:
+64 × 1 MB = 64 MB worst case.</p>
+<h3 id="anti-bluff-const-035-article-xi-11.9">5.5 Anti-bluff (CONST-035,
+Article XI §11.9)</h3>
+<ul>
+<li>Challenge in T13 spawns real shell command, polls TaskOutput across
+multiple intervals, captures the actual streaming timeline.</li>
+<li>TaskOutput returns real content from <code>task.output</code>, never
+a placeholder string. State carries the running/done signal; output
+carries lines.</li>
+<li>TaskStop actually cancels the subprocess. Challenge verifies no
+orphan PID via <code>pgrep</code>.</li>
+<li>No mock subprocess in integration tests — real shell, real exec,
+real PID lifecycle.</li>
+<li>Anti-bluff smoke
+<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/workflow/ internal/tools/task_tools.go internal/tools/shell/background.go internal/commands/tasks_command.go</code>
+must return empty.</li>
+</ul>
+<h3 id="logging">5.6 Logging</h3>
+<ul>
+<li><code>StartTask</code> logs INFO with id + tool name.</li>
+<li>State transitions log INFO.</li>
+<li>Errors log WARN with id + error.</li>
+<li>Sweeper deletions log DEBUG.</li>
+<li>No tool params or output content logged (could contain
+secrets).</li>
+</ul>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-tests-mocks-allowed">6.1 Unit tests (mocks allowed)</h3>
+<p><code>internal/workflow/background_test.go</code>: -
+StartTaskRunsExecutor, StopTaskCancelsCtx, StopUnknownTaskReturnsError,
+StopAlreadyDoneTaskRejects, GetTaskMissing, OutputRingBoundedAtCap,
+OutputLineTruncatedAt4KB, PanickingExecRecovers, NilResultNilError,
+MaxConcurrentEnforced, SweeperReapsCompleted, SweeperLeavesRunning,
+CloseIdempotent, CloseCancelsInFlight.</p>
+<p><code>internal/tools/task_tools_test.go</code>: -
+TaskOutputTool_ReturnsLastNLines, TaskOutputTool_DefaultLinesIs5,
+TaskOutputTool_UnknownTaskID, TaskStopTool_CancelsRunning,
+TaskStopTool_NotRunningRejects.</p>
+<p><code>internal/tools/shell/background_test.go</code>: -
+ShellBackgroundAware_StreamsLines,
+ShellBackgroundAware_ContextCancelKillsProcess,
+ShellBackgroundAware_ExitNonZeroIsErrorButCompletes.</p>
+<p><code>internal/tools/registry_background_test.go</code>: -
+RunInBackgroundFlagDispatchesToManager,
+RunInBackgroundWithoutManagerErrors, BackgroundFlagStrippedFromArgs,
+NonBackgroundAwareUsesFallback.</p>
+<p><code>internal/commands/tasks_command_test.go</code>: -
+SlashTasks_ListEmpty, SlashTasks_ListShowsTask,
+SlashTasks_OutputReturnsLines, SlashTasks_StopCancels,
+SlashTasks_UnknownSubcommand.</p>
+<h3 id="integration-tests--tagsintegration-real-subprocess">6.2
+Integration tests (<code>-tags=integration</code>, real subprocess)</h3>
+<p><code>tests/integration/background_shell_test.go</code>: -
+TestBackground_ShellEcho_StreamsAndCompletes — full path through real
+registry, real bgMgr, real subprocess; assert “hi” in output,
+state=Completed. - TestBackground_ShellSleep_StopCancels — real
+<code>sleep 30</code>, TaskStop, assert state=Cancelled within 2s, no
+orphan PID via <code>pgrep</code>. - TestBackground_ConcurrentTasks — 5
+parallel <code>sleep 1</code> tasks; all reach Completed; sweeper
+reduces to 0.</p>
+<p>All <code>-tags=integration</code>; no bare <code>t.Skip()</code>
+without <code>SKIP-OK: &lt;ticket&gt;</code>.</p>
+<h3 id="challenge">6.3 Challenge</h3>
+<p><code>challenges/p1-f07-background-tasks/</code>:</p>
+<ol type="1">
+<li>Build <code>bin/cli</code>.</li>
+<li>Small Go harness fires <code>Bash</code> with
+<code>command: &quot;for i in 1 2 3; do echo line $i; sleep 0.5; done&quot;</code>
+and <code>run_in_background: true</code>.</li>
+<li>Poll TaskOutput at 250ms intervals; capture sequence: empty → 1 line
+→ 2 → 3 → state=Completed. Mid-execution streaming captured (not just
+final result).</li>
+<li>Second <code>Bash</code> background <code>sleep 30</code>; wait
+200ms; TaskStop; verify cancelled within 1s; verify no orphan
+<code>sleep</code> process.</li>
+<li>Anti-bluff smoke clean.</li>
+<li>Cross-compile linux.</li>
+</ol>
+<p>Pasted runtime evidence committed to
+<code>docs/improvements/06_phase_1_evidence.md</code> per Article XI
+§11.9.</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>Shell <code>BackgroundAware</code> uses <code>os/exec</code> + pipes
++ <code>bufio.Scanner</code> + <code>exec.CommandContext</code> for
+ctx-driven cancellation. The existing shell sandbox/security
+infrastructure already handles process-group concerns. No new
+platform-specific code needed for F07. Cross-compile check (Linux
+native; Windows pre-existing CGO failures in unrelated packages remain
+documented out-of-scope).</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li>BackgroundAware adapters for browser, web, MCP tools. Documented in
+F07-T01 evidence as “follow-up if usage warrants”.</li>
+<li>Persistence of completed tasks across CLI sessions. The
+<code>internal/task/</code> heavy machinery covers durable distributed
+work; F07’s BackgroundManager is intentionally ephemeral.</li>
+<li>Push notifications when output arrives. The agent polls via
+<code>TaskOutput</code>.</li>
+<li><code>OnBackgroundTaskComplete</code> hooks. The hooks system fires
+on synchronous Execute; completion in a goroutine is outside that scope.
+Could be a follow-up.</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>CONST-033</strong> (no power management): no shell wrappers
+introduce shutdown/reboot vectors; cancellation only kills the
+subprocess group it started.</li>
+<li><strong>CONST-035 / Article XI §11.9</strong> (anti-bluff): every
+PASS carries runtime evidence; the Challenge captures actual
+mid-execution polling output, not metadata.</li>
+<li><strong>CONST-036</strong> (LLMsVerifier single source of truth):
+orthogonal — F07 doesn’t introduce model metadata.</li>
+<li><strong>CONST-039</strong> (all-providers integration):
+orthogonal.</li>
+<li><strong>CONST-042</strong> (no-secret-leak): tool params and output
+content are not logged. Secret-bearing tools (e.g.,
+<code>mcp auth</code>) are not BackgroundAware in F07.</li>
+<li><strong>CONST-043</strong> (no-force-push): branch is
+<code>main</code>; non-force pushes to all four remotes per programme
+convention.</li>
+</ul>
+<h2 id="open-questions-resolved-during-brainstorming">10. Open questions
+resolved during brainstorming</h2>
+<table>
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: where does BackgroundManager live</td>
+<td>(A) New file in <code>internal/workflow/</code></td>
+</tr>
+<tr>
+<td>Q2: output capture strategy</td>
+<td>(B) Opt-in <code>BackgroundAware</code> interface; non-streaming
+tools fall back to final-result-only</td>
+</tr>
+<tr>
+<td>Q3: user-facing surface</td>
+<td>(B) <code>/tasks</code> slash command only (no top-level cobra)</td>
+</tr>
+<tr>
+<td>Q4: which tools opt into BackgroundAware initially</td>
+<td>(A) Shell only</td>
+</tr>
+<tr>
+<td>Q5: cleanup policy</td>
+<td>(A) Sweeper goroutine, defaults: 5min interval, 1h max age</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

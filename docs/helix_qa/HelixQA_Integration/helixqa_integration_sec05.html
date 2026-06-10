@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec05</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec05</h1>
+</header>
+<h2 id="phase-4-test-type-challenge-coverage-matrix">5. Phase 4: Test
+Type &amp; Challenge Coverage Matrix</h2>
+<p>The HelixQA integration must achieve “100% coverage of all supported
+test types and the Challenges” per the project constitution
+[<sup>1</sup>]. This chapter defines ten test types, maps each against
+five client application categories, establishes challenge design
+standards that prevent bluff tests from passing when features are
+broken, and sets quantitative coverage measurement criteria with exact
+tools and targets.</p>
+<h3 id="test-type-definitions">5.1 Test Type Definitions</h3>
+<p>Every test type must declare three properties: what it validates,
+what it explicitly does not validate, and the anti-bluff verification
+method that proves the test exercises real functionality rather than a
+proxy. Test type numbering follows the HelixQA test bank schema
+convention [<sup>1</sup>].</p>
+<p><strong>Table 1 — Test Type Definitions and Anti-Bluff
+Methods</strong></p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>What It Tests</th>
+<th>What It Does NOT Test</th>
+<th>Anti-Bluff Verification Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>Individual Go functions in <code>*_test.go</code> with
+<code>go test -short</code> [<sup>1</sup>]</td>
+<td>Cross-package interactions, I/O side effects, real network or
+database calls</td>
+<td>Mutate function body (swap return, invert conditional); test MUST
+fail. Revert; MUST pass.</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>Real component interactions: database writes, HTTP round-trips,
+service calls [<sup>2</sup>]</td>
+<td>End-user UI flows, visual rendering, third-party inference
+quality</td>
+<td>Replace real dependency with broken stub (e.g.,
+<code>ErrConnectionRefused</code>); test MUST fail. Restore; MUST
+pass.</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>Full user workflows: client action → API → database → client state
+update [<sup>2</sup>]</td>
+<td>Internal algorithm correctness, single-function edge cases</td>
+<td>Replace API endpoint with 404; pipeline MUST fail. Failure evidence
+must include error-state screenshot.</td>
+</tr>
+<tr>
+<td>Functional</td>
+<td>Feature-level correctness with real user actions and visible
+outcomes [<sup>2</sup>]</td>
+<td>Resilience under failure, performance at scale, security
+boundaries</td>
+<td>Introduce UI regression (hide button via
+<code>display: none</code>); screenshot or vision analysis MUST detect
+absence.</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>Auth bypass, CSRF, XSS, SQL injection, permission escalation
+[<sup>1</sup>]</td>
+<td>Cryptographic strength, physical hardware security, OS
+sandboxing</td>
+<td>Attempt bypass with stripped headers / malformed payload; security
+check MUST reject. Disable check; test MUST detect hole.</td>
+</tr>
+<tr>
+<td>Stress</td>
+<td>High concurrency, large payloads, memory pressure, connection
+exhaustion [<sup>1</sup>]</td>
+<td>Functional correctness under normal load, UI usability during
+stress</td>
+<td>Saturate resource (e.g., 10 000 connections); verify graceful
+degradation. <code>pkg/detector</code> must report
+<code>HasCrash: false</code> [<sup>1</sup>].</td>
+</tr>
+<tr>
+<td>Chaos</td>
+<td>Resilience to random failures: network partitions, container kills,
+DB restarts mid-session [<sup>2</sup>]</td>
+<td>Deterministic failure recovery, known-bad input handling</td>
+<td>Kill dependency during active test; screenshot must show degraded
+state (spinner, error banner), not blank screen.</td>
+</tr>
+<tr>
+<td>Benchmark</td>
+<td>Performance baselines: latency percentiles, throughput, allocation
+rates [<sup>1</sup>]</td>
+<td>Real-world perceived performance, network latency variability</td>
+<td><code>benchstat</code> comparison against stored baseline;
+regression &gt; 5% MUST fail. Deliberately degrade algorithm; benchmark
+MUST detect.</td>
+</tr>
+<tr>
+<td>Challenge</td>
+<td>Real-life scenarios in <code>challenges/scripts/</code> validating
+actual behavior, not exit codes [<sup>1</sup>]</td>
+<td>Synthetic unit assertions, mocked component behavior</td>
+<td>Break challenged feature; challenge MUST fail. Restore; MUST pass.
+Validate with protocol-layer probe plus screenshot.</td>
+</tr>
+<tr>
+<td>Runtime Verification</td>
+<td>Live invariants: health checks, circuit breaker state, probe
+responses [<sup>2</sup>]</td>
+<td>Offline code paths, startup-only checks, build-time validations</td>
+<td>Force circuit breaker open; probe MUST report
+<code>unhealthy</code>. Restore; MUST report <code>healthy</code> within
+breaker timeout.</td>
+</tr>
+</tbody>
+</table>
+<p>The anti-bluff mandate follows CONST-035: “no simulated or test-only
+implementation may pass a test that claims to verify production
+behavior” [<sup>3</sup>]. For unit tests, mutation is applied at the
+source level and the suite is run with
+<code>go test -short -run TestX</code>. For integration and E2E tests,
+the break is injected via environment toggles or proxy stubs. For visual
+tests, the break is a CSS or layout change; the vision analyzer (SSIM or
+vision LLM) must detect the delta.</p>
+<p>Tests requiring real databases, devices, or HTTP calls carry build
+constraints such as <code>//go:build integration</code> or
+<code>//go:build e2e</code>; pure unit tests run under
+<code>go test -short</code> with no tag [<sup>1</sup>].</p>
+<h4 id="unit-tests">5.1.1 Unit Tests</h4>
+<p>Unit tests verify individual functions in isolation. Mocks are
+permitted only within <code>*_test.go</code> files executed under
+<code>go test -short</code>. Mocks must be injected through interfaces
+such as <code>CommandRunner</code> in <code>pkg/detector</code> and must
+not leak into production code [<sup>1</sup>]. The anti-bluff check is
+the “deliberately break it” protocol: edit the function to return an
+incorrect result, run the test, confirm failure, revert, and confirm
+success.</p>
+<h4 id="integration-tests">5.1.2 Integration Tests</h4>
+<p>Integration tests exercise real databases, real HTTP calls, and real
+service interactions. No mocks are allowed. HelixCode declares
+<code>make test-integration</code> as the target, running against a
+Docker Compose stack (<code>docker-compose.test.yml</code>) with
+PostgreSQL, Redis, and the application server [<sup>3</sup>]. The
+anti-bluff check replaces a real dependency with a broken endpoint; the
+test must fail with a connection error. Restore the real DSN; the test
+must pass.</p>
+<h4 id="e2e-tests">5.1.3 E2E Tests</h4>
+<p>E2E tests model full user workflows: client action → API request →
+database persistence → API response → client state update. The HelixQA
+E2E suite lives in <code>tests/e2e/</code> and runs via
+<code>make test-e2e</code> [<sup>3</sup>]. The autonomous pipeline
+captures a screenshot at every action and performs pre/post validation
+around each step [<sup>2</sup>]. The anti-bluff check replaces the API
+endpoint with a static 404 handler; the test must fail, and the failure
+evidence must include a screenshot of the error state.</p>
+<h4 id="functional-tests">5.1.4 Functional Tests</h4>
+<p>Functional tests isolate a single feature and verify only that
+feature’s surface. The HelixQA <code>TestCase</code> schema supports
+functional categorization via <code>category: functional</code> in bank
+YAML files [<sup>1</sup>]. The anti-bluff check uses visual regression:
+disable the upload handler, capture the resulting UI, and assert that
+the screenshot differs from baseline by SSIM &lt; 0.95
+[<sup>2</sup>].</p>
+<h4 id="security-tests">5.1.5 Security Tests</h4>
+<p>Security tests validate authentication, authorization, and injection
+resistance. HelixCode provides <code>cmd/security_test/</code> and
+<code>make security-test</code> [<sup>3</sup>]. Tests must attempt
+concrete bypasses: CSRF token omission, XSS payload injection, SQL
+injection, and JWT header stripping. The anti-bluff check is two-sided:
+first confirm the system rejects the attack; then temporarily disable
+the security control and confirm the attack succeeds.</p>
+<h4 id="stress-tests">5.1.6 Stress Tests</h4>
+<p>Stress tests exercise the system under high concurrency, large
+payloads, memory pressure, and connection exhaustion. HelixQA banks
+include <code>edge-cases-stress.yaml</code> and
+<code>performance-validation.yaml</code> [<sup>1</sup>]. The anti-bluff
+check monitors <code>pkg/detector</code> during the run:
+<code>HasCrash</code> and <code>HasANR</code> must remain
+<code>false</code> [<sup>1</sup>]. If the stress test passes but the
+detector finds a crash, the test is a bluff.</p>
+<h4 id="chaos-tests">5.1.7 Chaos Tests</h4>
+<p>Chaos tests introduce random failures via <code>tc qdisc</code>,
+<code>docker kill</code>, database restarts mid-session, and CPU
+throttling. HelixQA supports chaos through
+<code>PipelineConfig.CompetingAppPackages</code> and environment
+variables such as <code>HELIXQA_CAPTURE_ANDROID_STUB</code>
+[<sup>1</sup>][<sup>2</sup>]. The anti-bluff check requires a screenshot
+during the induced failure. <code>IsBlankScreenshot()</code> — sampling
+81 points on a 9×9 grid with per-channel range threshold &lt; 20 —
+rejects blank frames [<sup>2</sup>].</p>
+<h4 id="benchmark-tests">5.1.8 Benchmark Tests</h4>
+<p>Benchmark tests establish baselines via Go’s
+<code>func BenchmarkX(b *testing.B)</code> convention in
+<code>tests/benchmark/</code> [<sup>1</sup>]. The anti-bluff check uses
+<code>benchstat</code> to compare against a stored baseline. A
+deliberate degradation (e.g.,
+<code>time.Sleep(10 * time.Millisecond)</code> in the hot path) must
+cause a statistically significant regression (p &lt; 0.05). Regression
+&gt; 5% fails the CI gate.</p>
+<h4 id="challenge-tests">5.1.9 Challenge Tests</h4>
+<p>Challenge tests are real-life scenario scripts in
+<code>challenges/scripts/</code> [<sup>1</sup>]. HelixCode defines a
+7-phase suite: Basic Functionality, Configuration Management, LLM
+Provider Integration, Agent Execution, Memory System, Security &amp;
+Compliance, and Performance &amp; Scaling [<sup>3</sup>]. The anti-bluff
+check is the most rigorous: break the challenged feature, run the
+challenge, confirm failure, restore, confirm success. Verification uses
+protocol-layer probes plus screenshot evidence.</p>
+<h4 id="runtime-verification">5.1.10 Runtime Verification</h4>
+<p>Runtime verification tests live system invariants through periodic
+health checks and circuit breaker validation. The HelixQA vision server
+exposes <code>/health</code> for liveness and
+<code>/learning/stats</code> for cache-hit metrics [<sup>2</sup>]. The
+anti-bluff check forces a circuit breaker open (return 503 from
+downstream) and confirms the health endpoint reports
+<code>unhealthy</code>. When downstream recovers, the breaker must close
+and health must report <code>healthy</code> within the breaker timeout
+(typically 30 s).</p>
+<h3 id="client-app-coverage-matrix">5.2 Client App Coverage Matrix</h3>
+<p>HelixCode ships six client targets: Web, Desktop (Linux, macOS,
+Windows), Mobile (Android, iOS), CLI, and TUI [<sup>3</sup>]. Desktop is
+treated as a single category with OS-specific tooling noted per cell;
+Mobile is split into Android and iOS sub-rows where tooling differs.
+Table 2 presents 10 test types × 5 client categories = 50 cells, each
+specifying the exact tool, executor, and verification method.</p>
+<p><strong>Table 2 — Client App Coverage Matrix: Test Type × Client
+Category</strong></p>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 14%" />
+<col style="width: 18%" />
+<col style="width: 23%" />
+<col style="width: 12%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>Web (Browser)</th>
+<th>Desktop (Fyne GUI)</th>
+<th>Mobile (Android / iOS)</th>
+<th>CLI (Cobra)</th>
+<th>TUI (tview/tcell)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unit</strong></td>
+<td><code>go test -short</code> on <code>web/src/capture/</code>; jsdom
+for frontend logic</td>
+<td><code>go test -short</code> on Fyne widgets; <code>fyne test</code>
+headless app</td>
+<td><code>go test -short</code> on gomobile bindings; Android:
+Robolectric; iOS: XCTest</td>
+<td><code>go test -short</code> on <code>cmd/cli/</code> and
+<code>cmd/root.go</code>; Cobra command tree validation</td>
+<td><code>go test -short</code> on
+<code>applications/terminal_ui/</code>; tcell simulation mode</td>
+</tr>
+<tr>
+<td><strong>Integration</strong></td>
+<td>Playwright + real backend API
+(<code>docker-compose.test.yml</code>); no mock HTTP client</td>
+<td>X11/Playwright against running desktop binary; real API calls</td>
+<td>ADB + real device/emulator; <code>adb shell am start</code> with
+real backend; iOS: <code>xcrun simctl</code> + real API</td>
+<td><code>os/exec</code> of compiled CLI binary against real server;
+stdout/stderr parsed with real string ops</td>
+<td><code>asciinema</code> record of TUI session against real server;
+terminal state replayed and parsed</td>
+</tr>
+<tr>
+<td><strong>E2E</strong></td>
+<td>Playwright full journey: login → create agent → run → verify;
+screenshots at every step</td>
+<td>X11 executor: launch → navigate menus → trigger action → verify
+window title; <code>pkg/navigator/x11_executor.go</code>
+[<sup>1</sup>]</td>
+<td>ADBExecutor: tap → type → screenshot → vision verify;
+<code>pkg/navigator/executor.go</code> [<sup>1</sup>]; iOS:
+<code>simctl io</code> + WebDriverAgent</td>
+<td>CLI chain: <code>helix login</code> →
+<code>helix agent create</code> → <code>helix agent run</code> → parse
+output for success token</td>
+<td>TUI automation: tcell event injection → screen buffer capture →
+structural comparison</td>
+</tr>
+<tr>
+<td><strong>Functional</strong></td>
+<td>Playwright per-feature: upload, chat, settings; responsive
+breakpoints (375×667, 768×1024, 1920×1080) [<sup>2</sup>]</td>
+<td>Fyne <code>test.NewApp()</code> headless widget validation;
+pixel-diff for OpenGL canvas visual regression</td>
+<td>Feature isolation: camera permission, deep link, geo-restriction
+probe (<code>pkg/autonomous/geo_probe.go</code>) [<sup>1</sup>]</td>
+<td>Per-command: <code>helix config set</code> → verify config file;
+<code>helix status</code> → verify exit code 0 + “Status: OK”</td>
+<td>Per-screen: chat renders messages; config shows all fields; keyboard
+navigation reaches every widget</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>Playwright + OWASP ZAP proxy; XSS in chat input; CSRF token
+check</td>
+<td>X11 automation accessing admin menu without auth; verify login
+screen shown</td>
+<td>ADB: intercept traffic with <code>tcpdump</code> / Frida bridge
+(<code>pkg/observe/frida</code>) [<sup>1</sup>]; verify TLS pinning</td>
+<td>CLI: <code>helix admin</code> without valid token; verify exit code
+≠ 0 and stderr contains “unauthorized”</td>
+<td>TUI: privileged action from guest screen; verify modal error or
+blocked transition</td>
+</tr>
+<tr>
+<td><strong>Stress</strong></td>
+<td>Playwright: 50 concurrent browser contexts hitting chat; p95 via
+<code>performance.mark</code></td>
+<td>X11: rapid window open/close; monitor <code>X11Executor</code>
+memory via <code>/proc/[pid]/status</code></td>
+<td>ADB: <code>adb shell monkey</code> 10 000 events;
+<code>pkg/detector</code> checks ANR (<code>HasANR: false</code>)
+[<sup>1</sup>]</td>
+<td>Parallel CLI: 100 concurrent <code>helix status</code>; verify no
+panic in stderr</td>
+<td>Rapid screen switching: 1 000 key events/second; verify no dropped
+render frames</td>
+</tr>
+<tr>
+<td><strong>Chaos</strong></td>
+<td>Playwright + <code>tc qdisc</code> on server; screenshot must show
+retry spinner or error, not blank</td>
+<td>Kill desktop process mid-action; restart; verify recovery or
+graceful error dialog</td>
+<td><code>adb shell am force-stop</code> mid-transaction; restart;
+verify data persisted or error shown</td>
+<td><code>kill -9</code> CLI process mid-write; verify partial state
+does not corrupt config</td>
+<td>Drop WebSocket during chat stream; verify TUI reconnects and resumes
+display</td>
+</tr>
+<tr>
+<td><strong>Benchmark</strong></td>
+<td>Playwright <code>performance.mark</code> → <code>measure</code> for
+page load; Lighthouse CI for Core Web Vitals</td>
+<td><code>go test -bench</code> on Fyne render loop; frame time via
+OpenGL query counters</td>
+<td>ADB <code>dumpsys gfxinfo</code> for frame timing;
+<code>scrcpy</code> latency measurement</td>
+<td><code>go test -bench</code> on CLI dispatch; <code>perf</code> for
+syscall overhead</td>
+<td><code>go test -bench</code> on tcell event loop;
+<code>time.Since</code> on <code>Screen.Show</code></td>
+</tr>
+<tr>
+<td><strong>Challenge</strong></td>
+<td>7-phase challenge via
+<code>challenges/scripts/run_all_challenges.sh</code> [<sup>3</sup>];
+Phase 3 with real inference call</td>
+<td>Desktop challenge: full agent creation and execution; window state
+verified with screenshot diff</td>
+<td>Mobile challenge: onboard → login → create task → verify push
+notification; deep link validation</td>
+<td>CLI challenge: <code>helix run</code> from empty project to
+generated code; verify output directory contents</td>
+<td>TUI challenge: navigate all screens without mouse; keyboard-only
+from launch to chat completion</td>
+</tr>
+<tr>
+<td><strong>Runtime Verification</strong></td>
+<td>Periodic <code>/health</code> probe; vision server
+<code>/learning/stats</code> cache hit rate &gt; 0.8 [<sup>2</sup>]</td>
+<td>Process alive via <code>pidof</code>; window responsive to
+<code>xte</code> key event within 2 s</td>
+<td>ADB <code>pidof</code> + <code>dumpsys activity</code> probe every 5
+s; ANR detection [<sup>1</sup>]</td>
+<td><code>helix version</code> as liveness probe; exit code 0 + semantic
+version regex</td>
+<td>Send heartbeat key (<code>Ctrl+L</code>) every 10 s; verify screen
+buffer updates within 1 s</td>
+</tr>
+</tbody>
+</table>
+<p>No client category is exempt from any test type. CLI and TUI use
+terminal-state capture (<code>asciinema</code>,
+<code>tmux capture-pane</code>, tcell event injection) as
+screenshot-equivalent evidence [<sup>2</sup>]. Web testing uses
+<code>pkg/navigator/playwright_executor.go</code> (~8.2 KB)
+[<sup>1</sup>]. Desktop Linux uses
+<code>pkg/navigator/x11_executor.go</code> (~3.5 KB) with
+<code>xte</code> and <code>import -window root png:-</code>
+[<sup>1</sup>][<sup>2</sup>]. Android uses
+<code>pkg/navigator/executor.go</code> (~14 KB) for tap, type,
+screencap, and swipe [<sup>1</sup>].</p>
+<p>Web testing (5.2.2) uses Playwright with the bridge script
+<code>scripts/playwright-bridge.js</code> [<sup>1</sup>][<sup>2</sup>].
+Visual regression in <code>pkg/regression/visual.go</code> applies SSIM
+threshold 0.95 or perceptual hashing [<sup>2</sup>]. Responsive
+breakpoints at 375×667, 768×1024, and 1920×1080 use
+<code>CaptureResponsive()</code> [<sup>2</sup>]. Accessibility
+integrates <code>axe-core</code> scanning for WCAG 2.1 Level AA
+violations.</p>
+<p>Desktop (5.2.3) uses Fyne v2 [<sup>3</sup>]. <code>X11Executor</code>
+handles screenshot via <code>import -window root</code> and input via
+<code>xte</code> [<sup>1</sup>]. Multi-monitor capture currently
+captures root window only; the proposed <code>LinuxEngine</code> adds
+per-display enumeration via <code>xrandr</code> or
+<code>wl_output</code> [<sup>2</sup>]. Crash detection monitors PID and
+stderr via <code>pkg/detector</code> [<sup>1</sup>].</p>
+<p>Android (5.2.4) uses ADB through <code>ADBExecutor</code>
+[<sup>1</sup>]. <code>pkg/detector</code> polls <code>logcat</code> for
+<code>FATAL EXCEPTION</code> and <code>ANR in</code> plus
+<code>pidof</code> [<sup>1</sup>].
+<code>pkg/autonomous/geo_probe.go</code> curls endpoints and marks
+<code>GEO_RESTRICTED</code> for skipped tests [<sup>1</sup>]. Deep link
+validation uses <code>adb shell am start -W</code> and
+<code>dumpsys activity</code>.</p>
+<p>iOS (5.2.5) is absent from current capture [<sup>2</sup>]. The
+integration adds <code>iOSSimulatorEngine</code> via
+<code>xcrun simctl io screenshot</code> and <code>recordVideo</code>
+[<sup>2</sup>]. WebDriverAgent provides real-device automation. SSIM
+0.95 applies to screenshot diff [<sup>2</sup>]. Lifecycle testing
+exercises <code>simctl launch --terminate-running</code> and
+foregrounding.</p>
+<p>CLI (5.2.6) uses Cobra and Viper [<sup>3</sup>]. Tests invoke the
+compiled binary via <code>os/exec</code>, parsing stdout/stderr and
+verifying exit codes [<sup>2</sup>]. <code>CLIExecutor</code> returns
+stdout as its “screenshot”; the proposed <code>CLIEngine</code> adds
+rendered mode using <code>asciinema</code> [<sup>2</sup>]. ANSI capture
+verifies escape sequences appear when <code>--color</code> is set.</p>
+<p>TUI (5.2.7) uses <code>rivo/tview</code> and
+<code>gdamore/tcell/v2</code> [<sup>3</sup>]. The <code>TUIEngine</code>
+supports <code>asciinema</code> recording,
+<code>tmux capture-pane</code>, and <code>xterm.js</code> in a headless
+browser [<sup>2</sup>]. Keyboard simulation injects tcell
+<code>EventKey</code> values. Screen buffer comparison reconstructs the
+terminal grid from ANSI sequences. Color verification checks
+<code>tcell.Style</code> flags.</p>
+<h3 id="challenge-design-standards">5.3 Challenge Design Standards</h3>
+<p>Challenges are the highest-fidelity tests. A script that merely
+checks exit codes or greps for static strings is a bluff.</p>
+<p><strong>Table 3 — Challenge Design Template</strong></p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 15%" />
+<col style="width: 37%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Action</th>
+<th>Verification Method</th>
+<th>Anti-Bluff Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Setup</strong></td>
+<td>Start dependencies (Docker Compose, emulator, server), initialize
+data, verify pre-conditions</td>
+<td>Protocol-layer probe: TCP <code>connect</code> + HTTP
+<code>GET /health</code> → 200 + JSON <code>status: &quot;up&quot;</code></td>
+<td>Temporarily break health endpoint (return 503); setup MUST fail.
+Restore; MUST pass.</td>
+</tr>
+<tr>
+<td><strong>Execution</strong></td>
+<td>Run the user workflow: tap/type/click/navigate through real UI or
+send real API requests</td>
+<td>Screenshot before + after action; <code>IsBlankScreenshot()</code>
+must return <code>false</code> for both [<sup>2</sup>]</td>
+<td>Hide target button/field; screenshot diff (SSIM &lt; 0.95) or vision
+LLM must detect missing element.</td>
+</tr>
+<tr>
+<td><strong>Verification</strong></td>
+<td>Assert goal state reached: order confirmed, file uploaded, chat
+response received</td>
+<td>Protocol-layer probe: real HTTP request with real payload; parse
+real JSON response; do NOT grep for “success”</td>
+<td>Mutate API response schema (remove required field); verification
+MUST fail. Restore; MUST pass.</td>
+</tr>
+<tr>
+<td><strong>Teardown</strong></td>
+<td>Stop dependencies, clean data, reset environment to known state</td>
+<td>Post-teardown probe: <code>GET /health</code> returns
+<code>down</code> or connection refused; database tables empty</td>
+<td>Skip teardown; subsequent test MUST detect stale data or conflicting
+state.</td>
+</tr>
+</tbody>
+</table>
+<p>Every Challenge must traverse all four phases. The autonomous 4-phase
+lifecycle in <code>pkg/autonomous/phase.go</code> defines setup,
+doc-driven, curiosity, and report phases [<sup>1</sup>]. Challenge
+scripts follow setup, execution, verification, teardown. Setup must
+validate every dependency before execution. Teardown must run even if
+execution or verification fails; this is enforced by a
+<code>defer</code> block in the Challenge runner. The “floor” of shallow
+connectivity (<code>curl -I</code> returning 200) is rejected in favor
+of the “ceiling”: a real request with a real payload producing a real
+response whose fields are type-checked [<sup>2</sup>].</p>
+<p>For HTTP APIs, the floor is <code>curl -I</code> returning 200; the
+ceiling is a <code>POST</code> with real JSON payload, receiving a
+response whose body is parsed and type-checked. For ADB, the floor is
+<code>adb devices</code> listing a device; the ceiling is
+<code>adb shell screencap -p</code> returning valid PNG bytes (&gt; 5
+000 bytes, decodable, not blank) [<sup>2</sup>]. For WebSocket, the
+floor is <code>ws.Dial()</code> succeeding; the ceiling is real message
+exchange with screenshot verification of the resulting UI state.</p>
+<p>Visual Challenges capture screenshots immediately before and after
+the user action. Images are compared using SSIM with threshold 0.95,
+stored in <code>HELIX_VISION_SSIM_THRESHOLD</code>
+[<sup>1</sup>][<sup>2</sup>]. If SSIM exceeds the threshold, the screen
+did not change and the action may have failed silently. Alternatively, a
+vision LLM (Qwen2.5-VL, GLM-4V, or Ollama <code>minicpm-v:8b</code>)
+answers a structured question such as “Does the confirmation page show
+an order number?” [<sup>2</sup>]. The vision server
+<code>/analyze</code> endpoint accepts base64 PNG + prompt and returns
+<code>VisionResult</code> [<sup>2</sup>].</p>
+<p>For every Challenge, a companion “break test” runs on a separate
+branch or with an environment flag:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Break test: branch where login handler returns 401 for all credentials</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_ANTIBLUFF_BREAK</span><span class="op">=</span>1 <span class="ex">go</span> test ./challenges/... <span class="at">-run</span> TestChallengeLoginFlow</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: FAIL</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Normal test: main branch with correct handler</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_ANTIBLUFF_BREAK</span><span class="op">=</span>0 <span class="ex">go</span> test ./challenges/... <span class="at">-run</span> TestChallengeLoginFlow</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: PASS</span></span></code></pre></div>
+<p>If the Challenge passes when <code>HELIX_ANTIBLUFF_BREAK=1</code>, it
+is a bluff. The break test result is recorded in the test report
+alongside the normal result.</p>
+<h3 id="coverage-measurement">5.4 Coverage Measurement</h3>
+<p>Coverage is measured across four dimensions: code, feature, platform,
+and provider.</p>
+<p><strong>Table 4 — Coverage Measurement Criteria</strong></p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 47%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Measurement Method</th>
+<th>Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code coverage — critical paths</td>
+<td>100%</td>
+<td><code>go test -coverprofile=coverage.out</code>;
+<code>go tool cover -func</code></td>
+<td>Go built-in cover; <code>golangci-lint</code> with
+<code>gocov</code> reporter</td>
+</tr>
+<tr>
+<td>Code coverage — all packages</td>
+<td>≥ 80%</td>
+<td>Same as above, aggregated across <code>pkg/*</code></td>
+<td><code>make test-cover</code> [<sup>3</sup>]</td>
+</tr>
+<tr>
+<td>Feature coverage</td>
+<td>100%</td>
+<td>Map every <code>TestCase</code> in <code>banks/</code> to ≥ 1
+Challenge and ≥ 1 E2E test</td>
+<td><code>pkg/testbank/manager.go</code> filtering by
+<code>category</code> and <code>platform</code> [<sup>1</sup>]</td>
+</tr>
+<tr>
+<td>Platform coverage</td>
+<td>Every client on every supported OS</td>
+<td>Execute full suite on Linux, macOS, Windows, Aurora OS, Harmony
+OS</td>
+<td>Docker Compose for Linux; GitHub Actions runners for macOS/Windows;
+emulator for Aurora/Harmony [<sup>3</sup>]</td>
+</tr>
+<tr>
+<td>Provider coverage</td>
+<td>Every LLM provider with ≥ 1 real inference call</td>
+<td>Live <code>Chat()</code> or <code>Vision()</code> per provider per
+release; verify structurally valid response</td>
+<td><code>pkg/llm</code> adaptive provider with health probe;
+<code>internal/verifier/</code> for model scoring
+[<sup>1</sup>][<sup>3</sup>]</td>
+</tr>
+<tr>
+<td>Anti-bluff coverage</td>
+<td>100% of non-unit tests</td>
+<td>Every integration, E2E, functional, and Challenge test has a
+deliberate-break companion</td>
+<td><code>scripts/anti-bluff-verify.sh</code> orchestrates break/restore
+cycles [<sup>2</sup>]</td>
+</tr>
+<tr>
+<td>Screenshot coverage</td>
+<td>100% of UI tests produce ≥ 1 screenshot</td>
+<td><code>pkg/session/recorder.go</code> indexes screenshots; verify
+<code>screenshotIdx &gt; 0</code></td>
+<td>SessionRecorder timeline JSON [<sup>1</sup>]</td>
+</tr>
+<tr>
+<td>Crash/ANR coverage</td>
+<td>0 crashes, 0 ANRs per run</td>
+<td><code>pkg/detector</code> <code>HasCrash</code> and
+<code>HasANR</code> must be <code>false</code></td>
+<td>Detector output in <code>timeline.json</code> [<sup>1</sup>]</td>
+</tr>
+</tbody>
+</table>
+<p>The Go toolchain provides
+<code>go test -coverprofile=coverage.out</code>, consumed by
+<code>go tool cover -func</code> for per-function percentages. HelixCode
+declares <code>make test-cover</code> as the target [<sup>3</sup>].
+Critical paths — <code>internal/auth/</code>,
+<code>internal/llm/</code>, <code>internal/server/</code>, and
+<code>pkg/llm/</code> — target 100% line coverage. Non-critical packages
+relax to ≥ 80%. Coverage is not a substitute for anti-bluff validation:
+100% coverage with all mocks is a bluff.</p>
+<p>Feature coverage is tracked through <code>TestCase</code> in
+<code>banks/</code> files. Each <code>TestCase</code> has a
+<code>category</code> field and a <code>platforms</code> array
+[<sup>1</sup>]. For every user-facing feature in product documentation,
+there must exist at least one <code>TestCase</code> in a Challenge bank
+and one in an E2E bank. <code>pkg/testbank/manager.go</code> filtering
+generates a gap report: features with zero matching
+<code>TestCase</code> records are flagged as untested
+[<sup>1</sup>].</p>
+<p>HelixCode supports Linux, macOS, Windows, Aurora OS, and Harmony OS
+[<sup>3</sup>]. Every client application executes on every supported OS
+at least once per release. The Web client is OS-agnostic and tested via
+Playwright on all three major desktop OSes plus Dockerized Linux. The
+Desktop client (Fyne) is compiled per OS and tested via X11 on Linux,
+<code>screencapture</code> on macOS, and <code>PrintWindow</code> on
+Windows [<sup>2</sup>][<sup>3</sup>]. Aurora and Harmony use the same
+Fyne framework; testing is limited to build verification and smoke tests
+due to emulator availability [<sup>3</sup>]. Mobile is tested on Android
+emulator (all hosts) and iOS simulator (macOS host only). CLI and TUI
+compile and execute on all five OSes.</p>
+<p>HelixCode integrates 14 LLM providers: OpenAI, Anthropic, Google
+Gemini, Ollama, LlamaCPP, Qwen, XAI, OpenRouter, GitHub Copilot, Azure
+OpenAI, AWS Bedrock, Vertex AI, KoboldAI, and a generic local provider
+[<sup>3</sup>]. Every provider receives at least one real inference call
+per release. The call must exercise <code>Chat()</code> or
+<code>Vision()</code>, not just <code>Health()</code>. Verification is
+structural: the response must be a valid <code>Response</code> with
+non-empty <code>Text</code> and a <code>Latency</code> field in
+milliseconds. <code>pkg/llm/adaptive.go</code> probes all configured
+providers based on health, latency, and cost [<sup>1</sup>]; this
+infrastructure is reused for coverage validation.
+<code>internal/verifier/</code> caches <code>VerifiedModel</code>
+structs with capability flags (<code>SupportsVision</code>,
+<code>SupportsStreaming</code>, <code>SupportsTools</code>)
+[<sup>3</sup>]; provider tests verify that advertised capabilities match
+actual behavior.</p>
+<h4 id="example-challenge-script-template">Example Challenge Script
+Template</h4>
+<p>The following Bash template implements the 4-phase Challenge standard
+for an “Agent Creation” workflow. It includes protocol-layer probes,
+screenshot verification, and deliberate-break hooks.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># challenges/scripts/agent_creation_challenge.sh</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Phase 4 Challenge — Agent Creation Workflow</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires: Helix server on localhost:8080, Playwright or CLI executor wired</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="va">API_BASE</span><span class="op">=</span><span class="st">&quot;http://localhost:8080&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="va">OUTPUT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${HELIX_OUTPUT_DIR</span><span class="op">:-</span>./qa-results/challenges<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">$OUTPUT_DIR</span><span class="st">&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── Phase 1: Setup ─────────────────────────────────────────────</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[SETUP] Probing server health...&quot;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="va">HEALTH</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-sf</span> <span class="st">&quot;</span><span class="va">$API_BASE</span><span class="st">/api/v1/health&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;{}&quot;</span><span class="va">)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="va">$(</span><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$HEALTH</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-r</span> <span class="st">&#39;.status // &quot;down&quot;&#39;</span><span class="va">)</span> <span class="ot">!=</span> <span class="st">&quot;up&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[FAIL] Setup: server not healthy&quot;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Anti-bluff: HELIX_ANTIBLUFF_BREAK=1 causes server to return 503</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">${HELIX_ANTIBLUFF_BREAK</span><span class="op">:-</span>0<span class="va">}</span><span class="st">&quot;</span> <span class="ot">==</span> <span class="st">&quot;1&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[ANTI-BLUFF] Simulating broken health endpoint&quot;</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── Phase 2: Execution ─────────────────────────────────────────</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[EXEC] Creating agent via API...&quot;</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="va">RESPONSE</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-sf</span> <span class="at">-X</span> POST <span class="st">&quot;</span><span class="va">$API_BASE</span><span class="st">/api/v1/agents&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">-d</span> <span class="st">&#39;{&quot;name&quot;:&quot;challenge-agent&quot;,&quot;model&quot;:&quot;gpt-4o&quot;}&#39;</span><span class="va">)</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="va">AGENT_ID</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$RESPONSE</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-r</span> <span class="st">&#39;.id&#39;</span><span class="va">)</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Screenshot capture (Web executor)</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">command</span> <span class="at">-v</span> npx <span class="op">&amp;&gt;</span> /dev/null<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="ex">npx</span> playwright screenshot <span class="at">--viewport-size</span><span class="op">=</span>1280,720 <span class="dt">\</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;</span><span class="va">$API_BASE</span><span class="st">/agents/</span><span class="va">$AGENT_ID</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$OUTPUT_DIR</span><span class="st">/agent_created.png&quot;</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">[[</span> <span class="va">$(</span><span class="fu">stat</span> <span class="at">-c%s</span> <span class="st">&quot;</span><span class="va">$OUTPUT_DIR</span><span class="st">/agent_created.png&quot;</span><span class="va">)</span> <span class="ot">-lt</span> 5000 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;[FAIL] Screenshot too small — likely blank&quot;</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="bu">exit</span> 1</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── Phase 3: Verification ────────────────────────────────────</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[VERIFY] Fetching agent and asserting fields...&quot;</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="va">VERIFY</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-sf</span> <span class="st">&quot;</span><span class="va">$API_BASE</span><span class="st">/api/v1/agents/</span><span class="va">$AGENT_ID</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="va">$(</span><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$VERIFY</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-r</span> <span class="st">&#39;.name&#39;</span><span class="va">)</span> <span class="ot">!=</span> <span class="st">&quot;challenge-agent&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[FAIL] Verification: agent name mismatch&quot;</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="va">$(</span><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$VERIFY</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-r</span> <span class="st">&#39;.model&#39;</span><span class="va">)</span> <span class="ot">!=</span> <span class="st">&quot;gpt-4o&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[FAIL] Verification: agent model mismatch&quot;</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Anti-bluff: break-test branch removes required fields</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">${HELIX_ANTIBLUFF_BREAK</span><span class="op">:-</span>0<span class="va">}</span><span class="st">&quot;</span> <span class="ot">==</span> <span class="st">&quot;1&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$VERIFY</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-e</span> <span class="st">&#39;.name&#39;</span> <span class="op">&amp;&gt;</span>/dev/null<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;[FAIL] Anti-bluff: test passed when field should be missing&quot;</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>        <span class="bu">exit</span> 1</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="co"># ─── Phase 4: Teardown ──────────────────────────────────────────</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[TEARDOWN] Deleting test agent...&quot;</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-sf</span> <span class="at">-X</span> DELETE <span class="st">&quot;</span><span class="va">$API_BASE</span><span class="st">/api/v1/agents/</span><span class="va">$AGENT_ID</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ex">curl</span> <span class="at">-sf</span> <span class="st">&quot;</span><span class="va">$API_BASE</span><span class="st">/api/v1/agents/</span><span class="va">$AGENT_ID</span><span class="st">&quot;</span> <span class="op">&amp;&gt;</span>/dev/null<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[FAIL] Teardown: agent still exists after deletion&quot;</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[PASS] Agent Creation Challenge completed&quot;</span></span></code></pre></div>
+<p>The script uses <code>set -euo pipefail</code> for strict error
+handling, <code>curl -f</code> for HTTP-level failure propagation, and
+<code>jq</code> for structured JSON parsing rather than string grep. The
+<code>HELIX_ANTIBLUFF_BREAK</code> environment variable provides the
+deliberate-break hook. Screenshot validation checks file size against
+the 5 000-byte minimum from <code>ADBExecutor</code> validation in
+<code>pkg/navigator/executor.go</code> [<sup>1</sup>][<sup>2</sup>].
+Every Challenge script in the integration suite follows this template,
+adapting endpoint URLs, payloads, and executor commands to the feature
+under test.</p>
+</body>
+</html>

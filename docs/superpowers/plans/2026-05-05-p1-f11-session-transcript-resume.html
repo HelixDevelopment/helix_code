@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f11-session-transcript-resume</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f11-session-transcript-resume</h1>
+</header>
+<h1 id="p1-f11-session-transcript-resume-implementation-plan">P1-F11 —
+Session Transcript Resume Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Persist session transcripts to disk; resume
+via <code>--resume</code> (project) / <code>--continue</code> (global)
+flags + <code>/sessions</code> slash + <code>helixcode sessions</code>
+cobra (list/show/resume/delete). JSONL transcripts in
+<code>$XDG_DATA_HOME/helixcode/sessions/&lt;id&gt;/</code>.</p>
+<p><strong>Architecture:</strong> New
+<code>internal/session/{resume.go, transcript_store.go, identity.go}</code>.
+Existing <code>session_manager.go</code> extended with
+<code>Append</code>, <code>Resume</code>, <code>CurrentID</code>. CLI
+flags parsed early in main.go, ResumeFinder resolves target, transcript
+replayed into session manager.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, gopkg.in/yaml.v3
+(in go.mod), spf13/cobra, fsnotify, zap. <strong>No new external
+deps.</strong></p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-05-p1-f11-session-transcript-resume-design.md</code>
+(commit <code>9128a9d</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/session/resume.go internal/session/transcript_store.go internal/session/identity.go <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  internal/commands/sessions_command.go cmd/cli/sessions_cmd.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F11-T01 — bootstrap
+evidence + advance PROGRESS</label></li>
+<li><label><input type="checkbox" checked></input>P1-F11-T02 — identity.go:
+computeProjectIdentity (Git root, cwd fallback) (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F11-T03 —
+transcript_store.go: JSONL append/read + metadata I/O (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F11-T04 — resume.go:
+ResumeFinder + ResumeMode + FindResumeTarget (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F11-T05 —
+session_manager extensions: Append + Resume + CurrentID
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F11-T06 — /sessions
+slash + helixcode sessions cobra (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F11-T07 — main.go:
+–resume/–continue flag parsing + integration test</label></li>
+<li><label><input type="checkbox" checked></input>P1-F11-T08 — Challenge
+with runtime evidence (process restart preserves
+transcript)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F11-T09 — Feature 11
+close-out + push to 4 remotes</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F11 evidence section header (spec <code>9128a9d</code>),
+update PROGRESS current focus to F11, insert F11 task list (9 items)
+after F10’s. Commit
+<code>docs(P1-F11-T01): bootstrap Phase 1 / Feature 11 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-identity.go-tdd">Task 2: identity.go (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/session/identity.go</code>,
+<code>internal/session/identity_test.go</code>.</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestComputeProjectIdentity_GitRoot<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> exec<span class="op">.</span>Command<span class="op">(</span><span class="st">&quot;git&quot;</span><span class="op">,</span> <span class="st">&quot;-C&quot;</span><span class="op">,</span> dir<span class="op">,</span> <span class="st">&quot;init&quot;</span><span class="op">).</span>Run<span class="op">())</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;sub&quot;</span><span class="op">,</span> <span class="st">&quot;deep&quot;</span><span class="op">)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>sub<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    saved<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>Getwd<span class="op">()</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> os<span class="op">.</span>Chdir<span class="op">(</span>saved<span class="op">)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>Chdir<span class="op">(</span>sub<span class="op">))</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    id<span class="op">,</span> err <span class="op">:=</span> ComputeProjectIdentity<span class="op">()</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// git rev-parse --show-toplevel returns the dir we initialised</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    abs<span class="op">,</span> _ <span class="op">:=</span> filepath<span class="op">.</span>EvalSymlinks<span class="op">(</span>dir<span class="op">)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    got<span class="op">,</span> _ <span class="op">:=</span> filepath<span class="op">.</span>EvalSymlinks<span class="op">(</span>id<span class="op">)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> abs<span class="op">,</span> got<span class="op">)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestComputeProjectIdentity_NoGitFallback<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    saved<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>Getwd<span class="op">()</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> os<span class="op">.</span>Chdir<span class="op">(</span>saved<span class="op">)</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>Chdir<span class="op">(</span>dir<span class="op">))</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    id<span class="op">,</span> err <span class="op">:=</span> ComputeProjectIdentity<span class="op">()</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    abs<span class="op">,</span> _ <span class="op">:=</span> filepath<span class="op">.</span>EvalSymlinks<span class="op">(</span>dir<span class="op">)</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    got<span class="op">,</span> _ <span class="op">:=</span> filepath<span class="op">.</span>EvalSymlinks<span class="op">(</span>id<span class="op">)</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> abs<span class="op">,</span> got<span class="op">)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Implementation:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> session</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os/exec&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">// ComputeProjectIdentity returns the Git toplevel for the cwd, or the cwd</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">// itself when not in a Git repo. Surfaces error only on os.Getwd failure.</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ComputeProjectIdentity<span class="op">()</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>Command<span class="op">(</span><span class="st">&quot;git&quot;</span><span class="op">,</span> <span class="st">&quot;rev-parse&quot;</span><span class="op">,</span> <span class="st">&quot;--show-toplevel&quot;</span><span class="op">).</span>Output<span class="op">()</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span><span class="dt">string</span><span class="op">(</span>out<span class="op">)),</span> <span class="ot">nil</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> os<span class="op">.</span>Getwd<span class="op">()</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>TDD cycle. Subject:
+<code>feat(P1-F11-T02): identity.go: ComputeProjectIdentity (Git root + cwd fallback)</code>.</p>
+<hr />
+<h2 id="task-3-transcript_store.go-tdd">Task 3: transcript_store.go
+(TDD)</h2>
+<p><strong>Files:</strong>
+<code>internal/session/transcript_store.go</code>,
+<code>internal/session/transcript_store_test.go</code>.</p>
+<p>Tests cover: AppendReadRoundTrip, HandlesCorruptedLine,
+MetadataResynth (delete metadata.json, re-derive), DeleteSession,
+ListSessionMetadata (project-scoped + global). Use real tempdirs.</p>
+<p>Implementation: <code>TranscriptStore</code> struct with
+<code>baseDir string</code>. Methods: -
+<code>Append(ctx, sessionID, msg) error</code> — open
+<code>&lt;base&gt;/&lt;id&gt;/transcript.jsonl</code> with
+<code>O_APPEND|O_CREATE|O_WRONLY</code>, marshal msg, write line. -
+<code>ReadTranscript(ctx, sessionID) ([]Message, error)</code> — read
+line-by-line, skip malformed. -
+<code>ListSessionMetadata(ctx, projectPath) ([]SessionMetadata, error)</code>
+— walk <code>&lt;base&gt;/*/metadata.json</code>. If projectPath is
+empty, return all; else filter by metadata.ProjectPath equality. -
+<code>GetSessionMetadata(ctx, sessionID) (*SessionMetadata, error)</code>
+— read <code>&lt;base&gt;/&lt;id&gt;/metadata.json</code>. If missing,
+synthesize from transcript. -
+<code>UpdateSessionMetadata(ctx, meta) error</code> — write
+<code>&lt;base&gt;/&lt;id&gt;/metadata.json</code>. -
+<code>DeleteSession(ctx, sessionID) error</code> —
+<code>os.RemoveAll(&lt;base&gt;/&lt;id&gt;)</code>.</p>
+<p><code>Message</code> is the existing type from internal/session —
+verify name/shape via
+<code>grep -n &quot;^type Message&quot; internal/session/*.go</code> first;
+ADAPT.</p>
+<p>Subject:
+<code>feat(P1-F11-T03): transcript_store.go: JSONL append/read + metadata I/O</code>.</p>
+<hr />
+<h2 id="task-4-resume.go-resumefinder-tdd">Task 4: resume.go —
+ResumeFinder (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/session/resume.go</code>,
+<code>internal/session/resume_test.go</code>.</p>
+<p>Tests: - <code>FindMostRecentInProject</code> (multiple sessions,
+latest LastActivity wins) - <code>FindMostRecentGlobal</code> -
+<code>NoSessions</code> returns descriptive error -
+<code>Resume_LoadsTranscript</code></p>
+<p>Implementation:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> session</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;sort&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ResumeMode <span class="dt">string</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    ResumeProject ResumeMode <span class="op">=</span> <span class="st">&quot;project&quot;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    ResumeGlobal  ResumeMode <span class="op">=</span> <span class="st">&quot;global&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SessionMetadata <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* per spec */</span> <span class="op">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SessionStore <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    ListSessionMetadata<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> projectPath <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>SessionMetadata<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    GetSessionMetadata<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sessionID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>SessionMetadata<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    UpdateSessionMetadata<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> meta SessionMetadata<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    Append<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sessionID <span class="dt">string</span><span class="op">,</span> msg Message<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    ReadTranscript<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sessionID <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Message<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    DeleteSession<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sessionID <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ResumeFinder <span class="kw">struct</span><span class="op">{</span> store SessionStore <span class="op">}</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewResumeFinder<span class="op">(</span>store SessionStore<span class="op">)</span> <span class="op">*</span>ResumeFinder <span class="op">{</span> <span class="cf">return</span> <span class="op">&amp;</span>ResumeFinder<span class="op">{</span>store<span class="op">:</span> store<span class="op">}</span> <span class="op">}</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>rf <span class="op">*</span>ResumeFinder<span class="op">)</span> FindResumeTarget<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> mode ResumeMode<span class="op">,</span> currentProject <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>SessionMetadata<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> lookup <span class="dt">string</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> mode <span class="op">==</span> ResumeProject <span class="op">{</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        lookup <span class="op">=</span> currentProject</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    metas<span class="op">,</span> err <span class="op">:=</span> rf<span class="op">.</span>store<span class="op">.</span>ListSessionMetadata<span class="op">(</span>ctx<span class="op">,</span> lookup<span class="op">)</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;list sessions: %w&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>metas<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;no sessions found to resume&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    sort<span class="op">.</span>Slice<span class="op">(</span>metas<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>i<span class="op">,</span> j <span class="dt">int</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> metas<span class="op">[</span>i<span class="op">].</span>LastActivity<span class="op">.</span>After<span class="op">(</span>metas<span class="op">[</span>j<span class="op">].</span>LastActivity<span class="op">)</span> <span class="op">})</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>metas<span class="op">[</span><span class="dv">0</span><span class="op">],</span> <span class="ot">nil</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>rf <span class="op">*</span>ResumeFinder<span class="op">)</span> Resume<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sessionID <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Message<span class="op">,</span> <span class="op">*</span>SessionMetadata<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    meta<span class="op">,</span> err <span class="op">:=</span> rf<span class="op">.</span>store<span class="op">.</span>GetSessionMetadata<span class="op">(</span>ctx<span class="op">,</span> sessionID<span class="op">)</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;metadata: %w&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    msgs<span class="op">,</span> err <span class="op">:=</span> rf<span class="op">.</span>store<span class="op">.</span>ReadTranscript<span class="op">(</span>ctx<span class="op">,</span> sessionID<span class="op">)</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> meta<span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;transcript: %w&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> msgs<span class="op">,</span> meta<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F11-T04): resume.go: ResumeFinder + ResumeMode + FindResumeTarget</code>.</p>
+<hr />
+<h2 id="task-5-sessionmanager-extensions-tdd">Task 5: SessionManager
+extensions (TDD)</h2>
+<p>Find existing <code>internal/session/session_manager.go</code>. Add:
+- <code>Append(ctx, msg) error</code> — calls
+<code>store.Append(ctx, m.currentID, msg)</code> + updates metadata
+(LastActivity, MessageCount++) - <code>Resume(ctx, id) error</code> —
+<code>store.GetSessionMetadata</code> +
+<code>store.ReadTranscript</code>, replay into in-memory session state,
+set currentID - <code>CurrentID() string</code> — returns active session
+ID</p>
+<p>Tests: <code>Append_PersistsThroughStore</code>,
+<code>Resume_LoadsTranscript</code>,
+<code>CurrentID_ReturnsActive</code>.</p>
+<p>Subject:
+<code>feat(P1-F11-T05): SessionManager.Append/Resume/CurrentID</code>.</p>
+<hr />
+<h2 id="task-6-sessions-slash-helixcode-sessions-cobra-tdd">Task 6:
+/sessions slash + helixcode sessions cobra (TDD)</h2>
+<p>Mirror F09/F10 surface patterns. Tests cover
+list/show/resume/delete/unknown.</p>
+<p>Implementation <code>internal/commands/sessions_command.go</code> +
+<code>cmd/cli/sessions_cmd.go</code>. Both surfaces share a
+<code>SessionStore</code>.</p>
+<p>Subject:
+<code>feat(P1-F11-T06): /sessions slash + helixcode sessions cobra</code>.</p>
+<hr />
+<h2 id="task-7-main.go-startup-wiring-integration-test">Task 7: main.go
+startup wiring + integration test</h2>
+<p>In <code>cmd/cli/main.go</code>: 1. Add <code>--resume</code> /
+<code>--continue</code> / <code>--resume &lt;id&gt;</code> flag parsing
+<strong>before</strong> the existing dispatcher. 2. Resolve project
+identity, look up target via ResumeFinder. 3. Inject resumed transcript
+into session manager. 4. Wire <code>/sessions</code> slash + cobra
+dispatcher.</p>
+<p>Integration tests
+<code>tests/integration/sessions_resume_test.go</code>: -
+<code>TestSessions_ResumePersistsAcrossRestart</code> — write 3 messages
+via real file I/O, simulate restart, assert all 3 readable. -
+<code>TestSessions_GlobalFindsMostRecentAcrossProjects</code> — two
+project dirs, two sessions, global finder returns the more recent.</p>
+<p>Subject:
+<code>feat(P1-F11-T07): wire resume into main.go + integration test</code>.</p>
+<hr />
+<h2 id="task-8-challenge-with-runtime-evidence">Task 8: Challenge with
+runtime evidence</h2>
+<p>Harness <code>tests/integration/cmd/p1f11_challenge/main.go</code>:
+1. Start session in tempdir, append 3 messages 2. Read metadata, verify
+MessageCount=3 3. Simulate restart (drop session manager, construct new
+with same store + sessionID) 4. Resume; assert all 3 messages restored
+5. Test global resume finds the session across project boundaries 6.
+Anti-bluff smoke clean</p>
+<p>run.sh + CHALLENGE.md in
+<code>challenges/p1-f11-session-resume/</code>. Dual commit. Verbatim
+evidence in <code>06_phase_1_evidence.md</code>.</p>
+<p>Subject:
+<code>feat(P1-F11-T08): challenge with runtime evidence + cross-compile check</code>.</p>
+<hr />
+<h2 id="task-9-close-out-push">Task 9: Close-out + push</h2>
+<p>Tick 9 items, advance PROGRESS to idle (F12 candidate), final
+verification, commit, push 4 remotes non-force.</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li>Spec coverage: each spec section maps to a task (T02 identity, T03
+store, T04 finder, T05 manager extensions, T06 surfaces, T07 wiring, T08
+challenge, T09 close-out).</li>
+<li>TDD: every code task starts with failing tests.</li>
+<li>Type consistency: <code>SessionMetadata</code>,
+<code>ResumeMode</code>, <code>ResumeFinder</code>,
+<code>SessionStore</code>, <code>TranscriptStore</code>,
+<code>ComputeProjectIdentity</code>, <code>Message</code>
+consistent.</li>
+<li>Cross-platform: pure Go + os/exec for <code>git rev-parse</code>;
+fsnotify not needed (resume is request-response, not event-driven).</li>
+<li>Anti-bluff: full 4-term smoke + Challenge captures real
+process-restart resumption.</li>
+<li>No new deps.</li>
+<li>Branch + push: stays on main, non-force to all four remotes.</li>
+</ol>
+</body>
+</html>

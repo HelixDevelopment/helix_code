@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP5-SP6-parallel-dynamic-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP5-SP6-parallel-dynamic-plan</h1>
+</header>
+<h1 id="implementation-plan-sp5-parallelsubagent-enforcement-sp6-dynamic-flow-submodules">Implementation
+Plan — SP5 (Parallel/Subagent Enforcement) + SP6 (Dynamic-Flow
+Submodules)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>PLANNING — read-only plan. NO code edits, NO repo creation, NO
+network git performed. All repo-creation tasks are OPERATOR-GATED.</td>
+</tr>
+<tr>
+<td>Source roadmap</td>
+<td><code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>
+§SP5 / §SP6</td>
+</tr>
+<tr>
+<td>Source analysis</td>
+<td><code>docs/superpowers/specs/analysis/2026-06-10-F-parallel-dynamic-testing.md</code></td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>Cascades from <code>constitution/</code> + root
+<code>CLAUDE.md</code>/<code>CONSTITUTION.md</code>; anti-bluff §11.4
+family governs every closure</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4 / §11.4.123):</strong> This is a PLAN,
+not a claim of done work. No task below is “complete” until it carries
+captured runtime evidence per §11.4.5 / §11.4.69 / §11.4.107. Every task
+is authored RED-first (§11.4.43 / §11.4.115): a failing test reproduces
+the gap on the pre-fix tree, then implementation flips it GREEN with
+captured evidence, then a documented rollback path. Subagent-driven by
+default (§11.4.70 / §11.4.103). Repo-creation tasks are
+<strong>OPERATOR-GATED</strong> (§11.4.101 —
+irreversible/high-blast-radius external mutation).</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-grounding--verified-facts-fileline">1. Grounding —
+verified facts (file:line)</a></li>
+<li><a href="#2-sp5--parallel--subagent-driven-enforcement">2. SP5 —
+Parallel / subagent-driven enforcement</a>
+<ul>
+<li><a href="#21-sp5-goal--gap-restated">2.1 SP5 goal + gap
+restated</a></li>
+<li><a href="#22-sp5-target-architecture-shared-substrate">2.2 SP5
+target architecture (shared substrate)</a></li>
+<li><a href="#23-sp5-files-to-create--modify">2.3 SP5 files to create /
+modify</a></li>
+<li><a href="#24-sp5-ordered-task-list">2.4 SP5 ordered task list (RED →
+impl → GREEN+evidence → rollback)</a></li>
+<li><a href="#25-sp5-stress--chaos-coverage-1185">2.5 SP5 stress / chaos
+coverage (§11.4.85)</a></li>
+</ul></li>
+<li><a href="#3-sp6--dynamic-flow-submodules">3. SP6 — Dynamic-flow
+submodules (CREATE-LATER, operator-gated)</a>
+<ul>
+<li><a href="#31-sp6-goal--reuse-first-decision">3.1 SP6 goal +
+reuse-first decision</a></li>
+<li><a href="#32-sp6-per-submodule-spec-table">3.2 SP6 per-submodule
+spec table</a></li>
+<li><a href="#33-sp6-files-to-create--modify">3.3 SP6 files to create /
+modify</a></li>
+<li><a href="#34-sp6-ordered-task-list">3.4 SP6 ordered task
+list</a></li>
+<li><a href="#35-sp6-deep-research-topics-1199">3.5 SP6 deep-research
+topics (§11.4.99)</a></li>
+</ul></li>
+<li><a href="#4-operator-decisions-required">4. Operator decisions
+required</a></li>
+<li><a href="#5-cross-cutting-constraints">5. Cross-cutting
+constraints</a></li>
+<li><a href="#6-executive-summary">6. Executive summary (12 lines) +
+recommendation</a></li>
+</ul>
+<hr />
+<h2 id="grounding-verified-facts-fileline">1. Grounding — verified facts
+(file:line)</h2>
+<p>Every anchor below was opened during this planning pass; ABSENCE is
+marked explicitly.</p>
+<p><strong>HelixCode parallel stack (self-contained inside
+<code>helix_code/internal/</code>):</strong> -
+<code>helix_code/internal/agent/coordinator.go:13-23</code> —
+<code>type Coordinator struct{ registry *AgentRegistry; tasks; taskQueue; results; workflowExecutor *WorkflowExecutor; circuitBreakers *CircuitBreakerManager; retryPolicy *RetryPolicy }</code>.
+- <code>helix_code/internal/agent/coordinator.go:26-50</code> —
+<code>CoordinatorConfig{ MaxConcurrentTasks:10; ConflictResolution: ResolutionMethodVoting; EnableResilience; FailureThreshold:5 … }</code>.
+- <code>helix_code/internal/agent/subagent/types.go:199-202</code> —
+<code>type SubagentSpawner interface { Spawn(ctx, SubagentTask, llm.Provider) (&lt;-chan SubagentResult, error); Kind() string }</code>.
+Spawners present: <code>inprocess_spawner.go</code>,
+<code>subprocess_spawner.go</code>, <code>manager.go</code>,
+<code>worktree_integration.go</code>, <code>helper_mode.go</code>.
+Sentinels
+<code>ErrSubagentTimeout/Canceled/MaxConcurrency/Recursion/UnknownIsolation</code>
+(<code>types.go:205-221</code>); recursion cap env
+<code>HELIXCODE_SUBAGENT_NO_RECURSE</code> (<code>types.go:230</code>).
+- <code>helix_code/internal/worker/</code> —
+<code>worker_pool.go</code>, <code>ssh_pool.go</code>,
+<code>ssh_pool_consensus.go</code>, <code>consensus.go</code>,
+<code>distributed_manager.go</code>, <code>isolation.go</code>,
+<code>manager_db.go</code>, <code>memory_repository.go</code>.
+Stress/chaos already present: <code>worker_pool_stress_test.go</code>,
+<code>worker_pool_chaos_test.go</code>,
+<code>consensus_stress_chaos_test.go</code>,
+<code>consensus_election_test.go</code>,
+<code>consensus_fault_transport_test.go</code>. -
+<code>helix_code/internal/workflow/</code> — <code>executor.go</code>,
+<code>workflow.go</code>, <code>background.go</code>,
+<code>autonomy/</code> (<code>controller.go</code>,
+<code>guardrails.go</code>, <code>escalation.go</code>,
+<code>permission.go</code>, <code>modes.go</code>),
+<code>planmode/</code> (<code>mode_controller.go</code>,
+<code>gating.go</code>, <code>planner_approval_test.go</code>).
+Stress/chaos present: <code>workflow_stress_test.go</code>,
+<code>workflow_chaos_test.go</code>.</p>
+<p><strong>HelixAgent parallel stack
+(<code>submodules/helix_agent/</code>, module
+<code>dev.helix.agent</code>):</strong> -
+<code>submodules/helix_agent/internal/agentic/workflow.go:28-60</code> —
+<code>WorkflowGraph{Nodes,Edges,EntryPoint,EndNodes}</code>,
+<code>Node{ID,Name,Type,Handler,Condition,Config,RetryPolicy}</code>,
+<code>NodeType ∈ {agent,tool,condition,parallel,human,subgraph}</code>,
+<code>Edge</code>. -
+<code>submodules/helix_agent/internal/agents/swarm/swarm.go:1-30</code>
+— <code>package swarm</code>, imports
+<code>digital.vasic.concurrency/pkg/safe</code>,
+<code>AgentColor</code>, <code>AgentRole</code>. -
+<code>submodules/helix_agent/internal/ensemble/</code> —
+<code>background/</code>, <code>multi_instance/</code>,
+<code>synchronization/</code>. -
+<code>submodules/helix_agent/internal/planning/</code> —
+<code>tree_of_thoughts.go</code>, <code>mcts.go</code>,
+<code>hiplan.go</code>. -
+<code>submodules/helix_agent/internal/concurrency/</code> —
+<code>semaphore.go</code>, <code>nonblocking.go</code>,
+<code>worker_pool.go</code>, <code>deadlock/</code>.</p>
+<p><strong>Own-org reusable submodules already cloned + wired in
+<code>.gitmodules</code>:</strong> - <code>submodules/agentic</code> →
+<code>git@github.com:vasic-digital/Agentic.git</code>, module
+<code>digital.vasic.agentic</code>. -
+<code>submodules/concurrency</code> →
+<code>git@github.com:vasic-digital/Concurrency.git</code>, module
+<code>digital.vasic.concurrency</code>. -
+<code>submodules/planning</code> →
+<code>git@github.com:vasic-digital/Planning.git</code>, module
+<code>digital.vasic.planning</code>. -
+<code>submodules/llm_orchestrator</code> →
+<code>HelixDevelopment/LLMOrchestrator</code>;
+<code>submodules/debate_orchestrator</code> →
+<code>HelixDevelopment/DebateOrchestrator</code>.</p>
+<p><strong>The D-7 gap (CONFIRMED this pass):</strong> -
+<code>helix_code/go.mod</code> <code>require</code>/<code>replace</code>
+lines for
+<code>digital.vasic.{containers,debate,helixqa,helixspecifier,lazy,docprocessor,llmorchestrator,visionengine,challenges,security}</code>
+exist (<code>go.mod:6-10,194-212</code>).
+<code>grep -nE &#39;agentic|concurrency|planning&#39; helix_code/go.mod</code> →
+<strong>EMPTY</strong>.
+<code>grep -rn &#39;digital.vasic.{agentic,concurrency,planning}&#39; helix_code/internal helix_code/cmd</code>
+→ <strong>EMPTY</strong>. So HelixCode cannot import the own-org
+agentic/concurrency/planning substrate today; it re-implements all of it
+in <code>internal/{agent,worker,workflow,task}</code>. (Roadmap D-7,
+<code>helix_code/go.mod</code>.) - <code>helix_code/go.mod</code> also
+lacks <code>replace dev.helix.agent</code> (the HelixAgent
+<code>clis</code>/<code>agentic</code> substrate) — SP4/SP5 shared gap
+(roadmap D-7).</p>
+<p><strong>helix-deps.yaml schema (verified sample
+<code>submodules/security/helix-deps.yaml</code>):</strong>
+<code>schema_version: 1</code>; <code>deps: [...]</code>;
+<code>transitive_handling.{recursive,conflict_resolution}</code>;
+<code>language_specific_subtree</code>.</p>
+<hr />
+<h2 id="sp5-parallel-subagent-driven-enforcement">2. SP5 — Parallel /
+subagent-driven enforcement</h2>
+<h3 id="sp5-goal-gap-restated">2.1 SP5 goal + gap restated</h3>
+<p><strong>Goal (roadmap §SP5):</strong> <em>All HelixCode work can be
+done by coordinated parallel agents; subagent-driven used maximally
+without harming the main stream.</em></p>
+<p><strong>Gap (analysis-F §1.4):</strong> (1) duplication-not-reuse —
+HelixCode + HelixAgent each re-implement
+coordination/concurrency/planning, no shared contract; (2) no universal
+“every operation is a parallel-dispatchable agent unit” abstraction; (3)
+no swarm/ensemble parity in HelixCode; (4) no cross-process agent bus
+shared with HelixAgent.</p>
+<p><strong>SP5 strategy — EXTRACT not greenfield (§11.4.74):</strong>
+lift the shared coordination concern into a decoupled own-org module,
+reusing <code>digital.vasic.{concurrency,agentic,planning}</code>
+underneath; wire BOTH consumers via <code>replace</code>; make
+subagent-dispatch the default substrate. SP5 does NOT create the SP6
+flow engines — it creates the thin shared scheduler/dispatcher contract
+they (and existing code) plug into.</p>
+<h3 id="sp5-target-architecture-shared-substrate">2.2 SP5 target
+architecture (shared substrate)</h3>
+<p>A new own-org module <strong><code>agent_substrate</code></strong>
+(<code>HelixDevelopment/AgentSubstrate</code>, module
+<code>dev.helix.substrate</code>) holding ONLY project-not-aware
+interfaces + a reference scheduler. Decision: extend
+<code>digital.vasic.concurrency</code> first (it already owns
+worker-pool/semaphore/deadlock); promote <code>agent_substrate</code> to
+a NEW repo <strong>only if</strong> the contract does not fit inside
+<code>Concurrency</code> (operator decision — see §4). The four
+contracts (analysis-F §2.3):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// dev.helix.substrate (project-not-aware; no parent reach — CONST-051(B))</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Unit <span class="kw">interface</span> <span class="op">{</span> ID<span class="op">()</span> <span class="dt">string</span><span class="op">;</span> Run<span class="op">(</span>ctx<span class="op">,</span> <span class="op">*</span>State<span class="op">,</span> Input<span class="op">)</span> <span class="op">(</span>Output<span class="op">,</span> <span class="dt">error</span><span class="op">);</span> DependsOn<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span> <span class="op">}</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Scheduler <span class="kw">interface</span> <span class="op">{</span> Submit<span class="op">(</span>Unit<span class="op">)</span> Handle<span class="op">;</span> Await<span class="op">(</span>Handle<span class="op">)</span> <span class="op">(</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">);</span> Parallelism<span class="op">()</span> <span class="dt">int</span> <span class="op">}</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Dispatcher <span class="kw">interface</span> <span class="op">{</span> Dispatch<span class="op">(</span>ctx<span class="op">,</span> Task<span class="op">)</span> <span class="op">(</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">}</span> <span class="co">// sink: inprocess|subprocess|ssh|external-CLI</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Resolver  <span class="kw">interface</span> <span class="op">{</span> Resolve<span class="op">(</span>ctx<span class="op">,</span> <span class="op">[]</span>Result<span class="op">)</span> <span class="op">(</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">}</span> <span class="co">// voting/consensus</span></span></code></pre></div>
+<p><strong>Adapters (config-injection only — CONST-051(B)):</strong> -
+HelixCode <code>Scheduler</code> backed by <code>agent/subagent</code>
+spawners (<code>SubagentSpawner.Spawn</code>, <code>types.go:199</code>)
++ <code>worker</code> SSH pool. - HelixCode <code>Resolver</code> backed
+by <code>agent.ResolutionMethodVoting</code>
+(<code>coordinator.go:44</code>) + <code>worker/consensus.go</code>. -
+HelixAgent <code>Scheduler</code> backed by
+<code>internal/concurrency.WorkerPool</code> +
+<code>internal/background</code>. - Cross-process
+<code>Dispatcher</code> sink (d) backed by HelixAgent
+<code>clis/event_bus.go</code> — the missing shared bus.</p>
+<h3 id="sp5-files-to-create-modify">2.3 SP5 files to create /
+modify</h3>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Action</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submodules/agent_substrate/</code> (NEW repo, OPERATOR-GATED)
+OR <code>submodules/concurrency/pkg/substrate/</code>
+(extend-existing)</td>
+<td>create</td>
+<td><code>Unit</code>/<code>Scheduler</code>/<code>Dispatcher</code>/<code>Resolver</code>
+contracts + reference scheduler + <code>helix-deps.yaml</code>
+(CONST-054)</td>
+</tr>
+<tr>
+<td><code>helix_code/go.mod</code></td>
+<td>modify</td>
+<td>add <code>require dev.helix.substrate</code> +
+<code>replace … =&gt; ../submodules/agent_substrate</code>; add
+<code>require dev.helix.agent</code> +
+<code>replace dev.helix.agent =&gt; ../submodules/helix_agent</code>
+(closes D-7)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/agent/substrate_adapter.go</code></td>
+<td>create</td>
+<td>adapt <code>SubagentSpawner</code> + <code>worker</code> pool to
+<code>Scheduler</code>/<code>Dispatcher</code>; adapt voting to
+<code>Resolver</code></td>
+</tr>
+<tr>
+<td><code>helix_code/internal/agent/substrate_adapter_test.go</code></td>
+<td>create</td>
+<td>unit RED→GREEN for the adapter contract</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/agent/coordinator.go</code></td>
+<td>modify</td>
+<td>route <code>taskQueue</code> dispatch through <code>Scheduler</code>
+(default substrate) instead of inline goroutines</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/workflow/executor.go</code></td>
+<td>modify</td>
+<td>execute DAG steps via
+<code>Scheduler.Submit</code>/<code>Await</code> (every step a
+<code>Unit</code>)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/agent/swarm/</code></td>
+<td>create</td>
+<td>swarm/ensemble parity port (roles, colored agents, consensus)
+reusing helix_agent <code>agents/swarm</code> via adapter — NOT a
+re-impl</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/agentic/substrate_adapter.go</code></td>
+<td>create</td>
+<td>adapt <code>agentic.Node</code> +
+<code>concurrency.WorkerPool</code> to the shared
+<code>Scheduler</code>; keep <code>agentic</code> as thin adapter</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/stresschaos/substrate_stress_test.go</code></td>
+<td>create</td>
+<td>§11.4.85 stress (N≥10 parallel Units, fan-out, deep DAG)</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/stresschaos/substrate_chaos_test.go</code></td>
+<td>create</td>
+<td>§11.4.85 chaos (kill subagent/worker mid-Unit, partition,
+resolver-tie)</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/stresschaos/stresschaos_meta_test.go</code></td>
+<td>modify</td>
+<td>add §1.1 paired mutation: planted deadlock/leak in scheduler →
+meta-test FAILs</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/helixcode-parallel-substrate.yaml</code></td>
+<td>create</td>
+<td>HelixQA bank exercising the substrate end-to-end (real spawn)</td>
+</tr>
+<tr>
+<td><code>challenges/banks/sp5-parallel-substrate-challenge.sh</code></td>
+<td>create</td>
+<td>Challenge: real multi-agent workflow completes with captured
+evidence</td>
+</tr>
+<tr>
+<td><code>docs/superpowers/specs/2026-06-10-SP5-parallel-design.md</code></td>
+<td>create</td>
+<td>SP5 design spec (precedes implementation per roadmap §4)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sp5-ordered-task-list">2.4 SP5 ordered task list</h3>
+<p>Each task: <strong>RED</strong> (failing test on pre-fix tree) →
+<strong>impl</strong> → <strong>GREEN+evidence</strong> (captured
+runtime per §11.4.5/§11.4.69) → <strong>rollback</strong> (revert path).
+Subagent-driven (§11.4.70); long tests backgrounded (§11.4.89).</p>
+<p><strong>T5.0 — SP5 design spec + catalogue-check (§11.4.74).</strong>
+- RED: assert
+<code>docs/superpowers/specs/2026-06-10-SP5-parallel-design.md</code>
+absent (it is). - Impl: author spec; record
+<code>Catalogue-Check:</code> =
+<code>extend vasic-digital/Concurrency@&lt;sha&gt;</code> (reference
+impl) + <code>reuse vasic-digital/Agentic@&lt;sha&gt;</code> for graph
+nodes. - GREEN: spec present, metadata table (§11.4.61), ToC;
+<code>.html</code>/<code>.pdf</code> exported (§11.4.65). - Rollback:
+<code>git rm</code> the spec; no code touched.</p>
+<p><strong>T5.1 — Shared contract module bootstrap (OPERATOR-GATED on
+repo-vs-extend decision §4).</strong> - RED: unit test referencing
+<code>substrate.Scheduler</code> fails to compile (module absent). -
+Impl: create the 4 interfaces + a reference in-memory scheduler in
+<code>submodules/agent_substrate/</code> (or
+<code>submodules/concurrency/pkg/substrate/</code>); ship
+<code>helix-deps.yaml</code> declaring
+<code>concurrency</code>/<code>planning</code>/<code>agentic</code> deps
+(CONST-054); no nested own-org chains (CONST-051(C)). - GREEN:
+<code>go test ./...</code> in the module PASS with captured output;
+standalone-buildable (CONST-051 decoupled). - Rollback: drop the package
+dir / abandon the unmerged repo (nothing wired yet).</p>
+<p><strong>T5.2 — Wire own-org substrate into
+<code>helix_code/go.mod</code> (closes D-7).</strong> - RED: a test
+importing <code>dev.helix.substrate</code> +
+<code>dev.helix.agent</code> from <code>helix_code/internal/agent</code>
+fails (<code>go.mod</code> lacks require/replace — verified empty this
+pass). - Impl: add <code>require</code>+<code>replace</code> for
+<code>dev.helix.substrate</code> and <code>dev.helix.agent</code>;
+<code>go mod tidy</code>. - GREEN:
+<code>cd helix_code &amp;&amp; make verify-compile</code> PASS (pasted);
+<code>go list -m dev.helix.agent</code> resolves. - Rollback: revert
+<code>go.mod</code>/<code>go.sum</code>; <code>go mod tidy</code>.</p>
+<p><strong>T5.3 — HelixCode Scheduler/Dispatcher/Resolver
+adapter.</strong> - RED: <code>substrate_adapter_test.go</code> asserts
+<code>Submit→Await</code> of a Unit routes through a real
+<code>SubagentSpawner.Spawn</code> (<code>types.go:199</code>) — fails
+before adapter exists. - Impl: <code>substrate_adapter.go</code> maps
+Unit→SubagentTask, Scheduler→spawner+worker pool,
+Resolver→<code>ResolutionMethodVoting</code>+<code>worker/consensus.go</code>.
+- GREEN: adapter unit test PASS; an integration test spawns a real
+in-process subagent and returns a real result (captured stdout, not a
+mock). - Rollback: delete adapter + its wiring; coordinator falls back
+to inline path.</p>
+<p><strong>T5.4 — Make Scheduler the default coordinator dispatch
+path.</strong> - RED: a test asserts <code>Coordinator</code> dispatches
+via <code>Scheduler</code> (count Submit calls) — fails (today inline).
+- Impl: route <code>coordinator.go</code> <code>taskQueue</code>
+consumption through <code>Scheduler.Submit</code>/<code>Await</code>,
+preserving circuit-breaker/retry semantics
+(<code>coordinator.go:21-22</code>). - GREEN: existing coordinator unit
++ stress tests still GREEN (<code>make test ./internal/agent</code>);
+new dispatch-path test GREEN with captured evidence; §11.4.120 reconcile
+any gate that asserted the old inline path (rewrite, do NOT fake-pass).
+- Rollback: feature-flag the substrate path off (env), revert to inline
+consumption.</p>
+<p><strong>T5.5 — Workflow executor runs every DAG step as a
+Unit.</strong> - RED: test asserts <code>workflow/executor.go</code>
+submits each step to <code>Scheduler</code> — fails (today direct). -
+Impl: wrap each <code>WorkflowStep</code>
+(<code>agent/workflow.go:12-46</code>, <code>DependsOn</code>) as a
+<code>Unit</code>; honor <code>Optional</code>. - GREEN:
+<code>workflow_stress_test.go</code> +
+<code>workflow_chaos_test.go</code> still GREEN; new
+executor-via-scheduler test GREEN with captured DAG-completion evidence.
+- Rollback: revert executor to direct step execution.</p>
+<p><strong>T5.6 — Swarm/ensemble parity in HelixCode (no re-impl;
+adapter to helix_agent).</strong> - RED: test asserts a HelixCode swarm
+run produces role-tagged, consensus-resolved output — fails (absent in
+HelixCode). - Impl: <code>internal/agent/swarm/</code> thin adapter over
+helix_agent <code>agents/swarm</code> +
+<code>ensemble/multi_instance</code> via the shared
+<code>Dispatcher</code>/<code>Resolver</code>;
+investigate-before-reimplement (§11.4.124) — reuse, do not copy. -
+GREEN: swarm run of ≥3 roles completes; consensus resolves a deliberate
+disagreement (captured transcript under
+<code>docs/qa/&lt;run-id&gt;/</code> §11.4.83). - Rollback: delete
+<code>internal/agent/swarm/</code>; no other path depends on it.</p>
+<p><strong>T5.7 — HelixAgent side: keep <code>agentic</code> as thin
+adapter to shared Scheduler.</strong> - RED: HelixAgent test asserts
+<code>agentic.Node</code> execution routes through
+<code>dev.helix.substrate.Scheduler</code> — fails. - Impl:
+<code>submodules/helix_agent/internal/agentic/substrate_adapter.go</code>
+backs the WorkflowGraph executor with the shared scheduler +
+<code>internal/concurrency.WorkerPool</code>; keep public
+<code>agentic</code> API stable (decoupled — CONST-051(B): no HelixCode
+reach injected). - GREEN: HelixAgent’s own <code>agentic</code> tests
+still GREEN
+(<code>cd submodules/helix_agent &amp;&amp; go test ./internal/agentic/...</code>);
+new adapter test GREEN. - Rollback: revert adapter; HelixAgent uses its
+native executor.</p>
+<p><strong>T5.8 — Cross-process agent bus (the missing symmetric
+bus).</strong> - RED: integration test drives a HelixCode Unit that
+dispatches to an external CLI agent via helix_agent
+<code>clis/event_bus.go</code> and back — fails (no shared Dispatcher
+sink (d)). - Impl: implement <code>Dispatcher</code> sink (d) over
+<code>clis/event_bus.go</code> + <code>instance_manager.go</code>;
+config-injected endpoints (no hardcode). - GREEN: round-trip
+prompt→external-agent→result with captured wire evidence (real exec,
+anti-bluff §11.4.98 fully automated). - Rollback: remove sink (d); other
+three sinks (in-proc/subproc/ssh) remain.</p>
+<p><strong>T5.9 — Full test-type coverage + Challenge + HelixQA bank
+(§11.4.135 guard per closure).</strong> - RED: HelixQA bank
+<code>helixcode-parallel-substrate.yaml</code> +
+<code>challenges/banks/sp5-...sh</code> absent; register RED guards
+(<code>RED_MODE=1</code>) reproducing the pre-substrate gaps. - Impl:
+author banks/challenges; wire into the standing regression-guard suite
+(§11.4.135). - GREEN:
+<code>cd helix_qa &amp;&amp; cmd/helixqa autonomous</code> exercises the
+bank with captured wire evidence; Challenge PASS with pasted output;
+each closed item registers a <code>RED_MODE=0</code> guard. - Rollback:
+deregister banks/guards; remove from suite manifest.</p>
+<h3 id="sp5-stress-chaos-coverage-11.4.85">2.5 SP5 stress / chaos
+coverage (§11.4.85)</h3>
+<p>Extend the existing rich harness
+(<code>worker_pool_stress_test.go</code>,
+<code>worker_pool_chaos_test.go</code>,
+<code>consensus_stress_chaos_test.go</code>,
+<code>workflow_stress_test.go</code>,
+<code>workflow_chaos_test.go</code>) to the substrate: -
+<strong>Stress:</strong> N≥100 Units sustained (p50/p95/p99 latency
+captured); N≥10 parallel Submit (no deadlock/leak — reuse
+<code>concurrency/deadlock</code>); boundary (empty DAG / max fan-out /
+single-Unit). - <strong>Chaos:</strong> process-death (kill
+subagent/worker mid-Unit → consensus recovery); network-fault (partition
+SSH worker — reuse <code>consensus_fault_transport_test.go</code>);
+resource-exhaustion (FD/goroutine cap → refuse cleanly, never crash);
+state-corruption (resolver tie / mid-flight lock loss). - <strong>§1.1
+paired mutation</strong> in <code>stresschaos_meta_test.go</code>: plant
+a deadlock or drop the leak-detector → meta-test MUST FAIL; restore →
+PASS. Every PASS cites a captured-evidence artefact path
+(<code>boot_service</code>/runtime-signature class per §11.4.69).</p>
+<hr />
+<h2 id="sp6-dynamic-flow-submodules">3. SP6 — Dynamic-flow
+submodules</h2>
+<h3 id="sp6-goal-reuse-first-decision">3.1 SP6 goal + reuse-first
+decision</h3>
+<p><strong>Goal (roadmap §SP6):</strong> dynamic flows + other execution
+models as NEW decoupled PUBLIC submodules under
+<strong>HelixDevelopment</strong>, wired into HelixCode +
+HelixAgent.</p>
+<p><strong>ABSENT as named packages in BOTH repos (analysis-F
+§2.1):</strong> standalone <code>pipeline</code>, standalone reusable
+<code>dag</code>, <code>dataflow</code>, event-driven/reactive flow,
+<code>saga</code>, standalone <code>state-machine</code>,
+<code>behavior-tree</code>. EXISTING: DAG workflow (HelixCode),
+graph/state-machine (<code>helix_agent/agentic</code>),
+ToT/MCTS/hierarchical (<code>helix_agent/planning</code>).</p>
+<p><strong>§11.4.74 reuse-first ruling (this plan’s
+recommendation):</strong> - <code>planning_search</code> →
+<strong>REUSE</strong> existing <code>vasic-digital/Planning</code>
+(<code>digital.vasic.planning</code>, already cloned at
+<code>submodules/planning</code>). NO new repo. Add HelixCode binding
+only. - <code>flow_engine</code> → <strong>EXTEND</strong>
+<code>vasic-digital/Agentic</code>
+(<code>WorkflowGraph</code>/<code>Node</code>/<code>Edge</code> already
+cover typed nodes + conditional/parallel/human/subgraph —
+<code>agentic/workflow.go:28-60</code> covers ≥80%). NEW repo only if
+dynamic re-planning/sub-flow nesting cannot land in <code>Agentic</code>
+(operator decision §4). - <code>agent_mesh</code>/<code>swarm_kit</code>
+→ <strong>LIFT</strong> helix_agent <code>agents/swarm</code> +
+<code>ensemble</code> into the shared module (SP5
+<code>agent_substrate</code> or its own repo). Likely folds into SP5 —
+see §4. - <code>dag_orchestrator</code>, <code>pipeline_runtime</code>,
+<code>flow_dsl</code> → genuinely NEW (no existing home) → NEW
+HelixDevelopment repos, <strong>OPERATOR-GATED</strong>.</p>
+<h3 id="sp6-per-submodule-spec-table">3.2 SP6 per-submodule spec
+table</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Proposed submodule</th>
+<th>Org/repo (CREATE-LATER)</th>
+<th>Module id</th>
+<th>Verdict</th>
+<th>Interface it implements</th>
+<th>Wiring point (HelixCode / HelixAgent)</th>
+<th><code>helix-deps.yaml</code> (CONST-054)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>flow_engine</strong></td>
+<td><code>HelixDevelopment/FlowEngine</code></td>
+<td><code>dev.helix.flow</code></td>
+<td><strong>EXTEND <code>Agentic</code> first</strong>; new repo only if
+it can’t host dynamic re-plan</td>
+<td><code>Unit</code>+<code>Scheduler</code> (SP5) for nodes; adds
+dynamic edges, sub-flow nesting, runtime re-planning</td>
+<td>HC <code>internal/workflow/executor.go</code> registers flow tools;
+HA <code>internal/agentic</code> becomes thin adapter</td>
+<td>deps: <code>agentic</code>, <code>concurrency</code>,
+<code>agent_substrate</code></td>
+</tr>
+<tr>
+<td><strong>dag_orchestrator</strong></td>
+<td><code>HelixDevelopment/DagOrchestrator</code></td>
+<td><code>dev.helix.dag</code></td>
+<td><strong>NEW</strong> (generalise HC
+<code>workflow/executor.go</code> logic out)</td>
+<td>pure data DAG: topo-sort, fan-in/out, partial-failure, retries —
+agent-free</td>
+<td>HC <code>workflow/</code> consumes for non-agent DAGs; HA
+<code>agentic</code> for tool graphs</td>
+<td>deps: <code>concurrency</code></td>
+</tr>
+<tr>
+<td><strong>pipeline_runtime</strong></td>
+<td><code>HelixDevelopment/PipelineRuntime</code></td>
+<td><code>dev.helix.pipeline</code></td>
+<td><strong>NEW</strong></td>
+<td>staged transform→validate→sink pipeline + backpressure</td>
+<td>HC repomap/index build, LLM stream; HA RAG ingest</td>
+<td>deps: <code>concurrency</code></td>
+</tr>
+<tr>
+<td><strong>agent_mesh</strong> / <strong>swarm_kit</strong></td>
+<td><code>HelixDevelopment/AgentMesh</code></td>
+<td><code>dev.helix.mesh</code></td>
+<td><strong>LIFT from helix_agent
+<code>agents/swarm</code>+<code>ensemble</code></strong> — likely fold
+into SP5 <code>agent_substrate</code></td>
+<td><code>Dispatcher</code>+<code>Resolver</code> (SP5); roles, colored
+agents, XML/structured comms, voting/consensus</td>
+<td>HC <code>internal/agent/swarm/</code> (SP5 T5.6); HA
+<code>agents/swarm</code> becomes adapter</td>
+<td>deps: <code>concurrency</code>, <code>agent_substrate</code></td>
+</tr>
+<tr>
+<td><strong>planning_search</strong></td>
+<td><strong>REUSE <code>vasic-digital/Planning</code></strong> (NO new
+repo)</td>
+<td><code>digital.vasic.planning</code></td>
+<td><strong>REUSE</strong> (already at
+<code>submodules/planning</code>)</td>
+<td>search-based planning port (ToT/MCTS/hiplan)</td>
+<td>HC new binding in <code>internal/planner/</code>; HA already uses
+<code>planning/</code></td>
+<td>— (existing)</td>
+</tr>
+<tr>
+<td><strong>flow_dsl</strong> (optional)</td>
+<td><code>HelixDevelopment/FlowDSL</code></td>
+<td><code>dev.helix.flowdsl</code></td>
+<td><strong>NEW (optional)</strong></td>
+<td>declarative YAML/JSON flow def + validator + loader feeding the
+engines above</td>
+<td>HC + HA load flow defs; composes §11.4.106 docs-chain-style YAML
+contexts</td>
+<td>deps: <code>flow_engine</code>, <code>dag_orchestrator</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Naming respects CONST-052 lowercase snake_case at path layer
+(<code>submodules/flow_engine/</code>); repo display names CamelCase per
+host convention.</p>
+</blockquote>
+<h3 id="sp6-files-to-create-modify">3.3 SP6 files to create /
+modify</h3>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Action</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/superpowers/specs/2026-06-10-SP6-dynamic-flows-design.md</code></td>
+<td>create</td>
+<td>SP6 design spec (precedes implementation)</td>
+</tr>
+<tr>
+<td><code>docs/research/sp6_execution_models_20260610/</code></td>
+<td>create</td>
+<td>deep-research outputs for the 12 topics (§3.5), cited sources
+(§11.4.99)</td>
+</tr>
+<tr>
+<td><code>submodules/flow_engine/</code> (NEW repo OR
+<code>submodules/agentic</code> extension)</td>
+<td>OPERATOR-GATED create</td>
+<td>flow runtime + <code>helix-deps.yaml</code></td>
+</tr>
+<tr>
+<td><code>submodules/dag_orchestrator/</code> (NEW repo)</td>
+<td>OPERATOR-GATED create</td>
+<td>DAG scheduler + <code>helix-deps.yaml</code></td>
+</tr>
+<tr>
+<td><code>submodules/pipeline_runtime/</code> (NEW repo)</td>
+<td>OPERATOR-GATED create</td>
+<td>pipeline + <code>helix-deps.yaml</code></td>
+</tr>
+<tr>
+<td><code>submodules/agent_mesh/</code> (NEW repo, or fold into
+SP5)</td>
+<td>OPERATOR-GATED create</td>
+<td>swarm/ensemble + <code>helix-deps.yaml</code></td>
+</tr>
+<tr>
+<td><code>submodules/flow_dsl/</code> (NEW repo, optional)</td>
+<td>OPERATOR-GATED create</td>
+<td>flow DSL + validator</td>
+</tr>
+<tr>
+<td><code>.gitmodules</code></td>
+<td>modify</td>
+<td>add the approved new submodule entries (SSH only — Rule 3)</td>
+</tr>
+<tr>
+<td><code>helix_code/go.mod</code></td>
+<td>modify</td>
+<td><code>require</code>+<code>replace</code> each approved new
+module</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/workflow/flow_adapter.go</code></td>
+<td>create</td>
+<td>register flow engines as the execution substrate</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/planner/planning_search_binding.go</code></td>
+<td>create</td>
+<td>bind existing <code>digital.vasic.planning</code> (REUSE path) into
+HelixCode</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/agentic/flow_adapter.go</code></td>
+<td>create</td>
+<td>keep <code>agentic</code> as thin adapter over
+<code>flow_engine</code></td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/sp6-flow-*.yaml</code> (one per engine)</td>
+<td>create</td>
+<td>per-engine HelixQA banks</td>
+</tr>
+<tr>
+<td><code>challenges/banks/sp6-flow-*-challenge.sh</code> (one per
+engine)</td>
+<td>create</td>
+<td>per-engine Challenges</td>
+</tr>
+<tr>
+<td>each new submodule’s <code>tests/</code> +
+<code>Challenges/</code></td>
+<td>create</td>
+<td>OWN standalone full matrix (CONST-050(B), CONST-051)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sp6-ordered-task-list">3.4 SP6 ordered task list</h3>
+<p><strong>T6.0 — SP6 design spec + reuse-first ledger.</strong> RED:
+spec absent. Impl: author spec; record per-engine
+<code>Catalogue-Check:</code> (reuse/extend/new). GREEN: spec present
+with metadata+ToC, exported. Rollback: <code>git rm</code> spec.</p>
+<p><strong>T6.1 — Deep web research (§11.4.99 latest-source) on the 12
+topics (§3.5).</strong> RED:
+<code>docs/research/sp6_execution_models_20260610/</code> absent. Impl:
+research each topic via WebFetch/MCP, cite source URLs+date; record “NO
+external solution found — original work” where applicable (§11.4.8).
+GREEN: research docs with <code>## Sources verified</code> footer.
+Rollback: <code>git rm</code> research dir. (No repo creation — safe to
+run anytime.)</p>
+<p><strong>T6.2 — Confirm reuse-vs-create per engine (OPERATOR-GATED
+§4).</strong> RED: n/a (decision gate). Impl: present the §3.2 table to
+operator via <code>AskUserQuestion</code> (§11.4.66); record decision.
+GREEN: operator answer captured. Rollback: n/a.</p>
+<p><strong>T6.3 … T6.7 — Per approved engine (ONLY after T6.2 approval;
+repo-creation OPERATOR-GATED §11.4.101):</strong> - RED: a HelixCode
+integration test importing the engine module fails to compile (module
+absent). - Impl (repo path, OPERATOR-GATED): create the public repo
+under HelixDevelopment via <code>gh</code>/<code>glab</code> (SSH
+remotes only — Rule 3; no force §11.4.113); scaffold module +
+<code>helix-deps.yaml</code> (CONST-054); implement the interface from
+§3.2; ship the engine’s OWN full test matrix (CONST-050(B)) +
+Challenges, standalone-testable (CONST-051). - Impl (extend path —
+<code>flow_engine</code>→<code>Agentic</code>,
+<code>planning_search</code>→<code>Planning</code>): add the missing
+features TO the existing submodule (§11.4.74), bump pointer. - Impl
+(wire): add <code>.gitmodules</code> entry +
+<code>helix_code/go.mod</code>
+<code>require</code>+<code>replace</code>; create
+<code>flow_adapter.go</code> in both consumers (config-injection only —
+CONST-051(B)). - GREEN: engine standalone <code>go test ./...</code>
+PASS (captured); HelixCode + HelixAgent adapter integration+e2e PASS
+with captured runtime evidence; HelixQA bank + Challenge PASS; §11.4.135
+regression guard registered. - Rollback: revert <code>.gitmodules</code>
++ <code>go.mod</code>; the unmerged new repo is abandoned
+(operator-owned external state — never force-delete).</p>
+<p><strong>T6.8 — flow_dsl (optional, OPERATOR-GATED).</strong> Only if
+operator approves at T6.2. Same RED→impl→GREEN→rollback shape; composes
+§11.4.106 docs-chain YAML contexts.</p>
+<p><strong>T6.9 — Full coverage close-out (§11.4.135 /
+§11.4.118).</strong> Discovery-pressure pass enumerating every flow
+subsystem exercised; each new engine has its own matrix + HelixQA bank +
+Challenge + regression guard before close-out.</p>
+<h3 id="sp6-deep-research-topics-11.4.99">3.5 SP6 deep-research topics
+(§11.4.99)</h3>
+<p>(From analysis-F §2.4 — DO NOT research in this planning pass; T6.1
+runs them.) 1. LangGraph graph-execution semantics (conditional edges,
+checkpointing, human-in-loop) — latest API. 2. Temporal / Cadence
+durable-workflow + saga patterns in Go (durable execution, signals,
+queries). 3. Apache Airflow / Dagster / Prefect DAG-scheduler design
+(dynamic task mapping, partial-retry, backfill). 4. Behavior trees vs
+state machines vs DAGs for agent control flow — tradeoffs. 5. Actor
+model / supervision trees (Akka, Proto.Actor, Go <code>ergo</code>) for
+swarm supervision + fault isolation. 6. MCTS / Tree-of-Thoughts /
+Graph-of-Thoughts / MASTER framework latest papers (validate
+<code>planning/mcts.go</code>). 7. Multi-agent orchestration frameworks:
+AutoGen, CrewAI, OpenAI Swarm, MetaGPT — coordination + handoff. 8. Go
+concurrency-pattern correctness: structured concurrency, errgroup,
+semaphore-weighted, deadlock detection (validate
+<code>concurrency/deadlock</code>). 9. Workflow-as-data DSL design
+(YAML/CUE/HCL) + schema validation for <code>flow_dsl</code>. 10.
+Distributed consensus for agent voting (Raft/Paxos-lite) — relate to
+<code>worker/ssh_pool_consensus.go</code>. 11. Backpressure /
+flow-control for streaming pipelines (reactive streams) for
+<code>pipeline_runtime</code>. 12. gh/glab repo-creation +
+branch-protection + multi-upstream automation for the new public
+submodules.</p>
+<hr />
+<h2 id="operator-decisions-required">4. Operator decisions required</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Recommendation</th>
+<th>Why operator-gated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OD-1</td>
+<td>SP5 shared substrate: <strong>NEW repo
+<code>HelixDevelopment/AgentSubstrate</code></strong> vs <strong>extend
+<code>vasic-digital/Concurrency</code>
+(<code>pkg/substrate/</code>)</strong></td>
+<td><strong>Extend Concurrency</strong> (it already owns
+worker-pool/semaphore/deadlock; §11.4.74 reuse-first). Only new-repo if
+the contract genuinely doesn’t fit.</td>
+<td>Repo creation is irreversible external mutation (§11.4.101)</td>
+</tr>
+<tr>
+<td>OD-2</td>
+<td><code>flow_engine</code>: <strong>EXTEND
+<code>vasic-digital/Agentic</code></strong> vs <strong>NEW
+<code>HelixDevelopment/FlowEngine</code></strong></td>
+<td><strong>Extend Agentic</strong> —
+<code>WorkflowGraph</code>/<code>Node</code>/<code>Edge</code> already
+cover ≥80% (<code>agentic/workflow.go:28-60</code>). New repo only if
+dynamic re-planning/sub-flow nesting can’t land in Agentic.</td>
+<td>Avoids a duplicate flow engine (§11.4.74)</td>
+</tr>
+<tr>
+<td>OD-3</td>
+<td><code>agent_mesh</code>/<code>swarm_kit</code>: <strong>fold into
+SP5 <code>agent_substrate</code></strong> vs <strong>separate
+<code>HelixDevelopment/AgentMesh</code></strong></td>
+<td><strong>Fold into SP5</strong> — swarm/ensemble is the
+Dispatcher/Resolver surface; a separate repo duplicates the
+contract.</td>
+<td>Repo creation (§11.4.101)</td>
+</tr>
+<tr>
+<td>OD-4</td>
+<td>Which of <code>dag_orchestrator</code> /
+<code>pipeline_runtime</code> / <code>flow_dsl</code> are warranted
+NOW</td>
+<td><strong>Create <code>dag_orchestrator</code> +
+<code>pipeline_runtime</code></strong> (genuinely absent, clear
+consumers). <strong>Defer <code>flow_dsl</code></strong> until the
+engines exist (it composes them).</td>
+<td>Net-new public repos (§11.4.101)</td>
+</tr>
+<tr>
+<td>OD-5</td>
+<td><code>planning_search</code></td>
+<td><strong>REUSE <code>vasic-digital/Planning</code></strong> — NO new
+repo; add HelixCode binding only.</td>
+<td>n/a (reuse) — just confirm</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cross-cutting-constraints-apply-to-every-sp5sp6-task">5.
+Cross-cutting constraints (apply to every SP5/SP6 task)</h2>
+<ul>
+<li><strong>Anti-bluff §11.4 family</strong> — captured runtime evidence
+on every closure; no metadata-only/config-only/grep-only PASS.</li>
+<li><strong>TDD §11.4.43 / RED-polarity §11.4.115</strong> — every task
+RED-first on the pre-fix tree; <code>RED_MODE</code> polarity switch;
+standing regression guard §11.4.135.</li>
+<li><strong>§11.4.74 catalogue-first</strong> — reuse/extend before new
+repo; <code>Catalogue-Check:</code> in every tracker row.</li>
+<li><strong>CONST-051 decoupling</strong> — new modules are
+project-not-aware; config-injection only; no nested own-org chains
+(CONST-051(C)); deps reachable from root.</li>
+<li><strong>CONST-054</strong> — every new submodule ships
+<code>helix-deps.yaml</code>; verified by the incorporate-submodule
+Challenge.</li>
+<li><strong>§11.4.113 no-force-push</strong> —
+fetch→merge-onto-latest-main→fast-forward push for every repo/submodule;
+repo creation never force-deletes operator state.</li>
+<li><strong>§11.4.70 / §11.4.103 subagent-driven, ≥3 parallel
+streams</strong>; <strong>§11.4.89 background long tests</strong>;
+<strong>§11.4.88 detached push</strong>.</li>
+<li><strong>§11.4.85 stress+chaos</strong> on every fix;
+<strong>§11.4.50</strong> deterministic (N iterations, no flake).</li>
+<li><strong>§11.4.124</strong> dead-code investigate-before-remove (no
+deleting “duplicate” coordinators without git-history proof + operator
+confirm §11.4.122).</li>
+<li><strong>§11.4.125 / §11.4.134</strong> code-review-agent gate
+iterate-until-GO before pre-build+build.</li>
+<li><strong>CONST-044</strong> keep <code>docs/CONTINUATION.md</code> in
+sync each state-advancing commit; CONST-062/063 doc-sync exports.</li>
+</ul>
+<hr />
+<h2 id="executive-summary">6. Executive summary</h2>
+<ol type="1">
+<li><strong>SP5 gap CONFIRMED (file:line):</strong>
+<code>helix_code/go.mod</code> has NO
+<code>require</code>/<code>replace</code> for
+<code>digital.vasic.{agentic,concurrency,planning}</code> (grep empty)
+and NO imports of them in <code>helix_code/internal|cmd</code> — the D-7
+duplication is real; HelixCode re-implements coordination in
+<code>internal/{agent,worker,workflow}</code> while own-org modules sit
+unused.</li>
+<li><strong>SP5 = extract a shared substrate, not greenfield.</strong>
+New
+<code>Unit</code>/<code>Scheduler</code>/<code>Dispatcher</code>/<code>Resolver</code>
+contracts; reference scheduler; adapters back it with HelixCode
+<code>SubagentSpawner</code> (<code>agent/subagent/types.go:199</code>)
++ <code>worker</code> SSH pool + voting
+(<code>coordinator.go:44</code>), and HelixAgent
+<code>concurrency.WorkerPool</code> + <code>clis/event_bus</code>.</li>
+<li><strong>SP5 wiring:</strong> add
+<code>replace dev.helix.substrate</code> +
+<code>replace dev.helix.agent</code> to <code>helix_code/go.mod</code>
+(closes D-7), route <code>coordinator.go</code> +
+<code>workflow/executor.go</code> through the Scheduler, port
+swarm/ensemble parity as an adapter (not a re-impl per §11.4.124).</li>
+<li><strong>SP5 stress/chaos</strong> extends the existing rich harness
+(<code>worker_pool_*</code>, <code>consensus_stress_chaos</code>,
+<code>workflow_*</code> tests + <code>stresschaos_meta_test.go</code>)
+with substrate-level N≥10 parallel, kill-mid-Unit, partition,
+resolver-tie + a §1.1 planted-deadlock mutation.</li>
+<li><strong>SP6 reuse-first verdict:</strong>
+<code>planning_search</code> → <strong>REUSE</strong>
+<code>vasic-digital/Planning</code> (NO repo); <code>flow_engine</code>
+→ <strong>EXTEND</strong> <code>vasic-digital/Agentic</code>
+(<code>WorkflowGraph</code> already ≥80%); <code>agent_mesh</code> →
+<strong>fold into SP5</strong>.</li>
+<li><strong>SP6 genuinely-new repos:</strong>
+<code>dag_orchestrator</code> (<code>dev.helix.dag</code>) +
+<code>pipeline_runtime</code> (<code>dev.helix.pipeline</code>) are
+absent in both repos with clear consumers — warrant creation.
+<code>flow_dsl</code> deferred until engines exist.</li>
+<li><strong>Every SP6 engine</strong> ships its OWN standalone full test
+matrix + Challenges + <code>helix-deps.yaml</code>
+(CONST-050(B)/CONST-051/CONST-054), wired into both consumers via thin
+<code>flow_adapter.go</code> (config-injection only).</li>
+<li><strong>All repo-creation tasks are OPERATOR-GATED</strong>
+(§11.4.101 irreversible/high-blast-radius); the 5 operator decisions are
+enumerated in §4 (recommend: extend-not-create for
+substrate/flow_engine/mesh/planning; create only
+dag_orchestrator+pipeline_runtime).</li>
+<li><strong>TDD + anti-bluff throughout:</strong> every task is RED (on
+pre-fix tree) → impl → GREEN+captured-evidence → rollback; §11.4.135
+regression guard per closure; §11.4.125 code-review gate before
+build.</li>
+<li><strong>Deep-research (T6.1)</strong> runs the 12 §11.4.99 topics
+into <code>docs/research/sp6_execution_models_20260610/</code> with
+cited sources BEFORE any engine is built — this is safe to run anytime
+(no repo creation).</li>
+<li><strong>Plan deliverable only:</strong> this pass wrote ONLY this
+doc — no code edited, no repo created, no network/mutating git run; all
+anchors cited from real <code>file:line</code> opened this session.</li>
+<li><strong>Recommendation — CREATE vs REUSE:</strong> REUSE
+<code>vasic-digital/Planning</code>; EXTEND
+<code>vasic-digital/Agentic</code> (flow_engine) +
+<code>vasic-digital/Concurrency</code> (substrate); FOLD agent_mesh into
+the substrate; CREATE only two new HelixDevelopment repos —
+<strong><code>dag_orchestrator</code></strong> +
+<strong><code>pipeline_runtime</code></strong> — and DEFER
+<code>flow_dsl</code>. Net new public repos warranted:
+<strong>2</strong> (plus an optional 3rd later).</li>
+</ol>
+</body>
+</html>

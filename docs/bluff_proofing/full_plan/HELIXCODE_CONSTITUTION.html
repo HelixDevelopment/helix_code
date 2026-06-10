@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HELIXCODE_CONSTITUTION</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HELIXCODE_CONSTITUTION</h1>
+</header>
+<h1 id="helixcode-constitution">HelixCode Constitution</h1>
+<h2 id="helixcode-project-constitution">HelixCode Project
+Constitution</h2>
+<p><strong>Version</strong>: 1.0.0 <strong>Effective Date</strong>:
+2026-04-30 <strong>Scope</strong>: This Constitution applies to
+HelixCode and ALL its submodules <strong>Authority</strong>: Cascaded
+from HelixAgent root governance with HelixCode-specific addenda</p>
+<hr />
+<h2 id="preamble">Preamble</h2>
+<p>HelixCode is an enterprise-grade distributed AI development platform.
+This Constitution establishes the non-negotiable rules that govern all
+development, testing, deployment, and maintenance activities within the
+project. Every contributor, agent, and automated process MUST adhere to
+these rules. No exceptions.</p>
+<hr />
+<h2 id="const-001-no-cicd-pipelines-permanent">CONST-001: No CI/CD
+Pipelines (Permanent)</h2>
+<p>No <code>.github/workflows/</code>, <code>.gitlab-ci.yml</code>,
+<code>Jenkinsfile</code>, <code>.travis.yml</code>,
+<code>.circleci/</code>, or any automated pipeline. No Git hooks. All
+builds and tests run manually or via Makefile/script targets.</p>
+<p><strong>Rationale</strong>: Manual execution ensures human oversight
+and prevents automated propagation of bluffs.</p>
+<hr />
+<h2 id="const-002-no-mocks-in-production-permanent">CONST-002: No Mocks
+in Production (Permanent)</h2>
+<h3 id="const-002a-production-code">CONST-002a: Production Code</h3>
+<p>Mocks, stubs, fakes, placeholder classes, TODO implementations are
+STRICTLY FORBIDDEN in production code. All production code is fully
+functional with real integrations.</p>
+<h3 id="const-002b-test-code">CONST-002b: Test Code</h3>
+<p>Mocks/stubs/fakes MAY be used ONLY in unit tests (files ending
+<code>_test.go</code> run under <code>go test -short</code>).</p>
+<p><strong>Rationale</strong>: Production bluffs have repeatedly been
+discovered where features appeared implemented but were
+non-functional.</p>
+<hr />
+<h2 id="const-003-no-https-for-git-permanent">CONST-003: No HTTPS for
+Git (Permanent)</h2>
+<p>SSH URLs only (<code>git@github.com:…</code>,
+<code>git@gitlab.com:…</code>, etc.) for clones, fetches, pushes, and
+submodule updates. SSH keys are configured on every service.</p>
+<hr />
+<h2 id="const-004-no-manual-container-commands-permanent">CONST-004: No
+Manual Container Commands (Permanent)</h2>
+<p>Container orchestration is owned by the project’s binary/orchestrator
+(e.g., <code>make build</code> → <code>./bin/&lt;app&gt;</code>). Direct
+<code>docker</code>/<code>podman start|stop|rm</code> and
+<code>docker-compose up|down</code> are prohibited as workflows.</p>
+<hr />
+<h2 id="const-005-100-real-data-for-non-unit-tests">CONST-005: 100% Real
+Data for Non-Unit Tests</h2>
+<p>Beyond unit tests, all components MUST use actual API calls, real
+databases, live services. No simulated success. Fallback chains tested
+with actual failures.</p>
+<p><strong>Verification</strong>: Every integration/E2E test MUST
+connect to real services or skip (not fail) if unavailable.</p>
+<hr />
+<h2 id="const-006-challenge-coverage-permanent">CONST-006: Challenge
+Coverage (Permanent)</h2>
+<p>Every component MUST have Challenge scripts
+(<code>./challenges/scripts/</code>) validating real-life use cases. No
+false success — validate actual behavior, not return codes.</p>
+<hr />
+<h2 id="const-007-health-observability">CONST-007: Health &amp;
+Observability</h2>
+<p>Every service MUST expose health endpoints. Circuit breakers for all
+external dependencies. Prometheus / OpenTelemetry integration where
+applicable.</p>
+<hr />
+<h2 id="const-008-documentation-quality">CONST-008: Documentation &amp;
+Quality</h2>
+<p>Update <code>CLAUDE.md</code>, <code>AGENTS.md</code>, and relevant
+docs alongside code changes. Pass language-appropriate
+format/lint/security gates. Conventional Commits:
+<code>&lt;type&gt;(&lt;scope&gt;): &lt;description&gt;</code>.</p>
+<hr />
+<h2 id="const-009-validation-before-release">CONST-009: Validation
+Before Release</h2>
+<p>Pass the project’s full validation suite
+(<code>make ci-validate-all</code>-equivalent) plus all challenges
+(<code>./challenges/scripts/run_all_challenges.sh</code>).</p>
+<hr />
+<h2 id="const-010-comprehensive-verification">CONST-010: Comprehensive
+Verification</h2>
+<p>Every fix MUST be verified from all angles: runtime testing (actual
+HTTP requests / real CLI invocations), compile verification, code
+structure checks, dependency existence checks, backward compatibility,
+and no false positives. Grep-only validation is NEVER sufficient.</p>
+<hr />
+<h2 id="const-011-resource-limits-for-tests-challenges">CONST-011:
+Resource Limits for Tests &amp; Challenges</h2>
+<p>ALL test and challenge execution MUST be strictly limited to 30-40%
+of host system resources. Use <code>GOMAXPROCS=2</code>,
+<code>nice -n 19</code>, <code>ionice -c 3</code>, <code>-p 1</code> for
+<code>go test</code>. Container limits required.</p>
+<hr />
+<h2 id="const-012-bugfix-documentation">CONST-012: Bugfix
+Documentation</h2>
+<p>All bug fixes MUST be documented in
+<code>docs/issues/fixed/BUGFIXES.md</code> with root cause analysis,
+affected files, fix description, and a link to the verification
+test/challenge.</p>
+<hr />
+<h2 id="const-013-real-infrastructure-for-all-non-unit-tests">CONST-013:
+Real Infrastructure for All Non-Unit Tests</h2>
+<p>Mocks/fakes/stubs/placeholders MAY be used ONLY in unit tests. ALL
+other test types — integration, E2E, functional, security, stress,
+chaos, challenge, benchmark, runtime verification — MUST execute against
+REAL running systems with REAL containers, REAL databases, REAL
+services, and REAL HTTP calls.</p>
+<hr />
+<h2 id="const-014-reproduction-before-fix-mandatory">CONST-014:
+Reproduction-Before-Fix (Mandatory)</h2>
+<p>Every reported error, defect, or unexpected behavior MUST be
+reproduced by a Challenge script BEFORE any fix is attempted. Sequence:
+1. Write the Challenge first 2. Run it; confirm fail (it reproduces the
+bug) 3. Then write the fix 4. Re-run; confirm pass 5. Commit Challenge +
+fix together</p>
+<p>The Challenge becomes the regression guard for that bug forever.</p>
+<hr />
+<h2 id="const-015-concurrent-safe-containers">CONST-015: Concurrent-Safe
+Containers</h2>
+<p>Any struct field that is a mutable collection (map, slice) accessed
+concurrently MUST use thread-safe primitives. Bare
+<code>sync.Mutex + map/slice</code> combinations are prohibited for new
+code.</p>
+<hr />
+<h2 id="const-016-definition-of-done-universal">CONST-016: Definition of
+Done (Universal)</h2>
+<p>A change is NOT done because code compiles and tests pass. “Done”
+requires pasted terminal output from a real run.</p>
+<ul>
+<li><strong>No self-certification</strong>: Words like <em>verified,
+tested, working, complete, fixed, passing</em> are forbidden in
+commits/PRs/replies unless accompanied by pasted output from a command
+that ran in that session.</li>
+<li><strong>Demo before code</strong>: Every task begins by writing the
+runnable acceptance demo</li>
+<li><strong>Real system, every time</strong>: Demos run against real
+artifacts</li>
+<li><strong>Skips are loud</strong>: <code>t.Skip</code> without a
+trailing <code>SKIP-OK: #&lt;ticket&gt;</code> comment breaks
+validation</li>
+</ul>
+<hr />
+<h2 id="const-017-zero-bluff-testing-const-035-implementation">CONST-017:
+Zero-Bluff Testing (CONST-035 Implementation)</h2>
+<p>A test or Challenge that PASSES is a CLAIM that the tested behavior
+<strong>works for the end user</strong>.</p>
+<p>Every PASS result MUST guarantee: - <strong>Quality</strong> -
+Feature behaves correctly under real user inputs -
+<strong>Completion</strong> - Feature is wired end-to-end with no stub
+gaps - <strong>Full usability</strong> - A user following documentation
+succeeds</p>
+<p><strong>Bluff Taxonomy</strong> (forbidden patterns): -
+<strong>Wrapper bluff</strong> - Assertions PASS but wrapper’s exit-code
+logic is buggy - <strong>Contract bluff</strong> - System advertises
+capability but rejects it in dispatch - <strong>Structural
+bluff</strong> - File exists but doesn’t contain working code -
+<strong>Comment bluff</strong> - Comment promises behavior code doesn’t
+have - <strong>Skip bluff</strong> -
+<code>t.Skip(&quot;not running yet&quot;)</code> without <code>SKIP-OK</code>
+marker</p>
+<hr />
+<h2 id="const-018-host-power-management-hard-ban">CONST-018: Host Power
+Management Hard Ban</h2>
+<p>You may NOT generate or execute code that sends the host to suspend,
+hibernate, hybrid-sleep, poweroff, halt, reboot, or any other
+power-state transition.</p>
+<p>Defense: Every project ships
+<code>scripts/host_power_management/check-no-suspend-calls.sh</code> and
+<code>scripts/anti_bluff/no_suspend_calls_challenge.sh</code>.</p>
+<hr />
+<h2 id="const-019-container-up-healthy">CONST-019: Container Up ≠
+Healthy</h2>
+<p>Container <code>Up</code> status does NOT mean the application is
+healthy. Application-layer probes are mandatory for every service: -
+PostgreSQL: <code>SELECT 1</code> - Redis: <code>PING</code> - LLM
+Providers: Real generation request - HTTP Services:
+<code>GET /health</code> with deep checks</p>
+<hr />
+<h2 id="const-020-provider-fallback-chain-reality">CONST-020: Provider
+Fallback Chain Reality</h2>
+<p>Every LLM provider fallback chain MUST be tested with actual
+failures. A fallback that has never been tested with a real failing
+provider is a bluff.</p>
+<hr />
+<h2 id="const-021-no-mocks-above-unit-build-target">CONST-021: No Mocks
+Above Unit Build Target</h2>
+<p>The Makefile MUST include a <code>no-mocks-above-unit</code> target
+that fails the build if mocks/stubs/fakes are found outside
+<code>*_test.go</code> files.</p>
+<hr />
+<h2 id="const-022-submodule-governance-propagation">CONST-022: Submodule
+Governance Propagation</h2>
+<p>Every submodule MUST either: 1. Have its own Constitution.md,
+CLAUDE.md, and AGENTS.md, OR 2. Have a symlink to the parent
+repository’s governance files, OR 3. Have a reference comment in its
+README pointing to parent governance</p>
+<p>No submodule is exempt from these rules.</p>
+<hr />
+<h2 id="const-023-docker-health-checks-mandatory">CONST-023: Docker
+Health Checks Mandatory</h2>
+<p>Every Dockerfile MUST include:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">HEALTHCHECK</span> <span class="op">--interval=30s</span> <span class="op">--timeout=10s</span> <span class="op">--start-period=5s</span> <span class="op">--retries=3</span> \</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">CMD</span> <span class="ex">curl</span> <span class="at">-f</span> http://localhost:8080/health <span class="kw">||</span> <span class="bu">exit</span> 1</span></code></pre></div>
+<p>The health endpoint MUST perform deep checks (database connection,
+provider availability), not just return HTTP 200.</p>
+<hr />
+<h2 id="const-024-version-pinning">CONST-024: Version Pinning</h2>
+<p>All dependencies MUST be pinned to specific versions in
+<code>go.mod</code>. No <code>latest</code>, no floating tags. Renovate
+or Dependabot (manual review only — see CONST-001) may propose
+updates.</p>
+<hr />
+<h2 id="const-025-secret-management">CONST-025: Secret Management</h2>
+<p>NO secrets in code. EVER. Secrets via: - Environment variables
+(production) - <code>.env</code> files (development, in
+<code>.gitignore</code>) - Vault/Secret Manager (enterprise) - Docker
+secrets (containerized)</p>
+<p><code>go mod tidy</code> MUST NOT add secret-scanning bypasses.</p>
+<hr />
+<h2 id="const-026-minimal-privilege-containers">CONST-026: Minimal
+Privilege Containers</h2>
+<p>Containers run as non-root. Every Dockerfile:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">adduser</span> <span class="at">-D</span> <span class="at">-u</span> 1001 helixcode</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">USER</span> helixcode</span></code></pre></div>
+<hr />
+<h2 id="const-027-network-isolation">CONST-027: Network Isolation</h2>
+<p>Container orchestration MUST use internal networks. Services
+communicate via named hosts, not exposed ports where possible.</p>
+<hr />
+<h2 id="const-028-backup-before-destructive-operations">CONST-028:
+Backup Before Destructive Operations</h2>
+<p>Every file editing tool MUST create backups before modification. The
+backup MUST be restorable.</p>
+<hr />
+<h2 id="const-029-input-validation-at-all-boundaries">CONST-029: Input
+Validation at All Boundaries</h2>
+<p>Every public function MUST validate inputs. No trust of
+caller-provided data. SQL injection, path traversal, command injection
+MUST be impossible by design.</p>
+<hr />
+<h2 id="const-030-graceful-degradation">CONST-030: Graceful
+Degradation</h2>
+<p>When external services are unavailable, the system MUST degrade
+gracefully: - Return partial results where possible - Queue operations
+for retry - Inform user of degraded state - NEVER crash or hang
+indefinitely</p>
+<hr />
+<h2 id="const-031-audit-trail">CONST-031: Audit Trail</h2>
+<p>Every significant operation MUST be logged with: - Timestamp - User
+identity - Operation type - Success/failure status - Resource
+affected</p>
+<p>Log retention: 90 days minimum.</p>
+<hr />
+<h2 id="const-032-emergency-stop">CONST-032: Emergency Stop</h2>
+<p>Every long-running or distributed operation MUST support cancellation
+via <code>context.Context</code>. Users MUST be able to interrupt any
+operation.</p>
+<hr />
+<h2 id="const-033-data-integrity">CONST-033: Data Integrity</h2>
+<p>Database writes MUST be transactional. Partial writes MUST be rolled
+back. Consistency checks MUST run periodically.</p>
+<hr />
+<h2 id="const-034-api-stability">CONST-034: API Stability</h2>
+<p>Public APIs maintain backward compatibility within major versions.
+Deprecation requires: - 6-month notice - Migration guide - Compatibility
+shim</p>
+<hr />
+<h2 id="const-035-end-user-usability-mandate-2026-04-29-strengthening">CONST-035:
+End-User Usability Mandate (2026-04-29 Strengthening)</h2>
+<p>A test or Challenge that PASSES is a CLAIM that the tested behavior
+<strong>works for the end user of the product</strong>.</p>
+<p>The HelixAgent project has repeatedly hit the failure mode where
+every test ran green AND every Challenge reported PASS, yet most product
+features did not actually work. This MUST NOT recur in HelixCode.</p>
+<p>Every PASS result MUST guarantee: a. <strong>Quality</strong> -
+correct behavior under real inputs, edge cases, concurrency b.
+<strong>Completion</strong> - wired end-to-end with no stub/placeholder
+gaps c. <strong>Full usability</strong> - a user following documented
+request shapes SUCCEEDS</p>
+<p>A passing test that doesn’t certify all three is a
+<strong>bluff</strong> and MUST be tightened.</p>
+<p><strong>Bluff taxonomy</strong> (each pattern observed and now
+forbidden): - <strong>Wrapper bluff</strong> - assertions PASS but
+wrapper’s exit-code logic is buggy - <strong>Contract bluff</strong> -
+system advertises capability but rejects it in dispatch -
+<strong>Structural bluff</strong> - <code>check_file_exists</code>
+passes but doesn’t run the test - <strong>Comment bluff</strong> -
+comment promises behavior code doesn’t actually have - <strong>Skip
+bluff</strong> - <code>t.Skip(&quot;not running yet&quot;)</code> without
+<code>SKIP-OK: #&lt;ticket&gt;</code> marker</p>
+<p><strong>Full background</strong>:
+<code>docs/HOST_POWER_MANAGEMENT.md</code> and this Constitution
+(CONST-035).</p>
+<hr />
+<h2 id="const-036-propagation-to-submodules">CONST-036: Propagation to
+Submodules</h2>
+<p>This Constitution, along with CLAUDE.md and AGENTS.md, MUST be
+propagated to ALL submodules. Each submodule’s governance MUST reference
+this parent Constitution. Changes to this Constitution MUST trigger
+review of all submodule governance files.</p>
+<hr />
+<h2 id="amendment-process">Amendment Process</h2>
+<p>Constitution amendments require: 1. Written proposal with rationale
+2. Challenge demonstrating the need 3. 72-hour review period 4. Approval
+by project architect 5. Update to all submodule governance files</p>
+<hr />
+<p><em>This Constitution is the supreme law of the HelixCode project. No
+code, test, or process may contradict it.</em></p>
+</body>
+</html>

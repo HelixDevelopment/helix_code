@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ANTI_BLUFF_TESTING_STRATEGY</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ANTI_BLUFF_TESTING_STRATEGY</h1>
+</header>
+<h1 id="helixcode-anti-bluff-testing-strategy">HelixCode Anti-Bluff
+Testing Strategy</h1>
+<h2 id="purpose">Purpose</h2>
+<p>This document defines the comprehensive testing strategy that ensures
+<strong>every passing test and challenge is a GUARANTEE that the tested
+feature actually works for end users</strong>. This strategy is
+mandatory per HelixCode Constitution CONST-035 (End-User Usability
+Mandate).</p>
+<p><strong>Core Principle</strong>: A test that passes MUST certify: -
+<strong>Quality</strong> - Feature behaves correctly under real user
+inputs, edge cases, and concurrency - <strong>Completion</strong> -
+Feature is wired end-to-end from API to infrastructure, no stub gaps -
+<strong>Full Usability</strong> - A user following documentation
+succeeds without internal knowledge</p>
+<hr />
+<h2 id="test-pyramid-anti-bluff-edition">1. Test Pyramid (Anti-Bluff
+Edition)</h2>
+<pre><code>         /\
+        /  \     E2E Challenges (Real projects, real providers)
+       / __ \    Integration Tests (Real DB, real HTTP, real containers)
+      / /  \ \   Contract Tests (Provider API compatibility)
+     / / __ \ \  Component Tests (Real subsystems wired together)
+    /_/ /  \ \_\ Unit Tests (Mocks ALLOWED here only)
+   /___/    \___\ Static Analysis (Lint, security, structure)</code></pre>
+<p><strong>Anti-Bluff Rule</strong>: Unit tests are the ONLY level where
+mocks/stubs are permitted. Every other level MUST use real
+infrastructure.</p>
+<hr />
+<h2 id="test-categories-requirements">2. Test Categories &amp;
+Requirements</h2>
+<h3 id="unit-tests-_test.go-with--short-flag">2.1 Unit Tests
+(<code>*_test.go</code> with <code>-short</code> flag)</h3>
+<p><strong>Scope</strong>: Individual functions, methods, pure logic
+<strong>Mock Policy</strong>: MOCKS ALLOWED <strong>Execution</strong>:
+<code>go test -short ./...</code> <strong>Resource Limits</strong>:
+<code>GOMAXPROCS=2</code>, <code>nice -n 19</code></p>
+<p>Requirements: - [ ] Table-driven tests with subtests
+(<code>t.Run()</code>) - [ ] Use <code>testify/require</code> for fatal
+assertions - [ ] Use <code>testify/assert</code> for non-fatal checks -
+[ ] Mock external dependencies ONLY - [ ] Coverage target: 80%+ per
+package</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAuthService_Register<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    tests <span class="op">:=</span> <span class="op">[]</span><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        name     <span class="dt">string</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        username <span class="dt">string</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        email    <span class="dt">string</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        password <span class="dt">string</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        wantErr  <span class="dt">bool</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;valid&quot;</span><span class="op">,</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> <span class="st">&quot;user@example.com&quot;</span><span class="op">,</span> <span class="st">&quot;password123&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">},</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;short_password&quot;</span><span class="op">,</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> <span class="st">&quot;user@example.com&quot;</span><span class="op">,</span> <span class="st">&quot;123&quot;</span><span class="op">,</span> <span class="ot">true</span><span class="op">},</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;invalid_email&quot;</span><span class="op">,</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> <span class="st">&quot;not-an-email&quot;</span><span class="op">,</span> <span class="st">&quot;password123&quot;</span><span class="op">,</span> <span class="ot">true</span><span class="op">},</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> tt <span class="op">:=</span> <span class="kw">range</span> tests <span class="op">{</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Run<span class="op">(</span>tt<span class="op">.</span>name<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            mockRepo <span class="op">:=</span> <span class="bu">new</span><span class="op">(</span>MockAuthRepository<span class="op">)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>            svc <span class="op">:=</span> auth<span class="op">.</span>NewAuthService<span class="op">(</span>auth<span class="op">.</span>DefaultConfig<span class="op">(),</span> mockRepo<span class="op">)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            _<span class="op">,</span> err <span class="op">:=</span> svc<span class="op">.</span>Register<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> tt<span class="op">.</span>username<span class="op">,</span> tt<span class="op">.</span>email<span class="op">,</span> tt<span class="op">.</span>password<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tt<span class="op">.</span>wantErr <span class="op">{</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>                require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>                require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="contract-tests">2.2 Contract Tests</h3>
+<p><strong>Scope</strong>: LLM provider API compatibility, external
+service contracts <strong>Mock Policy</strong>: NO MOCKS - test against
+real or recorded APIs <strong>Execution</strong>:
+<code>go test ./tests/contract/...</code></p>
+<p>Requirements: - [ ] Each provider has contract tests against real API
+- [ ] Tests validate request/response schemas - [ ] Tests check error
+codes and handling - [ ] Recorded responses (vcr-style) for CI where
+live API unavailable - [ ] MUST skip (not fail) if API unavailable</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestOllamaProvider_Contract<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> testing<span class="op">.</span>Short<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;Contract tests skipped in short mode&quot;</span><span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    provider <span class="op">:=</span> ollama<span class="op">.</span>New<span class="op">(</span>os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;OLLAMA_HOST&quot;</span><span class="op">))</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> provider<span class="op">.</span>HealthCheck<span class="op">(</span>context<span class="op">.</span>Background<span class="op">());</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skipf<span class="op">(</span><span class="st">&quot;Ollama not available: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Real call to real Ollama</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> provider<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>GenerateRequest<span class="op">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        Prompt<span class="op">:</span> <span class="st">&quot;Say &#39;contract test passed&#39;&quot;</span><span class="op">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span>  <span class="st">&quot;llama3.2&quot;</span><span class="op">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> resp<span class="op">.</span>Text<span class="op">)</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> resp<span class="op">.</span>Text<span class="op">,</span> <span class="st">&quot;simulated&quot;</span><span class="op">)</span>  <span class="co">// ANTI-BLUFF CHECK</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="component-tests">2.3 Component Tests</h3>
+<p><strong>Scope</strong>: Real subsystems wired together (DB + Auth,
+Worker + Task, etc.) <strong>Mock Policy</strong>: NO MOCKS - use test
+databases, test containers <strong>Execution</strong>:
+<code>go test ./tests/component/...</code>
+<strong>Infrastructure</strong>: Testcontainers for PostgreSQL,
+Redis</p>
+<p>Requirements: - [ ] Use real PostgreSQL (testcontainers or dedicated
+test DB) - [ ] Use real Redis (testcontainers or dedicated test
+instance) - [ ] Clean state between tests (truncate tables, flush Redis)
+- [ ] Test actual HTTP handlers with <code>httptest.Server</code> - [ ]
+Verify real data persistence</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTaskLifecycle_Component<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ctx <span class="op">:=</span> context<span class="op">.</span>Background<span class="op">()</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Start real PostgreSQL container</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    postgresC <span class="op">:=</span> startTestPostgres<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> postgresC<span class="op">.</span>Terminate<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Start real Redis container</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    redisC <span class="op">:=</span> startTestRedis<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> redisC<span class="op">.</span>Terminate<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Initialize real service with real DB</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    db <span class="op">:=</span> connectToPostgres<span class="op">(</span>postgresC<span class="op">)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    taskMgr <span class="op">:=</span> task<span class="op">.</span>NewManager<span class="op">(</span>db<span class="op">)</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Create task in real DB</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    task<span class="op">,</span> err <span class="op">:=</span> taskMgr<span class="op">.</span>Create<span class="op">(</span>ctx<span class="op">,</span> <span class="op">&amp;</span>task<span class="op">.</span>Task<span class="op">{</span>Title<span class="op">:</span> <span class="st">&quot;Test Task&quot;</span><span class="op">})</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotZero<span class="op">(</span>t<span class="op">,</span> task<span class="op">.</span>ID<span class="op">)</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Verify task persisted</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    persisted<span class="op">,</span> err <span class="op">:=</span> taskMgr<span class="op">.</span>Get<span class="op">(</span>ctx<span class="op">,</span> task<span class="op">.</span>ID<span class="op">)</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Test Task&quot;</span><span class="op">,</span> persisted<span class="op">.</span>Title<span class="op">)</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Start task execution</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    err <span class="op">=</span> taskMgr<span class="op">.</span>Start<span class="op">(</span>ctx<span class="op">,</span> task<span class="op">.</span>ID<span class="op">)</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Verify state change in DB</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    updated<span class="op">,</span> err <span class="op">:=</span> taskMgr<span class="op">.</span>Get<span class="op">(</span>ctx<span class="op">,</span> task<span class="op">.</span>ID<span class="op">)</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> task<span class="op">.</span>StatusRunning<span class="op">,</span> updated<span class="op">.</span>Status<span class="op">)</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="integration-tests">2.4 Integration Tests</h3>
+<p><strong>Scope</strong>: Full application with real external
+dependencies <strong>Mock Policy</strong>: NO MOCKS
+<strong>Execution</strong>: <code>make integration-test</code> or
+<code>./run_tests.sh --integration</code>
+<strong>Infrastructure</strong>: Full docker-compose stack</p>
+<p>Requirements: - [ ] Start full application stack (app + postgres +
+redis + nginx) - [ ] Make real HTTP requests to running server - [ ]
+Test authentication flow end-to-end (register -&gt; login -&gt; call API
+-&gt; logout) - [ ] Test LLM generation with real provider (or skip if
+unavailable) - [ ] Test worker addition and task distribution - [ ] Test
+notification dispatch (verify message arrives) - [ ] Test file
+operations via API</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestAPI_Integration<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> testing<span class="op">.</span>Short<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;Integration tests skipped in short mode&quot;</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    baseURL <span class="op">:=</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;HELIX_TEST_URL&quot;</span><span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> baseURL <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;HELIX_TEST_URL not set&quot;</span><span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    client <span class="op">:=</span> <span class="op">&amp;</span>http<span class="op">.</span>Client<span class="op">{</span>Timeout<span class="op">:</span> <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Real registration</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> client<span class="op">.</span>Post<span class="op">(</span>baseURL<span class="op">+</span><span class="st">&quot;/api/v1/auth/register&quot;</span><span class="op">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;application/json&quot;</span><span class="op">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        strings<span class="op">.</span>NewReader<span class="op">(</span><span class="st">`{&quot;username&quot;:&quot;integuser&quot;,&quot;email&quot;:&quot;integ@test.com&quot;,&quot;password&quot;:&quot;testpass123&quot;}`</span><span class="op">))</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusCreated<span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Real login</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">=</span> client<span class="op">.</span>Post<span class="op">(</span>baseURL<span class="op">+</span><span class="st">&quot;/api/v1/auth/login&quot;</span><span class="op">,</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;application/json&quot;</span><span class="op">,</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        strings<span class="op">.</span>NewReader<span class="op">(</span><span class="st">`{&quot;username&quot;:&quot;integuser&quot;,&quot;password&quot;:&quot;testpass123&quot;}`</span><span class="op">))</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusOK<span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> loginResp <span class="kw">struct</span><span class="op">{</span> Token <span class="dt">string</span> <span class="op">}</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    json<span class="op">.</span>NewDecoder<span class="op">(</span>resp<span class="op">.</span>Body<span class="op">).</span>Decode<span class="op">(&amp;</span>loginResp<span class="op">)</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> loginResp<span class="op">.</span>Token<span class="op">)</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Real authenticated request</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    req<span class="op">,</span> _ <span class="op">:=</span> http<span class="op">.</span>NewRequest<span class="op">(</span><span class="st">&quot;GET&quot;</span><span class="op">,</span> baseURL<span class="op">+</span><span class="st">&quot;/api/v1/workers&quot;</span><span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    req<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Authorization&quot;</span><span class="op">,</span> <span class="st">&quot;Bearer &quot;</span><span class="op">+</span>loginResp<span class="op">.</span>Token<span class="op">)</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">=</span> client<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> http<span class="op">.</span>StatusOK<span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="e2e-challenges">2.5 E2E Challenges</h3>
+<p><strong>Scope</strong>: Complete user workflows validating real-world
+usage <strong>Mock Policy</strong>: ABSOLUTELY NO MOCKS
+<strong>Execution</strong>:
+<code>tests/e2e/challenges/run_all_challenges.sh</code>
+<strong>Infrastructure</strong>: Production-like deployment</p>
+<p>Challenge Requirements (per CONST-035): 1. Each challenge represents
+a REAL user workflow 2. Challenge MUST fail if feature is simulated or
+stubbed 3. Challenge MUST verify output quality (not just existence) 4.
+Challenge MUST use real infrastructure 5. Challenge wrapper MUST
+correctly propagate failures 6. Challenge MUST produce JSON report with
+pass/fail evidence</p>
+<h4 id="challenge-categories">Challenge Categories</h4>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 17%" />
+<col style="width: 33%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System Boot</td>
+<td>5</td>
+<td>Validate all services start and health checks pass</td>
+<td><code>full_system_boot_challenge.sh</code></td>
+</tr>
+<tr>
+<td>Constitution</td>
+<td>3</td>
+<td>Verify governance files exist and are valid</td>
+<td><code>constitution_validation_challenge.sh</code></td>
+</tr>
+<tr>
+<td>LLM Providers</td>
+<td>15</td>
+<td>Each provider generates real responses</td>
+<td><code>ollama_generation_challenge.sh</code></td>
+</tr>
+<tr>
+<td>Tools</td>
+<td>20</td>
+<td>Each tool performs real operations</td>
+<td><code>shell_execution_challenge.sh</code></td>
+</tr>
+<tr>
+<td>Workflows</td>
+<td>10</td>
+<td>Complete development workflows</td>
+<td><code>plan_build_test_challenge.sh</code></td>
+</tr>
+<tr>
+<td>Security</td>
+<td>5</td>
+<td>Auth, sandboxing, input validation</td>
+<td><code>auth_penetration_challenge.sh</code></td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>5</td>
+<td>Load testing, resource limits</td>
+<td><code>concurrent_tasks_challenge.sh</code></td>
+</tr>
+<tr>
+<td>Anti-Bluff</td>
+<td>10</td>
+<td>Detect simulated/placeholder behavior</td>
+<td><code>no_simulation_challenge.sh</code></td>
+</tr>
+<tr>
+<td>containers</td>
+<td>5</td>
+<td>Docker builds, compose orchestration</td>
+<td><code>docker_health_challenge.sh</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="challenge-framework">Challenge Framework</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Challenge Framework Template</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Every challenge MUST follow this structure</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="va">CHALLENGE_NAME</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${1</span><span class="op">:-</span>unknown<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="va">LOG_FILE</span><span class="op">=</span><span class="st">&quot;/tmp/challenge_</span><span class="va">${CHALLENGE_NAME}</span><span class="st">_</span><span class="va">$(</span><span class="fu">date</span> +%s<span class="va">)</span><span class="st">.log&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="va">RESULT_FILE</span><span class="op">=</span><span class="st">&quot;/tmp/challenge_results.json&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># ANTI-BLUFF: Robust failure tracking</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="va">PASSED</span><span class="op">=</span>0</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="va">FAILED</span><span class="op">=</span>0</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">log()</span> <span class="kw">{</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[</span><span class="va">$(</span><span class="fu">date</span> <span class="at">-Iseconds</span><span class="va">)</span><span class="st">] </span><span class="va">$1</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">tee</span> <span class="at">-a</span> <span class="st">&quot;</span><span class="va">$LOG_FILE</span><span class="st">&quot;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="fu">pass()</span> <span class="kw">{</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="va">PASSED</span><span class="op">=</span><span class="va">$((PASSED</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="ex">log</span> <span class="st">&quot;|PASSED| </span><span class="va">$1</span><span class="st">&quot;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="fu">fail()</span> <span class="kw">{</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="va">FAILED</span><span class="op">=</span><span class="va">$((FAILED</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="ex">log</span> <span class="st">&quot;|FAILED| </span><span class="va">$1</span><span class="st">&quot;</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Continue running - don&#39;t exit immediately</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="fu">cleanup()</span> <span class="kw">{</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generate JSON result</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$RESULT_FILE</span><span class="st">&quot;</span> <span class="op">&lt;&lt; EOF</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;challenge&quot;: &quot;</span><span class="va">$CHALLENGE_NAME</span><span class="st">&quot;,</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;timestamp&quot;: &quot;</span><span class="va">$(</span><span class="fu">date</span> <span class="at">-Iseconds</span><span class="va">)</span><span class="st">&quot;,</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;passed&quot;: </span><span class="va">$PASSED</span><span class="st">,</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;failed&quot;: </span><span class="va">$FAILED</span><span class="st">,</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;total&quot;: </span><span class="va">$((PASSED</span> <span class="op">+</span> <span class="va">FAILED))</span><span class="st">,</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;success&quot;: </span><span class="va">$(</span><span class="cf">if</span> <span class="bu">[</span> <span class="va">$FAILED</span> <span class="ot">-eq</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span> <span class="bu">echo</span> <span class="st">&quot;true&quot;</span><span class="kw">;</span> <span class="cf">else</span> <span class="bu">echo</span> <span class="st">&quot;false&quot;</span><span class="kw">;</span> <span class="cf">fi</span><span class="va">)</span><span class="st">,</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;log&quot;: &quot;</span><span class="va">$LOG_FILE</span><span class="st">&quot;</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="bu">trap</span> cleanup EXIT</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="co"># --- CHALLENGE BODY STARTS HERE ---</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="co"># ANTI-BLUFF: Always verify the real behavior, not just that code exists</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: LLM Generation Challenge</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="ex">log</span> <span class="st">&quot;Testing LLM generation with Ollama...&quot;</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="va">RESPONSE</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-s</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/llm/generate <span class="dt">\</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">-d</span> <span class="st">&#39;{&quot;prompt&quot;:&quot;What is the capital of France?&quot;,&quot;model&quot;:&quot;llama3.2&quot;}&#39;</span> <span class="dt">\</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span><span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$LOG_FILE</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="fu">true</span><span class="va">)</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a><span class="co"># ANTI-BLUFF CHECK 1: Response must exist</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-z</span> <span class="st">&quot;</span><span class="va">$RESPONSE</span><span class="st">&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>    <span class="ex">fail</span> <span class="st">&quot;Empty response from LLM endpoint&quot;</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    <span class="ex">pass</span> <span class="st">&quot;Received non-empty response&quot;</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="co"># ANTI-BLUFF CHECK 2: Response must not be simulated</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$RESPONSE</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-qi</span> <span class="st">&quot;simulated&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>    <span class="ex">fail</span> <span class="st">&quot;Response contains &#39;simulated&#39; - BLUFF DETECTED&quot;</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>    <span class="ex">pass</span> <span class="st">&quot;Response is not simulated&quot;</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a><span class="co"># ANTI-BLUFF CHECK 3: Response must actually answer the question</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$RESPONSE</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-qi</span> <span class="st">&quot;paris&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    <span class="ex">pass</span> <span class="st">&quot;Response correctly answers the question&quot;</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>    <span class="ex">fail</span> <span class="st">&quot;Response does not contain expected answer &#39;Paris&#39;&quot;</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="co"># ANTI-BLUFF CHECK 4: Response must have reasonable length (not just echo)</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="va">RESPONSE_LEN</span><span class="op">=</span><span class="va">${</span><span class="op">#</span><span class="va">RESPONSE}</span></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$RESPONSE_LEN</span><span class="st">&quot;</span> <span class="ot">-lt</span> 50 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    <span class="ex">fail</span> <span class="st">&quot;Response too short (</span><span class="va">$RESPONSE_LEN</span><span class="st"> chars) - likely just echoing prompt&quot;</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>    <span class="ex">pass</span> <span class="st">&quot;Response has reasonable length (</span><span class="va">$RESPONSE_LEN</span><span class="st"> chars)&quot;</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a><span class="co"># --- CHALLENGE BODY ENDS HERE ---</span></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$FAILED</span> <span class="ot">-gt</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>    <span class="ex">log</span> <span class="st">&quot;Challenge FAILED with </span><span class="va">$FAILED</span><span class="st"> failures&quot;</span></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>    <span class="ex">log</span> <span class="st">&quot;Challenge PASSED with </span><span class="va">$PASSED</span><span class="st"> checks&quot;</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 0</span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div>
+<h3 id="security-tests">2.6 Security Tests</h3>
+<p><strong>Scope</strong>: OWASP compliance, penetration testing,
+sandbox validation <strong>Execution</strong>:
+<code>make security-test</code> or
+<code>./run_tests.sh --security</code></p>
+<p>Requirements: - [ ] SQL injection attempts against all endpoints - [
+] Path traversal in file operations - [ ] Command injection in shell
+tool - [ ] JWT token tampering - [ ] Rate limit enforcement - [ ] CORS
+policy validation - [ ] Sandbox escape attempts</p>
+<h3 id="performance-benchmarks">2.7 Performance &amp; Benchmarks</h3>
+<p><strong>Scope</strong>: Response times, throughput, resource usage
+<strong>Execution</strong>: <code>make benchmark</code></p>
+<p>Requirements: - [ ] LLM generation latency benchmarks - [ ]
+Concurrent task handling benchmarks - [ ] Database query performance
+benchmarks - [ ] Memory usage profiling - [ ] Worker scaling
+benchmarks</p>
+<hr />
+<h2 id="test-execution-matrix">3. Test Execution Matrix</h2>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 15%" />
+<col style="width: 22%" />
+<col style="width: 17%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>Command</th>
+<th>Environment</th>
+<th>Duration</th>
+<th>Mocks Allowed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td><code>go test -short ./...</code></td>
+<td>Local</td>
+<td>&lt; 2 min</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>Contract</td>
+<td><code>go test ./tests/contract/...</code></td>
+<td>Local + APIs</td>
+<td>&lt; 5 min</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>Component</td>
+<td><code>go test ./tests/component/...</code></td>
+<td>Local + Testcontainers</td>
+<td>&lt; 10 min</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td><code>./run_tests.sh --integration</code></td>
+<td>Docker Compose</td>
+<td>&lt; 30 min</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>E2E Challenges</td>
+<td><code>./run_all_challenges.sh</code></td>
+<td>Production-like</td>
+<td>&lt; 60 min</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>Security</td>
+<td><code>./run_tests.sh --security</code></td>
+<td>Isolated</td>
+<td>&lt; 15 min</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td><code>./run_tests.sh --benchmarks</code></td>
+<td>Dedicated</td>
+<td>&lt; 30 min</td>
+<td>NO</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="anti-bluff-verification-checklist">4. Anti-Bluff Verification
+Checklist</h2>
+<p>For EVERY test added to HelixCode, verify:</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Not a Wrapper
+Bluff</strong>: Test wrapper correctly propagates all failures (use
+<code>grep &quot;|FAILED|&quot;</code> pattern, not just exit codes)</label></li>
+<li><label><input type="checkbox"></input><strong>Not a Contract
+Bluff</strong>: Test exercises the actual advertised capability, not a
+subset</label></li>
+<li><label><input type="checkbox"></input><strong>Not a Structural
+Bluff</strong>: Test verifies behavior, not just file/function
+existence</label></li>
+<li><label><input type="checkbox"></input><strong>Not a Comment
+Bluff</strong>: Test validates the actual code behavior, not the comment
+description</label></li>
+<li><label><input type="checkbox"></input><strong>Not a Skip Bluff</strong>:
+No bare <code>t.Skip()</code> without
+<code>SKIP-OK: #&lt;ticket&gt;</code> marker</label></li>
+<li><label><input type="checkbox"></input><strong>Real
+Infrastructure</strong>: Non-unit tests use real services (or properly
+skip if unavailable)</label></li>
+<li><label><input type="checkbox"></input><strong>Real Assertions</strong>:
+Assertions check actual output quality, not just
+non-nil/non-empty</label></li>
+<li><label><input type="checkbox"></input><strong>Failure Testing</strong>:
+Tests verify error handling with real failure injection</label></li>
+<li><label><input type="checkbox"></input><strong>Concurrency
+Testing</strong>: Tests verify thread-safety with
+goroutines</label></li>
+<li><label><input type="checkbox"></input><strong>Resource Limits</strong>:
+Tests respect GOMAXPROCS=2, nice -n 19 limits</label></li>
+</ul>
+<hr />
+<h2 id="continuous-verification-post-implementation">5. Continuous
+Verification (Post-Implementation)</h2>
+<p>After every commit:</p>
+<ol type="1">
+<li><strong>Unit Tests</strong>: <code>make test</code> - Must pass (2
+min)</li>
+<li><strong>Build Verification</strong>: <code>make build</code> - Must
+compile all targets</li>
+<li><strong>Lint &amp; Format</strong>: <code>make lint</code> - No
+warnings</li>
+<li><strong>Integration Smoke</strong>:
+<code>./run_tests.sh --smoke</code> - Core paths (5 min)</li>
+<li><strong>Challenge Sample</strong>:
+<code>./run_all_challenges.sh --sample</code> - 10% of challenges (5
+min)</li>
+</ol>
+<p>Before every release:</p>
+<ol type="1">
+<li><strong>Full Integration</strong>:
+<code>./run_tests.sh --integration</code> - All integration tests</li>
+<li><strong>Full Challenges</strong>:
+<code>./run_all_challenges.sh</code> - ALL challenges</li>
+<li><strong>Security Scan</strong>:
+<code>./run_tests.sh --security</code></li>
+<li><strong>Performance Baseline</strong>:
+<code>./run_tests.sh --benchmarks</code></li>
+<li><strong>Documentation Challenge</strong>: Verify all README examples
+work</li>
+</ol>
+<hr />
+<h2 id="test-data-management">6. Test Data Management</h2>
+<h3 id="database-fixtures">6.1 Database Fixtures</h3>
+<ul>
+<li>Use <code>testfixtures</code> or manual SQL scripts</li>
+<li>Load fixtures before component/integration tests</li>
+<li>Clean up (truncate) after each test</li>
+<li>NEVER use production data in tests</li>
+</ul>
+<h3 id="api-keys-secrets">6.2 API Keys &amp; Secrets</h3>
+<ul>
+<li>Use <code>.env.test</code> for test credentials</li>
+<li>Mark tests to skip when credentials unavailable</li>
+<li>Use free-tier providers for CI (GitHub Copilot, Qwen, OpenRouter
+free models)</li>
+<li>Rotate test credentials monthly</li>
+</ul>
+<h3 id="container-images">6.3 Container Images</h3>
+<ul>
+<li>Pin specific versions (not <code>latest</code>)</li>
+<li>Pre-pull images in CI to avoid network flakes</li>
+<li>Use minimal images where possible (alpine variants)</li>
+</ul>
+<hr />
+<h2 id="failure-investigation-protocol">7. Failure Investigation
+Protocol</h2>
+<p>When a test or challenge fails:</p>
+<ol type="1">
+<li><strong>Reproduce locally</strong>: Can you make it fail
+consistently?</li>
+<li><strong>Check infrastructure</strong>: Are all services running?
+(<code>docker-compose ps</code>)</li>
+<li><strong>Check logs</strong>:
+<code>docker-compose logs helixcode-server</code></li>
+<li><strong>Check resource limits</strong>: Did the test exceed
+CPU/memory limits?</li>
+<li><strong>Check for flakiness</strong>: Run 10 times, does it fail
+consistently?</li>
+<li><strong>Check anti-bluff indicators</strong>: Does failure reveal a
+bluff?</li>
+<li><strong>Document</strong>: Add to
+<code>docs/issues/fixed/BUGFIXES.md</code> with reproduction steps</li>
+</ol>
+<hr />
+<h2 id="success-metrics">8. Success Metrics</h2>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 23%" />
+<col style="width: 21%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Current</th>
+<th>Target</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit Test Coverage</td>
+<td>Unknown</td>
+<td>80%+</td>
+<td><code>go test -cover</code></td>
+</tr>
+<tr>
+<td>Integration Test Count</td>
+<td>Unknown</td>
+<td>50+</td>
+<td>Count in <code>tests/integration/</code></td>
+</tr>
+<tr>
+<td>Challenge Count</td>
+<td>Unknown</td>
+<td>100+</td>
+<td>Count in <code>tests/e2e/challenges/</code></td>
+</tr>
+<tr>
+<td>Bluff Detection Rate</td>
+<td>Unknown</td>
+<td>100%</td>
+<td>Challenges catch all simulated behavior</td>
+</tr>
+<tr>
+<td>False Positive Rate</td>
+<td>Unknown</td>
+<td>0%</td>
+<td>No test passes when feature is broken</td>
+</tr>
+<tr>
+<td>CI Build Time</td>
+<td>Unknown</td>
+<td>&lt; 10 min</td>
+<td><code>make ci-validate-all</code></td>
+</tr>
+<tr>
+<td>Documentation Example Pass Rate</td>
+<td>Unknown</td>
+<td>100%</td>
+<td>Every README example verified</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>This testing strategy is a living document. Every new feature
+MUST include tests that satisfy the anti-bluff criteria defined herein.
+No exceptions.</em></p>
+</body>
+</html>

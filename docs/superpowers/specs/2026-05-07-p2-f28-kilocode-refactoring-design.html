@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f28-kilocode-refactoring-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f28-kilocode-refactoring-design</h1>
+</header>
+<h1 id="phase-2-feature-28-kilo-code-ast-aware-refactoring">Phase 2 /
+Feature 28 — Kilo-code AST-Aware Refactoring</h1>
+<p><strong>Date:</strong> 2026-05-07 | <strong>Status:</strong> Approved
+<strong>Programme:</strong> CLI-Agent Fusion — Phase 2 port
+(kilo-code)</p>
+<h2 id="goal">1. Goal</h2>
+<p>Ship AST-aware multi-file refactoring: cross-file rename, semantic
+multi-edit blocks, codebase impact analysis with call-graph + blast
+radius, and refactoring utilities (extract method, move, inline). Reuses
+F17 smart-edit for atomic file edits, repomap/tree-sitter for AST
+parsing and call graph construction.</p>
+<h2 id="architecture">2. Architecture</h2>
+<p><code>internal/kilocode/</code> (NEW) — 3 sub-components: -
+<strong>RenameEngine</strong>: tree-sitter query all references → atomic
+F17 edits → verify - <strong>ImpactAnalyzer</strong>: call graph from
+tree-sitter → affected files/functions → blast radius -
+<strong>Refactorer</strong>: extract method, move symbol, inline call
+(AST transforms)</p>
+<p>Tools: kilocode_rename, kilocode_impact, kilocode_multi_edit. Slash:
+/kilocode.</p>
+<h2 id="task-breakdown-8-tasks">3. Task Breakdown (8 tasks)</h2>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 28%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>Bootstrap</td>
+<td>F28 evidence + PROGRESS + CONTINUATION</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>types.go + callgraph.go</td>
+<td>CallGraph + SymbolRef + sentinels (TDD)</td>
+</tr>
+<tr>
+<td>T03</td>
+<td>rename.go</td>
+<td>Tree-sitter query + atomic F17 edits (TDD)</td>
+</tr>
+<tr>
+<td>T04</td>
+<td>impact.go</td>
+<td>ImpactAnalyzer with call graph + blast radius (TDD)</td>
+</tr>
+<tr>
+<td>T05</td>
+<td>refactor.go</td>
+<td>Extract method, move, inline (TDD)</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>kilocode_tools.go</td>
+<td>3 tools + /kilocode slash (TDD)</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>main.go wiring</td>
+<td>Register tools + slash</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>Challenge harness + close-out</td>
+<td>5 phases + push 4 remotes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Zero new deps</strong> — tree-sitter already indirect,
+F17/F25/repomap already shipped.</p>
+</body>
+</html>

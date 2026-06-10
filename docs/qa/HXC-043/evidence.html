@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-043-auth-login-nil-db-panic-http-500-real-product-bug-found-by-hxc-041-live-run">HXC-043
+— auth Login nil-DB panic → HTTP 500 (real product bug, found by HXC-041
+live run)</h1>
+<p>Case HXC-AUTH-003 (login, expect 401) got HTTP 500 empty body. ROOT
+CAUSE (FACT from server stacktrace): with db=nil (server’s graceful
+“continuing without database” path),
+helix_code/internal/auth/auth.go:156 (*AuthService).Login calls
+s.db.GetUserByUsername on nil s.db → nil-pointer panic → Gin Recovery →
+HTTP 500. Reached via internal/server/handlers.go:162. Raw curl
+confirmed HTTP/1.1 500. FIX: guard nil s.db in Login + sibling
+db-touching auth paths → clean 401/503. RED test = helixcode-auth.yaml
+HXC-AUTH-003 via <code>helixqa http</code>. [Fix in progress under
+subagent — RED→GREEN evidence to be appended.]</p>
+<h2 id="fixed-s1-commit-fe764e96-redgreen-real-captured-evidence">FIXED
+(S1, commit fe764e96) — RED→GREEN, real captured evidence</h2>
+<p>Guarded all 8 db-touching auth methods via new nil-receiver-safe
+(<em>AuthService).dbAvailable() (handles nil db-field AND nil
+</em>AuthService receiver = the real boot path).
+Login→ErrInvalidCredentials(401),
+Register/Logout/LogoutAll/UpdateUser/DeleteUser/VerifyJWTWithDB→ErrAuthBackendUnavailable(503),
+VerifySession→ErrTokenInvalid. handlers.go login maps
+ErrAuthBackendUnavailable→503, keeps 401 default. - RED (pre-fix binary,
+db=nil): POST /api/v1/auth/login → HTTP 500 + panic at auth.go:156. -
+verify-compile: exit 0. - GREEN (fixed binary, db=nil): same curl → HTTP
+401 {“error”:“invalid credentials”,“message”:“Login failed”},
+panic_count=0. - helixqa bank vs live server: 16 cases — 16 PASS, 0
+FAIL, 0 SKIP (was 15/16). HXC-AUTH-003 now PASS. - New unit test
+auth_nildb_test.go TestAuthService_NilDB_NoPanic GREEN; §11.4.115
+RED_MODE=1 on guard-stripped copy PASSES (defect genuinely reproduces
+pre-fix). Commit fe764e96 (auth.go, auth_nildb_test.go, handlers.go) —
+already in meta history + pushed (ancestor of 81830bba).</p>
+</body>
+</html>

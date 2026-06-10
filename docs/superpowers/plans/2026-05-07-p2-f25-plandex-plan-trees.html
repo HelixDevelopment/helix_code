@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f25-plandex-plan-trees</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f25-plandex-plan-trees</h1>
+</header>
+<h1 id="p2-f25-plandex-plan-trees-context-compaction-implementation-plan">P2-F25
+— Plandex Plan Trees + Context Compaction Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<blockquote>
+<p><strong>Programme position:</strong> F25 is the
+<strong>fifth</strong> Phase 2 feature of CLI-Agent Fusion (after F21
+Codex Approval Modes, F22 Aider Git Auto-Commit, F23 Cline Browser Tool,
+F24 Codex Project Memory). Task T01 advances PROGRESS.md from “Phase 2:
+F24 closed; F25 next candidate (brainstorm)” to “Phase 2 of CLI-Agent
+Fusion programme: F25 (Plandex Plan Trees) in flight” and appends an F25
+evidence header to <code>docs/improvements/07_phase_2_evidence.md</code>
+(already created in F21-T01, extended by F22-T01 + F23-T01 +
+F24-T01).</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, end-to-end <strong>plan tree
+system</strong> for the HelixCode CLI agent. F25 ADDS a NEW
+<code>internal/plantree/</code> package: <code>PlanNode</code> (ID,
+Title, Description, Status, Children, ParentID, Metadata),
+<code>PlanTree</code> (Root + Name + Version), <code>FileStore</code>
+(atomic JSON Save/Load/List/Delete to
+<code>.helixcode/plans/&lt;name&gt;.json</code>), operations
+(CreateTree, BranchNode, MergeNode), <code>VerifyTree</code> (6
+structural checks), <code>CompactTree</code> (F01 summariser
+delegation). ADDS six <code>tools.Tool</code> implementations:
+<code>plan_create</code>, <code>plan_branch</code>,
+<code>plan_merge</code>, <code>plan_list</code>, <code>plan_show</code>,
+<code>plan_delete</code>. ADDS a NEW
+<code>internal/commands/plan_command.go</code> with <code>/plan</code>
+slash (<code>list</code> / <code>show</code> / <code>compact</code> /
+<code>verify</code>). MODIFIES <code>cmd/cli/main.go</code> to construct
+PlanStore + register tools + register slash.</p>
+<p><strong>Architecture:</strong> New files under
+<code>helix_code/internal/plantree/</code> — <code>types.go</code>
+(PlanNode + PlanTree + PlanStatus + PlanTreeSummary + PlanIssue +
+VerifyResult + sentinels + constants + RenderTree),
+<code>store.go</code> (FileStore with Store interface for test seam),
+<code>operations.go</code> (CreateTree + BranchNode + MergeNode — pure
+in-memory), <code>verify.go</code> (VerifyTree — orphans, cycles, depth,
+uniqueness), <code>compact.go</code> (CompactTree + Summariser
+interface), <code>plan_tools.go</code> (six tools.Tool implementations).
+New <code>internal/commands/plan_command.go</code> for the
+<code>/plan</code> slash. Three existing files get small additions:
+<code>cmd/cli/main.go</code> (construct PlanStore + RegisterPlanTools +
+/plan registration), <code>internal/tools/registry.go</code> (register 6
+plan tools in buildToolList),
+<code>internal/commands/builtin/register.go</code> (register /plan
+slash).</p>
+<p><strong>Tech Stack:</strong> Go 1.24, testify v1.11, google/uuid
+(ALREADY direct in <code>helix_code/go.mod</code>), F01
+compression.Summariser (ALREADY shipped). <strong>Zero new external
+deps</strong> — <code>encoding/json</code>, <code>os</code>,
+<code>sync</code>, <code>time</code>, <code>errors</code>,
+<code>fmt</code>, <code>strings</code>, <code>path/filepath</code>,
+<code>context</code>, <code>crypto/sha256</code> all stdlib.
+<code>go mod tidy</code> after T09 must produce no diff in either
+<code>go.mod</code> or <code>go.sum</code>.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-07-p2-f25-plandex-plan-trees-design.md</code>
+(this commit’s companion).</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (full 4-term applied to F25
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/plantree internal/commands/plan_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — F25 can
+degenerate in five ways: (a) plan_create writes invalid/empty JSON; (b)
+plan_branch adds orphan with unresolvable ParentID; (c) plan_merge
+leaves parent Metadata unchanged; (d) compact reports success but byte
+count unchanged; (e) verify reports clean on corrupted tree. Each mapped
+to unit + integration + Challenge phase per spec §5.2. Plus two bonus
+phases: (f) plan_show output doesn’t match actual tree structure; (g)
+shallow compaction (depth &lt; 3) is a no-op. Challenge harness has 7
+phases (A-G) with positive byte evidence.</p>
+<p><strong>Why this is consequential:</strong> plan trees give the agent
+structured, inspectable implementation tracking. Without F25, agents
+hold plans in opaque conversation context that disappears on restart.
+With F25, plans are persisted, branchable, mergeable, verifiable, and
+compactible — a full project-management surface. F21-24 gave the agent
+approvals, auto-commits, browser eyes, and persistent memory; F25 gives
+it a structured plan.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>P2-F25-T01 — bootstrap F25 evidence
+section + advance PROGRESS to F25</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T02 —
+<code>internal/plantree/types.go</code>: PlanNode + PlanTree +
+PlanStatus + PlanTreeSummary + PlanIssue + VerifyResult + sentinels +
+constants + RenderTree() (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T03 —
+<code>internal/plantree/store.go</code>: FileStore Save/Load/List/Delete
++ atomic writes + Store interface (TDD with real tempdirs)</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T04 —
+<code>internal/plantree/operations.go</code>: CreateTree + BranchNode +
+MergeNode pure-tree transforms (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T05 —
+<code>internal/plantree/verify.go</code>: VerifyTree 6 checks (orphans,
+cycles, depth, uniqueness, self-parent, node count) (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T06 —
+<code>internal/plantree/compact.go</code>: CompactTree + Summariser
+interface + threshold guard + byte reduction (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T07 —
+<code>internal/plantree/plan_tools.go</code>: Six tools.Tool
+implementations with Store seam (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T08 —
+<code>internal/commands/plan_command.go</code>: /plan slash
+(list/show/compact/verify) (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T09 — main.go wiring +
+registry registration + builtin registration + integration
+test</label></li>
+<li><label><input type="checkbox"></input>P2-F25-T10 — Challenge harness 7
+phases A-G + close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap-f25-evidence">Task 1: Bootstrap F25
+evidence</h2>
+<p>Append F25 section header to
+<code>docs/improvements/07_phase_2_evidence.md</code> (created in
+F21-T01, extended by F22-T01 + F23-T01 + F24-T01) with spec SHA
+placeholder (will be filled by this commit). Update PROGRESS.md current
+focus from “Phase 2 — CLI Agent Porting (in progress); F24 COMPLETE; F25
+next candidate” to “Phase 2 of CLI-Agent Fusion programme: F25 (Plandex
+Plan Trees) in flight”. Insert F25 task list (10 items). Verify zero new
+external deps:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;google/uuid&quot;</span> go.mod</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: google/uuid already present.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff go.mod <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;^\+|^-&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;^+++\|^---&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;UNEXPECTED&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>Update <code>docs/CONTINUATION.md</code> with F25 mid-flight section
+(active feature pointer, Q1-Q5 summary, task table, anti-bluff hot
+zone).</p>
+<p>Commit:
+<code>docs(P2-F25-T01): bootstrap F25 evidence + advance PROGRESS to F25 (Plandex Plan Trees)</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/plantree/types.go</code>,
+<code>internal/plantree/types_test.go</code>,
+<code>internal/plantree/doc.go</code></p>
+<p><strong>Implementation:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// types.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> plantree</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;encoding/json&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;errors&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">// PlanStatus enum</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanStatus <span class="dt">int</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    StatusPending    PlanStatus <span class="op">=</span> <span class="ot">iota</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    StatusInProgress</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    StatusCompleted</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    StatusFailed</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    StatusPruned</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s PlanStatus<span class="op">)</span> String<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> s <span class="op">{</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusPending<span class="op">:</span>    <span class="cf">return</span> <span class="st">&quot;pending&quot;</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusInProgress<span class="op">:</span> <span class="cf">return</span> <span class="st">&quot;in_progress&quot;</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusCompleted<span class="op">:</span>  <span class="cf">return</span> <span class="st">&quot;completed&quot;</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusFailed<span class="op">:</span>     <span class="cf">return</span> <span class="st">&quot;failed&quot;</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusPruned<span class="op">:</span>     <span class="cf">return</span> <span class="st">&quot;pruned&quot;</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span>               <span class="cf">return</span> <span class="st">&quot;unknown&quot;</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s PlanStatus<span class="op">)</span> Marker<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> s <span class="op">{</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusPending<span class="op">:</span>    <span class="cf">return</span> <span class="st">&quot;[ ]&quot;</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusInProgress<span class="op">:</span> <span class="cf">return</span> <span class="st">&quot;[▶]&quot;</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusCompleted<span class="op">:</span>  <span class="cf">return</span> <span class="st">&quot;[✓]&quot;</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusFailed<span class="op">:</span>     <span class="cf">return</span> <span class="st">&quot;[✗]&quot;</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> StatusPruned<span class="op">:</span>     <span class="cf">return</span> <span class="st">&quot;[×]&quot;</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span>               <span class="cf">return</span> <span class="st">&quot;[?]&quot;</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s PlanStatus<span class="op">)</span> MarshalJSON<span class="op">()</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> json<span class="op">.</span>Marshal<span class="op">(</span>s<span class="op">.</span>String<span class="op">())</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>PlanStatus<span class="op">)</span> UnmarshalJSON<span class="op">(</span>data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> str <span class="dt">string</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> json<span class="op">.</span>Unmarshal<span class="op">(</span>data<span class="op">,</span> <span class="op">&amp;</span>str<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> err</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> str <span class="op">{</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;pending&quot;</span><span class="op">:</span>     <span class="op">*</span>s <span class="op">=</span> StatusPending</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;in_progress&quot;</span><span class="op">:</span> <span class="op">*</span>s <span class="op">=</span> StatusInProgress</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;completed&quot;</span><span class="op">:</span>   <span class="op">*</span>s <span class="op">=</span> StatusCompleted</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;failed&quot;</span><span class="op">:</span>      <span class="op">*</span>s <span class="op">=</span> StatusFailed</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;pruned&quot;</span><span class="op">:</span>      <span class="op">*</span>s <span class="op">=</span> StatusPruned</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span>            <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;unknown plan status: %s&quot;</span><span class="op">,</span> str<span class="op">)</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="co">// PlanNode</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanNode <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span>            <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>    Title       <span class="dt">string</span>            <span class="st">`json:&quot;title&quot;`</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>            <span class="st">`json:&quot;description&quot;`</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>    Status      PlanStatus        <span class="st">`json:&quot;status&quot;`</span></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>    Children    <span class="op">[]*</span>PlanNode       <span class="st">`json:&quot;children,omitempty&quot;`</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>    ParentID    <span class="dt">string</span>            <span class="st">`json:&quot;parent_id,omitempty&quot;`</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>    Metadata    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`json:&quot;metadata,omitempty&quot;`</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>    CreatedAt   time<span class="op">.</span>Time         <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>    UpdatedAt   time<span class="op">.</span>Time         <span class="st">`json:&quot;updated_at&quot;`</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="co">// PlanTree</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanTree <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    Name      <span class="dt">string</span>    <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    Version   <span class="dt">int</span>       <span class="st">`json:&quot;version&quot;`</span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>    Root      <span class="op">*</span>PlanNode <span class="st">`json:&quot;root&quot;`</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    CreatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>    UpdatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;updated_at&quot;`</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a><span class="co">// PlanTreeSummary</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanTreeSummary <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>    Name      <span class="dt">string</span>    <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>    NodeCount <span class="dt">int</span>       <span class="st">`json:&quot;node_count&quot;`</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>    RootID    <span class="dt">string</span>    <span class="st">`json:&quot;root_id&quot;`</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>    RootTitle <span class="dt">string</span>    <span class="st">`json:&quot;root_title&quot;`</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>    CreatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>    UpdatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;updated_at&quot;`</span></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a><span class="co">// PlanIssue</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanIssueSeverity <span class="dt">int</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    SeverityError   PlanIssueSeverity <span class="op">=</span> <span class="ot">iota</span></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>    SeverityWarning</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanIssue <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>    Severity PlanIssueSeverity <span class="st">`json:&quot;severity&quot;`</span></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>    NodeID   <span class="dt">string</span>            <span class="st">`json:&quot;node_id,omitempty&quot;`</span></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>    Message  <span class="dt">string</span>            <span class="st">`json:&quot;message&quot;`</span></span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifyResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>    Valid  <span class="dt">bool</span>        <span class="st">`json:&quot;valid&quot;`</span></span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>    Issues <span class="op">[]</span>PlanIssue <span class="st">`json:&quot;issues&quot;`</span></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a><span class="co">// Sentinel errors</span></span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>    ErrPlanNotFound      <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan not found&quot;</span><span class="op">)</span></span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>    ErrNodeNotFound      <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;node not found in tree&quot;</span><span class="op">)</span></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>    ErrCyclicMerge       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;merge would create a cycle&quot;</span><span class="op">)</span></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>    ErrPlanAlreadyExists <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan already exists&quot;</span><span class="op">)</span></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>    ErrTooManyNodes      <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan tree exceeds maximum node count&quot;</span><span class="op">)</span></span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>    ErrTreeCorrupt       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan tree is corrupt&quot;</span><span class="op">)</span></span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a><span class="co">// Constants</span></span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>    MaxNodes            <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>    MaxNodeDepth        <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a>    MaxDescriptionBytes <span class="op">=</span> <span class="dv">32</span> <span class="op">*</span> <span class="dv">1024</span></span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a>    CompactThreshold    <span class="op">=</span> <span class="dv">128</span> <span class="op">*</span> <span class="dv">1024</span></span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a>    StorageDir          <span class="op">=</span> <span class="st">&quot;.helixcode/plans&quot;</span></span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a>    CompactMarker       <span class="op">=</span> <span class="st">&quot;[c]&quot;</span></span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a><span class="co">// RenderTree renders a PlanNode as an indented text representation.</span></span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> RenderTree<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">,</span> depth <span class="dt">int</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a>    indent <span class="op">:=</span> strings<span class="op">.</span>Repeat<span class="op">(</span><span class="st">&quot;  &quot;</span><span class="op">,</span> depth<span class="op">)</span></span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a>    compactTag <span class="op">:=</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node<span class="op">.</span>Metadata <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> node<span class="op">.</span>Metadata<span class="op">[</span><span class="st">&quot;compacted&quot;</span><span class="op">]</span> <span class="op">==</span> <span class="st">&quot;true&quot;</span> <span class="op">{</span></span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a>        compactTag <span class="op">=</span> <span class="st">&quot; &quot;</span> <span class="op">+</span> CompactMarker</span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a>    result <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%s%s %s (%s)%s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> indent<span class="op">,</span> node<span class="op">.</span>Status<span class="op">.</span>Marker<span class="op">(),</span> node<span class="op">.</span>Title<span class="op">,</span> node<span class="op">.</span>ID<span class="op">,</span> compactTag<span class="op">)</span></span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a>        result <span class="op">+=</span> RenderTree<span class="op">(</span>child<span class="op">,</span> depth<span class="op">+</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result</span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a><span class="co">// CountNodes recursively counts all nodes in the tree rooted at node.</span></span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> CountNodes<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">)</span> <span class="dt">int</span> <span class="op">{</span></span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="dv">0</span> <span class="op">}</span></span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a>    count <span class="op">:=</span> <span class="dv">1</span></span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a>        count <span class="op">+=</span> CountNodes<span class="op">(</span>child<span class="op">)</span></span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count</span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a><span class="co">// MaxDepth returns the maximum depth from the given node.</span></span>
+<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> MaxDepth<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">)</span> <span class="dt">int</span> <span class="op">{</span></span>
+<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="dv">0</span> <span class="op">}</span></span>
+<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a>    maxChild <span class="op">:=</span> <span class="dv">0</span></span>
+<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a>        d <span class="op">:=</span> MaxDepth<span class="op">(</span>child<span class="op">)</span></span>
+<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> d <span class="op">&gt;</span> maxChild <span class="op">{</span> maxChild <span class="op">=</span> d <span class="op">}</span></span>
+<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> maxChild <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Tests (types_test.go):</strong> 1.
+<code>TestPlanStatus_String</code> — table: StatusPending → “pending”,
+StatusCompleted → “completed”, etc. 2.
+<code>TestPlanStatus_Marker</code> — table: StatusPending → “[ ]”,
+StatusFailed → “[✗]”, etc. 3. <code>TestPlanStatus_JSONRoundtrip</code>
+— each status marshals/unmarshals correctly 4.
+<code>TestPlanStatus_UnmarshalJSON_Unknown</code> — “bogus” returns
+error 5. <code>TestPlanNode_Creation</code> — new node has correct
+fields, zero Children 6. <code>TestPlanTree_Creation</code> — tree with
+root, name, version 7. <code>TestRenderTree_SingleNode</code> — single
+node renders with correct marker + ID 8.
+<code>TestRenderTree_MultiLevel</code> — 3-level tree renders with
+correct indentation 9. <code>TestRenderTree_CompactedNode</code> — node
+with Metadata[“compacted”]=“true” shows [c] marker 10.
+<code>TestRenderTree_NilNode</code> — nil returns “” 11.
+<code>TestCountNodes</code> — tree with 7 nodes returns 7 12.
+<code>TestMaxDepth</code> — 3-level tree returns 3</p>
+<p>Commit:
+<code>feat(P2-F25-T02): plantree types — PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree (TDD)</code>.</p>
+<hr />
+<h2 id="task-3-store.go-tdd">Task 3: store.go (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/plantree/store.go</code>,
+<code>internal/plantree/store_test.go</code></p>
+<p><strong>Implementation:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// store.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Store <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Save<span class="op">(</span>tree PlanTree<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Load<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>PlanTree<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    List<span class="op">()</span> <span class="op">([]</span>PlanTreeSummary<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Delete<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FileStore <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    dir <span class="dt">string</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    mu  sync<span class="op">.</span>Mutex</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewFileStore<span class="op">(</span>baseDir <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>FileStore <span class="op">{</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>FileStore<span class="op">{</span>dir<span class="op">:</span> filepath<span class="op">.</span>Join<span class="op">(</span>baseDir<span class="op">,</span> StorageDir<span class="op">)}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>fs <span class="op">*</span>FileStore<span class="op">)</span> Save<span class="op">(</span>tree PlanTree<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    fs<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> fs<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>fs<span class="op">.</span>dir<span class="op">,</span> <span class="bn">0700</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;create storage dir: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> json<span class="op">.</span>MarshalIndent<span class="op">(</span>tree<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;  &quot;</span><span class="op">)</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;marshal tree: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    path <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>fs<span class="op">.</span>dir<span class="op">,</span> tree<span class="op">.</span>Name<span class="op">+</span><span class="st">&quot;.json&quot;</span><span class="op">)</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    tmp <span class="op">:=</span> path <span class="op">+</span> <span class="st">&quot;.tmp&quot;</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> os<span class="op">.</span>WriteFile<span class="op">(</span>tmp<span class="op">,</span> data<span class="op">,</span> <span class="bn">0600</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;write temp file: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> os<span class="op">.</span>Rename<span class="op">(</span>tmp<span class="op">,</span> path<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        os<span class="op">.</span>Remove<span class="op">(</span>tmp<span class="op">)</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;atomic rename: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>fs <span class="op">*</span>FileStore<span class="op">)</span> Load<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>PlanTree<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    path <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>fs<span class="op">.</span>dir<span class="op">,</span> name<span class="op">+</span><span class="st">&quot;.json&quot;</span><span class="op">)</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    data<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> os<span class="op">.</span>IsNotExist<span class="op">(</span>err<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> PlanTree<span class="op">{},</span> ErrPlanNotFound</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> PlanTree<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;read plan file: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> tree PlanTree</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> json<span class="op">.</span>Unmarshal<span class="op">(</span>data<span class="op">,</span> <span class="op">&amp;</span>tree<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> PlanTree<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;%w: %v&quot;</span><span class="op">,</span> ErrTreeCorrupt<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tree<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>fs <span class="op">*</span>FileStore<span class="op">)</span> List<span class="op">()</span> <span class="op">([]</span>PlanTreeSummary<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    entries<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadDir<span class="op">(</span>fs<span class="op">.</span>dir<span class="op">)</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> os<span class="op">.</span>IsNotExist<span class="op">(</span>err<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;read storage dir: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> summaries <span class="op">[]</span>PlanTreeSummary</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> entry <span class="op">:=</span> <span class="kw">range</span> entries <span class="op">{</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> entry<span class="op">.</span>IsDir<span class="op">()</span> <span class="op">||</span> <span class="op">!</span>strings<span class="op">.</span>HasSuffix<span class="op">(</span>entry<span class="op">.</span>Name<span class="op">(),</span> <span class="st">&quot;.json&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>        name <span class="op">:=</span> strings<span class="op">.</span>TrimSuffix<span class="op">(</span>entry<span class="op">.</span>Name<span class="op">(),</span> <span class="st">&quot;.json&quot;</span><span class="op">)</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Try to get summary from file metadata only (fast path)</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Fall back to Load for the full summary</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>        tree<span class="op">,</span> err <span class="op">:=</span> fs<span class="op">.</span>Load<span class="op">(</span>name<span class="op">)</span></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span> <span class="co">// skip corrupted files</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>        summaries <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>summaries<span class="op">,</span> tree<span class="op">.</span>Summary<span class="op">())</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> summaries<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>fs <span class="op">*</span>FileStore<span class="op">)</span> Delete<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>    path <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>fs<span class="op">.</span>dir<span class="op">,</span> name<span class="op">+</span><span class="st">&quot;.json&quot;</span><span class="op">)</span></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> os<span class="op">.</span>Remove<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>os<span class="op">.</span>IsNotExist<span class="op">(</span>err<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;delete plan file: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a><span class="co">// Helper on PlanTree</span></span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>pt <span class="op">*</span>PlanTree<span class="op">)</span> Summary<span class="op">()</span> PlanTreeSummary <span class="op">{</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> PlanTreeSummary<span class="op">{</span></span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>        Name<span class="op">:</span>      pt<span class="op">.</span>Name<span class="op">,</span></span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a>        NodeCount<span class="op">:</span> CountNodes<span class="op">(</span>pt<span class="op">.</span>Root<span class="op">),</span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>        RootID<span class="op">:</span>    pt<span class="op">.</span>Root<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>        RootTitle<span class="op">:</span> pt<span class="op">.</span>Root<span class="op">.</span>Title<span class="op">,</span></span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>        CreatedAt<span class="op">:</span> pt<span class="op">.</span>CreatedAt<span class="op">,</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>        UpdatedAt<span class="op">:</span> pt<span class="op">.</span>UpdatedAt<span class="op">,</span></span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Tests (store_test.go) — ALL against real tempdir:</strong> 1.
+<code>TestFileStore_SaveLoad</code> — save tree → load → assert fields
+match 2. <code>TestFileStore_AtomicWrite</code> — save → file exists at
+path, no .tmp residue 3. <code>TestFileStore_LoadNotFound</code> — load
+nonexistent → ErrPlanNotFound 4.
+<code>TestFileStore_LoadCorrupted</code> — write invalid JSON → load →
+ErrTreeCorrupt 5. <code>TestFileStore_List</code> — save 3 trees → list
+returns 3 summaries with correct names 6.
+<code>TestFileStore_ListEmpty</code> — empty dir → empty slice, nil
+error 7. <code>TestFileStore_Delete</code> — save → delete → load →
+ErrPlanNotFound 8. <code>TestFileStore_DeleteIdempotent</code> — delete
+nonexistent → nil error 9. <code>TestFileStore_FileMode</code> — save →
+stat file → mode 0600 10. <code>TestFileStore_DirectoryCreation</code> —
+NewFileStore with nonexistent parent → Save creates dirs</p>
+<p>Commit:
+<code>feat(P2-F25-T03): plantree FileStore — atomic JSON Save/Load/List/Delete + Store interface (TDD real-tempdir)</code>.</p>
+<hr />
+<h2 id="task-4-operations.go-tdd">Task 4: operations.go (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/plantree/operations.go</code>,
+<code>internal/plantree/operations_test.go</code></p>
+<p><strong>Implementation:</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> CreateTree<span class="op">(</span>name<span class="op">,</span> title<span class="op">,</span> description <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>PlanTree<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> name <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan name required&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    now <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">().</span>UTC<span class="op">()</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    root <span class="op">:=</span> <span class="op">&amp;</span>PlanNode<span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        ID<span class="op">:</span>          uuid<span class="op">.</span>New<span class="op">().</span>String<span class="op">(),</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        Title<span class="op">:</span>       title<span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        Description<span class="op">:</span> description<span class="op">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        Status<span class="op">:</span>      StatusPending<span class="op">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        CreatedAt<span class="op">:</span>   now<span class="op">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        UpdatedAt<span class="op">:</span>   now<span class="op">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>PlanTree<span class="op">{</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        Name<span class="op">:</span>      name<span class="op">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        Version<span class="op">:</span>   <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        Root<span class="op">:</span>      root<span class="op">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        CreatedAt<span class="op">:</span> now<span class="op">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        UpdatedAt<span class="op">:</span> now<span class="op">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> BranchNode<span class="op">(</span>tree <span class="op">*</span>PlanTree<span class="op">,</span> parentID<span class="op">,</span> title<span class="op">,</span> description <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>PlanNode<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tree <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> tree<span class="op">.</span>Root <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;invalid tree&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> CountNodes<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">)</span> <span class="op">&gt;=</span> MaxNodes <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrTooManyNodes <span class="op">}</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    parent <span class="op">:=</span> findNode<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> parentID<span class="op">)</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> parent <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrNodeNotFound <span class="op">}</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    depth <span class="op">:=</span> nodeDepth<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> parentID<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> depth <span class="op">&gt;=</span> MaxNodeDepth <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;max depth %d exceeded&quot;</span><span class="op">,</span> MaxNodeDepth<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    now <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">().</span>UTC<span class="op">()</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    child <span class="op">:=</span> <span class="op">&amp;</span>PlanNode<span class="op">{</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        ID<span class="op">:</span>          uuid<span class="op">.</span>New<span class="op">().</span>String<span class="op">(),</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        Title<span class="op">:</span>       title<span class="op">,</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        Description<span class="op">:</span> description<span class="op">,</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        Status<span class="op">:</span>      StatusPending<span class="op">,</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        ParentID<span class="op">:</span>    parentID<span class="op">,</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        CreatedAt<span class="op">:</span>   now<span class="op">,</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        UpdatedAt<span class="op">:</span>   now<span class="op">,</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    parent<span class="op">.</span>Children <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>parent<span class="op">.</span>Children<span class="op">,</span> child<span class="op">)</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    tree<span class="op">.</span>UpdatedAt <span class="op">=</span> now</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> child<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> MergeNode<span class="op">(</span>tree <span class="op">*</span>PlanTree<span class="op">,</span> childID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>PlanNode<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tree <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> tree<span class="op">.</span>Root <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;invalid tree&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    child <span class="op">:=</span> findNode<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> childID<span class="op">)</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> child <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrNodeNotFound <span class="op">}</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> child<span class="op">.</span>ParentID <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;root node cannot be merged&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    parent <span class="op">:=</span> findNode<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> child<span class="op">.</span>ParentID<span class="op">)</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> parent <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;parent %s not found: %w&quot;</span><span class="op">,</span> child<span class="op">.</span>ParentID<span class="op">,</span> ErrTreeCorrupt<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Cycle check: following parent chain must not reach child</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> wouldCycle<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> parent<span class="op">.</span>ID<span class="op">,</span> childID<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrCyclicMerge</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> parent<span class="op">.</span>Metadata <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>        parent<span class="op">.</span>Metadata <span class="op">=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">)</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    parent<span class="op">.</span>Metadata<span class="op">[</span><span class="st">&quot;merged_from&quot;</span><span class="op">]</span> <span class="op">=</span> childID</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> history<span class="op">,</span> ok <span class="op">:=</span> parent<span class="op">.</span>Metadata<span class="op">[</span><span class="st">&quot;merged_history&quot;</span><span class="op">];</span> ok <span class="op">&amp;&amp;</span> history <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>        parent<span class="op">.</span>Metadata<span class="op">[</span><span class="st">&quot;merged_history&quot;</span><span class="op">]</span> <span class="op">=</span> history <span class="op">+</span> <span class="st">&quot;,&quot;</span> <span class="op">+</span> childID</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>        parent<span class="op">.</span>Metadata<span class="op">[</span><span class="st">&quot;merged_history&quot;</span><span class="op">]</span> <span class="op">=</span> childID</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>    child<span class="op">.</span>Status <span class="op">=</span> StatusCompleted</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>    tree<span class="op">.</span>UpdatedAt <span class="op">=</span> time<span class="op">.</span>Now<span class="op">().</span>UTC<span class="op">()</span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> parent<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a><span class="co">// findNode DFS search for node by ID</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> findNode<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">,</span> id <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>PlanNode <span class="op">{</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node<span class="op">.</span>ID <span class="op">==</span> id <span class="op">{</span> <span class="cf">return</span> node <span class="op">}</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> found <span class="op">:=</span> findNode<span class="op">(</span>child<span class="op">,</span> id<span class="op">);</span> found <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> found</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a><span class="co">// nodeDepth returns the depth of a node with the given ID relative to the tree root</span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> nodeDepth<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">,</span> id <span class="dt">string</span><span class="op">,</span> depth <span class="dt">int</span><span class="op">)</span> <span class="dt">int</span> <span class="op">{</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="dv">0</span> <span class="op">}</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node<span class="op">.</span>ID <span class="op">==</span> id <span class="op">{</span> <span class="cf">return</span> depth <span class="op">}</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> d <span class="op">:=</span> nodeDepth<span class="op">(</span>child<span class="op">,</span> id<span class="op">,</span> depth<span class="op">+</span><span class="dv">1</span><span class="op">);</span> d <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> d</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a><span class="co">// wouldCycle returns true if following parent chain from ancestorID reaches descendantID</span></span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> wouldCycle<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">,</span> ancestorID<span class="op">,</span> descendantID <span class="dt">string</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>    current <span class="op">:=</span> findNode<span class="op">(</span>node<span class="op">,</span> ancestorID<span class="op">)</span></span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> current <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> current<span class="op">.</span>ParentID <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> current<span class="op">.</span>ParentID <span class="op">==</span> descendantID <span class="op">{</span></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">true</span></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a>        current <span class="op">=</span> findNode<span class="op">(</span>node<span class="op">,</span> current<span class="op">.</span>ParentID<span class="op">)</span></span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">false</span></span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Tests (operations_test.go):</strong> 1.
+<code>TestCreateTree</code> — create → assert root.ID non-empty,
+title/description match, status=StatusPending 2.
+<code>TestCreateTree_EmptyName</code> — empty name → error 3.
+<code>TestBranchNode</code> — create tree → branch under root → assert
+child.ParentID==root.ID, root.Children contains child 4.
+<code>TestBranchNode_NotFound</code> — branch under nonexistent ID →
+ErrNodeNotFound 5. <code>TestBranchNode_MaxDepth</code> — branch 20
+levels deep → 21st branch → error 6.
+<code>TestBranchNode_MaxNodes</code> — branch until MaxNodes → next →
+ErrTooManyNodes 7. <code>TestMergeNode</code> — create → branch → merge
+child → parent.Metadata[“merged_from”]==child.ID,
+child.Status==StatusCompleted 8.
+<code>TestMergeNode_RootCannotMerge</code> — merge root → error 9.
+<code>TestMergeNode_CyclicMerge_Rejected</code> — branch → child →
+branch grandchild → try merge grandchild into child → ok, then try
+create cycle → ErrCyclicMerge 10.
+<code>TestMergeNode_MergeHistory</code> — merge child1 → merge child2 →
+parent.Metadata[“merged_history”]==“child1ID,child2ID” 11.
+<code>TestFindNode</code> — create multi-level tree → findNode returns
+correct node 12. <code>TestNodeDepth</code> — 3-level tree → depth of
+deepest == 3</p>
+<p>Commit:
+<code>feat(P2-F25-T04): plantree operations — CreateTree + BranchNode + MergeNode pure-tree transforms (TDD)</code>.</p>
+<hr />
+<h2 id="task-5-verify.go-tdd">Task 5: verify.go (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/plantree/verify.go</code>,
+<code>internal/plantree/verify_test.go</code></p>
+<p><strong>Implementation:</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> VerifyTree<span class="op">(</span>tree <span class="op">*</span>PlanTree<span class="op">)</span> VerifyResult <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tree <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> tree<span class="op">.</span>Root <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> VerifyResult<span class="op">{</span>Valid<span class="op">:</span> <span class="ot">false</span><span class="op">,</span> Issues<span class="op">:</span> <span class="op">[]</span>PlanIssue<span class="op">{{</span>Severity<span class="op">:</span> SeverityError<span class="op">,</span> Message<span class="op">:</span> <span class="st">&quot;tree is empty&quot;</span><span class="op">}}}</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> issues <span class="op">[]</span>PlanIssue</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    nodeMap <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>PlanNode<span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    buildNodeMap<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> nodeMap<span class="op">)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Unique IDs</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    idCount <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">int</span><span class="op">)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    countIDs<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> idCount<span class="op">)</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> id<span class="op">,</span> count <span class="op">:=</span> <span class="kw">range</span> idCount <span class="op">{</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> count <span class="op">&gt;</span> <span class="dv">1</span> <span class="op">{</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            issues <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>issues<span class="op">,</span> PlanIssue<span class="op">{</span>Severity<span class="op">:</span> SeverityError<span class="op">,</span> NodeID<span class="op">:</span> id<span class="op">,</span> Message<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;duplicate node ID appears %d times&quot;</span><span class="op">,</span> count<span class="op">)})</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Orphaned children</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> node <span class="op">:=</span> <span class="kw">range</span> nodeMap <span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node<span class="op">.</span>ParentID <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> _<span class="op">,</span> ok <span class="op">:=</span> nodeMap<span class="op">[</span>node<span class="op">.</span>ParentID<span class="op">];</span> <span class="op">!</span>ok <span class="op">{</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>                issues <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>issues<span class="op">,</span> PlanIssue<span class="op">{</span>Severity<span class="op">:</span> SeverityError<span class="op">,</span> NodeID<span class="op">:</span> node<span class="op">.</span>ID<span class="op">,</span> Message<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;parent %s not found (orphan)&quot;</span><span class="op">,</span> node<span class="op">.</span>ParentID<span class="op">)})</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Cycles</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> hasCycle<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        issues <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>issues<span class="op">,</span> PlanIssue<span class="op">{</span>Severity<span class="op">:</span> SeverityError<span class="op">,</span> Message<span class="op">:</span> <span class="st">&quot;plan tree contains a cycle&quot;</span><span class="op">})</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. Depth limit</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> depth <span class="op">:=</span> MaxDepth<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">);</span> depth <span class="op">&gt;</span> MaxNodeDepth <span class="op">{</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        issues <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>issues<span class="op">,</span> PlanIssue<span class="op">{</span>Severity<span class="op">:</span> SeverityError<span class="op">,</span> Message<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;maximum depth %d exceeds limit %d&quot;</span><span class="op">,</span> depth<span class="op">,</span> MaxNodeDepth<span class="op">)})</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 5. Node count</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> count <span class="op">:=</span> CountNodes<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">);</span> count <span class="op">&gt;</span> MaxNodes <span class="op">{</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        issues <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>issues<span class="op">,</span> PlanIssue<span class="op">{</span>Severity<span class="op">:</span> SeverityError<span class="op">,</span> Message<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;node count %d exceeds maximum %d&quot;</span><span class="op">,</span> count<span class="op">,</span> MaxNodes<span class="op">)})</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 6. Self-parenting</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> node <span class="op">:=</span> <span class="kw">range</span> nodeMap <span class="op">{</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node<span class="op">.</span>ParentID <span class="op">==</span> node<span class="op">.</span>ID <span class="op">{</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>            issues <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>issues<span class="op">,</span> PlanIssue<span class="op">{</span>Severity<span class="op">:</span> SeverityError<span class="op">,</span> NodeID<span class="op">:</span> node<span class="op">.</span>ID<span class="op">,</span> Message<span class="op">:</span> <span class="st">&quot;node parent references itself&quot;</span><span class="op">})</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    valid <span class="op">:=</span> <span class="ot">true</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> issue <span class="op">:=</span> <span class="kw">range</span> issues <span class="op">{</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> issue<span class="op">.</span>Severity <span class="op">==</span> SeverityError <span class="op">{</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>            valid <span class="op">=</span> <span class="ot">false</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> VerifyResult<span class="op">{</span>Valid<span class="op">:</span> valid<span class="op">,</span> Issues<span class="op">:</span> issues<span class="op">}</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> buildNodeMap<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">,</span> m <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>PlanNode<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">}</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>    m<span class="op">[</span>node<span class="op">.</span>ID<span class="op">]</span> <span class="op">=</span> node</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>        buildNodeMap<span class="op">(</span>child<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> countIDs<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">,</span> m <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">int</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">}</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    m<span class="op">[</span>node<span class="op">.</span>ID<span class="op">]++</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>        countIDs<span class="op">(</span>child<span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> hasCycle<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">,</span> visited <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span><span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> visited<span class="op">[</span>node<span class="op">.</span>ID<span class="op">]</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">}</span></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>    visited<span class="op">[</span>node<span class="op">.</span>ID<span class="op">]</span> <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> hasCycle<span class="op">(</span>child<span class="op">,</span> visited<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">true</span> <span class="op">}</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>    visited<span class="op">[</span>node<span class="op">.</span>ID<span class="op">]</span> <span class="op">=</span> <span class="ot">false</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">false</span></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Tests (verify_test.go):</strong> 1.
+<code>TestVerifyTree_Clean</code> — 3-level valid tree → Valid=true, 0
+issues 2. <code>TestVerifyTree_Orphan</code> — create orphan ref (set
+ParentID to bogus) → Valid=false, orphan issue found 3.
+<code>TestVerifyTree_Cycle</code> — create cycle (A child of B child of
+C child of A) → Valid=false, cycle issue 4.
+<code>TestVerifyTree_DepthOverflow</code> — tree at depth 21 →
+Valid=false, depth issue 5. <code>TestVerifyTree_DuplicateIDs</code> —
+two nodes with same ID → Valid=false, dup issue 6.
+<code>TestVerifyTree_SelfParenting</code> — node.ParentID == node.ID →
+Valid=false, self-parent issue 7.
+<code>TestVerifyTree_NodeCountOverflow</code> — tree with 501 nodes →
+Valid=false, count issue 8. <code>TestVerifyTree_NilTree</code> — nil →
+Valid=false, “tree is empty” 9. <code>TestVerifyTree_NilRoot</code> —
+tree with nil Root → Valid=false</p>
+<p>Commit:
+<code>feat(P2-F25-T05): plantree VerifyTree — 6 structural checks (orphans, cycles, depth, uniqueness, self-parent, count) (TDD)</code>.</p>
+<hr />
+<h2 id="task-6-compact.go-tdd">Task 6: compact.go (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/plantree/compact.go</code>,
+<code>internal/plantree/compact_test.go</code></p>
+<p><strong>Implementation:</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Summariser <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    Summarise<span class="op">(</span>text <span class="dt">string</span><span class="op">,</span> maxWords <span class="dt">int</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CompactResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    Tree          PlanTree</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    OriginalBytes <span class="dt">int</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    NewBytes      <span class="dt">int</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    NodesCompacted <span class="dt">int</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> CompactTree<span class="op">(</span>tree <span class="op">*</span>PlanTree<span class="op">,</span> summariser Summariser<span class="op">)</span> <span class="op">(</span>CompactResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tree <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> tree<span class="op">.</span>Root <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> CompactResult<span class="op">{},</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;invalid tree&quot;</span><span class="op">)</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    origJSON<span class="op">,</span> err <span class="op">:=</span> json<span class="op">.</span>Marshal<span class="op">(</span>tree<span class="op">)</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> CompactResult<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;marshal: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    originalBytes <span class="op">:=</span> <span class="bu">len</span><span class="op">(</span>origJSON<span class="op">)</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> originalBytes <span class="op">&lt;</span> CompactThreshold <span class="op">{</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> CompactResult<span class="op">{</span>Tree<span class="op">:</span> <span class="op">*</span>tree<span class="op">,</span> OriginalBytes<span class="op">:</span> originalBytes<span class="op">,</span> NewBytes<span class="op">:</span> originalBytes<span class="op">,</span> NodesCompacted<span class="op">:</span> <span class="dv">0</span><span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    compacted <span class="op">:=</span> <span class="dv">0</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    walkAndCompact<span class="op">(</span>tree<span class="op">.</span>Root<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> summariser<span class="op">,</span> <span class="op">&amp;</span>compacted<span class="op">)</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    newJSON<span class="op">,</span> err <span class="op">:=</span> json<span class="op">.</span>Marshal<span class="op">(</span>tree<span class="op">)</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> CompactResult<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;marshal after compact: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> CompactResult<span class="op">{</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>        Tree<span class="op">:</span>           <span class="op">*</span>tree<span class="op">,</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        OriginalBytes<span class="op">:</span>  originalBytes<span class="op">,</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        NewBytes<span class="op">:</span>       <span class="bu">len</span><span class="op">(</span>newJSON<span class="op">),</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>        NodesCompacted<span class="op">:</span> compacted<span class="op">,</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> walkAndCompact<span class="op">(</span>node <span class="op">*</span>PlanNode<span class="op">,</span> depth <span class="dt">int</span><span class="op">,</span> summariser Summariser<span class="op">,</span> compacted <span class="op">*</span><span class="dt">int</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> node <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">}</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> child <span class="op">:=</span> <span class="kw">range</span> node<span class="op">.</span>Children <span class="op">{</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>        walkAndCompact<span class="op">(</span>child<span class="op">,</span> depth<span class="op">+</span><span class="dv">1</span><span class="op">,</span> summariser<span class="op">,</span> compacted<span class="op">)</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Only compact Completed or Failed leaf nodes at depth &gt;= 3</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> depth <span class="op">&gt;=</span> <span class="dv">3</span> <span class="op">&amp;&amp;</span> <span class="bu">len</span><span class="op">(</span>node<span class="op">.</span>Children<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> <span class="op">(</span>node<span class="op">.</span>Status <span class="op">==</span> StatusCompleted <span class="op">||</span> node<span class="op">.</span>Status <span class="op">==</span> StatusFailed<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>        summary<span class="op">,</span> err <span class="op">:=</span> summariser<span class="op">.</span>Summarise<span class="op">(</span>node<span class="op">.</span>Description<span class="op">,</span> <span class="dv">50</span><span class="op">)</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> summary <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> node<span class="op">.</span>Metadata <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>                node<span class="op">.</span>Metadata <span class="op">=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">)</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>            node<span class="op">.</span>Metadata<span class="op">[</span><span class="st">&quot;compacted_bytes&quot;</span><span class="op">]</span> <span class="op">=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%d&quot;</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>node<span class="op">.</span>Description<span class="op">))</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>            node<span class="op">.</span>Metadata<span class="op">[</span><span class="st">&quot;compacted&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="st">&quot;true&quot;</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>            node<span class="op">.</span>Description <span class="op">=</span> summary</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>compacted<span class="op">++</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Tests (compact_test.go):</strong> 1.
+<code>TestCompactTree_BelowThreshold</code> — small tree (&lt;
+CompactThreshold) → CompactResult.NodesCompacted==0, bytes unchanged 2.
+<code>TestCompactTree_AboveThreshold_Compacts</code> — create a tree
+with 30+ Completed leaf nodes and large descriptions → compact →
+NodesCompacted ≥ 1, bytes reduced 3.
+<code>TestCompactTree_ByteReduction</code> — byte diff (OriginalBytes -
+NewBytes) ≥ 30% of OriginalBytes 4.
+<code>TestCompactTree_SummariserCalled</code> — mock summariser counts
+calls → assert called exactly N times (N = compactible nodes) 5.
+<code>TestCompactTree_ShallowNodesNotCompacted</code> — Completed leaves
+at depth 1 or 2 → not compacted 6.
+<code>TestCompactTree_PendingNodesNotCompacted</code> — leaf at depth 3+
+with StatusPending → not compacted 7.
+<code>TestCompactTree_CompactedMarker</code> — after compact,
+node.Metadata[“compacted”]==“true” 8.
+<code>TestCompactTree_SummariseError_Graceful</code> — summariser
+returns error → node not compacted, no panic 9.
+<code>TestCompactTree_NilInput</code> — nil tree → error 10.
+<code>TestCompactTree_PreservesRoot</code> — after compact,
+root.Title/Description unchanged</p>
+<p>Commit:
+<code>feat(P2-F25-T06): plantree CompactTree + Summariser adapter — F01 delegation + threshold guard (TDD)</code>.</p>
+<hr />
+<h2 id="task-7-plan_tools.go-tdd">Task 7: plan_tools.go (TDD)</h2>
+<p><strong>Files:</strong> <code>internal/plantree/plan_tools.go</code>,
+<code>internal/plantree/plan_tools_test.go</code></p>
+<p><strong>Implementation:</strong> Six <code>tools.Tool</code>
+implementations. Each tool holds a <code>Store</code> interface for
+testability. Tools call the operations package (<code>CreateTree</code>,
+<code>BranchNode</code>, <code>MergeNode</code>) for in-memory
+transforms then <code>Store.Save(tree)</code> for persistence.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanCreateTool <span class="kw">struct</span><span class="op">{</span> store Store <span class="op">}</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanBranchTool <span class="kw">struct</span><span class="op">{</span> store Store <span class="op">}</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanMergeTool <span class="kw">struct</span><span class="op">{</span> store Store <span class="op">}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanListTool <span class="kw">struct</span><span class="op">{</span> store Store <span class="op">}</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanShowTool <span class="kw">struct</span><span class="op">{</span> store Store <span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanDeleteTool <span class="kw">struct</span><span class="op">{</span> store Store <span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">// All implement tools.Tool:</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">//   Name() string</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">//   Description() string</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   Parameters() map[string]interface{}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">//   Execute(ctx context.Context, params map[string]interface{}) (map[string]interface{}, error)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">//   Category() tools.ToolCategory</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   RequiresApproval() tools.ApprovalLevel</span></span></code></pre></div>
+<p>Tool names: <code>plan_create</code>, <code>plan_branch</code>,
+<code>plan_merge</code>, <code>plan_list</code>, <code>plan_show</code>,
+<code>plan_delete</code>.</p>
+<p>Category: <code>tools.CategoryPlan</code> (new constant added to
+registry.go).</p>
+<p><strong>Tests (plan_tools_test.go):</strong> 1.
+<code>TestPlanCreateTool</code> — execute with name/title/description →
+file saved, summary returned 2.
+<code>TestPlanCreateTool_DuplicateName</code> — create same name twice →
+second returns ErrPlanAlreadyExists 3. <code>TestPlanBranchTool</code> —
+create plan → branch → child returned with correct ParentID 4.
+<code>TestPlanBranchTool_ParentNotFound</code> → ErrNodeNotFound 5.
+<code>TestPlanMergeTool</code> → branch → merge → parent Metadata
+updated, child Completed 6. <code>TestPlanListTool</code> → create 2
+plans → list returns 2 summaries 7. <code>TestPlanShowTool</code> →
+create 3-level tree → show output contains markers + IDs 8.
+<code>TestPlanDeleteTool</code> → create → delete → load →
+ErrPlanNotFound 9. <code>TestPlanDeleteTool_NotFound</code> → delete
+nonexistent → ErrPlanNotFound 10.
+<code>TestAllTools_RequiresApproval</code> — each tool’s
+RequiresApproval() returns correct level 11.
+<code>TestAllTools_CategoryName</code> — each tool reports Name() +
+Category()</p>
+<p>Commit:
+<code>feat(P2-F25-T07): plan_tools.go — six tools.Tool implementations (plan_create/branch/merge/list/show/delete) (TDD)</code>.</p>
+<hr />
+<h2 id="task-8-plan-slash-command-tdd">Task 8: /plan slash command
+(TDD)</h2>
+<p><strong>Files:</strong>
+<code>internal/commands/plan_command.go</code>,
+<code>internal/commands/plan_command_test.go</code></p>
+<p><strong>Implementation:</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanCommand <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    store      plantree<span class="op">.</span>Store</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    summariser plantree<span class="op">.</span>Summariser</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Implements commands.Command:</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   Name() string → &quot;plan&quot;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">//   Aliases() []string → [&quot;pl&quot;]</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">//   Description() string → &quot;Manage plan trees&quot;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">//   Usage() string → &quot;/plan [list|show &lt;name&gt;|compact &lt;name&gt;|verify &lt;name&gt;]&quot;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   Execute(ctx context.Context, cmdCtx *CommandContext) (string, error)</span></span></code></pre></div>
+<p>Subcommand routing: no-args → list; <code>list</code> → tabular
+output; <code>show &lt;name&gt; [--id &lt;node-id&gt;]</code> →
+RenderTree; <code>compact &lt;name&gt;</code> → CompactTree + report
+byte reduction; <code>verify &lt;name&gt;</code> → VerifyTree + issue
+listing.</p>
+<p><strong>Tests (plan_command_test.go):</strong> 1.
+<code>TestPlanCommand_List</code> → empty store → “No plans found” 2.
+<code>TestPlanCommand_List_WithPlans</code> → 2 plans → output contains
+both names 3. <code>TestPlanCommand_Show</code> → create → show → output
+contains markers + node ID 4. <code>TestPlanCommand_Show_NotFound</code>
+→ nonexistent → “plan not found” 5.
+<code>TestPlanCommand_Show_Subtree</code> → show with –id → only subtree
+rendered 6. <code>TestPlanCommand_Compact</code> → compact calls
+summariser, byte reduction reported 7.
+<code>TestPlanCommand_Verify_Clean</code> → verify → “valid” 8.
+<code>TestPlanCommand_Verify_Corrupt</code> → corrupt tree → verify
+shows issues 9. <code>TestPlanCommand_DefaultToList</code> → no-args →
+calls list 10. <code>TestPlanCommand_HelpText</code> → help output
+contains subcommands</p>
+<p>Commit:
+<code>feat(P2-F25-T08): /plan slash command (list/show/compact/verify) (TDD)</code>.</p>
+<hr />
+<h2 id="task-9-main.go-wiring-registry-integration-test">Task 9: main.go
+wiring + registry + integration test</h2>
+<p><strong>Files modified:</strong> -
+<code>internal/tools/registry.go</code> — add <code>CategoryPlan</code>
+const + register 6 plan tools in <code>buildToolList</code> -
+<code>internal/commands/builtin/register.go</code> — register
+<code>/plan</code> slash - <code>cmd/cli/main.go</code> — construct
+FileStore + summariser → RegisterPlanTools → /plan registration -
+<code>tests/integration/cmd/p2f25_wiring_test.go</code> (NEW)</p>
+<p><strong>Integration test:</strong> 1. Construct FileStore in tempdir
+2. Construct PlanCommand 3. Execute plan_create tool → assert file
+created 4. Execute plan_branch tool → assert child added 5. Execute
+plan_list tool → assert 1 plan listed 6. Execute plan_show tool → assert
+tree rendered 7. Execute plan_merge tool → assert parent metadata
+updated 8. Execute plan_delete tool → assert file removed 9. Execute
+plan_verify → assert clean 10. Assert anti-bluff clean on all new
+files</p>
+<p>Commit:
+<code>feat(P2-F25-T09): main.go wiring + CategoryPlan + RegisterPlanTools + /plan builtin + integration test</code>.</p>
+<hr />
+<h2 id="task-10-challenge-harness-close-out">Task 10: Challenge harness
++ close-out</h2>
+<p><strong>Challenge harness directory:</strong>
+<code>tests/integration/cmd/p2f25_challenge/</code></p>
+<p><strong>7 phases (A-G):</strong></p>
+<p><strong>PHASE-A (create + verify schema):</strong> 1. Call
+<code>plan_create</code> with name=“challenge-plan”, title=“Challenge
+Plan”, description=“A plan for the F25 challenge” 2. Read
+<code>.helixcode/plans/challenge-plan.json</code> from disk 3. Assert:
+valid JSON, root.id is non-empty UUID, root.title == “Challenge Plan”,
+root.status == “pending” 4. Assert: node count == 1, root has 0
+children</p>
+<p><strong>PHASE-B (branch + structural integrity):</strong> 1. Call
+<code>plan_branch</code> 3 times under root: “Task 1”, “Task 2”, “Task
+3” 2. Read JSON file 3. Assert: root.Children array has length 3 4.
+Verify: all 3 children have ParentID == root.ID 5. Verify: 0 orphans
+(VerifyTree returns Valid=true)</p>
+<p><strong>PHASE-C (merge + metadata):</strong> 1. Call
+<code>plan_merge</code> on child “Task 1” 2. Read JSON file 3. Assert:
+child Status == “completed” 4. Assert: root.Metadata[“merged_from”] ==
+task1.ID 5. Assert: root.Metadata[“merged_history”] == task1.ID</p>
+<p><strong>PHASE-D (compact + byte reduction):</strong> 1. Create deep
+tree with 30+ Completed leaf nodes (each with 500-char descriptions) 2.
+Record serialized byte size (pre) 3. Call <code>CompactTree</code> with
+F01 summariser 4. Record serialized byte size (post) 5. Assert: post
+&lt; pre (reduction ≥ 30%) 6. Assert: root.Title + root.Description
+unchanged 7. Assert: at least one node has
+Metadata[“compacted”]=“true”</p>
+<p><strong>PHASE-E (verify detects corruption):</strong> 1. Create 3
+deliberately corrupted plan JSON files: a.
+<code>corrupt-orphan.json</code> — child node’s ParentID references
+nonexistent node b. <code>corrupt-cycle.json</code> — A→B→C→A cycle
+c. <code>corrupt-dup.json</code> — two nodes with identical ID 2. Run
+VerifyTree on each 3. Assert: all 3 return Valid=false 4. Assert: each
+has at least 1 issue with Severity=Error 5. Assert: orphan → issue
+mentions “orphan”; cycle → issue mentions “cycle”; dup → issue mentions
+“duplicate”</p>
+<p><strong>PHASE-F (show output structural match):</strong> 1. Create
+known 3-level tree:
+<code>Root (pending)      ├── Child1 (in_progress)      │   └── Grandchild1 (pending)      └── Child2 (completed)</code>
+2. Call plan_show 3. Assert: output contains “[ ] Root” at indent 0 4.
+Assert: output contains ” [▶] Child1” at indent 2 5. Assert: output
+contains ” [ ] Grandchild1” at indent 4 6. Assert: output contains ” [✓]
+Child2” at indent 2 7. Assert: node IDs appear in parentheses after each
+title</p>
+<p><strong>PHASE-G (shallow no-compact guard):</strong> 1. Create tree
+with all Completed leaves at depth 1 and 2 2. Call CompactTree 3.
+Assert: NodesCompacted == 0 4. Assert: bytes unchanged</p>
+<p><strong>Close-out:</strong> - Anti-bluff smoke clean - Cross-compile
+linux/amd64 PASS - All 10 plan tasks ticked - PROGRESS.md updated: “F25
+COMPLETE; F26 next candidate” - CONTINUATION.md F25 mid-flight section
+marked CLOSED - Push 4 meta-repo remotes non-force - Push Challenges
+submodule (for challenge harness)</p>
+<hr />
+<h2 id="verification-at-t09">Verification at T09</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build ./internal/plantree/... ./internal/commands/... ./cmd/cli/...</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-race</span> ./internal/plantree/</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-race</span> ./internal/commands/</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration <span class="at">-run</span> TestPlanTree_Integration ./tests/integration/</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> internal/plantree internal/commands/plan_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<hr />
+<p><em>Plan written. Execute via subagent-driven-development starting
+with T01.</em></p>
+</body>
+</html>

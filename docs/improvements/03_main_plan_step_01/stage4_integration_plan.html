@@ -1,0 +1,2956 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage4_integration_plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage4_integration_plan</h1>
+</header>
+<h1 id="master-integration-plan-cli-agent-features-into-helixcode">MASTER
+INTEGRATION PLAN: CLI Agent Features into HelixCode</h1>
+<blockquote>
+<p><strong>Document Version</strong>: 1.0<br />
+<strong>Date</strong>: 2025-01-20<br />
+<strong>Status</strong>: Draft for Review<br />
+<strong>Classification</strong>: Internal Engineering<br />
+<strong>Author</strong>: Integration Architecture Team</p>
+</blockquote>
+<hr />
+<h2 id="section-1-executive-summary">Section 1: EXECUTIVE SUMMARY</h2>
+<h3 id="vision-statement">1.1 Vision Statement</h3>
+<p><strong>HelixCode will become the unified, enterprise-grade AI-native
+code intelligence platform</strong> by systematically incorporating the
+best-of-breed capabilities from 10 leading CLI agent implementations
+(Claude Code, Aider, Cline, Codex, Plandex, Forge, Kilo Code, OpenCode,
+Gemini CLI, Amazon Q). This integration transforms HelixCode from a
+modular architecture into a cohesive “super-agent” capable of autonomous
+planning, sandboxed execution, multi-model orchestration, and
+enterprise-scale context management – all while maintaining the Go-based
+performance, Actor Model concurrency, and PostgreSQL/Redis persistence
+that define HelixCode’s core identity.</p>
+<p>The vision is not to bolt features onto HelixCode, but to
+<strong>deeply integrate</strong> each capability into the existing
+architectural patterns: Cobra commands become slash commands, Gin
+handlers become MCP endpoints, Actor agents become specialized
+sub-agents, and the Tree-sitter code map becomes the foundation for
+context compaction and fuzzy matching.</p>
+<h3 id="scope-and-boundaries">1.2 Scope and Boundaries</h3>
+<h4 id="in-scope">IN SCOPE</h4>
+<ul>
+<li><strong>4 missing submodules</strong>: <code>HelixAgent</code>,
+<code>HelixLLM</code>, <code>HelixMemory</code>,
+<code>HelixSpecifier</code> (addition via SSH)</li>
+<li><strong>3 uninitialized submodules</strong>:
+<code>LLMsVerifier</code>, <code>HelixQA</code>,
+<code>Challenges</code>, <code>Containers</code> (initialization and
+wiring)</li>
+<li><strong>20+ major feature domains</strong> across 10 CLI agent
+sources (see Feature Inventory below)</li>
+<li><strong>Build system unification</strong>: Go 1.26 workspace across
+all submodules</li>
+<li><strong>Configuration unification</strong>: Single Viper config tree
+with environment overlays</li>
+<li><strong>Database schema evolution</strong>: PostgreSQL migrations
+for tool persistence, sessions, transcripts</li>
+<li><strong>Redis data structures</strong>: Context windows, caches,
+session state</li>
+<li><strong>API surface expansion</strong>: OpenAPI 3.0 spec updates for
+new endpoints</li>
+<li><strong>Testing integration</strong>: 100% coverage mandate with
+helix_qa challenge sessions</li>
+</ul>
+<h4 id="out-of-scope-for-this-plan">OUT OF SCOPE (for this plan)</h4>
+<ul>
+<li><strong>Custom model training or fine-tuning</strong> (inference
+only)</li>
+<li><strong>Mobile application development</strong> (CLI and desktop UI
+only)</li>
+<li><strong>Third-party marketplace / plugin store</strong> (plugin
+system architecture only, no store)</li>
+<li><strong>Billing/subscription engine</strong> (authentication only,
+billing deferred)</li>
+<li><strong>Non-code LLM use cases</strong> (creative writing, general
+chat – code-focused only)</li>
+</ul>
+<h4 id="boundaries">BOUNDARIES</h4>
+<ul>
+<li>HelixCode remains the PRIMARY repository; HelixAgent is integrated
+as a submodule, not as a monorepo parent</li>
+<li>All LLM communication flows through the HelixCode gateway (no
+submodule direct provider access)</li>
+<li>Sandboxed execution is containerized (Docker/Podman) – no native OS
+process spawning without sandbox</li>
+<li>PostgreSQL is the single source of truth; Redis is ephemeral/cache
+only</li>
+</ul>
+<h3 id="success-criteria">1.3 Success Criteria</h3>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 31%" />
+<col style="width: 37%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Criterion</th>
+<th>Measurement</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>All 4 missing submodules added and building</td>
+<td><code>git submodule status</code> + <code>go build ./...</code></td>
+<td>100% clean</td>
+</tr>
+<tr>
+<td>2</td>
+<td>All 3 uninitialized submodules active</td>
+<td>Submodule status + CI pipeline</td>
+<td>All initialized</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Feature parity with Claude Code</td>
+<td>Feature checklist (see Appendix A)</td>
+<td>95%+ coverage</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Aider dual-model architecture</td>
+<td>Integration test with architect/editor</td>
+<td>Passing</td>
+</tr>
+<tr>
+<td>5</td>
+<td>MCP lifecycle complete</td>
+<td>MCP test suite (4 transports + OAuth)</td>
+<td>All passing</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Context compaction operational</td>
+<td>1M+ token context handling</td>
+<td>&lt;2s compaction</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Sandboxed shell execution</td>
+<td>Security audit + functional test</td>
+<td>No escapes</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Plan/Act mode separation</td>
+<td>User acceptance test</td>
+<td>Seamless switching</td>
+</tr>
+<tr>
+<td>9</td>
+<td>100% test coverage</td>
+<td><code>go test -cover</code></td>
+<td>&gt;= 100% (all new code)</td>
+</tr>
+<tr>
+<td>10</td>
+<td>helix_qa challenge sessions</td>
+<td>Challenge completion rate</td>
+<td>&gt;90% pass</td>
+</tr>
+<tr>
+<td>11</td>
+<td>OpenTelemetry observability</td>
+<td>Trace coverage</td>
+<td>All major flows traced</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Performance baseline</td>
+<td>p95 latency for key operations</td>
+<td>&lt;500ms edit, &lt;2s plan</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Theme system operational</td>
+<td>UI rendering test</td>
+<td>6 platform themes render</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Subagent delegation</td>
+<td>Multi-agent workflow test</td>
+<td>3+ agents cooperate</td>
+</tr>
+<tr>
+<td>15</td>
+<td>LSP integration</td>
+<td>Diagnostics feedback loop</td>
+<td>&lt;1s roundtrip</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="section-2-phases-overview">Section 2: PHASES OVERVIEW</h2>
+<h3 id="phase-0-foundation-submodule-integration-build-system-fix">Phase
+0: Foundation – Submodule Integration &amp; Build System Fix</h3>
+<table>
+<colgroup>
+<col style="width: 57%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase Goal</strong></td>
+<td>Establish the complete repository structure with all 11 submodules
+(7 existing + 4 missing) properly linked, initialized, and building
+under a unified Go workspace. Fix SSH submodule resolution and build
+chain.</td>
+</tr>
+<tr>
+<td><strong>Entry Criteria</strong></td>
+<td>- Access to all repositories via SSH keys configured<br>- Go 1.26
+installed and verified<br>- Current HelixCode builds successfully
+(baseline)<br>- Submodule access rights confirmed for all 11 repos</td>
+</tr>
+<tr>
+<td><strong>Exit Criteria</strong></td>
+<td>- <code>git submodule status</code> shows all 11 submodules at
+expected commits<br>- <code>go work init</code> +
+<code>go work use</code> produces clean workspace<br>-
+<code>go build ./...</code> from HelixCode root succeeds<br>- All
+submodule <code>go.mod</code> modules resolve without replace directives
+(or with approved ones)<br>- CI pipeline passes on all platforms (Linux,
+macOS, Windows)</td>
+</tr>
+<tr>
+<td><strong>Duration Estimate</strong></td>
+<td>5-7 calendar days</td>
+</tr>
+<tr>
+<td><strong>Risk Level</strong></td>
+<td><strong>HIGH</strong> – SSH submodule topology is unusual (HelixCode
+is child of HelixAgent); circular dependency risk exists</td>
+</tr>
+<tr>
+<td><strong>Rollback Strategy</strong></td>
+<td>- Pre-phase git tag <code>pre-phase0-baseline</code> on
+HelixCode<br>- Document original <code>.gitmodules</code> before
+modification<br>- Keep backup branch
+<code>backup/pre-submodule-merge</code><br>- If build fails, revert
+<code>.gitmodules</code> and <code>go.work</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="phase-1-core-infrastructure-llm-gateway-memory-spec-engine">Phase 1:
+Core Infrastructure – LLM Gateway, Memory, Spec Engine</h3>
+<table>
+<colgroup>
+<col style="width: 57%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase Goal</strong></td>
+<td>Build the three foundational services that all subsequent features
+depend on: a unified LLM gateway (incorporating OpenCode’s 75+ providers
+and multi-provider backend), a persistent memory/retrieval system
+(HelixMemory), and a specification engine (HelixSpecifier) for task
+decomposition and planning.</td>
+</tr>
+<tr>
+<td><strong>Entry Criteria</strong></td>
+<td>- Phase 0 exit criteria met<br>- HelixLLM submodule builds
+independently<br>- HelixMemory PostgreSQL schema designed<br>-
+HelixSpecifier module interfaces defined</td>
+</tr>
+<tr>
+<td><strong>Exit Criteria</strong></td>
+<td>- LLM gateway routes to &gt;= 5 providers with provider-specific
+config<br>- Memory system persists and retrieves conversation context
+with embedding search<br>- Spec engine decomposes a user prompt into
+actionable subtasks<br>- All three systems have &gt;= 90% unit test
+coverage<br>- OpenAPI spec updated with <code>/api/v1/llm</code>,
+<code>/api/v1/memory</code>, <code>/api/v1/spec</code> endpoints<br>-
+Redis connection pools configured for context caching</td>
+</tr>
+<tr>
+<td><strong>Duration Estimate</strong></td>
+<td>14-18 calendar days</td>
+</tr>
+<tr>
+<td><strong>Risk Level</strong></td>
+<td><strong>HIGH</strong> – LLM provider API drift; embedding model
+compatibility; spec engine accuracy</td>
+</tr>
+<tr>
+<td><strong>Rollback Strategy</strong></td>
+<td>- Feature flags for each service (<code>--enable-llm-gateway</code>,
+<code>--enable-memory</code>, <code>--enable-spec</code>)<br>- Database
+migrations are reversible (down migrations tested)<br>- Old provider
+factory remains accessible via
+<code>LEGACY_PROVIDER_FACTORY=1</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="phase-2-cli-agent-foundation-tool-framework-context-management-edit-system">Phase
+2: CLI Agent Foundation – Tool Framework, Context Management, Edit
+System</h3>
+<table>
+<colgroup>
+<col style="width: 57%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase Goal</strong></td>
+<td>Implement the core agent primitives: a pluggable tool framework
+(inspired by Claude Code’s tool system), context management with
+auto-compaction (Codex + Plandex), and a smart file editing system
+(Aider’s 4-layer fuzzy matching + Claude Code’s no-flicker
+rendering).</td>
+</tr>
+<tr>
+<td><strong>Entry Criteria</strong></td>
+<td>- Phase 1 exit criteria met<br>- Tool interface contracts
+defined<br>- Context window size limits configured per provider<br>-
+File watcher / Tree-sitter integration tested</td>
+</tr>
+<tr>
+<td><strong>Exit Criteria</strong></td>
+<td>- Tool framework supports &gt;= 10 tool types with
+registration/discovery<br>- Context auto-compaction reduces 2M tokens to
+provider limit with &lt;5% semantic loss<br>- Smart file edit applies
+changes with &gt;= 99% accuracy on test corpus<br>- Fuzzy matching
+resolves file references with &gt;= 95% success<br>- No-flicker
+rendering tested on 6 UI platforms<br>- Session transcript persistence
+to PostgreSQL</td>
+</tr>
+<tr>
+<td><strong>Duration Estimate</strong></td>
+<td>18-22 calendar days</td>
+</tr>
+<tr>
+<td><strong>Risk Level</strong></td>
+<td><strong>MEDIUM-HIGH</strong> – Context compaction quality is hard to
+validate; file edit accuracy depends on Tree-sitter coverage</td>
+</tr>
+<tr>
+<td><strong>Rollback Strategy</strong></td>
+<td>- <code>AUTO_COMPACTION=off</code> config flag<br>- Legacy edit
+system preserved in <code>pkg/edit/legacy</code><br>- Context size can
+be manually capped</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="phase-3-power-features-plan-mode-sandboxing-mcp-permissions">Phase
+3: Power Features – Plan Mode, Sandboxing, MCP, Permissions</h3>
+<table>
+<colgroup>
+<col style="width: 57%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase Goal</strong></td>
+<td>Deliver the differentiating agent capabilities: Plan/Act dual mode
+(Cline, Gemini CLI, Claude Code), sandboxed shell execution (Claude
+Code, Codex), full MCP lifecycle with OAuth (Claude Code), permission
+rule system with 5 modes + wildcards (Claude Code), background task
+system, and hook-based extensibility.</td>
+</tr>
+<tr>
+<td><strong>Entry Criteria</strong></td>
+<td>- Phase 2 exit criteria met<br>- Container runtime available
+(Docker/Podman)<br>- MCP spec 2024-11-05 compliance target set<br>-
+Permission policy schema designed</td>
+</tr>
+<tr>
+<td><strong>Exit Criteria</strong></td>
+<td>- Plan mode generates actionable plans with user approval
+checkpoints<br>- Sandboxed shell executes commands with seccomp-bpf +
+namespace isolation<br>- MCP client connects via all 4 transports
+(stdio, SSE, HTTP, WebSocket) with OAuth 2.1<br>- Permission system
+enforces 5 modes (Allow, Deny, Ask, Skip, Review) with wildcard
+patterns<br>- Background tasks run async with progress reporting<br>-
+Hook system fires 9+ events with registered handlers<br>- Git worktree
+isolation tested for concurrent sessions</td>
+</tr>
+<tr>
+<td><strong>Duration Estimate</strong></td>
+<td>21-28 calendar days</td>
+</tr>
+<tr>
+<td><strong>Risk Level</strong></td>
+<td><strong>HIGH</strong> – Sandboxed execution security is
+mission-critical; MCP OAuth complexity; permission system must not lock
+users out</td>
+</tr>
+<tr>
+<td><strong>Rollback Strategy</strong></td>
+<td>- <code>SANDBOX_MODE=disabled</code> for emergency fallback<br>-
+Permission default is <code>ask</code> (never deny by default)<br>- MCP
+can be disabled per-transport<br>- Plan mode has
+<code>auto-approve</code> opt-in only</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="phase-4-uiux-tui-streaming-tui-themes-terminal-intellisense">Phase
+4: UI/UX &amp; TUI – Streaming TUI, Themes, Terminal Intellisense</h3>
+<table>
+<colgroup>
+<col style="width: 57%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase Goal</strong></td>
+<td>Transform the HelixCode user interface into a best-in-class TUI with
+streaming updates, theme support, terminal intellisense (Amazon Q
+style), AskUserQuestion with previews (Claude Code), cumulative diff
+review (Plandex), and no-flicker rendering across all 6 supported
+platforms.</td>
+</tr>
+<tr>
+<td><strong>Entry Criteria</strong></td>
+<td>- Phase 3 exit criteria met<br>- UI rendering pipeline
+benchmarked<br>- Theme asset pipeline defined<br>- Terminal capability
+detection library chosen</td>
+</tr>
+<tr>
+<td><strong>Exit Criteria</strong></td>
+<td>- Streaming TUI renders token-by-token with &lt;50ms latency<br>-
+Theme system applies 6 platform themes + custom themes<br>- Terminal
+intellisense suggests commands with 85%+ relevance<br>- AskUserQuestion
+renders file previews, diffs, and images<br>- Cumulative diff review
+allows accept/reject per hunk<br>- No-flicker rendering verified on:
+Linux terminal, macOS terminal, Windows Terminal, VS Code terminal,
+JetBrains terminal, iTerm2</td>
+</tr>
+<tr>
+<td><strong>Duration Estimate</strong></td>
+<td>14-18 calendar days</td>
+</tr>
+<tr>
+<td><strong>Risk Level</strong></td>
+<td><strong>MEDIUM</strong> – Cross-platform terminal behavior variance;
+theme asset maintenance</td>
+</tr>
+<tr>
+<td><strong>Rollback Strategy</strong></td>
+<td>- <code>UI_MODE=simple</code> falls back to basic output<br>- Themes
+can be disabled with <code>THEME=none</code><br>- Terminal intellisense
+is opt-in (<code>--intellisense</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="phase-5-testing-qa-100-coverage-challenges-helix_qa-sessions">Phase
+5: Testing &amp; QA – 100% Coverage, Challenges, helix_qa Sessions</h3>
+<table>
+<colgroup>
+<col style="width: 57%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase Goal</strong></td>
+<td>Achieve production readiness through comprehensive testing: 100%
+code coverage on all new code, helix_qa automated challenge sessions,
+LLMsVerifier integration for model output validation, Containers-based
+integration testing, and performance benchmarking against
+baselines.</td>
+</tr>
+<tr>
+<td><strong>Entry Criteria</strong></td>
+<td>- Phase 4 exit criteria met<br>- Test infrastructure can execute
+containerized tests<br>- Challenge dataset prepared (&gt;= 50
+challenges)<br>- Performance benchmarks defined</td>
+</tr>
+<tr>
+<td><strong>Exit Criteria</strong></td>
+<td>- <code>go test -cover</code> reports &gt;= 100% for all new
+packages<br>- helix_qa completes &gt;= 50 challenge sessions with
+&gt;90% pass rate<br>- LLMsVerifier validates model outputs with &lt;5%
+false positive rate<br>- Integration tests run in containers with full
+feature matrix<br>- Performance benchmarks meet all p95 targets<br>-
+Security audit of sandboxed execution passes<br>- Load test: 100
+concurrent sessions stable for 1 hour</td>
+</tr>
+<tr>
+<td><strong>Duration Estimate</strong></td>
+<td>14-18 calendar days</td>
+</tr>
+<tr>
+<td><strong>Risk Level</strong></td>
+<td><strong>MEDIUM</strong> – 100% coverage is time-consuming; challenge
+flakiness; load test infrastructure</td>
+</tr>
+<tr>
+<td><strong>Rollback Strategy</strong></td>
+<td>- Coverage gates can be temporarily lowered to 95% with technical
+debt ticket<br>- Challenges can be rerun; flaky tests are
+quarantined<br>- Load tests run on staging environment only</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="section-3-detailed-tasks-per-phase">Section 3: DETAILED TASKS
+PER PHASE</h2>
+<hr />
+<h3 id="phase-0-foundation-submodule-integration-build-system-fix-1">Phase
+0: Foundation – Submodule Integration &amp; Build System Fix</h3>
+<h4 id="p0-t1-audit-current-submodule-state">P0-T1: Audit Current
+Submodule State</h4>
+<ul>
+<li><strong>Task ID</strong>: P0-T1</li>
+<li><strong>Task Name</strong>: Complete Submodule Audit and
+Inventory</li>
+<li><strong>Description</strong>: Catalog all 87 existing submodules,
+identify which are initialized, which have SSH URL issues, which have
+diverged from expected commits. Document the circular dependency between
+HelixCode (child) and HelixAgent (parent).</li>
+<li><strong>Dependencies</strong>: None</li>
+<li><strong>Estimated Effort</strong>: 1 day</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode (all 87
+submodules)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>SUBMODULE_AUDIT.md</code> (new document)</li>
+<li><strong>Acceptance Criteria</strong>: Complete inventory table with
+87 submodules showing: name, path, current commit, initialized status,
+SSH URL, last update date, build status.</li>
+</ul>
+<h4 id="p0-t2-add-missing-submodules">P0-T2: Add Missing Submodules</h4>
+<ul>
+<li><strong>Task ID</strong>: P0-T2</li>
+<li><strong>Task Name</strong>: Add HelixAgent, HelixLLM, HelixMemory,
+HelixSpecifier Submodules</li>
+<li><strong>Description</strong>: Add the 4 missing submodules as
+SSH-based git submodules at the correct paths. Handle the special case
+where HelixAgent is a parent/ancestor of HelixCode by using relative
+paths or explicit SSH URLs.</li>
+<li><strong>Dependencies</strong>: P0-T1</li>
+<li><strong>Estimated Effort</strong>: 1 day</li>
+<li><strong>Submodule(s) Involved</strong>: HelixAgent, HelixLLM,
+HelixMemory, HelixSpecifier</li>
+<li><strong>Files/Modules to Modify</strong>: <code>.gitmodules</code>,
+<code>.git/config</code> (local)</li>
+<li><strong>Acceptance Criteria</strong>:
+<code>git submodule status</code> shows all 4 new submodules;
+<code>git submodule update --init --recursive</code> clones all 4
+successfully; no SSH key prompts during CI.</li>
+</ul>
+<h4 id="p0-t3-initialize-dormant-submodules">P0-T3: Initialize Dormant
+Submodules</h4>
+<ul>
+<li><strong>Task ID</strong>: P0-T3</li>
+<li><strong>Task Name</strong>: Initialize LLMsVerifier, HelixQA,
+Challenges, Containers</li>
+<li><strong>Description</strong>: The 4 present-but-uninitialized
+submodules need to be initialized and their builds verified. Check if
+they have independent build requirements (e.g., containers may need
+Docker, helix_qa may need test datasets).</li>
+<li><strong>Dependencies</strong>: P0-T2</li>
+<li><strong>Estimated Effort</strong>: 1 day</li>
+<li><strong>Submodule(s) Involved</strong>: LLMsVerifier, HelixQA,
+Challenges, Containers</li>
+<li><strong>Files/Modules to Modify</strong>: <code>.gitmodules</code>
+(update init paths if needed), submodule <code>README.md</code>
+files</li>
+<li><strong>Acceptance Criteria</strong>: All 4 submodules show
+<code>init</code> status; each submodule’s <code>go build ./...</code>
+(or equivalent) succeeds.</li>
+</ul>
+<h4 id="p0-t4-create-go-workspace">P0-T4: Create Go Workspace</h4>
+<ul>
+<li><strong>Task ID</strong>: P0-T4</li>
+<li><strong>Task Name</strong>: Unify Build System with Go
+Workspaces</li>
+<li><strong>Description</strong>: Create a <code>go.work</code> file at
+HelixCode root that includes all submodules with Go code. Resolve any
+module path conflicts, replace directives, or version mismatches. Ensure
+the workspace builds from a clean environment.</li>
+<li><strong>Dependencies</strong>: P0-T2, P0-T3</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: All Go-based submodules</li>
+<li><strong>Files/Modules to Modify</strong>: <code>go.work</code>
+(new), <code>go.work.sum</code> (generated), individual
+<code>go.mod</code> files if version alignment needed</li>
+<li><strong>Acceptance Criteria</strong>: <code>go work sync</code>
+completes without errors; <code>go build ./...</code> from HelixCode
+root builds all modules; <code>go test ./...</code> runs all tests.</li>
+</ul>
+<h4 id="p0-t5-ci-pipeline-for-submodule-matrix">P0-T5: CI Pipeline for
+Submodule Matrix</h4>
+<ul>
+<li><strong>Task ID</strong>: P0-T5</li>
+<li><strong>Task Name</strong>: GitHub Actions CI for Submodule Build
+Matrix</li>
+<li><strong>Description</strong>: Create or update GitHub Actions
+workflows to build and test across all submodules on Linux, macOS, and
+Windows. Include SSH key setup for private submodule access.</li>
+<li><strong>Dependencies</strong>: P0-T4</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: All (CI configuration)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>.github/workflows/ci.yml</code> (new or updated),
+<code>.github/workflows/submodule-check.yml</code></li>
+<li><strong>Acceptance Criteria</strong>: CI passes for all 11
+submodules on all 3 OS platforms; submodule drift detection job runs
+daily.</li>
+</ul>
+<hr />
+<h3 id="phase-1-core-infrastructure-llm-gateway-memory-spec-engine-1">Phase
+1: Core Infrastructure – LLM Gateway, Memory, Spec Engine</h3>
+<h4 id="p1-t1-llm-gateway-interface-design">P1-T1: LLM Gateway Interface
+Design</h4>
+<ul>
+<li><strong>Task ID</strong>: P1-T1</li>
+<li><strong>Task Name</strong>: Define Unified LLM Provider
+Interface</li>
+<li><strong>Description</strong>: Design the <code>LLMGateway</code>
+interface that abstracts all 29+ existing providers and prepares for 75+
+(OpenCode-style). Must support: completion, streaming, tool calling,
+multi-modal input, context window querying, and provider capability
+discovery.</li>
+<li><strong>Dependencies</strong>: P0-T5 (workspace ready)</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixLLM, HelixCode
+(internal LLM factory)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/llm/gateway.go</code> (new), <code>pkg/llm/provider.go</code>
+(new), <code>pkg/llm/capability.go</code> (new)</li>
+<li><strong>Acceptance Criteria</strong>: Interface compiles; mock
+implementation passes; 29 existing providers can be adapted to
+interface.</li>
+</ul>
+<h4 id="p1-t2-multi-provider-backend-integration">P1-T2: Multi-Provider
+Backend Integration</h4>
+<ul>
+<li><strong>Task ID</strong>: P1-T2</li>
+<li><strong>Task Name</strong>: Integrate 75+ Provider Support with
+Mid-Session Switching</li>
+<li><strong>Description</strong>: Port OpenCode’s provider registry to
+HelixCode. Implement dynamic provider loading, configuration per
+provider (API keys, base URLs, timeouts), and mid-session model
+switching. Add provider health checking.</li>
+<li><strong>Dependencies</strong>: P1-T1</li>
+<li><strong>Estimated Effort</strong>: 4 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixLLM, OpenCode
+(reference)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/llm/registry.go</code>, <code>pkg/llm/provider_*.go</code>
+(one per provider family), <code>pkg/llm/switch.go</code>,
+<code>config/providers.yaml</code></li>
+<li><strong>Acceptance Criteria</strong>: Can list 75+ providers; can
+switch provider mid-conversation without losing context; health check
+returns status for each provider.</li>
+</ul>
+<h4 id="p1-t3-provider-wizard-and-configuration">P1-T3: Provider Wizard
+and Configuration</h4>
+<ul>
+<li><strong>Task ID</strong>: P1-T3</li>
+<li><strong>Task Name</strong>: Multi-Provider Backend Wizards</li>
+<li><strong>Description</strong>: Interactive CLI wizards (Cobra-based)
+for configuring new providers. Prompt for API keys, test connectivity,
+save to Viper config. Support OAuth flows for providers requiring
+it.</li>
+<li><strong>Dependencies</strong>: P1-T2</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode (CLI)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>cmd/llm/wizard.go</code>, <code>cmd/llm/configure.go</code>,
+<code>pkg/config/provider.go</code></li>
+<li><strong>Acceptance Criteria</strong>:
+<code>helixcode llm configure --provider openai</code> completes
+interactively; config persists; connection test passes.</li>
+</ul>
+<h4 id="p1-t4-memory-system-schema-and-storage">P1-T4: Memory System
+Schema and Storage</h4>
+<ul>
+<li><strong>Task ID</strong>: P1-T4</li>
+<li><strong>Task Name</strong>: PostgreSQL Schema for Conversation
+Memory</li>
+<li><strong>Description</strong>: Design and implement PostgreSQL schema
+for persistent memory: conversations, messages, embeddings, session
+state, and context windows. Use pgvector for embedding storage.</li>
+<li><strong>Dependencies</strong>: P0-T5</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixMemory</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>migrations/001_memory.up.sql</code>,
+<code>migrations/001_memory.down.sql</code>,
+<code>pkg/memory/schema.go</code>, <code>pkg/memory/store.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Migrations apply cleanly;
+pgvector extension enabled; CRUD operations on all tables pass.</li>
+</ul>
+<h4 id="p1-t5-embedding-and-retrieval-engine">P1-T5: Embedding and
+Retrieval Engine</h4>
+<ul>
+<li><strong>Task ID</strong>: P1-T5</li>
+<li><strong>Task Name</strong>: Semantic Search with Embeddings</li>
+<li><strong>Description</strong>: Integrate embedding generation (via
+HelixLLM or local model) and semantic retrieval. Implement conversation
+context retrieval, file similarity search, and cross-session memory.
+Support HNSW indexing.</li>
+<li><strong>Dependencies</strong>: P1-T4, P1-T2</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixMemory, HelixLLM</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/memory/embed.go</code>, <code>pkg/memory/search.go</code>,
+<code>pkg/memory/index.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Can store 1000 conversation
+fragments and retrieve top-5 relevant in &lt;100ms; embedding dimension
+matches model output.</li>
+</ul>
+<h4 id="p1-t6-spec-engine-core">P1-T6: Spec Engine Core</h4>
+<ul>
+<li><strong>Task ID</strong>: P1-T6</li>
+<li><strong>Task Name</strong>: Task Decomposition and Specification
+Engine</li>
+<li><strong>Description</strong>: Build HelixSpecifier core: parse user
+intent, decompose into subtasks, generate specifications for each
+subtask. Uses LLM with structured output (JSON schema) for reliable
+decomposition.</li>
+<li><strong>Dependencies</strong>: P1-T2</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixSpecifier</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/spec/engine.go</code>, <code>pkg/spec/decomposer.go</code>,
+<code>pkg/spec/validator.go</code>, <code>pkg/spec/schema.go</code></li>
+<li><strong>Acceptance Criteria</strong>: “Implement a REST API with
+auth” decomposes into &gt;= 3 subtasks with clear inputs/outputs;
+decomposition succeeds 90% of time on benchmark prompts.</li>
+</ul>
+<h4 id="p1-t7-redis-context-cache">P1-T7: Redis Context Cache</h4>
+<ul>
+<li><strong>Task ID</strong>: P1-T7</li>
+<li><strong>Task Name</strong>: Redis-Based Context Window Caching</li>
+<li><strong>Description</strong>: Implement Redis data structures for
+caching LLM context windows, provider responses, and embedding vectors.
+Configure TTL policies and eviction strategies.</li>
+<li><strong>Dependencies</strong>: P1-T4</li>
+<li><strong>Estimated Effort</strong>: 1 day</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode (Redis layer)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/cache/redis.go</code>, <code>pkg/cache/context.go</code>,
+<code>pkg/cache/ttl.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Context cache hit reduces LLM
+call latency by &gt;= 50%; TTL eviction works; Redis memory usage
+bounded.</li>
+</ul>
+<h4 id="p1-t8-openapi-spec-update-for-core-apis">P1-T8: OpenAPI Spec
+Update for Core APIs</h4>
+<ul>
+<li><strong>Task ID</strong>: P1-T8</li>
+<li><strong>Task Name</strong>: Expand OpenAPI 3.0 Spec for New
+Endpoints</li>
+<li><strong>Description</strong>: Add <code>/api/v1/llm/*</code>,
+<code>/api/v1/memory/*</code>, <code>/api/v1/spec/*</code> endpoints to
+the OpenAPI specification. Generate handler stubs and client SDK
+updates.</li>
+<li><strong>Dependencies</strong>: P1-T1, P1-T4, P1-T6</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode (Gin server)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>api/openapi.yaml</code>, <code>pkg/api/handlers_llm.go</code>,
+<code>pkg/api/handlers_memory.go</code>,
+<code>pkg/api/handlers_spec.go</code></li>
+<li><strong>Acceptance Criteria</strong>: <code>openapi-generator</code>
+produces valid client; all new endpoints documented; handler stubs
+compile.</li>
+</ul>
+<hr />
+<h3 id="phase-2-cli-agent-foundation-tool-framework-context-management-edit-system-1">Phase
+2: CLI Agent Foundation – Tool Framework, Context Management, Edit
+System</h3>
+<h4 id="p2-t1-tool-framework-core">P2-T1: Tool Framework Core</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T1</li>
+<li><strong>Task Name</strong>: Pluggable Tool Framework with
+Registration/Discovery</li>
+<li><strong>Description</strong>: Implement a tool framework where each
+tool is a self-describing plugin with JSON schema for inputs/outputs.
+Tools register at startup, support validation, execution, and result
+formatting. Inspired by Claude Code’s tool system.</li>
+<li><strong>Dependencies</strong>: P1-T2 (LLM gateway ready)</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode (core), HelixAgent
+(reference)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tool/framework.go</code>, <code>pkg/tool/registry.go</code>,
+<code>pkg/tool/executor.go</code>, <code>pkg/tool/schema.go</code>,
+<code>pkg/tool/builtin/*.go</code></li>
+<li><strong>Acceptance Criteria</strong>: &gt;= 10 tools registered;
+tool discovery API lists all tools; tool execution returns structured
+results; schema validation rejects invalid inputs.</li>
+</ul>
+<h4 id="p2-t2-built-in-tool-suite">P2-T2: Built-in Tool Suite</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T2</li>
+<li><strong>Task Name</strong>: Implement Core Tool Suite (Read, Edit,
+Bash, Git, Search, LS, Glob, Ask, Done)</li>
+<li><strong>Description</strong>: Build the essential tools every code
+agent needs: file read/write, directory listing, glob search, grep
+search, bash execution, git operations, user ask, and task completion
+signaling.</li>
+<li><strong>Dependencies</strong>: P2-T1</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tool/read.go</code>, <code>pkg/tool/edit.go</code>,
+<code>pkg/tool/bash.go</code>, <code>pkg/tool/git.go</code>,
+<code>pkg/tool/search.go</code>, <code>pkg/tool/ls.go</code>,
+<code>pkg/tool/glob.go</code>, <code>pkg/tool/ask.go</code>,
+<code>pkg/tool/done.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Each tool has unit tests;
+integration test exercises all tools in sequence; tool results are
+serializable to JSON.</li>
+</ul>
+<h4 id="p2-t3-tool-result-persistence">P2-T3: Tool Result
+Persistence</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T3</li>
+<li><strong>Task Name</strong>: Persist Tool Results to PostgreSQL</li>
+<li><strong>Description</strong>: Store all tool invocations, inputs,
+outputs, and execution timestamps in PostgreSQL. Support querying tool
+history by session, by tool type, and by time range.</li>
+<li><strong>Dependencies</strong>: P2-T2, P1-T4</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixMemory</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tool/persistence.go</code>,
+<code>migrations/002_tool_results.up.sql</code>,
+<code>pkg/tool/history.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Every tool call stored; query
+by session returns chronological list; no duplicate storage of identical
+calls.</li>
+</ul>
+<h4 id="p2-t4-context-window-manager">P2-T4: Context Window Manager</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T4</li>
+<li><strong>Task Name</strong>: Context Window Tracking and Limits</li>
+<li><strong>Description</strong>: Track token usage per provider, per
+model, per session. Enforce context window limits and provide warnings
+at 80%, 90%, 95% thresholds.</li>
+<li><strong>Dependencies</strong>: P1-T2, P1-T7</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/context/window.go</code>,
+<code>pkg/context/tokenizer.go</code>,
+<code>pkg/context/limits.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Accurate token counting
+(within 5% of provider count); warnings fire at correct thresholds; hard
+limit prevents overflow.</li>
+</ul>
+<h4 id="p2-t5-auto-compaction-system">P2-T5: Auto-Compaction System</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T5</li>
+<li><strong>Task Name</strong>: Semantic Context Compaction (Codex +
+Plandex Style)</li>
+<li><strong>Description</strong>: Implement automatic context compaction
+when approaching token limits. Strategy: summarize older conversation
+turns, compress file contents with Tree-sitter structural summaries, and
+evict least-relevant context based on embedding similarity.</li>
+<li><strong>Dependencies</strong>: P2-T4, P1-T5, P1-T7</li>
+<li><strong>Estimated Effort</strong>: 4 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode, HelixLLM,
+HelixMemory</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/context/compactor.go</code>,
+<code>pkg/context/summarizer.go</code>,
+<code>pkg/context/relevance.go</code></li>
+<li><strong>Acceptance Criteria</strong>: 2M token context compacted to
+128k with &lt;5% semantic loss (measured by QA task accuracy);
+compaction time &lt;2s.</li>
+</ul>
+<h4 id="p2-t6-smart-file-editing-with-fuzzy-matching">P2-T6: Smart File
+Editing with Fuzzy Matching</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T6</li>
+<li><strong>Task Name</strong>: 4-Layer Fuzzy Matching Edit System
+(Aider-Inspired)</li>
+<li><strong>Description</strong>: Implement Aider’s 4-layer approach:
+(1) exact match, (2) normalized whitespace match, (3) indent-ignoring
+match, (4) AI-guided fuzzy match. Apply edits with confidence scoring
+and fallback to user confirmation.</li>
+<li><strong>Dependencies</strong>: P2-T2 (edit tool), P1-T6 (spec engine
+for guidance)</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode, HelixAgent</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/edit/matcher.go</code> (4 layers),
+<code>pkg/edit/applier.go</code>,
+<code>pkg/edit/confidence.go</code></li>
+<li><strong>Acceptance Criteria</strong>: 99%+ accuracy on exact match
+test corpus; 95%+ on fuzzy match corpus; &lt;0.1% data loss
+incidents.</li>
+</ul>
+<h4 id="p2-t7-no-flicker-rendering-engine">P2-T7: No-Flicker Rendering
+Engine</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T7</li>
+<li><strong>Task Name</strong>: Terminal Rendering with No Flicker
+(Claude Code Style)</li>
+<li><strong>Description</strong>: Implement buffered terminal output
+that computes minimal diff between frames and renders only changed
+regions. Use terminal capability detection (CSI queries) for feature
+selection.</li>
+<li><strong>Dependencies</strong>: P2-T6</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode (UI layer)</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/render/buffer.go</code>, <code>pkg/render/diff.go</code>,
+<code>pkg/render/terminal.go</code>,
+<code>pkg/render/capabilities.go</code></li>
+<li><strong>Acceptance Criteria</strong>: 60 FPS render of streaming
+text with zero visible flicker on tested terminals; falls back
+gracefully on dumb terminals.</li>
+</ul>
+<h4 id="p2-t8-session-transcript-and-resume">P2-T8: Session Transcript
+and Resume</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T8</li>
+<li><strong>Task Name</strong>: Session Transcript Persistence and
+Resume (Claude Code Style)</li>
+<li><strong>Description</strong>: Persist full session transcripts (user
+inputs, AI responses, tool calls, results) to PostgreSQL. Support
+resuming a session from any point with full context restoration.</li>
+<li><strong>Dependencies</strong>: P2-T3, P1-T4</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixMemory</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/session/transcript.go</code>,
+<code>pkg/session/resume.go</code>,
+<code>pkg/session/serialize.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Session saved after every
+turn; resume restores identical context; 100 sessions can be listed and
+selected.</li>
+</ul>
+<h4 id="p2-t9-background-task-system">P2-T9: Background Task System</h4>
+<ul>
+<li><strong>Task ID</strong>: P2-T9</li>
+<li><strong>Task Name</strong>: Async Background Task Execution</li>
+<li><strong>Description</strong>: Allow tasks (tool calls, file
+operations, LLM requests) to run in background with progress reporting.
+Support task cancellation, prioritization, and result notification.</li>
+<li><strong>Dependencies</strong>: P2-T1, P1-T7</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/task/manager.go</code>, <code>pkg/task/worker.go</code>,
+<code>pkg/task/progress.go</code>, <code>pkg/task/cancel.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Task submitted and runs async;
+progress updates stream to UI; cancellation stops task; results
+delivered when complete.</li>
+</ul>
+<hr />
+<h3 id="phase-3-power-features-plan-mode-sandboxing-mcp-permissions-1">Phase
+3: Power Features – Plan Mode, Sandboxing, MCP, Permissions</h3>
+<h4 id="p3-t1-plan-mode-engine">P3-T1: Plan Mode Engine</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T1</li>
+<li><strong>Task Name</strong>: Plan/Act Dual Mode with Different Models
+(Cline + Gemini CLI Style)</li>
+<li><strong>Description</strong>: Implement Plan mode where a planning
+model (e.g., o1, Claude 3.5 Sonnet) generates a step-by-step plan, and
+an acting model (e.g., Claude 3.5 Haiku, GPT-4o-mini) executes each
+step. Plan must be user-editable and require approval before
+execution.</li>
+<li><strong>Dependencies</strong>: P1-T6 (spec engine), P1-T2
+(multi-provider), P2-T9 (background tasks)</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode,
+HelixSpecifier</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/plan/engine.go</code>, <code>pkg/plan/approval.go</code>,
+<code>pkg/plan/executor.go</code>, <code>pkg/plan/state.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Plan generated with &gt;= 3
+steps for complex requests; user can edit plan; approval gates prevent
+auto-execution; different models selectable for plan vs act.</li>
+</ul>
+<h4 id="p3-t2-cumulative-diff-review-sandbox">P3-T2: Cumulative Diff
+Review Sandbox</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T2</li>
+<li><strong>Task Name</strong>: Diff Review Sandbox with Per-Hunk
+Approval (Plandex Style)</li>
+<li><strong>Description</strong>: Collect all file changes across a
+session into a cumulative diff. Present hunks for review with
+accept/reject/edit options. Maintain a sandbox branch until changes are
+approved.</li>
+<li><strong>Dependencies</strong>: P2-T6 (smart edit), P3-T1 (plan
+mode)</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/diff/sandbox.go</code>, <code>pkg/diff/review.go</code>,
+<code>pkg/diff/hunk.go</code>, <code>pkg/diff/approval.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Changes accumulate across
+session; diff renders with syntax highlighting; accept/reject per hunk
+works; rejected hunks excluded from final patch.</li>
+</ul>
+<h4 id="p3-t3-shadow-git-checkpoints">P3-T3: Shadow Git Checkpoints</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T3</li>
+<li><strong>Task Name</strong>: Automatic Git Checkpoints Before Every
+Change (Cline Style)</li>
+<li><strong>Description</strong>: Create lightweight git checkpoints
+(branches or stashes) before every file modification. Support checkpoint
+restore, diff between checkpoints, and checkpoint history
+navigation.</li>
+<li><strong>Dependencies</strong>: P2-T2 (git tool)</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/git/checkpoint.go</code>, <code>pkg/git/restore.go</code>,
+<code>pkg/git/history.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Checkpoint created before each
+edit; restore returns to exact prior state; checkpoint list navigable;
+no impact on user’s main branch.</li>
+</ul>
+<h4 id="p3-t4-git-worktree-isolation">P3-T4: Git Worktree Isolation</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T4</li>
+<li><strong>Task Name</strong>: Git Worktree Isolation for Concurrent
+Sessions (Claude Code Style)</li>
+<li><strong>Description</strong>: Use git worktrees to isolate
+concurrent agent sessions. Each session gets its own worktree with
+independent file state, preventing cross-session interference.</li>
+<li><strong>Dependencies</strong>: P3-T3</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/git/worktree.go</code>,
+<code>pkg/session/isolation.go</code></li>
+<li><strong>Acceptance Criteria</strong>: 5 concurrent sessions each in
+own worktree; changes in one don’t affect others; worktree cleanup on
+session end.</li>
+</ul>
+<h4 id="p3-t5-sandboxed-shell-execution-core">P3-T5: Sandboxed Shell
+Execution Core</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T5</li>
+<li><strong>Task Name</strong>: Container-Based Sandboxed Shell (Claude
+Code + Codex Style)</li>
+<li><strong>Description</strong>: Implement containerized command
+execution using Docker/Podman. Each shell command runs in a fresh
+container with limited filesystem access, network restrictions, and
+timeout enforcement.</li>
+<li><strong>Dependencies</strong>: P0-T5 (containers submodule), P2-T2
+(bash tool)</li>
+<li><strong>Estimated Effort</strong>: 4 days</li>
+<li><strong>Submodule(s) Involved</strong>: Containers, HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/sandbox/container.go</code>,
+<code>pkg/sandbox/executor.go</code>,
+<code>pkg/sandbox/policy.go</code>, <code>pkg/sandbox/network.go</code>,
+<code>pkg/sandbox/fs.go</code></li>
+<li><strong>Acceptance Criteria</strong>: <code>ls -la</code> runs in
+container; network-restricted container cannot curl; timeout kills after
+limit; filesystem only sees mounted project directory.</li>
+</ul>
+<h4 id="p3-t6-os-native-sandboxed-execution">P3-T6: OS-Native Sandboxed
+Execution</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T6</li>
+<li><strong>Task Name</strong>: seccomp-bpf + Namespace Sandboxing for
+Native Performance (Codex Style)</li>
+<li><strong>Description</strong>: For local execution without Docker,
+implement Linux-native sandboxing using seccomp-bpf system call
+filtering, PID namespaces, mount namespaces, and capability dropping.
+macOS uses seatbelt/entitlements equivalent.</li>
+<li><strong>Dependencies</strong>: P3-T5</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/sandbox/seccomp.go</code>,
+<code>pkg/sandbox/namespace.go</code>,
+<code>pkg/sandbox/native.go</code></li>
+<li><strong>Acceptance Criteria</strong>: <code>execve</code> blocked by
+seccomp; process cannot access files outside project;
+<code>setuid</code> calls fail; sandbox overhead &lt;50ms per
+command.</li>
+</ul>
+<h4 id="p3-t7-permission-rule-system">P3-T7: Permission Rule System</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T7</li>
+<li><strong>Task Name</strong>: 5-Mode Permission System with Wildcards
+(Claude Code Style)</li>
+<li><strong>Description</strong>: Implement permission rules with 5
+modes: <code>Allow</code> (auto-execute), <code>Deny</code> (block),
+<code>Ask</code> (prompt user), <code>Skip</code> (silently ignore),
+<code>Review</code> (queue for batch review). Support wildcard patterns
+for file paths, command patterns, and tool types. Configurable
+per-directory, per-session, or globally.</li>
+<li><strong>Dependencies</strong>: P2-T1 (tool framework), P3-T5
+(sandbox)</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/permission/engine.go</code>,
+<code>pkg/permission/rule.go</code>,
+<code>pkg/permission/matcher.go</code>,
+<code>pkg/permission/mode.go</code>,
+<code>config/permissions.yaml</code></li>
+<li><strong>Acceptance Criteria</strong>: All 5 modes tested; wildcard
+<code>*.log</code> matches correctly; rule precedence resolved (most
+specific wins); permission prompt rendered in TUI.</li>
+</ul>
+<h4 id="p3-t8-mcp-client-lifecycle">P3-T8: MCP Client Lifecycle</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T8</li>
+<li><strong>Task Name</strong>: MCP Client with 4 Transports + OAuth
+(Claude Code Style)</li>
+<li><strong>Description</strong>: Implement Model Context Protocol
+client supporting 4 transports: stdio (local process), SSE (server-sent
+events), HTTP (direct REST), WebSocket (bidirectional). Include full
+OAuth 2.1 PKCE flow for authentication.</li>
+<li><strong>Dependencies</strong>: P1-T2 (provider system), P2-T1 (tool
+framework)</li>
+<li><strong>Estimated Effort</strong>: 5 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/mcp/client.go</code>, <code>pkg/mcp/transport_stdio.go</code>,
+<code>pkg/mcp/transport_sse.go</code>,
+<code>pkg/mcp/transport_http.go</code>,
+<code>pkg/mcp/transport_ws.go</code>, <code>pkg/mcp/oauth.go</code>,
+<code>pkg/mcp/discovery.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Connects to MCP server via
+each transport; OAuth flow completes; tool discovery lists remote tools;
+remote tool execution returns results.</li>
+</ul>
+<h4 id="p3-t9-hook-based-extensibility">P3-T9: Hook-Based
+Extensibility</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T9</li>
+<li><strong>Task Name</strong>: 9+ Event Hook System (Claude Code
+Style)</li>
+<li><strong>Description</strong>: Implement a hook system firing events
+at key lifecycle points: <code>before_request</code>,
+<code>after_request</code>, <code>before_tool_call</code>,
+<code>after_tool_call</code>, <code>before_edit</code>,
+<code>after_edit</code>, <code>on_plan</code>, <code>on_approval</code>,
+<code>on_error</code>, <code>on_session_start</code>,
+<code>on_session_end</code>. Support pre- and post-hooks with
+cancellation.</li>
+<li><strong>Dependencies</strong>: P2-T1, P3-T7</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/hook/engine.go</code>, <code>pkg/hook/events.go</code>,
+<code>pkg/hook/handler.go</code></li>
+<li><strong>Acceptance Criteria</strong>: All 11 hooks fire at correct
+times; pre-hook can cancel operation; post-hook receives full context;
+handler registration is dynamic.</li>
+</ul>
+<h4 id="p3-t10-skill-system">P3-T10: Skill System</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T10</li>
+<li><strong>Task Name</strong>: Skill Definition and Loading System
+(Claude Code Style)</li>
+<li><strong>Description</strong>: Skills are YAML/JSON bundles defining:
+prompt templates, tool configurations, permission rules, model
+preferences, and hooks. Load skills from filesystem or remote URL.
+Support skill versioning and dependencies.</li>
+<li><strong>Dependencies</strong>: P3-T9, P3-T7</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/skill/loader.go</code>, <code>pkg/skill/schema.go</code>,
+<code>pkg/skill/manager.go</code>,
+<code>pkg/skill/version.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Skill loaded from YAML; tools
+configured by skill; permissions overridden by skill; skill dependency
+resolved.</li>
+</ul>
+<h4 id="p3-t11-subagent-team-system">P3-T11: Subagent Team System</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T11</li>
+<li><strong>Task Name</strong>: Subagent Team Delegation (Claude Code +
+Kilo Code Style)</li>
+<li><strong>Description</strong>: Create specialized subagent types:
+Researcher (finds information), Editor (makes file changes), Reviewer
+(checks quality), Tester (runs tests), Architect (designs structure).
+Orchestrate via a meta-agent that delegates tasks.</li>
+<li><strong>Dependencies</strong>: P3-T1, P1-T6, P2-T9</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/agent/roles.go</code>, <code>pkg/agent/orchestrator.go</code>,
+<code>pkg/agent/delegator.go</code>,
+<code>pkg/agent/communicator.go</code></li>
+<li><strong>Acceptance Criteria</strong>: 5 subagent types defined;
+meta-agent delegates to correct specialist; inter-agent communication
+works; results aggregated.</li>
+</ul>
+<h4 id="p3-t12-computer-use-browser-automation">P3-T12: Computer Use /
+Browser Automation</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T12</li>
+<li><strong>Task Name</strong>: Browser Automation for Computer Use
+(Cline Style)</li>
+<li><strong>Description</strong>: Integrate browser automation
+(Playwright/CDP) for computer use capabilities: navigate URLs, click
+elements, fill forms, take screenshots, and extract content. Return
+results as tool outputs.</li>
+<li><strong>Dependencies</strong>: P2-T1 (tool framework)</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tool/browser.go</code>,
+<code>pkg/browser/controller.go</code>,
+<code>pkg/browser/screenshot.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Can navigate to URL and click
+element; screenshot returned as base64; form fill works; headless mode
+default.</li>
+</ul>
+<h4 id="p3-t13-quality-scoring-and-automated-gates">P3-T13: Quality
+Scoring and Automated Gates</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T13</li>
+<li><strong>Task Name</strong>: Quality Scoring with Automated Pass/Fail
+Gates (Forge Style)</li>
+<li><strong>Description</strong>: Implement quality metrics for agent
+outputs: code style, test coverage, static analysis score, security
+scan, performance benchmark. Gate plan execution on quality
+thresholds.</li>
+<li><strong>Dependencies</strong>: P3-T1, P2-T6</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode, HelixQA</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/quality/scorer.go</code>, <code>pkg/quality/gate.go</code>,
+<code>pkg/quality/metrics.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Score computed for code
+output; gate blocks low-quality changes; metric definitions
+extensible.</li>
+</ul>
+<h4 id="p3-t14-opentelemetry-integration">P3-T14: OpenTelemetry
+Integration</h4>
+<ul>
+<li><strong>Task ID</strong>: P3-T14</li>
+<li><strong>Task Name</strong>: Distributed Tracing and Metrics (Claude
+Code Style)</li>
+<li><strong>Description</strong>: Integrate OpenTelemetry for tracing
+all major flows: LLM requests, tool calls, file edits, plan steps, MCP
+operations. Export to Jaeger/Zipkin and Prometheus.</li>
+<li><strong>Dependencies</strong>: P1-T2, P3-T8</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/telemetry/tracer.go</code>,
+<code>pkg/telemetry/metrics.go</code>,
+<code>pkg/telemetry/provider.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Trace spans cover all major
+operations; p95 latency measured; metrics exported; sampling
+configurable.</li>
+</ul>
+<hr />
+<h3 id="phase-4-uiux-tui-streaming-tui-themes-terminal-intellisense-1">Phase
+4: UI/UX &amp; TUI – Streaming TUI, Themes, Terminal Intellisense</h3>
+<h4 id="p4-t1-streaming-tui-core">P4-T1: Streaming TUI Core</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T1</li>
+<li><strong>Task Name</strong>: Token-Streaming TUI with Markdown
+Rendering</li>
+<li><strong>Description</strong>: Build a TUI that streams LLM output
+token-by-token, renders markdown (code blocks, lists, tables), and
+handles concurrent tool output streams. Support split-pane view
+(conversation + tool output).</li>
+<li><strong>Dependencies</strong>: P2-T7 (no-flicker render), P3-T5
+(sandbox output)</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tui/stream.go</code>, <code>pkg/tui/markdown.go</code>,
+<code>pkg/tui/layout.go</code>, <code>pkg/tui/pane.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Tokens render within 50ms of
+arrival; markdown code blocks syntax highlighted; split pane resizable;
+60 FPS maintained.</li>
+</ul>
+<h4 id="p4-t2-theme-system">P4-T2: Theme System</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T2</li>
+<li><strong>Task Name</strong>: 6-Platform Theme System with Custom
+Themes (Claude Code Style)</li>
+<li><strong>Description</strong>: Implement a theme engine supporting:
+Linux terminal (16/256/truecolor), macOS Terminal.app, Windows Terminal,
+VS Code integrated terminal, JetBrains terminal, iTerm2. Detect terminal
+capabilities and adapt. Support custom theme YAML files.</li>
+<li><strong>Dependencies</strong>: P2-T7 (terminal capabilities)</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/theme/engine.go</code>, <code>pkg/theme/palette.go</code>,
+<code>pkg/theme/platforms.go</code>, <code>pkg/theme/custom.go</code>,
+<code>themes/*.yaml</code></li>
+<li><strong>Acceptance Criteria</strong>: Each platform renders with
+correct colors; custom theme loads and applies; theme switch without
+restart.</li>
+</ul>
+<h4 id="p4-t3-askuserquestion-with-previews">P4-T3: AskUserQuestion with
+Previews</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T3</li>
+<li><strong>Task Name</strong>: Interactive User Prompts with
+File/Diff/Image Previews (Claude Code Style)</li>
+<li><strong>Description</strong>: Enhanced AskUserQuestion tool that
+renders rich previews: file contents with syntax highlighting, diffs
+with color coding, images in supported terminals (iTerm2 inline, sixel,
+kitty graphics). Support keyboard navigation and quick actions.</li>
+<li><strong>Dependencies</strong>: P4-T1, P4-T2, P2-T2 (ask tool)</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tui/ask.go</code>, <code>pkg/tui/preview_file.go</code>,
+<code>pkg/tui/preview_diff.go</code>,
+<code>pkg/tui/preview_image.go</code></li>
+<li><strong>Acceptance Criteria</strong>: File preview renders with
+syntax highlight; diff preview shows colors; image preview works in
+iTerm2/kitty; keyboard navigation intuitive.</li>
+</ul>
+<h4 id="p4-t4-terminal-intellisense">P4-T4: Terminal Intellisense</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T4</li>
+<li><strong>Task Name</strong>: Fig-Style Terminal Intellisense (Amazon
+Q Style)</li>
+<li><strong>Description</strong>: Provide command-line completion
+suggestions as you type, showing: available commands, file paths, git
+branches, recent commands, and contextual suggestions based on current
+directory contents. Render in a floating popup.</li>
+<li><strong>Dependencies</strong>: P4-T1</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tui/intellisense.go</code>,
+<code>pkg/tui/completion.go</code>, <code>pkg/tui/popup.go</code>,
+<code>pkg/tui/context.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Suggestions appear within
+100ms of typing; file path completion works; git branch completion
+works; popup renders correctly; 85%+ relevance score.</li>
+</ul>
+<h4 id="p4-t5-slash-command-system">P4-T5: Slash Command System</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T5</li>
+<li><strong>Task Name</strong>: Slash Command Registry and Execution
+(Claude Code Style)</li>
+<li><strong>Description</strong>: Implement <code>/command</code> system
+where commands like <code>/compact</code>, <code>/memory</code>,
+<code>/undo</code>, <code>/help</code>, <code>/model</code> are
+registered and executed. Commands have completions, help text, and
+argument parsing.</li>
+<li><strong>Dependencies</strong>: P4-T4, P2-T1 (tool framework)</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/slash/registry.go</code>, <code>pkg/slash/executor.go</code>,
+<code>pkg/slash/builtins.go</code>,
+<code>pkg/slash/completion.go</code></li>
+<li><strong>Acceptance Criteria</strong>: &gt;= 15 slash commands
+registered; tab completion works; help text displayed; arguments parsed
+correctly.</li>
+</ul>
+<h4 id="p4-t6-architecteditor-dual-model-ui">P4-T6: Architect/Editor
+Dual-Model UI</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T6</li>
+<li><strong>Task Name</strong>: Dual-Model UI for Architect/Editor Mode
+(Aider Style)</li>
+<li><strong>Description</strong>: UI mode showing both architect model
+reasoning and editor model output side by side. Architect view shows
+design rationale; editor view shows implementation. Support switching
+focus between views.</li>
+<li><strong>Dependencies</strong>: P4-T1, P3-T1</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tui/dual_model.go</code>,
+<code>pkg/tui/architect_pane.go</code>,
+<code>pkg/tui/editor_pane.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Architect reasoning visible;
+editor code visible; dual pane layout correct; focus switch works.</li>
+</ul>
+<h4 id="p4-t7-multi-agent-platform-state-machine-ui">P4-T7: Multi-Agent
+Platform State Machine UI</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T7</li>
+<li><strong>Task Name</strong>: Agent State Machine Visualization (Kilo
+Code Style)</li>
+<li><strong>Description</strong>: Visualize the multi-agent state
+machine: show current state (Idle, Planning, Executing, Reviewing,
+Error), agent assignments, and transitions. Support manual state
+override.</li>
+<li><strong>Dependencies</strong>: P3-T11, P4-T1</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tui/state_machine.go</code>,
+<code>pkg/tui/agent_status.go</code>,
+<code>pkg/tui/transition.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Current state clearly shown;
+agent assignments listed; state transitions animated; manual override
+works.</li>
+</ul>
+<h4 id="p4-t8-lsp-integration-with-diagnostics">P4-T8: LSP Integration
+with Diagnostics</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T8</li>
+<li><strong>Task Name</strong>: LSP Client for Diagnostics Feedback
+(OpenCode Style)</li>
+<li><strong>Description</strong>: Integrate LSP client for receiving
+real-time diagnostics from language servers. Show errors, warnings, and
+suggestions inline. Support multiple concurrent LSP servers.</li>
+<li><strong>Dependencies</strong>: P4-T1, P2-T6</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/lsp/client.go</code>, <code>pkg/lsp/diagnostics.go</code>,
+<code>pkg/lsp/server_manager.go</code>,
+<code>pkg/lsp/inline.go</code></li>
+<li><strong>Acceptance Criteria</strong>: LSP connection established;
+diagnostics displayed inline; multi-server support; &lt;1s
+roundtrip.</li>
+</ul>
+<h4 id="p4-t9-multimodal-input-processing">P4-T9: Multimodal Input
+Processing</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T9</li>
+<li><strong>Task Name</strong>: Image and File Attachment in Prompts
+(Gemini CLI Style)</li>
+<li><strong>Description</strong>: Support multimodal input:
+drag-and-drop image files, paste images from clipboard, attach PDFs or
+text files to prompts. Process with vision-capable models.</li>
+<li><strong>Dependencies</strong>: P4-T1, P1-T2</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/input/multimodal.go</code>, <code>pkg/input/image.go</code>,
+<code>pkg/input/clipboard.go</code>,
+<code>pkg/input/attachment.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Image attached and sent to
+vision model; PDF text extracted; clipboard image pasted; attachment
+size limits enforced.</li>
+</ul>
+<h4 id="p4-t10-1m-token-context-window-ui">P4-T10: 1M+ Token Context
+Window UI</h4>
+<ul>
+<li><strong>Task ID</strong>: P4-T10</li>
+<li><strong>Task Name</strong>: Large Context Window Indicator and
+Management (Gemini CLI Style)</li>
+<li><strong>Description</strong>: UI components for managing 1M+ token
+contexts: context usage bar, file inclusion manager, context window
+visualization, and token budget allocation per file.</li>
+<li><strong>Dependencies</strong>: P2-T4, P2-T5</li>
+<li><strong>Estimated Effort</strong>: 1 day</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/tui/context_bar.go</code>,
+<code>pkg/tui/context_manager.go</code>,
+<code>pkg/tui/token_budget.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Context bar accurate; file
+inclusion toggle works; budget allocation visible; 1M tokens handled
+without UI lag.</li>
+</ul>
+<hr />
+<h3 id="phase-5-testing-qa-100-coverage-challenges-helix_qa-sessions-1">Phase
+5: Testing &amp; QA – 100% Coverage, Challenges, helix_qa Sessions</h3>
+<h4 id="p5-t1-unit-test-coverage-enforcement">P5-T1: Unit Test Coverage
+Enforcement</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T1</li>
+<li><strong>Task Name</strong>: Achieve 100% Unit Test Coverage for All
+New Code</li>
+<li><strong>Description</strong>: Write unit tests for every new
+function, method, and branch in Phases 1-4. Use table-driven tests,
+property-based tests where appropriate, and mock interfaces for external
+dependencies. Enforce via CI gate.</li>
+<li><strong>Dependencies</strong>: All Phase 1-4 tasks</li>
+<li><strong>Estimated Effort</strong>: 5 days</li>
+<li><strong>Submodule(s) Involved</strong>: All</li>
+<li><strong>Files/Modules to Modify</strong>: <code>*_test.go</code>
+files across all new packages</li>
+<li><strong>Acceptance Criteria</strong>: <code>go test -cover</code>
+reports &gt;= 100% for all packages modified in Phases 1-4; no test
+flakes in 100 consecutive runs.</li>
+</ul>
+<h4 id="p5-t2-integration-test-suite">P5-T2: Integration Test Suite</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T2</li>
+<li><strong>Task Name</strong>: End-to-End Integration Tests in
+Containers</li>
+<li><strong>Description</strong>: Build containerized integration tests
+exercising full workflows: plan -&gt; edit -&gt; test -&gt; commit. Use
+Docker Compose for PostgreSQL + Redis + HelixCode stack. Test all major
+feature combinations.</li>
+<li><strong>Dependencies</strong>: P5-T1, P0-T5</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: Containers, HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>tests/integration/*.go</code>,
+<code>docker-compose.test.yml</code>,
+<code>.github/workflows/integration.yml</code></li>
+<li><strong>Acceptance Criteria</strong>: &gt;= 20 integration scenarios
+pass; test stack starts in &lt;30s; tests complete in &lt;10
+minutes.</li>
+</ul>
+<h4 id="p5-t3-helix_qa-challenge-sessions">P5-T3: helix_qa Challenge
+Sessions</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T3</li>
+<li><strong>Task Name</strong>: Automated Challenge-Based QA
+Testing</li>
+<li><strong>Description</strong>: Configure helix_qa submodule to run
+&gt;= 50 challenge sessions against the integrated HelixCode. Challenges
+cover: bug fixing, feature implementation, refactoring, test writing,
+and documentation. Track pass rate and regression rate.</li>
+<li><strong>Dependencies</strong>: P0-T3 (HelixQA initialized),
+P5-T2</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixQA, Challenges</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>helixqa/challenges/*.yaml</code>, <code>helixqa/runner.go</code>,
+<code>.github/workflows/helixqa.yml</code></li>
+<li><strong>Acceptance Criteria</strong>: &gt;= 50 challenges defined;
+&gt;90% pass rate; challenge results stored; regression detection
+automated.</li>
+</ul>
+<h4 id="p5-t4-llmsverifier-integration">P5-T4: LLMsVerifier
+Integration</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T4</li>
+<li><strong>Task Name</strong>: Model Output Verification and
+Consistency Checks</li>
+<li><strong>Description</strong>: Integrate LLMsVerifier to validate LLM
+outputs: check for hallucinations, verify code correctness, detect
+harmful content, and measure output consistency across providers. Use
+for both regression testing and runtime validation.</li>
+<li><strong>Dependencies</strong>: P0-T3 (LLMsVerifier initialized),
+P1-T2</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: LLMsVerifier, HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>pkg/verify/llmverifier.go</code>,
+<code>pkg/verify/hallucination.go</code>,
+<code>pkg/verify/consistency.go</code></li>
+<li><strong>Acceptance Criteria</strong>: Hallucination detection &lt;5%
+false positive; consistency score computed; verifier runs in CI; runtime
+validation optional.</li>
+</ul>
+<h4 id="p5-t5-security-audit-sandboxed-execution">P5-T5: Security Audit
+– Sandboxed Execution</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T5</li>
+<li><strong>Task Name</strong>: Penetration Testing for Sandbox
+Escape</li>
+<li><strong>Description</strong>: Hire/engage security team to attempt
+sandbox escape from containerized and seccomp-based sandboxes. Test
+vectors: privilege escalation, filesystem breakout, network tunneling,
+resource exhaustion, and side-channel attacks.</li>
+<li><strong>Dependencies</strong>: P3-T5, P3-T6</li>
+<li><strong>Estimated Effort</strong>: 3 days</li>
+<li><strong>Submodule(s) Involved</strong>: Containers, HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>security/audit/sandbox_escape_tests.go</code> (new)</li>
+<li><strong>Acceptance Criteria</strong>: No sandbox escapes found; all
+test vectors contained; security report generated and signed off.</li>
+</ul>
+<h4 id="p5-t6-performance-benchmarking">P5-T6: Performance
+Benchmarking</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T6</li>
+<li><strong>Task Name</strong>: Establish and Validate Performance
+Baselines</li>
+<li><strong>Description</strong>: Create benchmark suite measuring: p95
+edit latency, p95 plan generation time, p95 context compaction time,
+throughput (requests/sec), memory usage under load. Run against
+baselines and fail on regression &gt;10%.</li>
+<li><strong>Dependencies</strong>: All Phase 1-4 tasks</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>tests/benchmark/*.go</code>,
+<code>.github/workflows/benchmark.yml</code></li>
+<li><strong>Acceptance Criteria</strong>: All p95 targets met;
+benchmarks run in CI; regression alerts configured; results dashboard
+accessible.</li>
+</ul>
+<h4 id="p5-t7-load-and-stress-testing">P5-T7: Load and Stress
+Testing</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T7</li>
+<li><strong>Task Name</strong>: 100 Concurrent Session Load Test</li>
+<li><strong>Description</strong>: Run 100 concurrent agent sessions for
+1 hour against the full stack. Monitor: response latency, error rate,
+memory leaks, goroutine leaks, database connection pool exhaustion,
+Redis saturation.</li>
+<li><strong>Dependencies</strong>: P5-T6, P5-T2</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode, Containers</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>tests/load/*.go</code>,
+<code>tests/load/scenarios.yaml</code></li>
+<li><strong>Acceptance Criteria</strong>: 100 sessions stable for 1
+hour; &lt;1% error rate; no memory leaks detected; no goroutine growth;
+database and Redis healthy.</li>
+</ul>
+<h4 id="p5-t8-plugin-system-validation">P5-T8: Plugin System
+Validation</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T8</li>
+<li><strong>Task Name</strong>: Validate 25+ Lifecycle Hooks for Plugin
+System (OpenCode Style)</li>
+<li><strong>Description</strong>: Test the plugin system with 25+
+lifecycle hooks: plugin load, init, pre/post command, pre/post tool,
+pre/post edit, on error, on shutdown. Validate with sample plugins.</li>
+<li><strong>Dependencies</strong>: P3-T9 (hook system), P4-T5 (slash
+commands)</li>
+<li><strong>Estimated Effort</strong>: 1 day</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>tests/plugin/*.go</code>,
+<code>tests/plugin/sample_plugin.go</code></li>
+<li><strong>Acceptance Criteria</strong>: All 25+ hooks tested; sample
+plugin loads and runs; plugin isolation verified; plugin crash doesn’t
+crash host.</li>
+</ul>
+<h4 id="p5-t9-ab-testing-framework-validation">P5-T9: A/B Testing
+Framework Validation</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T9</li>
+<li><strong>Task Name</strong>: A/B Testing for Agent Configurations
+(Forge Style)</li>
+<li><strong>Description</strong>: Validate the A/B testing framework:
+can run two agent configurations side by side, collect metrics, and
+statistically determine winner. Test with model selection and prompt
+variations.</li>
+<li><strong>Dependencies</strong>: P3-T13 (quality scoring)</li>
+<li><strong>Estimated Effort</strong>: 1 day</li>
+<li><strong>Submodule(s) Involved</strong>: HelixCode</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>tests/ab/*.go</code>, <code>pkg/ab/framework.go</code></li>
+<li><strong>Acceptance Criteria</strong>: A/B test runs to completion;
+metrics collected; statistical significance computed; winner selected
+correctly.</li>
+</ul>
+<h4 id="p5-t10-documentation-and-runbook">P5-T10: Documentation and
+Runbook</h4>
+<ul>
+<li><strong>Task ID</strong>: P5-T10</li>
+<li><strong>Task Name</strong>: Integration Documentation and
+Operational Runbook</li>
+<li><strong>Description</strong>: Write comprehensive documentation:
+architecture diagrams, API docs, configuration reference,
+troubleshooting guide, and operational runbook for on-call
+engineers.</li>
+<li><strong>Dependencies</strong>: All previous tasks</li>
+<li><strong>Estimated Effort</strong>: 2 days</li>
+<li><strong>Submodule(s) Involved</strong>: All</li>
+<li><strong>Files/Modules to Modify</strong>:
+<code>docs/INTEGRATION.md</code>, <code>docs/ARCHITECTURE.md</code>,
+<code>docs/OPERATIONS.md</code>, <code>docs/API.md</code></li>
+<li><strong>Acceptance Criteria</strong>: All docs reviewed and
+approved; architecture diagrams current; runbook covers 10 common
+incidents; API docs match OpenAPI spec.</li>
+</ul>
+<hr />
+<h2 id="section-4-submodule-integration-specifications">Section 4:
+SUBMODULE INTEGRATION SPECIFICATIONS</h2>
+<h3 id="submodule-1-helixagent">Submodule 1: HelixAgent</h3>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Repository</strong></td>
+<td><code>git@github.com:HelixDevelopment/HelixAgent.git</code></td>
+</tr>
+<tr>
+<td><strong>Target Path</strong></td>
+<td><code>submodules/HelixAgent</code></td>
+</tr>
+<tr>
+<td><strong>Purpose</strong></td>
+<td>Parent/ancestor repository containing 60+ cli_agents integrations
+and 26+ submodules. Provides reference implementations, agent role
+definitions, and CLI agent patterns.</td>
+</tr>
+<tr>
+<td><strong>Special Consideration</strong></td>
+<td>HelixCode is itself a submodule OF HelixAgent. Adding HelixAgent as
+a submodule of HelixCode creates a circular dependency. Must be handled
+carefully.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exact-ssh-commands">Exact SSH Commands</h4>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From HelixCode root</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/HelixCode</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add HelixAgent as submodule (shallow clone, specific branch)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">--name</span> HelixAgent <span class="dt">\</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  git@github.com:HelixDevelopment/HelixAgent.git <span class="dt">\</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  submodules/HelixAgent</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure to not recurse into HelixAgent&#39;s submodules (avoid infinite recursion)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config submodule.HelixAgent.update none</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/HelixAgent</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule deinit <span class="at">-f</span> .  <span class="co"># Prevent recursive init</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch to known good commit (DO NOT checkout HelixCode&#39;s commit within HelixAgent)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch origin</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="op">&lt;</span>TARGET_COMMIT<span class="op">&gt;</span>  <span class="co"># e.g., v2.3.1 or specific SHA</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Return to HelixCode root and commit .gitmodules</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../..</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules submodules/HelixAgent</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add HelixAgent submodule for cli_agent integration reference&quot;</span></span></code></pre></div>
+<h4 id="integration-wiring-steps">Integration Wiring Steps</h4>
+<ol type="1">
+<li><strong>Read-Only Reference</strong>: HelixAgent is a READ-ONLY
+reference. Do NOT modify it from HelixCode.</li>
+<li><strong>Code Port Pattern</strong>: When porting a feature from
+HelixAgent’s cli_agents:
+<ul>
+<li>Copy the relevant code into HelixCode’s <code>pkg/</code> tree</li>
+<li>Adapt import paths from <code>dev.helix.agent</code> to
+<code>dev.helix.code</code></li>
+<li>Add attribution comments referencing original source</li>
+<li>Write tests for the ported code</li>
+</ul></li>
+<li><strong>Interface Alignment</strong>: HelixAgent’s
+<code>pkg/agent/interfaces.go</code> should be compared with HelixCode’s
+actor model interfaces. Create adapter layer in
+<code>pkg/agent/adapter.go</code> if needed.</li>
+<li><strong>No Build Dependency</strong>: HelixCode must build without
+HelixAgent submodule being present. Use build tags:
+<code>//go:build helixagent_ref</code> for code that imports from
+HelixAgent.</li>
+</ol>
+<h4 id="configuration">Configuration</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># config/helixagent.yaml (new)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">helixagent</span><span class="kw">:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;submodules/HelixAgent&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">reference_only</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cli_agents_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;submodules/helix_agent/cli_agents&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">integrations_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;submodules/helix_agent/integrations&quot;</span></span></code></pre></div>
+<h4 id="build-system-changes">Build System Changes</h4>
+<ul>
+<li>Add <code>submodules/HelixAgent</code> to <code>go.work</code> but
+NOT as a <code>use</code> directive (it has its own go.work)</li>
+<li>Instead, reference specific packages via <code>replace</code> if
+absolutely necessary</li>
+<li>Prefer copying code over cross-module imports to avoid circular
+build issues</li>
+</ul>
+<hr />
+<h3 id="submodule-2-helixllm">Submodule 2: HelixLLM</h3>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Repository</strong></td>
+<td><code>git@github.com:HelixDevelopment/HelixLLM.git</code></td>
+</tr>
+<tr>
+<td><strong>Target Path</strong></td>
+<td><code>submodules/HelixLLM</code></td>
+</tr>
+<tr>
+<td><strong>Purpose</strong></td>
+<td>Dedicated LLM provider management, model routing, prompt
+engineering, and token counting. Will be the PRIMARY provider of LLM
+capabilities, eventually replacing HelixCode’s internal factory.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exact-ssh-commands-1">Exact SSH Commands</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/HelixCode</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Add HelixLLM submodule</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">--name</span> HelixLLM <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  git@github.com:HelixDevelopment/HelixLLM.git <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  submodules/HelixLLM</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/HelixLLM</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch origin</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="op">&lt;</span>TARGET_COMMIT<span class="op">&gt;</span>  <span class="co"># e.g., v1.5.0 or specific SHA</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize and update its submodules (if any)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../..</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules submodules/HelixLLM</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add HelixLLM submodule for unified LLM provider management&quot;</span></span></code></pre></div>
+<h4 id="integration-wiring-steps-1">Integration Wiring Steps</h4>
+<ol type="1">
+<li><p><strong>Workspace Integration</strong>: Add
+<code>submodules/HelixLLM</code> to <code>go.work</code>:</p>
+<pre><code>use ./submodules/HelixLLM</code></pre></li>
+<li><p><strong>Interface Migration</strong>: Gradually replace
+<code>pkg/llm/factory.go</code> references with HelixLLM’s provider
+registry:</p>
+<ul>
+<li>Phase 1: Add adapter <code>pkg/llm/helixllm_adapter.go</code></li>
+<li>Phase 2: Port provider configurations</li>
+<li>Phase 3: Migrate all provider calls (Phase 1 of this plan)</li>
+</ul></li>
+<li><p><strong>Configuration Merge</strong>: HelixLLM’s provider config
+should be mergeable with HelixCode’s Viper config tree. Use
+<code>viper.MergeConfig()</code> at initialization.</p></li>
+<li><p><strong>API Exposure</strong>: Expose HelixLLM’s capabilities
+through HelixCode’s Gin server via adapter handlers.</p></li>
+</ol>
+<h4 id="configuration-1">Configuration</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># config/llm.yaml (new, merged into viper)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">gateway</span><span class="kw">:</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helixllm&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 60s</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_policy</span><span class="kw">:</span><span class="at"> exponential</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">helixllm</span><span class="kw">:</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">module_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;submodules/HelixLLM&quot;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> openai</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> anthropic</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> google</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> mistral</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">      # ... 75+ providers</span></span></code></pre></div>
+<h4 id="build-system-changes-1">Build System Changes</h4>
+<ul>
+<li><code>go.work</code>: Add
+<code>use ./submodules/HelixLLM</code></li>
+<li><code>go.work.sum</code>: Will be auto-generated</li>
+<li>CI: Build HelixLLM independently before HelixCode to catch upstream
+issues early</li>
+</ul>
+<hr />
+<h3 id="submodule-3-helixmemory">Submodule 3: HelixMemory</h3>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Repository</strong></td>
+<td><code>git@github.com:HelixDevelopment/HelixMemory.git</code></td>
+</tr>
+<tr>
+<td><strong>Target Path</strong></td>
+<td><code>submodules/HelixMemory</code></td>
+</tr>
+<tr>
+<td><strong>Purpose</strong></td>
+<td>Persistent conversation memory, embedding storage, semantic search,
+and cross-session context retrieval. Uses PostgreSQL + pgvector.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exact-ssh-commands-2">Exact SSH Commands</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/HelixCode</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">--name</span> HelixMemory <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  git@github.com:HelixDevelopment/HelixMemory.git <span class="dt">\</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  submodules/HelixMemory</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/HelixMemory</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch origin</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="op">&lt;</span>TARGET_COMMIT<span class="op">&gt;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../..</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules submodules/HelixMemory</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add HelixMemory submodule for persistent conversation memory&quot;</span></span></code></pre></div>
+<h4 id="integration-wiring-steps-2">Integration Wiring Steps</h4>
+<ol type="1">
+<li><strong>Database Schema</strong>: HelixMemory manages its own
+migrations. HelixCode must:
+<ul>
+<li>Run HelixMemory migrations BEFORE starting the server</li>
+<li>Use migration table prefix <code>helixmemory_</code> to avoid
+collision with HelixCode tables</li>
+</ul></li>
+<li><strong>Connection Sharing</strong>: HelixMemory and HelixCode share
+the same PostgreSQL instance but separate schemas if needed. Use
+<code>search_path</code> or explicit schema qualification.</li>
+<li><strong>API Layer</strong>: HelixCode wraps HelixMemory’s Go API in
+HTTP handlers under <code>/api/v1/memory/*</code></li>
+<li><strong>Redis Integration</strong>: HelixMemory’s cache layer should
+use HelixCode’s Redis connection pool (configured in Phase 1).</li>
+</ol>
+<h4 id="configuration-2">Configuration</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># config/memory.yaml (merged into viper)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">memory</span><span class="kw">:</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">module_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;submodules/HelixMemory&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">schema</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helixmemory&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">migration_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;submodules/HelixMemory/migrations&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">embedding</span><span class="kw">:</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;text-embedding-3-large&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">dimensions</span><span class="kw">:</span><span class="at"> </span><span class="dv">3072</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">retrieval</span><span class="kw">:</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">top_k</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">similarity_threshold</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.85</span></span></code></pre></div>
+<h4 id="build-system-changes-2">Build System Changes</h4>
+<ul>
+<li><code>go.work</code>: Add
+<code>use ./submodules/HelixMemory</code></li>
+<li>PostgreSQL migration runner: Update to include
+<code>submodules/HelixMemory/migrations/*.sql</code></li>
+<li>Docker Compose: Add pgvector-enabled PostgreSQL image</li>
+</ul>
+<hr />
+<h3 id="submodule-4-helixspecifier">Submodule 4: HelixSpecifier</h3>
+<table>
+<colgroup>
+<col style="width: 44%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Repository</strong></td>
+<td><code>git@github.com:HelixDevelopment/HelixSpecifier.git</code></td>
+</tr>
+<tr>
+<td><strong>Target Path</strong></td>
+<td><code>submodules/HelixSpecifier</code></td>
+</tr>
+<tr>
+<td><strong>Purpose</strong></td>
+<td>Task decomposition, specification generation, and structured output
+validation. Powers Plan Mode and the architect/editor workflow.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exact-ssh-commands-3">Exact SSH Commands</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/HelixCode</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">--name</span> HelixSpecifier <span class="dt">\</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  git@github.com:HelixDevelopment/HelixSpecifier.git <span class="dt">\</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  submodules/HelixSpecifier</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/HelixSpecifier</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch origin</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="op">&lt;</span>TARGET_COMMIT<span class="op">&gt;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../..</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules submodules/HelixSpecifier</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add HelixSpecifier submodule for task decomposition and planning&quot;</span></span></code></pre></div>
+<h4 id="integration-wiring-steps-3">Integration Wiring Steps</h4>
+<ol type="1">
+<li><strong>LLM Dependency</strong>: HelixSpecifier needs LLM access.
+Route through HelixCode’s LLM gateway (Phase 1), NOT directly to
+providers.</li>
+<li><strong>Structured Output</strong>: HelixSpecifier’s JSON schema
+validation should use HelixCode’s validation library (or shared
+library).</li>
+<li><strong>Spec Storage</strong>: Generated specifications stored in
+HelixMemory for retrieval and version tracking.</li>
+<li><strong>Plan Mode Integration</strong>: HelixSpecifier is the engine
+behind Plan Mode (Phase 3, P3-T1). Direct call from
+<code>pkg/plan/engine.go</code> to HelixSpecifier.</li>
+</ol>
+<h4 id="configuration-3">Configuration</h4>
+<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># config/specifier.yaml (merged into viper)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">specifier</span><span class="kw">:</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">module_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;submodules/HelixSpecifier&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">llm</span><span class="kw">:</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">provider</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helixllm&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;claude-3-5-sonnet&quot;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">temperature</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.2</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">decomposition</span><span class="kw">:</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_depth</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">min_confidence</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.8</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">validation</span><span class="kw">:</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">schema_strict</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">retry_on_failure</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span></code></pre></div>
+<h4 id="build-system-changes-3">Build System Changes</h4>
+<ul>
+<li><code>go.work</code>: Add
+<code>use ./submodules/HelixSpecifier</code></li>
+<li>If HelixSpecifier has its own LLM client, replace with adapter to
+HelixCode gateway</li>
+</ul>
+<hr />
+<h3 id="summary-of-submodule-additions">Summary of Submodule
+Additions</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One-shot script for all 4 submodules (run from HelixCode root)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-e</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="va">REPOS</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;git@github.com:HelixDevelopment/HelixAgent.git:submodules/HelixAgent&quot;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;git@github.com:HelixDevelopment/HelixLLM.git:submodules/HelixLLM&quot;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;git@github.com:HelixDevelopment/HelixMemory.git:submodules/HelixMemory&quot;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;git@github.com:HelixDevelopment/HelixSpecifier.git:submodules/HelixSpecifier&quot;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="va">)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> repo_spec <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${REPOS</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="va">IFS</span><span class="op">=</span>: <span class="bu">read</span> <span class="at">-r</span> <span class="va">url</span> <span class="va">path</span> <span class="op">&lt;&lt;&lt;</span> <span class="st">&quot;</span><span class="va">$repo_spec</span><span class="st">&quot;</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">&quot;</span><span class="va">$path</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;=== Adding </span><span class="va">$name</span><span class="st"> ===&quot;</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> submodule add <span class="at">--name</span> <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$url</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$path</span><span class="st">&quot;</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$path</span><span class="st">&quot;</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> fetch origin</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># </span><span class="al">NOTE</span><span class="co">: Replace &lt;TARGET_COMMIT&gt; with actual commit after audit</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> checkout <span class="op">&lt;</span>TARGET_COMMIT<span class="op">&gt;</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="bu">cd</span> ../..</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Update go.work</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;&gt;</span> go.work <span class="op">&lt;&lt;EOF</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="st">use ./submodules/HelixLLM</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="st">use ./submodules/HelixMemory</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="st">use ./submodules/HelixSpecifier</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="st"># HelixAgent NOT added to go.work (circular dependency, read-only reference)</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules go.work</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: add HelixLLM, HelixMemory, HelixSpecifier submodules; HelixAgent as reference&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="section-5-dependency-graph">Section 5: DEPENDENCY GRAPH</h2>
+<h3 id="visual-representation">5.1 Visual Representation</h3>
+<pre><code>PHASE 0: FOUNDATION
+===================
+[P0-T1] Audit Submodules
+    |
+    v
+[P0-T2] Add Missing Submodules --+---------------+
+    |                            |
+    v                            |
+[P0-T3] Initialize Dormant       |
+    |                            |
+    v                            |
+[P0-T4] Create Go Workspace -----+
+    |                            |
+    v                            |
+[P0-T5] CI Pipeline -------------+
+              |
+              v
+PHASE 1: CORE INFRASTRUCTURE
+==============================
+[P1-T1] LLM Gateway Interface
+    |
+    v
+[P1-T2] 75+ Provider Support --+-------+
+    |                          |       |
+    v                          v       v
+[P1-T3] Provider Wizards   [P1-T6] Spec Engine ---+
+    |                          |                  |
+    v                          v                  v
+[P1-T8] OpenAPI Update &lt;----+ [P1-T7] Redis Cache |
+    |                         ^                    |
+    |                         |                    |
+[P1-T4] Memory Schema -------+ [P1-T5] Embedding    |
+    |                                              |
+    v                                              |
+PHASE 2: CLI AGENT FOUNDATION
+==============================
+[P2-T1] Tool Framework &lt;--------------------------+
+    |
+    v
+[P2-T2] Built-in Tool Suite ----+
+    |                          |
+    v                          v
+[P2-T3] Tool Persistence    [P2-T4] Context Window
+    |                          |
+    v                          v
+[P2-T8] Session Resume &lt;----+ [P2-T5] Auto-Compaction
+    |                          |
+    v                          v
+[P2-T9] Background Tasks   [P2-T6] Smart File Editing
+                                |
+                                v
+                           [P2-T7] No-Flicker Rendering
+                                |
+                                v
+PHASE 3: POWER FEATURES
+=========================
+[P3-T1] Plan Mode &lt;-------------------------+
+    |                                       |
+    v                                       |
+[P3-T2] Diff Review Sandbox               |
+    |                                       |
+    v                                       |
+[P3-T3] Shadow Git Checkpoints            |
+    |                                       |
+    v                                       |
+[P3-T4] Git Worktree Isolation            |
+    |                                       |
+    v                                       v
+[P3-T5] Container Sandbox ---+          [P3-T11] Subagent Team
+    |                        |              |
+    v                        v              v
+[P3-T6] Native Sandbox  [P3-T12] Browser [P3-T7] Permissions
+    |                       |              |
+    v                       v              v
+[P3-T8] MCP Client &lt;-------+              |
+    |                                     |
+    v                                     v
+[P3-T9] Hook System &lt;---------------------+
+    |
+    v
+[P3-T10] Skill System
+    |
+    v
+[P3-T13] Quality Scoring
+    |
+    v
+[P3-T14] OpenTelemetry
+
+PHASE 4: UI/UX &amp; TUI
+=====================
+[P4-T1] Streaming TUI &lt;--------------------+
+    |                                      |
+    v                                      |
+[P4-T2] Theme System                      |
+    |                                      |
+    v                                      v
+[P4-T3] AskUserQuestion Previews     [P4-T4] Terminal Intellisense
+    |                                      |
+    v                                      v
+[P4-T6] Dual-Model UI               [P4-T5] Slash Commands
+    |                                      |
+    v                                      v
+[P4-T7] State Machine UI            [P4-T8] LSP Integration
+    |                                      |
+    v                                      v
+[P4-T9] Multimodal Input            [P4-T10] 1M Context UI
+
+PHASE 5: TESTING &amp; QA
+======================
+[P5-T1] 100% Coverage
+    |
+    v
+[P5-T2] Integration Tests
+    |
+    v
+[P5-T3] helix_qa Challenges
+    |
+    v
+[P5-T4] LLMsVerifier
+    |
+    v
+[P5-T5] Security Audit
+    |
+    v
+[P5-T6] Performance Benchmarks
+    |
+    v
+[P5-T7] Load Testing
+    |
+    v
+[P5-T8] Plugin Validation
+    |
+    v
+[P5-T9] A/B Testing
+    |
+    v
+[P5-T10] Documentation</code></pre>
+<h3 id="critical-path-identification">5.2 Critical Path
+Identification</h3>
+<p>The critical path is the longest dependency chain that determines
+minimum project duration:</p>
+<pre><code>CRITICAL PATH (approximate duration: 76-95 days)
+================================================
+P0-T1 (1d) -&gt; P0-T2 (1d) -&gt; P0-T4 (2d) -&gt; P0-T5 (2d)
+    [Phase 0 total: 6d]
+    |
+    v
+P1-T1 (2d) -&gt; P1-T2 (4d) -&gt; P1-T6 (3d)
+    [Phase 1 critical: 9d]
+    |
+    v
+P2-T1 (3d) -&gt; P2-T2 (3d) -&gt; P2-T6 (3d) -&gt; P2-T7 (2d)
+    [Phase 2 critical: 11d]
+    |
+    v
+P3-T1 (3d) -&gt; P3-T5 (4d) -&gt; P3-T6 (3d) -&gt; P3-T8 (5d)
+    [Phase 3 critical: 15d]
+    |
+    v
+P4-T1 (3d) -&gt; P4-T2 (2d) -&gt; P4-T3 (2d)
+    [Phase 4 critical: 7d]
+    |
+    v
+P5-T1 (5d) -&gt; P5-T2 (3d) -&gt; P5-T3 (3d) -&gt; P5-T6 (2d) -&gt; P5-T7 (2d)
+    [Phase 5 critical: 15d]</code></pre>
+<p><strong>Critical Path Total</strong>: ~63 working days (~76-95
+calendar days with weekends/holidays/buffer)</p>
+<h3 id="parallel-workstreams">5.3 Parallel Workstreams</h3>
+<p>Multiple workstreams can proceed in parallel once Phase 0 is
+complete:</p>
+<p><strong>Workstream A: LLM &amp; Providers (Phase 1 focus)</strong> -
+P1-T1 -&gt; P1-T2 -&gt; P1-T3 -&gt; P1-T8 - Can start immediately after
+P0-T5</p>
+<p><strong>Workstream B: Memory &amp; Retrieval (Phase 1 focus)</strong>
+- P1-T4 -&gt; P1-T5 -&gt; P1-T7 - Can start immediately after P0-T5</p>
+<p><strong>Workstream C: Specification Engine (Phase 1 focus)</strong> -
+P1-T1 -&gt; P1-T6 -&gt; (feeds into Phase 3 Plan Mode) - Can start
+immediately after P1-T1</p>
+<p><strong>Workstream D: Tool Framework (Phase 2 focus)</strong> - P2-T1
+-&gt; P2-T2 -&gt; P2-T3 - Needs P1-T2 (for LLM tool)</p>
+<p><strong>Workstream E: Context Management (Phase 2 focus)</strong> -
+P2-T4 -&gt; P2-T5 -&gt; P2-T8 - Needs P1-T5 (embeddings) and P1-T7
+(Redis)</p>
+<p><strong>Workstream F: UI/UX Foundation (Phase 4 focus)</strong> -
+P4-T1 -&gt; P4-T2 -&gt; P4-T3 - Needs P2-T7 (no-flicker rendering) - Can
+start mid-Phase 2 once P2-T7 is complete</p>
+<p><strong>Workstream G: Sandboxing (Phase 3 focus)</strong> - P3-T5
+-&gt; P3-T6 - Needs P0-T3 (Containers submodule)</p>
+<p><strong>Workstream H: MCP Integration (Phase 3 focus)</strong> -
+P3-T8 - Needs P1-T2 and P2-T1</p>
+<p><strong>Workstream I: Quality &amp; Testing (Phase 5 focus)</strong>
+- P5-T5 -&gt; P5-T6 -&gt; P5-T7 - Needs P3-T5 and P3-T6 complete</p>
+<h3 id="merge-points-high-coordination-required">5.4 Merge Points (High
+Coordination Required)</h3>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Merge Point</th>
+<th>Tasks Converging</th>
+<th>Coordination Need</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>M1</strong> (After P2-T2)</td>
+<td>Tool suite complete</td>
+<td>All Phase 2+ tool-dependent tasks can start</td>
+</tr>
+<tr>
+<td><strong>M2</strong> (After P3-T1)</td>
+<td>Plan mode ready</td>
+<td>UI, permissions, MCP can integrate with plan mode</td>
+</tr>
+<tr>
+<td><strong>M3</strong> (After P3-T5)</td>
+<td>Sandboxing ready</td>
+<td>Security audit, integration tests can begin</td>
+</tr>
+<tr>
+<td><strong>M4</strong> (After P4-T1)</td>
+<td>TUI streaming ready</td>
+<td>All UI features can integrate</td>
+</tr>
+<tr>
+<td><strong>M5</strong> (After P5-T2)</td>
+<td>Integration tests pass</td>
+<td>Final QA and release preparation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="section-6-risk-register">Section 6: RISK REGISTER</h2>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 14%" />
+<col style="width: 16%" />
+<col style="width: 11%" />
+<col style="width: 16%" />
+<col style="width: 17%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk ID</th>
+<th>Risk Description</th>
+<th>Probability (1-5)</th>
+<th>Impact (1-5)</th>
+<th>Risk Score (PxI)</th>
+<th>Mitigation Strategy</th>
+<th>Contingency Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R-01</strong></td>
+<td><strong>Circular submodule dependency causes build
+failures</strong>: HelixCode is a child of HelixAgent. Adding HelixAgent
+as a submodule of HelixCode creates a loop that git may refuse to
+recurse.</td>
+<td>4</td>
+<td>5</td>
+<td><strong>20</strong></td>
+<td>Add HelixAgent as shallow, non-recursive submodule with
+<code>update=none</code> config. Do NOT add to <code>go.work</code>. Use
+read-only reference pattern.</td>
+<td>If git rejects the submodule add, maintain HelixAgent as a
+completely separate clone (e.g., <code>../HelixAgent</code>) and
+reference via symlink or documentation. Do not block build on HelixAgent
+presence.</td>
+</tr>
+<tr>
+<td><strong>R-02</strong></td>
+<td><strong>SSH key authentication fails in CI/CD</strong>: GitHub
+Actions (or other CI) cannot access private repos via SSH without
+deployed keys.</td>
+<td>4</td>
+<td>4</td>
+<td><strong>16</strong></td>
+<td>Configure Deploy Keys or GitHub App tokens for CI. Use
+<code>webfactory/ssh-agent</code> action. Document key rotation
+process.</td>
+<td>Fallback to HTTPS with Personal Access Tokens for CI. Rotate tokens
+via GitHub Secrets. Document token scoping (read-only).</td>
+</tr>
+<tr>
+<td><strong>R-03</strong></td>
+<td><strong>Go module version conflicts across 11 submodules</strong>:
+Different submodules may depend on different versions of shared
+libraries (e.g., Gin, Cobra, Viper, Redis client).</td>
+<td>4</td>
+<td>4</td>
+<td><strong>16</strong></td>
+<td>Centralize dependency version management in <code>go.work</code>.
+Run <code>go work sync</code> regularly. Pin major versions in
+workspace.</td>
+<td>Use <code>replace</code> directives in <code>go.work</code>
+temporarily to force version alignment. Create dependency upgrade
+sprints after integration.</td>
+</tr>
+<tr>
+<td><strong>R-04</strong></td>
+<td><strong>LLM provider API drift breaks gateway</strong>: Provider
+APIs change (OpenAI, Anthropic, Google), causing runtime failures after
+integration.</td>
+<td>4</td>
+<td>3</td>
+<td><strong>12</strong></td>
+<td>Implement provider capability discovery and version negotiation.
+Abstract provider specifics behind gateway interface. Add health checks
+with automatic failover.</td>
+<td>Maintain provider-specific fallback adapters. Use multiple providers
+for critical paths (automatic failover). Alert on provider health check
+failures.</td>
+</tr>
+<tr>
+<td><strong>R-05</strong></td>
+<td><strong>Context compaction loses critical semantic
+information</strong>: Auto-compaction may remove tokens that are
+essential for task completion, causing agent failure.</td>
+<td>3</td>
+<td>4</td>
+<td><strong>12</strong></td>
+<td>Multi-layer compaction strategy: first summarize, then compress,
+then evict by relevance. Use embedding-based relevance scoring. Preserve
+tool results and user directives.</td>
+<td>Implement “pin” mechanism for critical context. Allow user to mark
+context as non-compactable. Fallback to manual context management
+mode.</td>
+</tr>
+<tr>
+<td><strong>R-06</strong></td>
+<td><strong>Sandbox escape compromises host system</strong>: Container
+or seccomp-bpf misconfiguration allows malicious code to escape
+sandbox.</td>
+<td>3</td>
+<td>5</td>
+<td><strong>15</strong></td>
+<td>Defense in depth: containers + seccomp + AppArmor/SELinux + non-root
+user + read-only rootfs + limited capabilities. Regular security
+audits.</td>
+<td>Immediately disable sandbox execution and fall back to read-only
+mode. Quarantine affected sessions. Engage security team for incident
+response.</td>
+</tr>
+<tr>
+<td><strong>R-07</strong></td>
+<td><strong>Permission system locks out legitimate operations</strong>:
+Overly restrictive default permissions or wildcard misconfiguration
+prevents normal agent operation.</td>
+<td>3</td>
+<td>4</td>
+<td><strong>12</strong></td>
+<td>Default all permissions to <code>ask</code> (never deny by default).
+Require explicit opt-in for <code>deny</code> rules. Validate wildcard
+patterns before saving. Provide <code>--emergency-override</code>
+flag.</td>
+<td>Emergency override flag bypasses all permission checks. Log all
+overrides for audit. Support gradual permission tightening after initial
+permissive period.</td>
+</tr>
+<tr>
+<td><strong>R-08</strong></td>
+<td><strong>100% test coverage mandate causes schedule slip</strong>:
+Writing comprehensive tests for 20+ feature domains may take longer than
+estimated, pushing timeline.</td>
+<td>4</td>
+<td>3</td>
+<td><strong>12</strong></td>
+<td>Start test writing concurrently with feature development (TDD). Use
+code generation for boilerplate tests. Focus on critical path coverage
+first.</td>
+<td>Allow 95% coverage as temporary gate with technical debt ticket for
+remaining 5%. Prioritize integration tests over unit tests for
+non-critical paths.</td>
+</tr>
+<tr>
+<td><strong>R-09</strong></td>
+<td><strong>Theme system has platform-specific rendering bugs</strong>:
+Terminal capability detection fails on exotic terminals, causing garbled
+output or crashes.</td>
+<td>3</td>
+<td>2</td>
+<td><strong>6</strong></td>
+<td>Extensive terminal capability matrix testing. Graceful degradation
+to dumb terminal mode. Platform detection with fallback chains.</td>
+<td><code>UI_MODE=simple</code> forces plain text output. Per-platform
+test suites in CI. Community bug reporting for unsupported
+terminals.</td>
+</tr>
+<tr>
+<td><strong>R-10</strong></td>
+<td><strong>MCP OAuth implementation complexity</strong>: OAuth 2.1 PKCE
+flow is complex, error-prone, and may not work with all MCP
+servers.</td>
+<td>3</td>
+<td>3</td>
+<td><strong>9</strong></td>
+<td>Use mature OAuth library (e.g., <code>golang.org/x/oauth2</code>).
+Implement comprehensive error handling. Test against reference MCP
+servers.</td>
+<td>Support token-based auth as fallback for servers without OAuth.
+Document manual token configuration. Phase MCP OAuth as beta
+feature.</td>
+</tr>
+<tr>
+<td><strong>R-11</strong></td>
+<td><strong>HelixQA challenge flakiness causes false negatives</strong>:
+Challenge tests may fail due to non-deterministic LLM output, not actual
+regressions.</td>
+<td>4</td>
+<td>3</td>
+<td><strong>12</strong></td>
+<td>Implement challenge retry with exponential backoff. Use
+deterministic seed where possible. Grade on multiple criteria (not just
+exact match). Maintain challenge stability score.</td>
+<td>Quarantine flaky challenges after 3 consecutive failures. Manual
+review of borderline results. Separate “stable” and “experimental”
+challenge suites.</td>
+</tr>
+<tr>
+<td><strong>R-12</strong></td>
+<td><strong>Performance regression under load</strong>: 100 concurrent
+sessions may expose memory leaks, goroutine leaks, or database
+connection pool exhaustion.</td>
+<td>3</td>
+<td>4</td>
+<td><strong>12</strong></td>
+<td>Load test early (not just at end). Use pprof profiling. Set resource
+limits and alerts. Implement circuit breakers for LLM calls.</td>
+<td>Horizontal scaling: run multiple HelixCode instances behind load
+balancer. Scale PostgreSQL read replicas. Implement request queuing and
+backpressure.</td>
+</tr>
+<tr>
+<td><strong>R-13</strong></td>
+<td><strong>Key contributor availability</strong>: Core team members may
+be unavailable due to vacation, illness, or other projects.</td>
+<td>3</td>
+<td>3</td>
+<td><strong>9</strong></td>
+<td>Pair programming and knowledge sharing sessions. Document
+architecture decisions. Cross-train team members on critical
+subsystems.</td>
+<td>Redistribute tasks based on availability. Use external contractors
+for well-defined, isolated tasks. Extend timeline if needed.</td>
+</tr>
+<tr>
+<td><strong>R-14</strong></td>
+<td><strong>Tree-sitter integration gaps</strong>: Context compaction
+relies on Tree-sitter for structural summaries. Some languages may lack
+parser support.</td>
+<td>2</td>
+<td>3</td>
+<td><strong>6</strong></td>
+<td>Maintain fallback to regex-based heuristics for unsupported
+languages. Prioritize top-10 language parsers. Use LLM-based
+summarization as ultimate fallback.</td>
+<td>Document supported languages. Graceful degradation to text-level
+compaction. Community contribution path for new Tree-sitter
+parsers.</td>
+</tr>
+<tr>
+<td><strong>R-15</strong></td>
+<td><strong>Database migration conflicts</strong>: HelixMemory and
+HelixCode migrations may conflict on schema names, table names, or
+migration versioning.</td>
+<td>3</td>
+<td>3</td>
+<td><strong>9</strong></td>
+<td>Use separate PostgreSQL schemas. Centralized migration runner with
+ordering. Versioned migration filenames with timestamps. Pre-deployment
+migration test in staging.</td>
+<td>Rename conflicting tables/columns with migration. Use schema
+separation (<code>helixmemory.*</code> vs <code>helixcode.*</code>).
+Emergency rollback via <code>down</code> migrations.</td>
+</tr>
+<tr>
+<td><strong>R-16</strong></td>
+<td><strong>Skill system YAML parsing vulnerabilities</strong>: Loading
+skills from YAML files could introduce deserialization vulnerabilities
+if untrusted skills are loaded.</td>
+<td>2</td>
+<td>4</td>
+<td><strong>8</strong></td>
+<td>Strict YAML schema validation. Whitelist allowed keys. Sanitize all
+string inputs. Load skills from trusted paths only.</td>
+<td>Disable skill loading via <code>--no-skills</code> flag. Review all
+skill files before loading. Use static analysis on skill
+definitions.</td>
+</tr>
+<tr>
+<td><strong>R-17</strong></td>
+<td><strong>Embedding model compatibility</strong>: Embedding dimensions
+or models may change, invalidating stored vectors in pgvector.</td>
+<td>2</td>
+<td>3</td>
+<td><strong>6</strong></td>
+<td>Store embedding model version with vectors. Detect model mismatch on
+retrieval. Support re-embedding on model change.</td>
+<td>Migration to re-embed all stored content. Dimension-agnostic storage
+if possible. Alert on model version mismatch.</td>
+</tr>
+<tr>
+<td><strong>R-18</strong></td>
+<td><strong>Subagent communication deadlock</strong>: Multiple subagents
+waiting on each other creates deadlock in orchestrator.</td>
+<td>2</td>
+<td>4</td>
+<td><strong>8</strong></td>
+<td>Implement timeouts on all inter-agent requests. Use directed acyclic
+graphs for task dependencies. Monitor for circular wait conditions.</td>
+<td>Timeout-based cancellation of deadlocked tasks. Fallback to
+single-agent execution. Log deadlock patterns for post-hoc
+analysis.</td>
+</tr>
+<tr>
+<td><strong>R-19</strong></td>
+<td><strong>OpenTelemetry overhead impacts performance</strong>: Tracing
+and metrics collection adds latency to fast paths.</td>
+<td>2</td>
+<td>2</td>
+<td><strong>4</strong></td>
+<td>Use sampling (1% default, 100% on demand). Async trace export.
+Lightweight span creation. Benchmark with/without telemetry.</td>
+<td>Disable telemetry via <code>OTEL_DISABLED=1</code>. Reduce sampling
+rate. Batch span export to reduce overhead.</td>
+</tr>
+<tr>
+<td><strong>R-20</strong></td>
+<td><strong>Mid-session provider switching loses context</strong>:
+Switching LLM providers mid-session may cause context format
+incompatibilities.</td>
+<td>3</td>
+<td>3</td>
+<td><strong>9</strong></td>
+<td>Normalize context format in HelixCode before sending to any
+provider. Abstract provider-specific message formats. Test context
+round-trip for each provider.</td>
+<td>Warn user before switching. Offer to compact/summarize context on
+switch. Maintain per-provider context caches.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="risk-heat-map">Risk Heat Map</h3>
+<pre><code>Impact
+   5 |  R-01  R-06
+   4 |  R-02  R-03  R-05  R-07  R-08  R-12
+   3 |  R-04  R-10  R-11  R-15  R-18  R-20
+   2 |  R-09  R-14  R-17  R-19
+   1 |
+     +---------------------------
+       1   2   3   4   5
+           Probability
+
+HIGH RISK ZONE (PxI &gt;= 12): R-01, R-02, R-03, R-04, R-05, R-06, R-07, R-08, R-11, R-12, R-20
+MEDIUM RISK ZONE (PxI 6-11): R-09, R-10, R-13, R-14, R-15, R-16, R-17, R-18
+LOW RISK ZONE (PxI &lt; 6): R-19</code></pre>
+<hr />
+<h2 id="appendix-a-feature-inventory-summary">APPENDIX A: Feature
+Inventory Summary</h2>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 22%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Source Agent</th>
+<th># Features</th>
+<th>Key Features Integrated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td>20</td>
+<td>Auto-Compaction, Permissions, Tool Persistence, Worktree Isolation,
+Hooks, No-Flicker Rendering, Background Tasks, Smart Editing, Plan Mode,
+Slash Commands, MCP Lifecycle, Skills, Session Resume, Multi-Provider
+Wizards, LSP, Sandboxed Shell, Themes, AskUserQuestion, Subagent Team,
+OpenTelemetry</td>
+</tr>
+<tr>
+<td>Aider</td>
+<td>3</td>
+<td>Architect/Editor Dual-Model, 4-Layer Fuzzy Matching, Git-Native
+Auto-Commit</td>
+</tr>
+<tr>
+<td>Cline</td>
+<td>3</td>
+<td>Plan/Act with Different Models, Shadow Git Checkpoints, Browser
+Automation</td>
+</tr>
+<tr>
+<td>Codex</td>
+<td>3</td>
+<td>OS-Native Sandboxed Execution, Automatic Context Compaction,
+Stateless ZDR Architecture</td>
+</tr>
+<tr>
+<td>Plandex</td>
+<td>3</td>
+<td>Cumulative Diff Review Sandbox, 2M Token Context + 20M Indexing,
+Version-Controlled Model Packs</td>
+</tr>
+<tr>
+<td>Forge</td>
+<td>3</td>
+<td>6 Orchestration Patterns, Quality Scoring with Gates, A/B Testing
+for Agent Configs</td>
+</tr>
+<tr>
+<td>Kilo Code</td>
+<td>3</td>
+<td>5 Specialized Modes + Subagent Delegation, Multi-Agent Platform
+State Machine, Auto Triage/Review/App Builder</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td>3</td>
+<td>75+ Provider Support with Mid-Session Switching, LSP Integration
+with Diagnostics, Plugin System with 25+ Hooks</td>
+</tr>
+<tr>
+<td>Gemini CLI</td>
+<td>3</td>
+<td>1M Token Context Window, Plan Mode with ask_user, Multimodal
+Input</td>
+</tr>
+<tr>
+<td>Amazon Q</td>
+<td>3</td>
+<td>Fig-Style Terminal Intellisense, Architecture Diagram &lt;-&gt; Code
+Sync, CDK Construct Abstraction</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total Feature Domains</strong>: 47 distinct features across
+10 source agents</p>
+<hr />
+<h2 id="appendix-b-timeline-summary">APPENDIX B: Timeline Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Calendar Days</th>
+<th>Cumulative Days</th>
+<th>Risk Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 0: Foundation</td>
+<td>5-7</td>
+<td>5-7</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>Phase 1: Core Infrastructure</td>
+<td>14-18</td>
+<td>19-25</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>Phase 2: CLI Agent Foundation</td>
+<td>18-22</td>
+<td>37-47</td>
+<td>MEDIUM-HIGH</td>
+</tr>
+<tr>
+<td>Phase 3: Power Features</td>
+<td>21-28</td>
+<td>58-75</td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td>Phase 4: UI/UX &amp; TUI</td>
+<td>14-18</td>
+<td>72-93</td>
+<td>MEDIUM</td>
+</tr>
+<tr>
+<td>Phase 5: Testing &amp; QA</td>
+<td>14-18</td>
+<td>86-111</td>
+<td>MEDIUM</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Estimated Total Duration</strong>: 86-111 calendar days (~3-4
+months with 1 FTE team of 4-6 engineers)</p>
+<p><strong>Go-Live Target</strong>: Q2 2025 (with buffer for risk
+mitigation)</p>
+<hr />
+<h2 id="appendix-c-team-assignment-recommendations">APPENDIX C: Team
+Assignment Recommendations</h2>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 54%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Role</th>
+<th>Responsibilities</th>
+<th>Phases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Integration Lead</strong></td>
+<td>Architecture decisions, submodule coordination, critical path
+management</td>
+<td>All</td>
+</tr>
+<tr>
+<td><strong>LLM Engineer</strong></td>
+<td>Provider gateway, multi-model support, context compaction</td>
+<td>1, 2, 3</td>
+</tr>
+<tr>
+<td><strong>Agent Engineer</strong></td>
+<td>Tool framework, plan mode, subagent orchestration</td>
+<td>2, 3</td>
+</tr>
+<tr>
+<td><strong>Infrastructure Engineer</strong></td>
+<td>Sandboxing, MCP, security, build system</td>
+<td>0, 1, 3, 5</td>
+</tr>
+<tr>
+<td><strong>UI/UX Engineer</strong></td>
+<td>TUI streaming, themes, terminal intellisense, multimodal</td>
+<td>4</td>
+</tr>
+<tr>
+<td><strong>QA Engineer</strong></td>
+<td>Test strategy, coverage enforcement, challenge design</td>
+<td>5 (support throughout)</td>
+</tr>
+<tr>
+<td><strong>DevOps Engineer</strong></td>
+<td>CI/CD, deployment, observability, load testing</td>
+<td>0, 1, 5</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>End of Master Integration Plan</em></p>
+</body>
+</html>

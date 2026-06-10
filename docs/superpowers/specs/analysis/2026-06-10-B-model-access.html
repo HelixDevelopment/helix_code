@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-B-model-access</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-B-model-access</h1>
+</header>
+<h1 id="workstream-b-model-access-refinement-api-key-auto-recognition-dynamic-working-model-exposure-via-llmsverifier">Workstream
+B — Model-Access Refinement: API-Key Auto-Recognition + Dynamic
+Working-Model Exposure via LLMsVerifier</h1>
+<p><strong>Revision:</strong> 1 <strong>Created:</strong> 2026-06-10
+<strong>Last modified:</strong> 2026-06-10 <strong>Status:</strong>
+draft <strong>Maintainer:</strong> Workstream-B analysis subagent
+(READ-ONLY planning pass) <strong>Scope:</strong> Evidence-cited gap
+analysis. No code changed. All paths absolute. ABSENT items flagged.</p>
+<p>Goal restated (from the request): <em>“For every provider, if an API
+key is provided OR recognized from <code>.env</code> /
+<code>.api_keys</code> / shell-exported, that provider’s WORKING models
+become available — everything dynamically obtained + validated +
+verified via LLMsVerifier.”</em></p>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-api-key-loading">1. API-key loading — current state +
+GAP</a></li>
+<li><a href="#2-llmsverifier-integration">2. LLMsVerifier integration —
+real vs stubbed</a></li>
+<li><a href="#3-provider-inventory">3. Provider inventory — dynamic vs
+hardcoded + key-gating</a></li>
+<li><a href="#4-design">4. Design — key-recognized → verifier-validates
+→ only-working-exposed</a></li>
+<li><a href="#5-deliverables">5. Deliverables the request
+demands</a></li>
+<li><a href="#executive-summary">Executive summary + top 5 gaps</a></li>
+</ul>
+<hr />
+<h2 id="api-key-loading">1. API-key loading</h2>
+<h3 id="what-loads-keys-today-cited">1.1 What loads keys today
+(cited)</h3>
+<p>Four independent, partly-overlapping mechanisms exist; none of them
+implement the request goal end-to-end.</p>
+<p><strong>(a) Viper <code>AutomaticEnv</code> + explicit
+<code>BindEnv</code> (HelixCode primary path).</strong>
+<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/config/config.go</code>
+- L307–309 <code>v.AutomaticEnv()</code> +
+<code>v.SetEnvPrefix(&quot;HELIX&quot;)</code>. - L337–345 per-provider key
+bindings into config keys, e.g.
+<code>v.BindEnv(&quot;verifier.providers.openai.api_key&quot;, &quot;OPENAI_API_KEY&quot;)</code>
+… through <code>openrouter</code> (openai, anthropic, gemini, deepseek,
+groq, mistral, xai, openrouter — 8 providers). - These map
+shell-exported env vars into
+<code>cfg.Verifier.Providers[name].APIKey</code>.</p>
+<p><strong>(b) Per-provider constructor <code>os.Getenv</code> fallback
+(the de-facto runtime path).</strong> Every cloud provider constructor
+reads its env var directly if <code>config.APIKey</code> is empty: -
+<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/llm/openai_provider.go</code>
+L45–51 (<code>apiKey = os.Getenv(&quot;OPENAI_API_KEY&quot;)</code>; hard error if
+still empty). -
+<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/llm/anthropic_provider.go</code>
+L153 (<code>apiKey = os.Getenv(&quot;ANTHROPIC_API_KEY&quot;)</code>), plus
+<code>ANTHROPIC_BASE_URL</code> L169. - <code>azure_provider.go</code>
+L285 (<code>AZURE_OPENAI_API_KEY</code>),
+<code>bedrock_provider.go</code> L272/276
+(<code>AWS_REGION</code>/<code>AWS_DEFAULT_REGION</code>), and
+gemini/groq/deepseek/mistral/openrouter/xai mirror the same
+<code>if apiKey == &quot;&quot; { … os.Getenv(...) }</code> pattern (grep
+evidence: §3.3 table).</p>
+<p><strong>(c) <code>.env</code> / <code>api_keys.sh</code> loader —
+EXISTS but is UNWIRED (critical gap).</strong>
+<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/secrets/loader.go</code>
+- L30 <code>func LoadAPIKeys() error</code> — reads
+<code>$HOME/api_keys.sh</code> first (L33–37, parses
+<code>export VAR=value</code> lines, <code>loadFromShell</code>), else
+walks up from cwd to find a <code>.env</code> (<code>findEnvFile</code>
+L119–129, <code>loadFromEnv</code> L84–106), applying values via
+<code>os.Setenv</code>. - Real file I/O, no simulation; CONST-042-aware
+(never logs values). - <strong>GAP:</strong> grep across
+<code>helix_code/cmd</code>, <code>helix_code/internal/server</code>,
+<code>helix_code/applications</code> returns ZERO production call-sites.
+The ONLY references are unit tests
+(<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/secrets/loader_test.go</code>,
+<code>.../translator_test.go</code> L130). So HelixCode does
+<strong>not</strong> auto-load <code>.env</code> or
+<code>api_keys.sh</code> at startup — it depends entirely on the
+operator having already shell-exported the keys (mechanisms a + b). This
+directly fails the request clause “recognized from <code>.env</code> /
+<code>.api_keys</code>”. (Note: this is exactly the §11.4.124
+unwired-code situation — investigate-before-anything; the fix here is to
+WIRE it, not remove it.)</p>
+<p><strong>(d) <code>.env.example</code> (repo root).</strong>
+<code>/Volumes/T7/Projects/HelixCode/.env.example</code> L42–49 lists
+the 8 cloud key vars (<code>OPENAI_API_KEY</code>,
+<code>ANTHROPIC_API_KEY</code>, <code>GEMINI_API_KEY</code>,
+<code>DEEPSEEK_API_KEY</code>, <code>GROQ_API_KEY</code>,
+<code>MISTRAL_API_KEY</code>, <code>XAI_API_KEY</code>,
+<code>OPENROUTER_API_KEY</code>), all empty; L30–37 the verifier config
+block (<code>HELIX_VERIFIER_ENABLED=false</code> default,
+<code>HELIX_VERIFIER_ENDPOINT=http://localhost:8081</code>,
+<code>HELIX_VERIFIER_MIN_SCORE=6.0</code>,
+<code>HELIX_MODELS_DEV_ENDPOINT=https://api.models.dev</code>); L54–55
+local provider hosts. There is no <code>.api_keys</code> filename
+literally — the request’s “<code>.api_keys</code>” maps to loader.go’s
+<code>$HOME/api_keys.sh</code> shell-recipe file.</p>
+<h3 id="helix_agent-reference-implementation-the-design-template">1.2
+helix_agent reference implementation (the design template)</h3>
+<p><code>/Volumes/T7/Projects/HelixCode/submodules/helix_agent/internal/verifier/provider_types.go</code>
+- L348–349
+<code>var SupportedProviders = map[string]*ProviderTypeInfo{…}</code>
+declares <strong>every</strong> provider with a per-provider
+<code>EnvVars</code> list (multiple aliases each), e.g. L357 anthropic
+<code>{&quot;ANTHROPIC_API_KEY&quot;,&quot;CLAUDE_API_KEY&quot;}</code>, L381 gemini
+<code>{&quot;GEMINI_API_KEY&quot;,&quot;GOOGLE_API_KEY&quot;,&quot;ApiKey_Gemini&quot;}</code>, L552
+xai <code>{&quot;XAI_API_KEY&quot;,&quot;GROK_API_KEY&quot;}</code>, plus cerebras,
+perplexity, cohere, ai21, together, fireworks, zai, qwen, openrouter,
+ollama, llamacpp (20+ providers).</p>
+<p><code>/Volumes/T7/Projects/HelixCode/submodules/helix_agent/internal/verifier/startup.go</code>
+- L347–348
+<code>unsupportedScanner := api_keys.NewEnvVarScanner(); unsupportedScanner.ScanEnvForUnsupportedKeys()</code>
+— records env-detected keys that don’t map to a known provider. -
+L389–405 the core loop: for each <code>providerType</code> in
+<code>SupportedProviders</code>, for each <code>envVar</code> in
+<code>info.EnvVars</code>:
+<code>apiKey := os.Getenv(envVar); if apiKey != &quot;&quot; &amp;&amp; !isPlaceholder(apiKey)</code>
+→ <strong>try dynamic model discovery first</strong>
+(<code>sv.DiscoverModels(ctx, providerType, apiKey)</code>), fall back
+to <code>info.Models</code> static list only if discovery fails. -
+L342/360–364 + L1377/1401 integrate a faulty-key registry
+(<code>api_keys.ReadFaultyAPIKeys</code>,
+<code>GetProviderAPIKeyName</code>, <code>WriteFaultyAPIKey</code>) so
+providers with revoked/failing keys are de-prioritised.</p>
+<p>The <code>api_keys</code> package lives in the LLMsVerifier
+submodule:
+<code>/Volumes/T7/Projects/HelixCode/submodules/llms_verifier/llm-verifier/api_keys/{env_scanner.go,manager.go,priority.go}</code>
+(imported in helix_agent as
+<code>digital.vasic.llmsverifier/api_keys</code>, startup.go L26).</p>
+<p><strong>This is exactly the “key recognized → discover → expose” flow
+the request wants. HelixCode does not have it; helix_agent does. Per
+§11.4.74 the design should reuse/extend this, not re-invent
+it.</strong></p>
+<hr />
+<h2 id="llmsverifier-integration">2. LLMsVerifier integration</h2>
+<h3 id="consumption-is-real-not-stubbed">2.1 Consumption is REAL (not
+stubbed)</h3>
+<p><code>/Volumes/T7/Projects/HelixCode/helix_code/internal/verifier/client.go</code>
+- Real stdlib <code>net/http</code> REST client. <code>GetModels</code>
+L72–94 → <code>GET {baseURL}/api/models</code>, JSON-decodes
+<code>[]*VerifiedModel</code>. Also <code>Health</code> L47
+(<code>/api/health</code>), <code>GetModelByID</code> L97,
+<code>GetProviderScores</code> L126 (<code>/api/scores</code>),
+<code>VerifyModel</code> L151
+(<code>POST /api/models/{id}/verify</code>), <code>GetPricing</code>
+L177, <code>GetLimits</code> L202. <code>setAuthHeader</code> L227 adds
+<code>Authorization: Bearer</code> when an API key is set. No
+simulation.</p>
+<p><code>/Volumes/T7/Projects/HelixCode/helix_code/internal/verifier/adapter.go</code>
+- <code>GetVerifiedModels</code> L183–224: gated on
+<code>IsEnabled()</code> (L184) + circuit-breaker
+<code>health.AllowRequest()</code> (L187); cache-first (L192); live
+<code>client.GetModels</code> (L199); on failure → stale cache (L205) →
+<code>getFallbackModels()</code> (L210, hardcoded
+<code>FallbackModels</code>, marked <code>Source=&quot;fallback&quot;</code>,
+returns <code>ErrUsingFallback</code>). -
+<code>filterByProviderConfig</code> L277–289: drops models whose
+<code>config.Providers[m.Provider].Enabled == false</code>. -
+<code>refreshScores</code> L256–274 populates
+<code>modelScores/modelCodeScores/modelRelScores/providerScores</code>
+from the live list.</p>
+<p><code>/Volumes/T7/Projects/HelixCode/helix_code/internal/verifier/types.go</code>
+- <code>VerifiedModel</code> L24: carries <code>Verified bool</code>
+(L31), <code>VerificationStatus string</code> (L32:
+<code>pending|verified|failed|rate_limited</code>),
+<code>OverallScore float64</code> (L48), <code>LastVerified</code>
+(L54). These are the fields that determine “working”.</p>
+<h3 id="how-working-models-are-determined-today">2.2 How “working
+models” are determined today</h3>
+<p>There is <strong>no single “working models” funnel</strong>. Two
+disjoint exposure paths exist:</p>
+<p><strong>Path A — verifier-authoritative (CLI + server).</strong>
+<code>/Volumes/T7/Projects/HelixCode/helix_code/cmd/cli/main.go</code>
+<code>handleListModels</code> L1355–1390: 1. L1360 if
+<code>verifierAdapter != nil &amp;&amp; IsEnabled()</code> →
+<code>GetVerifiedModels(ctx)</code> → print all (L1363). 2. L1371 else
+if <code>c.llmProvider != nil</code> →
+<code>c.llmProvider.GetModels()</code> (single configured provider). 3.
+L1387 else → <code>verifier.FallbackModels</code> (constitutional
+hardcoded fallback). <code>printVerifiedModels</code> L1392–1414 shows
+score + <code>Verified/pending/failed/rate_limited</code> status — but
+it <strong>prints failed/pending models too</strong> (status string
+only; no filtering). Server mirror:
+<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/server/handlers.go</code>
+L1049/L1140/L1206 all call
+<code>s.verifierResult.Adapter.GetVerifiedModels(ctx)</code>.</p>
+<p><strong>Path B — provider <code>GetModels()</code> (capability
+enrichment).</strong>
+<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/llm/verifier_bridge.go</code>
+<code>EnrichModelInfo</code> L26–67: when verifier enabled, augments a
+provider’s <code>ModelInfo</code> with <code>verifier_score</code>,
+code/reliability caps, tool-support heuristic (score &gt; 7.0 →
+SupportsTools). Falls back to <code>inferCapabilitiesFromModelID</code>
+(string heuristics) when verifier off (L65). Bridge
+<code>VerifierModelSource.FetchModels</code>
+(<code>verifier_integration.go</code> L24–33) converts
+<code>VerifiedModel → ModelInfo</code> but is not the path the
+CLI/server actually use for listing.</p>
+<h3 id="gap-no-key-presence-gating-in-the-verifier-path">2.3 GAP — no
+key-presence gating in the verifier path</h3>
+<p><code>grep</code> over <code>helix_code/internal/verifier/*.go</code>
+(non-test) finds <code>APIKey</code> only in adapter/bootstrap config
+plumbing — <strong>the verifier path never checks whether the operator
+holds a key for a given provider.</strong>
+<code>GetVerifiedModels</code> returns the verifier’s ENTIRE catalog
+(every provider the verifier knows), filtered only by
+<code>config.Providers[*].Enabled</code> (an explicit,
+manually-maintained flag — <code>adapter.go</code> L283), not by “does
+this user have a usable key for provider X”. So today a user with only
+<code>ANTHROPIC_API_KEY</code> set still sees OpenAI, Gemini, etc.
+listed as “available.” That is the opposite of the request goal.</p>
+<h3 id="score-threshold-exists-but-is-not-applied-as-a-working-filter">2.4
+Score threshold exists but is not applied as a “working” filter</h3>
+<p><code>adapter.go</code> <code>GetMinAcceptableScore</code> L175–180
+(default 6.0, from <code>HELIX_VERIFIER_MIN_SCORE</code>) is defined but
+<strong>not invoked</strong> inside <code>GetVerifiedModels</code> /
+<code>filterByProviderConfig</code> — there is no
+<code>OverallScore &gt;= min</code> filter and no
+<code>Verified == true</code> filter in the listing path. “Working
+model” (verified + scored + key-present) is therefore not computed
+anywhere.</p>
+<hr />
+<h2 id="provider-inventory">3. Provider inventory</h2>
+<p>All cloud provider <code>GetModels()</code> return a stored
+<code>provider.models</code> slice populated at construction by
+<code>initializeModels()</code>; the interface is synchronous
+<code>GetModels() []ModelInfo</code> (no ctx/err) —
+<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/llm/provider.go</code>
+defines it.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>File (helix_code/internal/llm/)</th>
+<th>Model source</th>
+<th>Hardcoded? (CONST-036 risk)</th>
+<th>Key-presence gating</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td><code>openai_provider.go</code></td>
+<td><code>initializeModels</code> L201–239</td>
+<td><strong>HARDCODED</strong> (gpt-4o, gpt-4-turbo, gpt-4,
+gpt-3.5-turbo)</td>
+<td>constructor hard-errors if no key (L49–51)</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td><code>anthropic_provider.go</code></td>
+<td>models built L205–287</td>
+<td><strong>HARDCODED</strong> (claude-4-sonnet/opus, 3-7, 3-5 *,
+3-opus/sonnet/haiku)</td>
+<td>key fallback L153 (<code>os.Getenv</code>)</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td><code>gemini_provider.go</code></td>
+<td><code>GetModels</code> L299; init</td>
+<td>likely HARDCODED (init present)</td>
+<td>key checks L159/163/167</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td><code>groq_provider.go</code></td>
+<td>L190</td>
+<td>likely HARDCODED</td>
+<td>key checks L137/141</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td><code>deepseek_provider.go</code></td>
+<td><code>return dp.models</code> L80; init L177</td>
+<td><strong>HARDCODED</strong></td>
+<td>key check L50/53</td>
+</tr>
+<tr>
+<td>Mistral</td>
+<td><code>mistral_provider.go</code></td>
+<td><code>return mp.models</code> L66; init L165</td>
+<td><strong>HARDCODED</strong></td>
+<td>key check L39/42</td>
+</tr>
+<tr>
+<td>xAI</td>
+<td><code>xai_provider.go</code></td>
+<td>L72; init L199</td>
+<td>likely HARDCODED</td>
+<td>key check L35/38</td>
+</tr>
+<tr>
+<td><strong>OpenRouter</strong></td>
+<td><code>openrouter_provider.go</code></td>
+<td><code>fetchCatalog</code> L233–295, <code>initializeModels</code>
+L297+</td>
+<td><strong>DYNAMIC</strong> — live <code>GET /models</code> (L236),
+curated-fallback only if unreachable</td>
+<td>uses key in fetch (L240); key check L35/38</td>
+</tr>
+<tr>
+<td><strong>Ollama</strong></td>
+<td><code>ollama_provider.go</code></td>
+<td><code>GetModels</code> L225</td>
+<td><strong>DYNAMIC</strong> — <code>/api/tags</code> (local)</td>
+<td>n/a (local)</td>
+</tr>
+<tr>
+<td><strong>Llama.cpp</strong></td>
+<td><code>llamacpp_provider.go</code></td>
+<td>L60–96</td>
+<td>DYNAMIC-ish (returns <code>[]ModelInfo{}</code> when none)</td>
+<td>n/a (local)</td>
+</tr>
+<tr>
+<td>Azure</td>
+<td><code>azure_provider.go</code></td>
+<td>L463</td>
+<td>HARDCODED/deployment-map (<code>AZURE_DEPLOYMENTS_MAP</code>
+L303)</td>
+<td>key L285 (Entra ID alt)</td>
+</tr>
+<tr>
+<td>Bedrock</td>
+<td><code>bedrock_provider.go</code></td>
+<td>L421</td>
+<td>HARDCODED</td>
+<td>AWS region/creds L272</td>
+</tr>
+<tr>
+<td>VertexAI</td>
+<td><code>vertexai_provider.go</code></td>
+<td>L451</td>
+<td>HARDCODED</td>
+<td>GCP creds</td>
+</tr>
+<tr>
+<td>Copilot</td>
+<td><code>copilot_provider.go</code></td>
+<td>L191; init L318</td>
+<td>HARDCODED</td>
+<td>key opt L95</td>
+</tr>
+<tr>
+<td>OpenAI-compatible</td>
+<td><code>openai_compatible_provider.go</code></td>
+<td>L168</td>
+<td>config-driven</td>
+<td>key opt L277</td>
+</tr>
+<tr>
+<td>KoboldAI</td>
+<td><code>koboldai_provider.go</code></td>
+<td>L118</td>
+<td>local</td>
+<td>key opt</td>
+</tr>
+<tr>
+<td>Qwen</td>
+<td><code>qwen_provider.go</code></td>
+<td>L117; init L245</td>
+<td>HARDCODED + OAuth (<code>qwen_oauth.go</code>)</td>
+<td>key opt L66</td>
+</tr>
+</tbody>
+</table>
+<p>Notes: - <strong>CONST-036 violations (hardcoded model lists in
+production):</strong> OpenAI, Anthropic, DeepSeek, Mistral (confirmed by
+reading the literal slices), plus very-likely Gemini, Groq, xAI, Azure,
+Bedrock, VertexAI, Copilot, Qwen. OpenRouter (round-41 fix, L297–311
+comment) and Ollama/Llama.cpp are already dynamic — these are the
+templates. - <code>factory.go</code> <code>NewProvider</code> (L9
+switch) constructs ONE provider by <code>config.Type</code>; there is no
+“construct every provider for which a key is present” enumerator
+anywhere. - <code>auto_llm_manager.go</code> is a <strong>local-LLM
+lifecycle manager</strong> (clone/build/start Ollama/ llama.cpp etc.) —
+unrelated to cloud key→model exposure; do not conflate. -
+<code>model_manager.go</code> <code>getAvailableModels</code> L202–208
+just flattens an in-memory <code>modelRegistry</code>;
+<code>SetVerifierAdapter</code> L132 exists but the registry is
+populated from provider <code>GetModels()</code> (the hardcoded lists),
+not from the verifier catalog.</p>
+<hr />
+<h2 id="design">4. Design</h2>
+<h3 id="target-flow-key-recognized-verifier-validates-only-working-models-exposed">4.1
+Target flow: key recognized → verifier validates → only working models
+exposed</h3>
+<pre><code>startup
+  └─ secrets.LoadAPIKeys()                 [WIRE THIS — currently unwired]
+        reads $HOME/api_keys.sh, then .env (walk-up), os.Setenv each
+  └─ KeyRecognition (NEW, reuse helix_agent SupportedProviders.EnvVars + api_keys.EnvVarScanner)
+        for each provider: present = any(os.Getenv(envVarAlias)) != &quot;&quot; &amp;&amp; !isPlaceholder
+        → set of CONFIGURED providers
+  └─ verifier.Adapter.GetVerifiedModels(ctx)   [REAL HTTP, exists]
+  └─ WorkingModelFilter (NEW)
+        keep model m  iff  present[m.Provider]            (key-presence gate)
+                      AND  m.Verified == true             (verifier-validated)
+                      AND  m.VerificationStatus == &quot;verified&quot;
+                      AND  m.OverallScore &gt;= GetMinAcceptableScore()  [exists, L175]
+  └─ expose (CLI handleListModels / server /api/models / model_manager registry)</code></pre>
+<h3 id="concrete-wiring-points-where-to-change">4.2 Concrete wiring
+points (where to change)</h3>
+<ol type="1">
+<li><strong>Wire the key loader.</strong> Call
+<code>secrets.LoadAPIKeys()</code> (loader.go L30) at the start of
+<code>/Volumes/T7/Projects/HelixCode/helix_code/cmd/server/</code> and
+<code>/Volumes/T7/Projects/HelixCode/helix_code/cmd/cli/main.go</code>
+<code>main()</code> BEFORE config load (so
+<code>.env</code>/<code>api_keys.sh</code> populate
+<code>os.Environ()</code> ahead of viper <code>AutomaticEnv</code> and
+the provider <code>os.Getenv</code> fallbacks). Currently never called
+(§1.1c).</li>
+<li><strong>Add provider key-recognition table to HelixCode</strong> (or
+reuse helix_agent’s <code>SupportedProviders</code> via the catalogue
+per §11.4.74/§11.4.51 — it lives in
+<code>submodules/helix_agent/internal/verifier/provider_types.go</code>
+L349; the <code>api_keys</code> scanner lives in
+<code>submodules/llms_verifier/llm-verifier/api_keys/</code>).
+HelixCode’s own <code>config.go</code> only binds 8 single-alias keys
+(L337–345) — narrower than helix_agent’s multi-alias map; widen it.</li>
+<li><strong>Add the working-model filter</strong> inside
+<code>adapter.GetVerifiedModels</code>
+(<code>/Volumes/T7/Projects/HelixCode/helix_code/internal/verifier/adapter.go</code>
+L223 return site) OR as a new method
+<code>GetWorkingModels(ctx, presentProviders)</code> that applies the
+key-presence + <code>Verified</code> +
+<code>VerificationStatus==&quot;verified&quot;</code> +
+<code>OverallScore&gt;=min</code> (L175
+<code>GetMinAcceptableScore</code>) predicate. The min-score threshold
+is loaded but unused — apply it here.</li>
+<li><strong>Make <code>filterByProviderConfig</code> key-aware</strong>
+(adapter.go L277): today it only honours a manual <code>Enabled</code>
+flag; auto-derive <code>Enabled</code> from key-presence instead of (or
+in addition to) the static config flag.</li>
+<li><strong>Update exposure call-sites</strong> to the new working-model
+path: CLI <code>handleListModels</code> (<code>cmd/cli/main.go</code>
+L1361 — and stop printing <code>failed</code>/<code>pending</code> rows
+as available), server handlers (<code>internal/server/handlers.go</code>
+L1049/L1140/L1206), and <code>model_manager</code> registry population
+(<code>model_manager.go</code> L132 SetVerifierAdapter + L202
+getAvailableModels).</li>
+<li><strong>Convert remaining hardcoded provider
+<code>initializeModels</code> to dynamic</strong> (CONST-036):
+OpenAI/Anthropic/Gemini/etc. should fetch their live catalog (mirror
+OpenRouter <code>fetchCatalog</code> L233 / Ollama
+<code>/api/tags</code>) OR defer entirely to the verifier catalog, so
+nothing the user sees is a stale literal. This also closes the BLUFF-002
+regression risk.</li>
+<li><strong>Verifier-disabled degradation:</strong> when
+<code>HELIX_VERIFIER_ENABLED=false</code> (default in
+<code>.env.example</code> L30), define the honest behaviour — either
+require enabling for “working models”, or fall back to per-provider live
+<code>GetModels()</code> for key-present providers only (never the
+hardcoded fallback list presented as “working” — that would be a
+CONST-035/ §11.4 PASS-bluff).</li>
+</ol>
+<h3 id="anti-bluff-constraints-binding-this-work">4.3 Anti-bluff
+constraints binding this work</h3>
+<ul>
+<li>CONST-036/037/039/040: verifier is the single source of truth; no
+hardcoded model lists; all 10 mandated providers; capability flags from
+<code>VerificationResult</code>.</li>
+<li>§11.4.124: <code>secrets.LoadAPIKeys</code> is unwired-but-tested
+code — WIRE it (investigate-before- remove already satisfied; it has
+unit tests and a clear intended call-site per its doc-comment).</li>
+<li>CONST-042/§12.1 + CONST-053: keys via
+<code>.env</code>/<code>api_keys.sh</code> (mode 0600, gitignored),
+never logged (loader.go already compliant), never committed.</li>
+<li>§11.4.107/§11.4.69 + CONST-050: tests beyond unit MUST hit a real
+verifier + real provider endpoints; a model shown as “working” MUST be
+backed by captured runtime evidence (real generate call returns real
+output), not metadata-only.</li>
+</ul>
+<hr />
+<h2 id="deliverables">5. Deliverables</h2>
+<p>What the request demands once implemented (per
+CONST-047/048/050/§11.4.83/§11.4.135):</p>
+<ul>
+<li><strong>Code:</strong> key-recognition table (multi-alias, all
+CONST-039 providers) + <code>LoadAPIKeys</code> wiring +
+<code>GetWorkingModels</code> filter (key∧Verified∧status∧min-score) +
+dynamic <code>initializeModels</code> conversions + updated
+CLI/server/model_manager exposure.</li>
+<li><strong>Tests (4-layer, §11.4.4b):</strong> unit (filter predicate,
+key-recognition, placeholder rejection — mocks OK here only);
+integration <code>-tags=integration</code> against REAL verifier
+(<code>make test-verifier-integration</code>) + REAL provider key (no
+mocks, CONST-050); E2E that sets only one provider’s key and asserts
+ONLY that provider’s verified models list + a real <code>generate</code>
+returns real output (§11.4.107 liveness, not metadata); stress/chaos per
+§11.4.85 (verifier unreachable → honest degradation, not
+fallback-as-working); paired §1.1 mutation (strip the key-presence check
+→ a no-key provider’s models leak → test FAILs); standing regression
+guard per §11.4.135 (RED_MODE polarity).</li>
+<li><strong>Challenges:</strong> HelixQA + <code>challenges/</code> bank
+covering “set ANTHROPIC_API_KEY only → <code>cli --list-models</code>
+shows only Anthropic verified models → generate works” with captured
+bidirectional transcript under <code>docs/qa/&lt;run-id&gt;/</code>
+(§11.4.83).</li>
+<li><strong>Docs/guides (CONST-062/066, always-sync
+.md+.html+.pdf):</strong> update <code>.env.example</code> (document
+<code>api_keys.sh</code> + <code>.env</code> auto-load + per-provider
+aliases), a <code>docs/guides/model-access.md</code> user manual (how
+key-presence → working models works, verifier-disabled behaviour),
+<code>docs/ARCHITECTURE.md</code> flow update, and the relevant
+Status/Status_Summary + Issues/Fixed entries (ATM-NNN per
+§11.4.54).</li>
+</ul>
+<hr />
+<h2 id="executive-summary">Executive summary</h2>
+<ol type="1">
+<li><strong>Key loading is fragmented and the
+<code>.env</code>/<code>api_keys.sh</code> path is DEAD.</strong>
+<code>secrets.LoadAPIKeys</code>
+(<code>helix_code/internal/secrets/loader.go</code> L30) reads
+<code>$HOME/api_keys.sh</code> then a walked-up <code>.env</code>, but
+it is <strong>never called</strong> outside unit tests — production
+relies solely on shell-exported env (viper <code>BindEnv</code>
+config.go L337–345 + per-constructor <code>os.Getenv</code>). The
+request’s “recognized from <code>.env</code>/<code>.api_keys</code>” is
+therefore unmet.</li>
+<li><strong>LLMsVerifier consumption is REAL, not stubbed</strong> —
+<code>verifier/client.go</code> does live <code>net/http</code> to
+<code>/api/models</code> etc.; <code>adapter.GetVerifiedModels</code> is
+cache→live→stale→ fallback with circuit-breaking.</li>
+<li><strong>No key-presence gating anywhere in the model-exposure
+path.</strong> <code>GetVerifiedModels</code> returns the verifier’s
+whole catalog filtered only by a manual
+<code>Providers[*].Enabled</code> flag (adapter.go L277–289); a user
+with one key still sees every provider.</li>
+<li><strong>The “working model” predicate is not computed.</strong>
+<code>VerifiedModel.Verified</code>/
+<code>VerificationStatus</code>/<code>OverallScore</code> exist
+(types.go L31/32/48) and <code>GetMinAcceptableScore</code> (L175) is
+loaded from <code>HELIX_VERIFIER_MIN_SCORE</code>, but no listing path
+filters on verified∧status∧min-score; CLI even prints
+<code>failed</code>/<code>pending</code> rows.</li>
+<li><strong>Several provider <code>GetModels()</code> are hardcoded
+(CONST-036 risk):</strong> OpenAI (L203–232), Anthropic (L205–287),
+DeepSeek, Mistral confirmed; Gemini/Groq/xAI/Azure/Bedrock/
+VertexAI/Copilot/Qwen likely. Only OpenRouter (live
+<code>fetchCatalog</code>) + Ollama/Llama.cpp are dynamic and serve as
+the conversion template.</li>
+<li><strong>The exact target design already exists in
+helix_agent</strong> —
+<code>submodules/helix_agent/internal/verifier/{provider_types.go L349 SupportedProviders+EnvVars, startup.go L389–405 per-key→DiscoverModels}</code>
++ <code>submodules/llms_verifier/.../api_keys/</code>. Per §11.4.74
+reuse/extend rather than re-implement.</li>
+<li>Min-score threshold + verifier-disabled degradation are undefined
+behaviours that must be specified to avoid presenting hardcoded
+fallbacks as “working” (a §11.4 PASS-bluff).</li>
+<li>Provider construction has no “build every key-present provider”
+enumerator — <code>factory.go</code> builds ONE provider by
+<code>config.Type</code>.</li>
+<li>Closing this needs 4-layer tests + Challenges + always-sync docs per
+CONST-047/048/050/§11.4.83/§11.4.135, with captured liveness evidence
+(§11.4.107).</li>
+<li>All findings are READ-ONLY; no code was modified in this pass.</li>
+</ol>
+<h3 id="top-5-concrete-gaps">Top 5 concrete gaps</h3>
+<ol type="1">
+<li><strong><code>secrets.LoadAPIKeys</code> is never invoked at
+startup</strong> → <code>.env</code>/<code>api_keys.sh</code>
+auto-recognition does not happen. Fix: call it first in
+<code>cmd/server</code> + <code>cmd/cli/main.go</code>
+<code>main()</code>. (<code>helix_code/internal/secrets/loader.go</code>
+L30; zero production call-sites.)</li>
+<li><strong>No key-presence → provider-availability gate.</strong> The
+verifier path (<code>adapter.GetVerifiedModels</code> L183; CLI
+<code>handleListModels</code> L1361) lists the full catalog regardless
+of which keys the operator holds. Need a key-recognition table (reuse
+helix_agent <code>SupportedProviders.EnvVars</code>) + a
+present-providers filter.</li>
+<li><strong>No “working model” filter</strong> combining key-present ∧
+<code>Verified==true</code> ∧
+<code>VerificationStatus==&quot;verified&quot;</code> ∧
+<code>OverallScore &gt;= GetMinAcceptableScore()</code>. The threshold
+(adapter.go L175) is loaded but unused; CLI prints failed/pending
+models.</li>
+<li><strong>Hardcoded provider model lists</strong> (OpenAI L203,
+Anthropic L205, DeepSeek, Mistral, + ~8 more) violate CONST-036; convert
+to dynamic (OpenRouter <code>fetchCatalog</code> L233 / Ollama
+<code>/api/tags</code> templates) or defer to the verifier catalog.</li>
+<li><strong>Undefined verifier-disabled / cold behaviour</strong>
+(<code>HELIX_VERIFIER_ENABLED=false</code> default): the current
+fallback to <code>verifier.FallbackModels</code> (CLI L1387) presents a
+constitutional hardcoded list as available — must be specified so it is
+never shown as “working” without verifier validation (else
+§11.4/CONST-035 PASS-bluff).</li>
+</ol>
+</body>
+</html>

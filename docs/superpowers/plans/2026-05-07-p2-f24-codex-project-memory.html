@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f24-codex-project-memory</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f24-codex-project-memory</h1>
+</header>
+<h1 id="p2-f24-codex-project-memory-implementation-plan">P2-F24 — Codex
+Project Memory Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<blockquote>
+<p><strong>Programme position:</strong> F24 is the
+<strong>fourth</strong> Phase 2 feature of CLI-Agent Fusion (after F21
+Codex Approval Modes, F22 Aider Git Auto-Commit, F23 Cline Browser
+Tool). Task T01 advances PROGRESS.md from “Phase 2: F23 closed; F24 next
+candidate (brainstorm)” to “Phase 2 of CLI-Agent Fusion programme: F24
+(Codex Project Memory) in flight” and appends an F24 evidence header to
+<code>docs/improvements/07_phase_2_evidence.md</code> (already created
+in F21-T01, extended by F22-T01 + F23-T01).</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, end-to-end <strong>project
+memory</strong> subsystem for the HelixCode CLI agent. F24 ADDS a NEW
+<code>internal/projectmemory/</code> package: <code>Memory</code>
+(immutable value), <code>MemoryLoader</code> (parent-walk discovery +
+user overlay reader), <code>MemoryRegistry</code> (atomic-pointer
+Snapshot/Set/Reload), <code>MemoryWatcher</code> (fsnotify wrapper with
+200 ms debounce). ADDS a NEW
+<code>internal/commands/memory_command.go</code> with
+<code>/memory</code> slash (<code>status</code> / <code>show</code> /
+<code>edit</code> / <code>reload</code>). MODIFIES
+<code>BaseAgent</code> to optionally prepend
+<code>Memory.Render()</code> to the system prompt per-call (nil-safe;
+existing tests unchanged). MODIFIES <code>cmd/cli/main.go</code> to wire
+registry + watcher at startup adjacent to F23’s browser block. Discovery
+filenames: <code>helixcode.md</code> / <code>codex.md</code> /
+<code>AGENTS.md</code> (first match wins; case-insensitive). User
+overlay: <code>$XDG_CONFIG_HOME/helixcode/memory.md</code> (loaded AFTER
+project memory). 64 KB cap with positive <code>TruncatedProject</code> /
+<code>TruncatedUser</code> flags. Hot-reload via fsnotify (existing
+direct dep <code>github.com/fsnotify/fsnotify v1.9.0</code>). Graceful
+degradation: missing files return empty Memory + nil error; fsnotify
+watch failure degrades to slash-only reload.</p>
+<p><strong>Architecture:</strong> New files under
+<code>helix_code/internal/projectmemory/</code> — <code>types.go</code>
+(Memory + MemorySource + sentinels <code>ErrNoMemoryFile</code> /
+<code>ErrMemoryFileTooLarge</code> +
+<code>MaxMemoryBytes = 64 * 1024</code> +
+<code>DebounceWindow = 200 * time.Millisecond</code> +
+<code>DiscoveryFilenames = []string{&quot;helixcode.md&quot;, &quot;codex.md&quot;, &quot;AGENTS.md&quot;}</code>),
+<code>loader.go</code> (<code>MemoryLoader</code> with
+<code>Discover(cwd) (Memory, error)</code> + parent-walk + git-root-stop
++ user-overlay), <code>registry.go</code> (<code>MemoryRegistry</code>
+with <code>atomic.Pointer[Memory]</code> + <code>Snapshot()</code>
+lock-free + <code>Set</code> + <code>Reload(ctx)</code> +
+<code>MemorySnapshotter</code> interface), <code>watcher.go</code>
+(<code>MemoryWatcher</code> with fsnotify + 200 ms debounce + graceful
+degradation), <code>doc.go</code>. New
+<code>internal/commands/memory_command.go</code> for the
+<code>/memory</code> slash. Two existing files get small additions:
+<code>cmd/cli/main.go</code> (4 lines: construct loader → registry →
+call Reload → start watcher → register slash);
+<code>internal/agent/base_agent.go</code> (3 lines: field
+<code>memoryRegistry projectmemory.MemorySnapshotter</code>, setter
+<code>SetMemoryRegistry</code>, prepend in <code>getSystemPrompt</code>
+when non-nil). Backward-compat: BaseAgent without
+<code>SetMemoryRegistry</code> is byte-for-byte unchanged.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, zap (already
+direct), fsnotify v1.9.0 (ALREADY direct in
+<code>helix_code/go.mod</code>). <strong>Zero new external deps</strong>
+(<code>os</code>, <code>sync</code>, <code>sync/atomic</code>,
+<code>time</code>, <code>errors</code>, <code>fmt</code>,
+<code>strings</code>, <code>path/filepath</code>, <code>context</code>,
+<code>os/exec</code> all stdlib). <code>go mod tidy</code> after T07
+must produce no diff in either <code>go.mod</code> or
+<code>go.sum</code>. T08’s verification step asserts this loudly.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-07-p2-f24-codex-project-memory-design.md</code>
+(commit <code>c31b9ac</code>).</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (full 4-term applied to F24
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/projectmemory internal/commands/memory_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — F24 can
+degenerate in five ways: (a) discovery returns empty Memory because of
+case-sensitive filename mismatch on a case-sensitive filesystem
+(<code>AGENTS.md</code> vs <code>agents.md</code>); (b) hot-reload
+fsnotify event arrives but the registry is never re-stored because the
+debounce timer is reset infinitely under rapid successive events; (c)
+agent prepended the OLD memory blob because <code>getSystemPrompt</code>
+cached registry.Snapshot at agent-construct time; (d) loader silently
+truncates a &gt;64 KB file but <code>TruncatedProject == false</code>
+(positive evidence missing); (e) missing-file produces an error instead
+of empty Memory + nil error. The five “what counts as project memory
+works” criteria — (1) PHASE-A: project file with sentinel
+<code>MEMORY_FIXTURE_24</code> is loaded into
+<code>Memory.Project</code> and <code>User == &quot;&quot;</code>; (2) PHASE-B:
+missing file returns empty Memory + nil error; (3) PHASE-C: file rewrite
+triggers fsnotify-driven Reload within 500 ms (Snapshot returns NEW
+content, NOT old); (4) PHASE-D: project + user overlay loaded together
+with project before user in render order; (5) PHASE-E: 100 KB file
+truncated to MaxMemoryBytes with <code>TruncatedProject == true</code> —
+are each tested with both unit assertions AND a Challenge phase. The
+Challenge harness uses positive evidence: tempdir-scoped sentinel byte
+equality (PHASE-A), nil-Memory + nil-error post-condition (PHASE-B),
+pre/post-Reload byte differential (PHASE-C), Project + User render order
+byte equality (PHASE-D), <code>TruncatedProject == true</code> +
+first-64-KB byte equality (PHASE-E). Byte-evidence mismatch is a hard
+Challenge failure. Absence-of-error is NEVER acceptable.</p>
+<p><strong>Why this is consequential:</strong> project memory is codex’s
+“AGENTS.md” pattern — without it, the CLI agent has no persistent
+project context across sessions, and users must re-explain their
+project’s conventions every session. F24 makes the project’s
+<code>helixcode.md</code> (or <code>AGENTS.md</code>) the single source
+of truth that propagates automatically into every LLM call. F23
+(browser) gives the agent eyes; F22 (autocommit) makes its writes
+visible; F21 (approval) gates user surface; F24 gives the agent
+persistent project memory. F24’s discriminating tests are: (i) PHASE-A’s
+parent-walk discovery against case-insensitive filenames; (ii) PHASE-C’s
+fsnotify hot-reload byte differential within 500 ms; (iii) PHASE-D’s
+project-before-user render order; (iv) PHASE-E’s truncation flag; (v)
+PHASE-B’s missing-file-no-error. All five must produce positive
+evidence; none can be satisfied by absence-of-error.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>P2-F24-T01 — bootstrap F24 evidence
+section + advance PROGRESS to F24</label></li>
+<li><label><input type="checkbox"></input>P2-F24-T02 —
+<code>internal/projectmemory/types.go</code>: Memory + MemorySource +
+sentinels + MaxMemoryBytes + DebounceWindow + DiscoveryFilenames +
+Render() (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F24-T03 —
+<code>internal/projectmemory/loader.go</code>: MemoryLoader.Discover
+with parent-walk + git-root-stop + case-insensitive match + user overlay
++ truncation (TDD with real tempdirs)</label></li>
+<li><label><input type="checkbox"></input>P2-F24-T04 —
+<code>internal/projectmemory/registry.go</code>: MemoryRegistry
+atomic-pointer Snapshot/Set/Reload + MemorySnapshotter interface (TDD
+with -race)</label></li>
+<li><label><input type="checkbox"></input>P2-F24-T05 —
+<code>internal/projectmemory/watcher.go</code>: MemoryWatcher fsnotify +
+200 ms debounce + graceful degrade (TDD with real fsnotify on real
+tempdir)</label></li>
+<li><label><input type="checkbox"></input>P2-F24-T06 —
+<code>internal/commands/memory_command.go</code>: /memory slash
+(status/show/edit/reload) with editor seam (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F24-T07 —
+<code>internal/agent/base_agent.go</code> SetMemoryRegistry +
+getSystemPrompt prepend + main.go wiring + integration test
+(gated)</label></li>
+<li><label><input type="checkbox"></input>P2-F24-T08 — Challenge harness 5
+phases (project-only + missing-file-graceful + hot-reload +
+project-plus-user + truncation) + close-out + push 4 remotes
+non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap-f24-evidence">Task 1: Bootstrap F24
+evidence</h2>
+<p>Append F24 section header to
+<code>docs/improvements/07_phase_2_evidence.md</code> (created in
+F21-T01, extended by F22-T01 + F23-T01) with spec SHA
+<code>c31b9ac</code>. Update PROGRESS.md current focus from “Phase 2 of
+CLI-Agent Fusion programme: F23 closed; F24 next candidate (brainstorm)”
+to “Phase 2 of CLI-Agent Fusion programme: F24 (Codex Project Memory) in
+flight”. Insert F24 task list (8 items). Verify zero new external
+deps:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;fsnotify&quot;</span> go.mod</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: fsnotify v1.9.0 already present.</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff go.mod <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;^\+|^-&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;^+++\|^---&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;UNEXPECTED&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>Update <code>docs/CONTINUATION.md</code> root-level mid-flight
+section with F24 in-flight status.</p>
+<p>Commit:
+<code>docs(P2-F24-T01): bootstrap F24 evidence + advance PROGRESS to F24 (Codex Project Memory)</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/projectmemory/types.go</code>, new
+<code>helix_code/internal/projectmemory/types_test.go</code>, new
+<code>helix_code/internal/projectmemory/doc.go</code>.</p>
+<p>Define in <code>types.go</code>: -
+<code>Memory struct { Project, User, ProjectPath, UserPath string; LoadedAt time.Time; TruncatedProject, TruncatedUser bool }</code>.
+- <code>MemorySource string</code> enum with <code>SourceProject</code>,
+<code>SourceUser</code>. - Constants:
+<code>MaxMemoryBytes = 64 * 1024</code>,
+<code>DebounceWindow = 200 * time.Millisecond</code>. - Variable:
+<code>DiscoveryFilenames = []string{&quot;helixcode.md&quot;, &quot;codex.md&quot;, &quot;AGENTS.md&quot;}</code>.
+- Sentinel errors: <code>ErrNoMemoryFile</code>,
+<code>ErrMemoryFileTooLarge</code>. - Method:
+<code>(m Memory) Render() string</code> —
+<code>Project + &quot;\n\n--- USER MEMORY OVERLAY ---\n\n&quot; + User</code> when
+both non-empty; just <code>Project</code> when only project; just
+<code>User</code> when only user; <code>&quot;&quot;</code> when both empty.</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMaxMemoryBytes_Pin<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">64</span><span class="op">*</span><span class="dv">1024</span><span class="op">,</span> MaxMemoryBytes<span class="op">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDebounceWindow_Pin<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">200</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">,</span> DebounceWindow<span class="op">)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDiscoveryFilenames_OrderPin<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;helixcode.md&quot;</span><span class="op">,</span> <span class="st">&quot;codex.md&quot;</span><span class="op">,</span> <span class="st">&quot;AGENTS.md&quot;</span><span class="op">},</span> DiscoveryFilenames<span class="op">)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestErrorSentinels_DistinctErrorsIs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">error</span><span class="op">{</span>ErrNoMemoryFile<span class="op">,</span> ErrMemoryFileTooLarge<span class="op">}</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        wrapped <span class="op">:=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;wrapped: %w&quot;</span><span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> wrapped<span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryRender_Empty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> Memory<span class="op">{}.</span>Render<span class="op">())</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryRender_OnlyProject<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;p&quot;</span><span class="op">,</span> Memory<span class="op">{</span>Project<span class="op">:</span> <span class="st">&quot;p&quot;</span><span class="op">}.</span>Render<span class="op">())</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryRender_OnlyUser<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;u&quot;</span><span class="op">,</span> Memory<span class="op">{</span>User<span class="op">:</span> <span class="st">&quot;u&quot;</span><span class="op">}.</span>Render<span class="op">())</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryRender_ProjectBeforeUser<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> Memory<span class="op">{</span>Project<span class="op">:</span> <span class="st">&quot;P&quot;</span><span class="op">,</span> User<span class="op">:</span> <span class="st">&quot;U&quot;</span><span class="op">}.</span>Render<span class="op">()</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> strings<span class="op">.</span>Index<span class="op">(</span>out<span class="op">,</span> <span class="st">&quot;P&quot;</span><span class="op">)</span> <span class="op">&lt;</span> strings<span class="op">.</span>Index<span class="op">(</span>out<span class="op">,</span> <span class="st">&quot;U&quot;</span><span class="op">))</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;--- USER MEMORY OVERLAY ---&quot;</span><span class="op">)</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F24-T02): projectmemory types - Memory + Render + sentinels + MaxMemoryBytes + DiscoveryFilenames (TDD)</code>.</p>
+<hr />
+<h2 id="task-3-loader.go-tdd">Task 3: loader.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/projectmemory/loader.go</code>, new
+<code>helix_code/internal/projectmemory/loader_test.go</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryLoader <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    xdgConfigHome <span class="dt">string</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    log           <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryLoader<span class="op">(</span>log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>MemoryLoader <span class="op">{</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    xdg <span class="op">:=</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;XDG_CONFIG_HOME&quot;</span><span class="op">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> xdg <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> home<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>UserHomeDir<span class="op">();</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            xdg <span class="op">=</span> filepath<span class="op">.</span>Join<span class="op">(</span>home<span class="op">,</span> <span class="st">&quot;.config&quot;</span><span class="op">)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> log <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> log <span class="op">=</span> zap<span class="op">.</span>NewNop<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>MemoryLoader<span class="op">{</span>xdgConfigHome<span class="op">:</span> xdg<span class="op">,</span> log<span class="op">:</span> log<span class="op">}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MemoryLoader<span class="op">)</span> Discover<span class="op">(</span>cwd <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Memory<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    projPath<span class="op">,</span> err <span class="op">:=</span> l<span class="op">.</span>findProjectMemory<span class="op">(</span>cwd<span class="op">)</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> Memory<span class="op">{},</span> err <span class="op">}</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> project <span class="dt">string</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> truncProj <span class="dt">bool</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> projPath <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        b<span class="op">,</span> rerr <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>projPath<span class="op">)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> rerr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> Memory<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;projectmemory: read %s: %w&quot;</span><span class="op">,</span> projPath<span class="op">,</span> rerr<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>b<span class="op">)</span> <span class="op">&gt;</span> MaxMemoryBytes <span class="op">{</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            b <span class="op">=</span> b<span class="op">[:</span>MaxMemoryBytes<span class="op">]</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>            truncProj <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        project <span class="op">=</span> <span class="dt">string</span><span class="op">(</span>b<span class="op">)</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> userPath<span class="op">,</span> user <span class="dt">string</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> truncUser <span class="dt">bool</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> l<span class="op">.</span>xdgConfigHome <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        userPath <span class="op">=</span> filepath<span class="op">.</span>Join<span class="op">(</span>l<span class="op">.</span>xdgConfigHome<span class="op">,</span> <span class="st">&quot;helixcode&quot;</span><span class="op">,</span> <span class="st">&quot;memory.md&quot;</span><span class="op">)</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> b<span class="op">,</span> rerr <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>userPath<span class="op">);</span> rerr <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>b<span class="op">)</span> <span class="op">&gt;</span> MaxMemoryBytes <span class="op">{</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>                b <span class="op">=</span> b<span class="op">[:</span>MaxMemoryBytes<span class="op">]</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>                truncUser <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>            user <span class="op">=</span> <span class="dt">string</span><span class="op">(</span>b<span class="op">)</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>            userPath <span class="op">=</span> <span class="st">&quot;&quot;</span> <span class="co">// missing user overlay is not an error</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Memory<span class="op">{</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        Project<span class="op">:</span> project<span class="op">,</span> User<span class="op">:</span> user<span class="op">,</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        ProjectPath<span class="op">:</span> projPath<span class="op">,</span> UserPath<span class="op">:</span> userPath<span class="op">,</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        LoadedAt<span class="op">:</span> time<span class="op">.</span>Now<span class="op">(),</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>        TruncatedProject<span class="op">:</span> truncProj<span class="op">,</span> TruncatedUser<span class="op">:</span> truncUser<span class="op">,</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="co">// findProjectMemory walks parent dirs from cwd looking for the first</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a><span class="co">// matching DiscoveryFilenames entry (case-insensitive). Stops at .git</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="co">// directory or filesystem root. Returns empty string + nil error when</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="co">// no match found.</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MemoryLoader<span class="op">)</span> findProjectMemory<span class="op">(</span>start <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p>Failing tests FIRST (use real <code>t.TempDir()</code> directories —
+no mock fs):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_Discover_FindsHelixcodeMd_AtCwd<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;FIXTURE_24&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    l <span class="op">:=</span> NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> err <span class="op">:=</span> l<span class="op">.</span>Discover<span class="op">(</span>dir<span class="op">)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Project<span class="op">,</span> <span class="st">&quot;FIXTURE_24&quot;</span><span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>ProjectPath<span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_Discover_FindsAtParent_ParentWalk<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    root <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>root<span class="op">,</span> <span class="st">&quot;sub&quot;</span><span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>sub<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>root<span class="op">,</span> <span class="st">&quot;AGENTS.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;PARENT_24&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    l <span class="op">:=</span> NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> l<span class="op">.</span>Discover<span class="op">(</span>sub<span class="op">)</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Project<span class="op">,</span> <span class="st">&quot;PARENT_24&quot;</span><span class="op">)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_Discover_OrderHelixcodeBeforeCodex<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;HELIX_WIN&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;codex.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;CODEX_LOSE&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()).</span>Discover<span class="op">(</span>dir<span class="op">)</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Project<span class="op">,</span> <span class="st">&quot;HELIX_WIN&quot;</span><span class="op">)</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Project<span class="op">,</span> <span class="st">&quot;CODEX_LOSE&quot;</span><span class="op">)</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_Discover_StopsAtGitRoot<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    root <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>root<span class="op">,</span> <span class="st">&quot;.git&quot;</span><span class="op">),</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>root<span class="op">,</span> <span class="st">&quot;sub&quot;</span><span class="op">)</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>sub<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    grand <span class="op">:=</span> filepath<span class="op">.</span>Dir<span class="op">(</span>root<span class="op">)</span> <span class="co">// outside the git root</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> grand <span class="op">!=</span> <span class="st">&quot;/&quot;</span> <span class="op">{</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>grand<span class="op">,</span> <span class="st">&quot;AGENTS.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;OUTSIDE_LOSE&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">defer</span> os<span class="op">.</span>Remove<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>grand<span class="op">,</span> <span class="st">&quot;AGENTS.md&quot;</span><span class="op">))</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()).</span>Discover<span class="op">(</span>sub<span class="op">)</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Project<span class="op">,</span> <span class="st">&quot;OUTSIDE_LOSE&quot;</span><span class="op">)</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_Discover_MissingFile_NoError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> err <span class="op">:=</span> NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()).</span>Discover<span class="op">(</span>dir<span class="op">)</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>ProjectPath<span class="op">)</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Project<span class="op">)</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_Discover_UserOverlay_LoadedAfterProject<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    proj <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>proj<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;PROJ&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    xdg <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>xdg<span class="op">,</span> <span class="st">&quot;helixcode&quot;</span><span class="op">),</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>xdg<span class="op">,</span> <span class="st">&quot;helixcode&quot;</span><span class="op">,</span> <span class="st">&quot;memory.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;USER&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;XDG_CONFIG_HOME&quot;</span><span class="op">,</span> xdg<span class="op">)</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()).</span>Discover<span class="op">(</span>proj<span class="op">)</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;PROJ&quot;</span><span class="op">,</span> m<span class="op">.</span>Project<span class="op">)</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;USER&quot;</span><span class="op">,</span> m<span class="op">.</span>User<span class="op">)</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    rendered <span class="op">:=</span> m<span class="op">.</span>Render<span class="op">()</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> strings<span class="op">.</span>Index<span class="op">(</span>rendered<span class="op">,</span> <span class="st">&quot;PROJ&quot;</span><span class="op">)</span> <span class="op">&lt;</span> strings<span class="op">.</span>Index<span class="op">(</span>rendered<span class="op">,</span> <span class="st">&quot;USER&quot;</span><span class="op">))</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoader_Discover_TruncatesLargeFile_SetsFlag<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    big <span class="op">:=</span> strings<span class="op">.</span>Repeat<span class="op">(</span><span class="st">&quot;X&quot;</span><span class="op">,</span> MaxMemoryBytes<span class="op">+</span><span class="dv">100</span><span class="op">)</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span>big<span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> _ <span class="op">:=</span> NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()).</span>Discover<span class="op">(</span>dir<span class="op">)</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> MaxMemoryBytes<span class="op">,</span> <span class="bu">len</span><span class="op">(</span>m<span class="op">.</span>Project<span class="op">))</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>TruncatedProject<span class="op">)</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F24-T03): projectmemory loader - parent-walk + git-root-stop + user overlay + truncation (TDD)</code>.</p>
+<hr />
+<h2 id="task-4-registry.go-tdd-with--race">Task 4: registry.go (TDD with
+-race)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/projectmemory/registry.go</code>, new
+<code>helix_code/internal/projectmemory/registry_test.go</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemorySnapshotter <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Snapshot<span class="op">()</span> Memory</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryRegistry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    current atomic<span class="op">.</span>Pointer<span class="op">[</span>Memory<span class="op">]</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    loader  <span class="op">*</span>MemoryLoader</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    cwd     <span class="dt">string</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    mu      sync<span class="op">.</span>Mutex</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryRegistry<span class="op">(</span>loader <span class="op">*</span>MemoryLoader<span class="op">,</span> cwd <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>MemoryRegistry <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>MemoryRegistry<span class="op">{</span>loader<span class="op">:</span> loader<span class="op">,</span> cwd<span class="op">:</span> cwd<span class="op">}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>MemoryRegistry<span class="op">)</span> Snapshot<span class="op">()</span> Memory <span class="op">{</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p <span class="op">:=</span> r<span class="op">.</span>current<span class="op">.</span>Load<span class="op">();</span> p <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">*</span>p <span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Memory<span class="op">{}</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>MemoryRegistry<span class="op">)</span> Set<span class="op">(</span>m Memory<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>current<span class="op">.</span>Store<span class="op">(&amp;</span>m<span class="op">)</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>MemoryRegistry<span class="op">)</span> Reload<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span>Memory<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">();</span> <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r<span class="op">.</span>loader <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> Memory<span class="op">{},</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;projectmemory: nil loader&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>loader<span class="op">.</span>Discover<span class="op">(</span>r<span class="op">.</span>cwd<span class="op">)</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> Memory<span class="op">{},</span> err <span class="op">}</span> <span class="co">// keep previous on err</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>current<span class="op">.</span>Store<span class="op">(&amp;</span>m<span class="op">)</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (run with -race in T08 close-out):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_Snapshot_NilCurrent_ZeroValue<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> NewMemoryRegistry<span class="op">(</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> t<span class="op">.</span>TempDir<span class="op">())</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> r<span class="op">.</span>Snapshot<span class="op">()</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Project<span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>ProjectPath<span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_Set_Snapshot_Roundtrip<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> NewMemoryRegistry<span class="op">(</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> t<span class="op">.</span>TempDir<span class="op">())</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Set<span class="op">(</span>Memory<span class="op">{</span>Project<span class="op">:</span> <span class="st">&quot;X&quot;</span><span class="op">})</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;X&quot;</span><span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_Reload_RealTempdir<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;RELOAD_24&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> NewMemoryRegistry<span class="op">(</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    m<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Project<span class="op">,</span> <span class="st">&quot;RELOAD_24&quot;</span><span class="op">)</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">,</span> <span class="st">&quot;RELOAD_24&quot;</span><span class="op">)</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_Reload_KeepsPreviousOnError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// First reload sets known-good; second reload uses a loader that errs.</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;GOOD&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> NewMemoryRegistry<span class="op">(</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">,</span> <span class="st">&quot;GOOD&quot;</span><span class="op">)</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Replace cwd with a non-existent path; loader.Discover will succeed (returns empty) — so this test</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// verifies that a graceful empty-Memory replaces — DOCUMENTED behaviour. To prove keep-previous</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// we need a loader that errs — use an unreadable file.</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    bad <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">)</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>Chmod<span class="op">(</span>bad<span class="op">,</span> <span class="bn">0000</span><span class="op">))</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> os<span class="op">.</span>Chmod<span class="op">(</span>bad<span class="op">,</span> <span class="bn">0644</span><span class="op">)</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Geteuid<span class="op">()</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: #P2-F24 root bypasses chmod 0000&quot;</span><span class="op">)</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">,</span> <span class="st">&quot;GOOD&quot;</span><span class="op">)</span> <span class="co">// previous preserved</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_Concurrent_ReadWrite_NoDataRace<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> NewMemoryRegistry<span class="op">(</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> t<span class="op">.</span>TempDir<span class="op">())</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>Set<span class="op">(</span>Memory<span class="op">{</span>Project<span class="op">:</span> <span class="st">&quot;INITIAL&quot;</span><span class="op">})</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> wg sync<span class="op">.</span>WaitGroup</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    stop <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> <span class="kw">struct</span><span class="op">{})</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">5</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>        wg<span class="op">.</span>Add<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">go</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">defer</span> wg<span class="op">.</span>Done<span class="op">()</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>                <span class="cf">select</span> <span class="op">{</span> <span class="cf">case</span> <span class="op">&lt;-</span>stop<span class="op">:</span> <span class="cf">return</span><span class="op">;</span> <span class="cf">default</span><span class="op">:</span> <span class="op">}</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>                _ <span class="op">=</span> r<span class="op">.</span>Snapshot<span class="op">()</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>        <span class="op">}()</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">100</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>        r<span class="op">.</span>Set<span class="op">(</span>Memory<span class="op">{</span>Project<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;V%d&quot;</span><span class="op">,</span> i<span class="op">)})</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>    <span class="bu">close</span><span class="op">(</span>stop<span class="op">);</span> wg<span class="op">.</span>Wait<span class="op">()</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">,</span> <span class="st">&quot;V99&quot;</span><span class="op">)</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F24-T04): projectmemory registry - atomic-pointer Snapshot/Set/Reload + MemorySnapshotter (TDD -race)</code>.</p>
+<hr />
+<h2 id="task-5-watcher.go-tdd-with-real-fsnotify">Task 5: watcher.go
+(TDD with real fsnotify)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/projectmemory/watcher.go</code>, new
+<code>helix_code/internal/projectmemory/watcher_test.go</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryWatcher <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    registry <span class="op">*</span>MemoryRegistry</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    watcher  <span class="op">*</span>fsnotify<span class="op">.</span>Watcher</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    log      <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    debounce time<span class="op">.</span>Duration</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    done     <span class="kw">chan</span> <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryWatcher<span class="op">(</span>r <span class="op">*</span>MemoryRegistry<span class="op">,</span> log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>MemoryWatcher <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> log <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> log <span class="op">=</span> zap<span class="op">.</span>NewNop<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>MemoryWatcher<span class="op">{</span>registry<span class="op">:</span> r<span class="op">,</span> log<span class="op">:</span> log<span class="op">,</span> debounce<span class="op">:</span> DebounceWindow<span class="op">,</span> done<span class="op">:</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> <span class="kw">struct</span><span class="op">{})}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MemoryWatcher<span class="op">)</span> Start<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    fsw<span class="op">,</span> err <span class="op">:=</span> fsnotify<span class="op">.</span>NewWatcher<span class="op">()</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> w<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;projectmemory: fsnotify new watcher failed; degrading to slash-only reload&quot;</span><span class="op">);</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    w<span class="op">.</span>watcher <span class="op">=</span> fsw</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    snap <span class="op">:=</span> w<span class="op">.</span>registry<span class="op">.</span>Snapshot<span class="op">()</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">struct</span><span class="op">{})</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> p <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span>snap<span class="op">.</span>ProjectPath<span class="op">,</span> snap<span class="op">.</span>UserPath<span class="op">}</span> <span class="op">{</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> p <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        parent <span class="op">:=</span> filepath<span class="op">.</span>Dir<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _<span class="op">,</span> dup <span class="op">:=</span> seen<span class="op">[</span>parent<span class="op">];</span> dup <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        seen<span class="op">[</span>parent<span class="op">]</span> <span class="op">=</span> <span class="kw">struct</span><span class="op">{}{}</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> addErr <span class="op">:=</span> fsw<span class="op">.</span>Add<span class="op">(</span>parent<span class="op">);</span> addErr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>            w<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;projectmemory: fsnotify add failed&quot;</span><span class="op">,</span> zap<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;dir&quot;</span><span class="op">,</span> parent<span class="op">),</span> zap<span class="op">.</span>Error<span class="op">(</span>addErr<span class="op">))</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> w<span class="op">.</span>runEventLoop<span class="op">(</span>ctx<span class="op">,</span> snap<span class="op">)</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MemoryWatcher<span class="op">)</span> runEventLoop<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> snap Memory<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> <span class="bu">close</span><span class="op">(</span>w<span class="op">.</span>done<span class="op">)</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> timer <span class="op">*</span>time<span class="op">.</span>Timer</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    targets <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">struct</span><span class="op">{}{}</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> snap<span class="op">.</span>ProjectPath <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> targets<span class="op">[</span>snap<span class="op">.</span>ProjectPath<span class="op">]</span> <span class="op">=</span> <span class="kw">struct</span><span class="op">{}{}</span> <span class="op">}</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> snap<span class="op">.</span>UserPath <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> targets<span class="op">[</span>snap<span class="op">.</span>UserPath<span class="op">]</span> <span class="op">=</span> <span class="kw">struct</span><span class="op">{}{}</span> <span class="op">}</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">select</span> <span class="op">{</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">&lt;-</span>ctx<span class="op">.</span>Done<span class="op">():</span> <span class="cf">return</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> ev<span class="op">,</span> ok <span class="op">:=</span> <span class="op">&lt;-</span>w<span class="op">.</span>watcher<span class="op">.</span>Events<span class="op">:</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">!</span>ok <span class="op">{</span> <span class="cf">return</span> <span class="op">}</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> _<span class="op">,</span> hit <span class="op">:=</span> targets<span class="op">[</span>ev<span class="op">.</span>Name<span class="op">];</span> <span class="op">!</span>hit <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> ev<span class="op">.</span>Op<span class="op">&amp;(</span>fsnotify<span class="op">.</span>Write<span class="op">|</span>fsnotify<span class="op">.</span>Create<span class="op">|</span>fsnotify<span class="op">.</span>Rename<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> timer <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> timer<span class="op">.</span>Stop<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>            timer <span class="op">=</span> time<span class="op">.</span>AfterFunc<span class="op">(</span>w<span class="op">.</span>debounce<span class="op">,</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> w<span class="op">.</span>registry<span class="op">.</span>Reload<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>                    w<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;projectmemory: reload after fsnotify failed&quot;</span><span class="op">,</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>            <span class="op">})</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> _<span class="op">,</span> ok <span class="op">:=</span> <span class="op">&lt;-</span>w<span class="op">.</span>watcher<span class="op">.</span>Errors<span class="op">:</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">!</span>ok <span class="op">{</span> <span class="cf">return</span> <span class="op">}</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MemoryWatcher<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> w<span class="op">.</span>watcher <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> w<span class="op">.</span>watcher<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;-</span>w<span class="op">.</span>done</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> err</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (uses real fsnotify on real tempdir):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWatcher_FileWriteTriggersReload_Real<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    file <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>file<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;V1&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> NewMemoryRegistry<span class="op">(</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;V1&quot;</span><span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> NewMemoryWatcher<span class="op">(</span>r<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> w<span class="op">.</span>Start<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> w<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Rewrite file.</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>file<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;V2&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Wait up to 500 ms.</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    deadline <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">().</span>Add<span class="op">(</span><span class="dv">500</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time<span class="op">.</span>Now<span class="op">().</span>Before<span class="op">(</span>deadline<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project <span class="op">==</span> <span class="st">&quot;V2&quot;</span> <span class="op">{</span> <span class="cf">break</span> <span class="op">}</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">20</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;V2&quot;</span><span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWatcher_Close_Idempotent<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;X&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> NewMemoryRegistry<span class="op">(</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> NewMemoryWatcher<span class="op">(</span>r<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> w<span class="op">.</span>Start<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> w<span class="op">.</span>Close<span class="op">())</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Second close is a no-op (Close returns whatever fsnotify.Close returns; nil after first).</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> w<span class="op">.</span>Close<span class="op">()</span> <span class="co">// no panic</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWatcher_NoMemoryFile_GracefulStart<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> NewMemoryRegistry<span class="op">(</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> NewMemoryWatcher<span class="op">(</span>r<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> w<span class="op">.</span>Start<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> w<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F24-T05): projectmemory watcher - fsnotify + 200ms debounce + graceful degrade (TDD real-fsnotify)</code>.</p>
+<hr />
+<h2 id="task-6-memory_command.go-tdd">Task 6: memory_command.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/memory_command.go</code>, new
+<code>helix_code/internal/commands/memory_command_test.go</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryCommand <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    registry <span class="op">*</span>projectmemory<span class="op">.</span>MemoryRegistry</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    editor   <span class="kw">func</span><span class="op">()</span> <span class="dt">string</span> <span class="co">// test seam</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryCommand<span class="op">(</span>r <span class="op">*</span>projectmemory<span class="op">.</span>MemoryRegistry<span class="op">)</span> <span class="op">*</span>MemoryCommand <span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>MemoryCommand<span class="op">{</span>registry<span class="op">:</span> r<span class="op">,</span> editor<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> e <span class="op">:=</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;EDITOR&quot;</span><span class="op">);</span> e <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> <span class="cf">return</span> e <span class="op">}</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;vi&quot;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}}</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MemoryCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;memory&quot;</span> <span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MemoryCommand<span class="op">)</span> Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MemoryCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Inspect, show, edit, or reload project memory.&quot;</span> <span class="op">}</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MemoryCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/memory [status|show|edit|reload]&quot;</span> <span class="op">}</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MemoryCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="st">&quot;status&quot;</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>cc<span class="op">.</span>Args<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span> sub <span class="op">=</span> cc<span class="op">.</span>Args<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">}</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> sub <span class="op">{</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;status&quot;</span><span class="op">:</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> Output<span class="op">:</span> c<span class="op">.</span>handleStatus<span class="op">()},</span> <span class="ot">nil</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;show&quot;</span><span class="op">:</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> Output<span class="op">:</span> c<span class="op">.</span>handleShow<span class="op">()},</span> <span class="ot">nil</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;edit&quot;</span><span class="op">:</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>handleEdit<span class="op">(</span>ctx<span class="op">,</span> cc<span class="op">)</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;reload&quot;</span><span class="op">:</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>handleReload<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;/memory: unknown subcommand %q (want status|show|edit|reload)&quot;</span><span class="op">,</span> sub<span class="op">)</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="co">// handleStatus → &quot;Project path: ...\nProject size: N bytes\nProject truncated: bool\n</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="co">//                 User path: ...\nUser size: M bytes\nUser truncated: bool\nLoaded at: time&quot;.</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="co">// handleShow   → m.Render(); empty-message if both empty.</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="co">// handleEdit   → resolve path (ProjectPath or filepath.Join(cwd, &quot;helixcode.md&quot;));</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a><span class="co">//                 exec.CommandContext(ctx, c.editor(), path); inherit stdio; run.</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="co">// handleReload → registry.Reload(ctx); render new sizes.</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryCommand_Name<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;memory&quot;</span><span class="op">,</span> NewMemoryCommand<span class="op">(</span><span class="ot">nil</span><span class="op">).</span>Name<span class="op">())</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryCommand_Status_NoMemory<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryRegistry<span class="op">(</span>projectmemory<span class="op">.</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> t<span class="op">.</span>TempDir<span class="op">())</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewMemoryCommand<span class="op">(</span>r<span class="op">)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;status&quot;</span><span class="op">}})</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;Project size: 0&quot;</span><span class="op">)</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryCommand_Show_RendersContent<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;SHOW_24&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryRegistry<span class="op">(</span>projectmemory<span class="op">.</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewMemoryCommand<span class="op">(</span>r<span class="op">)</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;show&quot;</span><span class="op">}})</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;SHOW_24&quot;</span><span class="op">)</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryCommand_Edit_RunsEditor<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;EDIT_24&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryRegistry<span class="op">(</span>projectmemory<span class="op">.</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewMemoryCommand<span class="op">(</span>r<span class="op">)</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    cmd<span class="op">.</span>editor <span class="op">=</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;true&quot;</span> <span class="op">}</span> <span class="co">// unix true exits 0</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;edit&quot;</span><span class="op">}})</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Success<span class="op">)</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryCommand_Reload_RealTempdir<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    file <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">)</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>file<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;R1&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryRegistry<span class="op">(</span>projectmemory<span class="op">.</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewMemoryCommand<span class="op">(</span>r<span class="op">)</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;reload&quot;</span><span class="op">}})</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">,</span> <span class="st">&quot;R1&quot;</span><span class="op">)</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>file<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;R2&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;reload&quot;</span><span class="op">}})</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">,</span> <span class="st">&quot;R2&quot;</span><span class="op">)</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemoryCommand_UnknownSubcommand_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryRegistry<span class="op">(</span>projectmemory<span class="op">.</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> t<span class="op">.</span>TempDir<span class="op">())</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewMemoryCommand<span class="op">(</span>r<span class="op">)</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;nope&quot;</span><span class="op">}})</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F24-T06): /memory slash command - status/show/edit/reload + editor seam (TDD)</code>.</p>
+<hr />
+<h2 id="task-7-baseagent-integration-main.go-wiring-integration-test">Task
+7: BaseAgent integration + main.go wiring + integration test</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/internal/agent/base_agent.go</code>, modify
+<code>helix_code/cmd/cli/main.go</code>, new
+<code>helix_code/internal/agent/base_agent_memory_test.go</code>, new
+<code>helix_code/tests/integration/memory_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p><code>base_agent.go</code> (MINIMAL additions):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;dev.helix.code/internal/projectmemory&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BaseAgent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing fields ...</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    memoryRegistry projectmemory<span class="op">.</span>MemorySnapshotter</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>BaseAgent<span class="op">)</span> SetMemoryRegistry<span class="op">(</span>r projectmemory<span class="op">.</span>MemorySnapshotter<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    a<span class="op">.</span>memoryRegistry <span class="op">=</span> r</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>BaseAgent<span class="op">)</span> getSystemPrompt<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    base <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">`You are a %s agent named %s. Your capabilities include: %v.</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="st">You are part of a multi-agent system for software development. ...`</span><span class="op">,</span> a<span class="op">.</span>agentType<span class="op">,</span> a<span class="op">.</span>name<span class="op">,</span> a<span class="op">.</span>capabilities<span class="op">)</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> a<span class="op">.</span>memoryRegistry <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> base</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    rendered <span class="op">:=</span> a<span class="op">.</span>memoryRegistry<span class="op">.</span>Snapshot<span class="op">().</span>Render<span class="op">()</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> rendered <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> base</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rendered <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n\n</span><span class="st">---</span><span class="ch">\n\n</span><span class="st">&quot;</span> <span class="op">+</span> base</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>main.go</code> (4 lines + defer adjacent to F23 wiring):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// F24: project memory subsystem (codex AGENTS.md port).</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>cwd<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>Getwd<span class="op">()</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>memLoader <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>memRegistry <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryRegistry<span class="op">(</span>memLoader<span class="op">,</span> cwd<span class="op">)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> memRegistry<span class="op">.</span>Reload<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;projectmemory: initial reload failed: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>memWatcher <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryWatcher<span class="op">(</span>memRegistry<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">:=</span> memWatcher<span class="op">.</span>Start<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;projectmemory: watcher start failed (degrading to slash-only): %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> memWatcher<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> regErr <span class="op">:=</span> cmdRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewMemoryCommand<span class="op">(</span>memRegistry<span class="op">));</span> regErr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;projectmemory: register slash command failed: %v&quot;</span><span class="op">,</span> regErr<span class="op">)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>c<span class="op">.</span>memoryRegistry <span class="op">=</span> memRegistry  <span class="co">// expose to agent constructors</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/agent/base_agent_memory_test.go</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> stubSnapshotter <span class="kw">struct</span><span class="op">{</span> m projectmemory<span class="op">.</span>Memory <span class="op">}</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>stubSnapshotter<span class="op">)</span> Snapshot<span class="op">()</span> projectmemory<span class="op">.</span>Memory <span class="op">{</span> <span class="cf">return</span> s<span class="op">.</span>m <span class="op">}</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBaseAgent_GetSystemPrompt_NoMemoryRegistry_Unchanged<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    a <span class="op">:=</span> NewBaseAgent<span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">,</span> <span class="st">&quot;name&quot;</span><span class="op">,</span> AgentTypeOrchestrator<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> a<span class="op">.</span>getSystemPrompt<span class="op">()</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;USER MEMORY OVERLAY&quot;</span><span class="op">)</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBaseAgent_GetSystemPrompt_PrependsCurrentMemory<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    a <span class="op">:=</span> NewBaseAgent<span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">,</span> <span class="st">&quot;name&quot;</span><span class="op">,</span> AgentTypeOrchestrator<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>stubSnapshotter<span class="op">{</span>m<span class="op">:</span> projectmemory<span class="op">.</span>Memory<span class="op">{</span>Project<span class="op">:</span> <span class="st">&quot;PROJECT_FIXTURE_24&quot;</span><span class="op">}}</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    a<span class="op">.</span>SetMemoryRegistry<span class="op">(</span>s<span class="op">)</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> a<span class="op">.</span>getSystemPrompt<span class="op">()</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;PROJECT_FIXTURE_24&quot;</span><span class="op">)</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Memory must come before the base prompt&#39;s signature line.</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> strings<span class="op">.</span>Index<span class="op">(</span>out<span class="op">,</span> <span class="st">&quot;PROJECT_FIXTURE_24&quot;</span><span class="op">)</span> <span class="op">&lt;</span> strings<span class="op">.</span>Index<span class="op">(</span>out<span class="op">,</span> <span class="st">&quot;agent named name&quot;</span><span class="op">))</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBaseAgent_GetSystemPrompt_LiveSnapshot_NotCached<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    a <span class="op">:=</span> NewBaseAgent<span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">,</span> <span class="st">&quot;name&quot;</span><span class="op">,</span> AgentTypeOrchestrator<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>stubSnapshotter<span class="op">{</span>m<span class="op">:</span> projectmemory<span class="op">.</span>Memory<span class="op">{</span>Project<span class="op">:</span> <span class="st">&quot;OLD_24&quot;</span><span class="op">}}</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    a<span class="op">.</span>SetMemoryRegistry<span class="op">(</span>s<span class="op">)</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> a<span class="op">.</span>getSystemPrompt<span class="op">(),</span> <span class="st">&quot;OLD_24&quot;</span><span class="op">)</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    s<span class="op">.</span>m <span class="op">=</span> projectmemory<span class="op">.</span>Memory<span class="op">{</span>Project<span class="op">:</span> <span class="st">&quot;NEW_24&quot;</span><span class="op">}</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> a<span class="op">.</span>getSystemPrompt<span class="op">()</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;NEW_24&quot;</span><span class="op">)</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;OLD_24&quot;</span><span class="op">)</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing integration test FIRST:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemory_Integration_StartupLoadsProjectFile_Real<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;INTEGRATION_24&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryRegistry<span class="op">(</span>projectmemory<span class="op">.</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">,</span> <span class="st">&quot;INTEGRATION_24&quot;</span><span class="op">)</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMemory_Integration_HotReload_Real<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    file <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;helixcode.md&quot;</span><span class="op">)</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>file<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;INT_V1&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryRegistry<span class="op">(</span>projectmemory<span class="op">.</span>NewMemoryLoader<span class="op">(</span>zap<span class="op">.</span>NewNop<span class="op">()),</span> dir<span class="op">)</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> r<span class="op">.</span>Reload<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    w <span class="op">:=</span> projectmemory<span class="op">.</span>NewMemoryWatcher<span class="op">(</span>r<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> w<span class="op">.</span>Start<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> w<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>file<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;INT_V2&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    deadline <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">().</span>Add<span class="op">(</span><span class="dv">500</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time<span class="op">.</span>Now<span class="op">().</span>Before<span class="op">(</span>deadline<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project <span class="op">==</span> <span class="st">&quot;INT_V2&quot;</span> <span class="op">{</span> <span class="cf">break</span> <span class="op">}</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>        time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">20</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;INT_V2&quot;</span><span class="op">,</span> r<span class="op">.</span>Snapshot<span class="op">().</span>Project<span class="op">)</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F24-T07): BaseAgent SetMemoryRegistry + main.go wiring + integration test (TDD)</code>.</p>
+<hr />
+<h2 id="task-8-challenge-harness-5-phases-close-out-push-4-remotes-non-force">Task
+8: Challenge harness 5 phases + close-out + push 4 remotes
+non-force</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p2f24_challenge/main.go</code>,
+new <code>challenges/p2-f24-codex-project-memory/CHALLENGE.md</code>,
+new <code>challenges/p2-f24-codex-project-memory/run.sh</code>.</p>
+<p>Harness phases (per spec §6.3):</p>
+<ol type="1">
+<li><strong>PHASE-A: PROJECT-ONLY</strong> — tempdir with
+<code>helixcode.md</code> (sentinel <code>MEMORY_FIXTURE_24</code>);
+loader.Discover returns Memory with <code>Project</code> containing
+sentinel, <code>User</code> empty, <code>ProjectPath</code>
+non-empty.</li>
+<li><strong>PHASE-B: MISSING-FILE-GRACEFUL</strong> — empty tempdir;
+loader.Discover returns empty Memory + nil error;
+<code>Render() == &quot;&quot;</code>.</li>
+<li><strong>PHASE-C: HOT-RELOAD</strong> — write
+<code>MEM_INITIAL_24</code>; start watcher; rewrite to
+<code>MEM_UPDATED_24</code>; wait up to 500 ms; assert Snapshot returns
+NEW (not OLD).</li>
+<li><strong>PHASE-D: PROJECT-PLUS-USER</strong> — tempdir +
+<code>$XDG_CONFIG_HOME</code> overlay; both loaded;
+<code>Render()</code> contains both with project-before-user order.</li>
+<li><strong>PHASE-E: TRUNCATION</strong> — write 100 KB file; loader
+truncates to MaxMemoryBytes; <code>TruncatedProject == true</code>;
+first 64 KB byte-equal to input.</li>
+</ol>
+<p>Output skeleton ends with:</p>
+<pre><code>SUMMARY: PHASE-A=4/4 PASS; PHASE-B=4/4 PASS; PHASE-C=3/3 PASS; PHASE-D=3/3 PASS; PHASE-E=3/3 PASS
+==&gt; ALL CHECKS PASSED</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch.
+Anti-bluff smoke clean check appended. Verbatim output captured into
+<code>07_phase_2_evidence.md</code>. Dual commit (Challenges submodule +
+meta-repo bump).</p>
+<p><code>challenges/p2-f24-codex-project-memory/run.sh</code> mirrors
+F22/F23 structure with anti-bluff smoke + cross-compile linux check.</p>
+<p><strong>Close-out</strong> — tick all 8 items in PROGRESS, advance
+PROGRESS focus from F24 to “Phase 2 of CLI-Agent Fusion programme: F24
+closed; F25 next candidate”. Run final verification:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/projectmemory/...</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-race</span> ./internal/projectmemory/...</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/commands/</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/agent/ <span class="at">-run</span> <span class="st">&quot;GetSystemPrompt&quot;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration <span class="at">-run</span> <span class="st">&quot;TestMemory_Integration&quot;</span> ./tests/integration/...</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  internal/projectmemory internal/commands/memory_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--exit-code</span> go.mod go.sum</span></code></pre></div>
+<p>Cross-compile check:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="va">GOOS</span><span class="op">=</span>linux <span class="va">GOARCH</span><span class="op">=</span>amd64 <span class="ex">go</span> build <span class="at">-o</span> /tmp/helixcode-linux-amd64 ./cmd/server</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> /tmp/helixcode-linux-amd64</span></code></pre></div>
+<p>Commit
+<code>chore(P2-F24-T08): close out feature 24 — Codex Project Memory</code>.
+Push 4 remotes non-force (<code>origin</code>,
+<code>helixdev</code>/<code>github</code>,
+<code>vasic-digital</code>/<code>upstream</code>, <code>gitlab</code>
+per programme conventions).</p>
+<p>PROGRESS.md milestone entry (verbatim):</p>
+<pre><code>- 2026-05-07 — Feature 24 (Codex Project Memory) closed. 8 task commits (T01 ..., T08 close-out).
+  Real, end-to-end project memory subsystem modelled on codex&#39;s AGENTS.md
+  pattern. NEW internal/projectmemory/ package: Memory + MemoryLoader (parent-
+  walk discovery → helixcode.md / codex.md / AGENTS.md, case-insensitive,
+  stops at git root) + MemoryRegistry (atomic.Pointer[Memory] Snapshot/Set/
+  Reload + MemorySnapshotter interface) + MemoryWatcher (fsnotify + 200 ms
+  debounce + graceful degrade). NEW /memory slash (status/show/edit/reload).
+  BaseAgent.getSystemPrompt prepends Memory.Render() per-call (nil-safe,
+  backward-compat). User overlay at $XDG_CONFIG_HOME/helixcode/memory.md
+  loaded AFTER project memory. 64 KB cap with positive TruncatedProject /
+  TruncatedUser flags. Composes with F15 subagents (shared registry per CLI
+  instance), F04 worktrees (each worktree&#39;s cwd discovers its own memory
+  naturally). Zero new external deps (fsnotify v1.9.0 already direct).
+  Five-phase Challenge harness PASS (PROJECT-ONLY + MISSING-FILE-GRACEFUL +
+  HOT-RELOAD + PROJECT-PLUS-USER + TRUNCATION) with positive runtime
+  evidence per Article XI §11.9.</code></pre>
+<p>Subject:
+<code>chore(P2-F24-T08): close out feature 24 — Codex Project Memory</code>.</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types (§3.3), T03 loader (§4.1), T04 registry (§4.2 + concurrency),
+T05 watcher (§4.3), T06 /memory slash (§3.4), T07 BaseAgent + main.go
+wiring (§3.5 + §4.1), T08 Challenge 5 phases + close-out (§6.3).</li>
+<li><strong>TDD:</strong> every code task starts with failing tests.
+Loader tests use real <code>t.TempDir()</code>. Registry tests run with
+-race. Watcher tests use real fsnotify against real tempdir.</li>
+<li><strong>Type consistency:</strong> <code>Memory</code>,
+<code>MemorySource</code>, <code>MemoryLoader</code>,
+<code>MemoryRegistry</code>, <code>MemoryWatcher</code>,
+<code>MemorySnapshotter</code>, <code>MemoryCommand</code>, sentinel
+errors (<code>ErrNoMemoryFile</code>,
+<code>ErrMemoryFileTooLarge</code>), constants
+(<code>MaxMemoryBytes</code>, <code>DebounceWindow</code>,
+<code>DiscoveryFilenames</code>) — all match across spec §3 and plan
+T02-T08.</li>
+<li><strong>Zero new external deps:</strong> fsnotify v1.9.0 already
+direct in <code>helix_code/go.mod</code>. T08 verifies
+<code>git diff --exit-code go.mod go.sum</code> is no-op.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has 5 phases, each
+with positive byte-evidence: tempdir-scoped sentinel byte equality
+(PHASE-A), nil-Memory + nil-error (PHASE-B), pre/post-Reload byte
+differential within 500 ms (PHASE-C), Project + User render order byte
+equality (PHASE-D), <code>TruncatedProject == true</code> + first-64-KB
+byte equality (PHASE-E). Byte-evidence mismatch is hard failure.
+Absence-of-error never acceptable.</li>
+<li><strong>CONST-042:</strong> memory contents NEVER logged at INFO
+level. Loader logs only path + byte counts. Per-tool descriptions and
+telemetry NEVER include memory body.</li>
+<li><strong>CONST-043:</strong> F24 emits zero <code>git push</code>
+commands. T08 close-out push to 4 remotes requires explicit user
+authorisation per push.</li>
+<li><strong>CONST-033:</strong> F24 emits no shell commands beyond
+<code>/memory edit</code>’s <code>$EDITOR</code> invocation (runtime
+user-space process, not a power-state transition).</li>
+<li><strong>F15 subagents integration:</strong> registry is shared
+per-CLI-instance; subagents see the same memory. F15 task-specific
+<code>Input</code> carries per-subagent context — separate from project
+memory.</li>
+<li><strong>F04 worktree integration:</strong> each worktree’s cwd is
+its own discovery root; worktrees naturally inherit their parent
+project’s memory via parent-walk; no special handling needed.</li>
+<li><strong>Backward compat:</strong> <code>BaseAgent</code> without
+<code>SetMemoryRegistry</code> is byte-for-byte unchanged. Existing
+tests in <code>base_agent_extended_test.go</code> continue to pass.</li>
+<li><strong>Non-obvious call: parent-dir fsnotify watch (not
+file-level)</strong> — atomic-write editors (vim, emacs) replace the
+file’s inode; file-level watches lose subscription. Parent-dir watch
+survives.</li>
+<li><strong>Non-obvious call: 200 ms debounce window</strong> — vim
+atomic-write produces 3-5 events in ~50 ms; 200 ms coalesces into one
+Reload.</li>
+<li><strong>Non-obvious call: project before user in render
+order</strong> — security mandate; user-level overrides cannot bypass
+project-level rules.</li>
+<li><strong>Non-obvious call: missing files are NOT errors</strong> —
+<code>Discover</code> returns empty Memory + nil. Missing project memory
+is a normal user state (most projects don’t have one yet).</li>
+<li><strong>Non-obvious call: <code>vi</code> fallback (not
+<code>editor</code> or <code>nano</code>)</strong> — POSIX-mandatory;
+portable across all unix variants.</li>
+<li><strong>Non-obvious call: 64 KB cap matches F23’s
+<code>MaxSnapshotBytes</code></strong> — symmetry across the
+codebase.</li>
+<li><strong>Non-obvious call: <code>MemorySnapshotter</code> interface
+not concrete <code>*MemoryRegistry</code></strong> — BaseAgent depends
+on read-only contract; test fakes implement only
+<code>Snapshot() Memory</code>.</li>
+<li><strong>Non-obvious call: registry.Set is exposed (not just
+Reload)</strong> — useful for tests that want to inject Memory directly
+without disk I/O.</li>
+<li><strong>Non-obvious call: case-insensitive matching via two-pass dir
+scan</strong> — fast on case-insensitive FS, fallback for
+case-sensitive.</li>
+<li><strong>Fourth Phase 2 feature:</strong> F24 is the fourth Phase 2
+feature after F21 + F22 + F23. T01 advances PROGRESS.md from “F23
+closed; F24 next candidate” to “F24 in flight”; appends F24 evidence
+header to existing <code>07_phase_2_evidence.md</code>.</li>
+</ol>
+</body>
+</html>

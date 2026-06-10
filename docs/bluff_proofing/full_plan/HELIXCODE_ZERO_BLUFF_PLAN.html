@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HELIXCODE_ZERO_BLUFF_PLAN</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HELIXCODE_ZERO_BLUFF_PLAN</h1>
+</header>
+<h1 id="helixcode-zero-bluff-master-implementation-plan">HelixCode
+Zero-Bluff Master Implementation Plan</h1>
+<h2 id="document-purpose">Document Purpose</h2>
+<p>This is the authoritative implementation roadmap to transform
+HelixCode from its current state (with verified bluff areas) into a
+<strong>fully complete, zero-bluff project</strong> that exceeds all
+Tier 1 CLI agent capabilities. Every phase includes specific file
+references, implementation details, and anti-bluff verification
+criteria.</p>
+<p><strong>Date</strong>: 2026-04-30 <strong>Target</strong>:
+Zero-bluff, production-ready, Tier 1+ capability
+<strong>Governance</strong>: Based on HelixAgent CONSTITUTION.md
+CONST-001 through CONST-036 + CONST-035 anti-bluff mandate</p>
+<hr />
+<h2 id="phase-0-foundation-repair-week-1">PHASE 0: FOUNDATION REPAIR
+(Week 1)</h2>
+<h3 id="p0-001-fix-go.mod---add-all-advertised-dependencies">P0-001: Fix
+go.mod - Add All Advertised Dependencies</h3>
+<p><strong>File</strong>: <code>helix_code/go.mod</code> (replace root
+go.mod) <strong>Current State</strong>: Only 3 dependencies (uuid,
+errors, yaml) <strong>Required State</strong>: Full dependency
+manifest</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>module dev<span class="op">.</span>helix<span class="op">.</span>code</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">go</span> <span class="fl">1.24</span><span class="er">.0</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>toolchain go1<span class="fl">.24</span><span class="er">.9</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>require <span class="op">(</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// HTTP Framework</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>gin<span class="op">-</span>gonic<span class="op">/</span>gin v1<span class="fl">.11</span><span class="er">.0</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Authentication</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>golang<span class="op">-</span>jwt<span class="op">/</span>jwt<span class="op">/</span>v4 v4<span class="fl">.5</span><span class="er">.2</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    golang<span class="op">.</span>org<span class="op">/</span>x<span class="op">/</span>crypto v0<span class="fl">.36</span><span class="er">.0</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Database</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>jackc<span class="op">/</span>pgx<span class="op">/</span>v5 v5<span class="fl">.7</span><span class="er">.4</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Redis</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>redis<span class="op">/</span><span class="cf">go</span><span class="op">-</span>redis<span class="op">/</span>v9 v9<span class="fl">.7</span><span class="er">.3</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Configuration</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>spf13<span class="op">/</span>viper v1<span class="fl">.21</span><span class="er">.0</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// CLI</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>spf13<span class="op">/</span>cobra v1<span class="fl">.8</span><span class="er">.0</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Testing</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>stretchr<span class="op">/</span>testify v1<span class="fl">.11</span><span class="er">.1</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// UI</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>rivo<span class="op">/</span>tview v0<span class="fl">.42</span><span class="er">.0</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    fyne<span class="op">.</span>io<span class="op">/</span>fyne<span class="op">/</span>v2 v2<span class="fl">.7</span><span class="er">.0</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Browser Automation</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>chromedp<span class="op">/</span>chromedp v0<span class="fl">.14</span><span class="er">.2</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Web Scraping</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>PuerkitoBio<span class="op">/</span>goquery v1<span class="fl">.10</span><span class="er">.3</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Tree-sitter</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>smacker<span class="op">/</span><span class="cf">go</span><span class="op">-</span>tree<span class="op">-</span>sitter v0<span class="fl">.0</span><span class="er">.0</span><span class="op">-</span><span class="dv">20240625050157</span><span class="op">-</span>a31a98a7c127</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Utilities</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>google<span class="op">/</span>uuid v1<span class="fl">.6</span><span class="er">.0</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>pkg<span class="op">/</span>errors v0<span class="fl">.9</span><span class="er">.1</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    gopkg<span class="op">.</span>in<span class="op">/</span>yaml<span class="op">.</span>v2 v2<span class="fl">.4</span><span class="er">.0</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Observability</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>prometheus<span class="op">/</span>client_golang v1<span class="fl">.22</span><span class="er">.0</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>sirupsen<span class="op">/</span>logrus v1<span class="fl">.9</span><span class="er">.3</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">// SSE for MCP</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>r3labs<span class="op">/</span>sse<span class="op">/</span>v2 v2<span class="fl">.10</span><span class="er">.0</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p><strong>Anti-Bluff Verification</strong>: - [ ]
+<code>go mod tidy</code> completes without errors - [ ]
+<code>go build ./...</code> compiles all packages - [ ]
+<code>go list -m all</code> shows all dependencies resolved - [ ] CI
+script verifies no missing imports</p>
+<hr />
+<h3 id="p0-002-create-missing-docker-entrypoint.sh">P0-002: Create
+Missing docker-entrypoint.sh</h3>
+<p><strong>File</strong>: <code>docker/docker-entrypoint.sh</code> (new
+file) <strong>Current State</strong>: Referenced in Dockerfile but
+doesn’t exist</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/sh</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-e</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># HelixCode Container Entrypoint</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Anti-bluff: This script MUST actually start services, not just echo</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Validate required environment variables</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-z</span> <span class="st">&quot;</span><span class="va">$HELIX_AUTH_JWT_SECRET</span><span class="st">&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;ERROR: HELIX_AUTH_JWT_SECRET is required&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-z</span> <span class="st">&quot;</span><span class="va">$HELIX_DATABASE_PASSWORD</span><span class="st">&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;WARNING: HELIX_DATABASE_PASSWORD not set - database will be unavailable&quot;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Wait for PostgreSQL if configured</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">$HELIX_DATABASE_URL</span><span class="st">&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;Waiting for PostgreSQL...&quot;</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">until</span> <span class="ex">pg_isready</span> <span class="at">-d</span> <span class="st">&quot;</span><span class="va">$HELIX_DATABASE_URL</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sleep</span> 1</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">done</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;PostgreSQL is ready&quot;</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Wait for Redis if configured</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">$HELIX_REDIS_URL</span><span class="st">&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;Waiting for Redis...&quot;</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">until</span> <span class="ex">redis-cli</span> <span class="at">-u</span> <span class="st">&quot;</span><span class="va">$HELIX_REDIS_URL</span><span class="st">&quot;</span> ping <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-q</span> PONG<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sleep</span> 1</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">done</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;Redis is ready&quot;</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Run database migrations if available</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">&quot;./scripts/migrate.sh&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;Running database migrations...&quot;</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="ex">./scripts/migrate.sh</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the appropriate service based on HELIX_SERVICE_TYPE</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="st">&quot;</span><span class="va">${HELIX_SERVICE_TYPE</span><span class="op">:-</span>server<span class="va">}</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="ss">server</span><span class="kw">)</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;Starting HelixCode server...&quot;</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>        <span class="bu">exec</span> ./server</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    <span class="ss">cli</span><span class="kw">)</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;Starting HelixCode CLI...&quot;</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>        <span class="bu">exec</span> ./cli <span class="st">&quot;</span><span class="va">$@</span><span class="st">&quot;</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    <span class="ss">worker</span><span class="kw">)</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;Starting HelixCode worker...&quot;</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>        <span class="bu">exec</span> ./worker <span class="st">&quot;</span><span class="va">$@</span><span class="st">&quot;</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    <span class="pp">*</span><span class="kw">)</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;Unknown service type: </span><span class="va">$HELIX_SERVICE_TYPE</span><span class="st">&quot;</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>        <span class="bu">exit</span> 1</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="cf">esac</span></span></code></pre></div>
+<p><strong>Anti-Bluff Verification</strong>: - [ ] Container builds
+successfully: <code>docker build -t helixcode:test .</code> - [ ]
+Container starts without “file not found” errors - [ ] Container
+actually waits for dependencies (not just echoes) - [ ] Health endpoint
+responds after container starts</p>
+<hr />
+<h3 id="p0-003-add-root-level-governance-files">P0-003: Add Root-Level
+Governance Files</h3>
+<p><strong>Files</strong>: - <code>CONSTITUTION.md</code> (new) -
+<code>CLAUDE.md</code> (new) - <code>AGENTS.md</code> (update
+existing)</p>
+<p>These files MUST propagate to ALL submodules. See separate governance
+document for full text.</p>
+<hr />
+<h2 id="phase-1-core-llm-integration-weeks-2-3">PHASE 1: CORE LLM
+INTEGRATION (Weeks 2-3)</h2>
+<h3 id="p1-001-implement-real-llm-provider-interface">P1-001: Implement
+Real LLM Provider Interface</h3>
+<p><strong>File</strong>: <code>internal/llm/provider.go</code>
+(verify/update) <strong>Current State</strong>: Interface may exist but
+implementations are stubs</p>
+<p>Required Provider Interface (already partially defined):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(&lt;-</span><span class="kw">chan</span> <span class="op">*</span>GenerateChunk<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    GetCapabilities<span class="op">()</span> <span class="op">*</span>Capabilities</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span>  <span class="co">// CHANGED: must return real models</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ValidateConfig<span class="op">(</span>config <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    HealthCheck<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span>  <span class="co">// NEW: for anti-bluff verification</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="p1-002-implement-ollama-provider-local---priority-1">P1-002:
+Implement Ollama Provider (Local - Priority 1)</h3>
+<p><strong>File</strong>:
+<code>internal/llm/providers/ollama/ollama.go</code> (new or fix)</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> ollama</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;bytes&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;encoding/json&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/http&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> defaultBaseURL <span class="op">=</span> <span class="st">&quot;http://localhost:11434&quot;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> OllamaProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    baseURL    <span class="dt">string</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    httpClient <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> New<span class="op">(</span>baseURL <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>OllamaProvider <span class="op">{</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> baseURL <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        baseURL <span class="op">=</span> defaultBaseURL</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>OllamaProvider<span class="op">{</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        baseURL<span class="op">:</span> baseURL<span class="op">,</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        httpClient<span class="op">:</span> <span class="op">&amp;</span>http<span class="op">.</span>Client<span class="op">{</span>Timeout<span class="op">:</span> <span class="dv">120</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">},</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>OllamaProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>llm<span class="op">.</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>llm<span class="op">.</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: This MUST make a real HTTP call to Ollama API</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// NO simulation. NO echoing prompt. NO canned responses.</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    payload <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;model&quot;</span><span class="op">:</span>  req<span class="op">.</span>Model<span class="op">,</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;prompt&quot;</span><span class="op">:</span> req<span class="op">.</span>Prompt<span class="op">,</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;stream&quot;</span><span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;options&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;temperature&quot;</span><span class="op">:</span> req<span class="op">.</span>Temperature<span class="op">,</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;num_predict&quot;</span><span class="op">:</span> req<span class="op">.</span>MaxTokens<span class="op">,</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    body<span class="op">,</span> _ <span class="op">:=</span> json<span class="op">.</span>Marshal<span class="op">(</span>payload<span class="op">)</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    httpReq<span class="op">,</span> _ <span class="op">:=</span> http<span class="op">.</span>NewRequestWithContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;POST&quot;</span><span class="op">,</span> p<span class="op">.</span>baseURL<span class="op">+</span><span class="st">&quot;/api/generate&quot;</span><span class="op">,</span> bytes<span class="op">.</span>NewReader<span class="op">(</span>body<span class="op">))</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    httpReq<span class="op">.</span>Header<span class="op">.</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;application/json&quot;</span><span class="op">)</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>httpClient<span class="op">.</span>Do<span class="op">(</span>httpReq<span class="op">)</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;ollama generate failed: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> resp<span class="op">.</span>StatusCode <span class="op">!=</span> http<span class="op">.</span>StatusOK <span class="op">{</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;ollama returned %d&quot;</span><span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        Response <span class="dt">string</span> <span class="st">`json:&quot;response&quot;`</span></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        Done     <span class="dt">bool</span>   <span class="st">`json:&quot;done&quot;`</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> json<span class="op">.</span>NewDecoder<span class="op">(</span>resp<span class="op">.</span>Body<span class="op">).</span>Decode<span class="op">(&amp;</span>result<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to decode ollama response: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>llm<span class="op">.</span>GenerateResponse<span class="op">{</span></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>        Text<span class="op">:</span>      result<span class="op">.</span>Response<span class="op">,</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span>     req<span class="op">.</span>Model<span class="op">,</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        Provider<span class="op">:</span>  <span class="st">&quot;ollama&quot;</span><span class="op">,</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        Completed<span class="op">:</span> result<span class="op">.</span>Done<span class="op">,</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>OllamaProvider<span class="op">)</span> GetModels<span class="op">()</span> <span class="op">([]</span>llm<span class="op">.</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Must query Ollama&#39;s /api/tags endpoint</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Return REAL available models, not hardcoded list</span></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>httpClient<span class="op">.</span>Get<span class="op">(</span>p<span class="op">.</span>baseURL <span class="op">+</span> <span class="st">&quot;/api/tags&quot;</span><span class="op">)</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to list ollama models: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>        Models <span class="op">[]</span><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>            Name   <span class="dt">string</span> <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a>            Size   <span class="dt">int64</span>  <span class="st">`json:&quot;size&quot;`</span></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a>            Digest <span class="dt">string</span> <span class="st">`json:&quot;digest&quot;`</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="st">`json:&quot;models&quot;`</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> json<span class="op">.</span>NewDecoder<span class="op">(</span>resp<span class="op">.</span>Body<span class="op">).</span>Decode<span class="op">(&amp;</span>result<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>    models <span class="op">:=</span> <span class="bu">make</span><span class="op">([]</span>llm<span class="op">.</span>Model<span class="op">,</span> <span class="bu">len</span><span class="op">(</span>result<span class="op">.</span>Models<span class="op">))</span></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i<span class="op">,</span> m <span class="op">:=</span> <span class="kw">range</span> result<span class="op">.</span>Models <span class="op">{</span></span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>        models<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> llm<span class="op">.</span>Model<span class="op">{</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>            ID<span class="op">:</span>       m<span class="op">.</span>Name<span class="op">,</span></span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>            Name<span class="op">:</span>     m<span class="op">.</span>Name<span class="op">,</span></span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>            Provider<span class="op">:</span> <span class="st">&quot;ollama&quot;</span><span class="op">,</span></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Infer context size from model name patterns</span></span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> models<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>OllamaProvider<span class="op">)</span> HealthCheck<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Real health check, not just &quot;return nil&quot;</span></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>    req<span class="op">,</span> _ <span class="op">:=</span> http<span class="op">.</span>NewRequestWithContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;GET&quot;</span><span class="op">,</span> p<span class="op">.</span>baseURL<span class="op">+</span><span class="st">&quot;/api/tags&quot;</span><span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>httpClient<span class="op">.</span>Do<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;ollama health check failed: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> resp<span class="op">.</span>Body<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> resp<span class="op">.</span>StatusCode <span class="op">!=</span> http<span class="op">.</span>StatusOK <span class="op">{</span></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;ollama health check returned %d&quot;</span><span class="op">,</span> resp<span class="op">.</span>StatusCode<span class="op">)</span></span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="p1-003-implement-openai-provider-cloud---priority-2">P1-003:
+Implement OpenAI Provider (Cloud - Priority 2)</h3>
+<p><strong>File</strong>:
+<code>internal/llm/providers/openai/openai.go</code> (new)</p>
+<p>Similar pattern with real HTTP calls to
+<code>https://api.openai.com/v1/chat/completions</code>.</p>
+<h3 id="p1-004-implement-provider-manager-with-fallback">P1-004:
+Implement Provider Manager with Fallback</h3>
+<p><strong>File</strong>: <code>internal/llm/manager.go</code>
+(verify/fix)</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    providers <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>Provider</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    fallbackChain <span class="op">[]</span><span class="dt">string</span>  <span class="co">// Ordered list of provider names for fallback</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    circuitBreakers <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>CircuitBreaker  <span class="co">// NEW: per-provider circuit breakers</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>ProviderManager<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Must try REAL providers, not return simulated response</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> providerName <span class="op">:=</span> <span class="kw">range</span> m<span class="op">.</span>fallbackChain <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        provider <span class="op">:=</span> m<span class="op">.</span>providers<span class="op">[</span>providerName<span class="op">]</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> provider <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        cb <span class="op">:=</span> m<span class="op">.</span>circuitBreakers<span class="op">[</span>providerName<span class="op">]</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> cb <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> cb<span class="op">.</span>State<span class="op">()</span> <span class="op">==</span> CircuitOpen <span class="op">{</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span>  <span class="co">// Skip unhealthy providers</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        resp<span class="op">,</span> err <span class="op">:=</span> provider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">)</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> cb <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                cb<span class="op">.</span>RecordSuccess<span class="op">()</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> resp<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> cb <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>            cb<span class="op">.</span>RecordFailure<span class="op">()</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;all providers failed&quot;</span><span class="op">)</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="p1-005-fix-cli-handlegenerate-to-use-real-providers">P1-005: Fix
+CLI handleGenerate to Use Real Providers</h3>
+<p><strong>File</strong>: <code>cmd/cli/main.go</code> lines 190-214
+(CRITICAL FIX)</p>
+<p>Replace the simulated generation with real provider calls:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>CLI<span class="op">)</span> handleGenerate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt<span class="op">,</span> model <span class="dt">string</span><span class="op">,</span> maxTokens <span class="dt">int</span><span class="op">,</span> temperature <span class="dt">float64</span><span class="op">,</span> stream <span class="dt">bool</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: This MUST use the real LLM provider</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c<span class="op">.</span>llmProvider <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Initialize provider from config or default to local</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        provider<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>initializeProvider<span class="op">(</span>model<span class="op">)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to initialize provider: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>llmProvider <span class="op">=</span> provider</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    req <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>GenerateRequest<span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        Prompt<span class="op">:</span>      prompt<span class="op">,</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span>       model<span class="op">,</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        MaxTokens<span class="op">:</span>   maxTokens<span class="op">,</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        Temperature<span class="op">:</span> temperature<span class="op">,</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> stream <span class="op">{</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> c<span class="op">.</span>handleGenerateStream<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">)</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>llmProvider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">)</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;generation failed: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Println<span class="op">(</span>resp<span class="op">.</span>Text<span class="op">)</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="p1-006-implement-circuit-breaker-pattern">P1-006: Implement
+Circuit Breaker Pattern</h3>
+<p><strong>File</strong>: <code>internal/llm/circuit_breaker.go</code>
+(new - port from HelixAgent)</p>
+<p>Port the verified real implementation from HelixAgent:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CircuitBreaker <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    state        CircuitState</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    failureCount <span class="dt">int</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    successCount <span class="dt">int</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    threshold    <span class="dt">int</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    timeout      time<span class="op">.</span>Duration</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    lastFailure  time<span class="op">.</span>Time</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    mu           sync<span class="op">.</span>RWMutex</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CircuitState <span class="dt">int</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    CircuitClosed CircuitState <span class="op">=</span> <span class="ot">iota</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    CircuitOpen</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    CircuitHalfOpen</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p><strong>Anti-Bluff Verification for Phase 1</strong>: - [ ]
+<code>go test ./internal/llm/...</code> passes - [ ] Integration test
+calls real Ollama instance (or mock server in test) - [ ]
+<code>./bin/helixcode --prompt &quot;What is 2+2?&quot;</code> returns actual
+AI-generated text - [ ] <code>./bin/helixcode --list-models</code>
+returns dynamic models from running provider - [ ] Health check verifies
+provider is actually responding - [ ] Challenge script generates a real
+project using LLM calls - [ ] NO “simulated” or “for now” comments in
+production LLM code</p>
+<hr />
+<h2 id="phase-2-tools-editor-weeks-4-5">PHASE 2: TOOLS &amp; EDITOR
+(Weeks 4-5)</h2>
+<h3 id="p2-001-implement-real-filesystem-tools">P2-001: Implement Real
+Filesystem Tools</h3>
+<p><strong>Files</strong>: <code>internal/tools/filesystem/*.go</code>
+<strong>Current State</strong>: Interfaces may exist, need real
+implementations</p>
+<p>Required tools: - <code>fs_read</code> - Read file contents with path
+validation - <code>fs_write</code> - Write file with atomic operations -
+<code>fs_edit</code> - Edit file with backup - <code>glob</code> -
+Pattern matching - <code>grep</code> - Content search</p>
+<p><strong>Anti-Bluff Requirements</strong>: - [ ] Tools actually
+read/write files on disk - [ ] Path validation prevents directory
+traversal - [ ] Backups created before edits - [ ] Integration tests use
+real temp files</p>
+<h3 id="p2-002-implement-real-shell-tool-with-sandboxing">P2-002:
+Implement Real Shell Tool with Sandboxing</h3>
+<p><strong>File</strong>: <code>internal/tools/shell/shell.go</code></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>ShellTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: This MUST execute real shell commands</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// But with strict security boundaries</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    command <span class="op">:=</span> params<span class="op">[</span><span class="st">&quot;command&quot;</span><span class="op">].(</span><span class="dt">string</span><span class="op">)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Validate against blocklist</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> t<span class="op">.</span>validateCommand<span class="op">(</span>command<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;command blocked: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Execute with timeout and resource limits</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>ctx<span class="op">,</span> t<span class="op">.</span>maxExecutionTime<span class="op">)</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cancel<span class="op">()</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> exec<span class="op">.</span>CommandContext<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;sh&quot;</span><span class="op">,</span> <span class="st">&quot;-c&quot;</span><span class="op">,</span> command<span class="op">)</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    cmd<span class="op">.</span>Dir <span class="op">=</span> t<span class="op">.</span>workingDirectory</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Actually run the command, don&#39;t simulate</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    output<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>CombinedOutput<span class="op">()</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;stdout&quot;</span><span class="op">:</span>    <span class="dt">string</span><span class="op">(</span>output<span class="op">),</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;exit_code&quot;</span><span class="op">:</span> cmd<span class="op">.</span>ProcessState<span class="op">.</span>ExitCode<span class="op">(),</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;success&quot;</span><span class="op">:</span>   err <span class="op">==</span> <span class="ot">nil</span><span class="op">,</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="p2-003-implement-git-tool">P2-003: Implement Git Tool</h3>
+<p><strong>File</strong>: <code>internal/tools/git/git.go</code></p>
+<p>Required capabilities: - Status, diff, add, commit - Branch listing,
+checkout - Blame for attribution - Smart commit message generation</p>
+<h3 id="p2-004-implement-editor-with-multi-format-support">P2-004:
+Implement Editor with Multi-Format Support</h3>
+<p><strong>File</strong>: <code>internal/editor/editor.go</code></p>
+<p>Required formats: - Diff format (unified diff) - Whole file
+replacement - Search/Replace with regex - Line-based edits</p>
+<p><strong>Anti-Bluff Verification for Phase 2</strong>: - [ ]
+<code>fs_write</code> actually creates files - [ ] <code>shell</code>
+actually runs commands and returns real output - [ ]
+<code>git_status</code> returns real git status - [ ] Editor formats
+apply actual changes to files - [ ] Challenge: Edit a file and verify
+the change persists</p>
+<hr />
+<h2 id="phase-3-worker-distributed-computing-weeks-6-7">PHASE 3: WORKER
+&amp; DISTRIBUTED COMPUTING (Weeks 6-7)</h2>
+<h3 id="p3-001-verify-ssh-worker-implementation">P3-001: Verify SSH
+Worker Implementation</h3>
+<p><strong>Files</strong>: <code>internal/worker/ssh.go</code>,
+<code>internal/worker/pool.go</code> <strong>Current State</strong>:
+Unknown - need to verify if real or simulated</p>
+<p>If simulated, implement: - Real SSH connection management using
+<code>golang.org/x/crypto/ssh</code> - Health checks with actual TCP
+connection attempts - Task distribution with result collection -
+Auto-installation via SSH exec</p>
+<h3 id="p3-002-implement-task-checkpointing">P3-002: Implement Task
+Checkpointing</h3>
+<p><strong>File</strong>: <code>internal/task/checkpoint.go</code></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Checkpoint <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    TaskID      uuid<span class="op">.</span>UUID</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    Sequence    <span class="dt">int</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    State       <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    CreatedAt   time<span class="op">.</span>Time</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>TaskManager<span class="op">)</span> CreateCheckpoint<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> taskID uuid<span class="op">.</span>UUID<span class="op">,</span> state <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Must persist to real database</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    checkpoint <span class="op">:=</span> <span class="op">&amp;</span>Checkpoint<span class="op">{</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        TaskID<span class="op">:</span>    taskID<span class="op">,</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        Sequence<span class="op">:</span>  m<span class="op">.</span>getNextSequence<span class="op">(</span>taskID<span class="op">),</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        State<span class="op">:</span>     state<span class="op">,</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        CreatedAt<span class="op">:</span> time<span class="op">.</span>Now<span class="op">(),</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m<span class="op">.</span>db<span class="op">.</span>SaveCheckpoint<span class="op">(</span>ctx<span class="op">,</span> checkpoint<span class="op">)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="p3-003-implement-real-task-distribution">P3-003: Implement Real
+Task Distribution</h3>
+<p><strong>File</strong>: <code>internal/task/distributor.go</code></p>
+<p>Tasks must be: 1. Assigned to real workers based on capability
+matching 2. Monitored for progress (not just marked “running”) 3.
+Results collected from actual worker execution 4. Failover to other
+workers on failure</p>
+<p><strong>Anti-Bluff Verification for Phase 3</strong>: - [ ] Worker
+pool connects to real SSH endpoints - [ ] Task execution happens on
+remote workers - [ ] Checkpoints are stored in PostgreSQL - [ ] Task
+failures trigger retry on different workers - [ ] Challenge: Distribute
+a build task across 2 workers</p>
+<hr />
+<h2 id="phase-4-workflow-session-weeks-8-9">PHASE 4: WORKFLOW &amp;
+SESSION (Weeks 8-9)</h2>
+<h3 id="p4-001-implement-workflow-engine">P4-001: Implement Workflow
+Engine</h3>
+<p><strong>File</strong>: <code>internal/workflow/engine.go</code></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> WorkflowEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    actions <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>Action</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    store   WorkflowStore</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>WorkflowEngine<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> workflow <span class="op">*</span>Workflow<span class="op">)</span> <span class="op">(*</span>WorkflowResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ANTI-BLUFF: Must execute real steps, not just mark complete</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Dependency resolution</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Step execution with real action calls</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Result collection</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Rollback on failure</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="p4-002-implement-session-management-with-redis">P4-002:
+Implement Session Management with Redis</h3>
+<p><strong>File</strong>: <code>internal/session/manager.go</code></p>
+<p>Sessions must: - Store context in real Redis (not memory) - Handle
+TTL and expiration - Support multi-session tracking - Persist mentions,
+search results, history</p>
+<h3 id="p4-003-implement-real-project-lifecycle">P4-003: Implement Real
+Project Lifecycle</h3>
+<p><strong>File</strong>: <code>internal/project/manager.go</code></p>
+<p>Projects must: - Be stored in real database - Support lifecycle
+transitions (planning -&gt; building -&gt; testing -&gt; deploying) -
+Track associated tasks, sessions, workers - Generate actual project
+artifacts</p>
+<p><strong>Anti-Bluff Verification for Phase 4</strong>: - [ ] Workflow
+executes all steps in order - [ ] Session data persists across restarts
+(via Redis) - [ ] Project state changes are saved to database - [ ]
+Challenge: Create project, run workflow, verify artifacts</p>
+<hr />
+<h2 id="phase-5-mcp-memory-notifications-weeks-10-11">PHASE 5: MCP,
+MEMORY &amp; NOTIFICATIONS (Weeks 10-11)</h2>
+<h3 id="p5-001-full-mcp-protocol-implementation">P5-001: Full MCP
+Protocol Implementation</h3>
+<p><strong>File</strong>: <code>internal/mcp/server.go</code></p>
+<p>Must support: - stdio transport - SSE transport - Tool registration
+and execution - Resource management - Real bidirectional
+communication</p>
+<h3 id="p5-002-real-memory-provider-integration">P5-002: Real Memory
+Provider Integration</h3>
+<p><strong>File</strong>:
+<code>internal/memory/providers/*.go</code></p>
+<p>For each advertised provider (Mem0, Zep, ChromaDB, etc.): - Implement
+real API client - Implement health check - Test with real service (or
+skip if unavailable)</p>
+<h3 id="p5-003-real-notification-dispatch">P5-003: Real Notification
+Dispatch</h3>
+<p><strong>File</strong>:
+<code>internal/notification/channels/*.go</code></p>
+<p>For each channel: - Slack: Real webhook POST - Discord: Real webhook
+POST - Email: Real SMTP connection - Telegram: Real bot API call</p>
+<p><strong>Anti-Bluff Verification for Phase 5</strong>: - [ ] MCP
+server accepts real connections - [ ] Memory providers store and
+retrieve actual data - [ ] Notifications arrive at real endpoints - [ ]
+Challenge: Send notification, verify receipt</p>
+<hr />
+<h2 id="phase-6-testing-challenges-weeks-12-13">PHASE 6: TESTING &amp;
+CHALLENGES (Weeks 12-13)</h2>
+<h3 id="p6-001-anti-bluff-test-framework">P6-001: Anti-Bluff Test
+Framework</h3>
+<p><strong>File</strong>: <code>tests/anti_bluff_framework.go</code>
+(new)</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> tests</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">// AntiBluffVerifier ensures tests validate REAL behavior</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Usage: Every integration/E2E test must call at least one verification</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AntiBluffVerifier <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    t <span class="op">*</span>testing<span class="op">.</span>T</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>AntiBluffVerifier<span class="op">)</span> AssertRealHTTPCall<span class="op">(</span>resp <span class="op">*</span>http<span class="op">.</span>Response<span class="op">,</span> err <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// FAIL if response is simulated</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> resp<span class="op">.</span>StatusCode <span class="op">==</span> <span class="dv">200</span> <span class="op">{</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        body<span class="op">,</span> _ <span class="op">:=</span> io<span class="op">.</span>ReadAll<span class="op">(</span>resp<span class="op">.</span>Body<span class="op">)</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> strings<span class="op">.</span>Contains<span class="op">(</span><span class="dt">string</span><span class="op">(</span>body<span class="op">),</span> <span class="st">&quot;simulated&quot;</span><span class="op">)</span> <span class="op">||</span> strings<span class="op">.</span>Contains<span class="op">(</span><span class="dt">string</span><span class="op">(</span>body<span class="op">),</span> <span class="st">&quot;This is a simulated&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>            v<span class="op">.</span>t<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;ANTI-BLUFF VIOLATION: Response contains simulated content&quot;</span><span class="op">)</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>AntiBluffVerifier<span class="op">)</span> AssertRealFileChange<span class="op">(</span>path <span class="dt">string</span><span class="op">,</span> expectedContent <span class="dt">string</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// FAIL if file wasn&#39;t actually modified</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    content<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        v<span class="op">.</span>t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;ANTI-BLUFF VIOLATION: File not modified: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>strings<span class="op">.</span>Contains<span class="op">(</span><span class="dt">string</span><span class="op">(</span>content<span class="op">),</span> expectedContent<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        v<span class="op">.</span>t<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;ANTI-BLUFF VIOLATION: Expected content not found in file&quot;</span><span class="op">)</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>AntiBluffVerifier<span class="op">)</span> AssertRealProcessExecution<span class="op">(</span>cmd <span class="dt">string</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// FAIL if command execution is simulated</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check that actual system calls were made</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="p6-002-honest-challenge-framework">P6-002: Honest Challenge
+Framework</h3>
+<p><strong>File</strong>:
+<code>tests/e2e/challenges/framework.go</code></p>
+<p>Challenge requirements (per CONST-035): 1. Challenge MUST exercise
+the actual feature end-to-end 2. Challenge MUST fail if the feature is
+simulated/stubbed 3. Challenge MUST verify output quality (not just
+existence) 4. Challenge MUST run against real infrastructure 5.
+Challenge wrapper MUST correctly propagate failure</p>
+<p>Example challenge structure:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Challenge: llm_generation_001</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Validates that LLM generation produces real (non-simulated) responses</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="va">LOG</span><span class="op">=</span><span class="st">&quot;/tmp/challenge_llm_</span><span class="va">$$</span><span class="st">.log&quot;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="bu">trap</span> <span class="st">&#39;rm -f &quot;$LOG&quot;&#39;</span> EXIT</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Start server (if not running)</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> <span class="at">--daemon</span> <span class="kw">&amp;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="va">SERVER_PID</span><span class="op">=</span><span class="va">$!</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="bu">trap</span> <span class="st">&#39;kill $SERVER_PID 2&gt;/dev/null; rm -f &quot;$LOG&quot;&#39;</span> EXIT</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 2</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Make real generation request</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="va">RESPONSE</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-s</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/llm/generate <span class="dt">\</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">-d</span> <span class="st">&#39;{&quot;prompt&quot;:&quot;What is the capital of France?&quot;,&quot;model&quot;:&quot;llama-3-8b&quot;}&#39;</span><span class="va">)</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co"># ANTI-BLUFF: Verify response is not simulated</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$RESPONSE</span><span class="st">&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$LOG</span><span class="st">&quot;</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$RESPONSE</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-qi</span> <span class="st">&quot;simulated&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;|FAILED| Challenge llm_generation_001: Response is simulated&quot;</span> <span class="kw">|</span> <span class="fu">tee</span> <span class="at">-a</span> <span class="st">&quot;</span><span class="va">$LOG</span><span class="st">&quot;</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$RESPONSE</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-qi</span> <span class="st">&quot;This is a simulated&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;|FAILED| Challenge llm_generation_001: Response contains simulation marker&quot;</span> <span class="kw">|</span> <span class="fu">tee</span> <span class="at">-a</span> <span class="st">&quot;</span><span class="va">$LOG</span><span class="st">&quot;</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a><span class="co"># ANTI-BLUFF: Verify response actually answers the question</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ot">! </span><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$RESPONSE</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-qi</span> <span class="st">&quot;paris&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;|FAILED| Challenge llm_generation_001: Response doesn&#39;t contain expected answer&quot;</span> <span class="kw">|</span> <span class="fu">tee</span> <span class="at">-a</span> <span class="st">&quot;</span><span class="va">$LOG</span><span class="st">&quot;</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;|PASSED| Challenge llm_generation_001: Real LLM generation verified&quot;</span></span></code></pre></div>
+<h3 id="p6-003-master-challenge-runner">P6-003: Master Challenge
+Runner</h3>
+<p><strong>File</strong>:
+<code>tests/e2e/challenges/run_all_challenges.sh</code></p>
+<p>Must: - Run ALL challenges - Use robust failure detection (grep
+“|FAILED|”, not exit codes alone) - Generate JSON report with
+per-challenge results - Fail if ANY challenge fails (no silent
+swallowing) - Limit resource usage per Constitution (GOMAXPROCS=2, nice
+-n 19)</p>
+<p><strong>Anti-Bluff Verification for Phase 6</strong>: - [ ]
+<code>run_all_challenges.sh</code> fails when BLUFF-001 is present - [ ]
+Test framework detects simulated responses - [ ] Wrapper correctly
+reports failures - [ ] Challenge validates actual end-user workflow - [
+] 100% of P0 features have challenges - [ ] 80% of P1 features have
+challenges</p>
+<hr />
+<h2 id="phase-7-documentation-deployment-week-14">PHASE 7: DOCUMENTATION
+&amp; DEPLOYMENT (Week 14)</h2>
+<h3 id="p7-001-update-all-documentation">P7-001: Update All
+Documentation</h3>
+<p><strong>Files</strong>: README.md, docs/*.md</p>
+<p>Every document MUST: - Reflect actual implemented features (not
+aspirational) - Include working code examples - Be verified by challenge
+that executes examples</p>
+<h3 id="p7-002-create-deployment-guide">P7-002: Create Deployment
+Guide</h3>
+<p><strong>File</strong>: <code>docs/DEPLOYMENT.md</code></p>
+<p>Must include: - Docker Compose with real health checks - Kubernetes
+manifests (port from HelixAgent) - Environment variable reference -
+Troubleshooting with real diagnostic commands</p>
+<h3 id="p7-003-submodule-governance-propagation">P7-003: Submodule
+Governance Propagation</h3>
+<p><strong>Action</strong>: Create/update Constitution.md in each
+submodule</p>
+<p>For each submodule in <code>.gitmodules</code>: 1. Check if
+Constitution.md exists 2. If not, create symlink or copy from parent 3.
+Verify AGENTS.md references anti-bluff rules</p>
+<p><strong>Anti-Bluff Verification for Phase 7</strong>: - [ ] README
+examples work when copy-pasted - [ ] Docker Compose starts all services
+- [ ] All submodules have governance files - [ ] Documentation challenge
+passes</p>
+<hr />
+<h2 id="success-criteria">SUCCESS CRITERIA</h2>
+<p>HelixCode achieves zero-bluff status when ALL of the following are
+true:</p>
+<ol type="1">
+<li><label><input type="checkbox"></input><code>./bin/helixcode --prompt &quot;What is 2+2?&quot;</code>
+returns a real AI-generated answer (not simulated)</label></li>
+<li><label><input type="checkbox"></input><code>./bin/helixcode --list-models</code> returns
+dynamic models from running providers</label></li>
+<li><label><input type="checkbox"></input><code>./bin/helixcode --command &quot;echo hello&quot;</code>
+actually runs the command and returns “hello”</label></li>
+<li><label><input type="checkbox"></input><code>go build ./...</code> compiles
+ALL packages without errors</label></li>
+<li><label><input type="checkbox"></input><code>docker-compose up</code>
+starts all services, health checks pass</label></li>
+<li><label><input type="checkbox"></input><code>make test</code> runs unit
+tests with mocks only where allowed</label></li>
+<li><label><input type="checkbox"></input><code>make integration-test</code>
+runs against real PostgreSQL + Redis</label></li>
+<li><label><input type="checkbox"></input><code>./tests/e2e/challenges/run_all_challenges.sh</code>
+passes ALL challenges</label></li>
+<li><label><input type="checkbox"></input>NO “simulated”, “for now”, “TODO”,
+“placeholder” text in production code</label></li>
+<li><label><input type="checkbox"></input>Constitution.md, CLAUDE.md,
+AGENTS.md exist at root and in all submodules</label></li>
+<li><label><input type="checkbox"></input>All features advertised in README
+are exercised by at least one challenge</label></li>
+<li><label><input type="checkbox"></input>HelixCode exceeds Aider’s capability
+in: MCP support, distributed workers, memory integration</label></li>
+</ol>
+<hr />
+<h2 id="appendix-reference-implementations-to-port-from-helixagent">APPENDIX:
+Reference Implementations to Port from HelixAgent</h2>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 36%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>HelixAgent File</th>
+<th>HelixCode Target</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/llm/circuit_breaker.go</code></td>
+<td><code>internal/llm/circuit_breaker.go</code></td>
+<td>Production circuit breaker</td>
+</tr>
+<tr>
+<td><code>internal/llm/ensemble.go</code></td>
+<td><code>internal/llm/ensemble.go</code></td>
+<td>Parallel provider execution</td>
+</tr>
+<tr>
+<td><code>internal/llm/providers/*/provider.go</code></td>
+<td><code>internal/llm/providers/*/</code></td>
+<td>Real provider implementations</td>
+</tr>
+<tr>
+<td><code>internal/tools/handler.go</code></td>
+<td><code>internal/tools/</code></td>
+<td>1000+ line tool handler</td>
+</tr>
+<tr>
+<td><code>internal/services/boot_manager.go</code></td>
+<td><code>internal/server/boot.go</code></td>
+<td>Service boot orchestration</td>
+</tr>
+<tr>
+<td><code>challenges/scripts/run_all_challenges.sh</code></td>
+<td><code>tests/e2e/challenges/run_all.sh</code></td>
+<td>Master challenge runner</td>
+</tr>
+<tr>
+<td><code>challenges/scripts/challenge_framework.sh</code></td>
+<td><code>tests/e2e/challenges/framework.sh</code></td>
+<td>Challenge framework</td>
+</tr>
+<tr>
+<td><code>CONSTITUTION.md</code></td>
+<td><code>CONSTITUTION.md</code></td>
+<td>36-rule governance</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td><code>CLAUDE.md</code></td>
+<td>70KB agent manual</td>
+</tr>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td><code>docker-compose.yml</code></td>
+<td>Production orchestration</td>
+</tr>
+<tr>
+<td><code>k8s/</code></td>
+<td><code>k8s/</code></td>
+<td>Kubernetes manifests</td>
+</tr>
+<tr>
+<td><code>internal/skills/</code></td>
+<td><code>internal/skills/</code></td>
+<td>Skills system</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>This plan is a living document. Every change to HelixCode MUST
+update this plan and verify against the anti-bluff criteria defined
+herein.</em></p>
+</body>
+</html>

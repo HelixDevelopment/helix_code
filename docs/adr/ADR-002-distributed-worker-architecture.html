@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ADR-002-distributed-worker-architecture</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ADR-002-distributed-worker-architecture</h1>
+</header>
+<h1 id="adr-002-distributed-worker-architecture">ADR-002: Distributed
+Worker Architecture</h1>
+<h2 id="status">Status</h2>
+<p>Accepted</p>
+<h2 id="date">Date</h2>
+<p>2026-01-08</p>
+<h2 id="context">Context</h2>
+<p>HelixCode requires a distributed computing architecture to handle
+resource-intensive AI development tasks. The platform needs to:</p>
+<ol type="1">
+<li><strong>Scale horizontally</strong>: Support multiple worker nodes
+for parallel task execution</li>
+<li><strong>Support heterogeneous hardware</strong>: Workers may have
+different capabilities (GPU, high memory, specialized tools)</li>
+<li><strong>Handle network failures gracefully</strong>: Tasks should
+survive worker disconnections</li>
+<li><strong>Auto-provision workers</strong>: New workers should be
+automatically configured when added</li>
+<li><strong>Ensure security</strong>: SSH-based connections must be
+secure and verified</li>
+<li><strong>Provide isolation</strong>: Tasks from different
+users/projects should be isolated</li>
+<li><strong>Support capability-based routing</strong>: Tasks should be
+assigned to workers with appropriate capabilities</li>
+</ol>
+<p>The challenge was designing a system that provides enterprise-grade
+reliability while remaining simple to operate and extend.</p>
+<h2 id="decision">Decision</h2>
+<p>We implemented an SSH-based distributed worker pool architecture with
+the following components:</p>
+<h3 id="core-architecture">Core Architecture</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                     HelixCode Server                            │
+│  ┌─────────────┐  ┌──────────────────┐  ┌───────────────────┐   │
+│  │   Worker    │  │  Consensus       │  │   Task            │   │
+│  │   Manager   │──│  Manager         │──│   Queue           │   │
+│  └─────────────┘  └──────────────────┘  └───────────────────┘   │
+│         │                  │                      │              │
+│         └──────────────────┼──────────────────────┘              │
+│                            │                                     │
+│                    ┌───────▼───────┐                             │
+│                    │  SSH Worker   │                             │
+│                    │     Pool      │                             │
+│                    └───────────────┘                             │
+└────────────────────────────┼────────────────────────────────────┘
+                             │ SSH Connections
+         ┌───────────────────┼───────────────────┐
+         │                   │                   │
+    ┌────▼────┐        ┌────▼────┐        ┌────▼────┐
+    │ Worker  │        │ Worker  │        │ Worker  │
+    │   1     │        │   2     │        │   N     │
+    │ (GPU)   │        │ (CPU)   │        │ (Mixed) │
+    └─────────┘        └─────────┘        └─────────┘</code></pre>
+<h3 id="ssh-worker-pool">SSH Worker Pool</h3>
+<p>The <code>SSHWorkerPool</code> manages connections to distributed
+workers:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SSHWorkerPool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    workers        <span class="kw">map</span><span class="op">[</span>uuid<span class="op">.</span>UUID<span class="op">]*</span>SSHWorker</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    autoInstall    <span class="dt">bool</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    cliDownloadURL <span class="dt">string</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    hostKeys       <span class="op">*</span>HostKeyManager</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    isolation      <span class="op">*</span>WorkerIsolationManager</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    consensus      <span class="op">*</span>ConsensusManager</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Key features: - <strong>Secure SSH connections</strong> with host key
+verification - <strong>Auto-installation</strong> of Helix CLI on new
+workers - <strong>Capability detection</strong> (CPU, memory, GPU,
+Docker, CUDA) - <strong>Health monitoring</strong> with configurable
+intervals (default 30s) - <strong>Sandbox isolation</strong> for task
+execution</p>
+<h3 id="worker-configuration">Worker Configuration</h3>
+<p>Workers are configured via the pool configuration:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> WorkerConfigEntry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Host         <span class="dt">string</span>   <span class="st">`json:&quot;host&quot;`</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    Port         <span class="dt">int</span>      <span class="st">`json:&quot;port&quot;`</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Username     <span class="dt">string</span>   <span class="st">`json:&quot;username&quot;`</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    KeyPath      <span class="dt">string</span>   <span class="st">`json:&quot;key_path&quot;`</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Capabilities <span class="op">[]</span><span class="dt">string</span> <span class="st">`json:&quot;capabilities&quot;`</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    DisplayName  <span class="dt">string</span>   <span class="st">`json:&quot;display_name&quot;`</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="security-model">Security Model</h3>
+<ol type="1">
+<li><strong>Host Key Verification</strong>: Prevents man-in-the-middle
+attacks</li>
+<li><strong>SSH Key Authentication</strong>: Preferred over
+passwords</li>
+<li><strong>Sandboxed Execution</strong>: Tasks run in isolated
+environments</li>
+<li><strong>Resource Limits</strong>: Memory and CPU limits per
+task</li>
+<li><strong>Secure Ciphers</strong>: AES-256-CTR and strong MACs
+only</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sshConfig <span class="op">:=</span> <span class="op">&amp;</span>ssh<span class="op">.</span>ClientConfig<span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    HostKeyCallback<span class="op">:</span> p<span class="op">.</span>hostKeys<span class="op">.</span>VerifyHostKey<span class="op">(),</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Config<span class="op">:</span> ssh<span class="op">.</span>Config<span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        Ciphers<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;aes128-ctr&quot;</span><span class="op">,</span> <span class="st">&quot;aes192-ctr&quot;</span><span class="op">,</span> <span class="st">&quot;aes256-ctr&quot;</span><span class="op">},</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        MACs<span class="op">:</span>    <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;hmac-sha2-256-etm@openssh.com&quot;</span><span class="op">,</span> <span class="st">&quot;hmac-sha2-256&quot;</span><span class="op">},</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="task-distribution">Task Distribution</h3>
+<p>Tasks are distributed based on: 1. <strong>Criticality
+level</strong>: low, normal, high, critical 2.
+<strong>Priority</strong>: Numeric priority for ordering 3.
+<strong>Capabilities</strong>: Required worker capabilities 4.
+<strong>Resource requirements</strong>: CPU, memory, GPU needs 5.
+<strong>Current worker load</strong>: Task count vs capacity</p>
+<h3 id="health-and-recovery">Health and Recovery</h3>
+<ul>
+<li><strong>Heartbeat-based health</strong>: Workers must report within
+TTL (default 30s)</li>
+<li><strong>Automatic status transitions</strong>: healthy -&gt;
+degraded -&gt; unhealthy -&gt; offline</li>
+<li><strong>Task checkpointing</strong>: Preserves work across worker
+failures</li>
+<li><strong>Task reassignment</strong>: Failed tasks can be reassigned
+to healthy workers</li>
+</ul>
+<h3 id="consensus-management">Consensus Management</h3>
+<p>For multi-master deployments, a consensus manager handles: - Leader
+election - State synchronization - Split-brain prevention</p>
+<h2 id="consequences">Consequences</h2>
+<h3 id="positive">Positive</h3>
+<ol type="1">
+<li><strong>Scalability</strong>: Can scale from single node to hundreds
+of workers</li>
+<li><strong>Flexibility</strong>: Workers can have varied capabilities
+and hardware</li>
+<li><strong>Resilience</strong>: Tasks survive worker failures through
+checkpointing</li>
+<li><strong>Security</strong>: Strong SSH security with host key
+verification</li>
+<li><strong>Operability</strong>: Auto-installation reduces setup
+friction</li>
+<li><strong>Isolation</strong>: Sandboxing prevents task
+interference</li>
+<li><strong>Cost Efficiency</strong>: Can use spot instances or
+heterogeneous hardware</li>
+</ol>
+<h3 id="negative">Negative</h3>
+<ol type="1">
+<li><strong>Network Dependency</strong>: Requires reliable network
+connectivity</li>
+<li><strong>SSH Overhead</strong>: SSH connection establishment has
+latency</li>
+<li><strong>Configuration Complexity</strong>: Multiple workers require
+careful configuration</li>
+<li><strong>Monitoring Overhead</strong>: Health checks consume
+resources</li>
+<li><strong>Security Surface</strong>: SSH access requires careful key
+management</li>
+</ol>
+<h3 id="neutral">Neutral</h3>
+<ol type="1">
+<li><strong>Learning Curve</strong>: Operations team needs SSH and
+security expertise</li>
+<li><strong>Infrastructure Cost</strong>: Each worker node has
+infrastructure costs</li>
+</ol>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
+<h3 id="alternative-1-kubernetes-based-worker-pods">Alternative 1:
+Kubernetes-Based Worker Pods</h3>
+<p><strong>Description</strong>: Use Kubernetes to manage worker
+containers.</p>
+<p><strong>Pros</strong>: - Native scaling and scheduling - Built-in
+health monitoring - Container isolation - Easy deployment</p>
+<p><strong>Cons</strong>: - Kubernetes infrastructure requirement -
+Higher resource overhead - Complex for GPU workloads - Less control over
+node placement</p>
+<p><strong>Why Rejected</strong>: Many enterprises have existing
+bare-metal or VM infrastructure. SSH-based approach works with any Linux
+machine without requiring Kubernetes.</p>
+<h3 id="alternative-2-grpc-based-communication">Alternative 2:
+gRPC-Based Communication</h3>
+<p><strong>Description</strong>: Use gRPC instead of SSH for worker
+communication.</p>
+<p><strong>Pros</strong>: - Higher performance - Bidirectional streaming
+- Strong typing with protobuf - Built-in load balancing</p>
+<p><strong>Cons</strong>: - Requires custom daemon on workers - Less
+secure by default - Additional protocol to manage - Firewall
+configuration needed</p>
+<p><strong>Why Rejected</strong>: SSH provides universal access to any
+Linux machine and includes security by default. No additional daemon
+installation required.</p>
+<h3 id="alternative-3-agent-based-architecture-like-ansible">Alternative
+3: Agent-Based Architecture (Like Ansible)</h3>
+<p><strong>Description</strong>: Deploy agents on workers that poll for
+tasks.</p>
+<p><strong>Pros</strong>: - Works through firewalls (outbound only) -
+Simpler network configuration - No SSH key management</p>
+<p><strong>Cons</strong>: - Polling latency for task assignment - Agent
+deployment and updates - Less real-time control - Additional component
+to maintain</p>
+<p><strong>Why Rejected</strong>: Real-time task execution and
+monitoring require bidirectional communication. SSH provides this
+without additional agents.</p>
+<h3 id="alternative-4-message-queue-distribution-rabbitmqkafka">Alternative
+4: Message Queue Distribution (RabbitMQ/Kafka)</h3>
+<p><strong>Description</strong>: Use message queues for task
+distribution.</p>
+<p><strong>Pros</strong>: - Decoupled architecture - Built-in
+persistence - Easy horizontal scaling - Natural load balancing</p>
+<p><strong>Cons</strong>: - Additional infrastructure - Message queue
+management - Higher latency for interactive tasks - Complex error
+handling</p>
+<p><strong>Why Rejected</strong>: Interactive development workflows
+require low-latency direct communication. Message queues add unnecessary
+complexity and latency.</p>
+<h2 id="implementation-notes">Implementation Notes</h2>
+<ul>
+<li>Worker implementations are in <code>internal/worker/</code></li>
+<li>SSH pool manages connection lifecycle</li>
+<li>Health checks run in background goroutines (30s default
+interval)</li>
+<li>Sandbox cleanup runs hourly to remove expired sandboxes</li>
+<li>CLI download URL is configurable via
+<code>HELIX_CLI_DOWNLOAD_URL</code> env var</li>
+</ul>
+<h2 id="related-decisions">Related Decisions</h2>
+<ul>
+<li>ADR-001: LLM Provider Interface (tasks may use LLM providers)</li>
+<li>ADR-004: Workflow Execution Model (workflow steps execute on
+workers)</li>
+<li>ADR-006: Database Schema Design (worker state persisted to
+database)</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/ssh_pool.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/manager.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/types.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/isolation.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/internal/worker/consensus.go</code></li>
+</ul>
+</body>
+</html>

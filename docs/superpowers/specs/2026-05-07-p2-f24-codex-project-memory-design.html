@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f24-codex-project-memory-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f24-codex-project-memory-design</h1>
+</header>
+<h1 id="phase-2-feature-24-codex-project-memory">Phase 2 / Feature 24 —
+Codex Project Memory</h1>
+<p><strong>Date:</strong> 2026-05-07 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 2 port (codex / aider / cline / <strong>codex
+follow-on</strong>)</p>
+<blockquote>
+<p><strong>Programme position:</strong> F24 is the
+<strong>fourth</strong> Phase 2 feature (F21 Codex Approval Modes + F22
+Aider Git Auto-Commit + F23 Cline Browser Tool shipped before it). T01
+(bootstrap) appends an F24 evidence section to
+<code>docs/improvements/07_phase_2_evidence.md</code> (created in
+F21-T01, extended by F22-T01 + F23-T01); T08 (close-out) records F24’s
+runtime evidence beneath F23’s.</p>
+</blockquote>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, end-to-end <strong>project memory</strong> subsystem for
+the HelixCode CLI agent, modelled on Codex’s <code>AGENTS.md</code> /
+project-memory pattern (<code>cli_agents/codex/</code>), so that every
+LLM call automatically prepends a Markdown blob loaded from the project
+root (<code>helixcode.md</code> / <code>codex.md</code> /
+<code>AGENTS.md</code>, first-found wins) AND a per-user overlay at
+<code>$XDG_CONFIG_HOME/helixcode/memory.md</code>. The blob is
+hot-reloaded mid-session via <code>fsnotify</code> whenever the
+underlying file changes, so the user can edit project memory in their
+editor and the next LLM call reflects the change without restarting the
+CLI. A <code>/memory</code> slash command exposes the discovered paths
+(<code>status</code>), the concatenated content (<code>show</code>), the
+editor open (<code>edit</code>), and a manual reload trigger
+(<code>reload</code>).</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong><code>internal/projectmemory/</code> package</strong> — F24
+ADDS a NEW <code>internal/projectmemory/</code> Go package (no existing
+code conflict). Types: <code>Memory</code> (immutable value:
+<code>Project string</code> + <code>User string</code> +
+<code>ProjectPath string</code> + <code>UserPath string</code> +
+<code>LoadedAt time.Time</code> + <code>TruncatedProject bool</code> +
+<code>TruncatedUser bool</code>), <code>MemorySource</code> (string
+enum: <code>SourceProject = &quot;project&quot;</code> /
+<code>SourceUser = &quot;user&quot;</code>), <code>MemoryLoader</code>
+(parent-walk discovery via
+<code>Discover(cwd string) (Memory, error)</code> — searches cwd →
+parent → … → first matching
+<code>helixcode.md</code>/<code>codex.md</code>/<code>AGENTS.md</code>
+(case-insensitive); stops at git root or filesystem root; reads user
+overlay from <code>$XDG_CONFIG_HOME/helixcode/memory.md</code>),
+<code>MemoryRegistry</code> (atomic-pointer
+<code>current atomic.Pointer[Memory]</code> +
+<code>Snapshot() Memory</code> lock-free read + <code>Set(Memory)</code>
+swap + <code>Reload(ctx) error</code> re-runs Loader and Set),
+<code>MemoryWatcher</code> (fsnotify wrapper that watches
+<code>Memory.ProjectPath</code> + <code>Memory.UserPath</code> and
+triggers <code>Registry.Reload</code> on
+<code>Write</code>/<code>Create</code>/<code>Rename</code> events with a
+200 ms debounce). Sentinel errors (<code>ErrNoMemoryFile</code>,
+<code>ErrMemoryFileTooLarge</code>). Constants
+(<code>MaxMemoryBytes = 64 * 1024</code>,
+<code>DiscoveryFilenames = []string{&quot;helixcode.md&quot;, &quot;codex.md&quot;, &quot;AGENTS.md&quot;}</code>,
+<code>DebounceWindow = 200 * time.Millisecond</code>).</li>
+<li><strong><code>/memory</code> slash command</strong> —
+<code>internal/commands/memory_command.go</code>. Four subcommands:
+<code>/memory status</code> (paths + sizes + truncation flags +
+last-loaded timestamp), <code>/memory show</code> (concatenated content
+with delimiter <code>\n\n--- USER MEMORY OVERLAY ---\n\n</code> between
+project and user blobs), <code>/memory edit</code> (opens the project
+memory file in <code>$EDITOR</code> (default <code>vi</code>) via
+<code>os/exec</code>; if the file is not present, opens the discovery
+default <code>helixcode.md</code> at the resolved project root),
+<code>/memory reload</code> (calls <code>Registry.Reload(ctx)</code> and
+reports the new sizes). Default subcommand (no args):
+<code>status</code>.</li>
+<li><strong>Agent loop integration</strong> — every LLM call’s
+system-prompt construction reads <code>Registry.Snapshot()</code> and
+prepends the project memory + user overlay BEFORE the agent’s hard-coded
+prompt body. <code>BaseAgent.getSystemPrompt()</code> gains a
+<code>memoryRegistry MemorySnapshotter</code> field (nil-safe — when
+unset, falls back to the existing prompt verbatim, preserving backward
+compatibility with all existing agent tests).
+<code>cmd/cli/main.go</code> wiring constructs the registry + watcher at
+startup (after the F23 browser-manager block, before agent loop) and
+passes the registry into the agent constructor.</li>
+</ol>
+<p><strong>The single largest bluff vector for F24</strong> is “memory
+file edited but agent still sees the old content” — the slash reports
+<code>reload</code> succeeded, the file on disk has the new bytes, but
+the next LLM call’s system prompt still carries the stale blob because
+the registry’s atomic pointer was never re-stored, OR the agent loop
+reads from a captured-at-construct-time copy instead of
+<code>Registry.Snapshot()</code> per call. §5.2 enumerates five such
+patterns and pins each with positive runtime evidence: discovery MUST
+find the project file when it exists at any depth up to git root and
+MUST return empty (not error) when no file exists; the user overlay MUST
+be loaded after project memory; <code>Registry.Snapshot()</code> MUST
+return the NEW content within 500 ms of an fsnotify event after the file
+is rewritten on disk; <code>/memory reload</code> MUST re-trigger
+Loader.Discover and update the registry atomically; the agent’s
+system-prompt construction MUST read the registry per-call (not at
+construct-time). CONST-042 (no secret leak): memory contents may carry
+sensitive project-policy text — the loader logs only the paths + byte
+counts at INFO, NEVER the full body; INFO-level logs are scanned by a
+unit test. CONST-043: F24 emits zero <code>git push</code> commands;
+T08’s mirror push to four remotes is ATTEMPTED only with explicit user
+authorisation per push.</p>
+<p><strong>Anti-bluff hot zone (loud)</strong>: the loader returns
+successfully but <code>Memory.Project</code> is empty because the
+parent-walk found a file with the wrong name (e.g. matched
+<code>agents.md</code> lowercase on a case-sensitive filesystem when the
+canonical is <code>AGENTS.md</code>); the watcher reports a fsnotify
+event but <code>Registry.Reload</code> was never called because the
+debounce timer was reset infinitely on rapid successive events;
+<code>/memory show</code> reports the new content but the agent’s next
+LLM call still uses the old blob because <code>getSystemPrompt</code>
+cached the registry value at agent-construct time; the user overlay is
+loaded BEFORE project memory (wrong order — project should always come
+first); the loader silently truncates a 1 MB file to 64 KB but
+<code>Memory.TruncatedProject</code> is <code>false</code> (positive
+evidence missing). Each of these maps to a unit + integration +
+Challenge phase per §5.2.</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>The package layout under
+<code>helix_code/internal/projectmemory/</code> is NEW (no existing
+collision). It is a self-contained subsystem owned by main.go’s startup
+wiring:</p>
+<ul>
+<li><strong><code>Memory</code></strong> (<code>types.go</code>, NEW) —
+immutable value type returned by <code>MemoryLoader.Discover</code> and
+stored in <code>MemoryRegistry.current</code>. Fields:
+<code>Project string</code> (raw bytes of the resolved project memory
+file; capped at <code>MaxMemoryBytes</code>; empty when no file found),
+<code>User string</code> (raw bytes of the user overlay file; capped at
+<code>MaxMemoryBytes</code>; empty when no file found),
+<code>ProjectPath string</code> (absolute path of the discovered project
+memory file; empty when not found), <code>UserPath string</code>
+(absolute path of the user overlay file; empty when not found),
+<code>LoadedAt time.Time</code> (wall-clock when <code>Discover</code>
+completed), <code>TruncatedProject bool</code> (true when
+<code>Project</code> was capped from a larger source),
+<code>TruncatedUser bool</code> (true when <code>User</code> was capped
+from a larger source). Method: <code>Render() string</code> (returns
+Project + delimiter + User; empty when both are empty; never panics on
+partial data).</li>
+<li><strong><code>MemoryLoader</code></strong> (<code>loader.go</code>,
+NEW) — encapsulates discovery + read. Fields:
+<code>xdgConfigHome string</code> (resolved from
+<code>$XDG_CONFIG_HOME</code> or <code>$HOME/.config</code>),
+<code>log *zap.Logger</code>. Methods:
+<code>Discover(cwd string) (Memory, error)</code> (parent-walks from
+<code>cwd</code> up to a git root marker (<code>.git/</code> directory)
+or filesystem root, looking for first match against the case-INSENSITIVE
+filename list <code>[&quot;helixcode.md&quot;, &quot;codex.md&quot;, &quot;AGENTS.md&quot;]</code>;
+reads the matched file (capped at 64 KB with
+<code>TruncatedProject</code> set on overflow); reads the user overlay
+at <code>$XDG_CONFIG_HOME/helixcode/memory.md</code> (capped + flagged
+similarly); returns the assembled <code>Memory</code>; missing files are
+NOT errors — they yield empty strings + empty paths). Helper:
+<code>findProjectMemory(start string) (string, error)</code> (returns
+the absolute path of the first found file or empty string + nil
+error).</li>
+<li><strong><code>MemoryRegistry</code></strong>
+(<code>registry.go</code>, NEW) — atomic-pointer wrapper. Fields:
+<code>current atomic.Pointer[Memory]</code>,
+<code>loader *MemoryLoader</code>, <code>cwd string</code> (captured at
+construction; used by <code>Reload</code>), <code>mu sync.Mutex</code>
+(serialises Reload — multiple concurrent reloads collapse to one).
+Methods: <code>Snapshot() Memory</code> (lock-free atomic load; returns
+zero-value <code>Memory{}</code> if <code>current.Load()</code> is nil),
+<code>Set(m Memory)</code> (atomic.Store),
+<code>Reload(ctx context.Context) (Memory, error)</code> (acquires
+<code>mu</code>, calls <code>loader.Discover(cwd)</code>, atomically
+stores the result, returns the new Memory + nil; on Discover error,
+leaves the previous value in place and returns the error). Method:
+<code>MemorySnapshotter</code> interface —
+<code>Snapshot() Memory</code> — exposes only the read path to consumers
+(BaseAgent uses this).</li>
+<li><strong><code>MemoryWatcher</code></strong>
+(<code>watcher.go</code>, NEW) — fsnotify wrapper around the project +
+user paths. Fields: <code>registry *MemoryRegistry</code>,
+<code>watcher *fsnotify.Watcher</code>, <code>log *zap.Logger</code>,
+<code>debounce time.Duration</code> (default 200 ms; configurable),
+<code>done chan struct{}</code>. Methods:
+<code>Start(ctx context.Context) error</code> (initialises fsnotify
+watcher; adds <code>Memory.ProjectPath</code> parent dir +
+<code>Memory.UserPath</code> parent dir as watch targets; spawns
+<code>runEventLoop</code> goroutine), <code>Close() error</code> (closes
+the underlying fsnotify watcher; waits for the goroutine to exit). The
+event loop debounces successive events: a 200 ms timer is reset on each
+event; the timer’s expiry triggers <code>registry.Reload</code>.
+fsnotify watch failures (e.g. parent dir doesn’t exist) are logged at
+WARN and the watcher gracefully degrades to no-hot-reload; the registry
+still works via <code>/memory reload</code> slash-driven reload.</li>
+<li><strong><code>MemoryCommand</code></strong>
+(<code>internal/commands/memory_command.go</code>, NEW) —
+<code>/memory</code> slash. Mirrors F21 <code>ApprovalCommand</code>
+shape. Fields: <code>registry *projectmemory.MemoryRegistry</code>,
+<code>editor func() string</code> (test seam — defaults to
+<code>os.Getenv(&quot;EDITOR&quot;)</code> with <code>&quot;vi&quot;</code> fallback).
+Methods:
+<code>Name() / Aliases() / Description() / Usage() / Execute(ctx, *CommandContext)</code>
+per <code>Command</code> interface. Subcommands: <code>status</code>
+(default), <code>show</code>, <code>edit</code>,
+<code>reload</code>.</li>
+</ul>
+<pre><code>              cwd (process working dir at startup)
+                          │
+                          ▼
+            ┌── MemoryLoader.Discover ──┐
+            │  parent-walk to git root  │
+            │  match helixcode.md /     │
+            │   codex.md / AGENTS.md    │
+            │  read user overlay        │
+            └────────────┬──────────────┘
+                         │
+                         ▼
+              ┌── MemoryRegistry ──┐  ← atomic.Pointer[Memory]
+              │  Snapshot()        │
+              │  Set(Memory)       │
+              │  Reload(ctx)       │
+              └────────┬───────────┘
+                       │
+        ┌──────────────┼───────────────┐
+        ▼              ▼               ▼
+   MemoryWatcher  /memory slash   BaseAgent.getSystemPrompt
+   (fsnotify +    (status/show/    (lock-free Snapshot per call
+    debounce)     edit/reload)      → prepend Project + User)</code></pre>
+<p><strong>Why an atomic-pointer wrapper and NOT a mutex-guarded
+struct:</strong> <code>BaseAgent.getSystemPrompt()</code> is called on
+every LLM iteration; lock-free read avoids contention if multiple
+concurrent LLM calls (subagents per F15) share the same registry. The
+mutex serialises only <code>Reload</code> — a rare event triggered by
+either fsnotify (debounced) or <code>/memory reload</code>.</p>
+<p><strong>Why a single shared registry per CLI instance and NOT
+per-agent registries:</strong> project memory IS the project’s contract;
+every agent in the session should observe the same view. F15 subagents
+that need agent-specific context have their own per-task
+<code>Input</code> — not memory. F04 worktrees are isolated per-repo,
+but the project memory IS the repo’s contract — sharing across worktrees
+is fine because a worktree IS the same logical project.</p>
+<p><strong>Why hot-reload via fsnotify (Q5=A) and NOT polling:</strong>
+mid-session edits (the user opens <code>helixcode.md</code> in a
+separate editor while the CLI is running) are the canonical use case.
+Polling would either be too slow (&gt;1s) or wasteful (every 100 ms with
+a stat call on every iteration). fsnotify is push-based, debounced, and
+already a direct dep (<code>github.com/fsnotify/fsnotify v1.9.0</code>
+in <code>helix_code/go.mod</code>). Failure mode: fsnotify watch failure
+(e.g. macOS FSEvents temporarily unavailable) degrades to no-hot-reload
+but the slash-driven <code>/memory reload</code> always works.</p>
+<p><strong>Why per-user overlay AFTER project memory in the system
+prompt (Q3=A):</strong> project memory establishes the “ground truth”
+for the project; the user overlay is the user’s personal
+preferences/constraints (e.g. “I prefer terse responses”). Putting user
+AFTER project means the user’s preferences get the LLM’s most-recent
+attention bias without overriding project-level mandates. Inverting this
+order would let a user-level “disable approval gates” instruction
+silently override a project-level “always require approval” mandate — a
+genuine security risk.</p>
+<p><strong>Why a 64 KB cap (<code>MaxMemoryBytes</code>) and NOT
+unlimited:</strong> a 1 MB README accidentally renamed
+<code>helixcode.md</code> would blow the LLM’s context budget. 64 KB is
+~10–15 K tokens — large enough for a meaningful project contract, small
+enough that worst-case truncation is detectable + reportable to the user
+(<code>/memory status</code> shows <code>truncated: true</code>). 64 KB
+matches F23’s <code>MaxSnapshotBytes</code> for symmetry.</p>
+<p><strong>Why the discovery filename list is <code>helixcode.md</code>,
+<code>codex.md</code>, <code>AGENTS.md</code> in that order
+(Q1=A):</strong> <code>helixcode.md</code> is the project’s own brand;
+<code>codex.md</code> is the codex compatibility shim;
+<code>AGENTS.md</code> is the cross-tool generic that already exists at
+the repo root for many agent tools. First-match wins — projects that
+already have <code>AGENTS.md</code> get F24 working out-of-the-box.</p>
+<p><strong>Why case-INSENSITIVE matching:</strong> different filesystems
+(APFS case-insensitive, ext4 case-sensitive) produce different visible
+filenames; the loader tries each canonical filename via
+<code>os.Stat</code> (which is case-insensitive on APFS, case-sensitive
+on ext4); to be portable, we lowercase the dir entries on first miss and
+retry. Tests pin both <code>AGENTS.md</code> and
+<code>agents.md</code>.</p>
+<hr />
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/projectmemory/types.go</code> —
+<code>Memory</code>, <code>MemorySource</code>, sentinel errors,
+constants.</li>
+<li><code>helix_code/internal/projectmemory/types_test.go</code>.</li>
+<li><code>helix_code/internal/projectmemory/loader.go</code> —
+<code>MemoryLoader</code> + <code>Discover</code> + helpers.</li>
+<li><code>helix_code/internal/projectmemory/loader_test.go</code> —
+exercises parent-walk + user overlay + truncation + missing-file paths
+against real tempdirs.</li>
+<li><code>helix_code/internal/projectmemory/registry.go</code> —
+<code>MemoryRegistry</code> with atomic-pointer Snapshot/Set/Reload +
+<code>MemorySnapshotter</code> interface.</li>
+<li><code>helix_code/internal/projectmemory/registry_test.go</code> —
+concurrency (-race) + Reload-keeps-old-on-error.</li>
+<li><code>helix_code/internal/projectmemory/watcher.go</code> —
+<code>MemoryWatcher</code> fsnotify wrapper with debounce.</li>
+<li><code>helix_code/internal/projectmemory/watcher_test.go</code> —
+real fsnotify against real tempdir; assert Reload fires within 500 ms of
+file write.</li>
+<li><code>helix_code/internal/projectmemory/doc.go</code> —
+package-level docstring.</li>
+<li><code>helix_code/internal/commands/memory_command.go</code> —
+<code>/memory</code> slash.</li>
+<li><code>helix_code/internal/commands/memory_command_test.go</code>.</li>
+<li><code>helix_code/tests/integration/cmd/p2f24_challenge/main.go</code>
+— Challenge harness (5 phases A-E).</li>
+<li><code>challenges/p2-f24-codex-project-memory/CHALLENGE.md</code> +
+<code>challenges/p2-f24-codex-project-memory/run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/cmd/cli/main.go</code> — three additions adjacent
+to the F23 wiring: (1) construct
+<code>memLoader := projectmemory.NewMemoryLoader(zap.NewNop())</code>;
+(2) construct
+<code>memRegistry := projectmemory.NewMemoryRegistry(memLoader, cwd)</code>
+and call <code>memRegistry.Reload(ctx)</code> once at startup; (3)
+construct
+<code>memWatcher := projectmemory.NewMemoryWatcher(memRegistry, zap.NewNop()); memWatcher.Start(ctx); defer memWatcher.Close()</code>;
+(4) register <code>commands.NewMemoryCommand(memRegistry)</code>
+slash.</li>
+<li><code>helix_code/internal/agent/base_agent.go</code> —
+<code>getSystemPrompt()</code> reads
+<code>a.memoryRegistry.Snapshot()</code> (if
+<code>a.memoryRegistry != nil</code>) and prepends the rendered Memory
+to the existing prompt body. Field added:
+<code>memoryRegistry projectmemory.MemorySnapshotter</code>. Setter
+added:
+<code>SetMemoryRegistry(r projectmemory.MemorySnapshotter)</code>.
+Backward-compat: when <code>memoryRegistry == nil</code>, the prompt is
+unchanged.</li>
+<li><code>helix_code/go.mod</code> — <strong>zero new external
+deps</strong> (<code>github.com/fsnotify/fsnotify v1.9.0</code> is
+already a direct dep). T08’s verification step asserts
+<code>git diff go.mod</code> and <code>git diff go.sum</code> are
+no-op.</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/projectmemory/types.go (NEW)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Memory <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Project          <span class="dt">string</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    User             <span class="dt">string</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ProjectPath      <span class="dt">string</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    UserPath         <span class="dt">string</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    LoadedAt         time<span class="op">.</span>Time</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    TruncatedProject <span class="dt">bool</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    TruncatedUser    <span class="dt">bool</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m Memory<span class="op">)</span> Render<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> m<span class="op">.</span>Project <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">&amp;&amp;</span> m<span class="op">.</span>User <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> m<span class="op">.</span>User <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> m<span class="op">.</span>Project</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> m<span class="op">.</span>Project <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> m<span class="op">.</span>User</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m<span class="op">.</span>Project <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n\n</span><span class="st">--- USER MEMORY OVERLAY ---</span><span class="ch">\n\n</span><span class="st">&quot;</span> <span class="op">+</span> m<span class="op">.</span>User</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemorySource <span class="dt">string</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    SourceProject MemorySource <span class="op">=</span> <span class="st">&quot;project&quot;</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    SourceUser    MemorySource <span class="op">=</span> <span class="st">&quot;user&quot;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    MaxMemoryBytes <span class="op">=</span> <span class="dv">64</span> <span class="op">*</span> <span class="dv">1024</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    DebounceWindow <span class="op">=</span> <span class="dv">200</span> <span class="op">*</span> time<span class="op">.</span>Millisecond</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> DiscoveryFilenames <span class="op">=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;helixcode.md&quot;</span><span class="op">,</span> <span class="st">&quot;codex.md&quot;</span><span class="op">,</span> <span class="st">&quot;AGENTS.md&quot;</span><span class="op">}</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    ErrNoMemoryFile       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;projectmemory: no memory file found&quot;</span><span class="op">)</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    ErrMemoryFileTooLarge <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;projectmemory: memory file exceeds MaxMemoryBytes&quot;</span><span class="op">)</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/projectmemory/loader.go (NEW)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryLoader <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    xdgConfigHome <span class="dt">string</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    log           <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryLoader<span class="op">(</span>log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>MemoryLoader</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MemoryLoader<span class="op">)</span> Discover<span class="op">(</span>cwd <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Memory<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/projectmemory/registry.go (NEW)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemorySnapshotter <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Snapshot<span class="op">()</span> Memory</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryRegistry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    current atomic<span class="op">.</span>Pointer<span class="op">[</span>Memory<span class="op">]</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    loader  <span class="op">*</span>MemoryLoader</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    cwd     <span class="dt">string</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    mu      sync<span class="op">.</span>Mutex</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryRegistry<span class="op">(</span>loader <span class="op">*</span>MemoryLoader<span class="op">,</span> cwd <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>MemoryRegistry</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>MemoryRegistry<span class="op">)</span> Snapshot<span class="op">()</span> Memory</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>MemoryRegistry<span class="op">)</span> Set<span class="op">(</span>m Memory<span class="op">)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>MemoryRegistry<span class="op">)</span> Reload<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span>Memory<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/projectmemory/watcher.go (NEW)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryWatcher <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    registry <span class="op">*</span>MemoryRegistry</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    watcher  <span class="op">*</span>fsnotify<span class="op">.</span>Watcher</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    log      <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    debounce time<span class="op">.</span>Duration</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    done     <span class="kw">chan</span> <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryWatcher<span class="op">(</span>r <span class="op">*</span>MemoryRegistry<span class="op">,</span> log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>MemoryWatcher</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MemoryWatcher<span class="op">)</span> Start<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MemoryWatcher<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span></span></code></pre></div>
+<h3 id="memory-slash-command">3.4 <code>/memory</code> slash
+command</h3>
+<p><code>memory_command.go</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryCommand <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    registry <span class="op">*</span>projectmemory<span class="op">.</span>MemoryRegistry</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    editor   <span class="kw">func</span><span class="op">()</span> <span class="dt">string</span> <span class="co">// test seam</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryCommand<span class="op">(</span>r <span class="op">*</span>projectmemory<span class="op">.</span>MemoryRegistry<span class="op">)</span> <span class="op">*</span>MemoryCommand</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MemoryCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;memory&quot;</span> <span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MemoryCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Inspect, show, edit, or reload project memory.&quot;</span> <span class="op">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MemoryCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span>        <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/memory [status|show|edit|reload]&quot;</span> <span class="op">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Default subcommand (no args): status.</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Subcommands:</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   status  → paths + sizes + truncation flags + last-loaded timestamp</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   show    → concatenated content with delimiter</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">//   edit    → opens project memory file in $EDITOR (default vi); creates</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">//             helixcode.md at cwd if no project memory file exists yet</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">//   reload  → calls Registry.Reload(ctx); reports new sizes</span></span></code></pre></div>
+<h3 id="baseagent-integration">3.5 BaseAgent integration</h3>
+<p><code>internal/agent/base_agent.go</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BaseAgent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing fields ...</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// memoryRegistry is the optional project memory snapshotter. nil = no</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// project memory injection (graceful degradation; preserves existing</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// BaseAgent behaviour for tests that don&#39;t wire memory). Per Feature 24</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// (codex project memory port), P2-F24-T07.</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    memoryRegistry projectmemory<span class="op">.</span>MemorySnapshotter</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>BaseAgent<span class="op">)</span> SetMemoryRegistry<span class="op">(</span>r projectmemory<span class="op">.</span>MemorySnapshotter<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    a<span class="op">.</span>memoryRegistry <span class="op">=</span> r</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>BaseAgent<span class="op">)</span> getSystemPrompt<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    base <span class="op">:=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">`You are a %s agent named %s. ...`</span><span class="op">,</span> <span class="op">...)</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> a<span class="op">.</span>memoryRegistry <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> base</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    mem <span class="op">:=</span> a<span class="op">.</span>memoryRegistry<span class="op">.</span>Snapshot<span class="op">()</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    rendered <span class="op">:=</span> mem<span class="op">.</span>Render<span class="op">()</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> rendered <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> base</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rendered <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n\n</span><span class="st">---</span><span class="ch">\n\n</span><span class="st">&quot;</span> <span class="op">+</span> base</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Backward-compat: every existing <code>BaseAgent</code> test that
+constructs without a memory registry continues to pass byte-for-byte.
+The TestBaseAgentGetSystemPrompt test in
+<code>base_agent_extended_test.go</code> is unchanged because it
+constructs without <code>SetMemoryRegistry</code>.</p>
+<h3 id="new-external-dependencies">3.6 New external dependencies</h3>
+<p><strong>Zero new dependencies.</strong>
+<code>github.com/fsnotify/fsnotify v1.9.0</code> is already a direct dep
+in <code>helix_code/go.mod</code>. <code>os</code>, <code>sync</code>,
+<code>sync/atomic</code>, <code>time</code>, <code>errors</code>,
+<code>fmt</code>, <code>strings</code>, <code>path/filepath</code>,
+<code>context</code>, <code>os/exec</code> are stdlib. <code>zap</code>
+is already direct. T08’s verification step asserts
+<code>git diff --exit-code go.mod go.sum</code> is no-op.</p>
+<hr />
+<h2 id="data-flow">4. Data flow</h2>
+<ol type="1">
+<li><strong>Startup</strong> (<code>cmd/cli/main.go</code>):
+<ul>
+<li><code>cwd, _ := os.Getwd()</code>.</li>
+<li><code>memLoader := projectmemory.NewMemoryLoader(zap.NewNop())</code>.</li>
+<li><code>memRegistry := projectmemory.NewMemoryRegistry(memLoader, cwd)</code>.</li>
+<li><code>if _, err := memRegistry.Reload(ctx); err != nil { log.Printf(&quot;projectmemory: initial reload failed: %v&quot;, err) }</code>.</li>
+<li><code>memWatcher := projectmemory.NewMemoryWatcher(memRegistry, zap.NewNop())</code>.</li>
+<li><code>if err := memWatcher.Start(ctx); err != nil { log.Printf(&quot;projectmemory: watcher start failed (degrading to slash-only reload): %v&quot;, err) }</code>.</li>
+<li><code>defer memWatcher.Close()</code>.</li>
+<li><code>c.commandRegistry.Register(commands.NewMemoryCommand(memRegistry))</code>.</li>
+<li>Pass <code>memRegistry</code> to the agent constructor; agent calls
+<code>SetMemoryRegistry</code>.</li>
+</ul></li>
+<li><strong>Per LLM call</strong>
+(<code>BaseAgent.getSystemPrompt</code>):
+<ul>
+<li><code>mem := a.memoryRegistry.Snapshot()</code> — atomic load, no
+lock.</li>
+<li><code>rendered := mem.Render()</code> — Project + delimiter + User;
+empty when both empty.</li>
+<li>Prepend rendered + <code>\n\n---\n\n</code> to the base prompt body
+if non-empty; otherwise return base unchanged.</li>
+</ul></li>
+<li><strong>File change</strong> (mid-session):
+<ul>
+<li>User edits <code>helixcode.md</code> in their editor; saves.</li>
+<li>fsnotify delivers <code>Write</code> event on the project memory
+file’s parent dir.</li>
+<li><code>MemoryWatcher.runEventLoop</code> filters for the matching
+path; resets the 200 ms debounce timer.</li>
+<li>On debounce expiry, calls <code>registry.Reload(ctx)</code>.</li>
+<li><code>Reload</code> runs <code>loader.Discover(cwd)</code> and
+atomically swaps <code>current</code> to the new
+<code>Memory</code>.</li>
+<li>Next LLM call’s <code>Snapshot()</code> returns the new
+content.</li>
+</ul></li>
+<li><strong><code>/memory status</code></strong>:
+<ul>
+<li><code>mem := registry.Snapshot()</code>.</li>
+<li>Render:
+<code>paths={Project: ..., User: ...}; sizes={Project: N bytes, User: M bytes}; truncated={Project: bool, User: bool}; loaded_at: time.RFC3339</code>.</li>
+</ul></li>
+<li><strong><code>/memory show</code></strong>:
+<ul>
+<li><code>mem := registry.Snapshot()</code>.</li>
+<li>Output: <code>mem.Render()</code> (project + delimiter + user; empty
+result message if both empty).</li>
+</ul></li>
+<li><strong><code>/memory edit</code></strong>:
+<ul>
+<li><code>mem := registry.Snapshot()</code>.</li>
+<li><code>path := mem.ProjectPath</code>. If empty,
+<code>path = filepath.Join(cwd, &quot;helixcode.md&quot;)</code>.</li>
+<li><code>editor := os.Getenv(&quot;EDITOR&quot;); if editor == &quot;&quot; { editor = &quot;vi&quot; }</code>.</li>
+<li><code>cmd := exec.CommandContext(ctx, editor, path)</code>; inherit
+stdio; <code>cmd.Run()</code>.</li>
+<li>On exit, return success (the watcher will fire if the file
+changed).</li>
+</ul></li>
+<li><strong><code>/memory reload</code></strong>:
+<ul>
+<li><code>mem, err := registry.Reload(ctx)</code>.</li>
+<li>On err, surface; on success, render new sizes.</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="error-handling-anti-bluff-hot-zone-edge-cases">5. Error
+handling, anti-bluff hot zone, edge cases</h2>
+<h3 id="error-handling">5.1 Error handling</h3>
+<ul>
+<li><strong>No memory file found</strong> — <code>Discover</code>
+returns an empty <code>Memory{}</code> with
+<code>ProjectPath == &quot;&quot;</code> and <code>nil</code> error. Missing files
+are explicitly NOT errors; the system gracefully degrades to
+no-prepend.</li>
+<li><strong>Memory file &gt; 64 KB</strong> — <code>Discover</code>
+truncates to 64 KB and sets <code>Truncated*</code> flag to
+<code>true</code>; logs WARN with the path + original size + truncated
+size; returns successfully.</li>
+<li><strong>fsnotify watch failure</strong> —
+<code>MemoryWatcher.Start</code> logs WARN and returns nil (no error);
+<code>MemoryWatcher.Close</code> is a no-op safely. The slash-driven
+<code>/memory reload</code> continues to work.</li>
+<li><strong><code>$EDITOR</code> unset</strong> — defaults to
+<code>&quot;vi&quot;</code>. If <code>vi</code> is also missing on the system,
+<code>exec.Command(&quot;vi&quot;, path).Run()</code> returns an error which is
+surfaced to the user.</li>
+<li><strong><code>$XDG_CONFIG_HOME</code> unset</strong> — falls back to
+<code>$HOME/.config/helixcode/memory.md</code> per XDG spec.</li>
+<li><strong>Concurrent Reload calls</strong> — <code>Reload</code>’s
+<code>mu</code> serialises; a fast-Reload race collapses to one
+Discover.</li>
+<li><strong>Discover error mid-session</strong> — <code>Reload</code>
+leaves the previous <code>current</code> in place and returns the error;
+the agent continues with the stale-but-known-good blob.</li>
+</ul>
+<h3 id="anti-bluff-hot-zone-five-critical-patterns">5.2 Anti-bluff hot
+zone — five critical patterns</h3>
+<p><strong>Bluff #1: “File present but discovery returned
+empty.”</strong> - Pattern: parent-walk fails to recognise
+<code>AGENTS.md</code> because the loader case-sensitively compares to
+<code>agents.md</code> on a case-sensitive filesystem. - Test:
+<code>TestLoader_Discover_Finds_AGENTS_md_RealTempdir</code> creates a
+real tempdir with a real <code>AGENTS.md</code> file containing the
+sentinel <code>MEMORY_FIXTURE_24</code>; calls
+<code>loader.Discover(tempdir)</code>; asserts
+<code>Memory.ProjectPath != &quot;&quot;</code> AND
+<code>strings.Contains(Memory.Project, &quot;MEMORY_FIXTURE_24&quot;)</code>. -
+Challenge: PHASE-A asserts the same against a tempdir-scoped run.</p>
+<p><strong>Bluff #2: “Hot reload event fired but registry not
+updated.”</strong> - Pattern: fsnotify event arrives, but the debounce
+timer is reset infinitely under rapid successive events; OR the timer
+fires but the call to <code>registry.Reload</code> is replaced by a
+print statement. - Test:
+<code>TestWatcher_RegistryUpdatedAfterFileWrite_Real</code> writes
+initial <code>MEM_INITIAL_24</code> content; starts the watcher;
+rewrites the file with <code>MEM_UPDATED_24</code>; waits up to 500 ms;
+asserts <code>registry.Snapshot().Project</code> contains
+<code>MEM_UPDATED_24</code> AND NOT <code>MEM_INITIAL_24</code>. -
+Challenge: PHASE-C asserts the same.</p>
+<p><strong>Bluff #3: “Agent prepended the OLD memory blob.”</strong> -
+Pattern: <code>BaseAgent.getSystemPrompt</code> cached the registry’s
+value at agent-construct time instead of reading per call. - Test:
+<code>TestBaseAgent_GetSystemPrompt_PrependsCurrentMemory</code>
+constructs an agent with a registry whose initial value is
+<code>OLD_MEMORY_24</code>; calls <code>getSystemPrompt()</code>
+(asserts contains OLD); calls
+<code>registry.Set(Memory{Project: &quot;NEW_MEMORY_24&quot;})</code>; calls
+<code>getSystemPrompt()</code> again (asserts contains NEW AND NOT OLD).
+- Challenge: PHASE-D asserts the same in-process.</p>
+<p><strong>Bluff #4: “Loader silently truncated and the user has no
+idea.”</strong> - Pattern: 100 KB project memory file; loader caps to 64
+KB; <code>TruncatedProject</code> is <code>false</code>. - Test:
+<code>TestLoader_Discover_Truncates_Sets_Flag_Real</code> writes a 100
+KB tempdir file; asserts
+<code>len(Memory.Project) == MaxMemoryBytes</code> AND
+<code>Memory.TruncatedProject == true</code>. - Challenge: PHASE-E
+asserts the same + <code>/memory status</code> reports
+<code>truncated: true</code>.</p>
+<p><strong>Bluff #5: “Missing memory file produces error instead of
+empty Memory.”</strong> - Pattern: <code>loader.Discover(tempdir)</code>
+against a tempdir containing no memory files returns an error, but
+missing-file is a normal user state. - Test:
+<code>TestLoader_Discover_NoFile_NoError_RealTempdir</code> against an
+empty tempdir; asserts <code>err == nil</code> AND
+<code>Memory.ProjectPath == &quot;&quot;</code> AND
+<code>Memory.Project == &quot;&quot;</code>. - Challenge: PHASE-B asserts the
+same.</p>
+<h3 id="edge-cases">5.3 Edge cases</h3>
+<ul>
+<li><strong>Symlinked memory file</strong> — <code>os.ReadFile</code>
+follows symlinks; loader treats the resolved file as the source.
+<code>Memory.ProjectPath</code> reflects the symlink path (the lexical
+path the user gave), not the resolved target.</li>
+<li><strong>Memory file removed mid-session</strong> — fsnotify delivers
+<code>Remove</code> event; <code>Reload</code> re-runs
+<code>Discover</code> which returns empty <code>Memory</code>; agent
+gracefully degrades to no-prepend.</li>
+<li><strong>Memory file replaced (atomic write via rename)</strong> —
+fsnotify delivers <code>Rename</code> + <code>Create</code> on the
+parent dir; debounce coalesces; one Reload triggers.</li>
+<li><strong>Concurrent edits to memory + user overlay</strong> —
+fsnotify delivers events on both parents; debounce coalesces both into
+one Reload (200 ms window).</li>
+<li><strong><code>$XDG_CONFIG_HOME</code> set to a relative
+path</strong> — resolved via <code>filepath.Abs</code> before use.</li>
+<li><strong>Project memory file is a directory</strong> —
+<code>os.ReadFile</code> returns an error; loader logs WARN and treats
+as missing (empty Memory).</li>
+<li><strong>Memory file with NULL bytes</strong> — passed through as-is
+(Go strings are byte slices); LLM provider receives the raw
+content.</li>
+<li><strong>Permission denied on memory file</strong> —
+<code>os.ReadFile</code> returns <code>os.PermissionError</code>;
+<code>Discover</code> returns the error; main.go logs it and the
+registry holds zero-value Memory.</li>
+</ul>
+<hr />
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-tests-mocks-allowed-for-non-loader-components-loader-uses-real-tempdirs">6.1
+Unit tests (mocks ALLOWED for non-loader components; loader uses real
+tempdirs)</h3>
+<ul>
+<li><code>types_test.go</code> — pin <code>MaxMemoryBytes</code>,
+<code>DebounceWindow</code>, <code>DiscoveryFilenames</code>
+byte-for-byte; assert sentinel errors are distinct +
+<code>errors.Is</code>-comparable; test <code>Memory.Render()</code>
+across all combinations (both empty, only project, only user, both
+present).</li>
+<li><code>loader_test.go</code> — table-driven tests against real
+<code>t.TempDir()</code> directories. Cases: project file at cwd;
+project file at parent (parent-walk); project file at git-root marker;
+case-insensitive <code>AGENTS.md</code> vs <code>agents.md</code>; user
+overlay loaded; truncation flag set on &gt;64 KB file; missing file
+returns empty no-error; permission-denied returns error; user overlay
+loaded after project memory.</li>
+<li><code>registry_test.go</code> — atomic-pointer concurrency under
+-race (10 goroutines reading + 1 goroutine writing); double-Set produces
+last-write-wins; Reload-on-Discover-error keeps previous value; Snapshot
+returns zero-value when current is nil.</li>
+<li><code>watcher_test.go</code> — real fsnotify against a real tempdir.
+Cases: file write triggers Reload within 500 ms; rapid successive writes
+coalesce into one Reload via debounce; watcher.Close is idempotent;
+watcher graceful-degrade when parent dir doesn’t exist.</li>
+<li><code>memory_command_test.go</code> — status/show/edit/reload
+subcommands with a real registry + tempdir. Edit subcommand uses a stub
+<code>editor func() string</code> returning <code>&quot;true&quot;</code> (the
+unix <code>true</code> binary that exits 0) to avoid interactive editor
+in CI.</li>
+</ul>
+<h3 id="integration-tests">6.2 Integration tests</h3>
+<p><code>tests/integration/memory_test.go</code>
+(<code>//go:build integration</code>) — runs the full chain
+main.go-startup → fsnotify-event → registry-reload →
+BaseAgent.getSystemPrompt-snapshots-new against a real tempdir.
+Covered:</p>
+<ul>
+<li><code>TestMemory_Integration_StartupLoadsProjectFile_Real</code> —
+tempdir with <code>helixcode.md</code> containing sentinel; startup
+wires MemoryRegistry; assert <code>registry.Snapshot().Project</code>
+contains the sentinel.</li>
+<li><code>TestMemory_Integration_HotReload_Real</code> — start with
+content A; rewrite to content B; wait up to 500 ms; assert Snapshot
+returns B.</li>
+<li><code>TestMemory_Integration_BaseAgentPromptIncludesMemory_Real</code>
+— wire registry into BaseAgent; assert <code>getSystemPrompt()</code>
+contains the sentinel.</li>
+</ul>
+<h3 id="challenge-harness-five-phases">6.3 Challenge harness — five
+phases</h3>
+<p><code>challenges/p2-f24-codex-project-memory/run.sh</code> invokes
+<code>tests/integration/cmd/p2f24_challenge/main.go</code>:</p>
+<ol type="1">
+<li><strong>PHASE-A: PROJECT-ONLY</strong> — tempdir with
+<code>helixcode.md</code> containing sentinel
+<code>MEMORY_FIXTURE_24</code>; loader.Discover returns Memory with
+<code>Project</code> containing sentinel, <code>User</code> empty,
+<code>ProjectPath</code> ending in <code>helixcode.md</code>. Assert (i)
+<code>len(Project) &gt; 0</code>, (ii) sentinel present, (iii)
+<code>User == &quot;&quot;</code>, (iv) <code>ProjectPath != &quot;&quot;</code>.</li>
+<li><strong>PHASE-B: PROJECT-PLUS-USER</strong> — tempdir with
+<code>helixcode.md</code> (sentinel <code>MEM_PROJECT_24</code>) + user
+overlay file (sentinel <code>MEM_USER_24</code>); both loaded;
+<code>Memory.Render()</code> contains BOTH sentinels in correct order
+(project before user).</li>
+<li><strong>PHASE-C: HOT-RELOAD</strong> — load initial content
+<code>MEM_INITIAL_24</code>; start watcher; rewrite file with
+<code>MEM_UPDATED_24</code>; assert registry.Snapshot() returns content
+with <code>MEM_UPDATED_24</code> AND NOT <code>MEM_INITIAL_24</code>
+within 500 ms.</li>
+<li><strong>PHASE-D: MISSING-FILE-GRACEFUL</strong> — tempdir with NO
+memory files; loader.Discover returns empty Memory + nil error;
+<code>Render()</code> returns empty string. Assert (i) no error, (ii)
+<code>Memory.ProjectPath == &quot;&quot;</code>, (iii)
+<code>Memory.Project == &quot;&quot;</code>, (iv)
+<code>Render() == &quot;&quot;</code>.</li>
+<li><strong>PHASE-E: TRUNCATION</strong> — write 100 KB memory file;
+loader truncates to MaxMemoryBytes (64 KB) with
+<code>TruncatedProject == true</code>. Assert (i)
+<code>len(Project) == MaxMemoryBytes</code>, (ii)
+<code>TruncatedProject == true</code>, (iii) byte equality of first 64
+KB matches input.</li>
+</ol>
+<p>Output skeleton ends with:</p>
+<pre><code>SUMMARY: PHASE-A=4/4 PASS; PHASE-B=3/3 PASS; PHASE-C=3/3 PASS; PHASE-D=4/4 PASS; PHASE-E=3/3 PASS
+==&gt; ALL CHECKS PASSED</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch.
+Absence-of-error is NEVER acceptable as PASS.</p>
+<hr />
+<h2 id="cross-platform">7. Cross-platform</h2>
+<ul>
+<li><strong>Linux</strong> — fsnotify uses inotify;
+<code>$XDG_CONFIG_HOME</code> standard; tested.</li>
+<li><strong>macOS</strong> — fsnotify uses kqueue/FSEvents; APFS
+case-insensitive default — loader’s case-insensitive matching covers
+both filesystem dispositions.</li>
+<li><strong>Windows</strong> — fsnotify uses ReadDirectoryChangesW;
+<code>$XDG_CONFIG_HOME</code> typically unset; falls back to
+<code>%USERPROFILE%\.config\helixcode\memory.md</code> via Go’s
+<code>os.UserConfigDir()</code>.</li>
+<li><strong>No fsnotify support</strong> — extremely rare (e.g. some
+FUSE filesystems); <code>MemoryWatcher.Start</code> returns nil (logs
+WARN); <code>/memory reload</code> slash continues to work.</li>
+</ul>
+<hr />
+<h2 id="out-of-scope">8. Out of scope</h2>
+<ul>
+<li><strong>Multiple project-memory files</strong> — first-found wins;
+chained/merged memory across multiple files is v2.</li>
+<li><strong>Markdown rendering</strong> — content passes through to the
+LLM as raw bytes; no preprocessing, no template substitution.</li>
+<li><strong>Encryption / signing</strong> — memory file is plain
+Markdown; no MAC verification.</li>
+<li><strong>Per-tool memory scoping</strong> — every LLM call gets the
+same memory; no tool-specific overlays.</li>
+<li><strong>Memory inheritance across worktrees</strong> — F04 worktrees
+pin their own cwd; each worktree’s discovery walks from its own cwd, so
+worktrees inherit their parent project’s memory naturally without
+explicit inheritance logic.</li>
+<li><strong>Real-time content diff in
+<code>/memory reload</code></strong> — output reports new sizes only;
+not a content diff.</li>
+<li><strong>Locking memory file edits during
+<code>/memory edit</code></strong> — <code>$EDITOR</code> invocation is
+unguarded; concurrent edits from another process compete normally.</li>
+<li><strong>JSON Schema / TOML memory format</strong> — only Markdown is
+supported.</li>
+</ul>
+<hr />
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>CONST-035</strong> (anti-bluff): every PASS in F24 carries
+positive runtime evidence — real tempdirs + real fsnotify + real file
+I/O + sentinel byte equality + truncation flag verification +
+atomic-pointer Snapshot semantics. The Challenge harness MUST exit
+non-zero on byte mismatch. Tests use real fsnotify (mocks are forbidden
+in integration tests per Rule 5).</li>
+<li><strong>CONST-039</strong> (Challenge required): F24 ships with
+<code>challenges/p2-f24-codex-project-memory/</code> (Challenge harness
+with 5 phases A-E).</li>
+<li><strong>CONST-042</strong> (no secret leak): memory contents NEVER
+logged at INFO level. The loader’s logger logs only the path + byte
+counts. A unit test scans <code>internal/projectmemory/*.go</code>
+(excluding <code>_test.go</code>) for
+<code>logger\.Info\(.*\b(content|body|memory|project|user)\b.*\b%[sv]</code>
+matches and FAILs on any hit. Memory files MAY contain secrets (project
+policy text); the no-INFO-log rule prevents inadvertent leak via
+stdout/stderr of the CLI.</li>
+<li><strong>CONST-043</strong> (no force push, no auto-push): F24 emits
+zero <code>git push</code> commands. T08’s close-out push to four
+remotes (origin / helixdev / vasic-digital / gitlab) is performed by the
+human operator with explicit per-push approval per CONST-043.</li>
+<li><strong>CONST-033</strong> (host power management): F24 emits no
+shell commands beyond the <code>/memory edit</code> <code>$EDITOR</code>
+invocation (which is a runtime user-space process, not a power-state
+transition). No suspend/reboot/halt commands.</li>
+</ul>
+<hr />
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<ul>
+<li><strong>Q1 = A</strong> — Memory file discovery: parent-walk from
+cwd to git root or filesystem root, looking for first match against
+case-insensitive filename list
+<code>[&quot;helixcode.md&quot;, &quot;codex.md&quot;, &quot;AGENTS.md&quot;]</code>. PROJECT
+scope.</li>
+<li><strong>Q2 = A</strong> — Format: plain Markdown. No preprocessing.
+Prepended to system prompt at every LLM call.</li>
+<li><strong>Q3 = A</strong> — Per-user overlay:
+<code>$XDG_CONFIG_HOME/helixcode/memory.md</code> (or
+<code>$HOME/.config/helixcode/memory.md</code> fallback) loaded AFTER
+project memory in the system prompt with a delimiter.</li>
+<li><strong>Q4 = A</strong> — <code>/memory</code> slash with
+subcommands <code>status</code> (default — paths + sizes + truncation
+flags + loaded_at) / <code>show</code> (concatenated content with
+delimiter) / <code>edit</code> (open in <code>$EDITOR</code>, default
+<code>vi</code>) / <code>reload</code> (Registry.Reload).</li>
+<li><strong>Q5 = A</strong> — Hot reload via existing
+<code>fsnotify</code> dep. 200 ms debounce window. fsnotify failure
+degrades to no-hot-reload (slash-only); registry continues to work.</li>
+</ul>
+<hr />
+<h2 id="non-obvious-calls">11. Non-obvious calls</h2>
+<ol type="1">
+<li><strong>Atomic-pointer over RWMutex for
+<code>current</code>.</strong> <code>BaseAgent.getSystemPrompt</code> is
+called on every LLM iteration; lock-free read avoids contention if F15
+subagents run in parallel.</li>
+<li><strong>Discovery filenames are checked in the documented order, NOT
+alphabetically.</strong> <code>helixcode.md</code> first,
+<code>codex.md</code> second, <code>AGENTS.md</code> third. First-match
+wins. Tests pin this order.</li>
+<li><strong>Case-insensitive matching via two-pass dir scan.</strong>
+First pass: try canonical names with <code>os.Stat</code>. Second pass:
+list dir entries and case-insensitively match. Two passes because the
+first is fast on case-insensitive filesystems and the second only fires
+on case-sensitive misses.</li>
+<li><strong>Stop walking at git root marker (<code>.git</code>
+directory).</strong> Filesystem-root would also work but visits
+<code>/etc</code> etc. on Linux; git root is the natural project
+boundary. For projects without git, the filesystem root is the fallback
+bound.</li>
+<li><strong>64 KB cap matches F23’s
+<code>MaxSnapshotBytes</code>.</strong> Symmetry across the codebase + a
+sane LLM context bound. Truncation flag is positive evidence
+(<code>TruncatedProject == true</code>), not silent.</li>
+<li><strong>Project before User in render order.</strong> Reverse order
+would let user-level overrides bypass project-level mandates
+(security-relevant when project memory says “always require approval”).
+Tests pin the order.</li>
+<li><strong>fsnotify watches the PARENT directory, not the file
+itself.</strong> Editors that atomically write via rename (vim, emacs)
+replace the file’s inode; a file-level watch loses the subscription.
+Parent-dir watch survives the rename + filters events to the file
+path.</li>
+<li><strong>200 ms debounce is just enough for
+<code>vim :w</code>.</strong> Vim’s atomic-write produces 3-5 events in
+~50 ms; 200 ms coalesces them into one Reload. Lower would over-fire;
+higher would feel laggy.</li>
+<li><strong><code>/memory edit</code> falls back to <code>vi</code>, NOT
+<code>nano</code> or <code>editor</code>.</strong> <code>vi</code> is
+POSIX-mandatory; <code>nano</code> and <code>editor</code> are
+debian-isms. Portability wins.</li>
+<li><strong><code>SetMemoryRegistry</code> is opt-in, NOT
+mandatory.</strong> Existing BaseAgent constructors stay
+backward-compat. Tests that don’t wire memory continue to pass
+byte-for-byte.</li>
+<li><strong>Reload-on-Discover-error preserves previous Memory.</strong>
+A transient error (file briefly removed during atomic write) doesn’t
+drop the agent’s known-good blob. Tests pin this.</li>
+<li><strong><code>MemorySnapshotter</code> interface, not the concrete
+<code>*MemoryRegistry</code>.</strong> BaseAgent depends on the
+read-only contract; the registry’s write-side stays in main.go’s wiring.
+Test fakes implement only <code>Snapshot() Memory</code>.</li>
+<li><strong>Watcher.Start returns nil even on watch-add
+failure.</strong> Graceful degradation — slash-driven reload remains
+functional. WARN log captures the failure for the user; no fatal
+path.</li>
+<li><strong>Tempdir-based loader tests, NOT mock filesystems.</strong>
+Real <code>os.ReadFile</code> + real <code>os.MkdirAll</code> exercise
+real OS semantics (case-insensitive APFS, symlinks, permissions). Mocks
+would hide platform bugs.</li>
+<li><strong><code>Memory.Render()</code> is the only stable
+contract.</strong> Future versions may change the Project/User
+delimiter; consumers (agent loop) call <code>Render()</code> not
+concatenate by hand.</li>
+<li><strong>Loader does NOT consult environment variables for the
+project root.</strong> cwd is passed in explicitly. Avoids the “agent in
+subagent worktree gets parent worktree’s memory” footgun.</li>
+<li><strong><code>/memory edit</code> runs <code>$EDITOR</code> in a
+foreground subprocess.</strong> Terminal stdio is inherited so vim/emacs
+work normally; the slash command blocks until the editor exits.</li>
+<li><strong>No memory-file-creation on <code>Discover</code>.</strong>
+If no project memory file exists, Discover returns empty Memory; only
+<code>/memory edit</code> creates <code>helixcode.md</code> at cwd as a
+side effect of opening it (and even then only because
+<code>$EDITOR</code> does the create).</li>
+<li><strong>fsnotify watch survives editor-atomic-write because we watch
+the parent dir.</strong> Re-add of the watch is NOT needed across rename
+— parent dir is stable.</li>
+<li><strong>Single-source-of-truth for “what memory does the agent see
+right now”:</strong> <code>registry.Snapshot()</code>. Both
+<code>/memory show</code> and <code>BaseAgent.getSystemPrompt</code> use
+the same atomic load — no two-source-truth drift.</li>
+</ol>
+</body>
+</html>

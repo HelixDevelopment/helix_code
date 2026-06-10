@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p2-f22-aider-git-auto-commit-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p2-f22-aider-git-auto-commit-design</h1>
+</header>
+<h1 id="phase-2-feature-22-aider-git-auto-commit-per-change">Phase 2 /
+Feature 22 — Aider Git Auto-Commit Per Change</h1>
+<p><strong>Date:</strong> 2026-05-06 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 2 port (codex / cursor / aider patterns)</p>
+<blockquote>
+<p><strong>Programme position:</strong> F22 is the
+<strong>second</strong> Phase 2 feature. T01 (bootstrap) opens the F22
+evidence section in
+<code>docs/improvements/07_phase_2_evidence.md</code> (created in F21);
+T09 (close-out) records F22’s runtime evidence beneath F21’s.</p>
+</blockquote>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, end-to-end <strong>per-edit git auto-commit</strong>
+facility for the HelixCode CLI agent, modelled verbatim on
+<strong>aider</strong> (<code>cli_agents/aider/</code>) so that every
+accepted file-mutating tool call (e.g. <code>fs_edit</code>,
+<code>fs_write</code>, <code>smart_edit</code>,
+<code>multiedit_commit</code>, <code>notebook_edit</code>) results in a
+real <code>git commit</code> against the live working tree, with a real
+LLM-summarised message, a real
+<code>Co-Authored-By: HelixCode &lt;noreply@helixcode.dev&gt;</code>
+trailer, and a real working-tree-clean post-condition. The feature is
+<strong>default-on</strong> (Q4=A) so users immediately see commit
+history materialise as the agent works; opt-out is available at three
+levels (env <code>HELIXCODE_GIT_AUTO_COMMIT=off</code>, runtime
+<code>/git_auto_commit off</code>, per-edit arg
+<code>_helix_skip_git_commit:true</code>). One commit per accepted edit
+(Q1=A) — aider’s default cadence — so the resulting history is a
+faithful step-by-step trace of the agent’s work, reviewable, revertable,
+and <code>git bisect</code>-able. The commit message is
+<strong>LLM-summarised from the actual diff</strong> (Q2=A) using the
+same <code>llm.Provider</code> already wired in
+<code>cmd/cli/main.go</code>; a deterministic fallback handles LLM
+unavailability so a flaky upstream NEVER blocks a commit. The co-author
+trailer (Q3=A) is appended to every auto-commit unconditionally; the
+user surface for runtime control is the <code>/git_auto_commit</code>
+slash command (Q5=A) with subcommands <code>status</code> /
+<code>on</code> / <code>off</code> / <code>show</code>. NO cobra
+subcommand.</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong><code>autocommit</code> package</strong>
+(<code>helix_code/internal/autocommit/</code>) —
+<code>AutoCommitter</code> (encapsulates the live state: enabled flag
+stored in <code>atomic.Bool</code>, llm.Provider reference, git
+working-directory path, logger), <code>CommitContext</code> (per-call
+value: tool name, args, mutated paths, captured-before snapshot of the
+diff), <code>MessageSummariser</code> (LLM-driven; deterministic
+fallback when LLM unavailable), <code>Git</code> (thin wrapper over
+<code>os/exec</code> for <code>git status</code> / <code>git diff</code>
+/ <code>git add</code> / <code>git commit</code> /
+<code>git rev-parse --is-inside-work-tree</code>), sentinel errors,
+env-var helper. The committer is constructed once at startup with the
+initial enabled state resolved from
+<code>HELIXCODE_GIT_AUTO_COMMIT</code> env var (default <code>on</code>
+— anything other than the literal string <code>off</code> is on, so
+typos default to safe-on). Public API:
+<code>MaybeCommit(ctx, CommitContext) (CommitResult, error)</code>,
+<code>SetEnabled(bool)</code>, <code>Enabled() bool</code>,
+<code>IsGitRepo() bool</code>.</li>
+<li><strong>Registry post-Execute hook</strong> —
+<code>internal/tools/registry.go::Execute</code> already has a hook
+point AFTER <code>tool.Execute</code> succeeds (the F13 LSP-auto-trigger
+fires there). F22 adds a SECOND post-Execute hook adjacent to it:
+<code>r.fireAutoCommit(ctx, name, params, result, execErr)</code>
+invoked ONLY when <code>execErr == nil</code> AND the F21 approval gate
+previously returned <code>Allow</code> (or <code>Prompt</code> then
+user-approved) AND the tool’s <code>RequiresApproval()</code> level is
+<code>LevelEdit</code> or <code>LevelAll</code> (the file-mutating
+tiers; <code>LevelReadOnly</code> and <code>LevelRun</code> are EXCLUDED
+— read tools don’t touch files; shell tools may touch files but the user
+is already supervising the shell). The hook detects “did this call
+actually mutate a tracked path” via <code>git status --porcelain</code>
+(positive evidence: dirty tracked path → commit; clean tracked path →
+no-op, even though the tool reported success). Per-edit opt-out: if
+<code>params[&quot;_helix_skip_git_commit&quot;] == true</code>, the hook returns
+immediately without calling <code>MaybeCommit</code>. The hook NEVER
+propagates auto-commit errors back to the caller (commit failure is
+logged at WARN, the tool result is returned verbatim — auto-commit is a
+best-effort observability layer, not a blocking gate).</li>
+<li><strong><code>/git_auto_commit</code> slash command + env
+var</strong> (Q5=A) — <code>HELIXCODE_GIT_AUTO_COMMIT=off</code> env var
+(any non-<code>off</code> value, including unset, is on);
+<code>/git_auto_commit</code> slash command with four subcommands:
+<code>/git_auto_commit status</code> (active state +
+git-repo-availability + provider summary),
+<code>/git_auto_commit on</code> (mutates the committer’s atomic flag),
+<code>/git_auto_commit off</code> (mutates the flag),
+<code>/git_auto_commit show</code> (prints the commit message template +
+co-author trailer for documentation purposes). NO cobra subcommand.</li>
+</ol>
+<p>The single largest bluff vector for F22 is <strong>“commit succeeded
+but working tree still dirty”</strong> — the auto-committer reports
+“committed” but <code>git status</code> still shows untracked or
+modified files, because <code>git add</code> selected the wrong path
+(e.g. used the tool’s reported path which doesn’t match the actual
+on-disk path due to symlinks, or used <code>--all</code> which staged
+unrelated files, or fell into a race where another tool wrote between
+status-capture and commit). §5.2 enumerates four such patterns and pins
+each with positive runtime evidence: post-commit
+<code>git status --porcelain</code> MUST be empty for the staged paths;
+the committed SHA MUST be obtainable via
+<code>git log -1 --format=%H</code> and equal the result returned by
+<code>MaybeCommit</code>; the commit message MUST contain the co-author
+trailer literal
+<code>Co-Authored-By: HelixCode &lt;noreply@helixcode.dev&gt;</code> AND
+a non-empty subject line; the commit MUST contain the actual diff of the
+mutated path (verifiable via <code>git show --stat HEAD</code>).</p>
+<p>Runtime opt-out via <code>/git_auto_commit off</code> (Q4=A) is
+<strong>structurally enforced</strong> to take effect on the very next
+edit: the committer holds the enabled flag in <code>atomic.Bool</code>;
+<code>SetEnabled(false)</code> swaps it; <code>MaybeCommit</code> loads
+via <code>Load()</code> on entry; an integration test runs
+<code>committer.SetEnabled(false)</code> then triggers a real
+<code>WriteFileTool</code> invocation through the real registry and
+asserts (i) the file IS written (tool succeeds), (ii)
+<code>git log -1 --format=%H</code> is UNCHANGED from before the call
+(no commit fired), (iii) <code>git status --porcelain</code> shows the
+new file as dirty (uncommitted).</p>
+<p>Out of scope for v1: auto-push (NEVER push — CONST-043 forbids
+without explicit approval per push); branching strategy /
+auto-branch-per-task; conflict resolution (if <code>git commit</code>
+fails for any reason, log WARN and continue); commit signing
+(<code>commit.gpgsign=true</code> is honoured if the user has it
+configured globally — the committer doesn’t pass
+<code>--no-gpg-sign</code>); rebase / squash of auto-commits (each
+commit is a single accepted edit, period — squashing is left to the
+user’s manual workflow); message localisation (English only — the LLM
+prompt is English; users’ diffs may be any language but the message is
+summarised in English). See §8.</p>
+<p>Anti-bluff hot zone (loud): a commit “succeeded” but
+<code>git log -1</code> still shows the prior SHA (the call returned an
+error and the committer logged-and-swallowed without surfacing); the LLM
+call returns a message but the message doesn’t reflect the actual diff
+(the committer concatenated the tool name and a static “edit” string
+without ever invoking the LLM); auto-commit fires on tools that didn’t
+actually mutate any file (e.g. <code>read_file</code> somehow reaches
+the hook because the EXCLUDE list is incomplete, and the hook captures
+an empty diff and produces a “no-op” commit); the env var is honoured at
+startup but <code>/git_auto_commit on</code> runtime change isn’t
+reflected in the next edit (the slash mutates a struct field that
+<code>MaybeCommit</code> doesn’t re-read); commit message bodies leak
+secrets from the diff (CONST-042 — best-effort filter via a regex
+pre-pass on the message, plus a unit test asserting common patterns like
+<code>AKIA[0-9A-Z]{16}</code>, <code>sk-[A-Za-z0-9]{32,}</code>,
+<code>xoxb-</code> are stripped). Each of these maps to a unit +
+integration + Challenge phase per §5.2.</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>Three layers under <code>helix_code/internal/autocommit/</code>, plus
+thin wiring at the registry boundary, the F21 approval pipeline, and one
+slash command.</p>
+<ul>
+<li><strong><code>Git</code> thin wrapper</strong> (<code>git.go</code>)
+— pure shell-out façade over <code>os/exec</code>. Methods:
+<code>IsRepo() (bool, error)</code>,
+<code>StatusPorcelain() (string, error)</code>,
+<code>DiffStaged() (string, error)</code>,
+<code>DiffUnstaged() (string, error)</code>,
+<code>Add(paths ...string) error</code>,
+<code>Commit(message string) (sha string, err error)</code>,
+<code>HeadSHA() (string, error)</code>. Each method runs
+<code>git ...</code> via <code>exec.CommandContext</code> with the
+working directory pinned to the committer’s configured root. Errors
+include the git stderr verbatim. Tests use a real tempdir +
+<code>git init</code> + real commits — no mocks of git itself.</li>
+<li><strong><code>MessageSummariser</code></strong>
+(<code>summariser.go</code>) — LLM-driven primary + deterministic
+fallback. <code>Summarise(ctx, diff, toolName, paths) string</code>
+calls <code>llm.Provider.Generate</code> with a 50-72-char-imperative
+prompt (verbatim per §3.4); on any LLM error (timeout, rate-limit,
+provider unavailable) returns a deterministic fallback
+<code>&quot;Auto-edit: &lt;toolName&gt; on &lt;paths-joined&gt;&quot;</code>
+truncated to 72 chars. The summariser NEVER blocks indefinitely —
+context deadline is set to 5 seconds via
+<code>context.WithTimeout(parentCtx, 5*time.Second)</code>. A unit test
+asserts the fallback message format byte-for-byte; another asserts the
+LLM-call path (with a fake <code>llm.Provider</code>) produces the LLM’s
+output trimmed + length-capped.</li>
+<li><strong><code>AutoCommitter</code></strong>
+(<code>committer.go</code>) — runtime façade. Holds
+<code>atomic.Bool</code> for the enabled flag, an
+<code>llm.Provider</code> reference (for the summariser), the git
+working directory string, the <code>Git</code> wrapper instance, and a
+<code>*zap.Logger</code>. Public API:
+<code>MaybeCommit(ctx, CommitContext) (CommitResult, error)</code>,
+<code>SetEnabled(bool)</code>, <code>Enabled() bool</code>,
+<code>IsGitRepo() bool</code>. <code>MaybeCommit</code> is the single
+entry point: (i) read <code>enabled.Load()</code> — if false, return
+<code>CommitResult{Skipped: true, Reason: &quot;auto-commit disabled&quot;}</code>;
+(ii) if <code>CommitContext.SkipRequested == true</code>, return
+<code>CommitResult{Skipped: true, Reason: &quot;per-edit skip&quot;}</code>; (iii)
+read <code>git.StatusPorcelain</code> — if empty, return
+<code>CommitResult{Skipped: true, Reason: &quot;no changes&quot;}</code>; (iv)
+filter the porcelain output to ONLY paths under git tracking AND under
+the committer’s working dir AND matching the mutated-paths set in
+CommitContext (positive evidence: tool actually touched these); (v) call
+<code>git.Add(filteredPaths...)</code>; (vi) call
+<code>git.DiffStaged()</code> → produces the diff used by both the LLM
+and the post-condition assertion; (vii) call
+<code>summariser.Summarise(ctx, diff, toolName, paths)</code> → trimmed
++ length-capped subject line; (viii) call
+<code>secret.Filter(message)</code> (best-effort regex strip of common
+secret patterns per CONST-042); (ix) build the full commit message:
+<code>&lt;subject&gt;\n\nCo-Authored-By: HelixCode &lt;noreply@helixcode.dev&gt;\n</code>;
+(x) call <code>git.Commit(fullMessage)</code> → SHA; (xi) post-condition
+assert: <code>git.StatusPorcelain()</code> for the staged paths is
+empty, <code>git.HeadSHA()</code> equals the returned SHA — failure logs
+WARN but doesn’t error (the commit DID happen; the assert is
+observability). Returns
+<code>CommitResult{SHA, Subject, Files, Skipped: false}</code>.</li>
+</ul>
+<pre><code>                        ┌── env HELIXCODE_GIT_AUTO_COMMIT (default on) ──┐
+                        │ /git_auto_commit on|off (runtime atomic swap)  │
+                        │ params[&quot;_helix_skip_git_commit&quot;]:true (per-edit)│
+                        └────────────────────────┬────────────────────────┘
+                                                 │
+                                                 ▼
+                          ┌── autocommit.NewAutoCommitter(...) ──┐
+                          │  atomic.Bool enabled                  │
+                          │  llm.Provider for summariser          │
+                          │  Git (os/exec wrapper)                │
+                          │  workingDir string                    │
+                          │  *zap.Logger                          │
+                          └────────────────────┬───────────────────┘
+                                               │
+                                               ▼
+                  registry.Execute (post-tool-success hook chain)
+                  - F13 LSP auto-trigger      (existing)
+                  - F22 fireAutoCommit        (NEW)
+                                               │
+                                               ▼
+                                ApprovalLevel ∈ {Edit, All}?
+                                          │
+                                          ▼
+                                  MaybeCommit(ctx, ctx)
+                                          │
+                  ┌───────────────────────┼────────────────────────┐
+                  ▼                       ▼                        ▼
+            disabled? skip       no diff? skip            git add → diff →
+                                                          summarise → secret.Filter
+                                                          → commit → SHA → result
+                                                                 │
+                                                                 ▼
+                                                       /git_auto_commit slash
+                                                       (status / on / off / show)</code></pre>
+<p><strong>Wire points</strong> (existing code; one addition per
+location):</p>
+<ul>
+<li><strong><code>internal/tools/registry.go::Execute</code></strong> —
+adds a new post-Execute call AFTER the existing F13
+<code>triggerLSPAfterEdit</code> invocation, BEFORE the function
+returns:
+<code>if execErr == nil { r.fireAutoCommit(ctx, name, params, tool, result) }</code>.
+The new helper <code>fireAutoCommit</code> reads (a)
+<code>r.autoCommitter</code> field (nil-safe); (b) tool’s
+<code>RequiresApproval()</code> — only <code>LevelEdit</code> and
+<code>LevelAll</code> proceed; (c)
+<code>params[&quot;_helix_skip_git_commit&quot;]</code> — true → return; (d)
+constructs <code>CommitContext{ToolName, Args, MutatedPaths}</code>
+(mutated paths derived from tool-name → param-key mapping in §3.5;
+<code>fs_write</code>/<code>fs_edit</code> use
+<code>params[&quot;path&quot;]</code>, <code>multiedit_commit</code> uses
+<code>params[&quot;edits&quot;][i][&quot;path&quot;]</code>, etc.). Calls
+<code>committer.MaybeCommit(ctx, cctx)</code> — failure logs
+<code>WARN</code> and is swallowed (NEVER returned to caller).</li>
+<li><strong><code>internal/tools/registry.go</code> field</strong>: new
+optional field <code>autoCommitter *autocommit.AutoCommitter</code>
+(nil-safe — when nil, <code>fireAutoCommit</code> is a no-op, preserving
+backward compatibility for tests + the <code>cmd/server</code> HTTP
+path).</li>
+<li><strong><code>internal/tools/registry.go::SetAutoCommitter(c *autocommit.AutoCommitter)</code></strong>
+— new setter method, mirrors <code>SetApprovalManager</code>.</li>
+<li><strong><code>cmd/cli/main.go::run</code></strong> — three additions
+adjacent to F21 wiring:
+<ol type="1">
+<li>Resolve initial enabled state from env:
+<code>enabled := os.Getenv(&quot;HELIXCODE_GIT_AUTO_COMMIT&quot;) != &quot;off&quot;</code>.</li>
+<li>Construct
+<code>committer := autocommit.NewAutoCommitter(autocommit.Options{Enabled: enabled, Provider: c.llmProvider, WorkingDir: cwd, Logger: c.logger})</code>.</li>
+<li>Wire <code>c.toolRegistry.SetAutoCommitter(committer)</code> +
+register <code>/git_auto_commit</code> slash with
+<code>commands.NewGitAutoCommitCommand(committer)</code>.</li>
+</ol></li>
+<li><strong><code>internal/commands/git_auto_commit_command.go</code></strong>
+— new file. Exposes
+<code>NewGitAutoCommitCommand(c *autocommit.AutoCommitter)</code>
+returning a <code>Command</code>. Four subcommands: <code>status</code>
+/ <code>on</code> / <code>off</code> / <code>show</code>.
+<code>on</code>/<code>off</code> call
+<code>c.SetEnabled(true|false)</code>; <code>show</code> prints the
+trailer template (no committer state needed). <code>status</code> prints
+active state + <code>c.IsGitRepo()</code> + a one-line description of
+what enabled means.</li>
+</ul>
+<p>Why a new <code>internal/autocommit/</code> package and not “extend
+<code>internal/tools/git/</code>”: - <code>internal/tools/git/</code> is
+a TOOL-implementing package (it registers <code>git_*</code> tools that
+the LLM can call via the Tool interface).
+<code>internal/autocommit/</code> is a CROSS-CUTTING observer that
+watches every successful edit and produces a commit. They serve
+different roles; conflating them would (a) require the auto-committer to
+register itself as a tool (which it isn’t — the LLM doesn’t call it
+directly), or (b) bloat the git-tools package with non-tool runtime
+infrastructure. - Keeping them separate lets
+<code>internal/tools/git/</code> stay test-focused on the tool surface,
+while <code>internal/autocommit/</code> carries the cross-cutting
+observability semantics.</p>
+<p>Why post-Execute hook (and not pre-Execute): - Pre-Execute would mean
+“commit BEFORE the edit happens”, which is nonsensical (no diff yet).
+Auto-commit is intrinsically a <em>post</em>-success event. - The F13
+LSP auto-trigger already established the “after-success
+file-mutating-tool hook” pattern. F22 reuses the placement adjacent to
+it; the only ordering rule between F13 and F22 is that F13 fires first
+(LSP diagnostics depend on file state, not on commit state).</p>
+<p>Why per-edit (and not batch): - Aider’s default is per-edit and
+that’s what this spec faithfully ports. Batch mode (one commit per
+session, or per task) would (a) defer the runtime-evidence promise (a
+session-end batch hides bugs across multiple edits), (b) make
+<code>git bisect</code> less useful (you can’t bisect to a single edit),
+(c) require batch-flush semantics (when does the commit fire? on session
+end? on slash command? on ctx cancel?). Per-edit is simpler, more
+honest, and matches user mental model from aider.</p>
+<p>Why default ON (Q4=A): - Aider defaults to on, and our user-confirmed
+answer was Q4=A. Default-off would mean most users never see
+auto-commit, defeating the purpose. The opt-out surfaces (env + slash +
+per-edit param) cover every legitimate “don’t commit this one” case.</p>
+<p>Why LLM message + deterministic fallback (Q2=A + §5.3): - Aider’s
+user-visible value is the readable commit history. A fixed template
+(“Auto-edit: <toolName>”) gives history but not value — every commit
+looks the same. The LLM summary makes each commit individually
+meaningful. The deterministic fallback makes the system reliable (LLM
+unavailable → commit still fires, just less informative) instead of
+fragile (LLM unavailable → no commit).</p>
+<p>Why slash + env + per-edit and NOT cobra (Q5=A): - Auto-commit is a
+<em>runtime posture</em>, like F21’s approval mode: the user wants to
+flip on/off mid-session (“ok I’m refactoring messily, turn it off for
+now”). A cobra subcommand would force a process restart. - The env var
+covers “all my CI/non-interactive runs default to on/off”; the slash
+covers “switch mid-session”; the per-edit param covers “this single edit
+shouldn’t commit, e.g. it’s a temporary scratch file the next tool will
+delete”. Each surface targets a distinct ergonomic case.</p>
+<hr />
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/autocommit/types.go</code> —
+<code>CommitContext</code>, <code>CommitResult</code>,
+<code>Options</code>, sentinel errors (<code>ErrNotGitRepo</code>,
+<code>ErrCommitFailed</code>, <code>ErrLLMUnavailable</code>),
+<code>EnvVarName</code> constant.</li>
+<li><code>helix_code/internal/autocommit/types_test.go</code>.</li>
+<li><code>helix_code/internal/autocommit/git.go</code> —
+<code>Git</code> wrapper struct + methods (<code>IsRepo</code> /
+<code>StatusPorcelain</code> / <code>DiffStaged</code> /
+<code>DiffUnstaged</code> / <code>Add</code> / <code>Commit</code> /
+<code>HeadSHA</code>).</li>
+<li><code>helix_code/internal/autocommit/git_test.go</code> — real
+tempdir + <code>git init</code> + real commits; exhaustive coverage of
+each method.</li>
+<li><code>helix_code/internal/autocommit/summariser.go</code> —
+<code>MessageSummariser</code> interface + <code>LLMSummariser</code>
+impl + <code>DeterministicFallback</code> impl +
+<code>Summarise(ctx, diff, toolName, paths) string</code> chain (LLM
+first, fallback on error).</li>
+<li><code>helix_code/internal/autocommit/summariser_test.go</code> —
+fake <code>llm.Provider</code> (NOT a mock — a tiny stub returning
+canned responses); LLM-success path; LLM-error path → fallback;
+LLM-empty-response path → fallback; length-cap test (&gt;72 chars →
+truncated).</li>
+<li><code>helix_code/internal/autocommit/secret_filter.go</code> —
+best-effort regex strip of common secret patterns (CONST-042). Patterns:
+AWS access keys (<code>AKIA[0-9A-Z]{16}</code>), generic OpenAI keys
+(<code>sk-[A-Za-z0-9]{20,}</code>), Slack tokens
+(<code>xox[baprs]-[A-Za-z0-9-]{10,}</code>), GitHub tokens
+(<code>gh[pousr]_[A-Za-z0-9]{36}</code>). Replaces matches with
+<code>[REDACTED]</code>. Tests assert each pattern.</li>
+<li><code>helix_code/internal/autocommit/committer.go</code> —
+<code>AutoCommitter</code> struct +
+<code>NewAutoCommitter(Options)</code> +
+<code>MaybeCommit(ctx, cctx) (CommitResult, error)</code> +
+<code>SetEnabled(bool)</code> + <code>Enabled() bool</code> +
+<code>IsGitRepo() bool</code>.</li>
+<li><code>helix_code/internal/autocommit/committer_test.go</code> — full
+pipeline coverage with real tempdir + <code>git init</code> + real edits
++ real commits; assertions on <code>git log -1 --format=%H</code> SHA
+equality + co-author trailer presence + working-tree-clean
+post-condition.</li>
+<li><code>helix_code/internal/commands/git_auto_commit_command.go</code>
+— slash command (<code>status</code> / <code>on</code> /
+<code>off</code> / <code>show</code>).</li>
+<li><code>helix_code/internal/commands/git_auto_commit_command_test.go</code>.</li>
+<li><code>helix_code/tests/integration/autocommit_test.go</code> —
+<code>//go:build integration</code>; ALWAYS-runs; real registry + real
+F21 ApprovalManager + real <code>WriteFileTool</code> + real git repo in
+tempdir; per-mode behaviour assertions.</li>
+<li><code>helix_code/tests/integration/cmd/p2f22_challenge/main.go</code>
+— runtime evidence harness.</li>
+<li><code>challenges/p2-f22-aider-git-auto-commit/CHALLENGE.md</code> +
+<code>run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/internal/tools/registry.go</code> — three
+additions: (1) <code>ToolRegistry</code> struct gains
+<code>autoCommitter *autocommit.AutoCommitter</code> field; (2)
+<code>SetAutoCommitter(c)</code> setter; (3) <code>Execute</code> gains
+a new post-success call to a new helper
+<code>fireAutoCommit(ctx, name, params, tool, result)</code> adjacent to
+<code>triggerLSPAfterEdit</code>. The helper consults
+<code>tool.RequiresApproval()</code> to filter to
+<code>LevelEdit</code>/<code>LevelAll</code>, reads
+<code>params[&quot;_helix_skip_git_commit&quot;]</code>, builds
+<code>CommitContext</code>, and calls
+<code>committer.MaybeCommit(ctx, cctx)</code> with errors logged at WARN
+(NEVER returned).</li>
+<li><code>helix_code/cmd/cli/main.go</code> — three additions: (1) read
+<code>os.Getenv(&quot;HELIXCODE_GIT_AUTO_COMMIT&quot;)</code> to resolve initial
+enabled state; (2) construct <code>autocommit.AutoCommitter</code>
+adjacent to F21 wiring; (3)
+<code>c.toolRegistry.SetAutoCommitter(c.autoCommitter)</code> + register
+<code>/git_auto_commit</code> slash.</li>
+<li><code>helix_code/internal/commands/registry.go</code> — no schema
+change; one new <code>Register(...)</code> call site for
+<code>/git_auto_commit</code>.</li>
+<li><code>helix_code/go.mod</code> — <strong>zero new external
+deps</strong>. <code>os/exec</code>, <code>regexp</code>,
+<code>sync/atomic</code>, <code>context</code>, <code>fmt</code>,
+<code>strings</code>, <code>time</code> are stdlib.
+<code>llm.Provider</code> is in-tree (<code>internal/llm</code>).
+Logging via existing <code>zap</code>.</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/autocommit/types.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// CommitContext is the per-call value passed by the registry hook to</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">// MaybeCommit. Carries the tool name + raw args + the set of paths the tool</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">// is known (or believed) to have mutated. The committer uses MutatedPaths to</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">// filter `git status --porcelain` so it commits ONLY the paths this tool</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">// touched, not unrelated dirty paths from prior tools.</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CommitContext <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    ToolName       <span class="dt">string</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    Args           <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    MutatedPaths   <span class="op">[]</span><span class="dt">string</span> <span class="co">// derived in registry.fireAutoCommit per §3.5</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    SkipRequested  <span class="dt">bool</span>     <span class="co">// mirrors params[&quot;_helix_skip_git_commit&quot;] == true</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">// CommitResult is the return value of MaybeCommit.</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CommitResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    SHA     <span class="dt">string</span>   <span class="co">// empty when Skipped</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    Subject <span class="dt">string</span>   <span class="co">// empty when Skipped</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    Files   <span class="op">[]</span><span class="dt">string</span> <span class="co">// empty when Skipped</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    Skipped <span class="dt">bool</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    Reason  <span class="dt">string</span>   <span class="co">// human-readable; populated even on success</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">// Options configures a fresh AutoCommitter.</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Options <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    Enabled    <span class="dt">bool</span>         <span class="co">// initial state; mutable via SetEnabled</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    Provider   llm<span class="op">.</span>Provider <span class="co">// for the LLM-driven summariser; nil → fallback only</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    WorkingDir <span class="dt">string</span>       <span class="co">// git working-tree root; usually the cwd</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    Logger     <span class="op">*</span>zap<span class="op">.</span>Logger  <span class="co">// optional; nil → no-op</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    NowFunc    <span class="kw">func</span><span class="op">()</span> time<span class="op">.</span>Time <span class="co">// optional test seam; default time.Now</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">// EnvVarName is the canonical env var checked at startup. The literal string</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;off&quot; (case-sensitive) disables auto-commit; everything else (including</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">// unset) enables it (default-on per Q4=A).</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> EnvVarName <span class="op">=</span> <span class="st">&quot;HELIXCODE_GIT_AUTO_COMMIT&quot;</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="co">// Sentinel errors (errors.Is comparable).</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    ErrNotGitRepo     <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;autocommit: not inside a git work tree&quot;</span><span class="op">)</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    ErrCommitFailed   <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;autocommit: git commit failed&quot;</span><span class="op">)</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    ErrLLMUnavailable <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;autocommit: llm summariser unavailable&quot;</span><span class="op">)</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co">// CoAuthorTrailer is the literal trailer appended to every auto-commit (Q3=A).</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">// Tests pin this byte-for-byte.</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> CoAuthorTrailer <span class="op">=</span> <span class="st">&quot;Co-Authored-By: HelixCode &lt;noreply@helixcode.dev&gt;&quot;</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co">// SkipParamKey is the per-edit opt-out marker. When params[SkipParamKey]</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">// == true on the inbound tool call, the registry hook returns immediately</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co">// without invoking MaybeCommit.</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> SkipParamKey <span class="op">=</span> <span class="st">&quot;_helix_skip_git_commit&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/autocommit/committer.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AutoCommitter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    enabled    atomic<span class="op">.</span>Bool</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    provider   llm<span class="op">.</span>Provider <span class="co">// nil → use fallback</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    workingDir <span class="dt">string</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    git        <span class="op">*</span>Git</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    summariser MessageSummariser</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    secretFilt <span class="op">*</span>SecretFilter</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    log        <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    nowFunc    <span class="kw">func</span><span class="op">()</span> time<span class="op">.</span>Time</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewAutoCommitter<span class="op">(</span>opts Options<span class="op">)</span> <span class="op">*</span>AutoCommitter</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">// MaybeCommit is the single entry point. Concurrency-safe (enabled read</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">// via atomic.Bool.Load). NEVER returns commit failures as fatal errors —</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">// the caller should log + continue.</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>AutoCommitter<span class="op">)</span> MaybeCommit<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cctx CommitContext<span class="op">)</span> <span class="op">(</span>CommitResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>AutoCommitter<span class="op">)</span> SetEnabled<span class="op">(</span>on <span class="dt">bool</span><span class="op">)</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>AutoCommitter<span class="op">)</span> Enabled<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>AutoCommitter<span class="op">)</span> IsGitRepo<span class="op">()</span> <span class="dt">bool</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/autocommit/summariser.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MessageSummariser <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Summarise<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> diff<span class="op">,</span> toolName <span class="dt">string</span><span class="op">,</span> paths <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMSummariser <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    provider llm<span class="op">.</span>Provider</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    timeout  time<span class="op">.</span>Duration <span class="co">// default 5s</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DeterministicFallback <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSummariser<span class="op">(</span>p llm<span class="op">.</span>Provider<span class="op">)</span> MessageSummariser</span></code></pre></div>
+<h3 id="llm-prompt-verbatim">3.4 LLM prompt (verbatim)</h3>
+<p>The prompt sent to <code>llm.Provider.Generate</code>. Tests in T04
+pin this byte-for-byte.</p>
+<pre><code>Summarise this diff in 50-72 chars (imperative voice, no period):
+
+&lt;diff&gt;</code></pre>
+<p>The <code>&lt;diff&gt;</code> placeholder is substituted with the
+actual <code>git.DiffStaged()</code> output, capped at 8 KB to avoid
+blowing context windows. The LLM response is trimmed (whitespace),
+capped at 72 chars (truncate, no ellipsis — git subjects don’t
+ellipsis), and used verbatim as the commit subject. If the response is
+empty after trim, the summariser falls through to
+<code>DeterministicFallback</code>.</p>
+<p>The <code>DeterministicFallback.Summarise</code> returns:
+<code>Auto-edit: &lt;toolName&gt; on &lt;paths-joined-comma&gt;</code>
+truncated at 72 chars. Tests in T04 pin this byte-for-byte for
+<code>toolName=&quot;fs_edit&quot;</code>, <code>paths=[&quot;foo.go&quot;, &quot;bar.go&quot;]</code>
+→ <code>&quot;Auto-edit: fs_edit on foo.go, bar.go&quot;</code>.</p>
+<h3 id="tool-name-mutated-paths-derivation-table">3.5 Tool name →
+mutated-paths derivation table</h3>
+<p><code>registry.fireAutoCommit</code> uses this table to extract the
+mutated paths from <code>params</code>. T06 enumerates and tests every
+entry. Tools not in this table fall through to a generic “no specific
+paths known” path which still triggers a commit (the porcelain output
+covers everything dirty under the working dir).</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool name</th>
+<th>Param key(s)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fs_write</code></td>
+<td><code>params[&quot;path&quot;]</code></td>
+<td>Single path.</td>
+</tr>
+<tr>
+<td><code>fs_edit</code></td>
+<td><code>params[&quot;path&quot;]</code></td>
+<td>Single path.</td>
+</tr>
+<tr>
+<td><code>smart_edit</code></td>
+<td><code>params[&quot;path&quot;]</code></td>
+<td>F17 single-target.</td>
+</tr>
+<tr>
+<td><code>multiedit_commit</code></td>
+<td><code>params[&quot;edits&quot;][*][&quot;path&quot;]</code></td>
+<td>F08 multi-edit; iterate the slice; dedup.</td>
+</tr>
+<tr>
+<td><code>notebook_edit</code></td>
+<td><code>params[&quot;path&quot;]</code></td>
+<td>Notebook is a single .ipynb file.</td>
+</tr>
+<tr>
+<td><code>mapping_edit</code></td>
+<td><code>params[&quot;target_file&quot;]</code></td>
+<td>Mapping multi-edit.</td>
+</tr>
+<tr>
+<td>(other Edit-level)</td>
+<td>(none specific)</td>
+<td>Falls through to porcelain-based discovery.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="new-external-dependencies">3.6 New external dependencies</h3>
+<p><strong>Zero new dependencies.</strong> <code>os/exec</code>,
+<code>regexp</code>, <code>sync/atomic</code>, <code>context</code>,
+<code>errors</code>, <code>fmt</code>, <code>strings</code>,
+<code>time</code> are stdlib. <code>llm.Provider</code> is in-tree.
+<code>zap</code> is already direct (logging infra). T08’s verification
+step asserts <code>git diff go.mod</code> and
+<code>git diff go.sum</code> are both no-op.</p>
+<hr />
+<h2 id="data-flow">4. Data flow</h2>
+<ol type="1">
+<li><strong>Startup</strong> (<code>cmd/cli/main.go</code>):
+<ul>
+<li><code>enabled := os.Getenv(autocommit.EnvVarName) != &quot;off&quot;</code>
+(default-on).</li>
+<li><code>committer := autocommit.NewAutoCommitter(autocommit.Options{Enabled: enabled, Provider: c.llmProvider, WorkingDir: cwd, Logger: c.logger})</code>.</li>
+<li><code>c.toolRegistry.SetAutoCommitter(committer)</code>.</li>
+<li><code>c.commandRegistry.Register(commands.NewGitAutoCommitCommand(committer))</code>.</li>
+</ul></li>
+<li><strong>Per-edit</strong> (<code>registry.Execute</code>
+post-success):
+<ul>
+<li>F13 LSP auto-trigger fires (existing).</li>
+<li><code>r.fireAutoCommit(ctx, name, params, tool, result)</code>
+(NEW):
+<ul>
+<li>Read <code>r.autoCommitter</code> (nil-safe).</li>
+<li>Read <code>tool.RequiresApproval()</code>. If not in
+<code>{LevelEdit, LevelAll}</code>, return.</li>
+<li>Read <code>params[autocommit.SkipParamKey]</code>. If
+<code>true</code>, return.</li>
+<li>Build <code>CommitContext{ToolName, Args, MutatedPaths}</code> per
+§3.5 derivation table.</li>
+<li><code>committer.MaybeCommit(ctx, cctx)</code> — log WARN on error,
+return.</li>
+</ul></li>
+</ul></li>
+<li><strong>Inside <code>MaybeCommit</code></strong>:
+<ul>
+<li><code>enabled.Load()</code> — false → return Skipped.</li>
+<li><code>cctx.SkipRequested</code> — true → return Skipped.</li>
+<li><code>git.IsRepo()</code> — false → return Skipped
+(<code>Reason: &quot;not a git repo&quot;</code>).</li>
+<li><code>git.StatusPorcelain()</code> — empty → return Skipped
+(<code>Reason: &quot;no changes&quot;</code>).</li>
+<li>Filter porcelain output to <code>cctx.MutatedPaths</code> ∩
+tracked-or-newly-added paths.</li>
+<li><code>git.Add(filteredPaths...)</code>.</li>
+<li><code>diff := git.DiffStaged()</code>.</li>
+<li><code>subject := summariser.Summarise(ctx, diff, cctx.ToolName, paths)</code>.</li>
+<li><code>subject = secret.Filter(subject)</code>.</li>
+<li><code>message := subject + &quot;\n\n&quot; + autocommit.CoAuthorTrailer + &quot;\n&quot;</code>.</li>
+<li><code>sha := git.Commit(message)</code>.</li>
+<li>Post-condition: <code>git.StatusPorcelain()</code> for the staged
+paths is empty + <code>git.HeadSHA()</code> == sha.</li>
+<li>Return
+<code>CommitResult{SHA, Subject, Files, Skipped: false}</code>.</li>
+</ul></li>
+<li><strong>Slash <code>/git_auto_commit on|off</code></strong>:
+<ul>
+<li>Calls <code>committer.SetEnabled(true|false)</code>.</li>
+<li>The next <code>MaybeCommit</code> call sees the new state via
+<code>enabled.Load()</code>.</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="error-handling-anti-bluff-hot-zone-edge-cases">5. Error
+handling, anti-bluff hot zone, edge cases</h2>
+<h3 id="error-handling">5.1 Error handling</h3>
+<ul>
+<li><strong>Git not installed</strong> → <code>git.IsRepo()</code>
+returns <code>false</code> (the <code>exec.LookPath(&quot;git&quot;)</code>
+failure is interpreted as “no git available”). Auto-commit is silently
+disabled for the session (logged once at INFO).</li>
+<li><strong>Not a git repo</strong> → <code>git.IsRepo()</code> returns
+<code>false</code>. <code>MaybeCommit</code> returns
+<code>Skipped</code>. The slash status command shows
+<code>git_repo: no</code>.</li>
+<li><strong>LLM call fails</strong> → <code>summariser.Summarise</code>
+falls back to deterministic message. Commit STILL fires (the message is
+just less informative). A unit test asserts this.</li>
+<li><strong><code>git commit</code> fails</strong> (e.g. pre-commit hook
+rejects, no staged changes) → <code>MaybeCommit</code> returns
+<code>(CommitResult{Skipped: false}, ErrCommitFailed)</code>. The
+registry hook logs WARN and CONTINUES (does NOT propagate the error to
+the tool result).</li>
+<li><strong>Concurrent edits</strong> (two tool calls back-to-back) →
+the registry serialises tool execution (mu lock around Execute), so
+auto-commit fires sequentially. Each commit captures only the paths its
+tool touched (per §3.5).</li>
+</ul>
+<h3 id="anti-bluff-hot-zone-four-critical-patterns">5.2 Anti-bluff hot
+zone — four critical patterns</h3>
+<p><strong>Bluff #1: “Commit succeeded but working tree still
+dirty.”</strong> - Pattern: <code>git commit</code> returns success, but
+the porcelain output afterwards is non-empty for the supposedly-staged
+paths (e.g. the committer ran <code>git add foo.go</code> but the actual
+mutation was in <code>bar.go</code>). - Test: integration test runs real
+<code>WriteFileTool</code> → <code>MaybeCommit</code> → asserts
+<code>git status --porcelain</code> for the written path is empty AND
+<code>git log -1 --name-only</code> lists the path. - Challenge: PHASE-A
+asserts <code>os.Stat(committedFile)</code> exists AND
+<code>git log -1 --name-only</code> lists the file AND
+<code>git status --porcelain</code> is empty for that path.</p>
+<p><strong>Bluff #2: “Commit message generated but doesn’t reflect
+actual diff.”</strong> - Pattern: the summariser concatenates a static
+string (“edit”) without ever calling the LLM, OR the LLM is called but
+its response is discarded and a hardcoded subject is used. - Test: unit
+test injects a fake <code>llm.Provider</code> that returns a sentinel
+string <code>&quot;FAKE_LLM_RESPONSE_42&quot;</code>; asserts the resulting commit
+subject CONTAINS that sentinel (proves LLM was actually called and its
+output used). - Challenge: PHASE-B asserts the commit subject in
+<code>git log -1 --format=%s</code> equals what the fake provider
+returned (positive evidence: the LLM result reached the commit).</p>
+<p><strong>Bluff #3: “Auto-commit fires on tools that didn’t actually
+mutate any tracked file.”</strong> - Pattern: the
+<code>RequiresApproval()</code> filter is incomplete (e.g. a read tool
+slipped through), OR the porcelain check is skipped, so the committer
+runs <code>git commit</code> with no staged changes (which would fail,
+but the failure is swallowed and the system reports “skipped”
+deceptively). - Test: unit test runs <code>MaybeCommit</code> against a
+clean repo; asserts <code>Skipped == true</code> AND
+<code>Reason == &quot;no changes&quot;</code> AND no <code>git commit</code> was
+attempted (verified via a spy on <code>Git.Commit</code>). - Challenge:
+PHASE-C asserts after a <code>read_file</code> tool call that
+<code>git log -1 --format=%H</code> is unchanged (no commit fired for a
+read).</p>
+<p><strong>Bluff #4: “Env var honoured at startup but
+<code>/git_auto_commit on</code> runtime change ignored.”</strong> -
+Pattern: the slash mutates a struct field
+(<code>c.enabled = true</code>) that <code>MaybeCommit</code> doesn’t
+re-read; the next edit still sees the old value. - Test: integration
+test starts with <code>HELIXCODE_GIT_AUTO_COMMIT=off</code> (off);
+triggers <code>WriteFileTool</code> → asserts no commit fired
+(<code>git log -1 --format=%H</code> unchanged); calls
+<code>committer.SetEnabled(true)</code> (or invokes
+<code>/git_auto_commit on</code> via the slash); triggers another
+<code>WriteFileTool</code> → asserts commit DID fire
+(<code>git log -1 --format=%H</code> changed). - Challenge: PHASE-E
+asserts the SHA before/after differential is observable AND the
+<code>/git_auto_commit status</code> output flips from <code>off</code>
+to <code>on</code>.</p>
+<p><strong>Bluff #5: “Commit messages leak secrets.”</strong> - Pattern:
+the LLM-summarised subject embeds an API key from the diff (e.g. the
+diff contained <code>OPENAI_API_KEY=sk-abc...</code> in a config file).
+- Test: unit test feeds a diff containing each of the four pattern types
+(AKIA, sk-, xoxb, ghp) through <code>secret.Filter</code>; asserts each
+is replaced with <code>[REDACTED]</code>. - Challenge: PHASE-F
+(extension; runs only if challenge time budget permits) feeds a
+synthetic diff with a fake <code>sk-AAAA...</code> key; asserts the
+resulting commit message contains <code>[REDACTED]</code> and NOT the
+literal key.</p>
+<h3 id="edge-cases">5.3 Edge cases</h3>
+<ul>
+<li><strong>Empty diff after filtering</strong> (the tool reported a
+path but the file is byte-identical) → <code>MaybeCommit</code> returns
+<code>Skipped</code> with
+<code>Reason: &quot;no effective change&quot;</code>.</li>
+<li><strong>Path outside working dir</strong> (the tool wrote to
+<code>/tmp/xyz</code>) → <code>MaybeCommit</code> returns
+<code>Skipped</code> with
+<code>Reason: &quot;path outside working tree&quot;</code>.</li>
+<li><strong>Pre-commit hook rejects</strong> → <code>git commit</code>
+exits non-zero; <code>MaybeCommit</code> returns
+<code>(Skipped: false, ErrCommitFailed)</code> with the hook’s stderr in
+the wrapped error message; registry hook logs WARN.</li>
+<li><strong>Detached HEAD / mid-rebase</strong> →
+<code>git commit</code> may succeed but the SHA is on a detached
+pointer; the user’s git workflow is unchanged. The committer doesn’t try
+to “fix” the state.</li>
+<li><strong>Untracked files</strong> →
+<code>git status --porcelain</code> shows them with <code>??</code>; the
+filter logic detects them and uses <code>git add &lt;path&gt;</code>
+(which adds new files, including untracked); the commit includes
+them.</li>
+</ul>
+<hr />
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-tests-mocks-allowed">6.1 Unit tests (mocks ALLOWED)</h3>
+<ul>
+<li><code>types_test.go</code> — pin EnvVarName, CoAuthorTrailer,
+SkipParamKey constants byte-for-byte.</li>
+<li><code>git_test.go</code> — real tempdir + <code>git init</code>;
+exhaustive coverage of each <code>Git</code> method against real git
+output.</li>
+<li><code>summariser_test.go</code> — fake <code>llm.Provider</code>
+(in-package stub, NOT <code>internal/mocks/</code>); LLM-success path;
+LLM-error path; LLM-empty path; length-cap path. Deterministic fallback
+path tested explicitly.</li>
+<li><code>secret_filter_test.go</code> — table-driven over each pattern
+(AKIA, sk-, xoxb, gh[pousr]_).</li>
+<li><code>committer_test.go</code> — full pipeline against real tempdir
++ real git: enabled-flag respected; SkipRequested respected; not-a-repo
+path; clean-tree path; dirty-tree path produces real commit with
+co-author trailer; SetEnabled atomic swap visible to next call.</li>
+<li><code>git_auto_commit_command_test.go</code> — status/on/off/show
+subcommands.</li>
+</ul>
+<h3 id="integration-tests-no-mocks-gobuild-integration">6.2 Integration
+tests (NO mocks; <code>//go:build integration</code>)</h3>
+<ul>
+<li><code>tests/integration/autocommit_test.go</code>:
+<ul>
+<li><code>TestAutoCommit_Integration_DefaultOn_RealEdit_RealCommit</code>
+— startup with env unset → committer enabled; real
+<code>WriteFileTool</code> through real registry →
+<code>git log -1 --format=%H</code> changes;
+<code>git status --porcelain</code> empty; commit message contains
+co-author trailer.</li>
+<li><code>TestAutoCommit_Integration_EnvOff_NoCommit</code> — startup
+with <code>HELIXCODE_GIT_AUTO_COMMIT=off</code> → real
+<code>WriteFileTool</code> succeeds; <code>git log -1 --format=%H</code>
+unchanged.</li>
+<li><code>TestAutoCommit_Integration_RuntimeToggle</code> — startup with
+env unset → off via <code>committer.SetEnabled(false)</code> → no
+commit; on via <code>SetEnabled(true)</code> → commit fires.</li>
+<li><code>TestAutoCommit_Integration_PerEditSkip_HonouredViaParam</code>
+— <code>params[&quot;_helix_skip_git_commit&quot;] = true</code> → no commit; same
+tool without the param → commit fires.</li>
+<li><code>TestAutoCommit_Integration_NotAGitRepo_NoOp</code> — tempdir
+is NOT a git repo → tool succeeds, no commit, no error.</li>
+<li><code>TestAutoCommit_Integration_LLMUnavailable_FallbackUsed</code>
+— llm.Provider is a stub that returns
+<code>ErrProviderUnavailable</code> → commit STILL fires with
+deterministic fallback subject.</li>
+<li><code>TestAutoCommit_Integration_F21ApprovalDenied_NoCommit</code> —
+F21 in <code>ModeSuggest</code> denies edit → tool returns
+<code>ErrApprovalRequired</code> → no commit (the post-Execute hook only
+fires when <code>execErr == nil</code>).</li>
+</ul></li>
+</ul>
+<h3 id="challenge-harness-six-phases">6.3 Challenge harness — six
+phases</h3>
+<p>Phases (per spec §6.3 of F21’s template, adapted):</p>
+<ol type="1">
+<li><strong>PHASE-A: DEFAULT-ON-COMMITS-EDIT (always runs)</strong> —
+env unset; real <code>WriteFileTool</code> through real registry against
+real git tempdir; assert (i) tool succeeds, (ii)
+<code>git log -1 --format=%H</code> changed, (iii)
+<code>git log -1 --format=%s</code> is non-empty AND length ≤ 72, (iv)
+<code>git log -1 --format=%B</code> contains
+<code>Co-Authored-By: HelixCode &lt;noreply@helixcode.dev&gt;</code>,
+(v) <code>git status --porcelain</code> is empty, (vi)
+<code>git show --stat HEAD</code> lists the written path.</li>
+<li><strong>PHASE-B: LLM-SUMMARY-ACCURATE (always runs; uses fake
+llm.Provider returning sentinel)</strong> — assert commit subject equals
+the fake provider’s output (sentinel string proves LLM was called and
+used).</li>
+<li><strong>PHASE-C: NON-EDIT-TOOL-NO-COMMIT (always runs)</strong> —
+invoke <code>read_file</code> (LevelReadOnly); assert
+<code>git log -1 --format=%H</code> unchanged after the call.</li>
+<li><strong>PHASE-D: ENV-OFF-NO-COMMIT (always runs)</strong> — set env
+to <code>off</code> before construct; invoke <code>WriteFileTool</code>;
+assert tool succeeds AND <code>git log -1 --format=%H</code> unchanged
+AND <code>git status --porcelain</code> shows the file as dirty.</li>
+<li><strong>PHASE-E: RUNTIME-TOGGLE (always runs)</strong> — start off →
+SetEnabled(true) → next call commits. Assert SHA before/after
+differential AND <code>committer.Enabled()</code> returns the live
+state.</li>
+<li><strong>PHASE-F: PER-EDIT-SKIP (always runs)</strong> — invoke
+<code>WriteFileTool</code> with
+<code>params[&quot;_helix_skip_git_commit&quot;] = true</code>; assert tool
+succeeds AND <code>git log -1 --format=%H</code> unchanged AND
+<code>git status --porcelain</code> shows the file as dirty.</li>
+</ol>
+<p>Optional <strong>PHASE-G: SECRET-FILTER (runs)</strong> — synthesise
+a diff containing <code>sk-FAKE...</code>; assert
+<code>git log -1 --format=%B</code> contains <code>[REDACTED]</code> and
+NOT the fake key.</p>
+<p>Output skeleton ends with:</p>
+<pre><code>SUMMARY: PHASE-A=6/6 PASS; PHASE-B=3/3 PASS; PHASE-C=2/2 PASS; PHASE-D=3/3 PASS;
+         PHASE-E=4/4 PASS; PHASE-F=3/3 PASS; PHASE-G=2/2 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch.
+Absence-of-error is NEVER acceptable.</p>
+<hr />
+<h2 id="cross-platform">7. Cross-platform</h2>
+<ul>
+<li><strong>Linux / macOS</strong> — <code>git</code> CLI is the
+de-facto standard; <code>exec.CommandContext(&quot;git&quot;, ...)</code> works
+directly.</li>
+<li><strong>Windows</strong> — <code>git</code> (via Git for Windows) is
+in PATH for nearly all dev installs; <code>exec.CommandContext</code>
+resolves it. The committer does NOT shell-out via <code>cmd /c</code> —
+it invokes git directly, avoiding shell-quoting differences.</li>
+<li><strong>No git</strong> — <code>exec.LookPath(&quot;git&quot;)</code> returns
+error → <code>IsRepo()</code> returns false → committer is a no-op for
+the session.</li>
+</ul>
+<hr />
+<h2 id="out-of-scope">8. Out of scope</h2>
+<ul>
+<li>Auto-push (CONST-043 forbids without explicit per-push approval;
+pushes are always manual).</li>
+<li>Auto-branch-per-task (single-branch model; user can branch
+manually).</li>
+<li>Conflict resolution / rebase / squash automation (each commit is
+atomic; user squashes manually).</li>
+<li>Commit signing override (<code>commit.gpgsign=true</code> is
+honoured if user has it; we do NOT pass
+<code>--no-gpg-sign</code>).</li>
+<li>Message localisation (English-only LLM prompt and fallback; v1.5 may
+add locale support).</li>
+<li>Per-tool message templates (one prompt fits all; v1.5 may
+differentiate by tool category).</li>
+<li>Squash-on-session-end (out of scope; aider-style per-edit is the
+contract).</li>
+<li>Persistence of enabled state across sessions (env var sets the
+default; runtime changes are ephemeral; v1.5 may add
+<code>--persist</code> writeback).</li>
+<li>Diff size limits beyond the 8 KB LLM-context cap (large diffs commit
+fine; only the LLM prompt is capped).</li>
+</ul>
+<hr />
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>CONST-035</strong> (anti-bluff): every PASS in F22 carries
+positive runtime evidence — real git tempdir + real commits + real SHA
+equality assertions + real co-author trailer presence + real
+working-tree-clean post-condition. The Challenge harness MUST exit
+non-zero on byte mismatch. Tests use real <code>git init</code> + real
+<code>git commit</code>; mocks of git are forbidden in integration tests
+(per Rule 5).</li>
+<li><strong>CONST-039</strong> (Challenge required): F22 ships with
+<code>challenges/p2-f22-aider-git-auto-commit/</code> (Challenge harness
+with 6 phases + optional PHASE-G).</li>
+<li><strong>CONST-042</strong> (no secret leak): the secret filter
+strips common patterns (AKIA, sk-, xoxb, gh[pousr]_) from commit
+messages before they’re committed. The committer’s logger NEVER logs the
+diff body at INFO; only paths + SHA + length are logged. A unit test
+scans <code>internal/autocommit/*.go</code> for
+<code>logger\.Info\(.*\b(diff|body|content)\b</code> and FAILs on any
+hit.</li>
+<li><strong>CONST-043</strong> (no force push, no auto-push): F22 NEVER
+calls <code>git push</code>. The Git wrapper does not implement a
+<code>Push</code> method. The committer’s domain ends at
+<code>git commit</code>; pushes are a separate user action requiring
+explicit approval per CONST-043.</li>
+<li><strong>CONST-033</strong> (host power management): F22 emits no
+shell commands beyond <code>git ...</code> invocations through
+<code>exec.CommandContext</code>. No suspend/reboot/halt commands.</li>
+</ul>
+<hr />
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<ul>
+<li><strong>Q1 = A</strong> — Commit cadence: ONE commit per accepted
+edit (aider default).</li>
+<li><strong>Q2 = A</strong> — Commit message: LLM-summarised from diff,
+deterministic fallback on LLM error.</li>
+<li><strong>Q3 = A</strong> — Co-author trailer:
+<code>Co-Authored-By: HelixCode &lt;noreply@helixcode.dev&gt;</code>
+appended to every auto-commit.</li>
+<li><strong>Q4 = A</strong> — Default ON; opt-out via env var
+<code>HELIXCODE_GIT_AUTO_COMMIT=off</code>, runtime
+<code>/git_auto_commit off</code>, per-edit param
+<code>_helix_skip_git_commit:true</code>.</li>
+<li><strong>Q5 = A</strong> — <code>/git_auto_commit</code> slash
+command (status/on/off/show) + env var. NO cobra subcommand.</li>
+</ul>
+<hr />
+<h2 id="non-obvious-calls">11. Non-obvious calls</h2>
+<ol type="1">
+<li><strong>Post-Execute hook ordering</strong> — F22’s
+<code>fireAutoCommit</code> runs AFTER F13’s
+<code>triggerLSPAfterEdit</code>. F13 doesn’t depend on commit state, so
+order F13→F22 is sufficient. The reverse (commit-then-LSP) would mean
+LSP diagnostics could include “the file just changed” reports that
+trigger spurious tool calls; running LSP first lets the diagnostics
+settle.</li>
+<li><strong>Mutated-paths derivation table is per-tool</strong> —
+generic introspection (“find all <code>path</code>-shaped strings in
+args”) would over-trigger (e.g. include unrelated path-looking
+arguments). The per-tool table in §3.5 is the source of truth; tools not
+in the table fall through to the porcelain-based discovery path which is
+safe (commits everything dirty under the working dir).</li>
+<li><strong><code>_helix_skip_git_commit:true</code> per-edit
+param</strong> — analogous to F21’s <code>_helix_sandbox_required</code>
+marker. Invisible to tools that don’t care; ergonomic for callers who
+want to suppress a single commit (e.g. agent’s internal scratch-file
+write).</li>
+<li><strong><code>atomic.Bool</code> for enabled flag</strong> —
+lock-free, single writer + many readers. The slash command’s
+<code>SetEnabled</code> is the only writer; every
+<code>MaybeCommit</code> is a reader. Anti-bluff #4 is structurally
+impossible because every <code>MaybeCommit</code> begins with
+<code>if !c.enabled.Load() { return Skipped }</code>.</li>
+<li><strong>Default-on with literal <code>off</code> string
+opt-out</strong> — typos default to safe-on, NOT silently-off.
+<code>HELIXCODE_GIT_AUTO_COMMIT=disabled</code> is on, not off, by
+design. The slash command’s <code>off</code> subcommand is the canonical
+runtime-off path.</li>
+<li><strong>5-second LLM timeout</strong> — bounded blocking; aider
+observed-acceptable upper bound. Longer timeouts let a stuck provider
+stall every commit; shorter risks missing fast-but-not-instant
+providers. 5s is the goldilocks per aider’s own behaviour.</li>
+<li><strong>Subject length cap at 72 chars</strong> — git’s de-facto
+subject convention. Truncation, no ellipsis, because git history commits
+don’t ellipsis their subjects.</li>
+<li><strong>Co-author trailer is appended to EVERY auto-commit,
+unconditionally</strong> — including fallback-message commits. Q3=A is
+unambiguous. Tests pin this byte-for-byte.</li>
+<li><strong>Auto-commit failure is swallowed at the registry
+boundary</strong> — never propagated as a tool error. Auto-commit is
+observability, not correctness; a failed commit doesn’t invalidate the
+edit. The error IS logged at WARN so users see it in the log.</li>
+<li><strong><code>fireAutoCommit</code> honours F21
+<code>RequiresApproval()</code> level filter</strong> —
+<code>LevelReadOnly</code> (read tools) and <code>LevelRun</code> (shell
+tools) are EXCLUDED. Read tools don’t touch files; shell tools may touch
+files but the user is already supervising the shell, and shell-induced
+commits would mix with the user’s own workflow.</li>
+<li><strong>F21 integration: only fires AFTER approval granted</strong>
+— the post-Execute hook runs only when <code>execErr == nil</code>.
+F21’s <code>ApprovalManager</code> returns
+<code>ErrApprovalRequired</code> on deny, and the registry returns that
+error from <code>Execute</code>, so <code>execErr != nil</code> and the
+auto-commit hook is structurally bypassed. F21 + F22 compose
+monotonically.</li>
+<li><strong>F04 worktree integration</strong> — auto-commit works in
+subagent worktrees too. The <code>WorkingDir</code> option is set
+per-CLI-instance to the cwd; in a subagent worktree, the cwd IS the
+worktree path, so <code>git status</code> / <code>git commit</code>
+operate on the worktree’s git directory (which is a real git work tree
+pointed at the parent’s <code>.git</code> via <code>gitdir:</code>). No
+special handling needed beyond using the cwd as
+<code>WorkingDir</code>.</li>
+<li><strong>Secret filter is best-effort, not exhaustive</strong> — the
+four patterns (AKIA, sk-, xoxb, gh[pousr]_) cover the most common leak
+vectors per CONST-042 audit history. A user with custom secret formats
+SHOULD set <code>_helix_skip_git_commit:true</code> for sensitive edits
+OR use <code>/git_auto_commit off</code> for the duration. The filter is
+a safety net, not a replacement for <code>.env</code> discipline.</li>
+<li><strong>The diff fed to the LLM is <code>git diff --staged</code>,
+NOT <code>--unstaged</code></strong> — by the time
+<code>summariser.Summarise</code> is called, the paths are already added
+(step v in §4 data flow). Using <code>--staged</code> ensures the LLM
+sees exactly what’s about to be committed, not unrelated dirty
+files.</li>
+<li><strong>The <code>Git</code> wrapper uses <code>git</code> CLI, not
+<code>go-git</code></strong> — <code>go-git</code> is a heavyweight
+in-process implementation that doesn’t honour user
+<code>~/.gitconfig</code>, hooks, or git aliases. Shell-out matches user
+expectation: their pre-commit hooks fire, their commit signing config
+applies, their aliases work. The wrapper is intentionally thin (each
+method is one <code>exec.CommandContext</code> call).</li>
+</ol>
+</body>
+</html>

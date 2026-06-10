@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec11</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec11</h1>
+</header>
+<h2 id="phase-10-monitoring-reporting-compliance">11. Phase 10:
+Monitoring, Reporting &amp; Compliance</h2>
+<p>Phase 10 ensures every QA result is visible, every constitutional
+mandate is auditable, and every failure feeds back into the test bank.
+Without this phase, the preceding nine phases produce data that goes
+unexamined; with it, the Catalogizer-HelixQA integration becomes a
+self-correcting system.</p>
+<p>Article XI §11.9 of the umbrella <code>CONSTITUTION.md</code> states
+that the bar for shipping is “not ‘tests pass’ but ‘users can use the
+feature’”[<sup>1</sup>]. Every PASS must carry positive evidence
+captured during execution. CONST-035 mandates that tests verify the
+product, not the LLM’s mental model, requiring deliberate-break
+verification for every test class<a href="%60HelixQA/CONSTITUTION.md%60,%20CONST-035%20Anti-Bluff%20Tests%20&amp;%20Challenges:" title="TCP-open is the FLOOR, not the ceiling... Verification of CONST-035 itself: deliberately break the feature. The test MUST fail."><sup>2</sup></a>.
+Phase 10 provides the instrumentation that makes these mandates
+enforceable.</p>
+<hr />
+<h3 id="qa-results-dashboard">11.1 QA Results Dashboard</h3>
+<p>The QA Results Dashboard is a static HTML application served from
+<code>HelixQA/docs/website/challenges-dashboard/</code> that reads
+<code>pipeline-report.json</code> artifacts generated by
+<code>pkg/reporter</code> and renders aggregate statistics, trend
+charts, and adversarial-coverage tables. It operates without a backend
+server: the operator loads one or more JSON files through a file picker
+or the File System Access API, and all aggregation occurs in the browser
+via vanilla JavaScript. This design respects the constitutional
+prohibition on CI/CD pipelines<a href="%60HelixQA/CONSTITUTION.md%60,%20Universal%20Mandatory%20Constraints%20§1:" title="NO CI/CD pipelines. No `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.travis.yml`, `.circleci/`, or any automated pipeline."><sup>3</sup></a>
+while still providing real-time visibility into QA health.</p>
+<h4 id="static-html-dashboard-structure">11.1.1 Static HTML Dashboard
+Structure</h4>
+<p>The dashboard markup in <code>index.html</code> (commit
+<code>35deb43</code>) defines a single-page layout with four zones: a
+load bar for file selection, a summary grid of stat cards, a charts row
+for trend and bank visualizations, and a table card for adversarial
+category coverage<a href="%60HelixQA/docs/website/challenges-dashboard/index.html%60,%20commit%20%6035deb43%60,%20lines%201–167."><sup>4</sup></a>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Excerpt from challenges-dashboard/index.html --&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;dashboard&quot;</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;display:none&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;summary-grid&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;stat-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;value blue&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;s-sessions&quot;</span><span class="dt">&gt;</span>—<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;label&quot;</span><span class="dt">&gt;</span>Sessions<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;stat-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;value blue&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;s-total&quot;</span><span class="dt">&gt;</span>—<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;label&quot;</span><span class="dt">&gt;</span>Total Challenges<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;stat-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;value green&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;s-pass&quot;</span><span class="dt">&gt;</span>—<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;label&quot;</span><span class="dt">&gt;</span>Passed<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;stat-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;value red&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;s-fail&quot;</span><span class="dt">&gt;</span>—<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;label&quot;</span><span class="dt">&gt;</span>Failed<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;stat-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;value yellow&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;s-skip&quot;</span><span class="dt">&gt;</span>—<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;label&quot;</span><span class="dt">&gt;</span>Skipped<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;stat-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;value green&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;s-rate&quot;</span><span class="dt">&gt;</span>—<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;label&quot;</span><span class="dt">&gt;</span>Pass Rate<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;charts-row&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;chart-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Pass rate over sessions<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">canvas</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;pass-rate-trend&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">canvas</span><span class="dt">&gt;</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;chart-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Pass rate per bank<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">canvas</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;pass-rate-per-bank&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">canvas</span><span class="dt">&gt;</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;table-card&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Adversarial category coverage<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">table</span><span class="dt">&gt;</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">thead</span><span class="dt">&gt;</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">tr</span><span class="dt">&gt;&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Category<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Passed<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Total<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Rate<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Progress<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;/</span><span class="kw">thead</span><span class="dt">&gt;</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">tbody</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;adv-table-body&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">tbody</span><span class="dt">&gt;</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">table</span><span class="dt">&gt;</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>The JavaScript logic in <code>index.js</code> parses
+<code>pipeline-report.json</code> files, normalizes the pass/fail/skip
+counts across multiple report shapes (<code>report.summary</code>,
+<code>report.results</code>, <code>report.by_category</code>,
+<code>report.banks</code>), and feeds the aggregated data into Chart.js
+4.4.4 for rendering<a href="%60HelixQA/docs/website/challenges-dashboard/index.js%60,%20commit%20%6035deb43%60,%20%60extractCounts()%60,%20%60extractBanks()%60,%20%60extractAdversarial()%60%20functions."><sup>5</sup></a>.
+Color coding is semantic: green (<code>#4ade80</code>) for rates above
+90%, yellow (<code>#facc15</code>) for 60–90%, and red
+(<code>#f87171</code>) for below 60%. The adversarial table sorts
+ascending by pass rate so the weakest categories surface first.</p>
+<p>The dashboard expects <code>pipeline-report.json</code> files placed
+in <code>qa-results/session-YYYYMMDD_HHMMSS/</code> directories. Each
+session directory also contains <code>screenshots/</code>,
+<code>videos/</code>, <code>timeline.json</code>, and a
+<code>FINAL-REPORT.md</code>[<sup>6</sup>]. The dashboard does not
+access these sub-artifacts directly; it operates only on the JSON
+summary. For deep-dive analysis, the operator opens the companion Ticket
+Viewer.</p>
+<h4 id="ticket-viewer-with-inline-evidence">11.1.2 Ticket Viewer with
+Inline Evidence</h4>
+<p>The Ticket Viewer at <code>HelixQA/docs/website/ticket-viewer/</code>
+renders OCU tickets as Markdown with inline evidence previews. It
+resolves twelve evidence kinds from <code>pkg/ticket</code> into
+platform-native widgets: screenshots and diff-overlays as
+<code>&lt;img&gt;</code> with lazy loading; video clips as
+<code>&lt;video controls&gt;</code>; JSON, OCR, and element-tree as
+collapsible blocks; hook-traces and logcat as
+<code>&lt;details&gt;</code>; replay scripts as copyable
+<code>&lt;pre&gt;</code> blocks<a href="%60HelixQA/docs/website/ticket-viewer/index.js%60,%20commit%20%6035deb43%60,%20%60buildWidget()%60%20function%20and%20%60EVIDENCE_FENCE_RE%60%20regex."><sup>7</sup></a>.</p>
+<p>The viewer loads tickets via URL query
+(<code>?ticket=path/to/HELIX-123.md</code>) or file picker, then
+post-processes marked.js output to replace evidence fences like
+<code>evidence:screenshot\nscreenshots/android_login_20260501_143022.png</code>
+with an inline <code>&lt;img&gt;</code>. The 12 evidence kinds are:
+<code>screenshot</code>, <code>diff-overlay</code>, <code>clip</code>,
+<code>video</code>, <code>json</code>, <code>ocr</code>,
+<code>element-tree</code>, <code>hook-trace</code>, <code>logcat</code>,
+<code>log-dump</code>, <code>coverage-map</code>, and
+<code>replay-script</code>[<sup>8</sup>].</p>
+<h4 id="coverage-tracker">11.1.3 Coverage Tracker</h4>
+<p>Per-feature, per-platform, and per-test-type coverage percentages are
+tracked in a structured matrix stored alongside each
+<code>pipeline-report.json</code>. Coverage is the ratio of challenged
+features to total declared features in
+<code>catalog-api/challenges/</code>. A feature is “covered” if at least
+one challenge passed on at least one platform; “fully covered” requires
+passes on all target platforms (Web, Android, Desktop, Android TV).</p>
+<p>The coverage matrix is generated by a Go tool invoked as:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> run ./cmd/helixqa <span class="at">--mode</span><span class="op">=</span>report <span class="at">--input</span><span class="op">=</span>qa-results/session-20260501/ <span class="at">--formats</span><span class="op">=</span>markdown,html</span></code></pre></div>
+<p>Historical trends are stored in
+<code>qa-results/coverage-history.jsonl</code>, appended after each
+session. The dashboard’s trend chart can read this file when the
+operator selects it alongside <code>pipeline-report.json</code>
+files.</p>
+<p><strong>Table 1: Dashboard Components</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 22%" />
+<col style="width: 26%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Data Source</th>
+<th>Visualization</th>
+<th>Update Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Summary stat cards</td>
+<td><code>pipeline-report.json</code> pass/fail/skip counts</td>
+<td>Numeric display with color coding (green/yellow/red)</td>
+<td>Per session load</td>
+</tr>
+<tr>
+<td>Pass-rate trend chart</td>
+<td><code>coverage-history.jsonl</code> or aggregated session
+reports</td>
+<td>Chart.js line chart (0–100% Y-axis)</td>
+<td>Per session load</td>
+</tr>
+<tr>
+<td>Per-bank pass-rate bar chart</td>
+<td><code>report.banks</code> or <code>report.by_category</code></td>
+<td>Horizontal bar chart with per-bar color grading</td>
+<td>Per session load</td>
+</tr>
+<tr>
+<td>Adversarial coverage table</td>
+<td><code>report.adversarial</code> or bank names matching
+“adversar”</td>
+<td>Sortable HTML table with progress bars</td>
+<td>Per session load</td>
+</tr>
+<tr>
+<td>Coverage matrix</td>
+<td>Challenge registry + platform results</td>
+<td>HTML table with platform × feature grid</td>
+<td>Per report generation</td>
+</tr>
+<tr>
+<td>Ticket viewer</td>
+<td>Individual <code>HELIX-*.md</code> files</td>
+<td>Markdown + inline evidence widgets</td>
+<td>On-demand per ticket</td>
+</tr>
+</tbody>
+</table>
+<p>The six components in Table 1 form a complete observability surface
+without a backend server. The static-file approach respects the no-CI/CD
+constraint<a href="%60HelixQA/CONSTITUTION.md%60,%20Universal%20Mandatory%20Constraints%20§1:" title="NO CI/CD pipelines. No `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.travis.yml`, `.circleci/`, or any automated pipeline."><sup>3</sup></a>
+while giving operators full visibility. The trade-off is that data is
+not pushed automatically; an operator must load the files. To mitigate
+this, <code>run-qa-suite.sh</code> prints the dashboard open command at
+the end of every run, and the File System Access API directory picker
+(Chrome/Edge 86+) allows recursive loading of all
+<code>pipeline-report.json</code> files under <code>qa-results/</code>
+in a single gesture<a href="%60HelixQA/docs/website/challenges-dashboard/index.js%60,%20lines%20432–469:%20%60showDirectoryPicker%60%20with%20recursive%20%60collectReportFiles()%60."><sup>9</sup></a>.</p>
+<hr />
+<h3 id="compliance-reporting">11.2 Compliance Reporting</h3>
+<p>Compliance reporting transforms the raw QA artifacts into attestation
+documents that can be audited against <code>CONSTITUTION.md</code>
+mandates. Three report types are produced: the anti-bluff compliance
+report, the governance compliance report, and the release gate
+report.</p>
+<h4 id="anti-bluff-compliance-report">11.2.1 Anti-Bluff Compliance
+Report</h4>
+<p>The anti-bluff compliance report verifies that tests exercise real
+functionality rather than asserting on proxies. CONST-035 requires five
+verification methods: deliberately break the feature and confirm the
+test fails; protocol-layer functional probes; real HTTP requests with
+real bodies and screenshots; real CLI invocations with real output
+parsing; and visual verification of screenshot content<a href="%60HelixQA/CONSTITUTION.md%60,%20CONST-035%20Anti-Bluff%20Tests%20&amp;%20Challenges:" title="TCP-open is the FLOOR, not the ceiling... Verification of CONST-035 itself: deliberately break the feature. The test MUST fail."><sup>2</sup></a>.</p>
+<p>The report is generated by <code>scripts/anti-bluff-verify.sh</code>
+at
+<code>docs/reports/anti-bluff/anti-bluff-compliance-YYYYMMDD.md</code>
+with this structure:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Anti-Bluff Compliance Report — 2026-05-01</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Verification Summary</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Metric <span class="pp">|</span> Value <span class="pp">|</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="pp">|--------|-------|</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Tests verified <span class="pp">|</span> 156 <span class="pp">|</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Deliberate-break failures detected <span class="pp">|</span> 3 <span class="pp">|</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> False-positive rate <span class="pp">|</span> 1.9% <span class="pp">|</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Screenshot pipeline validated <span class="pp">|</span> Yes (all 4 platforms) <span class="pp">|</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Protocol-layer probes passed <span class="pp">|</span> 47/47 <span class="pp">|</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## Per-Test Verification Methods</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Test <span class="pp">|</span> Method <span class="pp">|</span> Result <span class="pp">|</span> Evidence <span class="pp">|</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="pp">|------|--------|--------|----------|</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> TestLoginFlow <span class="pp">|</span> Break: remove password check <span class="pp">|</span> FAIL → expected <span class="pp">|</span> screenshot: missing error state <span class="pp">|</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> TestAPIGateway <span class="pp">|</span> Probe: real HTTP 200 + body <span class="pp">|</span> PASS <span class="pp">|</span> json: response_payload.json <span class="pp">|</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> TestAndroidScreenshot <span class="pp">|</span> Visual: decode PNG, &gt;100px <span class="pp">|</span> PASS <span class="pp">|</span> screenshot: adb_capture.png <span class="pp">|</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## Non-Conformant Findings</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Test <span class="pp">|</span> Issue <span class="pp">|</span> Remediation <span class="pp">|</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="pp">|------|-------|-------------|</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> TestCacheTTL <span class="pp">|</span> Passes after cache removal; only checks key existence <span class="pp">|</span> Add value comparison + TTL check <span class="pp">|</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-035 Attestation</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>All production tests verified. 3 bluff tests identified and ticketed.</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>Signed: <span class="co">[</span><span class="ot">QA operator</span><span class="co">] [timestamp]</span></span></code></pre></div>
+<h4 id="governance-compliance-report">11.2.2 Governance Compliance
+Report</h4>
+<p>The governance compliance report verifies submodule constitution
+integrity across the 39 submodules in the Catalogizer monorepo<a href="%60catalogizer-integration.md%60,%20Section%201:%20Complete%20Submodule%20Map%20—%2039%20submodules%20total,%2032%20under%20%60vasic-digital%60,%205%20under%20%60HelixDevelopment%60."><sup>10</sup></a>.
+It checks three dimensions: constitution presence
+(<code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>CONSTITUTION.md</code> in each submodule); cascade status
+(submodule pointers at or behind mandated commits); and missing mandates
+(any <code>CONSTITUTION.md</code> omitting CONST-035 or Article XI §11.9
+is flagged).</p>
+<p>Cascade verification reads <code>.gitmodules</code> and compares
+pinned commits against upstream <code>HEAD</code>. Catalogizer currently
+pins HelixQA at <code>35deb43</code> (Phase 27.7) while upstream is at
+<code>0bca023</code> (Phase 29)[<sup>11</sup>]. This gap is recorded as
+a governance deviation with a remediation ticket.</p>
+<h4 id="release-gate-report">11.2.3 Release Gate Report</h4>
+<p>The release gate report is a binary attestation: all listed items
+must pass, or the release is blocked. The checklist is produced by
+<code>scripts/release-gate-checklist.sh</code> and appended to the
+session’s <code>FINAL-REPORT.md</code>.</p>
+<p><strong>Release Gate Checklist (all items must pass)</strong></p>
+<ol type="1">
+<li>All unit tests pass (<code>make test</code> exits 0,
+<code>-race</code> clean, no <code>t.Skip</code> without
+<code>SKIP-OK</code> ticket)</li>
+<li>All integration tests pass against real services (no mocks outside
+<code>_test.go</code> files)</li>
+<li>All E2E tests pass on all target platforms (Web, Android, Desktop,
+Android TV)</li>
+<li>All challenge banks pass (<code>run_all_challenges.sh</code> exits
+0)</li>
+<li>All HelixQA autonomous sessions complete without crash or ANR</li>
+<li>All screenshots verified: every screenshot decodes as valid PNG,
+dimensions &gt;100×100, not blank (<code>IsBlankScreenshot</code>
+returns false)</li>
+<li>All anti-bluff checks pass: deliberate-break tests confirm failure;
+false-positive rate &lt;2%</li>
+<li>All security scans pass (<code>gosec</code>, <code>trivy</code>,
+<code>semgrep</code> exit 0 with no HIGH/CRITICAL findings)</li>
+<li>Coverage matrix shows ≥90% per-feature coverage and 100%
+per-platform coverage for all declared features</li>
+<li>CONST-035 attestation signed by QA operator</li>
+<li>Article XI §11.9 user-mandate forensic anchor present and unmodified
+in <code>CONSTITUTION.md</code></li>
+<li>No unresolved tickets from prior sessions (all <code>HELIX-*</code>
+tickets in <code>docs/reports/qa-sessions/</code> are closed or have
+active remediation branches)</li>
+</ol>
+<p><strong>Table 2: Compliance Report Items</strong></p>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 31%" />
+<col style="width: 16%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Verification Method</th>
+<th>Frequency</th>
+<th>Responsible</th>
+<th>Pass Criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deliberate-break test validation</td>
+<td><code>scripts/anti-bluff-verify.sh</code> comments out feature code,
+runs test, confirms FAIL</td>
+<td>Every Full-QA Master Cycle</td>
+<td>QA Lead</td>
+<td>100% of verified tests transition from PASS to FAIL when feature is
+broken</td>
+</tr>
+<tr>
+<td>Screenshot pipeline validation</td>
+<td><code>pkg/navigator</code> executor screenshot + decode PNG +
+<code>IsBlankScreenshot</code> check</td>
+<td>Every session</td>
+<td>Automation</td>
+<td>All screenshots valid PNG, &gt;100×100px, not blank</td>
+</tr>
+<tr>
+<td>Protocol-layer functional probe</td>
+<td>Real HTTP/ADB/WS request with real payload; no <code>net.Dial</code>
+only</td>
+<td>Every E2E test</td>
+<td>Test Author</td>
+<td>Response body verified + screenshot captured</td>
+</tr>
+<tr>
+<td>Submodule constitution check</td>
+<td><code>grep -c &quot;CONST-035\|Article XI&quot; CONSTITUTION.md</code> in each
+submodule</td>
+<td>Every release</td>
+<td>Dev Lead</td>
+<td>All 39 submodules have both mandates present</td>
+</tr>
+<tr>
+<td>Cascade status verification</td>
+<td><code>git submodule status</code> vs upstream <code>HEAD</code></td>
+<td>Every release</td>
+<td>Dev Lead</td>
+<td>All submodule pointers at or behind mandated commits; gaps
+ticketed</td>
+</tr>
+<tr>
+<td>False-positive rate audit</td>
+<td><code>bluff_count / total_verified × 100</code> from anti-bluff
+report</td>
+<td>Every Full-QA Master Cycle</td>
+<td>QA Lead</td>
+<td>Rate &lt;2%</td>
+</tr>
+<tr>
+<td>Security scan gate</td>
+<td><code>gosec</code>, <code>trivy</code>, <code>semgrep</code> with
+severity threshold</td>
+<td>Every release</td>
+<td>Security Lead</td>
+<td>Zero HIGH/CRITICAL findings</td>
+</tr>
+<tr>
+<td>Coverage threshold gate</td>
+<td>Coverage matrix JSON vs 90% feature / 100% platform targets</td>
+<td>Every release</td>
+<td>QA Lead</td>
+<td>All declared features meet thresholds</td>
+</tr>
+<tr>
+<td>Ticket closure verification</td>
+<td><code>find docs/reports/qa-sessions/ -name &quot;HELIX-*.md&quot;</code> for
+open status</td>
+<td>Every release</td>
+<td>QA Lead</td>
+<td>No unresolved tickets from prior 2 sessions</td>
+</tr>
+<tr>
+<td>Article XI §11.9 anchor integrity</td>
+<td>MD5 hash of anchor block in <code>CONSTITUTION.md</code> vs
+canonical hash</td>
+<td>Every release</td>
+<td>Dev Lead</td>
+<td>Hash matches canonical; block unmodified</td>
+</tr>
+<tr>
+<td>Resource-limit compliance</td>
+<td><code>GOMAXPROCS=2 nice -n 19 ionice -c 3</code> in test invocation
+logs</td>
+<td>Every session</td>
+<td>Automation</td>
+<td>All test processes show limit flags in <code>ps</code> output</td>
+</tr>
+<tr>
+<td>Challenge real-data validation</td>
+<td>Challenge scripts use real API calls, real databases, real
+services</td>
+<td>Every challenge run</td>
+<td>Automation</td>
+<td>Zero mock-driven challenge passes</td>
+</tr>
+</tbody>
+</table>
+<p>The 12 items in Table 2 cover anti-bluff (items 1–3, 5, 11),
+governance (items 4, 5, 10), and release readiness (items 6–9, 12). Each
+item specifies a concrete verification method, cadence, owner, and pass
+criterion. QA Lead owns 6 items, Dev Lead 3, Security Lead 1, and
+Automation 2.</p>
+<hr />
+<h3 id="continuous-improvement">11.3 Continuous Improvement</h3>
+<p>Continuous improvement closes the loop from detection to prevention.
+Every failure becomes a permanent regression guard; every new feature
+receives challenge coverage before release; every benchmark establishes
+a baseline that future runs must not regress.</p>
+<h4 id="feedback-loop-failed-test-to-regression-guard">11.3.1 Feedback
+Loop: Failed Test to Regression Guard</h4>
+<p>The feedback loop follows the reproduction-before-fix sequence
+mandated by CONST-032<a href="%60HelixQA/CONSTITUTION.md%60,%20Universal%20Mandatory%20Constraints%20§12:" title="Reproduction-Before-Fix (CONST-032 — MANDATORY)."><sup>12</sup></a>:</p>
+<pre class="mermaid"><code>flowchart LR
+    A[Test Failure] --&gt; B[Ticket Generation]
+    B --&gt; C[Root Cause Analysis]
+    C --&gt; D[Challenge Script Write]
+    D --&gt; E[Run Challenge → Confirm FAIL]
+    E --&gt; F[Fix Implementation]
+    F --&gt; G[Re-run Challenge → Confirm PASS]
+    G --&gt; H[Commit Challenge + Fix]
+    H --&gt; I[Regression Guard Active]</code></pre>
+<p>When a test fails, HelixQA’s <code>pkg/ticket</code> system generates
+a markdown ticket with 12 evidence kinds attached. The operator writes a
+challenge script that reproduces the failure, confirms it fails on
+unfixed code, then applies the fix and confirms the challenge passes.
+The challenge is committed to <code>catalog-api/challenges/</code> and
+registered in the challenge bank. Every subsequent Full-QA Master Cycle
+re-runs the challenge, making it a permanent regression guard.</p>
+<h4 id="test-bank-expansion">11.3.2 Test Bank Expansion</h4>
+<p>The test bank expands on three triggers: every bug adds a challenge
+script and HelixQA bank entry; every feature requires challenge
+registration before merge; every new provider integration receives a
+dedicated bank with platform variants. The 60+ banks in
+<code>HelixQA/banks/</code> follow this discipline<a href="%60HelixQA/banks/%60%20directory%20listing,%20%60catalogizer-integration.md%60%20Section%207.6."><sup>13</sup></a>.
+Categories include Full-QA Campaigns (<code>full-qa-api</code>,
+<code>full-qa-web</code>, <code>full-qa-android</code>), Nexus
+Platform-Specific (<code>nexus-browser</code>,
+<code>nexus-desktop-linux</code>, <code>nexus-mobile-android</code>),
+OCU Program (<code>ocu-foundation</code>, <code>ocu-capture</code>,
+<code>ocu-vision</code>), and Fixes Validation
+(<code>fixes-validation</code>, <code>fixes-validation-a11y</code>,
+<code>fixes-validation-browser</code>)<a href="%60catalogizer-integration.md%60,%20Section%207.6,%20bank%20category%20table."><sup>14</sup></a>.</p>
+<h4 id="benchmark-baselines">11.3.3 Benchmark Baselines</h4>
+<p>Three performance dimensions are tracked: test execution time
+(wall-clock per platform, per bank, per challenge), screenshot capture
+latency (time from <code>executor.Screenshot(ctx)</code> to valid PNG
+bytes), and LLM response time per provider (prompt dispatch to first
+token at <code>pkg/autonomous/pipeline.go</code>). Baselines are stored
+in <code>qa-results/benchmarks/baseline-YYYYMMDD.json</code>. A
+regression is declared when the current run exceeds the rolling
+5-session p95 by more than 20%.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 27%" />
+<col style="width: 7%" />
+<col style="width: 22%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>Measurement Point</th>
+<th>Unit</th>
+<th>Baseline Source</th>
+<th>Regression Threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Test execution time</td>
+<td><code>PlatformResult.Duration</code></td>
+<td>seconds</td>
+<td>Rolling 5-session mean</td>
+<td>&gt;120% of baseline</td>
+</tr>
+<tr>
+<td>Screenshot capture latency</td>
+<td><code>Result.Duration</code> in <code>pkg/screenshot</code></td>
+<td>milliseconds</td>
+<td>Rolling 5-session p95</td>
+<td>&gt;120% of baseline</td>
+</tr>
+<tr>
+<td>LLM response time</td>
+<td><code>autonomous</code> pipeline prompt-to-token</td>
+<td>milliseconds</td>
+<td>Per-provider rolling mean</td>
+<td>&gt;150% of baseline</td>
+</tr>
+<tr>
+<td>Vision analysis latency</td>
+<td><code>visionserver</code> <code>/analyze</code> endpoint</td>
+<td>milliseconds</td>
+<td>Rolling 5-session p95</td>
+<td>&gt;120% of baseline</td>
+</tr>
+<tr>
+<td>Video encode throughput</td>
+<td><code>pkg/nexus/record</code> encoder frames/sec</td>
+<td>frames/second</td>
+<td>Rolling 5-session mean</td>
+<td>&lt;80% of baseline</td>
+</tr>
+</tbody>
+</table>
+<p>The benchmark table captures five metrics that characterize QA system
+health. Latency metrics trigger at 120% of baseline; encode throughput
+triggers at 80%. When a regression is detected, the delta is appended to
+<code>FINAL-REPORT.md</code> as a warning, and the operator decides
+whether to investigate or update the baseline if the change is expected
+(e.g., a new vision model with higher accuracy but longer inference
+time).</p>
+<h4 id="monthly-review">11.3.4 Monthly Review</h4>
+<p>The review is documented in
+<code>docs/reports/monthly/YYYY-MM-qa-review.md</code> and presented
+using the Challenges Dashboard loaded with all sessions from the
+month.</p>
+<p>The review directly serves Article XI §11.9: it asks not “did tests
+pass?” but “can users use the feature?”[<sup>1</sup>]. A component with
+100% test pass rate but 30% challenge failure rate is flagged as
+high-risk because the tests do not capture real-user pathways.
+Conversely, a component with 85% test pass rate but 95% challenge pass
+rate is flagged as having test gaps rather than product gaps. This
+dual-lens analysis prevents the “green suite, broken product” failure
+mode that §11.9 was written to eliminate.</p>
+<hr />
+<p>[<sup>1</sup>]: <code>HelixQA/CONSTITUTION.md</code>, Article XI
+§11.9 user-mandate forensic anchor (2026-04-29): “The operative rule:
+the bar for shipping is not ‘tests pass’ but ‘users can use the
+feature.’”</p>
+<p>[<sup>6</sup>]:
+<code>docs/plans/2026-04-18-full-qa-cycle-master-plan.md</code>, Phase
+10: “Final session report” including <code>FINAL-REPORT.md</code>,
+<code>logs/</code>, <code>challenges/</code>, <code>helixqa/</code>,
+<code>videos/</code>, <code>screenshots/</code>, <code>tickets/</code>,
+<code>analysis/</code>.</p>
+<p>[<sup>8</sup>]: <code>HelixQA/pkg/ticket</code> package,
+<code>EvidenceKind</code> constants (12 kinds), referenced in
+ticket-viewer <code>index.js</code> <code>buildWidget()</code> switch
+statement.</p>
+<p>[<sup>11</sup>]: <code>catalogizer-integration.md</code>, Section 2:
+HelixQA Submodule Status — pinned at <code>35deb43</code> (Phase 27.7),
+upstream at <code>0bca023</code> (Phase 29).</p>
+</body>
+</html>

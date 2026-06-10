@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-F-parallel-dynamic-testing</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-F-parallel-dynamic-testing</h1>
+</header>
+<h1 id="workstream-f-parallelsubagent-enforcement-dynamic-flow-submodules-testingqa-strategy">Workstream
+F — Parallel/Subagent Enforcement · Dynamic-Flow Submodules · Testing/QA
+Strategy</h1>
+<p><strong>Phase:</strong> PLANNING (read-only analysis).
+<strong>Date:</strong> 2026-06-10. <strong>Author:</strong> Workstream-F
+analysis subagent. <strong>Scope:</strong> <code>helix_code/</code>
+(inner Go app <code>dev.helix.code</code>),
+<code>submodules/helix_agent/</code> (<code>HelixAgent</code>),
+<code>submodules/helix_qa/</code>, <code>challenges/</code>, plus
+own-org orchestration submodules already wired in
+<code>.gitmodules</code>. <strong>Evidence rule:</strong> every claim
+cites a real <code>file:line</code> or <code>dir/</code>. ABSENT is
+marked explicitly. No fabrication.</p>
+<hr />
+<h2 id="parallel-subagent-driven-coordination-what-exists">1. Parallel /
+subagent-driven coordination — WHAT EXISTS</h2>
+<h3 id="helixcode-helix_codeinternal">1.1 HelixCode
+(<code>helix_code/internal/…</code>)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Location</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-agent coordinator (registry, task queue, results, circuit
+breakers, retry, conflict resolution by voting)</td>
+<td><code>helix_code/internal/agent/coordinator.go:11-50</code></td>
+<td><code>type Coordinator struct{ registry, tasks, taskQueue, results, workflowExecutor, circuitBreakers, retryPolicy }</code>;
+<code>CoordinatorConfig.MaxConcurrentTasks</code> default 10,
+<code>ConflictResolution: ResolutionMethodVoting</code>
+(<code>coordinator.go:38-49</code>)</td>
+</tr>
+<tr>
+<td>Multi-step workflow over agents with DAG deps</td>
+<td><code>helix_code/internal/agent/workflow.go:12-46</code></td>
+<td><code>WorkflowStep.DependsOn []string</code>,
+<code>Optional bool</code>; <code>Workflow.Steps</code>,
+<code>Results map[stepID]*task.Result</code></td>
+</tr>
+<tr>
+<td>Agent types (planner/builder/tester/reviewer/debugger/documentor) +
+Orchestrator</td>
+<td><code>helix_code/internal/agent/README.md</code></td>
+<td><code>TypePlanner…TypeDocumentor</code>;
+<code>type Orchestrator struct{ agents, coordinator, config }</code></td>
+</tr>
+<tr>
+<td>Subagent spawning — in-process AND subprocess, with git-worktree
+isolation</td>
+<td><code>helix_code/internal/agent/subagent/</code></td>
+<td><code>inprocess_spawner.go</code>,
+<code>subprocess_spawner.go</code>, <code>manager.go</code>,
+<code>worktree_integration.go</code>, <code>helper_mode.go</code></td>
+</tr>
+<tr>
+<td>Distributed worker pool over SSH (auto-install, heartbeats,
+capability-based assignment, isolation, <strong>consensus</strong>)</td>
+<td><code>helix_code/internal/worker/</code></td>
+<td><code>worker_pool.go</code>, <code>ssh_pool.go</code>,
+<code>ssh_pool_consensus.go</code>, <code>consensus.go</code>,
+<code>distributed_manager.go</code>, <code>isolation.go</code>; README
+lists “Consensus management for distributed coordination”</td>
+</tr>
+<tr>
+<td>Priority task queue + dependency resolution + checkpointing</td>
+<td><code>helix_code/internal/task/</code></td>
+<td><code>queue.go</code>
+(<code>highPriority/normalPriority/lowPriority</code> in
+<code>GetNextTask</code>), <code>dependency.go</code>,
+<code>checkpoint.go</code>, <code>manager.go</code></td>
+</tr>
+<tr>
+<td>Standalone DAG workflow executor (step deps, LLM-powered steps)</td>
+<td><code>helix_code/internal/workflow/</code></td>
+<td><code>workflow.go:12-26</code> (race-guarded <code>Workflow</code>),
+<code>executor.go</code>, README “Step dependencies (DAG
+execution)”</td>
+</tr>
+<tr>
+<td>Autonomy controller (modes, guardrails, escalation, permission)</td>
+<td><code>helix_code/internal/workflow/autonomy/</code></td>
+<td><code>controller.go</code>, <code>guardrails.go</code>,
+<code>escalation.go</code>, <code>permission.go</code>,
+<code>modes.go</code></td>
+</tr>
+<tr>
+<td>Plan-mode gating + planner approval</td>
+<td><code>helix_code/internal/workflow/planmode/</code></td>
+<td><code>mode_controller.go</code>, <code>gating.go</code>,
+<code>planner_approval_test.go</code></td>
+</tr>
+<tr>
+<td>Background workflow execution</td>
+<td><code>helix_code/internal/workflow/background.go</code></td>
+<td><code>background_test.go</code> present</td>
+</tr>
+<tr>
+<td>Planner / plan-tree / continuation tooling</td>
+<td><code>helix_code/internal/planner/</code>, <code>…/plantree/</code>,
+<code>…/continua/</code></td>
+<td><code>planner/executor.go</code>,
+<code>plantree/operations.go</code>+<code>store.go</code>,
+<code>continua/session.go</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict (HelixCode):</strong> Substantial parallel-agent
+machinery EXISTS and is self-contained inside
+<code>helix_code/internal/</code> (own coordinator + subagent spawner +
+SSH worker pool + DAG workflow + autonomy). It is NOT consumed from the
+standalone own-org orchestration submodules.</p>
+<h3 id="helixagent-submoduleshelix_agentinternal">1.2 HelixAgent
+(<code>submodules/helix_agent/internal/…</code>)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Location</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Graph-based (LangGraph-style) agentic workflow engine</td>
+<td><code>submodules/helix_agent/internal/agentic/workflow.go:28-194</code></td>
+<td><code>WorkflowGraph</code>, <code>Node</code>,
+<code>NodeType</code>, <code>Edge</code>, <code>NodeHandler</code>,
+<code>WorkflowState</code>, <code>NodeExecution</code>; README: node
+types <code>agent/tool/condition/parallel/human</code></td>
+</tr>
+<tr>
+<td>Agent registry (18+ CLI agents) + sub-namespaces
+dream/kairos/modes/subagent/swarm/voice/yolo</td>
+<td><code>submodules/helix_agent/internal/agents/</code></td>
+<td><code>registry.go</code>; dirs
+<code>dream/ kairos/ modes/ subagent/ swarm/ voice/ yolo/</code></td>
+</tr>
+<tr>
+<td>Subagent orchestrator + manager</td>
+<td><code>submodules/helix_agent/internal/agents/subagent/</code></td>
+<td><code>orchestrator.go</code>, <code>manager.go</code>,
+<code>types.go</code></td>
+</tr>
+<tr>
+<td>Multi-agent <strong>swarm</strong> (XML comms, colors, roles —
+Claude-Code-team-style)</td>
+<td><code>submodules/helix_agent/internal/agents/swarm/swarm.go:1-30</code></td>
+<td><code>package swarm</code> “multi-agent swarm enhancements”,
+<code>AgentColor</code>, <code>AgentRole</code>; imports
+<code>digital.vasic.concurrency/pkg/safe</code></td>
+</tr>
+<tr>
+<td>Concurrency primitives (semaphore, non-blocking, worker pool,
+deadlock detection)</td>
+<td><code>submodules/helix_agent/internal/concurrency/</code></td>
+<td><code>semaphore.go</code>, <code>nonblocking.go</code>,
+<code>worker_pool.go</code>, <code>deadlock/</code></td>
+</tr>
+<tr>
+<td>Advanced planning: Tree-of-Thoughts, MCTS (MASTER framework),
+Hierarchical</td>
+<td><code>submodules/helix_agent/internal/planning/</code></td>
+<td><code>tree_of_thoughts.go:1</code>, <code>mcts.go:1-13</code>
+(imports <code>digital.vasic.concurrency/pkg/safe</code>),
+<code>hiplan.go</code></td>
+</tr>
+<tr>
+<td>Background task engine (adaptive worker pool, stuck detector,
+resource monitor)</td>
+<td><code>submodules/helix_agent/internal/background/</code></td>
+<td><code>adaptive_worker_pool_test.go</code>,
+<code>stuck_detector.go</code>, <code>resource_monitor.go</code>,
+<code>task_queue.go</code></td>
+</tr>
+<tr>
+<td>Ensemble (multi-instance, synchronization, background) + placement
+(capability prober/planner)</td>
+<td><code>submodules/helix_agent/internal/ensemble/</code>,
+<code>…/placement/</code></td>
+<td><code>ensemble/multi_instance/</code>,
+<code>placement/capability.go</code>+<code>planner.go</code>+<code>prober.go</code></td>
+</tr>
+<tr>
+<td>CLI instance manager + event bus (drives external CLI agents)</td>
+<td><code>submodules/helix_agent/internal/clis/</code></td>
+<td><code>instance_manager.go</code>, <code>event_bus.go</code>,
+per-agent dirs <code>aider/ claude/ claude_code/ kiro/ …</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="own-org-orchestration-submodules-already-in-.gitmodules">1.3
+Own-org orchestration submodules ALREADY in
+<code>.gitmodules</code></h3>
+<p><code>.gitmodules</code> already wires reusable, decoupled own-org
+modules (consumed today mainly by HelixAgent):</p>
+<ul>
+<li><code>submodules/agentic</code> → <code>vasic-digital/Agentic</code>
+(<code>module digital.vasic.agentic</code>)</li>
+<li><code>submodules/concurrency</code> →
+<code>vasic-digital/Concurrency</code>
+(<code>module digital.vasic.concurrency</code>, go 1.25.0)</li>
+<li><code>submodules/planning</code> →
+<code>digital.vasic.planning</code> (go 1.24)</li>
+<li><code>submodules/llm_orchestrator</code> →
+<code>HelixDevelopment/LLMOrchestrator</code></li>
+<li><code>submodules/debate_orchestrator</code> →
+<code>HelixDevelopment/DebateOrchestrator</code></li>
+</ul>
+<p><code>helix_code/go.mod</code> requires own-org
+<code>digital.vasic.{debate, helixqa, helixspecifier, lazy, containers, challenges}</code>
+with <code>replace … =&gt; ../submodules/…</code>. It does
+<strong>NOT</strong> require
+<code>digital.vasic.{agentic, concurrency, planning}</code> nor
+<code>LLMOrchestrator</code>. Grep for those imports across
+<code>helix_code/internal</code> + <code>helix_code/cmd</code> returns
+ONLY <code>dev.helix.code/internal/agent/subagent</code> (its own
+internal package).</p>
+<h3 id="the-gap-parallelsubagent-enforcement">1.4 THE GAP
+(parallel/subagent enforcement)</h3>
+<p>The request: <em>“all work HelixCode performs can be done by multiple
+coordinated parallel agents; subagent-driven used as much as
+possible.”</em></p>
+<ol type="1">
+<li><strong>Duplication, not reuse (CONST-051/§11.4.74 risk).</strong>
+HelixCode re-implements coordination/concurrency/planning inside
+<code>helix_code/internal/{agent,worker,workflow,task}</code> while
+equivalent decoupled own-org modules (<code>agentic</code>,
+<code>concurrency</code>, <code>planning</code>, <code>swarm</code> in
+helix_agent) already exist and are NOT imported. There is no shared
+coordination contract between HelixCode and HelixAgent — two parallel
+implementations of the same concern.</li>
+<li><strong>No universal “every operation is an agent-dispatchable unit”
+abstraction.</strong> HelixCode’s coordinator/workflow cover
+<em>agent-typed</em> steps, but ordinary HelixCode operations
+(model-access, repomap build, LLM generate, command exec) are not
+uniformly modeled as parallel-dispatchable task units behind one
+scheduler. Subagent spawning (<code>agent/subagent/</code>) exists but
+is not the default execution substrate for all work.</li>
+<li><strong>Swarm/ensemble parity missing in HelixCode.</strong>
+HelixAgent has <code>agents/swarm</code> +
+<code>ensemble/multi_instance</code>; HelixCode has voting
+conflict-resolution in the coordinator but no swarm/ensemble
+equivalent.</li>
+<li><strong>No cross-process agent bus shared with HelixAgent.</strong>
+HelixAgent has <code>clis/event_bus.go</code> +
+<code>instance_manager.go</code> to drive external agents; HelixCode has
+no symmetric bus to be driven-by / drive HelixAgent.</li>
+</ol>
+<p><strong>Closing the gap</strong> = extract the shared
+coordination/flow concern into decoupled own-org submodule(s) (below),
+wire BOTH HelixCode and HelixAgent to consume them via
+<code>replace</code>/SDK, and make subagent-dispatch the default path
+per §11.4.70/§11.4.103.</p>
+<hr />
+<h2 id="other-execution-models-dynamic-flows-submodule-proposal">2.
+Other execution models / dynamic flows — submodule proposal</h2>
+<h3 id="execution-models-that-exist-today">2.1 Execution models that
+EXIST today</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model</th>
+<th>Where</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DAG / dependency workflow</strong></td>
+<td><code>helix_code/internal/workflow/</code>
+(<code>executor.go</code>),
+<code>helix_code/internal/agent/workflow.go</code>
+(<code>DependsOn</code>)</td>
+<td>static step graph; deps resolved at run</td>
+</tr>
+<tr>
+<td><strong>Graph / state-machine (LangGraph-style)</strong></td>
+<td><code>submodules/helix_agent/internal/agentic/workflow.go</code>
+(<code>WorkflowGraph</code>/<code>Node</code>/<code>Edge</code>, node
+types incl. <code>condition</code>, <code>parallel</code>,
+<code>human</code>)</td>
+<td>dynamic-ish (conditional edges) but lives ONLY in helix_agent</td>
+</tr>
+<tr>
+<td><strong>Tree-of-Thoughts / MCTS / Hierarchical
+planning</strong></td>
+<td><code>submodules/helix_agent/internal/planning/</code></td>
+<td>search-based planning; HelixCode-side ABSENT</td>
+</tr>
+<tr>
+<td><strong>Priority queue scheduling</strong></td>
+<td><code>helix_code/internal/task/queue.go</code></td>
+<td>high/normal/low</td>
+</tr>
+<tr>
+<td><strong>Autonomy / plan-mode controllers</strong></td>
+<td><code>helix_code/internal/workflow/{autonomy,planmode}/</code></td>
+<td>gating + guardrails</td>
+</tr>
+<tr>
+<td><strong>Debate / multi-orchestrator</strong></td>
+<td><code>submodules/{debate_orchestrator,llm_orchestrator}</code></td>
+<td>own-org submodules; HelixCode requires
+<code>digital.vasic.debate</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ABSENT in BOTH repos as named packages:</strong>
+<code>pipeline</code>, <code>dag</code> (as a standalone reusable
+engine), <code>dataflow</code>, <code>event-driven/reactive flow</code>,
+<code>saga</code>, <code>state-machine</code> (standalone),
+<code>behavior-tree</code>.
+<code>ls helix_code/internal | grep -iE &#39;flow|graph|dag|pipeline|orchestr|swarm&#39;</code>
+→ only <code>workflow</code>.</p>
+<h3 id="proposed-new-decoupled-submodules-under-helixdevelopment-public-created-via-ghglab">2.2
+Proposed NEW decoupled submodules (under HelixDevelopment, public,
+created via <code>gh</code>/<code>glab</code>)</h3>
+<p>Per §11.4.74 (catalogue-first) the existing
+<code>vasic-digital/Agentic</code> graph engine +
+<code>Concurrency</code> + <code>Planning</code> should be the FIRST
+reuse candidates — <strong>extend them</strong> rather than greenfield
+where ≥80% matches. Net-new flow engines that have no existing home
+become new submodules. Candidate names (project-not-aware, reusable,
+modular — CONST-051(B)):</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Proposed submodule</th>
+<th>Org/repo (to create)</th>
+<th>Go module id</th>
+<th>Execution model it owns</th>
+<th>Reuse/extend note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>flow_engine</strong></td>
+<td><code>HelixDevelopment/FlowEngine</code></td>
+<td><code>dev.helix.flow</code></td>
+<td>Dynamic flow runtime: typed nodes, conditional + dynamic edges,
+parallel/fan-out, human-in-loop, sub-flow nesting, runtime
+re-planning</td>
+<td>EXTEND <code>vasic-digital/Agentic</code>
+(<code>WorkflowGraph</code>) if it can host this; else new</td>
+</tr>
+<tr>
+<td><strong>dag_orchestrator</strong></td>
+<td><code>HelixDevelopment/DagOrchestrator</code></td>
+<td><code>dev.helix.dag</code></td>
+<td>Pure data/dependency DAG scheduler (topological, fan-in/out,
+partial-failure, retries) decoupled from agents</td>
+<td>new; HelixCode <code>workflow/executor.go</code> logic generalised
+out</td>
+</tr>
+<tr>
+<td><strong>pipeline_runtime</strong></td>
+<td><code>HelixDevelopment/PipelineRuntime</code></td>
+<td><code>dev.helix.pipeline</code></td>
+<td>Linear/branching staged pipeline (transform→validate→sink) with
+backpressure</td>
+<td>new</td>
+</tr>
+<tr>
+<td><strong>agent_mesh</strong> (or <strong>swarm_kit</strong>)</td>
+<td><code>HelixDevelopment/AgentMesh</code></td>
+<td><code>dev.helix.mesh</code></td>
+<td>Multi-agent swarm/ensemble: roles, colored agents, XML/structured
+comms, voting/consensus, parallel coordination</td>
+<td>EXTEND helix_agent <code>agents/swarm</code> + <code>ensemble</code>
+— lift into shared module</td>
+</tr>
+<tr>
+<td><strong>planning_search</strong></td>
+<td>reuse <code>vasic-digital/Planning</code></td>
+<td><code>digital.vasic.planning</code></td>
+<td>ToT / MCTS / hierarchical search-based planning</td>
+<td>REUSE existing submodule (already cloned at
+<code>submodules/planning</code>); add HelixCode binding</td>
+</tr>
+<tr>
+<td><strong>flow_dsl</strong> (optional)</td>
+<td><code>HelixDevelopment/FlowDSL</code></td>
+<td><code>dev.helix.flowdsl</code></td>
+<td>Declarative YAML/JSON flow definition + validator + loader feeding
+the above engines</td>
+<td>new; composes §11.4.106 docs-chain-style YAML contexts</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Naming respects CONST-052 lowercase snake_case at the directory/path
+layer (<code>submodules/flow_engine/</code>), repo display names
+CamelCase per host convention.</p>
+</blockquote>
+<h3 id="wiring-integration-points-interfaces-to-implement">2.3 Wiring /
+integration points (interfaces to implement)</h3>
+<p>Each new engine must expose a small, project-not-aware Go interface;
+BOTH HelixCode and HelixAgent implement adapters (config-injection only,
+no hardcoded parent reach — CONST-051(B)).</p>
+<ul>
+<li><strong>Node/Step contract:</strong>
+<code>type Node interface { ID() string; Run(ctx, *State, Input) (Output, error); DependsOn() []string }</code>
+— HelixCode adapts <code>helix_code/internal/workflow.Step</code> +
+<code>agent.WorkflowStep</code>; HelixAgent adapts
+<code>agentic.Node</code>.</li>
+<li><strong>Scheduler contract:</strong>
+<code>type Scheduler interface { Submit(Unit) Handle; Await(Handle) (Result, error); Parallelism() int }</code>
+— backed by HelixCode <code>agent/subagent</code> spawner and
+<code>worker</code> SSH pool; backed by HelixAgent
+<code>concurrency.WorkerPool</code> + <code>background</code>.</li>
+<li><strong>Dispatch sink:</strong>
+<code>type Dispatcher interface { Dispatch(ctx, Task) (Result, error) }</code>
+so a flow node can dispatch to (a) in-process subagent, (b) subprocess
+subagent, (c) SSH worker, (d) external CLI agent via helix_agent
+<code>clis/event_bus</code>.</li>
+<li><strong>Conflict/consensus port:</strong> reuse HelixCode
+<code>agent</code> voting (<code>ResolutionMethodVoting</code>) +
+<code>worker/consensus.go</code>; expose as <code>Resolver</code>
+interface.</li>
+<li><strong>HelixCode wire-in:</strong> <code>helix_code/go.mod</code>
+add <code>require dev.helix.flow …</code> +
+<code>replace dev.helix.flow =&gt; ../submodules/flow_engine</code>;
+register flow tools in
+<code>helix_code/internal/agent/coordinator.go</code> +
+<code>workflow/executor.go</code> as the execution substrate.</li>
+<li><strong>HelixAgent wire-in:</strong> replace
+<code>internal/agentic</code> internals with the shared
+<code>flow_engine</code>, keeping <code>agentic</code> as a thin
+adapter; lift <code>agents/swarm</code>+<code>ensemble</code> into
+<code>agent_mesh</code>.</li>
+<li><strong>HelixQA wire-in:</strong> new flows become testable units —
+register flow banks in <code>helix_qa/banks/</code> and challenges in
+<code>challenges/</code>.</li>
+<li><strong>Manifest:</strong> each new submodule ships
+<code>helix-deps.yaml</code> (CONST-054) declaring
+<code>concurrency</code>/<code>planning</code> deps so consumers
+reconstruct the graph at root (no nested own-org chains —
+CONST-051(C)).</li>
+</ul>
+<h3 id="deep-web-research-topics-needed-do-not-research-now-list-only">2.4
+Deep-web-research topics needed (DO NOT research now — list only)</h3>
+<ol type="1">
+<li>LangGraph / LangChain graph-execution semantics (conditional edges,
+checkpointing, human-in-loop) — latest API (§11.4.99).</li>
+<li>Temporal / Cadence durable-workflow + saga patterns in Go (durable
+execution, signals, queries).</li>
+<li>Apache Airflow / Dagster / Prefect DAG-scheduler design (dynamic
+task mapping, partial-retry, backfill).</li>
+<li>Behavior trees vs state machines vs DAGs for agent control flow —
+tradeoffs.</li>
+<li>Actor model / supervision trees (Akka, Proto.Actor, Go
+<code>ergo</code>) for swarm supervision + fault isolation.</li>
+<li>MCTS / Tree-of-Thoughts / Graph-of-Thoughts / MASTER framework
+latest papers (validate <code>planning/mcts.go</code> claims).</li>
+<li>Multi-agent orchestration frameworks: AutoGen, CrewAI, OpenAI Swarm,
+MetaGPT — coordination + handoff protocols.</li>
+<li>Go concurrency-pattern correctness: structured concurrency,
+errgroup, semaphore-weighted, deadlock detection (validate
+<code>concurrency/deadlock</code>).</li>
+<li>Workflow-as-data DSL design (YAML/CUE/HCL) + schema validation for
+<code>flow_dsl</code>.</li>
+<li>Distributed consensus for agent voting (Raft/Paxos-lite) — relate to
+<code>worker/ssh_pool_consensus.go</code>.</li>
+<li>Backpressure / flow-control for streaming pipelines (reactive
+streams) for <code>pipeline_runtime</code>.</li>
+<li>gh/glab repo-creation + branch-protection + multi-upstream
+(GitHub+GitLab+GitFlic+GitVerse) automation for new public
+submodules.</li>
+</ol>
+<hr />
+<h2 id="testing-qa-coverage-matrix">3. Testing / QA — coverage
+matrix</h2>
+<h3 id="helixqa-submoduleshelix_qa-present-must-be-pulled-to-latest">3.1
+HelixQA (<code>submodules/helix_qa/</code>) — present, must be pulled to
+latest</h3>
+<ul>
+<li><strong>State:</strong> README banner says <strong>round 219,
+2026-05-19</strong> → STALE vs today 2026-06-10. <strong>TASK (do not
+run now):</strong>
+<code>git -C submodules/helix_qa fetch --all --prune &amp;&amp; git -C submodules/helix_qa pull</code>
+then bump pointer per §11.4.71 (do NOT fetch in this PLANNING
+pass).</li>
+<li><strong>Structure:</strong> <code>banks/</code> (100+ YAML/JSON test
+banks incl. <code>helixcode-*.yaml</code>, <code>nexus-*</code>,
+<code>ddos-ratelimit-comprehensive.yaml</code>,
+<code>security-comprehensive.yaml</code>,
+<code>benchmarking-baselines.yaml</code>),
+<code>tests/{benchmark,e2e,integration,security,stress}</code>,
+<code>cmd/helixqa</code> (+ <code>autonomous</code> subcommand),
+<code>challenges/scripts/</code>, <code>helixqa-bridge</code>.</li>
+<li><strong>HelixQA’s own ledger</strong>
+(<code>submodules/helix_qa/docs/test-coverage.md</code>) declares all
+<strong>15 test-type slots FILLED</strong> (unit, integration, e2e,
+full-automation, security, ddos, scaling, chaos, stress, performance,
+benchmarking, ui, ux, Challenges, autonomous-QA-session) with per-row
+evidence pathways.</li>
+<li><strong>HelixCode↔︎HelixQA bridge:</strong>
+<code>helix_code/internal/helixqa/{wrapper.go,translator.go}</code>;
+Makefile <code>helixqa-build</code> / <code>helixqa-test</code> /
+<code>helixqa-challenge</code> / <code>helixqa-bump-submodules</code>
+(<code>helix_code/Makefile:694-720</code>).
+<code>helix_code/go.mod</code> requires
+<code>digital.vasic.helixqa</code> (replace →
+<code>../submodules/helix_qa</code>).</li>
+</ul>
+<h3 id="helixcode-test-type-matrix-where-each-lives-today">3.2 HelixCode
+test-type matrix — WHERE EACH LIVES TODAY</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Test type</th>
+<th>HelixCode location</th>
+<th>Status / evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>unit</td>
+<td><code>helix_code/internal/**/*_test.go</code>,
+<code>helix_code/tests/unit/</code></td>
+<td>PRESENT; Makefile <code>test</code> (<code>Makefile:107</code>),
+<code>test-unit-full</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>integration</td>
+<td><code>helix_code/tests/integration/</code>
+(<code>api_integration_test.go</code>, <code>approval_test.go</code>,
+…)</td>
+<td>PRESENT; <code>test-integration-full</code> (<code>:222</code>),
+<code>-tags=integration</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>e2e</td>
+<td><code>helix_code/tests/e2e/</code>
+(<code>complete_workflow_test.go</code>, <code>challenges/</code>,
+<code>core/</code>, docker-compose)</td>
+<td>PRESENT; <code>test-e2e-full</code> (<code>:228</code>)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>full-automation</td>
+<td>HelixQA autonomous sessions +
+<code>helix_code/tests/automation/</code></td>
+<td>PRESENT (delegated to HelixQA <code>autonomous</code>);
+<code>test-complete</code> (<code>:246</code>)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>security</td>
+<td><code>helix_code/tests/security/</code> (<code>owasp_test.go</code>,
+<code>authn/authz</code>, <code>tools_security_test.go</code>) +
+<code>make security-scan*</code> (<code>Makefile:751-775</code>:
+gosec/trivy/grype/kics/semgrep/snyk/sonarqube)</td>
+<td>PRESENT; <code>test-security-full</code> (<code>:234</code>)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>ddos</td>
+<td>HelixQA <code>banks/ddos-ratelimit-comprehensive.yaml</code> +
+<code>challenges/scripts/ddos_health_flood_challenge.sh</code></td>
+<td>HelixCode-local harness ABSENT — relies on HelixQA/challenges</td>
+</tr>
+<tr>
+<td>7</td>
+<td>scaling</td>
+<td>HelixQA
+<code>challenges/scripts/scaling_horizontal_challenge.sh</code></td>
+<td>HelixCode-local ABSENT — delegated</td>
+</tr>
+<tr>
+<td>8</td>
+<td>chaos</td>
+<td><code>helix_code/tests/stresschaos/chaos.go</code>; Makefile
+<code>stress-chaos</code> (<code>:114</code>) covers ~30 internal pkgs
+<code>-race</code></td>
+<td>PRESENT (rich)</td>
+</tr>
+<tr>
+<td>9</td>
+<td>stress</td>
+<td><code>helix_code/tests/stresschaos/stresschaos.go</code>; per-pkg
+<code>*_stress_test.go</code>
+(e.g. <code>internal/worker/worker_pool_stress_test.go</code>,
+<code>task/task_stress_test.go</code>,
+<code>agent/agent_stress_test.go</code>,
+<code>workflow/workflow_stress_test.go</code>)</td>
+<td>PRESENT (rich)</td>
+</tr>
+<tr>
+<td>10</td>
+<td>performance</td>
+<td><code>helix_code/tests/performance/</code>
+(<code>benchmark_test.go</code>,
+<code>competitor_baseline_test.go</code>, <code>pgo_test.go</code>,
+<code>pprof_harness_test.go</code>, <code>scenarios/</code>)</td>
+<td>PRESENT; <code>test-benchmark</code> (<code>:157</code>)</td>
+</tr>
+<tr>
+<td>11</td>
+<td>benchmarking</td>
+<td>same as 10 + PGO (<code>Makefile:70-95</code>
+<code>pgo-refresh</code>) + HelixQA
+<code>banks/benchmarking-baselines.yaml</code></td>
+<td>PRESENT</td>
+</tr>
+<tr>
+<td>12</td>
+<td>ui</td>
+<td>applications terminal-ui/desktop tests + HelixQA
+<code>ui_terminal_interaction_challenge.sh</code></td>
+<td>HelixCode-local UI test harness THIN — mostly delegated to
+HelixQA</td>
+</tr>
+<tr>
+<td>13</td>
+<td>ux</td>
+<td>HelixQA <code>ux_end_to_end_flow_challenge.sh</code></td>
+<td>HelixCode-local ABSENT — delegated</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Challenges</td>
+<td><code>challenges/</code> submodule (banks
+<code>p1-f06…p2-f24</code>),
+<code>helix_code/tests/e2e/challenges/</code></td>
+<td>PRESENT</td>
+</tr>
+<tr>
+<td>15</td>
+<td>autonomous-QA-session</td>
+<td>HelixQA <code>cmd/helixqa autonomous</code> +
+<code>pkg/{autonomous,issuedetector,session}</code></td>
+<td>PRESENT (in HelixQA)</td>
+</tr>
+<tr>
+<td>(mut)</td>
+<td>§1.1 paired-mutation meta-tests</td>
+<td><code>helix_code/tests/stresschaos/stresschaos_meta_test.go</code>;
+Makefile <code>stress-chaos-meta</code> (<code>:121</code>)</td>
+<td>PRESENT</td>
+</tr>
+<tr>
+<td>(regr)</td>
+<td>regression-guard</td>
+<td><code>helix_code/tests/regression/</code></td>
+<td>PRESENT (dir exists)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>HelixCode-side coverage GAPS (must be filled or explicitly
+delegated-with-evidence):</strong> ddos (6), scaling (7), ux (13) have
+NO HelixCode-local harness — they exist only as HelixQA banks/challenge
+scripts. ui (12) is thin HelixCode-side. Per CONST-050(B) a delegated
+slot is acceptable only if the HelixQA/challenge asset truly exercises
+HelixCode and captures evidence; otherwise it is a §11.4 coverage
+bluff.</p>
+<h3 id="what-the-new-features-each-need-per-test-type">3.3 What the NEW
+features each need (per test type)</h3>
+<p>For each new feature (model-access, helixagent-exposure, cli-bridge,
+parallel-agents, dynamic-flows) the four-layer floor (§11.4.4(b)) +
+every applicable type:</p>
+<ul>
+<li><strong>model-access</strong> (LLMsVerifier-sourced model/provider
+access): unit (selection/filtering); integration (real verifier data per
+CONST-037, real provider HTTP); e2e (<code>/api/v1/llm/generate</code>
+real output); security (key handling, no leak CONST-042); ddos/scaling
+(rate-limit + concurrent generate); stress/chaos (provider timeout/kill
+injection); performance/benchmarking (tokens/latency, ties §11.4.141);
+Challenge + HelixQA bank <code>helixcode-providers-verifier.yaml</code>
+(exists). New banks for new providers.</li>
+<li><strong>helixagent-exposure</strong> (HelixCode capabilities exposed
+to/through HelixAgent): integration (cross-module call
+HelixCode↔︎helix_agent <code>clis/event_bus</code>); e2e (full
+agent-driven flow); contract tests on the shared Scheduler/Dispatcher
+interfaces; chaos (agent crash mid-task → consensus recovery);
+autonomous-QA session driving HelixAgent against HelixCode.</li>
+<li><strong>cli-bridge</strong> (drive external CLI agents —
+aider/claude/cline/…): integration (spawn real CLI per
+<code>clis/&lt;agent&gt;/</code>); e2e (round-trip prompt→edit→commit);
+security (sandboxed shell —
+<code>tests/integration/background_shell_test.go</code> pattern); ui/ux
+(terminal interaction via HelixQA); stress (N concurrent CLI instances);
+Challenge banks <code>cli-agents-comprehensive.yaml</code>,
+<code>cli-agent-e2e-flow.yaml</code> (exist in HelixQA).</li>
+<li><strong>parallel-agents</strong> (coordinated multi-agent default):
+unit (scheduler, conflict resolver); integration (subagent spawn
+in-process+subprocess+SSH); e2e (multi-agent workflow completes);
+<strong>stress</strong> (N≥10 parallel per §11.4.85 — extend
+<code>agent_stress_test.go</code>/<code>worker_pool_stress_test.go</code>);
+<strong>chaos</strong> (kill agent/worker mid-flight, partition — extend
+<code>worker_pool_chaos_test.go</code>/<code>consensus_stress_chaos_test.go</code>);
+scaling (horizontal worker scale-out); performance (throughput vs
+parallelism); §1.1 mutation (planted deadlock/leak detected —
+<code>stresschaos_meta_test.go</code> pattern).</li>
+<li><strong>dynamic-flows</strong> (new flow_engine/dag/pipeline/mesh
+submodules): EACH new submodule needs its OWN full matrix
+(unit→Challenge) per CONST-050(B), decoupled + standalone-testable
+(CONST-051); HelixCode + HelixAgent each need integration+e2e adapter
+tests; flow definitions become HelixQA banks; chaos = node
+failure/partial-DAG-failure injection; stress = wide fan-out + deep
+nesting; ux = human-in-loop node flows.</li>
+</ul>
+<h3 id="standing-qa-tasks-do-not-execute-now">3.4 Standing QA tasks (do
+not execute now)</h3>
+<ol type="1">
+<li><code>git fetch &amp;&amp; pull</code> HelixQA + challenges +
+agentic/concurrency/planning submodules to latest; bump
+<code>.gitmodules</code> pointers (§11.4.71).</li>
+<li>Re-run HelixQA <code>docs/test-coverage.md</code> round to confirm
+15 slots still FILLED post-pull (CONST-055).</li>
+<li>Add HelixCode-local ddos/scaling/ux harnesses OR document delegation
+with captured HelixQA evidence per slot.</li>
+<li>Author HelixQA banks + Challenges for each new submodule and each
+new feature before any close-out (§11.4.135 regression guard per
+fix).</li>
+</ol>
+<hr />
+<h2 id="executive-summary-12-lines">Executive summary (12 lines)</h2>
+<ol type="1">
+<li><strong>Parallel-agent capability EXISTS, twice:</strong> HelixCode
+has a self-contained stack (<code>agent/coordinator.go</code>,
+<code>agent/subagent/</code> in-process+subprocess+worktree spawner, SSH
+<code>worker/</code> pool with consensus, DAG <code>workflow/</code>,
+<code>autonomy</code>+<code>planmode</code>).</li>
+<li>HelixAgent independently has graph-flow
+(<code>agentic/workflow.go</code> WorkflowGraph),
+<code>agents/swarm</code>, <code>ensemble</code>,
+<code>planning/{tree_of_thoughts,mcts,hiplan}</code>,
+<code>concurrency/</code>, <code>clis/event_bus</code>.</li>
+<li><strong>Gap:</strong> the two are duplicated, not shared; HelixCode
+does NOT import own-org
+<code>agentic</code>/<code>concurrency</code>/<code>planning</code>
+(only its own <code>internal/agent/subagent</code>); no universal “every
+operation is a parallel-dispatchable agent unit” substrate; no
+swarm/ensemble parity in HelixCode.</li>
+<li>Own-org reuse candidates already cloned:
+<code>submodules/{agentic, concurrency, planning, llm_orchestrator, debate_orchestrator}</code>
+— extend-don’t-reimplement (§11.4.74).</li>
+<li><strong>Proposed NEW decoupled submodules (HelixDevelopment, public
+via gh/glab):</strong> <code>flow_engine</code> (dev.helix.flow),
+<code>dag_orchestrator</code> (dev.helix.dag),
+<code>pipeline_runtime</code> (dev.helix.pipeline),
+<code>agent_mesh</code>/<code>swarm_kit</code> (dev.helix.mesh),
+optional <code>flow_dsl</code> (dev.helix.flowdsl).</li>
+<li><strong>Reuse-not-new:</strong> <code>planning_search</code> ←
+existing <code>vasic-digital/Planning</code>; <code>flow_engine</code>
+should EXTEND <code>vasic-digital/Agentic</code> graph engine where ≥80%
+matches.</li>
+<li><strong>Wiring:</strong> shared
+<code>Node</code>/<code>Scheduler</code>/<code>Dispatcher</code>/<code>Resolver</code>
+Go interfaces; HelixCode <code>go.mod</code>
+<code>require</code>+<code>replace</code>; register in
+<code>coordinator.go</code>+<code>workflow/executor.go</code>;
+HelixAgent keeps <code>agentic</code> as thin adapter; each submodule
+ships <code>helix-deps.yaml</code> (CONST-054, no nested own-org
+chains).</li>
+<li><strong>Research topics (12, not run now):</strong> LangGraph,
+Temporal/saga, Airflow/Dagster/Prefect DAG, behavior-trees vs FSM,
+actor/supervision, MCTS/ToT/GoT, Go structured concurrency, workflow
+DSL, agent-voting consensus, backpressure, AutoGen/CrewAI/Swarm, gh/glab
+multi-upstream repo creation.</li>
+<li><strong>Testing — present:</strong> HelixCode strong on
+unit/integration/e2e/security/chaos/stress/performance/benchmarking +
+§1.1 mutation meta-tests + regression dir; HelixQA ledger declares all
+15 slots FILLED.</li>
+<li><strong>Test-type GAPS (HelixCode-local):</strong> ddos (6), scaling
+(7), ux (13) have NO HelixCode-local harness (HelixQA/challenge-only);
+ui (12) thin — delegated slots risk a §11.4 coverage bluff unless the
+delegated asset truly exercises HelixCode with captured evidence.</li>
+<li><strong>HelixQA is STALE</strong> (README round 219 / 2026-05-19) —
+must be fetched+pulled to latest and pointer-bumped (§11.4.71) before
+relied on; CONST-055 post-pull re-verify required.</li>
+<li><strong>New features</strong> (model-access, helixagent-exposure,
+cli-bridge, parallel-agents, dynamic-flows) each need the full per-type
+matrix + four-layer floor; every new flow submodule needs its OWN
+standalone matrix + HelixQA banks + Challenges + §11.4.135 regression
+guards before close-out.</li>
+</ol>
+</body>
+</html>

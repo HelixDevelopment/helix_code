@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ADR-008-mobile-platform-strategy</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ADR-008-mobile-platform-strategy</h1>
+</header>
+<h1 id="adr-008-mobile-platform-strategy">ADR-008: Mobile Platform
+Strategy</h1>
+<h2 id="status">Status</h2>
+<p>Accepted</p>
+<h2 id="date">Date</h2>
+<p>2026-01-08</p>
+<h2 id="context">Context</h2>
+<p>HelixCode aims to be accessible from multiple platforms including
+mobile devices. The platform needs mobile support for:</p>
+<ol type="1">
+<li><strong>iOS and Android</strong>: Standard mobile platforms</li>
+<li><strong>Aurora OS</strong>: Russian mobile operating system</li>
+<li><strong>Harmony OS</strong>: Huawei’s mobile operating system</li>
+</ol>
+<p>Mobile requirements include: - Task monitoring and management -
+Worker status visibility - Notification reception - Authentication and
+session management - Theme customization - Dashboard access</p>
+<p>The challenge was enabling mobile access to HelixCode while: -
+Maximizing code reuse between platforms - Maintaining performance on
+resource-constrained devices - Handling connectivity issues gracefully -
+Providing native user experiences - Supporting platform-specific
+distribution</p>
+<h2 id="decision">Decision</h2>
+<p>We implemented a shared Go core library (<code>mobile-core</code>)
+that compiles to native bindings for each platform using gomobile, with
+platform-specific UI layers built natively.</p>
+<h3 id="architecture">Architecture</h3>
+<pre><code>┌────────────────────────────────────────────────────────────────┐
+│                    Platform Applications                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │   iOS App    │  │ Android App  │  │ Aurora/Harmony App   │  │
+│  │  (Swift UI)  │  │  (Kotlin)    │  │    (Qt/Native)       │  │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘  │
+│         │                 │                      │              │
+│         └─────────────────┼──────────────────────┘              │
+│                           │                                     │
+│                    ┌──────▼──────┐                              │
+│                    │ Mobile Core │                              │
+│                    │    (Go)     │                              │
+│                    └──────┬──────┘                              │
+│                           │                                     │
+│         ┌─────────────────┼─────────────────────┐              │
+│         │                 │                     │              │
+│  ┌──────▼──────┐   ┌─────▼──────┐    ┌────────▼────────┐      │
+│  │   Config    │   │   Task     │    │    Worker       │      │
+│  │   Module    │   │   Module   │    │    Module       │      │
+│  └─────────────┘   └────────────┘    └─────────────────┘      │
+│         │                 │                     │              │
+│         └─────────────────┼─────────────────────┘              │
+│                           │                                     │
+│                    ┌──────▼──────┐                              │
+│                    │ HTTP Client │                              │
+│                    │  (Server)   │                              │
+│                    └─────────────┘                              │
+└────────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="shared-mobile-core">Shared Mobile Core</h3>
+<p>Located in <code>shared/mobile-core/mobile.go</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MobileCore <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    config             <span class="op">*</span>config<span class="op">.</span>Config</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    db                 <span class="op">*</span>database<span class="op">.</span>Database</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    taskManager        <span class="op">*</span>task<span class="op">.</span>TaskManager</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    workerManager      <span class="op">*</span>worker<span class="op">.</span>WorkerManager</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    llmProvider        llm<span class="op">.</span>Provider</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    notificationEngine <span class="op">*</span>notification<span class="op">.</span>NotificationEngine</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    server             <span class="op">*</span>server<span class="op">.</span>Server</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    themeManager       <span class="op">*</span>ThemeManager</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Mobile-specific state</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    isConnected  <span class="dt">bool</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    currentUser  <span class="dt">string</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    sessionToken <span class="dt">string</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    mu           sync<span class="op">.</span>RWMutex</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="exported-functions-gomobile-bindings">Exported Functions
+(gomobile bindings)</h3>
+<p>All public methods are exported for mobile binding:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">//export NewMobileCore</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMobileCore<span class="op">()</span> <span class="op">*</span>MobileCore</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">//export Initialize</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> Initialize<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">//export Connect</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> Connect<span class="op">(</span>serverURL<span class="op">,</span> username<span class="op">,</span> password <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">//export Disconnect</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> Disconnect<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">//export IsConnected</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> IsConnected<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">//export GetDashboardData</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> GetDashboardData<span class="op">()</span> <span class="dt">string</span>  <span class="co">// Returns JSON</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">//export GetTasks</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> GetTasks<span class="op">()</span> <span class="dt">string</span>  <span class="co">// Returns JSON</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">//export GetWorkers</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> GetWorkers<span class="op">()</span> <span class="dt">string</span>  <span class="co">// Returns JSON</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">//export CreateTask</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> CreateTask<span class="op">(</span>name<span class="op">,</span> description <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">//export SendNotification</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> SendNotification<span class="op">(</span>title<span class="op">,</span> message<span class="op">,</span> notificationType <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">//export GetTheme</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> GetTheme<span class="op">()</span> <span class="dt">string</span>  <span class="co">// Returns JSON</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">//export SetTheme</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> SetTheme<span class="op">(</span>themeName <span class="dt">string</span><span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">//export Close</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span></span></code></pre></div>
+<h3 id="data-exchange-format">Data Exchange Format</h3>
+<p>All complex data exchanged as JSON strings:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> getDashboardDataInternal<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    data <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;isConnected&quot;</span><span class="op">:</span> mc<span class="op">.</span>isConnected<span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;user&quot;</span><span class="op">:</span>        mc<span class="op">.</span>currentUser<span class="op">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;theme&quot;</span><span class="op">:</span>       mc<span class="op">.</span>themeManager<span class="op">.</span>GetCurrentTheme<span class="op">().</span>Name<span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;stats&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;tasks&quot;</span><span class="op">:</span>    <span class="dv">0</span><span class="op">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;workers&quot;</span><span class="op">:</span>  <span class="dv">0</span><span class="op">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;projects&quot;</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;sessions&quot;</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    jsonData<span class="op">,</span> _ <span class="op">:=</span> json<span class="op">.</span>Marshal<span class="op">(</span>data<span class="op">)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dt">string</span><span class="op">(</span>jsonData<span class="op">)</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="theme-system">Theme System</h3>
+<p>Built-in theme support for consistent UI:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Theme <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    Name       <span class="dt">string</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    IsDark     <span class="dt">bool</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    Primary    <span class="dt">string</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    Secondary  <span class="dt">string</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    Accent     <span class="dt">string</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    Text       <span class="dt">string</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    Background <span class="dt">string</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    Border     <span class="dt">string</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    Success    <span class="dt">string</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    Warning    <span class="dt">string</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    Error      <span class="dt">string</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    Info       <span class="dt">string</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Pre-defined themes</strong>: - Dark - Light - Helix (brand
+theme)</p>
+<h3 id="authentication-flow">Authentication Flow</h3>
+<p>Mobile authentication supports both real server and mock mode for
+development:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> connectInternal<span class="op">(</span>serverURL<span class="op">,</span> username<span class="op">,</span> password <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Attempt server authentication</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> client<span class="op">.</span>Post<span class="op">(</span>authURL<span class="op">,</span> <span class="st">&quot;application/json&quot;</span><span class="op">,</span> authData<span class="op">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Fallback to mock authentication for development</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        mc<span class="op">.</span>isConnected <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        mc<span class="op">.</span>currentUser <span class="op">=</span> username</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        mc<span class="op">.</span>sessionToken <span class="op">=</span> <span class="st">&quot;mock-token-&quot;</span> <span class="op">+</span> username</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Handle real authentication...</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="platform-specific-builds">Platform-Specific Builds</h3>
+<p><strong>Makefile targets</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> mobile        <span class="co"># Build iOS + Android bindings</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> aurora-os     <span class="co"># Build Aurora OS client</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> harmony-os    <span class="co"># Build Harmony OS client</span></span></code></pre></div>
+<h3 id="application-directories">Application Directories</h3>
+<pre><code>applications/
+├── terminal-ui/    # TUI application
+├── desktop/        # Desktop application (Fyne)
+├── aurora-os/      # Aurora OS application
+└── harmony-os/     # Harmony OS application</code></pre>
+<h3 id="thread-safety">Thread Safety</h3>
+<p>All mobile core methods are thread-safe:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> getDashboardDataInternal<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    mc<span class="op">.</span>mu<span class="op">.</span>RLock<span class="op">()</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> mc<span class="op">.</span>mu<span class="op">.</span>RUnlock<span class="op">()</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... read operations</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>mc <span class="op">*</span>MobileCore<span class="op">)</span> connectInternal<span class="op">(...)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    mc<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> mc<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... write operations</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="consequences">Consequences</h2>
+<h3 id="positive">Positive</h3>
+<ol type="1">
+<li><strong>Code Reuse</strong>: 90%+ logic shared across platforms</li>
+<li><strong>Consistency</strong>: Same business logic on all
+platforms</li>
+<li><strong>Maintenance</strong>: Single codebase for core
+functionality</li>
+<li><strong>Performance</strong>: Native Go code, not interpreted</li>
+<li><strong>Type Safety</strong>: Go’s type system prevents many
+bugs</li>
+<li><strong>Testing</strong>: Core can be tested in Go</li>
+<li><strong>Platform Support</strong>: Easily extend to new
+platforms</li>
+</ol>
+<h3 id="negative">Negative</h3>
+<ol type="1">
+<li><strong>gomobile Limitations</strong>: Not all Go packages work with
+gomobile</li>
+<li><strong>UI Duplication</strong>: Each platform needs native UI
+code</li>
+<li><strong>Build Complexity</strong>: Multiple build targets</li>
+<li><strong>Debugging</strong>: Harder to debug across language
+boundaries</li>
+<li><strong>JSON Overhead</strong>: Data serialization/deserialization
+cost</li>
+</ol>
+<h3 id="neutral">Neutral</h3>
+<ol type="1">
+<li><strong>Learning Curve</strong>: Developers need gomobile
+knowledge</li>
+<li><strong>Binary Size</strong>: Go runtime adds to app size</li>
+</ol>
+<h2 id="alternatives-considered">Alternatives Considered</h2>
+<h3 id="alternative-1-react-native-flutter">Alternative 1: React Native
+/ Flutter</h3>
+<p><strong>Description</strong>: Use cross-platform mobile
+frameworks.</p>
+<p><strong>Pros</strong>: - Single codebase for UI - Large ecosystems -
+Hot reload for development - Many UI components</p>
+<p><strong>Cons</strong>: - Different language (JavaScript/Dart) -
+Another runtime - Performance overhead - Additional dependency</p>
+<p><strong>Why Rejected</strong>: HelixCode is Go-based. Adding
+JavaScript/Dart introduces unnecessary complexity and another
+runtime.</p>
+<h3 id="alternative-2-pure-native-apps">Alternative 2: Pure Native
+Apps</h3>
+<p><strong>Description</strong>: Build separate native apps for each
+platform.</p>
+<p><strong>Pros</strong>: - Best performance - Native UX -
+Platform-specific features - No abstraction overhead</p>
+<p><strong>Cons</strong>: - Triplicated business logic - Multiple
+codebases - Higher maintenance - Team skill requirements</p>
+<p><strong>Why Rejected</strong>: Duplicating business logic across
+platforms is error-prone and expensive to maintain.</p>
+<h3 id="alternative-3-pwa-progressive-web-app">Alternative 3: PWA
+(Progressive Web App)</h3>
+<p><strong>Description</strong>: Use web technologies with PWA
+capabilities.</p>
+<p><strong>Pros</strong>: - Single codebase - No app store requirements
+- Web technologies - Easy updates</p>
+<p><strong>Cons</strong>: - Limited native access - Performance
+limitations - Offline capabilities limited - Not installable on all
+platforms</p>
+<p><strong>Why Rejected</strong>: Mobile-specific features like
+background tasks and push notifications work better with native
+apps.</p>
+<h3 id="alternative-4-kotlin-multiplatform">Alternative 4: Kotlin
+Multiplatform</h3>
+<p><strong>Description</strong>: Use Kotlin Multiplatform for shared
+code.</p>
+<p><strong>Pros</strong>: - Android-native integration - Growing iOS
+support - Shared business logic - Modern language</p>
+<p><strong>Cons</strong>: - Different language from server - iOS support
+still maturing - Additional toolchain - Learning curve</p>
+<p><strong>Why Rejected</strong>: HelixCode is Go-based. Maintaining
+consistency with gomobile is simpler than adding Kotlin.</p>
+<h2 id="implementation-notes">Implementation Notes</h2>
+<ul>
+<li>Mobile core in <code>shared/mobile-core/</code></li>
+<li>Uses gomobile for binding generation</li>
+<li>JSON for all complex data exchange</li>
+<li>Thread-safe implementation</li>
+<li>Graceful fallback for offline/mock scenarios</li>
+</ul>
+<h2 id="platform-distribution">Platform Distribution</h2>
+<p><strong>iOS</strong>: App Store distribution
+<strong>Android</strong>: Google Play Store + APK distribution
+<strong>Aurora OS</strong>: Aurora Store <strong>Harmony OS</strong>:
+Huawei AppGallery</p>
+<h2 id="offline-capabilities">Offline Capabilities</h2>
+<p>The mobile core handles connectivity gracefully: - Connection state
+tracking - Mock mode for development - Cached data for offline viewing -
+Queued operations for later sync</p>
+<h2 id="related-decisions">Related Decisions</h2>
+<ul>
+<li>ADR-005: Authentication System (mobile authentication)</li>
+<li>ADR-001: LLM Provider Interface (mobile can trigger LLM
+requests)</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/shared/mobile_core/mobile.go</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/applications/aurora_os/</code></li>
+<li><code>/run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/applications/harmony_os/</code></li>
+</ul>
+</body>
+</html>

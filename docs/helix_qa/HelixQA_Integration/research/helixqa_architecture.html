@@ -1,0 +1,2694 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_architecture</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_architecture</h1>
+</header>
+<p>Below is the master analysis document for the
+<strong>HelixQA</strong> repository. It is organized exactly as
+requested in the prompt and is based on the actual source files (and
+repo metadata) pulled from
+<code>https://github.com/HelixDevelopment/HelixQA</code>. Each section
+contains concrete file paths, type/function signatures extracted from
+<code>raw.githubusercontent.com</code>, and architectural context.</p>
+<hr />
+<h1 id="helixqa-deep-architecture-analysis">HelixQA — Deep Architecture
+Analysis</h1>
+<blockquote>
+<p><strong>Repository</strong>:
+<code>https://github.com/HelixDevelopment/HelixQA</code><br />
+<strong>License</strong>: Apache-2.0<br />
+<strong>Primary language</strong>: Go (97.6 %)<br />
+<strong>Commits examined</strong>: ~570 (main branch)<br />
+<strong>Key external dependency</strong>:
+<code>digital.vasic.challenges</code> (sibling repo under
+<code>../Challenges</code>)</p>
+</blockquote>
+<hr />
+<h2 id="repository-layout-top-level">1. Repository Layout
+(Top-Level)</h2>
+<table>
+<thead>
+<tr>
+<th>Directory / File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd/helixqa/</code></td>
+<td>CLI entry point and subcommands</td>
+</tr>
+<tr>
+<td><code>pkg/</code></td>
+<td>40+ Go packages (see §2)</td>
+</tr>
+<tr>
+<td><code>banks/</code></td>
+<td>YAML/JSON test banks (see §6)</td>
+</tr>
+<tr>
+<td><code>challenges/</code></td>
+<td>Shell challenge scripts (see §7)</td>
+</tr>
+<tr>
+<td><code>tests/</code></td>
+<td>Unit, e2e, integration, stress, security, benchmark tests</td>
+</tr>
+<tr>
+<td><code>internal/visionserver/</code></td>
+<td>Internal vision-model HTTP server</td>
+</tr>
+<tr>
+<td><code>docker/</code></td>
+<td>Container definitions</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td>Architecture &amp; user-guide docs</td>
+</tr>
+<tr>
+<td><code>data/</code></td>
+<td>Vector-memory DB dumps</td>
+</tr>
+<tr>
+<td><code>monitoring/</code></td>
+<td>Metrics &amp; dashboards</td>
+</tr>
+<tr>
+<td><code>tools/opensource/</code></td>
+<td>25+ Git submodules (see §12)</td>
+</tr>
+<tr>
+<td><code>web/src/capture/</code></td>
+<td>Web-based capture UI</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td>Master configuration template (see §9)</td>
+</tr>
+<tr>
+<td><code>go.mod</code></td>
+<td>Module: <code>digital.vasic.helixqa</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complete-package-analysis-pkg">2. Complete Package Analysis
+(<code>pkg/</code>)</h2>
+<h3 id="pkgorchestrator-main-qa-brain">2.1 <code>pkg/orchestrator</code>
+— Main QA Brain</h3>
+<p><strong>Responsibility</strong>: Central coordinator that loads test
+banks, iterates platforms, runs challenges via the <em>Challenges</em>
+runner, invokes step validation, and produces the combined report.</p>
+<p><strong>Key files</strong>: -
+<code>pkg/orchestrator/orchestrator.go</code> (196 lines, ~9.6 KB)</p>
+<p><strong>Key types / signatures</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Report     <span class="op">*</span>reporter<span class="op">.</span>QAReport <span class="st">`json:&quot;report&quot;`</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    ReportPath <span class="dt">string</span>             <span class="st">`json:&quot;report_path&quot;`</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Success    <span class="dt">bool</span>               <span class="st">`json:&quot;success&quot;`</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    StartTime  time<span class="op">.</span>Time          <span class="st">`json:&quot;start_time&quot;`</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    EndTime    time<span class="op">.</span>Time          <span class="st">`json:&quot;end_time&quot;`</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    Duration   time<span class="op">.</span>Duration      <span class="st">`json:&quot;duration&quot;`</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Orchestrator <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    config   <span class="op">*</span>config<span class="op">.</span>Config</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    detector <span class="op">*</span>detector<span class="op">.</span>Detector</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    val      <span class="op">*</span>validator<span class="op">.</span>Validator</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    reporter <span class="op">*</span>reporter<span class="op">.</span>Reporter</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    logger   logging<span class="op">.</span>Logger</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    runner   runner<span class="op">.</span>Runner</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    bank     <span class="op">*</span>bank<span class="op">.</span>Bank</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Option <span class="kw">func</span><span class="op">(*</span>Orchestrator<span class="op">)</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> New<span class="op">(</span>cfg <span class="op">*</span>config<span class="op">.</span>Config<span class="op">,</span> opts <span class="op">...</span>Option<span class="op">)</span> <span class="op">*</span>Orchestrator</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>o <span class="op">*</span>Orchestrator<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>o <span class="op">*</span>Orchestrator<span class="op">)</span> runPlatform<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> platform config<span class="op">.</span>Platform<span class="op">,</span> definitions <span class="op">[]*</span>challenge<span class="op">.</span>Definition<span class="op">)</span> <span class="op">(*</span>reporter<span class="op">.</span>PlatformResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Functional options</strong> (<code>WithLogger</code>,
+<code>WithRunner</code>, <code>WithDetector</code>,
+<code>WithValidator</code>, <code>WithReporter</code>,
+<code>WithBank</code>) allow dependency injection for testing.</p>
+<p><strong>Integration</strong>: - Imports
+<code>digital.vasic.challenges/pkg/{bank,challenge,runner,logging}</code>
+- Uses <code>pkg/detector</code> for crash checks,
+<code>pkg/validator</code> for step validation,
+<code>pkg/reporter</code> for output.</p>
+<hr />
+<h3 id="pkgtestbank-yaml-test-bank-management">2.2
+<code>pkg/testbank</code> — YAML Test Bank Management</h3>
+<p><strong>Responsibility</strong>: Loads, validates, and filters
+QA-specific YAML/JSON test banks. Bridges to the <em>Challenges</em>
+<code>challenge.Definition</code> type for execution.</p>
+<p><strong>Key files</strong>: - <code>pkg/testbank/loader.go</code> -
+<code>pkg/testbank/manager.go</code> -
+<code>pkg/testbank/schema.go</code> -
+<code>pkg/testbank/generator.go</code></p>
+<p><strong>Key types / signatures</strong> (<code>schema.go</code>):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Priority <span class="dt">string</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    PriorityCritical Priority <span class="op">=</span> <span class="st">&quot;critical&quot;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    PriorityHigh     Priority <span class="op">=</span> <span class="st">&quot;high&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    PriorityMedium   Priority <span class="op">=</span> <span class="st">&quot;medium&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    PriorityLow      Priority <span class="op">=</span> <span class="st">&quot;low&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TestCase <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    ID                <span class="dt">string</span>           <span class="st">`yaml:&quot;id&quot; json:&quot;id&quot;`</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    Name              <span class="dt">string</span>           <span class="st">`yaml:&quot;name&quot; json:&quot;name&quot;`</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    Description       <span class="dt">string</span>           <span class="st">`yaml:&quot;description&quot; json:&quot;description&quot;`</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    Category          <span class="dt">string</span>           <span class="st">`yaml:&quot;category&quot; json:&quot;category&quot;`</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    Priority          Priority         <span class="st">`yaml:&quot;priority&quot; json:&quot;priority&quot;`</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    Platforms         <span class="op">[]</span>config<span class="op">.</span>Platform <span class="st">`yaml:&quot;platforms&quot; json:&quot;platforms&quot;`</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    Steps             <span class="op">[]</span>TestStep       <span class="st">`yaml:&quot;steps&quot; json:&quot;steps&quot;`</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    Dependencies      <span class="op">[]</span><span class="dt">string</span>         <span class="st">`yaml:&quot;dependencies&quot; json:&quot;dependencies&quot;`</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    DocumentationRefs <span class="op">[]</span>DocRef         <span class="st">`yaml:&quot;documentation_refs&quot; json:&quot;documentation_refs&quot;`</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    Tags              <span class="op">[]</span><span class="dt">string</span>         <span class="st">`yaml:&quot;tags&quot; json:&quot;tags&quot;`</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    EstimatedDuration <span class="dt">string</span>           <span class="st">`yaml:&quot;estimated_duration&quot; json:&quot;estimated_duration&quot;`</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    ExpectedResult    <span class="dt">string</span>           <span class="st">`yaml:&quot;expected_result&quot; json:&quot;expected_result&quot;`</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    AllowForegroundLeave <span class="dt">bool</span>          <span class="st">`yaml:&quot;allow_foreground_leave,omitempty&quot;`</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    RequiresEnv       <span class="op">[]</span><span class="dt">string</span>         <span class="st">`yaml:&quot;requires_env,omitempty&quot;`</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    _llm_driven       <span class="dt">bool</span>             <span class="co">// annotated on 41 banks per commit 57ccdc4</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TestStep <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    Name               <span class="dt">string</span>            <span class="st">`yaml:&quot;name&quot; json:&quot;name&quot;`</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    Action             <span class="dt">string</span>            <span class="st">`yaml:&quot;action&quot; json:&quot;action&quot;`</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    Expected           <span class="dt">string</span>            <span class="st">`yaml:&quot;expected&quot; json:&quot;expected&quot;`</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    Platform           config<span class="op">.</span>Platform   <span class="st">`yaml:&quot;platform,omitempty&quot;`</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    Timeout            <span class="dt">int</span>               <span class="st">`yaml:&quot;timeout,omitempty&quot;`</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    VisionVerify       <span class="dt">bool</span>              <span class="st">`yaml:&quot;vision_verify,omitempty&quot;`</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    Body               <span class="dt">any</span>               <span class="st">`yaml:&quot;body,omitempty&quot;`</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    Headers            <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`yaml:&quot;headers,omitempty&quot;`</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    AuthMode           <span class="dt">string</span>            <span class="st">`yaml:&quot;auth,omitempty&quot;`</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    ExpectStatus       <span class="dt">int</span>               <span class="st">`yaml:&quot;expect_status,omitempty&quot;`</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    ExpectJSONPath     <span class="dt">string</span>            <span class="st">`yaml:&quot;expect_json_path,omitempty&quot;`</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    ExpectBodyContains <span class="dt">string</span>            <span class="st">`yaml:&quot;expect_body_contains,omitempty&quot;`</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    Skip               <span class="dt">bool</span>              <span class="st">`yaml:&quot;_skip,omitempty&quot;`</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    SkipReason         <span class="dt">string</span>            <span class="st">`yaml:&quot;_skip_reason,omitempty&quot;`</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BankFile <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    Version     <span class="dt">string</span>            <span class="st">`yaml:&quot;version&quot; json:&quot;version&quot;`</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span>            <span class="st">`yaml:&quot;name&quot; json:&quot;name&quot;`</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>            <span class="st">`yaml:&quot;description&quot; json:&quot;description&quot;`</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    TestCases   <span class="op">[]</span>TestCase        <span class="st">`yaml:&quot;test_cases&quot; json:&quot;test_cases&quot;`</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    Metadata    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`yaml:&quot;metadata,omitempty&quot; json:&quot;metadata,omitempty&quot;`</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadFile<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>BankFile<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>tc <span class="op">*</span>TestCase<span class="op">)</span> ToDefinition<span class="op">()</span> <span class="op">*</span>challenge<span class="op">.</span>Definition</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>tc <span class="op">*</span>TestCase<span class="op">)</span> AppliesToPlatform<span class="op">(</span>p config<span class="op">.</span>Platform<span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>tc <span class="op">*</span>TestCase<span class="op">)</span> IsValid<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ts <span class="op">*</span>TestStep<span class="op">)</span> ParseAction<span class="op">()</span> <span class="op">(</span>ActionType<span class="op">,</span> <span class="dt">string</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Action types</strong> (<code>ActionType</code> enum from
+<code>schema.go</code> lines 97-183): - <code>description</code>,
+<code>adb_shell</code>, <code>sleep</code>, <code>screenshot</code>,
+<code>keypress</code>, <code>tap</code>, <code>swipe</code>,
+<code>text</code>, <code>playback_check</code>, <code>frame_diff</code>,
+<code>http</code>, <code>assert</code>, <code>playwright</code></p>
+<p><strong>Integration</strong>: - Converts <code>TestCase</code> →
+<code>challenge.Definition</code> via <code>ToDefinition()</code> -
+<code>pkg/testbank/loader.go</code> uses <code>gopkg.in/yaml.v3</code>
+for YAML and <code>encoding/json</code> for JSON; supports
+<code>&quot;challenges&quot;</code> as alternate key for
+<code>test_cases</code>.</p>
+<hr />
+<h3 id="pkgdetector-real-time-crash-anr-detection">2.3
+<code>pkg/detector</code> — Real-Time Crash / ANR Detection</h3>
+<p><strong>Responsibility</strong>: Per-platform crash and ANR
+detection.</p>
+<p><strong>Key file</strong>: <code>pkg/detector/detector.go</code>
+(~4.5 KB)</p>
+<p><strong>Key types</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DetectionResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Platform       config<span class="op">.</span>Platform <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    HasCrash       <span class="dt">bool</span>            <span class="st">`json:&quot;has_crash&quot;`</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    HasANR         <span class="dt">bool</span>            <span class="st">`json:&quot;has_anr&quot;`</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ProcessAlive   <span class="dt">bool</span>            <span class="st">`json:&quot;process_alive&quot;`</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    StackTrace     <span class="dt">string</span>          <span class="st">`json:&quot;stack_trace,omitempty&quot;`</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    LogEntries     <span class="op">[]</span><span class="dt">string</span>        <span class="st">`json:&quot;log_entries,omitempty&quot;`</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ScreenshotPath <span class="dt">string</span>          <span class="st">`json:&quot;screenshot_path,omitempty&quot;`</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    Timestamp      time<span class="op">.</span>Time       <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    Error          <span class="dt">string</span>          <span class="st">`json:&quot;error,omitempty&quot;`</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CommandRunner <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">,</span> args <span class="op">...</span><span class="dt">string</span><span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Detector <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* platform, device, packageName, browserURL, processName, processPID, evidenceDir, cmdRunner */</span> <span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> New<span class="op">(</span>platform config<span class="op">.</span>Platform<span class="op">,</span> opts <span class="op">...</span>Option<span class="op">)</span> <span class="op">*</span>Detector</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>d <span class="op">*</span>Detector<span class="op">)</span> Check<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>DetectionResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>d <span class="op">*</span>Detector<span class="op">)</span> CheckApp<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> platform config<span class="op">.</span>Platform<span class="op">)</span> <span class="op">(*</span>DetectionResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Platform-specific checks</strong>: -
+<code>checkAndroid</code> → ADB <code>logcat</code>, <code>pidof</code>,
+<code>screencap</code> - <code>checkWeb</code> → browser process
+monitoring, console error collection - <code>checkDesktop</code> →
+process alive checks, stderr monitoring</p>
+<p><strong>Integration</strong>: - Used by <code>pkg/validator</code>
+for pre/post-step validation. - <code>CommandRunner</code> interface
+enables mocking in tests.</p>
+<hr />
+<h3 id="pkgvalidator-step-by-step-validation">2.4
+<code>pkg/validator</code> — Step-by-Step Validation</h3>
+<p><strong>Responsibility</strong>: Wraps the detector to perform
+pre/post-step validation with screenshot capture.</p>
+<p><strong>Key file</strong>: <code>pkg/validator/validator.go</code>
+(~6.2 KB)</p>
+<p><strong>Key types</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StepStatus <span class="dt">string</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span> StepPassed StepStatus <span class="op">=</span> <span class="st">&quot;passed&quot;</span><span class="op">;</span> StepFailed StepStatus <span class="op">=</span> <span class="st">&quot;failed&quot;</span><span class="op">;</span> StepSkipped StepStatus <span class="op">=</span> <span class="st">&quot;skipped&quot;</span><span class="op">;</span> StepError StepStatus <span class="op">=</span> <span class="st">&quot;error&quot;</span> <span class="op">)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> StepResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    StepName       <span class="dt">string</span>                  <span class="st">`json:&quot;step_name&quot;`</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Status         StepStatus              <span class="st">`json:&quot;status&quot;`</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Platform       config<span class="op">.</span>Platform         <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    Detection      <span class="op">*</span>detector<span class="op">.</span>DetectionResult <span class="st">`json:&quot;detection,omitempty&quot;`</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    PreScreenshot  <span class="dt">string</span>                  <span class="st">`json:&quot;pre_screenshot,omitempty&quot;`</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    PostScreenshot <span class="dt">string</span>                  <span class="st">`json:&quot;post_screenshot,omitempty&quot;`</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    StartTime      time<span class="op">.</span>Time               <span class="st">`json:&quot;start_time&quot;`</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    EndTime        time<span class="op">.</span>Time               <span class="st">`json:&quot;end_time&quot;`</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    Duration       time<span class="op">.</span>Duration           <span class="st">`json:&quot;duration&quot;`</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    Error          <span class="dt">string</span>                  <span class="st">`json:&quot;error,omitempty&quot;`</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Validator <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* mu, det *detector.Detector, evidenceDir string */</span> <span class="op">}</span></span></code></pre></div>
+<p><strong>Integration</strong>: - Called by
+<code>pkg/orchestrator</code> between each challenge step. - Produces
+<code>StepResult</code> with pre/post screenshots and detection
+correlation.</p>
+<hr />
+<h3 id="pkgevidence-evidence-collection">2.5 <code>pkg/evidence</code> —
+Evidence Collection</h3>
+<p><strong>Responsibility</strong>: Centralized evidence gathering:
+screenshots, video, logcat, stack traces, console logs, audio.</p>
+<p><strong>Key file</strong>: <code>pkg/evidence/collector.go</code>
+(520 lines, 11.3 KB)</p>
+<p><strong>Key types</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Type <span class="dt">string</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    TypeScreenshot Type <span class="op">=</span> <span class="st">&quot;screenshot&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    TypeVideo      Type <span class="op">=</span> <span class="st">&quot;video&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    TypeLogcat     Type <span class="op">=</span> <span class="st">&quot;logcat&quot;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    TypeStackTrace Type <span class="op">=</span> <span class="st">&quot;stacktrace&quot;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    TypeConsoleLog Type <span class="op">=</span> <span class="st">&quot;console_log&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    TypeAudio      Type <span class="op">=</span> <span class="st">&quot;audio&quot;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Item <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    Type      Type           <span class="st">`json:&quot;type&quot;`</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    Path      <span class="dt">string</span>         <span class="st">`json:&quot;path&quot;`</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    Platform  config<span class="op">.</span>Platform <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    Step      <span class="dt">string</span>         <span class="st">`json:&quot;step,omitempty&quot;`</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    Timestamp time<span class="op">.</span>Time      <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    Size      <span class="dt">int64</span>          <span class="st">`json:&quot;size&quot;`</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Collector <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    mu            sync<span class="op">.</span>Mutex</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    outputDir     <span class="dt">string</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    platform      config<span class="op">.</span>Platform</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    cmdRunner     detector<span class="op">.</span>CommandRunner</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    items         <span class="op">[]</span>Item</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    recording     <span class="dt">bool</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    recordingID   <span class="dt">string</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    audioRecording <span class="dt">bool</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    audioRecordingID <span class="dt">string</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    audioCmd      <span class="op">*</span>exec<span class="op">.</span>Cmd</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> New<span class="op">(</span>opts <span class="op">...</span>Option<span class="op">)</span> <span class="op">*</span>Collector</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Collector<span class="op">)</span> CaptureScreenshot<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Item<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Collector<span class="op">)</span> CaptureLogcat<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">,</span> lines <span class="dt">int</span><span class="op">)</span> <span class="op">(*</span>Item<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Collector<span class="op">)</span> StartVideo<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Collector<span class="op">)</span> StopVideo<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>Item<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Collector<span class="op">)</span> StartAudio<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Collector<span class="op">)</span> StopAudio<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>Item<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Platform-specific screenshot methods</strong>: -
+<code>captureAndroidScreenshot</code> → ADB <code>screencap -p</code> -
+<code>captureWebScreenshot</code> → Playwright / browser screenshot -
+<code>captureDesktopScreenshot</code> → X11 <code>import</code> or
+similar</p>
+<p><strong>Integration</strong>: - Used by <code>pkg/validator</code>
+for step screenshots. - Used by <code>pkg/session</code> for
+session-wide video/audio recording. -
+<code>pkg/evidence/annotator.go</code> adds visual annotations to
+screenshots.</p>
+<hr />
+<h3 id="pkgsession-session-recording-timeline">2.6
+<code>pkg/session</code> — Session Recording &amp; Timeline</h3>
+<p><strong>Responsibility</strong>: Coordinates video recording,
+screenshot capture, and timeline event tracking across platforms during
+an autonomous QA session.</p>
+<p><strong>Key files</strong>: - <code>pkg/session/recorder.go</code>
+(246 lines, 5.59 KB) - <code>pkg/session/timeline.go</code> -
+<code>pkg/session/video.go</code> -
+<code>pkg/session/cleanup.go</code></p>
+<p><strong>Key types</strong> (<code>recorder.go</code>):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Screenshot <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Path        <span class="dt">string</span>        <span class="st">`json:&quot;path&quot;`</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Platform    <span class="dt">string</span>        <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span>        <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    Index       <span class="dt">int</span>           <span class="st">`json:&quot;index&quot;`</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    Timestamp   time<span class="op">.</span>Time     <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    VideoOffset time<span class="op">.</span>Duration <span class="st">`json:&quot;video_offset&quot;`</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SessionRecorder <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    sessionID     <span class="dt">string</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    outputDir     <span class="dt">string</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    videos        <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>VideoManager</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    timeline      <span class="op">*</span>Timeline</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    screenshotIdx <span class="dt">int</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    mu            sync<span class="op">.</span>Mutex</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSessionRecorder<span class="op">(</span>sessionID<span class="op">,</span> outputDir <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>SessionRecorder</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sr <span class="op">*</span>SessionRecorder<span class="op">)</span> RecordScreenshot<span class="op">(</span>platform <span class="dt">string</span><span class="op">,</span> data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="op">(*</span>Screenshot<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sr <span class="op">*</span>SessionRecorder<span class="op">)</span> StartVideo<span class="op">(</span>platform <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sr <span class="op">*</span>SessionRecorder<span class="op">)</span> StopVideo<span class="op">(</span>platform <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>VideoItem<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sr <span class="op">*</span>SessionRecorder<span class="op">)</span> RecordEvent<span class="op">(</span>event TimelineEvent<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>sr <span class="op">*</span>SessionRecorder<span class="op">)</span> SessionID<span class="op">()</span> <span class="dt">string</span></span></code></pre></div>
+<p><strong>Timeline event types</strong> (<code>timeline.go</code>):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EventType <span class="dt">string</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    EventAction    EventType <span class="op">=</span> <span class="st">&quot;action&quot;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    EventDetection EventType <span class="op">=</span> <span class="st">&quot;detection&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    EventScreenshot EventType <span class="op">=</span> <span class="st">&quot;screenshot&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    EventVideo      EventType <span class="op">=</span> <span class="st">&quot;video&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    EventError      EventType <span class="op">=</span> <span class="st">&quot;error&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    EventPhase      EventType <span class="op">=</span> <span class="st">&quot;phase&quot;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TimelineEvent <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    Type        EventType     <span class="st">`json:&quot;type&quot;`</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    Platform    <span class="dt">string</span>        <span class="st">`json:&quot;platform,omitempty&quot;`</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>        <span class="st">`json:&quot;description&quot;`</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    Timestamp   time<span class="op">.</span>Time     <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    FeatureID   <span class="dt">string</span>        <span class="st">`json:&quot;feature_id,omitempty&quot;`</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    Duration    time<span class="op">.</span>Duration <span class="st">`json:&quot;duration,omitempty&quot;`</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Integration</strong>: - Consumed by <code>pkg/evidence</code>
+for item storage. - Consumed by <code>pkg/autonomous</code>
+(PlatformWorker records events during doc-driven &amp; curiosity
+phases). - <code>pkg/session/video.go</code> wraps
+<code>pkg/video</code> for per-platform video management.</p>
+<hr />
+<h3 id="pkgautonomous-autonomous-qa-session">2.7
+<code>pkg/autonomous</code> — Autonomous QA Session</h3>
+<p><strong>Responsibility</strong>: 4-phase autonomous QA session
+lifecycle orchestrated by <code>SessionCoordinator</code> and executed
+by parallel <code>PlatformWorker</code>s.</p>
+<p><strong>Key files</strong> (all in <code>pkg/autonomous/</code>):</p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 31%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>coordinator.go</code></td>
+<td>467</td>
+<td><code>SessionCoordinator</code>, <code>SessionConfig</code>, phase
+orchestration</td>
+</tr>
+<tr>
+<td><code>worker.go</code></td>
+<td>~300</td>
+<td><code>PlatformWorker</code> — per-platform doc-driven + curiosity
+execution</td>
+</tr>
+<tr>
+<td><code>phase.go</code></td>
+<td>244</td>
+<td><code>PhaseManager</code>, <code>Phase</code>,
+<code>PhaseListener</code>, 4-phase definitions</td>
+</tr>
+<tr>
+<td><code>pipeline.go</code></td>
+<td><strong>3,958</strong> (110 KB)</td>
+<td><code>SessionPipeline</code>, <code>PipelineConfig</code>,
+<code>PipelineResult</code> — master autonomous runner</td>
+</tr>
+<tr>
+<td><code>executor_factory.go</code></td>
+<td>120</td>
+<td><code>ExecutorFactory</code>, <code>DefaultExecutorFactory</code>,
+<code>NoopExecutorFactory</code></td>
+</tr>
+<tr>
+<td><code>structured_executor.go</code></td>
+<td>~1,050</td>
+<td><code>StructuredTestExecutor</code> — runs bank test cases
+systematically</td>
+</tr>
+<tr>
+<td><code>http_executor.go</code></td>
+<td>~800</td>
+<td><code>HTTPExecutor</code> — executes <code>ActionTypeHTTP</code>
+steps with auth, CSRF, token cache</td>
+</tr>
+<tr>
+<td><code>playwright_executor.go</code></td>
+<td>~250</td>
+<td><code>PlaywrightExecutor</code> — browser automation for
+<code>ActionTypePlaywright</code></td>
+</tr>
+<tr>
+<td><code>real_executor.go</code></td>
+<td>~200</td>
+<td>Real-device executor wrappers</td>
+</tr>
+<tr>
+<td><code>screenshot.go</code></td>
+<td>153</td>
+<td><code>IsBlankScreenshot</code>, <code>resizeScreenshot</code> (480
+px max for LLM)</td>
+</tr>
+<tr>
+<td><code>stagnation.go</code></td>
+<td>~200</td>
+<td><code>StagnationDetector</code> with BOCPD (Bayesian Online
+Change-Point Detection)</td>
+</tr>
+<tr>
+<td><code>bocpd.go</code></td>
+<td>~150</td>
+<td><code>BOCPD</code>, <code>BOCPDConfig</code> — per-frame change
+probability</td>
+</tr>
+<tr>
+<td><code>geo_probe.go</code></td>
+<td>209</td>
+<td><code>ProbeGeoRestriction</code>, <code>GeoProbeResult</code> —
+geo-restriction probe via ADB+curl</td>
+</tr>
+<tr>
+<td><code>retry.go</code></td>
+<td>~100</td>
+<td>Retry logic with exponential backoff</td>
+</tr>
+<tr>
+<td><code>sanitize.go</code></td>
+<td>~80</td>
+<td>Input sanitization</td>
+</tr>
+<tr>
+<td><code>fallback.go</code></td>
+<td>~150</td>
+<td>Fallback model selection</td>
+</tr>
+<tr>
+<td><code>adapters.go</code></td>
+<td>~200</td>
+<td>External module adapters</td>
+</tr>
+<tr>
+<td><code>findings_bridge.go</code></td>
+<td>~150</td>
+<td>Bridges findings to ticket generator</td>
+</tr>
+<tr>
+<td><code>device_preserve.go</code></td>
+<td>~100</td>
+<td>Device state preservation</td>
+</tr>
+<tr>
+<td><code>result.go</code></td>
+<td>~80</td>
+<td><code>StepResult</code>, <code>SessionResult</code> types</td>
+</tr>
+</tbody>
+</table>
+<p><strong>4-Phase Lifecycle</strong> (<code>phase.go</code> lines
+85-95):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewPhaseManager<span class="op">()</span> <span class="op">*</span>PhaseManager <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>PhaseManager<span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        phases<span class="op">:</span> <span class="op">[]</span>Phase<span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;setup&quot;</span><span class="op">,</span>       Status<span class="op">:</span> PhasePending<span class="op">},</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;doc-driven&quot;</span><span class="op">,</span>  Status<span class="op">:</span> PhasePending<span class="op">},</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;curiosity&quot;</span><span class="op">,</span>   Status<span class="op">:</span> PhasePending<span class="op">},</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;report&quot;</span><span class="op">,</span>      Status<span class="op">:</span> PhasePending<span class="op">},</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        current<span class="op">:</span> <span class="op">-</span><span class="dv">1</span><span class="op">,</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>SessionCoordinator</strong>
+(<code>coordinator.go</code>):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SessionCoordinator <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    config          <span class="op">*</span>SessionConfig</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    orchestrator    agent<span class="op">.</span>AgentPool</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    visionEngine    analyzer<span class="op">.</span>Analyzer</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    featureMap      <span class="op">*</span>feature<span class="op">.</span>FeatureMap</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    executorFactory ExecutorFactory</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    workers         <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>PlatformWorker</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    phaseManager    <span class="op">*</span>PhaseManager</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    session         <span class="op">*</span>session<span class="op">.</span>SessionRecorder</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    coverage        coverage<span class="op">.</span>CoverageTracker</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    status          SessionStatus</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    mu              sync<span class="op">.</span>Mutex</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SessionConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    SessionID        <span class="dt">string</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    OutputDir        <span class="dt">string</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    Platforms        <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    Timeout          time<span class="op">.</span>Duration</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    CoverageTarget   <span class="dt">float64</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    CuriosityEnabled <span class="dt">bool</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    CuriosityTimeout time<span class="op">.</span>Duration</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>PlatformWorker</strong> (<code>worker.go</code>):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlatformWorker <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    platform      <span class="dt">string</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    agent         agent<span class="op">.</span>Agent</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    analyzer      analyzer<span class="op">.</span>Analyzer</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    navigator     <span class="op">*</span>navigator<span class="op">.</span>NavigationEngine</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    issueDetector <span class="op">*</span>issuedetector<span class="op">.</span>IssueDetector</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    coverage      coverage<span class="op">.</span>CoverageTracker</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    navGraph      graph<span class="op">.</span>NavigationGraph</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    session       <span class="op">*</span>session<span class="op">.</span>SessionRecorder</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    executor      navigator<span class="op">.</span>ActionExecutor</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    mu            sync<span class="op">.</span>Mutex</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>pw <span class="op">*</span>PlatformWorker<span class="op">)</span> RunDocDriven<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> features <span class="op">[]</span>feature<span class="op">.</span>Feature<span class="op">)</span> <span class="op">([]</span>StepResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>pw <span class="op">*</span>PlatformWorker<span class="op">)</span> RunCuriosity<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> budget time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">([]</span>StepResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>PipelineConfig</strong> (<code>pipeline.go</code> lines
+60-240) — key fields:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PipelineConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    ProjectRoot      <span class="dt">string</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    Platforms        <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    OutputDir        <span class="dt">string</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    IssuesDir        <span class="dt">string</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    BanksDir         <span class="dt">string</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    HTTPBaseURL      <span class="dt">string</span>          <span class="co">// for ActionTypeHTTP</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    PlaywrightCDPURL  <span class="dt">string</span>         <span class="co">// for ActionTypePlaywright</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    Timeout          time<span class="op">.</span>Duration</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    PassNumber       <span class="dt">int</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    AndroidDevice    <span class="dt">string</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    AndroidPackage   <span class="dt">string</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    CompetingAppPackages <span class="op">[]</span><span class="dt">string</span>    <span class="co">// Android TV foreign-app guard</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    WebURL           <span class="dt">string</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    DesktopDisplay   <span class="dt">string</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    FFmpegPath       <span class="dt">string</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    CuriosityEnabled <span class="dt">bool</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    CuriosityTimeout time<span class="op">.</span>Duration</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    VisionHost       <span class="dt">string</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    VisionUser       <span class="dt">string</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    VisionModel      <span class="dt">string</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    UseLlamaCpp      <span class="dt">bool</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    LlamaCppModelPath <span class="dt">string</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    LlamaCppMMProjPath <span class="dt">string</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    QACredentials    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    LlamaCppFreeGPU  <span class="dt">bool</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    VisionHosts      <span class="op">[]</span><span class="dt">string</span>        <span class="co">// distributed vision</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    VisionMultiUser  <span class="dt">string</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    LlamaCppRPCModelPath <span class="dt">string</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    ChatProviders    <span class="op">[]</span>llm<span class="op">.</span>ProviderConfig</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Integration</strong>: - Imports
+<code>digital.vasic.llmorchestrator/pkg/agent</code> (LLM agent pool) -
+Imports
+<code>digital.vasic.visionengine/pkg/{analyzer,graph,remote}</code>
+(vision engine) - Imports
+<code>digital.vasic.docprocessor/pkg/{coverage,feature}</code> (doc
+processor) - Uses <code>pkg/navigator</code>,
+<code>pkg/issuedetector</code>, <code>pkg/session</code>,
+<code>pkg/llm</code>, <code>pkg/planning</code>,
+<code>pkg/learning</code>, <code>pkg/memory</code>,
+<code>pkg/video</code>, <code>pkg/vision</code>,
+<code>pkg/performance</code>, <code>pkg/regression</code>,
+<code>pkg/reproduce</code>, <code>pkg/training</code>,
+<code>pkg/maestro</code></p>
+<hr />
+<h3 id="pkgnavigator-navigation-engine">2.8 <code>pkg/navigator</code> —
+Navigation Engine</h3>
+<p><strong>Responsibility</strong>: Drives platform-specific UI
+interactions during autonomous QA. Bridges LLM agent decisions with
+physical UI actions.</p>
+<p><strong>Key files</strong>: - <code>pkg/navigator/engine.go</code>
+(~5.5 KB) - <code>pkg/navigator/executor.go</code> (~14 KB) -
+<code>pkg/navigator/api_executor.go</code> (~4.2 KB) -
+<code>pkg/navigator/cli_executor.go</code> (~3.3 KB) -
+<code>pkg/navigator/playwright_executor.go</code> (~8.2 KB) -
+<code>pkg/navigator/x11_executor.go</code> (~3.5 KB) -
+<code>pkg/navigator/llm_navigator.go</code> -
+<code>pkg/navigator/state.go</code> (~8.2 KB) -
+<code>pkg/navigator/dual_screen.go</code> -
+<code>pkg/navigator/tvkeyboard.go</code></p>
+<p><strong>Key types</strong> (<code>engine.go</code>):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NavigationEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    agent    agent<span class="op">.</span>Agent</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    analyzer analyzer<span class="op">.</span>Analyzer</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    executor ActionExecutor</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    graph    graph<span class="op">.</span>NavigationGraph</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    state    <span class="op">*</span>StateTracker</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewNavigationEngine<span class="op">(</span>ag agent<span class="op">.</span>Agent<span class="op">,</span> az analyzer<span class="op">.</span>Analyzer<span class="op">,</span> exec ActionExecutor<span class="op">,</span> navGraph graph<span class="op">.</span>NavigationGraph<span class="op">)</span> <span class="op">*</span>NavigationEngine</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ne <span class="op">*</span>NavigationEngine<span class="op">)</span> NavigateTo<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> target <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ne <span class="op">*</span>NavigationEngine<span class="op">)</span> PerformAction<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> action analyzer<span class="op">.</span>Action<span class="op">)</span> <span class="op">(*</span>ActionResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ne <span class="op">*</span>NavigationEngine<span class="op">)</span> Explore<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> budget time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">(*</span>ExploreResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>ActionExecutor interface</strong>
+(<code>executor.go</code>):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ActionExecutor <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    Click<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> x<span class="op">,</span> y <span class="dt">int</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    Type<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> text <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    Clear<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    Scroll<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> direction <span class="dt">string</span><span class="op">,</span> amount <span class="dt">int</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    LongPress<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> x<span class="op">,</span> y <span class="dt">int</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    Swipe<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> fromX<span class="op">,</span> fromY<span class="op">,</span> toX<span class="op">,</span> toY <span class="dt">int</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    KeyPress<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    Back<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    Home<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    Screenshot<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Implementations</strong>: - <code>ADBExecutor</code> —
+Android via ADB (<code>adb shell input tap</code>,
+<code>input text</code>, <code>screencap</code>) -
+<code>PlaywrightExecutor</code> — Web via Playwright CDP / browser
+automation - <code>X11Executor</code> — Desktop Linux via X11
+(<code>xte</code>, <code>import</code> for screenshots) -
+<code>APIExecutor</code> — REST API navigation -
+<code>CLIExecutor</code> — Command-line navigation</p>
+<p><strong>Integration</strong>: - Used by
+<code>pkg/autonomous/PlatformWorker</code> -
+<code>NavigationEngine</code> maintains a
+<code>graph.NavigationGraph</code> for path-finding and
+<code>StateTracker</code> for screen-state tracking.</p>
+<hr />
+<h3 id="pkgissuedetector-llm-powered-issue-detection">2.9
+<code>pkg/issuedetector</code> — LLM-Powered Issue Detection</h3>
+<p><strong>Responsibility</strong>: Detects bugs via LLM vision analysis
+across visual, UX, accessibility, functional, performance, and crash
+categories.</p>
+<p><strong>Key files</strong>: -
+<code>pkg/issuedetector/detector.go</code> (~6.8 KB) -
+<code>pkg/issuedetector/categories.go</code> (~1.4 KB) -
+<code>pkg/issuedetector/llm_analyzer.go</code> (~7 KB) -
+<code>pkg/issuedetector/prompts.go</code> (~2 KB)</p>
+<p><strong>Key types</strong> (<code>detector.go</code>):</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> IssueDetector <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    agent    agent<span class="op">.</span>Agent</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    analyzer analyzer<span class="op">.</span>Analyzer</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    session  <span class="op">*</span>session<span class="op">.</span>SessionRecorder</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    mu       sync<span class="op">.</span>Mutex</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewIssueDetector<span class="op">(</span>agent agent<span class="op">.</span>Agent<span class="op">,</span> analyzer analyzer<span class="op">.</span>Analyzer<span class="op">,</span> session <span class="op">*</span>session<span class="op">.</span>SessionRecorder<span class="op">)</span> <span class="op">*</span>IssueDetector</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>id <span class="op">*</span>IssueDetector<span class="op">)</span> AnalyzeScreen<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> screenshot <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> platform <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Issue<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>id <span class="op">*</span>IssueDetector<span class="op">)</span> AnalyzeFlow<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> screenshots <span class="op">[][]</span><span class="dt">byte</span><span class="op">,</span> platform <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Issue<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Issue categories</strong> (<code>categories.go</code>): -
+<code>CategoryVisual</code> — visual glitches, layout breaks -
+<code>CategoryUX</code> — usability problems -
+<code>CategoryAccessibility</code> — a11y violations -
+<code>CategoryFunctional</code> — broken functionality -
+<code>CategoryPerformance</code> — lag, jank, memory issues -
+<code>CategoryCrash</code> — crashes, ANRs</p>
+<p><strong>LLM Analyzer</strong> (<code>llm_analyzer.go</code>): - Sends
+screenshots to vision LLM with structured prompts
+(<code>prompts.go</code>) - Parses JSON responses into
+<code>Issue</code> structs - Supports severity scoring and confidence
+thresholds</p>
+<p><strong>Integration</strong>: - Called by
+<code>pkg/autonomous/PlatformWorker</code> after each action /
+exploration step. - Results feed into <code>pkg/ticket</code> for ticket
+generation.</p>
+<hr />
+<h3 id="pkgplanning-test-planning">2.10 <code>pkg/planning</code> — Test
+Planning</h3>
+<p><strong>Responsibility</strong>: Generates and ranks test plans for
+autonomous sessions, with Android TV channel framework support.</p>
+<p><strong>Key files</strong>: - <code>pkg/planning/planner.go</code> -
+<code>pkg/planning/types.go</code> - <code>pkg/planning/ranker.go</code>
+- <code>pkg/planning/reconciler.go</code> -
+<code>pkg/planning/androidtv_channels_framework.go</code> -
+<code>pkg/planning/channels_support.go</code></p>
+<p><strong>Integration</strong>: - Consumed by
+<code>pkg/autonomous/pipeline.go</code> for plan generation. - Uses
+<code>pkg/llm</code> for plan reasoning.</p>
+<hr />
+<h3 id="pkgllm-llm-provider-abstraction">2.11 <code>pkg/llm</code> — LLM
+Provider Abstraction</h3>
+<p><strong>Responsibility</strong>: Unified interface for multiple LLM
+providers with adaptive selection, cost tracking, rate limiting,
+consensus, and escalation.</p>
+<p><strong>Key files</strong> (30+ files): -
+<code>pkg/llm/provider.go</code> - <code>pkg/llm/adaptive.go</code> -
+<code>pkg/llm/bridge_provider.go</code> -
+<code>pkg/llm/escalation.go</code> - <code>pkg/llm/anthropic.go</code>,
+<code>openai.go</code>, <code>google.go</code>, <code>ollama.go</code>,
+<code>astica.go</code> - <code>pkg/llm/consensus.go</code>,
+<code>cost_tracker.go</code>, <code>ratelimiter.go</code>,
+<code>prompt_optimizer.go</code>, <code>vision_ranking.go</code></p>
+<p><strong>Key types</strong> (<code>provider.go</code>):</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    Chat<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> messages <span class="op">[]</span>Message<span class="op">)</span> <span class="op">(</span>Response<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    Vision<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> image <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Response<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    Health<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    Name    <span class="dt">string</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    APIKey  <span class="dt">string</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    BaseURL <span class="dt">string</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    Model   <span class="dt">string</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Adaptive provider</strong> (<code>adaptive.go</code>): -
+Probes all configured providers and selects the best based on health,
+latency, and cost. - Supports dual-model architecture: vision model for
+screenshot analysis, chat model for reasoning/planning.</p>
+<p><strong>Integration</strong>: - Used throughout autonomous packages
+(<code>pkg/autonomous</code>, <code>pkg/navigator</code>,
+<code>pkg/issuedetector</code>, <code>pkg/planning</code>). -
+<code>pkg/llm/bridge_provider.go</code> bridges to external
+<code>digital.vasic.llmorchestrator</code> agents.</p>
+<hr />
+<h3 id="pkgvision-computer-vision-ui-detection">2.12
+<code>pkg/vision</code> — Computer Vision &amp; UI Detection</h3>
+<p><strong>Responsibility</strong>: UI element detection, OCR, image
+diff, and LLM-powered vision analysis.</p>
+<p><strong>Key files</strong>: - <code>pkg/vision/detector.go</code>
+(682 lines, 16.7 KB) - <code>pkg/vision/diff.go</code> -
+<code>pkg/vision/llm_ollama.go</code> -
+<code>pkg/vision/ocr_paddle.go</code>, <code>ocr_tesseract.go</code></p>
+<p><strong>Key types</strong> (<code>detector.go</code>):</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ElementType <span class="dt">string</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    ElementButton   ElementType <span class="op">=</span> <span class="st">&quot;button&quot;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    ElementInput    ElementType <span class="op">=</span> <span class="st">&quot;input&quot;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    ElementText     ElementType <span class="op">=</span> <span class="st">&quot;text&quot;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    ElementImage    ElementType <span class="op">=</span> <span class="st">&quot;image&quot;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    ElementLink     ElementType <span class="op">=</span> <span class="st">&quot;link&quot;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    ElementCheckbox ElementType <span class="op">=</span> <span class="st">&quot;checkbox&quot;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    ElementRadio    ElementType <span class="op">=</span> <span class="st">&quot;radio&quot;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    ElementDropdown ElementType <span class="op">=</span> <span class="st">&quot;dropdown&quot;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    ElementSlider   ElementType <span class="op">=</span> <span class="st">&quot;slider&quot;</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    ElementToggle   ElementType <span class="op">=</span> <span class="st">&quot;toggle&quot;</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    ElementMenu     ElementType <span class="op">=</span> <span class="st">&quot;menu&quot;</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    ElementTab      ElementType <span class="op">=</span> <span class="st">&quot;tab&quot;</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    ElementScroll   ElementType <span class="op">=</span> <span class="st">&quot;scroll&quot;</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    ElementUnknown  ElementType <span class="op">=</span> <span class="st">&quot;unknown&quot;</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Element <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    ID         <span class="dt">string</span>            <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    Type       ElementType       <span class="st">`json:&quot;type&quot;`</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    Bounds     image<span class="op">.</span>Rectangle   <span class="st">`json:&quot;bounds&quot;`</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    Confidence <span class="dt">float64</span>           <span class="st">`json:&quot;confidence&quot;`</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    Text       <span class="dt">string</span>            <span class="st">`json:&quot;text,omitempty&quot;`</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    Label      <span class="dt">string</span>            <span class="st">`json:&quot;label,omitempty&quot;`</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    Enabled    <span class="dt">bool</span>              <span class="st">`json:&quot;enabled&quot;`</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    Visible    <span class="dt">bool</span>              <span class="st">`json:&quot;visible&quot;`</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    Selected   <span class="dt">bool</span>              <span class="st">`json:&quot;selected,omitempty&quot;`</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>    Focused    <span class="dt">bool</span>              <span class="st">`json:&quot;focused,omitempty&quot;`</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    Metadata   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`json:&quot;metadata,omitempty&quot;`</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FrameResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    FrameID    <span class="dt">string</span>      <span class="st">`json:&quot;frame_id&quot;`</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    Timestamp  time<span class="op">.</span>Time   <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>    Elements   <span class="op">[]</span>Element   <span class="st">`json:&quot;elements&quot;`</span></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>    TextBlocks <span class="op">[]</span>TextBlock <span class="st">`json:&quot;text_blocks,omitempty&quot;`</span></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>    LatencyMs  <span class="dt">float64</span>     <span class="st">`json:&quot;latency_ms&quot;`</span></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Integration</strong>: - Used by <code>pkg/navigator</code>
+for UI element discovery. - Used by <code>pkg/issuedetector</code> for
+visual bug detection. - <code>pkg/vision/llm_ollama.go</code> interfaces
+with local Ollama vision models.</p>
+<hr />
+<h3 id="pkgcapture-platform-capture-drivers">2.13
+<code>pkg/capture</code> — Platform Capture Drivers</h3>
+<p><strong>Responsibility</strong>: Low-level screenshot/video capture
+per platform.</p>
+<p><strong>Key files</strong>: -
+<code>pkg/capture/android_capture.go</code> -
+<code>pkg/capture/desktop_capture.go</code> -
+<code>pkg/capture/linux_capture.go</code> -
+<code>pkg/capture/macos_capture.go</code> -
+<code>pkg/capture/windows_capture.go</code></p>
+<p><strong>Integration</strong>: - Called by
+<code>pkg/evidence/collector.go</code> for screenshots. - Called by
+<code>pkg/session/recorder.go</code> for session screenshots. -
+<code>pkg/capture/android_capture.go</code> uses scrcpy-direct path + v3
+wire protocol.</p>
+<hr />
+<h3 id="pkgvideo-video-recording">2.14 <code>pkg/video</code> — Video
+Recording</h3>
+<p><strong>Responsibility</strong>: Video recording via FFmpeg and
+scrcpy.</p>
+<p><strong>Key files</strong>: -
+<code>pkg/video/ffmpeg_recorder.go</code> -
+<code>pkg/video/scrcpy.go</code> - <code>pkg/video/frames.go</code></p>
+<p><strong>Integration</strong>: - Used by
+<code>pkg/session/video.go</code> for per-platform video management. -
+Used by <code>pkg/evidence/collector.go</code> for video evidence.</p>
+<hr />
+<h3 id="pkgticket-ticket-generation">2.15 <code>pkg/ticket</code> —
+Ticket Generation</h3>
+<p><strong>Responsibility</strong>: Generates detailed Markdown issue
+tickets from failures.</p>
+<p><strong>Key file</strong>: <code>pkg/ticket/ticket.go</code> (~13.7
+KB)</p>
+<p><strong>Key types</strong>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Severity <span class="dt">string</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span> SeverityCritical Severity <span class="op">=</span> <span class="st">&quot;critical&quot;</span><span class="op">;</span> SeverityHigh Severity <span class="op">=</span> <span class="st">&quot;high&quot;</span><span class="op">;</span> SeverityMedium Severity <span class="op">=</span> <span class="st">&quot;medium&quot;</span><span class="op">;</span> SeverityLow Severity <span class="op">=</span> <span class="st">&quot;low&quot;</span> <span class="op">)</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Ticket <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    ID               <span class="dt">string</span>            <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    Title            <span class="dt">string</span>            <span class="st">`json:&quot;title&quot;`</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    Severity         Severity          <span class="st">`json:&quot;severity&quot;`</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    Platform         config<span class="op">.</span>Platform   <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    Category         <span class="dt">string</span>            <span class="st">`json:&quot;category&quot;`</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    Description      <span class="dt">string</span>            <span class="st">`json:&quot;description&quot;`</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    ReproSteps       <span class="op">[]</span><span class="dt">string</span>          <span class="st">`json:&quot;repro_steps&quot;`</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    ExpectedBehavior <span class="dt">string</span>            <span class="st">`json:&quot;expected_behavior&quot;`</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    ActualBehavior   <span class="dt">string</span>            <span class="st">`json:&quot;actual_behavior&quot;`</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    StackTrace       <span class="dt">string</span>            <span class="st">`json:&quot;stack_trace,omitempty&quot;`</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    Logs             <span class="op">[]</span><span class="dt">string</span>          <span class="st">`json:&quot;logs,omitempty&quot;`</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    Screenshots      <span class="op">[]</span><span class="dt">string</span>          <span class="st">`json:&quot;screenshots,omitempty&quot;`</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    VideoRef         <span class="op">*</span>VideoReference   <span class="st">`json:&quot;video_ref,omitempty&quot;`</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    LLMSuggestedFix  <span class="op">*</span>LLMSuggestedFix  <span class="st">`json:&quot;llm_suggested_fix,omitempty&quot;`</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    DocumentationRefs <span class="op">[]</span>validator<span class="op">.</span>DocRef <span class="st">`json:&quot;documentation_refs,omitempty&quot;`</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    Timestamp        time<span class="op">.</span>Time         <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> GenerateTicket<span class="op">(</span>stepResult <span class="op">*</span>validator<span class="op">.</span>StepResult<span class="op">,</span> detection <span class="op">*</span>detector<span class="op">.</span>DetectionResult<span class="op">)</span> <span class="op">(*</span>Ticket<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> WriteTicket<span class="op">(</span>ticket <span class="op">*</span>Ticket<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ParseReplayScript<span class="op">(</span>data <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="op">([]</span>automation<span class="op">.</span>Action<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Integration</strong>: - Consumed by <code>pkg/reporter</code>
+for ticket output. - <code>cmd/helixqa/replay.go</code> uses
+<code>ticket.ParseReplayScript()</code> to replay
+<code>.ocu-replay</code> DSL blocks.</p>
+<hr />
+<h3 id="pkgreporter-report-generation">2.16 <code>pkg/reporter</code> —
+Report Generation</h3>
+<p><strong>Responsibility</strong>: Produces QA reports in Markdown,
+HTML, and JSON.</p>
+<p><strong>Key file</strong>: <code>pkg/reporter/reporter.go</code> (~11
+KB)</p>
+<p><strong>Key types</strong>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> QAReport <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    Title            <span class="dt">string</span>            <span class="st">`json:&quot;title&quot;`</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    GeneratedAt      time<span class="op">.</span>Time         <span class="st">`json:&quot;generated_at&quot;`</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    PlatformResults  <span class="op">[]*</span>PlatformResult <span class="st">`json:&quot;platform_results&quot;`</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    TotalChallenges  <span class="dt">int</span>               <span class="st">`json:&quot;total_challenges&quot;`</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    PassedChallenges <span class="dt">int</span>               <span class="st">`json:&quot;passed_challenges&quot;`</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    FailedChallenges <span class="dt">int</span>               <span class="st">`json:&quot;failed_challenges&quot;`</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    TotalCrashes     <span class="dt">int</span>               <span class="st">`json:&quot;total_crashes&quot;`</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    TotalANRs        <span class="dt">int</span>               <span class="st">`json:&quot;total_anrs&quot;`</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    TotalDuration    time<span class="op">.</span>Duration     <span class="st">`json:&quot;total_duration&quot;`</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    OutputDir        <span class="dt">string</span>            <span class="st">`json:&quot;output_dir&quot;`</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Reporter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    challengeReporter report<span class="op">.</span>Reporter</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    outputDir         <span class="dt">string</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    reportFormat      config<span class="op">.</span>ReportFormat</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Reporter<span class="op">)</span> GenerateQAReport<span class="op">(</span>results <span class="op">[]*</span>PlatformResult<span class="op">)</span> <span class="op">(*</span>QAReport<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Reporter<span class="op">)</span> WriteMarkdown<span class="op">(</span>qa <span class="op">*</span>QAReport<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Reporter<span class="op">)</span> WriteJSON<span class="op">(</span>qa <span class="op">*</span>QAReport<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Reporter<span class="op">)</span> WriteHTML<span class="op">(</span>qa <span class="op">*</span>QAReport<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<p><strong>Integration</strong>: - Reuses
+<code>digital.vasic.challenges/pkg/report</code> for challenge-level
+formatting. - Called by <code>pkg/orchestrator</code> at the end of a
+run.</p>
+<hr />
+<h3 id="pkgconfig-configuration">2.17 <code>pkg/config</code> —
+Configuration</h3>
+<p><strong>Responsibility</strong>: Configuration types and parsing.</p>
+<p><strong>Key file</strong>: <code>pkg/config/config.go</code> (~14
+KB)</p>
+<p><strong>Key types</strong>:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Platform <span class="dt">string</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    PlatformAndroid    Platform <span class="op">=</span> <span class="st">&quot;android&quot;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    PlatformAndroidTV  Platform <span class="op">=</span> <span class="st">&quot;androidtv&quot;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    PlatformWeb        Platform <span class="op">=</span> <span class="st">&quot;web&quot;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    PlatformDesktop    Platform <span class="op">=</span> <span class="st">&quot;desktop&quot;</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    PlatformCLI        Platform <span class="op">=</span> <span class="st">&quot;cli&quot;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    PlatformAPI        Platform <span class="op">=</span> <span class="st">&quot;api&quot;</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    PlatformAll        Platform <span class="op">=</span> <span class="st">&quot;all&quot;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SpeedMode <span class="dt">string</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span> SpeedSlow SpeedMode <span class="op">=</span> <span class="st">&quot;slow&quot;</span><span class="op">;</span> SpeedNormal SpeedMode <span class="op">=</span> <span class="st">&quot;normal&quot;</span><span class="op">;</span> SpeedFast SpeedMode <span class="op">=</span> <span class="st">&quot;fast&quot;</span> <span class="op">)</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ReportFormat <span class="dt">string</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span> ReportMarkdown ReportFormat <span class="op">=</span> <span class="st">&quot;markdown&quot;</span><span class="op">;</span> ReportHTML ReportFormat <span class="op">=</span> <span class="st">&quot;html&quot;</span><span class="op">;</span> ReportJSON ReportFormat <span class="op">=</span> <span class="st">&quot;json&quot;</span> <span class="op">)</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    Banks          <span class="op">[]</span><span class="dt">string</span>        <span class="st">`yaml:&quot;banks&quot; json:&quot;banks&quot;`</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    Platforms      <span class="op">[]</span>Platform      <span class="st">`yaml:&quot;platforms&quot; json:&quot;platforms&quot;`</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    Device         <span class="dt">string</span>          <span class="st">`yaml:&quot;device&quot; json:&quot;device&quot;`</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    PackageName    <span class="dt">string</span>          <span class="st">`yaml:&quot;package_name&quot; json:&quot;package_name&quot;`</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    OutputDir      <span class="dt">string</span>          <span class="st">`yaml:&quot;output_dir&quot; json:&quot;output_dir&quot;`</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    Speed          SpeedMode       <span class="st">`yaml:&quot;speed&quot; json:&quot;speed&quot;`</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    ReportFormat   ReportFormat    <span class="st">`yaml:&quot;report_format&quot; json:&quot;report_format&quot;`</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    ValidateSteps  <span class="dt">bool</span>            <span class="st">`yaml:&quot;validate&quot; json:&quot;validate&quot;`</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    Record         <span class="dt">bool</span>            <span class="st">`yaml:&quot;record&quot; json:&quot;record&quot;`</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    Verbose        <span class="dt">bool</span>            <span class="st">`yaml:&quot;verbose&quot; json:&quot;verbose&quot;`</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>    Timeout        time<span class="op">.</span>Duration   <span class="st">`yaml:&quot;timeout&quot; json:&quot;timeout&quot;`</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    StepTimeout    time<span class="op">.</span>Duration   <span class="st">`yaml:&quot;step_timeout&quot; json:&quot;step_timeout&quot;`</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>    BrowserURL     <span class="dt">string</span>          <span class="st">`yaml:&quot;browser_url&quot; json:&quot;browser_url&quot;`</span></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>    DesktopProcess <span class="dt">string</span>          <span class="st">`yaml:&quot;desktop_process&quot; json:&quot;desktop_process&quot;`</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    DesktopPID     <span class="dt">int</span>             <span class="st">`yaml:&quot;desktop_pid&quot; json:&quot;desktop_pid&quot;`</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>    Autonomous     AutonomousConfig <span class="st">`yaml:&quot;autonomous&quot; json:&quot;autonomous&quot;`</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AutonomousConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>    Enabled          <span class="dt">bool</span>            <span class="st">`yaml:&quot;enabled&quot; json:&quot;enabled&quot;`</span></span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>    CoverageTarget   <span class="dt">float64</span>         <span class="st">`yaml:&quot;coverage_target&quot; json:&quot;coverage_target&quot;`</span></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>    CuriosityEnabled <span class="dt">bool</span>            <span class="st">`yaml:&quot;curiosity_enabled&quot; json:&quot;curiosity_enabled&quot;`</span></span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>    CuriosityTimeout time<span class="op">.</span>Duration   <span class="st">`yaml:&quot;curiosity_timeout&quot; json:&quot;curiosity_timeout&quot;`</span></span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>    AgentsEnabled    <span class="op">[]</span><span class="dt">string</span>        <span class="st">`yaml:&quot;agents_enabled&quot; json:&quot;agents_enabled&quot;`</span></span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>    AgentPoolSize    <span class="dt">int</span>             <span class="st">`yaml:&quot;agent_pool_size&quot; json:&quot;agent_pool_size&quot;`</span></span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>    AgentTimeout     time<span class="op">.</span>Duration   <span class="st">`yaml:&quot;agent_timeout&quot; json:&quot;agent_timeout&quot;`</span></span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>    AgentMaxRetries  <span class="dt">int</span>             <span class="st">`yaml:&quot;agent_max_retries&quot; json:&quot;agent_max_retries&quot;`</span></span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>    VisionProvider   <span class="dt">string</span>          <span class="st">`yaml:&quot;vision_provider&quot; json:&quot;vision_provider&quot;`</span></span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>    VisionOpenCVEnabled <span class="dt">bool</span>        <span class="st">`yaml:&quot;vision_opencv_enabled&quot; json:&quot;vision_opencv_enabled&quot;`</span></span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    VisionSSIMThreshold <span class="dt">float64</span>      <span class="st">`yaml:&quot;vision_ssim_threshold&quot; json:&quot;vision_ssim_threshold&quot;`</span></span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>    DocsRoot         <span class="dt">string</span>          <span class="st">`yaml:&quot;docs_root&quot; json:&quot;docs_root&quot;`</span></span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>    DocsAutoDiscover <span class="dt">bool</span>            <span class="st">`yaml:&quot;docs_auto_discover&quot; json:&quot;docs_auto_discover&quot;`</span></span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>    DocsFormats      <span class="op">[]</span><span class="dt">string</span>        <span class="st">`yaml:&quot;docs_formats&quot; json:&quot;docs_formats&quot;`</span></span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>    RecordingVideo           <span class="dt">bool</span>    <span class="st">`yaml:&quot;recording_video&quot; json:&quot;recording_video&quot;`</span></span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a>    RecordingScreenshots     <span class="dt">bool</span>    <span class="st">`yaml:&quot;recording_screenshots&quot; json:&quot;recording_screenshots&quot;`</span></span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>    RecordingVideoQuality    <span class="dt">string</span>  <span class="st">`yaml:&quot;recording_video_quality&quot; json:&quot;recording_video_quality&quot;`</span></span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a>    RecordingScreenshotFormat <span class="dt">string</span> <span class="st">`yaml:&quot;recording_screenshot_format&quot; json:&quot;recording_screenshot_format&quot;`</span></span>
+<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>    RecordingAudio           <span class="dt">bool</span>    <span class="st">`yaml:&quot;recording_audio&quot; json:&quot;recording_audio&quot;`</span></span>
+<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a>    RecordingAudioQuality    <span class="dt">string</span>  <span class="st">`yaml:&quot;recording_audio_quality&quot; json:&quot;recording_audio_quality&quot;`</span></span>
+<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a>    RecordingAudioFormat     <span class="dt">string</span>  <span class="st">`yaml:&quot;recording_audio_format&quot; json:&quot;recording_audio_format&quot;`</span></span>
+<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a>    RecordingAudioDevice     <span class="dt">string</span>  <span class="st">`yaml:&quot;recording_audio_device&quot; json:&quot;recording_audio_device&quot;`</span></span>
+<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>    RecordingFFmpegPath      <span class="dt">string</span>  <span class="st">`yaml:&quot;recording_ffmpeg_path&quot; json:&quot;recording_ffmpeg_path&quot;`</span></span>
+<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a>    AndroidDevice    <span class="dt">string</span>          <span class="st">`yaml:&quot;android_device&quot; json:&quot;android_device&quot;`</span></span>
+<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a>    AndroidPackage   <span class="dt">string</span>          <span class="st">`yaml:&quot;android_package&quot; json:&quot;android_package&quot;`</span></span>
+<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a>    WebURL           <span class="dt">string</span>          <span class="st">`yaml:&quot;web_url&quot; json:&quot;web_url&quot;`</span></span>
+<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a>    WebBrowser       <span class="dt">string</span>          <span class="st">`yaml:&quot;web_browser&quot; json:&quot;web_browser&quot;`</span></span>
+<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>    DesktopProcess   <span class="dt">string</span>          <span class="st">`yaml:&quot;desktop_process&quot; json:&quot;desktop_process&quot;`</span></span>
+<span id="cb19-66"><a href="#cb19-66" aria-hidden="true" tabindex="-1"></a>    DesktopDisplay   <span class="dt">string</span>          <span class="st">`yaml:&quot;desktop_display&quot; json:&quot;desktop_display&quot;`</span></span>
+<span id="cb19-67"><a href="#cb19-67" aria-hidden="true" tabindex="-1"></a>    ReportFormats    <span class="op">[]</span><span class="dt">string</span>        <span class="st">`yaml:&quot;report_formats&quot; json:&quot;report_formats&quot;`</span></span>
+<span id="cb19-68"><a href="#cb19-68" aria-hidden="true" tabindex="-1"></a>    TicketsEnabled   <span class="dt">bool</span>            <span class="st">`yaml:&quot;tickets_enabled&quot; json:&quot;tickets_enabled&quot;`</span></span>
+<span id="cb19-69"><a href="#cb19-69" aria-hidden="true" tabindex="-1"></a>    TicketsMinSeverity <span class="dt">string</span>        <span class="st">`yaml:&quot;tickets_min_severity&quot; json:&quot;tickets_min_severity&quot;`</span></span>
+<span id="cb19-70"><a href="#cb19-70" aria-hidden="true" tabindex="-1"></a>    LLMProvider      <span class="dt">string</span>          <span class="st">`yaml:&quot;llm_provider&quot; json:&quot;llm_provider&quot;`</span></span>
+<span id="cb19-71"><a href="#cb19-71" aria-hidden="true" tabindex="-1"></a>    LLMAPIKey        <span class="dt">string</span>          <span class="st">`yaml:&quot;llm_api_key&quot; json:&quot;llm_api_key&quot;`</span></span>
+<span id="cb19-72"><a href="#cb19-72" aria-hidden="true" tabindex="-1"></a>    LLMBaseURL       <span class="dt">string</span>          <span class="st">`yaml:&quot;llm_base_url&quot; json:&quot;llm_base_url&quot;`</span></span>
+<span id="cb19-73"><a href="#cb19-73" aria-hidden="true" tabindex="-1"></a>    LLMModel         <span class="dt">string</span>          <span class="st">`yaml:&quot;llm_model&quot; json:&quot;llm_model&quot;`</span></span>
+<span id="cb19-74"><a href="#cb19-74" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-75"><a href="#cb19-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-76"><a href="#cb19-76" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ParsePlatforms<span class="op">(</span>s <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Platform<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ParseBanks<span class="op">(</span>s <span class="dt">string</span><span class="op">)</span> <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb19-78"><a href="#cb19-78" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Config<span class="op">)</span> Validate<span class="op">()</span> <span class="dt">error</span></span></code></pre></div>
+<hr />
+<h3 id="other-packages-summary">2.18 Other Packages (Summary)</h3>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 32%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Package</th>
+<th>Key Files</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/controller</code></td>
+<td><code>controller.go</code></td>
+<td>Process lifecycle management, fallback model control</td>
+</tr>
+<tr>
+<td><code>pkg/bridge</code></td>
+<td><code>dbusportal/</code>, <code>scrcpy/</code>,
+<code>sidecarutil/</code></td>
+<td>D-Bus portal, scrcpy server lifecycle, sidecar utilities</td>
+</tr>
+<tr>
+<td><code>pkg/bridges</code></td>
+<td><code>registry.go</code></td>
+<td>HelixQA-native sidecar probe registry</td>
+</tr>
+<tr>
+<td><code>pkg/discovery</code></td>
+<td><code>host_discovery.go</code></td>
+<td>Host discovery for distributed vision</td>
+</tr>
+<tr>
+<td><code>pkg/distributed</code></td>
+<td><code>state.go</code></td>
+<td>Distributed state management</td>
+</tr>
+<tr>
+<td><code>pkg/learning</code></td>
+<td><code>knowledge.go</code>, <code>codebase.go</code>,
+<code>manifest.go</code>, <code>platform_features.go</code></td>
+<td>Learn phase: discovers project structure, credentials, features</td>
+</tr>
+<tr>
+<td><code>pkg/memory</code></td>
+<td><code>store.go</code>, <code>findings.go</code>,
+<code>cognitive.go</code>, <code>coverage.go</code>,
+<code>sessions.go</code></td>
+<td>Vector-memory DB, cognitive memory, session persistence</td>
+</tr>
+<tr>
+<td><code>pkg/maestro</code></td>
+<td><code>maestro.go</code></td>
+<td>Maestro FlowRunner for YAML mobile flow execution</td>
+</tr>
+<tr>
+<td><code>pkg/performance</code></td>
+<td><code>collector.go</code>, <code>exec.go</code>,
+<code>types.go</code></td>
+<td>Performance metrics collection</td>
+</tr>
+<tr>
+<td><code>pkg/regression</code></td>
+<td><code>visual.go</code>, <code>pixelmatch.go</code>,
+<code>deltae.go</code>, <code>report.go</code></td>
+<td>Visual regression testing (pixel match, Delta E)</td>
+</tr>
+<tr>
+<td><code>pkg/replay</code></td>
+<td><code>buffer.go</code></td>
+<td>Replay buffer management</td>
+</tr>
+<tr>
+<td><code>pkg/reproduce</code></td>
+<td><code>reproducer.go</code></td>
+<td>Issue reproduction orchestration</td>
+</tr>
+<tr>
+<td><code>pkg/streaming</code></td>
+<td><code>scrcpy_rtsp_bridge.go</code>, <code>webrtc_handler.go</code>,
+<code>webrtc_server.go</code></td>
+<td>Scrcpy RTSP bridge, WebRTC streaming</td>
+</tr>
+<tr>
+<td><code>pkg/types</code></td>
+<td><code>issue.go</code></td>
+<td>Common issue types</td>
+</tr>
+<tr>
+<td><code>pkg/validators</code></td>
+<td><code>image.go</code>, <code>text.go</code>, <code>video.go</code>,
+<code>manager.go</code>, <code>types.go</code></td>
+<td>Validators for image, text, video assets</td>
+</tr>
+<tr>
+<td><code>pkg/visionnav</code></td>
+<td><code>provider.go</code>, <code>explorer.go</code>,
+<code>evidence.go</code></td>
+<td>Vision-nav provider interface + NopProvider</td>
+</tr>
+<tr>
+<td><code>pkg/visual</code></td>
+<td><code>comparator.go</code></td>
+<td>Visual comparator</td>
+</tr>
+<tr>
+<td><code>pkg/audio</code></td>
+<td><code>stream.go</code>, <code>tesseract_client.go</code>,
+<code>whisper_client.go</code></td>
+<td>Audio stream processing, speech-to-text</td>
+</tr>
+<tr>
+<td><code>pkg/agent</code></td>
+<td><code>action/</code>, <code>explore/</code>, <code>graph/</code>,
+<code>ground/</code></td>
+<td>Agent action primitives, exploration, graph, grounding</td>
+</tr>
+<tr>
+<td><code>pkg/analysis</code></td>
+<td><code>pelt.go</code></td>
+<td>PELT change-point segmentation</td>
+</tr>
+<tr>
+<td><code>pkg/nexus</code></td>
+<td><code>adapter.go</code>, <code>doc.go</code></td>
+<td>Nexus adapter for cross-project integration</td>
+</tr>
+<tr>
+<td><code>pkg/observe/frida</code></td>
+<td><code>frida</code> bridge</td>
+<td>Frida dynamic instrumentation HTTP bridge</td>
+</tr>
+<tr>
+<td><code>pkg/opensource</code></td>
+<td>Various</td>
+<td>Open-source tool wrappers</td>
+</tr>
+<tr>
+<td><code>pkg/infra</code></td>
+<td>Various</td>
+<td>Infrastructure helpers</td>
+</tr>
+<tr>
+<td><code>pkg/training</code></td>
+<td>Various</td>
+<td>Training data management</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cli-commands-cmdhelixqa">3. CLI Commands
+(<code>cmd/helixqa/</code>)</h2>
+<p><strong>Entry point</strong>: <code>cmd/helixqa/main.go</code>
+(version <code>0.2.0</code>)</p>
+<p><strong>Subcommands</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 14%" />
+<col style="width: 42%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Subcommand</th>
+<th>Flags</th>
+<th>Implementation File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run</code></td>
+<td><code>--banks</code>, <code>--platform</code>,
+<code>--device</code>, <code>--output</code>, <code>--speed</code>,
+<code>--report</code>, <code>--validate</code>, <code>--record</code>,
+<code>--verbose</code>, <code>--package</code>, <code>--timeout</code>,
+<code>--browser-url</code>, <code>--desktop-process</code>,
+<code>--tickets</code></td>
+<td><code>main.go</code> lines 94-212</td>
+<td>Execute QA pipeline</td>
+</tr>
+<tr>
+<td><code>list</code></td>
+<td><code>--banks</code>, <code>--platform</code>,
+<code>--category</code>, <code>--priority</code>, <code>--tag</code>,
+<code>--json</code></td>
+<td><code>main.go</code> lines 214-304</td>
+<td>List/filter test cases</td>
+</tr>
+<tr>
+<td><code>report</code></td>
+<td><code>--input</code>, <code>--format</code>,
+<code>--output</code></td>
+<td><code>main.go</code> lines 306+</td>
+<td>Generate report from existing results</td>
+</tr>
+<tr>
+<td><code>autonomous</code></td>
+<td><code>--project</code>, <code>--platforms</code>,
+<code>--env</code>, <code>--timeout</code></td>
+<td><code>main.go</code> (calls <code>autonomous</code> package)</td>
+<td>Run autonomous LLM-driven QA session</td>
+</tr>
+<tr>
+<td><code>replay</code></td>
+<td><code>--ticket</code> (required), <code>--execute</code></td>
+<td><code>cmd/helixqa/replay.go</code></td>
+<td>Replay a ticket’s OCU action chain (dry-run by default)</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>—</td>
+<td><code>main.go</code> line 65</td>
+<td>Print version</td>
+</tr>
+<tr>
+<td><code>help</code> / <code>-h</code> / <code>--help</code></td>
+<td>—</td>
+<td><code>main.go</code> line 76</td>
+<td>Show usage</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Additional CLIs in <code>cmd/</code> directory</strong>: -
+<code>helixqa-axtree-darwin/</code> — macOS accessibility tree extractor
+- <code>helixqa-axtree-windows/</code> — Windows accessibility tree
+extractor - <code>helixqa-capture-demo/</code> — Capture demo tool -
+<code>helixqa-capture-linux/</code> — Linux capture helper -
+<code>helixqa-dreamsim/</code> — DreamSim perceptual similarity -
+<code>helixqa-frida-bridge/</code> — Frida bridge CLI -
+<code>helixqa-input/</code> — Input injection tool -
+<code>helixqa-kmsgrab/</code> — KMS grab tool -
+<code>helixqa-lpips/</code> — LPIPS perceptual similarity -
+<code>helixqa-omniparser/</code> — OmniParser CLI -
+<code>helixqa-text/</code> — Text extraction CLI -
+<code>helixqa-uitars/</code> — UI-TARS CLI -
+<code>helixqa-x11grab/</code> — X11 grab tool -
+<code>ocu-dispatch-test/</code> — OCU dispatch test -
+<code>ocu-probe/</code> — OCU probe - <code>qa-audio-probe/</code> —
+Audio probe</p>
+<hr />
+<h2 id="configuration-system-pkgconfig-.env.example">4. Configuration
+System (<code>pkg/config/</code> + <code>.env.example</code>)</h2>
+<h3 id="env.example-configuration-options">4.1 <code>.env.example</code>
+Configuration Options</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 13%" />
+<col style="width: 25%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr>
+<th>Section</th>
+<th>Key</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Master Switch</strong></td>
+<td><code>HELIX_AUTONOMOUS_ENABLED</code></td>
+<td><code>true</code></td>
+<td>Enable autonomous QA</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AUTONOMOUS_PLATFORMS</code></td>
+<td><code>android,desktop,web</code></td>
+<td>Platforms to test</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AUTONOMOUS_TIMEOUT</code></td>
+<td><code>2h</code></td>
+<td>Max session duration</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AUTONOMOUS_COVERAGE_TARGET</code></td>
+<td><code>0.90</code></td>
+<td>Desired coverage</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AUTONOMOUS_CURIOSITY_ENABLED</code></td>
+<td><code>true</code></td>
+<td>Enable curiosity phase</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AUTONOMOUS_CURIOSITY_TIMEOUT</code></td>
+<td><code>30m</code></td>
+<td>Curiosity phase limit</td>
+</tr>
+<tr>
+<td><strong>LLMsVerifier</strong></td>
+<td><code>LLMSVERIFIER_CONFIG</code></td>
+<td><code>./llmsverifier.yaml</code></td>
+<td>LLMsVerifier config path</td>
+</tr>
+<tr>
+<td></td>
+<td><code>LLMSVERIFIER_STRATEGY</code></td>
+<td><code>helix-qa</code></td>
+<td>Verification strategy</td>
+</tr>
+<tr>
+<td></td>
+<td><code>LLMSVERIFIER_MIN_SCORE</code></td>
+<td><code>0.6</code></td>
+<td>Min acceptance score</td>
+</tr>
+<tr>
+<td></td>
+<td><code>LLMSVERIFIER_MAX_MODELS</code></td>
+<td><code>5</code></td>
+<td>Max models to probe</td>
+</tr>
+<tr>
+<td></td>
+<td><code>LLMSVERIFIER_CACHE_RESULTS</code></td>
+<td><code>true</code></td>
+<td>Enable result caching</td>
+</tr>
+<tr>
+<td></td>
+<td><code>LLMSVERIFIER_CACHE_TTL</code></td>
+<td><code>24h</code></td>
+<td>Cache TTL</td>
+</tr>
+<tr>
+<td><strong>Distributed Vision</strong></td>
+<td><code>HELIX_VISION_HOSTS</code></td>
+<td><code>thinker.local,amber.local</code></td>
+<td>Remote vision hosts</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_VISION_MULTI_USER</code></td>
+<td><code>milosvasic</code></td>
+<td>SSH user for vision hosts</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_LLAMACPP_RPC_MODEL</code></td>
+<td><code>~/models/vision-model.gguf</code></td>
+<td>RPC model path</td>
+</tr>
+<tr>
+<td><strong>Vision Providers</strong></td>
+<td><code>ASTICA_API_KEY</code></td>
+<td>—</td>
+<td>Astica.AI vision</td>
+</tr>
+<tr>
+<td></td>
+<td><code>OPENAI_API_KEY</code></td>
+<td>—</td>
+<td>OpenAI vision</td>
+</tr>
+<tr>
+<td></td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td>—</td>
+<td>Anthropic vision</td>
+</tr>
+<tr>
+<td></td>
+<td><code>GEMINI_API_KEY</code></td>
+<td>—</td>
+<td>Google Gemini</td>
+</tr>
+<tr>
+<td></td>
+<td><code>KIMI_API_KEY</code></td>
+<td>—</td>
+<td>Kimi (Moonshot)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>STEPFUN_API_KEY</code></td>
+<td>—</td>
+<td>StepFun</td>
+</tr>
+<tr>
+<td></td>
+<td><code>NVIDIA_API_KEY</code></td>
+<td>—</td>
+<td>NVIDIA</td>
+</tr>
+<tr>
+<td></td>
+<td><code>GROQ_API_KEY</code></td>
+<td>—</td>
+<td>Groq</td>
+</tr>
+<tr>
+<td></td>
+<td><code>MISTRAL_API_KEY</code></td>
+<td>—</td>
+<td>Mistral</td>
+</tr>
+<tr>
+<td></td>
+<td><code>DEEPSEEK_API_KEY</code></td>
+<td>—</td>
+<td>DeepSeek</td>
+</tr>
+<tr>
+<td></td>
+<td><code>XAI_API_KEY</code></td>
+<td>—</td>
+<td>xAI</td>
+</tr>
+<tr>
+<td></td>
+<td><code>TOGETHER_API_KEY</code></td>
+<td>—</td>
+<td>Together.ai</td>
+</tr>
+<tr>
+<td></td>
+<td><code>QWEN_API_KEY</code></td>
+<td>—</td>
+<td>Qwen</td>
+</tr>
+<tr>
+<td></td>
+<td><code>JUNIE_API_KEY</code></td>
+<td>—</td>
+<td>Junie</td>
+</tr>
+<tr>
+<td><strong>Local Vision</strong></td>
+<td><code>HELIX_OLLAMA_URL</code></td>
+<td><code>http://thinker.local:11434</code></td>
+<td>Ollama endpoint</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_OLLAMA_MODEL</code></td>
+<td><code>minicpm-v:8b</code></td>
+<td>Ollama vision model</td>
+</tr>
+<tr>
+<td><strong>CLI Agents</strong></td>
+<td><code>HELIX_AGENTS_ENABLED</code></td>
+<td><code>opencode,claude-code,gemini</code></td>
+<td>Enabled CLI agents</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AGENT_*_PATH</code></td>
+<td>various</td>
+<td>Agent binary paths</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AGENT_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>Agent timeout</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AGENT_MAX_RETRIES</code></td>
+<td><code>3</code></td>
+<td>Max retries</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_AGENT_POOL_SIZE</code></td>
+<td><code>3</code></td>
+<td>Agent pool size</td>
+</tr>
+<tr>
+<td><strong>Vision Engine</strong></td>
+<td><code>HELIX_VISION_PROVIDER</code></td>
+<td><code>auto</code></td>
+<td>Provider selection</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_VISION_OPENCV_ENABLED</code></td>
+<td><code>true</code></td>
+<td>Enable OpenCV</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_VISION_SSIM_THRESHOLD</code></td>
+<td><code>0.95</code></td>
+<td>SSIM threshold</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_VISION_MAX_IMAGE_SIZE</code></td>
+<td><code>4096</code></td>
+<td>Max image size</td>
+</tr>
+<tr>
+<td><strong>Doc Processor</strong></td>
+<td><code>HELIX_DOCS_ROOT</code></td>
+<td><code>./docs</code></td>
+<td>Documentation root</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_DOCS_AUTO_DISCOVER</code></td>
+<td><code>true</code></td>
+<td>Auto-discover docs</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_DOCS_FORMATS</code></td>
+<td><code>md,yaml,html,adoc,rst</code></td>
+<td>Supported formats</td>
+</tr>
+<tr>
+<td><strong>Recording</strong></td>
+<td><code>HELIX_RECORDING_VIDEO</code></td>
+<td><code>true</code></td>
+<td>Video recording</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_RECORDING_SCREENSHOTS</code></td>
+<td><code>true</code></td>
+<td>Screenshot capture</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_RECORDING_VIDEO_QUALITY</code></td>
+<td><code>medium</code></td>
+<td>Video quality</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_RECORDING_SCREENSHOT_FORMAT</code></td>
+<td><code>png</code></td>
+<td>Screenshot format</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_RECORDING_FFMPEG_PATH</code></td>
+<td><code>/usr/bin/ffmpeg</code></td>
+<td>FFmpeg path</td>
+</tr>
+<tr>
+<td><strong>Audio Recording</strong></td>
+<td><code>HELIXQA_RECORDING_AUDIO</code></td>
+<td><code>false</code></td>
+<td>Audio capture</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIXQA_RECORDING_AUDIO_QUALITY</code></td>
+<td><code>high</code></td>
+<td>Audio quality</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIXQA_RECORDING_AUDIO_FORMAT</code></td>
+<td><code>wav</code></td>
+<td>Audio format</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIXQA_RECORDING_AUDIO_DEVICE</code></td>
+<td><code>default</code></td>
+<td>Audio device</td>
+</tr>
+<tr>
+<td><strong>Platform</strong></td>
+<td><code>HELIX_ANDROID_DEVICE</code></td>
+<td><code>emulator-5554</code></td>
+<td>ADB device</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_ANDROID_PACKAGE</code></td>
+<td><code>com.example.app</code></td>
+<td>Android package</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_WEB_URL</code></td>
+<td><code>http://localhost:8080</code></td>
+<td>Web URL</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_WEB_BROWSER</code></td>
+<td><code>chromium</code></td>
+<td>Browser</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_DESKTOP_PROCESS</code></td>
+<td><code>yole-desktop</code></td>
+<td>Desktop process</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_DESKTOP_DISPLAY</code></td>
+<td><code>:0</code></td>
+<td>X11 display</td>
+</tr>
+<tr>
+<td><strong>Output</strong></td>
+<td><code>HELIX_OUTPUT_DIR</code></td>
+<td><code>./qa-results</code></td>
+<td>Output directory</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_REPORT_FORMATS</code></td>
+<td><code>markdown,html,json</code></td>
+<td>Report formats</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_TICKETS_ENABLED</code></td>
+<td><code>true</code></td>
+<td>Generate tickets</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_TICKETS_MIN_SEVERITY</code></td>
+<td><code>low</code></td>
+<td>Min ticket severity</td>
+</tr>
+<tr>
+<td><strong>Remote Vision</strong></td>
+<td><code>HELIX_VISION_HOST</code></td>
+<td>—</td>
+<td>Single vision host</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_VISION_USER</code></td>
+<td>—</td>
+<td>SSH user</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_VISION_MODEL</code></td>
+<td><code>llava:7b</code></td>
+<td>Vision model</td>
+</tr>
+<tr>
+<td><strong>Distributed RPC</strong></td>
+<td><code>HELIX_LLAMACPP_RPC_ENABLED</code></td>
+<td><code>false</code></td>
+<td>Enable RPC</td>
+</tr>
+<tr>
+<td></td>
+<td><code>HELIX_LLAMACPP_RPC_WORKERS</code></td>
+<td>—</td>
+<td>RPC worker hosts</td>
+</tr>
+<tr>
+<td><strong>Device Exclusion</strong></td>
+<td><code>HELIX_ADB_EXCLUDE</code></td>
+<td><code>ATMOSphere</code></td>
+<td>Exclude device models</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-bank-system-banks">5. Test Bank System
+(<code>banks/</code>)</h2>
+<h3 id="bank-file-count-types">5.1 Bank File Count &amp; Types</h3>
+<p>The <code>banks/</code> directory contains <strong>~120 bank
+files</strong> in both YAML and JSON formats (many pairs:
+<code>.yaml</code> + <code>.json</code>).</p>
+<p><strong>Complete file listing</strong> (from
+<code>api.github.com</code> listing, 2026-04-30):</p>
+<p><strong>Android / Mobile</strong>: -
+<code>full-qa-android.yaml</code> / <code>.json</code> — Comprehensive
+Android phone QA (106 KB YAML) - <code>full-qa-androidtv.yaml</code> /
+<code>.json</code> — Android TV comprehensive QA (166 KB YAML) -
+<code>nexus-mobile-android.yaml</code> / <code>.json</code> — Nexus
+mobile Android - <code>nexus-mobile-ios.yaml</code> / <code>.json</code>
+— Nexus mobile iOS - <code>capture-android.yaml</code> — Android capture
+integration tests - <code>validation-androidtv-focus.json</code> —
+Android TV focus validation</p>
+<p><strong>Web / API</strong>: - <code>full-qa-web.yaml</code> /
+<code>.json</code> — Comprehensive web QA (172 KB YAML) -
+<code>full-qa-api.yaml</code> / <code>.json</code> — API endpoint QA -
+<code>nexus-browser.yaml</code> / <code>.json</code> — Browser-specific
+Nexus tests - <code>nexus-a11y.yaml</code> / <code>.json</code> —
+Accessibility tests</p>
+<p><strong>Desktop</strong>: - <code>nexus-desktop-linux.yaml</code> /
+<code>.json</code> — Linux desktop -
+<code>nexus-desktop-macos.yaml</code> / <code>.json</code> — macOS
+desktop - <code>nexus-desktop-windows.yaml</code> / <code>.json</code> —
+Windows desktop - <code>capture-linux.yaml</code> — Linux capture
+tests</p>
+<p><strong>Cross-Platform / Comprehensive</strong>: -
+<code>full-qa-cross-platform.yaml</code> / <code>.json</code> -
+<code>all-formats.yaml</code> / <code>.json</code> -
+<code>edge-cases-stress.yaml</code> / <code>.json</code></p>
+<p><strong>Feature-Specific</strong>: - <code>atmosphere.yaml</code> /
+<code>.json</code> - <code>app-navigation.yaml</code> /
+<code>.json</code> - <code>file-browser.yaml</code> / <code>.json</code>
+- <code>editor-operations.yaml</code> / <code>.json</code> -
+<code>entity-management.yaml</code> / <code>.json</code> -
+<code>cloud-storage-operations.yaml</code> / <code>.json</code> -
+<code>storage-configuration.yaml</code> / <code>.json</code> -
+<code>admin-operations.yaml</code> / <code>.json</code> -
+<code>image-quality-gate.yaml</code> / <code>.json</code> -
+<code>performance-validation.yaml</code> / <code>.json</code> -
+<code>security-validation.yaml</code> / <code>.json</code> -
+<code>security-comprehensive.yaml</code> -
+<code>ddos-ratelimit-comprehensive.yaml</code> -
+<code>benchmarking-baselines.yaml</code></p>
+<p><strong>CLI / Agent</strong>: -
+<code>cli-agents-comprehensive.yaml</code> / <code>.json</code> -
+<code>cli-agents-test-helixagent.yaml</code> / <code>.json</code> -
+<code>cli-agent-e2e-flow.yaml</code> -
+<code>helixagent-cli-agent-tests.yaml</code> -
+<code>aichat-bash-tools-comprehensive.yaml</code> /
+<code>.json</code></p>
+<p><strong>Fixes Validation</strong> (13 banks): -
+<code>fixes-validation.yaml</code> / <code>.json</code> -
+<code>fixes-validation-a11y.yaml</code> / <code>.json</code> -
+<code>fixes-validation-ai.yaml</code> / <code>.json</code> -
+<code>fixes-validation-browser.yaml</code> / <code>.json</code> -
+<code>fixes-validation-cover.yaml</code> / <code>.json</code> -
+<code>fixes-validation-decoupling.yaml</code> / <code>.json</code> -
+<code>fixes-validation-desktop.yaml</code> / <code>.json</code> -
+<code>fixes-validation-mobile.yaml</code> / <code>.json</code> -
+<code>fixes-validation-obs.yaml</code> / <code>.json</code> -
+<code>fixes-validation-perf.yaml</code> / <code>.json</code> -
+<code>fixes-validation-xflow.yaml</code> / <code>.json</code></p>
+<p><strong>Nexus</strong> (10 banks): - <code>nexus-ai.yaml</code> /
+<code>.json</code> - <code>nexus-browser.yaml</code> /
+<code>.json</code> - <code>nexus-desktop-linux.yaml</code> /
+<code>.json</code> - <code>nexus-desktop-macos.yaml</code> /
+<code>.json</code> - <code>nexus-desktop-windows.yaml</code> /
+<code>.json</code> - <code>nexus-mobile-android.yaml</code> /
+<code>.json</code> - <code>nexus-mobile-ios.yaml</code> /
+<code>.json</code> - <code>nexus-observability.yaml</code> /
+<code>.json</code> - <code>nexus-perf.yaml</code> / <code>.json</code> -
+<code>nexus-xflow.yaml</code> / <code>.json</code></p>
+<p><strong>OCU (OpenClawing)</strong>: -
+<code>ocu-adversarial.json</code> - <code>ocu-automation.json</code> -
+<code>ocu-capture.json</code> - <code>ocu-cross-platform.json</code> -
+<code>ocu-fixes-validation.json</code> -
+<code>ocu-foundation.json</code> - <code>ocu-interact.json</code> -
+<code>ocu-observe.json</code> - <code>ocu-record.json</code> -
+<code>ocu-tickets.json</code> - <code>ocu-vision.json</code></p>
+<p><strong>OpenClawing2 (Phase references)</strong>: -
+<code>openclawing2-phase1-references.yaml</code> / <code>.json</code> -
+<code>openclawing2-phase2-agent-step.yaml</code> / <code>.json</code> -
+<code>openclawing2-phase3-message-manager.yaml</code> /
+<code>.json</code> -
+<code>openclawing2-phase4-retry-healer-loop.yaml</code> /
+<code>.json</code> - <code>openclawing2-phase5-primitives.yaml</code> /
+<code>.json</code> - <code>openclawing2-phase6-coord-actions.yaml</code>
+/ <code>.json</code> -
+<code>openclawing2-phase7-rich-ticketing.yaml</code> /
+<code>.json</code></p>
+<p><strong>Phase / GoCore</strong>: - <code>phase1-gocore.yaml</code>
+(45 KB) - <code>phase2-gocore.yaml</code> -
+<code>phase3-gocore.yaml</code> - <code>phase6-gocore.yaml</code></p>
+<p><strong>Other</strong>: - <code>docs-audit.yaml</code> -
+<code>input-linux.yaml</code> -
+<code>openclawing2-phase1-references.json</code></p>
+<h3 id="yaml-structure">5.2 YAML Structure</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0&quot;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Catalogizer Full QA - Android Phone&quot;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Comprehensive test bank...&quot;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">metadata</span><span class="kw">:</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;vasic-digital&quot;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">app</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Catalogizer&quot;</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;2.3.0&quot;</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="fu">test_cases</span><span class="kw">:</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> FQA-AND-001</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Cold launch displays login screen&quot;</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">category</span><span class="kw">:</span><span class="at"> functional</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> critical</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">platforms</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">android</span><span class="kw">]</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Launch app from launcher&quot;</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">action</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Tap Catalogizer icon on home screen or app drawer&quot;</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">expected</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Splash screen appears briefly, then login screen is displayed&quot;</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">launch</span><span class="kw">,</span><span class="at"> login</span><span class="kw">,</span><span class="at"> cold-start</span><span class="kw">,</span><span class="at"> ui</span><span class="kw">]</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">estimated_duration</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;10s&quot;</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">expected_result</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;App cold-launches to login screen with all UI elements visible&quot;</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">_llm_driven</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="co">   # on 41 banks per commit 57ccdc4</span></span></code></pre></div>
+<h3 id="bank-loading-machinery">5.3 Bank Loading Machinery</h3>
+<ul>
+<li><code>pkg/testbank/loader.go</code>: <code>LoadFile(path)</code>
+supports <code>.yaml</code> and <code>.json</code>. JSON files accept
+<code>&quot;challenges&quot;</code> as alternate key for
+<code>&quot;test_cases&quot;</code>.</li>
+<li><code>pkg/testbank/manager.go</code>: <code>Manager</code> holds
+loaded banks; supports filtering by platform, category, priority,
+tag.</li>
+<li>Validation: duplicate ID detection, <code>IsValid()</code> checks,
+intra-bank uniqueness enforcement.</li>
+</ul>
+<hr />
+<h2 id="challenge-system-challenges">6. Challenge System
+(<code>challenges/</code>)</h2>
+<h3 id="directory-structure">6.1 Directory Structure</h3>
+<pre><code>challenges/
+├── config/
+└── scripts/
+    ├── host_no_auto_suspend_challenge.sh
+    └── no_suspend_calls_challenge.sh</code></pre>
+<h3 id="challenge-scripts">6.2 Challenge Scripts</h3>
+<p><strong><code>challenges/scripts/host_no_auto_suspend_challenge.sh</code></strong>
+(3.7 KB): - Validates that the host system does not auto-suspend during
+QA sessions. - Checks systemd sleep settings, AC power policy, and
+screensaver inhibition. - Returns <code>PASS</code>/<code>FAIL</code>
+with descriptive messages.</p>
+<p><strong><code>challenges/scripts/no_suspend_calls_challenge.sh</code></strong>:
+- Validates that no suspend/hibernate calls are made by the test
+harness. - Uses <code>strace</code>-style monitoring or log analysis to
+detect <code>suspend</code>, <code>hibernate</code>,
+<code>pm-suspend</code> invocations.</p>
+<p><strong>Integration</strong>: - Challenge scripts are executed by the
+<em>Challenges</em> framework
+(<code>digital.vasic.challenges/pkg/runner</code>). - HelixQA loads
+challenge definitions from <code>banks/</code> and delegates execution
+to the Challenges runner. - Results flow back through
+<code>pkg/orchestrator</code> → <code>pkg/reporter</code>.</p>
+<hr />
+<h2 id="autonomous-session-deep-dive">7. Autonomous Session Deep
+Dive</h2>
+<h3 id="architecture-overview">7.1 Architecture Overview</h3>
+<p>The autonomous QA session extends HelixQA with LLM-powered autonomous
+testing. A <code>SessionCoordinator</code> manages 4 sequential phases,
+delegating platform testing to parallel <code>PlatformWorker</code>
+instances.</p>
+<p><strong>External module dependencies</strong> (Git submodules): -
+<code>LLMsVerifier</code> — strategy pattern, model scoring -
+<code>LLMOrchestrator</code> — agent pool, CLI adapters -
+<code>VisionEngine</code> — GoCV + LLM Vision, NavigationGraph -
+<code>DocProcessor</code> — feature maps, coverage tracking</p>
+<h3 id="phase-lifecycle">7.2 4-Phase Lifecycle</h3>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 23%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Setup</strong></td>
+<td><code>pkg/autonomous/coordinator.go</code></td>
+<td>Initialize agents, vision engine, executor factory, session
+recorder</td>
+</tr>
+<tr>
+<td><strong>2. Doc-Driven</strong></td>
+<td><code>pkg/autonomous/worker.go</code>
+<code>RunDocDriven()</code></td>
+<td>Execute documented features from
+<code>DocProcessor.FeatureMap</code>; verify each feature’s test
+steps</td>
+</tr>
+<tr>
+<td><strong>3. Curiosity</strong></td>
+<td><code>pkg/autonomous/worker.go</code>
+<code>RunCuriosity()</code></td>
+<td>LLM-driven exploration beyond documented features; budget-limited
+(<code>CuriosityTimeout</code>)</td>
+</tr>
+<tr>
+<td><strong>4. Report</strong></td>
+<td><code>pkg/autonomous/pipeline.go</code></td>
+<td>Generate findings report, tickets, coverage analysis</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Phase Manager</strong>
+(<code>pkg/autonomous/phase.go</code>):</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PhaseStatus <span class="dt">string</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span> PhasePending PhaseStatus <span class="op">=</span> <span class="st">&quot;pending&quot;</span><span class="op">;</span> PhaseRunning PhaseStatus <span class="op">=</span> <span class="st">&quot;running&quot;</span><span class="op">;</span> PhaseCompleted PhaseStatus <span class="op">=</span> <span class="st">&quot;completed&quot;</span><span class="op">;</span> PhaseFailed PhaseStatus <span class="op">=</span> <span class="st">&quot;failed&quot;</span><span class="op">;</span> PhaseSkipped PhaseStatus <span class="op">=</span> <span class="st">&quot;skipped&quot;</span> <span class="op">)</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Phase <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    Name     <span class="dt">string</span>      <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    Status   PhaseStatus <span class="st">`json:&quot;status&quot;`</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    StartAt  time<span class="op">.</span>Time   <span class="st">`json:&quot;start_at,omitempty&quot;`</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    EndAt    time<span class="op">.</span>Time   <span class="st">`json:&quot;end_at,omitempty&quot;`</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    Progress <span class="dt">float64</span>     <span class="st">`json:&quot;progress&quot;`</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    Error    <span class="dt">error</span>       <span class="st">`json:&quot;-&quot;`</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PhaseManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    phases    <span class="op">[]</span>Phase</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    current   <span class="dt">int</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    listeners <span class="op">[]</span>PhaseListener</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    mu        sync<span class="op">.</span>Mutex</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="platformworker-execution">7.3 PlatformWorker Execution</h3>
+<div class="sourceCode" id="cb23"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Per-platform doc-driven testing</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>pw <span class="op">*</span>PlatformWorker<span class="op">)</span> RunDocDriven<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> features <span class="op">[]</span>feature<span class="op">.</span>Feature<span class="op">)</span> <span class="op">([]</span>StepResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Per-platform curiosity-driven exploration</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>pw <span class="op">*</span>PlatformWorker<span class="op">)</span> RunCuriosity<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> budget time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">([]</span>StepResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Worker internals</strong>: - Gets its own
+<code>agent.Agent</code> (LLM), <code>analyzer.Analyzer</code> (vision),
+<code>navigator.ActionExecutor</code> (platform-specific),
+<code>issuedetector.IssueDetector</code>. - Records all events via
+<code>session.SessionRecorder</code>. - <code>NavigationEngine</code>
+(<code>pkg/navigator/engine.go</code>) performs path-finding and action
+execution. - <code>StagnationDetector</code>
+(<code>pkg/autonomous/stagnation.go</code>) detects UI freeze using
+BOCPD (Bayesian Online Change-Point Detection) over dHash
+Hamming-distance stream.</p>
+<h3 id="navigationengine">7.4 NavigationEngine</h3>
+<div class="sourceCode" id="cb24"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NavigationEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    agent    agent<span class="op">.</span>Agent</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    analyzer analyzer<span class="op">.</span>Analyzer</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    executor ActionExecutor</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    graph    graph<span class="op">.</span>NavigationGraph</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    state    <span class="op">*</span>StateTracker</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ne <span class="op">*</span>NavigationEngine<span class="op">)</span> NavigateTo<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> target <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ne <span class="op">*</span>NavigationEngine<span class="op">)</span> PerformAction<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> action analyzer<span class="op">.</span>Action<span class="op">)</span> <span class="op">(*</span>ActionResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ne <span class="op">*</span>NavigationEngine<span class="op">)</span> Explore<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> budget time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">(*</span>ExploreResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Actions supported</strong>: <code>click</code>,
+<code>type</code>, <code>scroll</code>, <code>long_press</code>,
+<code>swipe</code>, <code>key_press</code>, <code>back</code>,
+<code>home</code></p>
+<p><strong>Screen-change detection</strong>: <code>StateTracker</code>
+tracks current screen; compares pre/post screenshots to determine
+<code>ScreenChanged</code>.</p>
+<h3 id="issuedetector-llm-bug-detection">7.5 IssueDetector (LLM Bug
+Detection)</h3>
+<div class="sourceCode" id="cb25"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> IssueDetector <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    agent    agent<span class="op">.</span>Agent</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    analyzer analyzer<span class="op">.</span>Analyzer</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    session  <span class="op">*</span>session<span class="op">.</span>SessionRecorder</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>id <span class="op">*</span>IssueDetector<span class="op">)</span> AnalyzeScreen<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> screenshot <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> platform <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Issue<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>id <span class="op">*</span>IssueDetector<span class="op">)</span> AnalyzeFlow<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> screenshots <span class="op">[][]</span><span class="dt">byte</span><span class="op">,</span> platform <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>Issue<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Detection categories</strong>
+(<code>pkg/issuedetector/categories.go</code>): -
+<code>CategoryVisual</code> — layout breaks, rendering artifacts -
+<code>CategoryUX</code> — confusing flows, missing feedback -
+<code>CategoryAccessibility</code> — missing labels, contrast issues,
+screen-reader problems - <code>CategoryFunctional</code> — buttons not
+working, state not persisting - <code>CategoryPerformance</code> — jank,
+memory growth, slow transitions - <code>CategoryCrash</code> — crashes,
+ANRs, exceptions</p>
+<p><strong>LLM prompt flow</strong>
+(<code>pkg/issuedetector/prompts.go</code>): 1. Encode screenshot as
+base64 or downscaled PNG (max 480 px wide for speed). 2. Send to vision
+LLM with structured prompt requesting JSON output. 3. Parse JSON into
+<code>Issue</code> structs with severity, confidence, category,
+description. 4. Filter by confidence threshold; deduplicate against
+existing findings.</p>
+<h3 id="sessionrecorder-timeline">7.6 SessionRecorder &amp;
+Timeline</h3>
+<div class="sourceCode" id="cb26"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SessionRecorder <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    sessionID     <span class="dt">string</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    outputDir     <span class="dt">string</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    videos        <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>VideoManager</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    timeline      <span class="op">*</span>Timeline</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    screenshotIdx <span class="dt">int</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    mu            sync<span class="op">.</span>Mutex</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Video recording</strong>: - Per-platform
+<code>VideoManager</code> starts/stops FFmpeg or scrcpy recording. -
+<code>StartVideo(platform)</code> → <code>StopVideo(platform)</code>
+lifecycle. - Screenshots are indexed and correlated with video offset
+(<code>VideoOffset</code>).</p>
+<p><strong>Timeline</strong>: - <code>TimelineEvent</code> records every
+action, detection, screenshot, video segment, error, and phase
+transition. - Events are JSON-serializable and feed into the final
+report.</p>
+<hr />
+<h2 id="screenshot-evidence-pipeline">8. Screenshot &amp; Evidence
+Pipeline</h2>
+<h3 id="screenshot-capture-per-platform">8.1 Screenshot Capture Per
+Platform</h3>
+<table>
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 33%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Method</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Android</strong></td>
+<td>ADB <code>screencap -p</code></td>
+<td><code>pkg/evidence/collector.go</code>
+<code>captureAndroidScreenshot()</code></td>
+</tr>
+<tr>
+<td><strong>Android (scrcpy)</strong></td>
+<td>scrcpy-direct v3 wire protocol</td>
+<td><code>pkg/capture/android_capture.go</code>,
+<code>pkg/bridge/scrcpy/</code></td>
+</tr>
+<tr>
+<td><strong>Web</strong></td>
+<td>Playwright <code>page.screenshot()</code></td>
+<td><code>pkg/evidence/collector.go</code>
+<code>captureWebScreenshot()</code></td>
+</tr>
+<tr>
+<td><strong>Desktop (Linux)</strong></td>
+<td>X11 <code>import</code> or <code>xwd</code></td>
+<td><code>pkg/evidence/collector.go</code>
+<code>captureDesktopScreenshot()</code></td>
+</tr>
+<tr>
+<td><strong>Desktop (macOS)</strong></td>
+<td><code>screencapture</code></td>
+<td><code>pkg/capture/macos_capture.go</code></td>
+</tr>
+<tr>
+<td><strong>Desktop (Windows)</strong></td>
+<td><code>PrintWindow</code> / D3D</td>
+<td><code>pkg/capture/windows_capture.go</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="video-recording">8.2 Video Recording</h3>
+<ul>
+<li><strong>FFmpeg-based</strong>:
+<code>pkg/video/ffmpeg_recorder.go</code> — captures desktop via
+<code>ffmpeg -f x11grab</code> or <code>gdigrab</code>.</li>
+<li><strong>scrcpy-based</strong>: <code>pkg/video/scrcpy.go</code> —
+streams Android screen via scrcpy server.</li>
+<li><strong>Session lifecycle</strong>:
+<code>pkg/session/recorder.go</code> <code>StartVideo()</code> /
+<code>StopVideo()</code> manages per-platform video files.</li>
+</ul>
+<h3 id="audio-recording">8.3 Audio Recording</h3>
+<ul>
+<li><code>pkg/evidence/collector.go</code> <code>StartAudio()</code> /
+<code>StopAudio()</code></li>
+<li>Uses FFmpeg or PulseAudio/ALSA capture.</li>
+<li>Configurable quality: <code>standard</code> (44.1kHz/16bit),
+<code>high</code> (48kHz/24bit), <code>ultra</code> (96kHz/32bit).</li>
+<li>Format: <code>wav</code> (lossless) or <code>flac</code>.</li>
+</ul>
+<h3 id="evidence-organization">8.4 Evidence Organization</h3>
+<pre><code>qa-results/
+├── report.md
+├── report.html
+├── report.json
+├── evidence/
+│   ├── screenshot-step1-1714500000000.png
+│   ├── screenshot-step2-1714500001000.png
+│   ├── video-android-1714500000000.mp4
+│   ├── video-web-1714500000000.mp4
+│   ├── logcat-1714500000000.txt
+│   ├── audio-1714500000000.wav
+│   └── stacktrace-1714500000000.txt
+└── tickets/
+    ├── TICKET-001.md
+    └── TICKET-002.md</code></pre>
+<p><strong>Evidence Item tracking</strong>
+(<code>pkg/evidence/collector.go</code>):</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Item <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    Type      Type           <span class="st">`json:&quot;type&quot;`</span>      <span class="co">// screenshot | video | logcat | stacktrace | console_log | audio</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    Path      <span class="dt">string</span>         <span class="st">`json:&quot;path&quot;`</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    Platform  config<span class="op">.</span>Platform <span class="st">`json:&quot;platform&quot;`</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    Step      <span class="dt">string</span>         <span class="st">`json:&quot;step,omitempty&quot;`</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    Timestamp time<span class="op">.</span>Time      <span class="st">`json:&quot;timestamp&quot;`</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    Size      <span class="dt">int64</span>          <span class="st">`json:&quot;size&quot;`</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="on-demand-screenshot-requests">8.5 On-Demand Screenshot
+Requests</h3>
+<p>The architecture supports on-demand screenshots via multiple paths:
+1. <strong>Autonomous session</strong>: <code>PlatformWorker</code>
+calls <code>executor.Screenshot(ctx)</code> during
+<code>PerformAction()</code>; screenshots are resized to 480 px max for
+LLM vision (<code>pkg/autonomous/screenshot.go</code>). 2.
+<strong>Validation pipeline</strong>: <code>pkg/validator</code>
+captures pre/post screenshots around each step. 3. <strong>Evidence
+collector</strong>: <code>pkg/evidence/collector.go</code>
+<code>CaptureScreenshot()</code> can be called directly by any package
+with a <code>context.Context</code>. 4. <strong>Navigation
+engine</strong>: <code>NavigationEngine</code> captures screenshots to
+determine <code>ScreenChanged</code>. 5. <strong>Issue
+detector</strong>: <code>IssueDetector</code> captures screenshots for
+LLM analysis.</p>
+<hr />
+<h2 id="tests-within-helixqa-tests">9. Tests Within HelixQA
+(<code>tests/</code>)</h2>
+<h3 id="test-directory-structure">9.1 Test Directory Structure</h3>
+<pre><code>tests/
+├── benchmark/
+│   └── benchmark_test.go
+├── e2e/
+│   └── e2e_test.go
+├── integration/
+│   └── integration_test.go
+├── security/
+│   └── (security tests)
+└── stress/
+    └── (stress tests)</code></pre>
+<h3 id="per-package-test-coverage">9.2 Per-Package Test Coverage</h3>
+<p>From <code>ARCHITECTURE.md</code>:</p>
+<table>
+<colgroup>
+<col style="width: 39%" />
+<col style="width: 30%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Package</th>
+<th>Tests</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pkg/config</code></td>
+<td>Unit + edge</td>
+<td>Validation, parsing, defaults</td>
+</tr>
+<tr>
+<td><code>pkg/detector</code></td>
+<td>Unit + platform</td>
+<td>Android/Web/Desktop detection</td>
+</tr>
+<tr>
+<td><code>pkg/validator</code></td>
+<td>Unit + concurrent</td>
+<td>Step validation, evidence</td>
+</tr>
+<tr>
+<td><code>pkg/reporter</code></td>
+<td>Unit + format</td>
+<td>Markdown, HTML, JSON output</td>
+</tr>
+<tr>
+<td><code>pkg/orchestrator</code></td>
+<td>Unit + edge + integration + stress</td>
+<td>Full pipeline, cancellation</td>
+</tr>
+<tr>
+<td><code>pkg/testbank</code></td>
+<td>Unit + stress + benchmark</td>
+<td>YAML loading, filtering</td>
+</tr>
+<tr>
+<td><code>pkg/ticket</code></td>
+<td>Unit + stress + benchmark</td>
+<td>Markdown generation</td>
+</tr>
+<tr>
+<td><code>pkg/evidence</code></td>
+<td>Unit + stress + benchmark</td>
+<td>Concurrent capture</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total</strong>: <strong>235 tests</strong>, all passing with
+<code>-race</code> flag.</p>
+<h3 id="notable-test-files-by-package">9.3 Notable Test Files by
+Package</h3>
+<ul>
+<li><code>pkg/autonomous/coordinator_test.go</code></li>
+<li><code>pkg/autonomous/phase_test.go</code></li>
+<li><code>pkg/autonomous/pipeline_test.go</code></li>
+<li><code>pkg/autonomous/executor_factory_test.go</code></li>
+<li><code>pkg/autonomous/http_executor_test.go</code></li>
+<li><code>pkg/autonomous/playwright_executor_test.go</code></li>
+<li><code>pkg/autonomous/real_executor_test.go</code></li>
+<li><code>pkg/autonomous/structured_executor_test.go</code></li>
+<li><code>pkg/autonomous/screenshot_test.go</code> (implicit)</li>
+<li><code>pkg/autonomous/stagnation_test.go</code></li>
+<li><code>pkg/autonomous/bocpd_test.go</code></li>
+<li><code>pkg/autonomous/geo_probe_test.go</code></li>
+<li><code>pkg/autonomous/fallback_test.go</code></li>
+<li><code>pkg/autonomous/findings_bridge_test.go</code></li>
+<li><code>pkg/autonomous/retry_test.go</code></li>
+<li><code>pkg/autonomous/sanitize_test.go</code></li>
+<li><code>pkg/autonomous/adapters_test.go</code></li>
+<li><code>pkg/autonomous/bank_realbinary_test.go</code></li>
+<li><code>pkg/autonomous/allow_foreground_leave_test.go</code></li>
+<li><code>pkg/autonomous/foreground_parse_test.go</code></li>
+<li><code>pkg/navigator/engine_test.go</code></li>
+<li><code>pkg/navigator/executor_test.go</code></li>
+<li><code>pkg/navigator/api_executor_test.go</code></li>
+<li><code>pkg/navigator/cli_executor_test.go</code></li>
+<li><code>pkg/navigator/playwright_executor_test.go</code></li>
+<li><code>pkg/navigator/x11_executor_test.go</code></li>
+<li><code>pkg/navigator/state_test.go</code></li>
+<li><code>pkg/navigator/dual_screen_test.go</code></li>
+<li><code>pkg/navigator/clear_test.go</code></li>
+<li><code>pkg/issuedetector/detector_test.go</code></li>
+<li><code>pkg/session/recorder_test.go</code></li>
+<li><code>pkg/session/timeline_test.go</code></li>
+<li><code>pkg/session/video_test.go</code></li>
+<li><code>pkg/evidence/collector_test.go</code></li>
+<li><code>pkg/evidence/collector_stress_test.go</code></li>
+<li><code>pkg/evidence/annotator_test.go</code></li>
+<li><code>pkg/evidence/audio_test.go</code></li>
+<li><code>pkg/vision/detector_test.go</code></li>
+<li><code>pkg/vision/diff_test.go</code></li>
+<li><code>pkg/vision/integration_test.go</code></li>
+<li><code>pkg/vision/llm_ollama_test.go</code></li>
+<li><code>pkg/vision/ocr_paddle_test.go</code></li>
+<li><code>pkg/vision/ocr_tesseract_test.go</code></li>
+<li><code>pkg/testbank/manager_test.go</code></li>
+<li><code>pkg/testbank/manager_stress_test.go</code></li>
+<li><code>pkg/testbank/schema_test.go</code></li>
+<li><code>pkg/testbank/duplicate_test.go</code></li>
+<li><code>pkg/testbank/generator_test.go</code></li>
+<li><code>pkg/llm/adaptive_test.go</code></li>
+<li><code>pkg/llm/adaptive_enhanced_test.go</code></li>
+<li><code>pkg/llm/anthropic_test.go</code></li>
+<li><code>pkg/llm/astica_test.go</code></li>
+<li><code>pkg/llm/bridge_provider_test.go</code></li>
+<li><code>pkg/llm/consensus_test.go</code></li>
+<li><code>pkg/llm/cost_tracker_test.go</code></li>
+<li><code>pkg/llm/escalation_test.go</code></li>
+<li><code>pkg/llm/google_test.go</code></li>
+<li><code>pkg/llm/ollama_test.go</code></li>
+<li><code>pkg/llm/openai_test.go</code></li>
+<li><code>pkg/llm/phase_selector_test.go</code></li>
+<li><code>pkg/llm/prompt_optimizer_test.go</code></li>
+<li><code>pkg/llm/provider_test.go</code></li>
+<li><code>pkg/llm/providers_registry_test.go</code></li>
+<li><code>pkg/llm/ratelimiter_test.go</code></li>
+<li><code>pkg/llm/vision_ranking_test.go</code></li>
+<li><code>pkg/regression/visual_test.go</code></li>
+<li><code>pkg/regression/pixelmatch_test.go</code></li>
+<li><code>pkg/regression/deltae_test.go</code></li>
+<li><code>pkg/regression/report_test.go</code></li>
+<li><code>pkg/reporter/reporter_test.go</code></li>
+<li><code>pkg/validator/validator_test.go</code></li>
+<li><code>pkg/detector/detector_test.go</code></li>
+<li><code>pkg/config/config_test.go</code></li>
+<li><code>pkg/controller/controller_test.go</code></li>
+<li><code>pkg/memory/store_test.go</code></li>
+<li><code>pkg/memory/findings_test.go</code></li>
+<li><code>pkg/memory/cognitive_test.go</code></li>
+<li><code>pkg/memory/coverage_test.go</code></li>
+<li><code>pkg/memory/knowledge_test.go</code></li>
+<li><code>pkg/memory/sessions_test.go</code></li>
+<li><code>pkg/planning/planner_test.go</code></li>
+<li><code>pkg/planning/ranker_test.go</code></li>
+<li><code>pkg/planning/reconciler_test.go</code></li>
+<li><code>pkg/planning/androidtv_channels_framework_test.go</code></li>
+<li><code>pkg/planning/channels_support_test.go</code></li>
+<li><code>pkg/learning/codebase_test.go</code></li>
+<li><code>pkg/learning/git_test.go</code></li>
+<li><code>pkg/learning/knowledge_test.go</code></li>
+<li><code>pkg/learning/manifest_test.go</code></li>
+<li><code>pkg/learning/platform_features_test.go</code></li>
+<li><code>pkg/learning/reader_test.go</code></li>
+<li><code>pkg/performance/collector_test.go</code></li>
+<li><code>pkg/reproduce/reproducer_test.go</code></li>
+<li><code>pkg/replay/buffer_test.go</code></li>
+<li><code>pkg/streaming/scrcpy_rtsp_bridge.go</code> (live tests)</li>
+<li><code>pkg/streaming/webrtc_server_test.go</code></li>
+<li><code>pkg/streaming/webrtc_example_test.go</code></li>
+<li><code>pkg/video/scrcpy_test.go</code></li>
+<li><code>pkg/video/scrcpy_live_test.go</code></li>
+<li><code>pkg/video/frames_test.go</code></li>
+<li><code>pkg/visionnav/provider_test.go</code></li>
+<li><code>pkg/visionnav/visionnav_test.go</code></li>
+<li><code>pkg/visual/comparator_test.go</code></li>
+<li><code>pkg/audio/stream_test.go</code></li>
+<li><code>pkg/audio/tesseract_client_test.go</code></li>
+<li><code>pkg/audio/whisper_client_test.go</code></li>
+<li><code>pkg/nexus/adapter_test.go</code></li>
+<li><code>cmd/helixqa/replay_test.go</code></li>
+<li><code>cmd/helixqa/nexus_adapters_test.go</code></li>
+</ul>
+<hr />
+<h2 id="integration-dependencies-.gitmodules">10. Integration
+Dependencies (<code>.gitmodules</code>)</h2>
+<h3 id="submodule-listing">10.1 Submodule Listing</h3>
+<p>HelixQA depends on <strong>25+ open-source tools</strong> vendored as
+Git submodules under <code>tools/opensource/</code>:</p>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 23%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>scrcpy</td>
+<td><code>tools/opensource/scrcpy</code></td>
+<td>Android screen mirroring / control</td>
+</tr>
+<tr>
+<td>allure2</td>
+<td><code>tools/opensource/allure2</code></td>
+<td>Test reporting framework</td>
+</tr>
+<tr>
+<td>leakcanary</td>
+<td><code>tools/opensource/leakcanary</code></td>
+<td>Android memory leak detection</td>
+</tr>
+<tr>
+<td>docker-android</td>
+<td><code>tools/opensource/docker-android</code></td>
+<td>Android in Docker</td>
+</tr>
+<tr>
+<td>appium</td>
+<td><code>tools/opensource/appium</code></td>
+<td>Mobile test automation</td>
+</tr>
+<tr>
+<td>midscene</td>
+<td><code>tools/opensource/midscene</code></td>
+<td>Web UI automation</td>
+</tr>
+<tr>
+<td>mem0</td>
+<td><code>tools/opensource/mem0</code></td>
+<td>Memory layer for LLMs</td>
+</tr>
+<tr>
+<td>moondream</td>
+<td><code>tools/opensource/moondream</code></td>
+<td>Tiny vision-language model</td>
+</tr>
+<tr>
+<td>ui-tars</td>
+<td><code>tools/opensource/ui-tars</code></td>
+<td>UI understanding model</td>
+</tr>
+<tr>
+<td>perfetto</td>
+<td><code>tools/opensource/perfetto</code></td>
+<td>Android system tracing</td>
+</tr>
+<tr>
+<td>chroma</td>
+<td><code>tools/opensource/chroma</code></td>
+<td>Vector database</td>
+</tr>
+<tr>
+<td>shortest</td>
+<td><code>tools/opensource/shortest</code></td>
+<td>AI end-to-end testing</td>
+</tr>
+<tr>
+<td>marker</td>
+<td><code>tools/opensource/marker</code></td>
+<td>PDF / document OCR</td>
+</tr>
+<tr>
+<td>kiwi-tcms</td>
+<td><code>tools/opensource/kiwi-tcms</code></td>
+<td>Test case management</td>
+</tr>
+<tr>
+<td>testdriverai</td>
+<td><code>tools/opensource/testdriverai</code></td>
+<td>AI test automation</td>
+</tr>
+<tr>
+<td>stagehand</td>
+<td><code>tools/opensource/stagehand</code></td>
+<td>Browser automation</td>
+</tr>
+<tr>
+<td>unstructured</td>
+<td><code>tools/opensource/unstructured</code></td>
+<td>Document parsing</td>
+</tr>
+<tr>
+<td>redroid</td>
+<td><code>tools/opensource/redroid</code></td>
+<td>Android in Docker (remote)</td>
+</tr>
+<tr>
+<td>signoz</td>
+<td><code>tools/opensource/signoz</code></td>
+<td>Observability platform</td>
+</tr>
+<tr>
+<td>docling</td>
+<td><code>tools/opensource/docling</code></td>
+<td>Document understanding</td>
+</tr>
+<tr>
+<td>llama-index</td>
+<td><code>tools/opensource/llama-index</code></td>
+<td>LLM data framework</td>
+</tr>
+<tr>
+<td>appcrawler</td>
+<td><code>tools/opensource/appcrawler</code></td>
+<td>App crawler</td>
+</tr>
+<tr>
+<td>browser-use</td>
+<td><code>tools/opensource/browser-use</code></td>
+<td>Browser-use AI</td>
+</tr>
+<tr>
+<td>skyvern</td>
+<td><code>tools/opensource/skyvern</code></td>
+<td>AI web automation</td>
+</tr>
+<tr>
+<td>anthropic-quickstarts</td>
+<td><code>tools/opensource/anthropic-quickstarts</code></td>
+<td>Anthropic examples</td>
+</tr>
+<tr>
+<td>ui-tars-desktop</td>
+<td><code>tools/opensource/ui-tars-desktop</code></td>
+<td>Desktop UI-TARS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Test app submodule</strong>: - <code>rest-demo</code> →
+<code>tools/test-apps/rest-demo</code>
+(<code>nicehash/rest-clients-demo</code>)</p>
+<h3 id="sibling-dependencies">10.2 Sibling Dependencies</h3>
+<p>From <code>ARCHITECTURE.md</code> and <code>go.mod</code>
+imports:</p>
+<table>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 30%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Module</th>
+<th>Path</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>digital.vasic.challenges</code></td>
+<td><code>../Challenges</code></td>
+<td>Challenge execution engine, runner, bank loader, reporter</td>
+</tr>
+<tr>
+<td><code>digital.vasic.containers</code></td>
+<td><code>../Containers</code></td>
+<td>Container orchestration, runtime, lifecycle</td>
+</tr>
+<tr>
+<td><code>digital.vasic.llmorchestrator</code></td>
+<td>External</td>
+<td>LLM agent pool, CLI adapters</td>
+</tr>
+<tr>
+<td><code>digital.vasic.visionengine</code></td>
+<td>External</td>
+<td>GoCV + LLM vision, NavigationGraph</td>
+</tr>
+<tr>
+<td><code>digital.vasic.docprocessor</code></td>
+<td>External</td>
+<td>Feature maps, coverage tracking</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="key-design-patterns">11. Key Design Patterns</h2>
+<ol type="1">
+<li><strong>Composition over reimplementation</strong>: HelixQA imports
+<em>Challenges</em> types directly (<code>challenge.Definition</code>,
+<code>bank.Bank</code>, <code>report.Reporter</code>). No wrapper
+types.</li>
+<li><strong>Functional options pattern</strong>: All constructors use
+<code>WithX()</code> options for clean dependency injection and
+testing.</li>
+<li><strong>CommandRunner interface</strong>: Abstracts command
+execution (<code>adb</code>, <code>npx</code>, <code>xte</code>) behind
+an interface, enabling full test coverage without real devices.</li>
+<li><strong>Platform-agnostic orchestration</strong>: The orchestrator
+runs the same pipeline for all platforms. Platform-specific behavior is
+encapsulated in <code>pkg/detector</code>, <code>pkg/evidence</code>,
+<code>pkg/navigator</code>.</li>
+<li><strong>Evidence-first reporting</strong>: Every failure includes
+evidence (screenshots, logs, traces). Tickets are self-contained for AI
+pipeline consumption.</li>
+<li><strong>Dual-model architecture</strong>: Vision models analyze
+screenshots; chat models generate test plans, write reports, reason
+about findings.</li>
+<li><strong>Anti-bluff compliance</strong>: Article XI §11.5 — explicit
+<code>_skip</code> support with <code>_skip_reason</code>; Article XI
+§11.9 — user-mandate forensic anchor; CONST-035 anti-bluff guard.</li>
+</ol>
+<hr />
+<h2 id="notable-architectural-decisions">12. Notable Architectural
+Decisions</h2>
+<ul>
+<li><strong>BOCPD for stagnation</strong>:
+<code>pkg/autonomous/stagnation.go</code> uses Bayesian Online
+Change-Point Detection (Adams &amp; MacKay 2007) over dHash
+Hamming-distance stream for per-frame UI change probability — no need to
+wait 10 seconds for “UI is stuck” heuristic.</li>
+<li><strong>Geo-restriction probing</strong>:
+<code>pkg/autonomous/geo_probe.go</code> probes app content endpoints
+before playback; marks <code>GEO_RESTRICTED</code> so tests
+<code>SKIP</code> rather than <code>FAIL</code>.</li>
+<li><strong>Android TV competing-app guard</strong>:
+<code>PipelineConfig.CompetingAppPackages</code> force-stops foreign
+apps before testing to prevent DPAD_ENTER from handing control to wrong
+app.</li>
+<li><strong>CSRF preflight in HTTP executor</strong>:
+<code>HTTPExecutor</code> automatically handles CSRF token lifecycle for
+mutating API requests.</li>
+<li><strong>Token caching</strong>: <code>HTTPExecutor</code> caches
+admin session tokens across steps to avoid N login round-trips.</li>
+<li><strong>Blank screenshot detection</strong>:
+<code>IsBlankScreenshot()</code> samples 9x9 grid (81 points) and checks
+per-channel range; catches faint widgets while rejecting truly blank
+frames.</li>
+<li><strong>Screenshot resizing</strong>: Screenshots sent to LLM are
+downscaled to max 480 px wide via nearest-neighbor for fast CPU
+inference.</li>
+<li><strong>Distributed vision</strong>:
+<code>PipelineConfig.VisionHosts</code> probes multiple hosts via SSH,
+selects strongest model fitting combined resources, activates llama.cpp
+RPC if needed.</li>
+<li><strong>Constitution compliance</strong>:
+<code>CONSTITUTION.md</code> governs architecture decisions;
+<code>CONST-035</code> anti-bluff; <code>Article XI §11.9</code>
+forensic anchor; <code>Article XI §11.5</code> honest skip mandate.</li>
+</ul>
+<hr />
+<p><em>Document generated from live source analysis of
+<code>https://github.com/HelixDevelopment/HelixQA</code> (main branch,
+~570 commits, commit <code>0bca023</code>).</em></p>
+</body>
+</html>

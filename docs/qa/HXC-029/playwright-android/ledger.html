@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ledger</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ledger</h1>
+</header>
+<h1 id="hxc-029-11.4.98-playwright-browser-android-banks-ledger">HXC-029
+§11.4.98 — Playwright (browser) + Android Banks Ledger</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Tracked item</td>
+<td>HXC-029 (§11.4.98 full-automation anti-bluff forward sweep)</td>
+</tr>
+<tr>
+<td>Batch</td>
+<td>Playwright (browser) + Android banks in
+<code>helix_qa/banks/</code></td>
+</tr>
+<tr>
+<td>Pass type</td>
+<td><strong>SCOPE classification + live web-UI surface probe + read-only
+adb device probe. NO real device driven. NO bank source
+modified.</strong></td>
+</tr>
+<tr>
+<td>Drivers present</td>
+<td>chromium + <code>~/.local/bin/playwright</code> + cached
+chromium-1217; adb 37.0.0 + 2 connected devices</td>
+</tr>
+</tbody>
+</table>
+<h2 id="headline-result">Headline result</h2>
+<p><strong>ZERO of the Playwright/Android banks in this batch are
+HelixCode-scope.</strong> Every browser bank and every Android bank
+targets a DIFFERENT project (Catalogizer, Yole) or HelixQA’s OWN
+internal automation engine (<code>pkg/nexus</code>,
+<code>pkg/capture</code>) — not the HelixCode platform. HelixCode itself
+is <strong>API-only</strong> (no web UI, no Android app), proven by live
+route probing. Therefore there is <strong>no in-scope HelixCode
+Playwright surface to convert</strong> and <strong>no in-scope HelixCode
+Android app to drive</strong>. Honest classification per §11.4.6
+(no-guessing) and §11.4.90 — NOT a fabricated PASS.</p>
+<h2 id="evidence-helixcode-serves-no-web-ui-playwright-has-no-in-scope-target">Evidence:
+HelixCode serves NO web UI (Playwright has no in-scope target)</h2>
+<p><code>docs/qa/HXC-029/playwright-android/helixcode-webui-probe.txt</code>
+(live, server up):</p>
+<pre><code>GET /                 -&gt; HTTP 404  text/plain
+GET /api/v1/health    -&gt; HTTP 200  application/json
+GET /health           -&gt; HTTP 200  application/json
+GET /dashboard        -&gt; HTTP 404  text/plain
+GET /ui               -&gt; HTTP 404  text/plain
+GET /login            -&gt; HTTP 404  text/plain
+GET /index.html       -&gt; HTTP 404  text/plain
+GET /static/          -&gt; HTTP 404  (empty)
+GET /web              -&gt; HTTP 404  text/plain
+GET /metrics          -&gt; HTTP 404  text/plain</code></pre>
+<p>Only the two JSON health endpoints answer 200. There is no
+HTML/dashboard/login surface. Playwright (chromium driver present +
+cached) has nothing HelixCode-side to drive — running the browser banks
+would exercise Catalogizer’s React frontend
+(<code>localhost:3000</code>) or HelixQA’s own Go engine, both out of
+HXC-029 scope.</p>
+<h2 id="evidence-read-only-adb-device-probe-android-classification-only">Evidence:
+read-only adb device probe (Android — classification only)</h2>
+<p><code>docs/qa/HXC-029/playwright-android/android-driver-probe.txt</code>:</p>
+<pre><code>adb version 1.0.41 / 37.0.0  (driver present)
+2 devices: 66ff9c4f51f00ee7 + 998fd36615e99484  -&gt; model:ATMOSphere product:shiba</code></pre>
+<p>The 2 physical devices are <strong>ATMOSphere</strong> (shiba)
+hardware — the Arvus/ATMOSphere project, NOT HelixCode. No
+<code>install</code> / <code>am start</code> / <code>settings put</code>
+/ <code>input</code> was issued (only <code>adb devices</code>). Per the
+batch safety rule, real devices are NOT auto-driven; in-scope Android
+work (there is none here) would be <code>operator_attended</code>.</p>
+<h2 id="per-bank-ledger">Per-bank ledger</h2>
+<p>Scope grep evidence:
+<code>docs/qa/HXC-029/playwright-android/bank-scope-evidence.txt</code>.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>bank</th>
+<th>scope</th>
+<th>driver</th>
+<th>classification</th>
+<th>evidence-path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>full-qa-web.json/.yaml</code></td>
+<td><strong>other-project (Catalogizer)</strong></td>
+<td>playwright</td>
+<td>out-of-scope (targets Catalogizer React @
+<code>localhost:3000</code>)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Catalogizer&quot;</code>, 22× <code>localhost:3000</code>)</td>
+</tr>
+<tr>
+<td><code>fixes-validation-browser.yaml</code></td>
+<td><strong>other (HelixQA own engine)</strong></td>
+<td>go-build/test</td>
+<td>out-of-scope (tests HelixQA’s <code>pkg/nexus/browser</code> engine,
+target <code>catalogizer.local</code>)</td>
+<td><code>bank-scope-evidence.txt</code> (6×
+<code>pkg/nexus</code>)</td>
+</tr>
+<tr>
+<td><code>nexus-browser.json/.yaml</code></td>
+<td><strong>other (HelixQA own engine)</strong></td>
+<td>go-build/test</td>
+<td>out-of-scope (<code>feature: helix-nexus-browser</code>;
+<code>go build ./pkg/nexus/...</code>)</td>
+<td><code>bank-scope-evidence.txt</code> (<code>helix-nexus</code>,
+<code>pkg/nexus</code>)</td>
+</tr>
+<tr>
+<td><code>full-qa-android.json/.yaml</code></td>
+<td><strong>other-project (Catalogizer)</strong></td>
+<td>adb/uiauto</td>
+<td>out-of-scope (Catalogizer Android phone app)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Catalogizer&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>full-qa-androidtv.json/.yaml</code></td>
+<td><strong>other-project (Catalogizer)</strong></td>
+<td>adb/DPAD</td>
+<td>out-of-scope (<code>com.catalogizer.androidtv</code> on Xiaomi Mi
+Box; <code>localhost:8080</code> is the user-typed <em>Catalogizer
+backend</em> URL field)</td>
+<td><code>bank-scope-evidence.txt</code> (55×
+<code>com.catalogizer.androidtv</code>)</td>
+</tr>
+<tr>
+<td><code>full-qa-androidtv-challenges.json</code></td>
+<td><strong>other-project (Catalogizer)</strong></td>
+<td>adb/DPAD</td>
+<td>out-of-scope (Catalogizer Android TV challenge mirror)</td>
+<td><code>bank-scope-evidence.txt</code> (Catalogizer, Mi Box,
+Xiaomi)</td>
+</tr>
+<tr>
+<td><code>validation-androidtv-focus.json</code></td>
+<td><strong>other-project (Catalogizer)</strong></td>
+<td>adb/DPAD</td>
+<td>out-of-scope (Catalogizer AndroidTV channels/deep-links)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Catalogizer&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>file-browser.yaml</code></td>
+<td><strong>other-project (Yole)</strong></td>
+<td>adb/uiauto + browser</td>
+<td>out-of-scope (Yole file browser GUI)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Yole&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>app-navigation.yaml</code></td>
+<td><strong>other-project (Yole)</strong></td>
+<td>adb/uiauto</td>
+<td>out-of-scope (Yole navigation)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Yole&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>editor-operations.yaml</code></td>
+<td><strong>other-project (Yole)</strong></td>
+<td>adb/uiauto</td>
+<td>out-of-scope (Yole editor GUI)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Yole&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>all-formats.yaml</code></td>
+<td><strong>other-project (Yole)</strong></td>
+<td>adb/uiauto</td>
+<td>out-of-scope (Yole editor formats)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Yole&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>cloud-storage-operations.yaml</code></td>
+<td><strong>other-project (Yole)</strong></td>
+<td>adb/uiauto</td>
+<td>out-of-scope (Yole cloud storage GUI)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Yole&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>storage-configuration.yaml</code></td>
+<td><strong>other-project (Yole)</strong></td>
+<td>adb/uiauto</td>
+<td>out-of-scope (Yole storage config GUI)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Yole&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>edge-cases-stress.yaml</code></td>
+<td><strong>other-project (Yole)</strong></td>
+<td>adb/uiauto</td>
+<td>out-of-scope (Yole GUI stress)</td>
+<td><code>bank-scope-evidence.txt</code> (24× Yole)</td>
+</tr>
+<tr>
+<td><code>nexus-mobile-android.yaml</code></td>
+<td><strong>other (HelixQA own engine)</strong></td>
+<td>go/appium</td>
+<td>out-of-scope (<code>feature: helix-nexus-mobile-android</code>;
+Appium engine)</td>
+<td><code>bank-scope-evidence.txt</code> (<code>helix-nexus</code>)</td>
+</tr>
+<tr>
+<td><code>fixes-validation-mobile.yaml</code></td>
+<td><strong>other (HelixQA own engine)</strong></td>
+<td>go/appium</td>
+<td>out-of-scope (HelixQA <code>pkg/nexus</code> mobile
+regressions)</td>
+<td><code>bank-scope-evidence.txt</code> (4×
+<code>pkg/nexus</code>)</td>
+</tr>
+<tr>
+<td><code>image-quality-gate.yaml</code></td>
+<td><strong>other-project (Catalogizer)</strong></td>
+<td>adb/screencap</td>
+<td>out-of-scope (Catalogizer AndroidTV image-quality)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Catalogizer&quot;</code>, androidtv)</td>
+</tr>
+<tr>
+<td><code>full-qa-cross-platform.yaml</code></td>
+<td><strong>other-project (Catalogizer)</strong></td>
+<td>playwright/adb</td>
+<td>out-of-scope (Catalogizer cross-platform login flow)</td>
+<td><code>bank-scope-evidence.txt</code> (meta
+<code>app: &quot;Catalogizer&quot;</code>)</td>
+</tr>
+<tr>
+<td><code>capture-android.yaml</code></td>
+<td><strong>other (HelixQA own device-capture)</strong></td>
+<td>adb/scrcpy</td>
+<td>out-of-scope (HelixQA <code>pkg/capture/android</code> device
+capture — Arvus/ATMOSphere surface)</td>
+<td><code>bank-scope-evidence.txt</code> (11×
+<code>pkg/capture</code>)</td>
+</tr>
+<tr>
+<td><code>capture-linux.yaml</code></td>
+<td><strong>other (HelixQA own device-capture)</strong></td>
+<td>x11/portal</td>
+<td>out-of-scope (HelixQA <code>pkg/capture/linux</code> desktop
+capture)</td>
+<td><code>bank-scope-evidence.txt</code> (11×
+<code>pkg/capture</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="counts">Counts</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Banks examined (browser + android + capture)</td>
+<td>20</td>
+</tr>
+<tr>
+<td><strong>HelixCode-scope</strong></td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>Other-project / other-component (out of HXC-029 scope)</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Playwright verified-3x (HelixCode)</td>
+<td>0 (no HelixCode web UI exists)</td>
+</tr>
+<tr>
+<td>Android operator-attended (HelixCode)</td>
+<td>0 (no HelixCode Android app exists)</td>
+</tr>
+<tr>
+<td>Obsolete</td>
+<td>0 (banks are valid — for THEIR own projects)</td>
+</tr>
+<tr>
+<td>Out-of-scope</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<p>Out-of-scope breakdown: Catalogizer = 8 (full-qa-web,
+full-qa-android, full-qa-androidtv, full-qa-androidtv-challenges,
+validation-androidtv-focus, image-quality-gate, full-qa-cross-platform);
+Yole = 7 (file-browser, app-navigation, editor-operations, all-formats,
+cloud-storage-operations, storage-configuration, edge-cases-stress);
+HelixQA own engine/capture = 5 (fixes-validation-browser, nexus-browser,
+nexus-mobile-android, fixes-validation-mobile, capture-android,
+capture-linux — note nexus-browser + nexus-mobile share the engine).</p>
+<h2 id="anti-bluff-posture">Anti-bluff posture</h2>
+<p>Per §11.4.6 (no-guessing) and §11.4.51/§11.4.79 (HelixQA banks stay
+decoupled, project-not-aware): these banks are NOT broken and NOT
+obsolete — they correctly validate Catalogizer / Yole / HelixQA’s own
+engine. Converting them to target HelixCode would be incorrect (it would
+couple a reusable QA bank to a specific consuming project) AND out of
+HXC-029 scope. The honest classification is <strong>out-of-scope for
+HXC-029</strong>, with the underlying reason captured live: HelixCode
+has no browser UI and no Android app for these driver classes to
+target.</p>
+<h2 id="what-genuinely-remains-for-hxc-029">What genuinely remains for
+HXC-029</h2>
+<p>Nothing automatable in THIS batch. The HelixCode-relevant automatable
+surface (API + CLI banks) was handled by the prior 7/18 verified banks.
+The <code>manual-review-required</code> prose steps catalogued in
+<code>bank-classification.md</code> (server-API + CLI sub-groups) are
+the remaining HelixCode-scope conversion work and belong to the API/CLI
+batches, not this one. This Playwright/Android batch <strong>concludes
+with no further automatable HelixCode work</strong> — driving the real
+ATMOSphere devices or other-project apps is explicitly out of scope and
+would be operator-attended for those projects.</p>
+<h2 id="sources-verified-2026-05-29">Sources verified 2026-05-29</h2>
+<ul>
+<li>Live HelixCode server route probe (<code>localhost:8080</code>) —
+captured in <code>helixcode-webui-probe.txt</code></li>
+<li><code>helix_qa/banks/*.{yaml,json}</code> metadata + target greps —
+captured in <code>bank-scope-evidence.txt</code></li>
+<li><code>adb devices -l</code> (read-only) — captured in
+<code>android-driver-probe.txt</code></li>
+</ul>
+</body>
+</html>

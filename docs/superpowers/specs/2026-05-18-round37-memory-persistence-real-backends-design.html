@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-18-round37-memory-persistence-real-backends-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-18-round37-memory-persistence-real-backends-design</h1>
+</header>
+<h1 id="round-37-memory-persistence-real-backend-wiring-design">Round 37
+— Memory-Persistence Real-Backend Wiring — Design</h1>
+<p><strong>Date</strong>: 2026-05-18 <strong>Status</strong>: Approved
+(operator blanket-approved all sections) <strong>Programme</strong>:
+HelixCode anti-bluff campaign, round 37 (follow-on from round 31 partial
+fix + round 35 RedisMemoryProvider audit finding) <strong>Constitutional
+anchors</strong>: CONST-035, CONST-042 (no-secret-leak), CONST-050(A) +
+CONST-050(B), CONST-051(B), CONST-060, CONST-061, Article XI §11.9</p>
+<hr />
+<h2 id="architecture">1. Architecture</h2>
+<p><strong>Premise</strong>: Round 31’s fix made <code>Health()</code>
+honest (real <code>Ping()</code> + sentinel for nil-client) but left the
+data path fake — <code>RedisMemoryProvider</code> is an in-memory map
+masquerading as Redis; same for Memcached.
+<code>Storage.SyncRecording</code> marks recordings “synced” with no S3
+upload. <code>VectorDB</code> pgvector.Search/Get return sentinels.
+End-user data is being lost across restarts despite the API contract
+promising persistence.</p>
+<p><strong>Round 37 closes the gap</strong> by giving each provider a
+<strong>real client field acquired at construction from
+configuration</strong>. The sentinel error becomes a strict
+precondition: if <code>client == nil</code> at method entry, refuse
+loudly; otherwise delegate to the real client.</p>
+<p><strong>Three submodules touched, all decoupled per
+CONST-051(B)</strong>: 1. <code>helix_code/internal/memory/</code> —
+RedisMemoryProvider + MemcachedMemoryProvider get real clients 2.
+<code>submodules/storage/</code> — <code>SyncRecording</code> wires real
+S3 <code>PutObject</code> 3. <code>submodules/vector_db/</code> —
+pgvector <code>Search</code> + <code>Get</code> use real pgxpool</p>
+<p><strong>Config flow</strong>: Each provider’s constructor takes a
+typed config struct sourced from the parent application’s
+<code>.env</code> (CONST-042). Absent/invalid config → constructor
+returns the sentinel; provider is created in a “stub” state where every
+data method returns the sentinel. Preserves the round-31 invariant that
+an unconfigured provider is safe to hold and surfaces the gap loudly on
+first use.</p>
+<p><strong>Non-goals</strong>: - Connection pooling tuning (use sensible
+defaults; perf round later) - Failover/replica strategies
+(single-endpoint sufficient) - Runtime backend swap (operator restarts
+on config change)</p>
+<hr />
+<h2 id="components">2. Components</h2>
+<h3 id="helix_codeinternalmemorymemory_manager.go">2.1
+<code>helix_code/internal/memory/memory_manager.go</code></h3>
+<p><strong><code>RedisMemoryProvider</code></strong> struct gains: -
+<code>client *redis.Client</code> field (from
+<code>github.com/redis/go-redis/v9</code> — already in go.mod, verify;
+if not, <code>go-redis/v9</code> is canonical) -
+<code>config RedisConfig</code> (URL, Password, DB, TLS bool,
+DialTimeout)</p>
+<p><strong>Constructor</strong>:
+<code>NewRedisMemoryProvider(cfg RedisConfig) *RedisMemoryProvider</code>
+— if <code>cfg.URL == &quot;&quot;</code>, returns a provider with
+<code>client = nil</code> (data methods return
+<code>ErrRedisClientNotInitialized</code>). Otherwise calls
+<code>redis.NewClient(opts)</code> + invokes <code>Ping(ctx)</code> once
+at construction; on failure stores the client but Ping error surfaces on
+next data call.</p>
+<p><strong>Data methods</strong> (Get, Set, Delete, List, Health,
+Close): - Each guards
+<code>if p.client == nil { return ..., ErrRedisClientNotInitialized }</code>
+- Get → <code>p.client.Get(ctx, key).Bytes()</code>; map
+<code>redis.Nil</code> to <code>(nil, ErrKeyNotFound)</code> (existing
+sentinel) - Set → <code>p.client.Set(ctx, key, value, ttl).Err()</code>
+- Delete → <code>p.client.Del(ctx, keys...).Err()</code> - List (prefix
+scan) → <code>p.client.Scan(ctx, 0, prefix+&quot;*&quot;, 100).Iterator()</code>
+paginated - Health → existing real <code>Ping()</code> (round-31; no
+change) - Close → <code>p.client.Close()</code></p>
+<p><strong><code>MemcachedMemoryProvider</code></strong> struct gains: -
+<code>client *memcache.Client</code> field (from
+<code>github.com/bradfitz/gomemcache/memcache</code>) -
+<code>config MemcachedConfig</code> (Servers []string, Timeout,
+MaxIdleConns)</p>
+<p><strong>Constructor</strong>: same pattern — empty Servers →
+nil-client mode → sentinels. Otherwise
+<code>memcache.New(cfg.Servers...)</code>.</p>
+<p><strong>Data methods</strong>: - Get → <code>p.client.Get(key)</code>
+→ <code>ErrCacheMiss</code> mapped to <code>ErrKeyNotFound</code> - Set
+→ <code>p.client.Set(&amp;memcache.Item{Key, Value, Expiration})</code>
+- Delete → <code>p.client.Delete(key)</code> → <code>ErrCacheMiss</code>
+ignored (idempotent) - List → <strong>not supported by memcached
+protocol</strong>; return <code>ErrListNotSupported</code> sentinel +
+doc-comment explaining memcached has no scan API - Health → existing
+real Ping (round-31) - Close → <code>p.client.Close()</code> (or no-op
+if not supported)</p>
+<h3 id="submodulesstorage-syncrecording">2.2
+<code>submodules/storage/</code> SyncRecording</h3>
+<p><strong>Current state</strong> (per round 21 close-out):
+<code>SyncRecording</code> returns <code>ErrS3UploadNotWired</code>
+sentinel.</p>
+<p><strong>Round 37 wires it</strong>: existing <code>s3Client</code>
+field (or add one) of type <code>*s3.Client</code> (AWS SDK v2:
+<code>github.com/aws/aws-sdk-go-v2/service/s3</code>).</p>
+<p><strong><code>SyncRecording(ctx, session)</code> body</strong>: 1. If
+<code>s.s3Client == nil</code>: return <code>ErrS3UploadNotWired</code>
+(unchanged round-21 behaviour) 2. Read recording from local disk:
+<code>data, err := os.ReadFile(session.LocalPath)</code> 3. Detect size:
+if &gt; 5 MB, use multipart upload via
+<code>manager.NewUploader(s.s3Client).Upload(...)</code>; else single
+<code>PutObject</code> 4. On success: <code>session.S3Key = key</code>,
+<code>session.Status = RecordingStatusSynced</code>,
+<code>session.SyncedAt = time.Now()</code> 5. On failure:
+<code>session.Status = RecordingStatusFailed</code>, wrap and return
+error</p>
+<p><strong>Constructor</strong>
+<code>NewSyncManager(cfg StorageConfig)</code>: - If
+<code>cfg.Bucket == &quot;&quot; || cfg.Region == &quot;&quot;</code> →
+<code>s3Client = nil</code> → all data methods return
+ErrS3UploadNotWired - Else <code>aws.NewConfig(...)</code> from
+env-sourced credentials (CONST-042; never hardcoded) →
+<code>s3.NewFromConfig(cfg)</code></p>
+<p><strong>CloudFront RSA-SHA1 signing</strong> (round-21 sibling fix
+<code>ErrCloudFrontSigningNotWired</code>) — <strong>out of scope for
+round 37</strong>; deferred to round 38 candidate.</p>
+<h3 id="submodulesvector_db-pgvector">2.3
+<code>submodules/vector_db/</code> pgvector</h3>
+<p><strong>Current state</strong> (per round 22 close-out):
+<code>Search</code> + <code>Get</code> return
+<code>ErrPgvectorSearchNotWired</code> /
+<code>ErrPgvectorGetNotWired</code>.</p>
+<p><strong>Round 37 wires both</strong>: <code>*pgxpool.Pool</code>
+field on the pgvector client struct, from
+<code>github.com/jackc/pgx/v5/pgxpool</code>.</p>
+<p><strong><code>Search(ctx, query, k)</code> body</strong>: 1. If
+<code>c.pool == nil</code>: return
+<code>ErrPgvectorSearchNotWired</code> (unchanged) 2. Build query:
+<code>SELECT id, content, embedding &lt;=&gt; $1 AS distance FROM vectors ORDER BY distance LIMIT $2</code>
+(uses pgvector <code>&lt;=&gt;</code> cosine-distance operator) 3.
+<code>rows, err := c.pool.Query(ctx, sql, query, k)</code> 4. Scan into
+<code>[]SearchResult</code>; return</p>
+<p><strong><code>Get(ctx, id)</code> body</strong>: -
+<code>c.pool.QueryRow(ctx, &quot;SELECT content FROM vectors WHERE id = $1&quot;, id).Scan(&amp;content)</code>
+- <code>pgx.ErrNoRows</code> → <code>ErrVectorNotFound</code> (introduce
+if absent)</p>
+<p><strong>Constructor</strong>
+<code>NewPgvectorClient(cfg PgvectorConfig)</code>: - If
+<code>cfg.DSN == &quot;&quot;</code> → <code>pool = nil</code> → sentinels - Else
+<code>pgxpool.New(ctx, cfg.DSN)</code> + register
+<code>pgvector.RegisterTypes(ctx, conn)</code> once per acquired
+conn</p>
+<hr />
+<h2 id="data-flow">3. Data flow</h2>
+<pre><code>End user → application/Service → MemoryProvider.Set(&quot;key&quot;, value, ttl)
+                                       ↓
+                              [Round 36: returns nil silently to in-memory map]
+                              [Round 37: client.Set(ctx, key, value, ttl).Err()]
+                                       ↓
+                                Real Redis container
+                                       ↓
+                              Data survives restart ✓</code></pre>
+<p>Same shape for Storage S3 upload (recording bytes → S3 PutObject →
+object actually exists in bucket) and pgvector (query embedding → cosine
+distance → real ANN result set).</p>
+<hr />
+<h2 id="error-handling">4. Error handling</h2>
+<p><strong>Sentinel taxonomy</strong> (per provider, all already
+named):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Nil-client sentinel</th>
+<th>Operation-failure pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Redis</td>
+<td><code>ErrRedisClientNotInitialized</code></td>
+<td>wrap <code>client.X.Err()</code> with
+<code>fmt.Errorf(&quot;redis %s: %w&quot;, op, err)</code></td>
+</tr>
+<tr>
+<td>Memcached</td>
+<td><code>ErrMemcachedClientNotInitialized</code></td>
+<td>wrap; ignore <code>ErrCacheMiss</code> for Delete</td>
+</tr>
+<tr>
+<td>S3</td>
+<td><code>ErrS3UploadNotWired</code> (nil-client) + new
+<code>ErrS3UploadFailed</code> wrapping AWS error</td>
+<td>distinguish nil-client (config gap) from upload failure
+(network/perms)</td>
+</tr>
+<tr>
+<td>pgvector</td>
+<td><code>ErrPgvectorSearchNotWired</code> +
+<code>ErrPgvectorGetNotWired</code> (existing); new
+<code>ErrVectorNotFound</code> for missing row</td>
+<td>wrap pgx errors</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Round-31 invariant preserved</strong>: a caller holding an
+unconfigured provider can safely call <code>Health()</code> — it returns
+the sentinel without panicking. Round 37 extends this guarantee to every
+data method.</p>
+<p><strong>No silent fallbacks</strong>. If real client returns an
+error, it bubbles to the caller with full context (operation +
+key/bucket/path + wrapped underlying error). Never
+log-and-return-nil.</p>
+<hr />
+<h2 id="testing">5. Testing</h2>
+<p>Per operator’s chosen test approach (reuse existing helix_code
+docker-compose + SKIP-OK for submodules):</p>
+<h3 id="helix_codeinternalmemory-real-backend-integration-tests-via-docker-compose">5.1
+<code>helix_code/internal/memory/</code> — real-backend integration
+tests via docker-compose</h3>
+<p><strong>Extend</strong> <code>docker-compose.full-test.yml</code> if
+Redis/Memcached aren’t already there (they likely are per CLAUDE.md §3.4
+since this is a multi-backend platform; subagent verifies + extends if
+missing).</p>
+<p><strong>Tests</strong>: -
+<code>TestRedisMemoryProvider_Set_Get_Roundtrip</code> — Set then Get
+returns same value - <code>TestRedisMemoryProvider_Get_NotFound</code> —
+returns <code>ErrKeyNotFound</code> for unknown key -
+<code>TestRedisMemoryProvider_Set_TTL_Expires</code> — sets short TTL,
+sleeps past it, Get returns NotFound -
+<code>TestRedisMemoryProvider_NilClient_ReturnsSentinel</code> —
+constructor with empty URL → Get/Set/Delete all return
+<code>ErrRedisClientNotInitialized</code> -
+<code>TestMemcachedMemoryProvider_*</code> — mirror shape -
+<code>TestMemcachedMemoryProvider_List_NotSupported</code> — asserts
+<code>ErrListNotSupported</code></p>
+<p>Build tag: <code>//go:build integration</code>. Run via
+<code>make test-integration-full</code> per existing pattern.</p>
+<p><strong>Unit tests</strong> (CONST-050(A) allows mocks here): use
+<code>redis/v9</code>’s <code>redismock</code> package or hand-rolled
+fake satisfying the minimal interface; assert nil-client sentinel path +
+method dispatch.</p>
+<h3 id="submodulesstorage-skip-ok-integration-test">5.2
+<code>submodules/storage/</code> — SKIP-OK integration test</h3>
+<p><code>TestSyncRecording_RealS3Upload</code> marked
+<code>t.Skip(&quot;SKIP-OK: #STORAGE-S3-REAL-ROUND37 — requires real S3 bucket; set STORAGE_TEST_BUCKET + AWS creds in env to enable&quot;)</code>
+per CONST-035 loud-skip taxonomy.</p>
+<p><strong>Unit tests</strong>: assert nil-client returns
+<code>ErrS3UploadNotWired</code>; assert
+<code>RecordingStatusSynced</code> only set on success path (use mock S3
+client satisfying minimal <code>PutObject</code> interface).</p>
+<h3 id="submodulesvector_db-skip-ok-integration-test">5.3
+<code>submodules/vector_db/</code> — SKIP-OK integration test</h3>
+<p><code>TestPgvectorClient_Search_Real</code> marked
+<code>t.Skip(&quot;SKIP-OK: #VECTORDB-PG-REAL-ROUND37 — requires Postgres+pgvector; set VECTORDB_TEST_DSN to enable&quot;)</code>.</p>
+<p><strong>Unit tests</strong>: nil-pool returns sentinel; assert SQL
+composition + pgvector operator (<code>&lt;=&gt;</code>) presence via
+mock interface.</p>
+<h3 id="paired-mutation-per-const-055">5.4 Paired mutation per
+CONST-055</h3>
+<p>For each new sentinel-returning path, the test asserts
+<code>errors.Is(err, ErrXxxNotInitialized)</code> (not just
+<code>err != nil</code>) — meta-test ensures the assertion would fail if
+the production code returned a different error.</p>
+<hr />
+<h2 id="implementation-order-commit-shape">6. Implementation order +
+commit shape</h2>
+<p>3 independent submodules → 3 parallel subagents. Per submodule,
+<strong>one focused fix commit</strong> + tests. Commit messages match
+the round-31 template (sentinel name in commit body + per-finding
+rationale).</p>
+<p>After all 3 land: meta-repo close-out⁹⁹ commit bumping the 3
+submodule pointers + CONTINUATION.md narrative + push to all 4
+distribution remotes.</p>
+<p>CONST-061 merge-first pipeline applies if any submodule’s upstream
+has advanced between fetch and push.</p>
+<hr />
+<h2 id="risks-mitigations">7. Risks + mitigations</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>go-redis/v9</code> not in helix_code go.mod</td>
+<td>Subagent verifies + runs <code>go mod tidy</code> if needed</td>
+</tr>
+<tr>
+<td><code>bradfitz/gomemcache</code> not in go.mod</td>
+<td>Same</td>
+</tr>
+<tr>
+<td>AWS SDK v2 not in Storage go.mod</td>
+<td>Same; if already on v1, choose path-of-least-resistance per existing
+pattern</td>
+</tr>
+<tr>
+<td><code>pgxpool</code> not in VectorDB go.mod (round 22 may have left
+it on lib/pq only)</td>
+<td>Same</td>
+</tr>
+<tr>
+<td>docker-compose.full-test.yml missing Redis/Memcached</td>
+<td>Subagent extends + documents in commit</td>
+</tr>
+<tr>
+<td>Pre-existing unrelated test failures in helix_code</td>
+<td>Verify via <code>git stash</code>; document in commit; do NOT block
+on them</td>
+</tr>
+<tr>
+<td>CONST-042 secret-leak risk</td>
+<td>All credentials from env vars only; never hardcoded; .env stays
+gitignored</td>
+</tr>
+<tr>
+<td>Cross-submodule divergence during multi-agent push</td>
+<td>CONST-061 fetch-before-push + retry on lock-race</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="out-of-scope-round-38-candidates">8. Out-of-scope (round 38+
+candidates)</h2>
+<ul>
+<li>CloudFront RSA-SHA1 signing (sibling to S3 upload; round-21 sentinel
+still in place)</li>
+<li>MCP transport wiring (round 29 candidate)</li>
+<li>Harmony OS distributed SDK (round 28 candidate)</li>
+<li>VisionEngine SSH process management (round 27 + 28 sentinels)</li>
+<li>Connection pooling tuning + failover (perf round)</li>
+<li>TLS cert management UX (security round)</li>
+</ul>
+<hr />
+<h2 id="definition-of-done">9. Definition of Done</h2>
+<p>A change is DONE when: 1. Each submodule’s real client is wired and
+Get/Set/Delete (or Upload/Search) delegates to it 2. Sentinels still
+fire on nil-client config gap 3. Integration tests PASS against real
+backends (helix_code via docker-compose; Storage + VectorDB via SKIP-OK
++ env-gated) 4. Unit tests PASS at the provider boundary 5.
+Paired-mutation meta-test for each sentinel asserts
+<code>errors.Is(...)</code> 6. All 4 distribution remotes converged for
+each touched submodule + meta-repo 7. CONTINUATION.md updated with
+close-out narrative</p>
+<p>No claim of “done” without pasted terminal output from a real test
+run (CLAUDE.md §1 Rule 8).</p>
+</body>
+</html>

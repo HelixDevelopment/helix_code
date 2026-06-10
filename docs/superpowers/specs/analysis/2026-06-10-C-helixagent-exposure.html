@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-C-helixagent-exposure</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-C-helixagent-exposure</h1>
+</header>
+<h1 id="workstream-c-helixagent-exposure-extension-analysis">Workstream
+C — HelixAgent Exposure Extension (Analysis)</h1>
+<p><strong>Type:</strong> Task / read-only analysis (PLANNING phase)
+<strong>Date:</strong> 2026-06-10 <strong>Author:</strong> Workstream-C
+analysis subagent (read-only; no code changed) <strong>Scope
+root:</strong> <code>/Volumes/T7/Projects/HelixCode</code>
+<strong>Primary subject:</strong> <code>submodules/helix_agent</code>
+(module <code>dev.helix.agent</code>, <code>go 1.26</code>)</p>
+<blockquote>
+<p>Evidence discipline: every claim below cites a real
+<code>file:line</code>. Paths are absolute from the repo root. Items not
+found are marked <strong>ABSENT</strong> explicitly. No fabrication.</p>
+</blockquote>
+<hr />
+<h2 id="package-map-submoduleshelix_agentinternal">1. Package map —
+<code>submodules/helix_agent/internal</code></h2>
+<p>Note up-front: the task named
+<code>ensemble, llm, router, verifier, providers, modelsdev, models, clis</code>.
+The standalone <code>internal/providers</code> package is
+<strong>ABSENT</strong>; provider <em>implementations</em> live under
+<code>internal/llm/providers/</code> (48 provider dirs). The ensemble
+logic is split between <code>internal/llm</code> (core
+<code>RunEnsemble</code>) and <code>internal/ensemble</code>
+(multi-instance scaling). Each is mapped below.</p>
+<h3 id="internalllm-provider-abstraction-ensemble-core">1.1
+<code>internal/llm</code> — provider abstraction + ensemble core</h3>
+<p>The package doc declares the central contract and the ensemble model
+(<code>submodules/helix_agent/internal/llm/doc.go:1-89</code>). The
+interface every provider satisfies is <code>LLMProvider</code>
+(<code>submodules/helix_agent/internal/llm/provider.go</code>, interface
+body):</p>
+<pre><code>Complete(ctx, *models.LLMRequest) (*models.LLMResponse, error)
+CompleteStream(ctx, *models.LLMRequest) (&lt;-chan *models.LLMResponse, error)
+HealthCheck() error
+GetCapabilities() *models.ProviderCapabilities
+ValidateConfig(map[string]interface{}) (bool, []string)</code></pre>
+<p><strong>KEY FINDING (load-bearing):</strong> the interface has
+<strong>no <code>GetModels()</code> method</strong>. A provider’s model
+list is surfaced only via <code>GetCapabilities().SupportedModels</code>
+(<code>submodules/helix_agent/internal/models/types.go:181-199</code>,
+field <code>SupportedModels []string</code>). This is the single seam
+through which “this provider’s models” is read everywhere downstream
+(router, discovery fallback, etc.). Core ensemble executor:
+<code>RunEnsembleWithProviders</code>
+(<code>submodules/helix_agent/internal/llm/ensemble.go:55-112</code>) —
+fan-out to N providers under a <code>semaphore</code>, pick highest
+<code>Confidence</code>. Exported helpers
+<code>SetMaxConcurrentProviders</code> /
+<code>GetMaxConcurrentProviders</code>
+(<code>ensemble.go:26-37</code>).</p>
+<h3 id="internalensemble-multi-instance-ensemble-scaling">1.2
+<code>internal/ensemble</code> — multi-instance ensemble scaling</h3>
+<p>Sub-packages only (no top-level <code>.go</code>):
+<code>background/worker_pool.go</code>,
+<code>multi_instance/{coordinator,health_monitor,load_balancer}.go</code>,
+<code>synchronization/manager.go</code>. This is the horizontal-scaling
+layer (worker pool + coordinator + load balancer) that runs ensemble
+work across instances; it is orthogonal to the per-request
+<code>internal/llm</code> ensemble executor. Key types:
+<code>multi_instance.Coordinator</code>,
+<code>background.WorkerPool</code>.</p>
+<h3 id="internalrouter-http-exposure-surface-gin">1.3
+<code>internal/router</code> — HTTP exposure surface (Gin)</h3>
+<p><code>internal/router/router.go</code> (1639 lines) registers every
+public route via Gin (<code>router.go:471</code> onward).
+<code>internal/router/gin_router.go</code> (220 lines) is the
+constructor wrapper; <code>quic_server.go</code> adds a QUIC/HTTP3
+transport. <strong>This is the exposure surface</strong> (full
+enumeration in §2). Key exported symbol: the route-setup function that
+wires every handler group.</p>
+<h3 id="internalverifier-modelprovider-verification-discovery-llmsverifier">1.4
+<code>internal/verifier</code> — model/provider verification + discovery
+(LLMsVerifier)</h3>
+<p>The authoritative source for verification + scoring + discovery
+(CONST-036/040). - <code>ModelDiscoveryService</code>
+(<code>internal/verifier/discovery.go:23</code>) — discovers models per
+provider credential, scores, and selects the ensemble set.
+<code>Start(credentials)</code> (<code>discovery.go:107</code>),
+<code>GetSelectedModels() []*SelectedModel</code>
+(<code>discovery.go:447</code>),
+<code>GetDiscoveredModels() []*DiscoveredModel</code>
+(<code>discovery.go:452</code>). - <code>DiscoveredModel</code>
+(<code>discovery.go:50-63</code>):
+<code>ModelID, ModelName, Provider, ProviderID,   Verified, CodeVisible, OverallScore, ScoreSuffix, Capabilities, ContextWindow</code>.
+- <code>SelectedModel</code> (<code>discovery.go:66-72</code>): embeds
+<code>*DiscoveredModel</code> +
+<code>Rank,   VoteWeight, Selected, SelectedAt</code> — this is the
+AI-debate ensemble member shape. - <code>service.go</code> (1097 lines)
+— the verifier service; <code>scoring.go</code> /
+<code>enhanced_scoring.go</code> — scoring;
+<code>subscription_detector.go</code> — subscription/API detection;
+<code>provider_access.go</code> (see 1.4.1).</p>
+<h4 id="internalverifierprovider_access.go">1.4.1
+<code>internal/verifier/provider_access.go</code></h4>
+<p>Static provider-access registry:
+<code>GetProviderAccessConfig(type)</code> (<code>:370</code>),
+<code>GetAllProviderAccessConfigs()</code> (<code>:379</code>),
+<code>GetProvidersWithSubscriptionAPI()</code> (<code>:384</code>),
+<code>GetProvidersWithRateLimitHeaders()</code> (<code>:395</code>).
+Describes how each provider type is reached (subscription API vs
+rate-limit headers).</p>
+<h3 id="internalllmproviders-the-48-concrete-providers">1.5
+<code>internal/llm/providers</code> — the 48 concrete providers</h3>
+<p><strong>KEY FINDING:</strong> 48 provider implementation directories
+(<code>ls internal/llm/providers</code> → ai21, anthropic, anthropic_cu,
+azure, cerebras, chutes, claude, cloudflare, codestral, cohere,
+deepseek, fireworks, gemini, generic, githubmodels, groq, helixllm,
+huggingface, hyperbolic, junie, kilo, kimi, kimicode, lmstudio, mistral,
+modal, nia, nlpcloud, novita, nvidia, ollama, openai, openrouter,
+perplexity, publicai, qwen, replicate, sambanova, sarvam, siliconflow,
+together, upstage, venice, vertex, vulavula, xai, zai, zen, zhipu). All
+implement <code>LLMProvider</code> over <strong>plain
+<code>net/http</code></strong> — e.g. <code>azure/azure.go</code>
+imports only <code>net/http</code> (no <code>azcore</code>), confirmed
+by its import block (no vendor SDK).
+<code>helixllm/provider.go:1-31</code> is the HelixLLM submodule bridge
+(OpenAI-compatible, endpoints <code>/v1/chat/completions</code>,
+<code>/v1/models</code>, <code>/v1/embeddings</code>, default
+<code>https://localhost:8443</code>).</p>
+<h3 id="internalmodelsdev-models.dev-catalog-client">1.6
+<code>internal/modelsdev</code> — models.dev catalog client</h3>
+<p>External catalog of model metadata. <code>Service</code>
+(<code>internal/modelsdev/service.go:13-23</code>) wraps
+<code>Client</code> + <code>Cache</code> with background refresh.
+<code>Client</code> hits <code>https://api.models.dev/v1</code>
+(<code>internal/modelsdev/client.go:14</code>
+<code>DefaultBaseURL</code>). Rich <code>ModelInfo</code> shape
+(<code>internal/modelsdev/models.go:19-35</code>): pricing,
+capabilities, performance/benchmarks, family, tags.
+<code>ListModelsOptions</code> supports
+<code>Provider/Search/ModelType/Capability/Page/Limit</code> filters
+(<code>models.go:10-17</code>). This is <strong>reference catalog
+metadata</strong>, distinct from runtime provider model lists.</p>
+<h3 id="internalmodels-shared-dtos">1.7 <code>internal/models</code> —
+shared DTOs</h3>
+<p><code>ProviderCapabilities</code> (<code>types.go:181</code>),
+<code>LLMRequest</code>/<code>LLMResponse</code>,
+<code>EnsembleConfig</code>, <code>ModelParameters</code>,
+<code>Message</code>. The cross-package contract types used by router +
+handlers + providers.</p>
+<h3 id="internalclis-managed-cli-agent-pool-not-llm-providers">1.8
+<code>internal/clis</code> — managed CLI-agent pool (NOT LLM
+providers)</h3>
+<p>Manages external coding CLIs (aider, claude_code, codex, cline,
+openhands, kiro, continue, goose, plandex, cursor, windsurf, devin, … —
+<code>clis/types.go:18-40</code>+) as poolable instances
+(<code>pool.go</code>, <code>instance_manager.go</code>,
+<code>event_bus.go</code>). <code>CLIAgentType</code> string enum.
+<strong>Orthogonal to the provider/model exposure ask</strong> — this is
+about driving third-party agent binaries, not exposing LLM endpoints.
+Mentioned for completeness since the task listed it.</p>
+<hr />
+<h2 id="current-exposure-surface-how-providersmodelsensemblehelixllm-reach-users">2.
+Current exposure surface — how providers/models/ensemble/HelixLLM reach
+users</h2>
+<p><strong>Exposure surface = the Gin routes registered in
+<code>submodules/helix_agent/internal/router/router.go</code>.</strong>
+All under <code>/v1</code> (most behind <code>auth.Middleware</code>,
+group opened at <code>router.go:617</code>/<code>638</code>). Enumerated
+by evidence:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Route</th>
+<th>Handler</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ensemble (AI debate)</strong></td>
+<td><code>POST /v1/ensemble/completions</code></td>
+<td>inline closure →
+<code>providerRegistry.GetEnsembleService().RunEnsemble</code></td>
+<td><code>router.go:676-767</code> (call at <code>:730-731</code>)</td>
+</tr>
+<tr>
+<td>Ensemble member list</td>
+<td><code>GET /v1/discovery/ensemble</code></td>
+<td><code>discoveryHandler.GetEnsembleModels</code></td>
+<td><code>router.go:1312</code>; impl
+<code>discovery_handler.go:346-414</code></td>
+</tr>
+<tr>
+<td>Debate model lookup</td>
+<td><code>GET /v1/discovery/debate-model</code></td>
+<td><code>discoveryHandler.GetModelForDebate</code></td>
+<td><code>router.go:1313</code></td>
+</tr>
+<tr>
+<td><strong>Provider list</strong></td>
+<td><code>GET /v1/providers</code></td>
+<td>inline closure → <code>providerRegistry.ListProviders()</code> +
+<code>GetCapabilities()</code></td>
+<td><code>router.go:773-797</code></td>
+</tr>
+<tr>
+<td>Provider CRUD</td>
+<td><code>POST/GET/PUT/DELETE /v1/providers[/:id]</code></td>
+<td><code>providerMgmtHandler.*</code></td>
+<td><code>router.go:812-815</code></td>
+</tr>
+<tr>
+<td>Provider verification</td>
+<td><code>GET /v1/providers/verification</code>,
+<code>POST /verify</code>, <code>GET /:id/verification</code></td>
+<td><code>providerMgmtHandler.*</code></td>
+<td><code>router.go:801-818</code></td>
+</tr>
+<tr>
+<td>Provider discovery</td>
+<td><code>GET /v1/providers/discovery</code>,
+<code>POST /discover</code>, <code>/rediscover</code>,
+<code>GET /best</code></td>
+<td><code>providerMgmtHandler.*</code></td>
+<td><code>router.go:806-809</code></td>
+</tr>
+<tr>
+<td><strong>Model discovery</strong></td>
+<td><code>GET /v1/discovery/models</code>,
+<code>/models/selected</code>, <code>/stats</code>,
+<code>POST /trigger</code></td>
+<td><code>discoveryHandler.*</code></td>
+<td><code>router.go:1308-1311</code></td>
+</tr>
+<tr>
+<td>Model metadata (catalog)</td>
+<td><code>GET /v1/models/metadata[...]</code> (+ <code>/compare</code>,
+<code>/capability/:cap</code>, <code>/:id/benchmarks</code>)</td>
+<td><code>modelMetadataHandler.*</code></td>
+<td><code>router.go:643-647</code></td>
+</tr>
+<tr>
+<td>Completion model list</td>
+<td><code>GET /v1/completion/models</code></td>
+<td><code>completionHandler.Models</code></td>
+<td><code>router.go:1206</code></td>
+</tr>
+<tr>
+<td>Verification (LLMsVerifier)</td>
+<td><code>GET /v1/verification/models</code>, <code>/status</code>,
+<code>POST /model</code> …</td>
+<td><code>verificationHandler.*</code></td>
+<td><code>router.go:1380-1387</code></td>
+</tr>
+<tr>
+<td>Scoring</td>
+<td><code>GET /v1/scoring/top</code>, <code>/range</code>,
+<code>/model/:id</code> …</td>
+<td><code>scoringHandler.*</code></td>
+<td><code>router.go:1327-1335</code></td>
+</tr>
+<tr>
+<td>Health (per provider)</td>
+<td><code>GET /v1/health/providers[...]</code></td>
+<td><code>healthHandler.*</code></td>
+<td><code>router.go:1403-1414</code></td>
+</tr>
+<tr>
+<td>Plain completion</td>
+<td><code>POST /v1/completion</code>, <code>/stream</code>,
+<code>/chat</code>, <code>/chat/stream</code></td>
+<td><code>completionHandler.*</code></td>
+<td><code>router.go:1202-1206</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="how-a-user-currently-picks-a-model">How a user currently picks a
+model</h3>
+<ul>
+<li><strong>Free-text <code>model</code> string</strong> in the request
+body. <code>CompletionRequest.Model</code>
+(<code>internal/handlers/completion.go:28</code>) and the ensemble
+closure (<code>router.go:702</code> →
+<code>ModelParameters.Model: req.Model</code>). No enum, no server-side
+validation against a catalog at call time.</li>
+<li><strong>HelixLLM is NOT a top-level selectable surface.</strong> It
+is exposed <em>only</em> as one provider named <code>&quot;helixllm&quot;</code>
+inside the provider registry (default config
+<code>internal/services/provider_registry.go:749-764</code>, model id
+<code>helixllm-default</code>), enabled via
+<code>USE_HELIX_LLM=true</code>. There is no
+<code>/v1/helixllm/...</code> root and no first-class “HelixLLM” listing
+alongside the ensemble.</li>
+<li><strong>Is there a registry/catalog?</strong> Yes —
+<code>services.ProviderRegistry</code>
+(<code>internal/services/provider_registry.go:82</code>) is the runtime
+registry. It registers 6 default providers
+(<code>registerDefaultProviders</code>, <code>:696-801</code>: deepseek,
+claude, gemini, helixllm, qwen, openrouter — each <em>disabled</em>
+until an API key is present). <code>ListProviders()</code>
+(<code>:963</code>), <code>ListProvidersOrderedByScore()</code>
+(<code>:1029</code>), <code>GetProvider(name)</code>
+(<code>:901</code>), <code>GetEnsembleService()</code>
+(<code>:1066</code>). The verifier (<code>ModelDiscoveryService</code>)
+is the authoritative discovery/scoring catalog; the models.dev
+<code>Service</code> is the external reference catalog.</li>
+</ul>
+<h3 id="bluffconsistency-flags-found-while-mapping-worth-a-follow-up-ticket">Bluff/consistency
+flags found while mapping (worth a follow-up ticket)</h3>
+<ul>
+<li><strong><code>GET /v1/completion/models</code> returns a HARDCODED
+3-model list</strong>
+(<code>internal/handlers/completion.go:406</code>+: deepseek-coder,
+claude-3-sonnet-20240229, gemini-pro — literal maps,
+<code>time.Now()</code> timestamps). This contradicts CONST-036/037 and
+the resolved BLUFF-002 pattern (model lists must come from
+<code>providerManager.GetProviders()</code> / the verifier).
+<strong>Flag for remediation</strong>, not part of C’s build-out but
+directly adjacent.</li>
+<li><code>GET /v1/providers</code> correctly reads live
+<code>GetCapabilities().SupportedModels</code>
+(<code>router.go:783</code>) — this is the good pattern to extend.</li>
+</ul>
+<hr />
+<h2 id="gap-proposed-naming-scheme">3. GAP + proposed naming scheme</h2>
+<h3 id="the-gap">3.1 The gap</h3>
+<p>The request wants, <strong>under ONE root</strong>, individually
+exposed: (a) the AI-debate ensemble, (b) HelixLLM (when enabled), (c)
+<strong>every discovered provider individually</strong>, and (d)
+<strong>each provider’s WORKING (verified) models</strong> — yielding
+dozens–hundreds of exposed items. Today:</p>
+<ol type="1">
+<li>The <strong>ensemble</strong> is exposed
+(<code>POST /v1/ensemble/completions</code>,
+<code>GET /v1/discovery/ensemble</code>) but as a single aggregate, not
+as a sibling in a unified catalog of selectable “targets”.</li>
+<li><strong>HelixLLM</strong> is buried as provider
+<code>&quot;helixllm&quot;</code>; no first-class root entry.</li>
+<li><strong>Providers</strong> are individually listable
+(<code>GET /v1/providers</code>) but there is <strong>no unified
+“catalog” that places ensemble + HelixLLM + each provider + each
+working-model as addressable, uniformly-named selection
+targets</strong>.</li>
+<li><strong>Per-provider working models</strong>: only
+<code>GetCapabilities().SupportedModels</code> (static, not
+“working/verified”) at <code>/v1/providers</code>; verified/working
+status lives separately in the verifier
+(<code>GetSelectedModels</code>/<code>GetDiscoveredModels</code>,
+<code>Verified</code> flag) and is surfaced only under
+<code>/v1/discovery/*</code> and <code>/v1/verification/*</code>. The
+two are <strong>not joined into one selectable namespace</strong>. There
+is no single endpoint returning “ensemble + helixllm + provider/model
+for every verified model”.</li>
+</ol>
+<p><strong>Net:</strong> the building blocks all exist (registry,
+verifier discovery with <code>Verified</code> flag + score, ensemble
+service, HelixLLM provider). What is missing is a <strong>unified
+catalog/selection namespace</strong> that (i) lists ensemble + HelixLLM
++ every provider + every provider’s <em>verified</em> models as
+uniformly-named entries, and (ii) lets a user target any one of them
+with the same <code>model</code> selector used today.</p>
+<h3 id="proposed-naming-consistent-with-what-exists">3.2 Proposed naming
+— consistent with what exists</h3>
+<p>Existing conventions observed: - Provider names are <strong>lowercase
+identifiers</strong>: <code>deepseek</code>, <code>claude</code>,
+<code>gemini</code>, <code>helixllm</code>, <code>qwen</code>,
+<code>openrouter</code> (<code>provider_registry.go:696-799</code>). -
+Models are referenced <strong>bare or
+<code>vendor/model</code></strong>: <code>deepseek-coder</code>,
+<code>claude-3-sonnet-20240229</code>, and crucially
+<code>x-ai/grok-4</code> (<code>provider_registry.go:791</code>) —
+already a slash-namespaced id. - Discovery/ensemble responses key on
+<code>(Provider, ModelID)</code> pairs
+(<code>discovery_handler.go:85-95</code>,
+<code>DiscoveredModel.Provider</code>/<code>.ModelID</code>). - Ensemble
+object type is already string-tagged:
+<code>&quot;object&quot;: &quot;ensemble.completion&quot;</code>
+(<code>router.go:740</code>).</p>
+<p>Proposed unified selector grammar (extends, does not break, the
+free-text <code>model</code> field) — <code>provider/model</code> is the
+spine, with two reserved roots:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Exposed item</th>
+<th>Proposed canonical name (selector)</th>
+<th>Derived from</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI-debate ensemble (aggregate)</td>
+<td><code>ensemble</code> (alias <code>ensemble/auto</code>)</td>
+<td>matches existing <code>ensemble.completion</code> object tag
+(<code>router.go:740</code>)</td>
+</tr>
+<tr>
+<td>A named ensemble preset</td>
+<td><code>ensemble/&lt;preset&gt;</code>
+e.g. <code>ensemble/confidence_weighted</code></td>
+<td>mirrors <code>EnsembleConfig.Strategy</code>
+(<code>router.go:686</code>)</td>
+</tr>
+<tr>
+<td>HelixLLM (whole provider)</td>
+<td><code>helixllm</code></td>
+<td>provider name <code>helixllm</code>
+(<code>provider_registry.go:753</code>)</td>
+</tr>
+<tr>
+<td>A specific HelixLLM model</td>
+<td><code>helixllm/&lt;model&gt;</code>
+e.g. <code>helixllm/helixllm-default</code></td>
+<td>model id (<code>provider_registry.go:757</code>)</td>
+</tr>
+<tr>
+<td>Any provider (whole)</td>
+<td><code>&lt;provider&gt;</code> e.g. <code>openai</code>,
+<code>anthropic</code>, <code>groq</code></td>
+<td>the 48 provider dir names + registry names</td>
+</tr>
+<tr>
+<td>A provider’s working model</td>
+<td><code>&lt;provider&gt;/&lt;model_id&gt;</code>
+e.g. <code>anthropic/claude-3-sonnet-20240229</code>,
+<code>openrouter/x-ai/grok-4</code></td>
+<td><code>(Provider, ModelID)</code> pairs; preserves already-namespaced
+ids</td>
+</tr>
+</tbody>
+</table>
+<p>Rationale for consistency: this reuses (1) the existing lowercase
+provider names, (2) the already-present <code>vendor/model</code> slash
+form (<code>x-ai/grok-4</code>), (3) the existing
+<code>ensemble.*</code> object tag, and (4) the
+<code>(Provider, ModelID)</code> join the discovery handler already
+emits. The catalog endpoint should return, per item: <code>name</code>
+(selector above), <code>kind</code> ∈ {<code>ensemble</code>,
+<code>provider</code>, <code>model</code>}, <code>provider</code>,
+<code>verified</code> bool + <code>overall_score</code> (from
+<code>DiscoveredModel.Verified</code>/<code>.OverallScore</code>,
+<code>discovery.go:50-63</code>), and <code>enabled</code>. “WORKING
+models” = filter on <code>DiscoveredModel.Verified == true</code> (the
+verifier’s authoritative flag) — never the static
+<code>SupportedModels</code> list, and never a hardcoded list (avoid the
+<code>completion.go:406</code> anti-pattern).</p>
+<p>Suggested single new root (illustrative, to confirm in design):
+<code>GET /v1/catalog</code> returning the unified list, with the
+existing <code>model</code> request field accepting any
+<code>name</code> from it. This keeps ONE root over ensemble + HelixLLM
++ providers + verified models while leaving all current endpoints
+intact.</p>
+<hr />
+<h2 id="provider-api-sdk-currency">4. Provider / API SDK currency</h2>
+<p><strong>KEY FINDING:</strong> <code>submodules/helix_agent</code>
+(module <code>dev.helix.agent</code>, <code>go 1.26</code>,
+<code>go.mod:1-3</code>) contains <strong>NO cloud-provider or
+LLM-vendor SDKs at all</strong> — grep for
+<code>aws|azure|openai|anthropic|vertex|genai|cohere|mistral|sashabaranov|bedrock</code>
+over <code>submodules/helix_agent/go.mod</code> returns
+<strong>nothing</strong>. Every one of the 48 providers is hand-rolled
+over <code>net/http</code> (confirmed: <code>azure/azure.go</code>
+imports only <code>net/http</code>). So for helix_agent there are
+<strong>no provider SDK versions to age out</strong> — currency risk
+there is in the <em>hand-written HTTP clients vs each vendor’s latest
+API</em>, not in <code>go.mod</code>.</p>
+<p>The SDKs named in the project tech-stack live in the <strong>inner Go
+app</strong>
+<code>/Volumes/T7/Projects/HelixCode/helix_code/go.mod</code> (module
+<code>dev.helix.code</code>, <code>go 1.26</code>). Observed versions
+(cite <code>helix_code/go.mod:&lt;line&gt;</code>):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Version</th>
+<th>go.mod line</th>
+<th>Staleness flag (for later deep web research — NOT fetched here)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>github.com/Azure/azure-sdk-for-go/sdk/azcore</code></td>
+<td><code>v1.16.0</code></td>
+<td><code>:12</code></td>
+<td><strong>REVIEW</strong> — azcore has shipped past v1.16; confirm
+latest</td>
+</tr>
+<tr>
+<td><code>github.com/Azure/azure-sdk-for-go/sdk/azidentity</code></td>
+<td><code>v1.8.0</code></td>
+<td><code>:13</code></td>
+<td><strong>REVIEW</strong> — azidentity moves fast (auth/security);
+confirm latest</td>
+</tr>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2</code></td>
+<td><code>v1.32.7</code></td>
+<td><code>:15</code></td>
+<td><strong>REVIEW</strong> — core AWS SDK releases frequently; confirm
+latest</td>
+</tr>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2/config</code></td>
+<td><code>v1.28.7</code></td>
+<td><code>:16</code></td>
+<td><strong>REVIEW</strong></td>
+</tr>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2/credentials</code></td>
+<td><code>v1.17.48</code></td>
+<td><code>:17</code></td>
+<td><strong>REVIEW</strong></td>
+</tr>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2/service/bedrockruntime</code></td>
+<td><code>v1.23.1</code></td>
+<td><code>:18</code></td>
+<td><strong>REVIEW (high value)</strong> — Bedrock adds models/params
+often; new model access likely gated on a newer version</td>
+</tr>
+<tr>
+<td><code>github.com/getzep/zep-go/v3</code></td>
+<td><code>v3.10.0</code></td>
+<td><code>:26</code></td>
+<td><strong>REVIEW</strong> — confirm latest v3.x</td>
+</tr>
+<tr>
+<td><code>github.com/smacker/go-tree-sitter</code></td>
+<td><code>v0.0.0-20240827…</code> (Aug 2024 pseudo-version)</td>
+<td><code>:39</code></td>
+<td><strong>STALE-LIKELY</strong> — pinned to an Aug-2024 commit;
+tree-sitter grammars churn; confirm newer pseudo-version (same pin also
+in <code>helix_agent/go.mod:73</code>)</td>
+</tr>
+<tr>
+<td><code>github.com/gin-gonic/gin</code></td>
+<td><code>v1.11.0</code></td>
+<td><code>:27</code></td>
+<td>minor — CLAUDE stack says v1.11.0; helix_agent uses
+<strong>v1.12.0</strong> (<code>helix_agent/go.mod:5</code>) →
+<strong>version skew between the two modules, flag</strong></td>
+</tr>
+<tr>
+<td><code>github.com/golang-jwt/jwt/v4</code></td>
+<td><code>v4.5.2</code></td>
+<td><code>:28</code></td>
+<td>acceptable (security-patched line); note v5 also pulled indirectly
+(<code>:127</code>)</td>
+</tr>
+<tr>
+<td><code>github.com/jackc/pgx/v5</code></td>
+<td><code>v5.7.6</code></td>
+<td><code>:32</code></td>
+<td>minor — newer v5.x exists; confirm</td>
+</tr>
+<tr>
+<td><code>github.com/redis/go-redis/v9</code></td>
+<td><code>v9.17.2</code></td>
+<td><code>:37</code></td>
+<td>minor — newer v9.x exists; confirm</td>
+</tr>
+</tbody>
+</table>
+<p>No OpenAI / Anthropic / Gemini / Cohere / Mistral Go SDK appears in
+<strong>either</strong> <code>go.mod</code> (both use hand-written HTTP)
+— so “update the vendor SDK” does <strong>not</strong> apply to those;
+their currency risk is API-drift in the hand-rolled clients, which a
+deep web research pass against each vendor’s current API reference
+should check.</p>
+<blockquote>
+<p>All “REVIEW/STALE” tags above are <strong>flags for a later
+deep-web-research task</strong> (§11.4.99 latest-source). This analysis
+did <strong>not</strong> fetch any registry/network to determine the
+true latest versions.</p>
+</blockquote>
+<hr />
+<h2 id="executive-summary-10-lines">Executive summary (10 lines)</h2>
+<ol type="1">
+<li><strong>Exposure surface =
+<code>submodules/helix_agent/internal/router/router.go</code></strong>
+(Gin, all under <code>/v1</code>); the unified catalog work belongs here
++ a new handler.</li>
+<li>The <strong>ensemble</strong> is exposed at
+<code>POST /v1/ensemble/completions</code> (<code>router.go:676</code>,
+calls <code>GetEnsembleService().RunEnsemble</code>) and
+<code>GET /v1/discovery/ensemble</code>.</li>
+<li><strong>Providers</strong> are listable at
+<code>GET /v1/providers</code> (<code>router.go:773</code>, reads live
+<code>GetCapabilities().SupportedModels</code>); runtime registry is
+<code>services.ProviderRegistry</code>
+(<code>provider_registry.go:82</code>) with 48 provider impls.</li>
+<li><strong>HelixLLM</strong> is NOT a first-class root — only provider
+<code>&quot;helixllm&quot;</code> (<code>provider_registry.go:749-764</code>,
+gated by <code>USE_HELIX_LLM=true</code>).</li>
+<li><strong>Working/verified models</strong> live in the verifier
+(<code>ModelDiscoveryService</code>, <code>discovery.go:23</code>;
+<code>DiscoveredModel.Verified</code> flag
+<code>discovery.go:50</code>), surfaced only under
+<code>/v1/discovery/*</code> and <code>/v1/verification/*</code>.</li>
+<li><strong>Model selection today</strong> = free-text
+<code>model</code> string (<code>completion.go:28</code>); no unified
+selectable namespace joining ensemble + HelixLLM + provider + verified
+model.</li>
+<li><strong>GAP:</strong> build a unified catalog/selection namespace
+under one root that lists all four item classes as uniformly-named,
+addressable targets.</li>
+<li><strong>Proposed naming:</strong> <code>ensemble</code> /
+<code>ensemble/&lt;preset&gt;</code>,
+<code>helixllm[/&lt;model&gt;]</code>, <code>&lt;provider&gt;</code>,
+<code>&lt;provider&gt;/&lt;model_id&gt;</code> — reuses existing
+lowercase provider names + the already-present <code>vendor/model</code>
+slash form (<code>x-ai/grok-4</code>,
+<code>provider_registry.go:791</code>); “working” =
+<code>DiscoveredModel.Verified == true</code>.</li>
+<li><strong>Bluff flag:</strong> <code>GET /v1/completion/models</code>
+returns a <strong>hardcoded 3-model list</strong>
+(<code>completion.go:406</code>) — contradicts CONST-036/BLUFF-002;
+remediate.</li>
+<li><strong>SDK currency:</strong> helix_agent has <strong>zero vendor
+SDKs</strong> (hand-rolled HTTP); cloud SDKs live in
+<code>helix_code/go.mod</code> — flag aws bedrockruntime v1.23.1, azcore
+v1.16.0, azidentity v1.8.0, go-tree-sitter (Aug-2024 pin), gin skew
+(1.11.0 vs 1.12.0) for later deep-web-research version checks.</li>
+</ol>
+<p><strong>Exposure surface location:</strong>
+<code>submodules/helix_agent/internal/router/router.go</code> (route
+registration; ensemble at <code>:676</code>, providers at
+<code>:773</code>, discovery at <code>:1306-1313</code>, verification at
+<code>:1378-1387</code>). Runtime registry:
+<code>submodules/helix_agent/internal/services/provider_registry.go</code>.</p>
+<p><strong>Proposed naming examples:</strong> <code>ensemble</code>,
+<code>ensemble/confidence_weighted</code>, <code>helixllm</code>,
+<code>helixllm/helixllm-default</code>,
+<code>anthropic/claude-3-sonnet-20240229</code>,
+<code>openrouter/x-ai/grok-4</code>, <code>groq</code>,
+<code>deepseek/deepseek-coder</code>.</p>
+</body>
+</html>

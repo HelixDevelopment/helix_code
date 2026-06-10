@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PROVIDER_UPDATE_SUMMARY</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PROVIDER_UPDATE_SUMMARY</h1>
+</header>
+<h1 id="provider-feature-updates-summary">Provider Feature Updates
+Summary</h1>
+<p>This document summarizes the changes made to each provider to support
+prompt caching, reasoning, and token budgets.</p>
+<h2 id="summary-of-changes">Summary of Changes</h2>
+<h3 id="core-infrastructure-completed">Core Infrastructure (✅
+Completed)</h3>
+<ol type="1">
+<li><strong>LLMRequest Structure</strong> (<code>provider.go</code>)
+<ul>
+<li>Added <code>Reasoning *ReasoningConfig</code> for reasoning/thinking
+configuration</li>
+<li>Added <code>CacheConfig *CacheConfig</code> for prompt caching
+configuration</li>
+<li>Added <code>TokenBudget *TokenBudget</code> for budget limits</li>
+<li>Added <code>ThinkingBudget int</code> for per-request thinking token
+allocation</li>
+<li>Added <code>SessionID string</code> for session-based tracking</li>
+</ul></li>
+<li><strong>ProviderManager</strong> (<code>provider.go</code>)
+<ul>
+<li>Added <code>tokenTracker *TokenTracker</code> for token/cost
+tracking</li>
+<li>Added <code>cacheMetrics *CacheMetrics</code> for caching
+performance metrics</li>
+<li>Enhanced <code>Generate()</code> method with:
+<ul>
+<li>Automatic reasoning config detection for known models</li>
+<li>Default cache config application</li>
+<li>Pre-request budget checking</li>
+<li>Post-request usage tracking</li>
+<li>Cache metrics collection</li>
+</ul></li>
+<li>Added methods:
+<ul>
+<li><code>NewProviderManagerWithBudget()</code> for custom budgets</li>
+<li><code>GetTokenTracker()</code> to access token tracking</li>
+<li><code>GetCacheMetrics()</code> to access cache stats</li>
+<li><code>GetSessionUsage()</code> for session statistics</li>
+<li><code>GetBudgetStatus()</code> for budget monitoring</li>
+<li><code>ResetSession()</code> to clear session data</li>
+</ul></li>
+</ul></li>
+<li><strong>Supporting Infrastructure</strong>
+<ul>
+<li><code>reasoning.go</code>: Comprehensive reasoning support for all
+model types</li>
+<li><code>cache_control.go</code>: Caching strategies and cost
+calculation</li>
+<li><code>token_budget.go</code>: Token/cost tracking with rate
+limiting</li>
+</ul></li>
+</ol>
+<h2 id="provider-specific-changes">Provider-Specific Changes</h2>
+<h3 id="anthropic-provider-fully-implemented">1. Anthropic Provider (✅
+Fully Implemented)</h3>
+<p><strong>File</strong>: <code>anthropic_provider.go</code></p>
+<p><strong>Status</strong>: ✅ Complete - All features fully
+implemented</p>
+<p><strong>Features</strong>: - ✅ Prompt caching with
+<code>cache_control</code> directives - ✅ Extended thinking mode with
+token budgets - ✅ Token budget integration - ✅ Auto-detection of
+reasoning models - ✅ Configurable cache strategies</p>
+<p><strong>Key Changes</strong>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// buildRequest() now supports:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// 1. CacheConfig-based caching strategy</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>cacheConfig <span class="op">:=</span> request<span class="op">.</span>CacheConfig</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> cacheConfig <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    defaultCache <span class="op">:=</span> DefaultCacheConfig<span class="op">()</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    cacheConfig <span class="op">=</span> <span class="op">&amp;</span>defaultCache</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. Reasoning configuration with auto-detection</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>reasoningConfig <span class="op">:=</span> request<span class="op">.</span>Reasoning</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> reasoningConfig <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    isReasoning<span class="op">,</span> modelType <span class="op">:=</span> IsReasoningModel<span class="op">(</span>request<span class="op">.</span>Model<span class="op">)</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> isReasoning <span class="op">{</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        reasoningConfig <span class="op">=</span> NewReasoningConfig<span class="op">(</span>modelType<span class="op">)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">// 3. Thinking budget from config or request</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> reasoningConfig <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> reasoningConfig<span class="op">.</span>Enabled <span class="op">{</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    thinkingBudget <span class="op">:=</span> reasoningConfig<span class="op">.</span>ThinkingBudget</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> request<span class="op">.</span>ThinkingBudget <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        thinkingBudget <span class="op">=</span> request<span class="op">.</span>ThinkingBudget</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    req<span class="op">.</span>Thinking <span class="op">=</span> <span class="op">&amp;</span>anthropicThinkingConfig<span class="op">{</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        Type<span class="op">:</span> <span class="st">&quot;enabled&quot;</span><span class="op">,</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        Budget<span class="op">:</span> thinkingBudget<span class="op">,</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Cache Support</strong>: - System messages: Cached with
+<code>cache_control: {type: &quot;ephemeral&quot;}</code> - Tool definitions: Last
+tool cached for efficiency - Messages: Last message cached in
+Context/Aggressive strategies - TTL: 5 minutes default</p>
+<p><strong>Reasoning Support</strong>: - Claude 4 models: Full extended
+thinking - Claude 3.7 Sonnet: Enhanced reasoning - Auto-detection via
+model name or keywords - Configurable thinking budgets</p>
+<h3 id="openai-provider-partial-implementation">2. OpenAI Provider (⚠️
+Partial Implementation)</h3>
+<p><strong>File</strong>: <code>openai_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>:</p>
+<ol type="1">
+<li><strong>Add reasoning support for O-series models</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>op <span class="op">*</span>OpenAIProvider<span class="op">)</span> convertToOpenAIRequest<span class="op">(</span>request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>openaiRequest<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    req <span class="op">:=</span> <span class="op">&amp;</span>openaiRequest<span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span> request<span class="op">.</span>Model<span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        Messages<span class="op">:</span> convertMessages<span class="op">(</span>request<span class="op">.</span>Messages<span class="op">),</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        MaxTokens<span class="op">:</span> request<span class="op">.</span>MaxTokens<span class="op">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        Temperature<span class="op">:</span> request<span class="op">.</span>Temperature<span class="op">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check if this is a reasoning model (o1, o3, o4)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> isReasoning<span class="op">,</span> modelType <span class="op">:=</span> IsReasoningModel<span class="op">(</span>request<span class="op">.</span>Model<span class="op">);</span> isReasoning <span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// O-series models handle reasoning automatically</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// May need to adjust parameters (o1 doesn&#39;t support temperature, etc.)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">switch</span> modelType <span class="op">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> ReasoningModelOpenAI_O1<span class="op">,</span> ReasoningModelOpenAI_O3<span class="op">,</span> ReasoningModelOpenAI_O4<span class="op">:</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>            req<span class="op">.</span>Temperature <span class="op">=</span> <span class="dv">0</span> <span class="co">// O-series uses fixed temperature</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            req<span class="op">.</span>TopP <span class="op">=</span> <span class="dv">0</span>        <span class="co">// O-series doesn&#39;t support top_p</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> req<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Add token budget integration</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>op <span class="op">*</span>OpenAIProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Token budgets are handled by ProviderManager</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Just need to return accurate usage in response</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    response<span class="op">,</span> err <span class="op">:=</span> op<span class="op">.</span>makeOpenAIRequest<span class="op">(</span>ctx<span class="op">,</span> openaiRequest<span class="op">)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// For o-series models, separate thinking tokens</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    llmResponse <span class="op">:=</span> op<span class="op">.</span>convertFromOpenAIResponse<span class="op">(</span>response<span class="op">,</span> request<span class="op">.</span>ID<span class="op">,</span> processingTime<span class="op">)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> response<span class="op">.</span>Usage<span class="op">.</span>CompletionTokensDetails <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Add reasoning tokens to metadata</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        llmResponse<span class="op">.</span>ProviderMetadata <span class="op">=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;reasoning_tokens&quot;</span><span class="op">:</span> response<span class="op">.</span>Usage<span class="op">.</span>CompletionTokensDetails<span class="op">.</span>ReasoningTokens<span class="op">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> llmResponse<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Add o-series models to model list</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">:</span> <span class="st">&quot;o1-preview&quot;</span><span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Provider<span class="op">:</span> ProviderTypeOpenAI<span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    ContextSize<span class="op">:</span> <span class="dv">128000</span><span class="op">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">:</span> <span class="dv">32768</span><span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Capabilities<span class="op">:</span> reasoningCapabilities<span class="op">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    SupportsTools<span class="op">:</span> <span class="ot">false</span><span class="op">,</span> <span class="co">// o1 doesn&#39;t support tools yet</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    SupportsVision<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">:</span> <span class="st">&quot;OpenAI O1 Preview - Advanced reasoning model&quot;</span><span class="op">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="op">},</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">:</span> <span class="st">&quot;o1-mini&quot;</span><span class="op">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    Provider<span class="op">:</span> ProviderTypeOpenAI<span class="op">,</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    ContextSize<span class="op">:</span> <span class="dv">128000</span><span class="op">,</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">:</span> <span class="dv">65536</span><span class="op">,</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    Capabilities<span class="op">:</span> reasoningCapabilities<span class="op">,</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    SupportsTools<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    SupportsVision<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">:</span> <span class="st">&quot;OpenAI O1 Mini - Fast reasoning model&quot;</span><span class="op">,</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="op">},</span></span></code></pre></div>
+<p><strong>Priority</strong>: High - O-series models are
+production-ready</p>
+<h3 id="azure-provider-needs-implementation">3. Azure Provider (⚠️ Needs
+Implementation)</h3>
+<p><strong>File</strong>: <code>azure_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>: - Same as OpenAI provider (Azure
+uses OpenAI API) - Support Azure-specific authentication (Entra ID, API
+keys) - Handle Azure-specific endpoints - Map Azure deployment names to
+model capabilities</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>ap <span class="op">*</span>AzureProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Translate Azure deployment to base model</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    baseModel <span class="op">:=</span> ap<span class="op">.</span>getBaseModel<span class="op">(</span>request<span class="op">.</span>Model<span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check for reasoning models</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> isReasoning<span class="op">,</span> modelType <span class="op">:=</span> IsReasoningModel<span class="op">(</span>baseModel<span class="op">);</span> isReasoning <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Handle o-series specific configuration</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Apply reasoning config</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Proceed with Azure API call</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ap<span class="op">.</span>makeAzureRequest<span class="op">(</span>ctx<span class="op">,</span> azureRequest<span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Priority</strong>: High - Azure is widely used in
+enterprise</p>
+<h3 id="gemini-provider-needs-implementation">4. Gemini Provider (⚠️
+Needs Implementation)</h3>
+<p><strong>File</strong>: <code>gemini_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>:</p>
+<ol type="1">
+<li><strong>Add Gemini 2.0 models with reasoning</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">:</span> <span class="st">&quot;gemini-2.0-flash-thinking-exp&quot;</span><span class="op">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    Provider<span class="op">:</span> ProviderTypeGemini<span class="op">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    ContextSize<span class="op">:</span> <span class="dv">1000000</span><span class="op">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">:</span> <span class="dv">8192</span><span class="op">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    Capabilities<span class="op">:</span> allCapabilities<span class="op">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    SupportsTools<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    SupportsVision<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">:</span> <span class="st">&quot;Gemini 2.0 Flash with thinking mode (experimental)&quot;</span><span class="op">,</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">},</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Support thinking mode</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>gp <span class="op">*</span>GeminiProvider<span class="op">)</span> buildRequest<span class="op">(</span>request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>geminiRequest<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    req <span class="op">:=</span> <span class="op">&amp;</span>geminiRequest<span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        Contents<span class="op">:</span> gp<span class="op">.</span>convertMessages<span class="op">(</span>request<span class="op">.</span>Messages<span class="op">),</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        GenerationConfig<span class="op">:</span> geminiGenerationConfig<span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>            MaxOutputTokens<span class="op">:</span> request<span class="op">.</span>MaxTokens<span class="op">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>            Temperature<span class="op">:</span> request<span class="op">.</span>Temperature<span class="op">,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check for thinking models (gemini-2.0-flash-thinking-exp)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>Contains<span class="op">(</span>request<span class="op">.</span>Model<span class="op">,</span> <span class="st">&quot;thinking&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> request<span class="op">.</span>Reasoning <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> request<span class="op">.</span>Reasoning<span class="op">.</span>Enabled <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            req<span class="op">.</span>GenerationConfig<span class="op">.</span>ThinkingConfig <span class="op">=</span> <span class="op">&amp;</span>geminiThinkingConfig<span class="op">{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> req<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Add context caching support</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Gemini uses cachedContent API</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Need to create cached content first, then reference in requests</span></span></code></pre></div>
+<p><strong>Priority</strong>: Medium - Gemini 2.0 thinking is
+experimental</p>
+<h3 id="vertexai-provider-needs-implementation">5. VertexAI Provider (⚠️
+Needs Implementation)</h3>
+<p><strong>File</strong>: <code>vertexai_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>: - Similar to Gemini provider
+(VertexAI hosts Gemini models) - Add GCP authentication and project
+configuration - Support Vertex-specific features (tuned models,
+etc.)</p>
+<p><strong>Priority</strong>: Medium</p>
+<h3 id="bedrock-provider-needs-implementation">6. Bedrock Provider (⚠️
+Needs Implementation)</h3>
+<p><strong>File</strong>: <code>bedrock_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>:</p>
+<ol type="1">
+<li><strong>Support Claude models on Bedrock</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>bp <span class="op">*</span>BedrockProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Detect underlying model (Claude, etc.)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>Contains<span class="op">(</span>request<span class="op">.</span>Model<span class="op">,</span> <span class="st">&quot;claude&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Use Anthropic-style features via Bedrock API</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Bedrock supports prompt caching for Claude</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Extended thinking may be available</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bp<span class="op">.</span>invokeModel<span class="op">(</span>ctx<span class="op">,</span> bedrockRequest<span class="op">)</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Add Bedrock-specific caching</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// AWS Bedrock supports prompt caching for Claude models</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Use AWS SDK to enable caching</span></span></code></pre></div>
+<p><strong>Priority</strong>: Medium - Bedrock is popular for enterprise
+AWS users</p>
+<h3 id="groq-provider-partial---budget-only">7. Groq Provider (✅
+Partial - Budget Only)</h3>
+<p><strong>File</strong>: <code>groq_provider.go</code></p>
+<p><strong>Status</strong>: ✅ Token budgets supported, reasoning
+model-dependent</p>
+<p><strong>Changes Needed</strong>: - Token budgets: ✅ Already
+supported via ProviderManager - Caching: ❌ Not supported by Groq API -
+Reasoning: ⚠️ Depends on model (DeepSeek-R1, etc.)</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Reasoning support for compatible models</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> strings<span class="op">.</span>Contains<span class="op">(</span>request<span class="op">.</span>Model<span class="op">,</span> <span class="st">&quot;deepseek&quot;</span><span class="op">)</span> <span class="op">&amp;&amp;</span> strings<span class="op">.</span>Contains<span class="op">(</span>request<span class="op">.</span>Model<span class="op">,</span> <span class="st">&quot;r1&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Apply DeepSeek R1 reasoning configuration</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    reasoningConfig <span class="op">:=</span> llm<span class="op">.</span>NewReasoningConfig<span class="op">(</span>llm<span class="op">.</span>ReasoningModelDeepSeek_R1<span class="op">)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Priority</strong>: Low - Limited feature support</p>
+<h3 id="qwen-provider-needs-implementation">8. Qwen Provider (⚠️ Needs
+Implementation)</h3>
+<p><strong>File</strong>: <code>qwen_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>:</p>
+<ol type="1">
+<li><strong>Add QwQ-32B reasoning model</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">:</span> <span class="st">&quot;qwq-32b-preview&quot;</span><span class="op">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    Provider<span class="op">:</span> ProviderTypeQwen<span class="op">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    ContextSize<span class="op">:</span> <span class="dv">32000</span><span class="op">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    MaxTokens<span class="op">:</span> <span class="dv">8192</span><span class="op">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    Capabilities<span class="op">:</span> allCapabilities<span class="op">,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    SupportsTools<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    SupportsVision<span class="op">:</span> <span class="ot">false</span><span class="op">,</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">:</span> <span class="st">&quot;QwQ-32B Preview - Reasoning model&quot;</span><span class="op">,</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="op">},</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Support thinking mode</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>qp <span class="op">*</span>QwenProvider<span class="op">)</span> buildRequest<span class="op">(</span>request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>qwenRequest<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check for QwQ-32B</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>Contains<span class="op">(</span>request<span class="op">.</span>Model<span class="op">,</span> <span class="st">&quot;qwq&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> request<span class="op">.</span>Reasoning <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> request<span class="op">.</span>Reasoning<span class="op">.</span>Enabled <span class="op">{</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>            <span class="co">// QwQ uses thinking tags in prompt</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            prompt <span class="op">:=</span> FormatReasoningPrompt<span class="op">(</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>                request<span class="op">.</span>Messages<span class="op">[</span><span class="bu">len</span><span class="op">(</span>request<span class="op">.</span>Messages<span class="op">)-</span><span class="dv">1</span><span class="op">].</span>Content<span class="op">,</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                request<span class="op">.</span>Reasoning<span class="op">,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            <span class="op">)</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Update last message with formatted prompt</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> req<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Priority</strong>: Low-Medium</p>
+<h3 id="xai-provider-needs-implementation">9. xAI Provider (⚠️ Needs
+Implementation)</h3>
+<p><strong>File</strong>: <code>xai_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>: - Token budgets: ✅ Supported via
+ProviderManager - Reasoning: Add Grok model reasoning support - Caching:
+❌ Not supported by xAI API</p>
+<p><strong>Priority</strong>: Low</p>
+<h3 id="openrouter-provider-passthrough">10. OpenRouter Provider (✅
+Passthrough)</h3>
+<p><strong>File</strong>: <code>openrouter_provider.go</code></p>
+<p><strong>Status</strong>: ✅ Features passed through to underlying
+models</p>
+<p><strong>Implementation</strong>: - Token budgets: ✅ Supported via
+ProviderManager - Reasoning: ✅ Depends on selected model (o1, Claude,
+etc.) - Caching: ⚠️ Depends on upstream provider</p>
+<p><strong>Notes</strong>: - OpenRouter routes to multiple providers -
+Features depend on selected model - ProviderManager automatically
+handles this</p>
+<p><strong>Priority</strong>: Low - Already functional</p>
+<h3 id="copilot-provider-needs-implementation">11. Copilot Provider (⚠️
+Needs Implementation)</h3>
+<p><strong>File</strong>: <code>copilot_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>: - Similar to OpenAI (Copilot uses
+GPT-4 based models) - GitHub-specific authentication - Token budgets via
+ProviderManager</p>
+<p><strong>Priority</strong>: Low</p>
+<h3 id="local-provider-ollama-llama.cpp-needs-implementation">12. Local
+Provider (Ollama, llama.cpp) (⚠️ Needs Implementation)</h3>
+<p><strong>File</strong>: <code>local_provider.go</code>,
+<code>ollama_provider.go</code>, <code>llamacpp_provider.go</code></p>
+<p><strong>Status</strong>: ⚠️ Needs Updates</p>
+<p><strong>Required Changes</strong>:</p>
+<ol type="1">
+<li><strong>Support local reasoning models</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Models like QwQ-32B, DeepSeek-R1 can run locally</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>lp <span class="op">*</span>LocalProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check for reasoning models</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> isReasoning<span class="op">,</span> modelType <span class="op">:=</span> IsReasoningModel<span class="op">(</span>request<span class="op">.</span>Model<span class="op">);</span> isReasoning <span class="op">{</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Format prompt for reasoning</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> request<span class="op">.</span>Reasoning <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> request<span class="op">.</span>Reasoning<span class="op">.</span>Enabled <span class="op">{</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>            prompt <span class="op">:=</span> FormatReasoningPrompt<span class="op">(</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                request<span class="op">.</span>Messages<span class="op">[</span><span class="bu">len</span><span class="op">(</span>request<span class="op">.</span>Messages<span class="op">)-</span><span class="dv">1</span><span class="op">].</span>Content<span class="op">,</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                request<span class="op">.</span>Reasoning<span class="op">,</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Use formatted prompt with thinking instructions</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lp<span class="op">.</span>callLocalModel<span class="op">(</span>ctx<span class="op">,</span> localRequest<span class="op">)</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Token budgets</strong>:</li>
+</ol>
+<ul>
+<li>✅ Already supported via ProviderManager</li>
+<li>Local models don’t have API costs, but still useful for resource
+limits</li>
+</ul>
+<p><strong>Priority</strong>: Medium - Many users run local models</p>
+<h2 id="implementation-priorities">Implementation Priorities</h2>
+<h3 id="high-priority-critical">High Priority (Critical)</h3>
+<ol type="1">
+<li>✅ Core infrastructure (ProviderManager, LLMRequest)</li>
+<li>✅ Anthropic provider (complete)</li>
+<li>⚠️ OpenAI provider (o-series reasoning)</li>
+<li>⚠️ Azure provider (enterprise use)</li>
+</ol>
+<h3 id="medium-priority-important">Medium Priority (Important)</h3>
+<ol start="5" type="1">
+<li>⚠️ Bedrock provider (AWS enterprise)</li>
+<li>⚠️ Gemini/VertexAI providers (Google ecosystem)</li>
+<li>⚠️ Local providers (cost-effective, privacy)</li>
+</ol>
+<h3 id="low-priority-nice-to-have">Low Priority (Nice to Have)</h3>
+<ol start="8" type="1">
+<li>⚠️ Qwen provider (QwQ-32B)</li>
+<li>⚠️ Groq provider (fast inference)</li>
+<li>⚠️ xAI provider (Grok models)</li>
+<li>⚠️ Copilot provider (IDE integration)</li>
+<li>✅ OpenRouter (passthrough, already works)</li>
+</ol>
+<h2 id="testing-strategy">Testing Strategy</h2>
+<p>For each provider, add tests for:</p>
+<ol type="1">
+<li><strong>Reasoning Support</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestProviderReasoning<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    request <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span> <span class="st">&quot;reasoning-model-name&quot;</span><span class="op">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>            <span class="op">{</span>Role<span class="op">:</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span> <span class="st">&quot;Explain why 2+2=4 step by step&quot;</span><span class="op">},</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        Reasoning<span class="op">:</span> llm<span class="op">.</span>NewReasoningConfig<span class="op">(</span>llm<span class="op">.</span>ReasoningModelType<span class="op">),</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    response<span class="op">,</span> err <span class="op">:=</span> provider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> request<span class="op">)</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> response<span class="op">.</span>Content<span class="op">)</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// For providers that support thinking tokens</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> metadata<span class="op">,</span> ok <span class="op">:=</span> response<span class="op">.</span>ProviderMetadata<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{});</span> ok <span class="op">{</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> metadata<span class="op">[</span><span class="st">&quot;thinking_tokens&quot;</span><span class="op">],</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="2" type="1">
+<li><strong>Caching Support</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestProviderCaching<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    cacheConfig <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>CacheConfig<span class="op">{</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>        Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        Strategy<span class="op">:</span> llm<span class="op">.</span>CacheStrategyTools<span class="op">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// First request (creates cache)</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    response1<span class="op">,</span> err <span class="op">:=</span> provider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span> <span class="st">&quot;model-name&quot;</span><span class="op">,</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        Messages<span class="op">:</span> messages<span class="op">,</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        CacheConfig<span class="op">:</span> cacheConfig<span class="op">,</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Second request (uses cache)</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    response2<span class="op">,</span> err <span class="op">:=</span> provider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>        Model<span class="op">:</span> <span class="st">&quot;model-name&quot;</span><span class="op">,</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        Messages<span class="op">:</span> messages<span class="op">,</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        CacheConfig<span class="op">:</span> cacheConfig<span class="op">,</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Verify cache was used (if supported)</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> metadata<span class="op">,</span> ok <span class="op">:=</span> response2<span class="op">.</span>ProviderMetadata<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{});</span> ok <span class="op">{</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        assert<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> metadata<span class="op">[</span><span class="st">&quot;cache_read_tokens&quot;</span><span class="op">],</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ol start="3" type="1">
+<li><strong>Token Budgets</strong>:</li>
+</ol>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTokenBudgets<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    budget <span class="op">:=</span> llm<span class="op">.</span>TokenBudget<span class="op">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        MaxTokensPerRequest<span class="op">:</span> <span class="dv">1000</span><span class="op">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        MaxTokensPerSession<span class="op">:</span> <span class="dv">5000</span><span class="op">,</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    pm <span class="op">:=</span> llm<span class="op">.</span>NewProviderManagerWithBudget<span class="op">(</span>config<span class="op">,</span> budget<span class="op">)</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    sessionID <span class="op">:=</span> <span class="st">&quot;test-session&quot;</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Make requests until budget is approached</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">6</span><span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        _<span class="op">,</span> err <span class="op">:=</span> pm<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>            Model<span class="op">:</span> <span class="st">&quot;model-name&quot;</span><span class="op">,</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>            Messages<span class="op">:</span> messages<span class="op">,</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>            SessionID<span class="op">:</span> sessionID<span class="op">,</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">})</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&lt;</span> <span class="dv">5</span> <span class="op">{</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span> <span class="co">// Should succeed</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>            assert<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span> <span class="co">// Should fail on budget</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="documentation-updates">Documentation Updates</h2>
+<p>All providers now have: - ✅ Feature matrix documentation
+(<code>PROVIDER_FEATURES.md</code>) - ✅ Implementation guide for each
+feature - ✅ Code examples and configuration samples - ✅ Cost
+estimation and optimization tips - ✅ Migration guide for existing
+code</p>
+<h2 id="backward-compatibility">Backward Compatibility</h2>
+<p>All changes maintain backward compatibility: - ✅ Existing
+<code>LLMRequest</code> usage continues to work - ✅ New fields are
+optional (nil = disabled) - ✅ Providers without feature support
+silently ignore configs - ✅ Default configs can be applied
+automatically</p>
+<h2 id="next-steps">Next Steps</h2>
+<ol type="1">
+<li>⬜ Implement high-priority providers (OpenAI, Azure)</li>
+<li>⬜ Add comprehensive tests for all providers</li>
+<li>⬜ Create provider-specific documentation</li>
+<li>⬜ Add integration examples</li>
+<li>⬜ Performance benchmarking</li>
+<li>⬜ Cost optimization analysis</li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p>The core infrastructure is complete and production-ready.
+Provider-specific implementations can be rolled out incrementally based
+on priority and user demand. The Anthropic provider serves as a
+reference implementation for other providers to follow.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29:
+https://platform.claude.com/docs/en/docs/about-claude/models/overview
+(current Anthropic Claude model IDs — <code>claude-sonnet-4-6</code>,
+<code>claude-haiku-4-5</code>, plus the Opus family; older API aliases
+such as <code>claude-3-5-sonnet-latest</code> are no longer in the
+current/legacy model table), https://go.dev/doc/devel/release (Go 1.26.3
+latest patch — matches CLAUDE.md §3.1). Confirmed: this summary
+documents provider-integration code-structure (request/response
+conversion, reasoning-model handling, capability flags), which per
+CONST-036 must source live model metadata from LLMsVerifier rather than
+from any hardcoded list, so the document is not itself an
+operator-facing model catalogue. Negative finding: the inline
+<code>Description</code> strings and reasoning-model constant names
+(e.g. <code>ReasoningModelOpenAI_O1/O3/O4</code>) are illustrative of
+historical model generations and are NOT the runtime source of truth —
+the live provider/model set is verifier-driven; per §11.4.6 no model IDs
+were invented here, and stale-looking literals are left as
+code-illustration rather than rewritten to guessed current IDs.</p>
+</body>
+</html>

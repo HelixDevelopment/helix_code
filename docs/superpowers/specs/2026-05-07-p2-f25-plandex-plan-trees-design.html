@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f25-plandex-plan-trees-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f25-plandex-plan-trees-design</h1>
+</header>
+<h1 id="phase-2-feature-25-plandex-plan-trees-context-compaction">Phase
+2 / Feature 25 — Plandex Plan Trees + Context Compaction</h1>
+<p><strong>Date:</strong> 2026-05-07 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 2 port (plandex — branching plan trees, context
+compaction)</p>
+<blockquote>
+<p><strong>Programme position:</strong> F25 is the
+<strong>fifth</strong> Phase 2 feature (F21 Codex Approval Modes + F22
+Aider Git Auto-Commit + F23 Cline Browser Tool + F24 Codex Project
+Memory shipped before it). T01 (bootstrap) appends an F25 evidence
+section to <code>docs/improvements/07_phase_2_evidence.md</code>
+(created in F21-T01, extended by F22-T01 + F23-T01 + F24-T01); T11
+(close-out) records F25’s runtime evidence beneath F24’s.</p>
+</blockquote>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, end-to-end <strong>plan tree system</strong> for the
+HelixCode CLI agent, modelled on Plandex’s branching plan architecture
+(<code>cli_agents/plandex/</code>), so that an agent can construct,
+branch, merge, prune, and verify structured implementation plans with
+zero stubs. Every plan is a tree of <code>PlanNode</code> values (title,
+description, status, children) serialized to JSON files at
+<code>.helixcode/plans/&lt;name&gt;.json</code>. Agents traverse the
+tree via a rich tool surface: <code>plan_create</code> (root a new
+tree), <code>plan_branch</code> (fork a child from a node),
+<code>plan_merge</code> (fold a completed child back into its parent),
+<code>plan_list</code> / <code>plan_show</code> (inspect),
+<code>plan_delete</code> (prune). A <code>/plan</code> slash command
+exposes interactive tree exploration. Context compaction for
+long-running plan sessions reuses F01’s <code>AutoCompactor</code>
+infrastructure — when the plan tree’s serialized JSON exceeds a token
+budget, older completed nodes are summarized into compact leaf
+notes.</p>
+<p>Five concrete user surfaces ship together:</p>
+<ol type="1">
+<li><p><strong><code>internal/plantree/</code> package</strong> — F25
+ADDS a NEW <code>internal/plantree/</code> Go package (no existing code
+conflict). Types: <code>PlanNode</code> (ID string UUID, Title string,
+Description string, Status enum:
+Pending/InProgress/Completed/Failed/Pruned, Children []*PlanNode,
+ParentID string, CreatedAt/UpdatedAt time.Time, Metadata
+map[string]string), <code>PlanTree</code> (Root PlanNode, Name string,
+Version int, CreatedAt/UpdatedAt time.Time), <code>PlanStatus</code>
+enum, sentinels (<code>ErrPlanNotFound</code>,
+<code>ErrNodeNotFound</code>, <code>ErrCyclicMerge</code>,
+<code>ErrPlanAlreadyExists</code>, <code>ErrTooManyNodes</code>,
+<code>ErrTreeCorrupt</code>). Constants: <code>MaxNodes = 500</code>,
+<code>MaxNodeDepth = 20</code>,
+<code>MaxDescriptionBytes = 32 * 1024</code>,
+<code>StorageDir = &quot;.helixcode/plans&quot;</code>.</p></li>
+<li><p><strong><code>PlanStore</code></strong> (<code>store.go</code>,
+NEW) — filesystem-backed persistence. Methods:
+<code>Save(tree PlanTree) error</code> (JSON marshal to
+<code>.helixcode/plans/&lt;name&gt;.json</code>; mode 0600; atomic write
+via temp-file + rename),
+<code>Load(name string) (PlanTree, error)</code> (JSON unmarshal with
+version validation; returns <code>ErrPlanNotFound</code> on missing
+file), <code>List() ([]PlanTreeSummary, error)</code> (readdir + parse
+filename stems + filter <code>.json</code>),
+<code>Delete(name string) error</code> (unlink file; idempotent).
+<code>PlanTreeSummary</code>: Name string, NodeCount int, RootID string,
+CreatedAt/UpdatedAt time.Time — minimal struct for
+<code>/plan list</code>.</p></li>
+<li><p><strong>Six <code>tools.Tool</code> implementations</strong> —
+<code>plan_create</code> (creates a new PlanTree with a single root
+node; args: name string + title string + description string; returns
+tree summary), <code>plan_branch</code> (adds a child PlanNode under a
+specified parent node ID in an existing tree; args: plan_name string +
+parent_node_id string + title string + description string; returns the
+new node), <code>plan_merge</code> (imports changes from a completed
+child node back into its parent — copies child.Description into
+parent.Metadata[“merged_from”] and moves child.Status to Completed;
+returns updated parent), <code>plan_list</code> (lists all saved plan
+trees with node counts and root titles; args: none),
+<code>plan_show</code> (returns the full tree as a formatted indented
+text representation with status markers [✓]/[▶]/[ ]/[✗]/[×] + node IDs;
+args: plan_name string), <code>plan_delete</code> (deletes a plan tree
+file from disk; args: plan_name string; requires confirmation). Per-tool
+<code>RequiresApproval</code>:
+<code>plan_create</code>/<code>plan_branch</code>/<code>plan_merge</code>/<code>plan_delete</code>
+→ <code>LevelEdit</code>; <code>plan_list</code>/<code>plan_show</code>
+→ <code>LevelReadOnly</code>. NO
+<code>LevelRun</code>/<code>LevelAll</code>.</p></li>
+<li><p><strong><code>/plan</code> slash command</strong> —
+<code>internal/commands/plan_command.go</code>. Four subcommands:
+<code>/plan list</code> (default — tabular list of all saved plans with
+name/node-count/root-title/updated-at),
+<code>/plan show &lt;name&gt;</code> (indented tree view with status
+markers; optional <code>--id &lt;node-id&gt;</code> to focus on a
+subtree), <code>/plan compact &lt;name&gt;</code> (triggers context
+compaction on a plan tree — delegates to F01 <code>AutoCompactor</code>
+with plan-tree-specific context trimming),
+<code>/plan verify &lt;name&gt;</code> (consistency checks: no orphaned
+children, max-depth honored, no cycles, all node IDs unique,
+cross-references valid). Default subcommand (no args):
+<code>list</code>.</p></li>
+<li><p><strong>Agent loop integration</strong> — Plan trees are NOT
+auto-loaded into every LLM call (unlike F24 project memory). Instead,
+the agent itself uses plan_create/plan_branch/etc. tools to construct
+its working plan. The <code>/plan</code> slash exposes the current
+state. <strong>Context compaction</strong> (<code>/plan compact</code>)
+is triggered manually or via an automatic threshold check: when an agent
+session produces a plan tree whose serialized JSON exceeds
+<code>CompactThreshold = 128 * 1024</code> bytes (≈25–30 K tokens), the
+compactor replaces Completed and Failed leaf nodes (depth ≥ 3) with
+compact summaries (50-word max, preserving title + status + 1-line
+resolution). This reuses F01’s <code>compression.Summariser</code>
+interface — no new LLM dependency path.</p></li>
+</ol>
+<p><strong>The single largest bluff vector for F25</strong> is “plan
+tree created but agent ignores it” — the data structure is real but the
+agent never reads it back or makes decisions based on it. §5.2
+enumerates five such patterns and pins each with positive runtime
+evidence: (a) plan_create writes a valid JSON file with correct schema;
+(b) plan_branch adds a child with the correct ParentID link and the tree
+is re-readable; (c) plan_merge sets child.Status=Completed and
+parent.Metadata has the merged-from marker; (d) /plan compact reduces
+the serialized JSON byte size of a deep completed tree by ≥30% while
+preserving the root structure; (e) /plan verify detects injected
+corruptions (orphan, cycle, overflow). Each requires positive byte
+evidence — never absence-of-error.</p>
+<p><strong>Anti-bluff hot zone (loud):</strong> the store writes a file
+but on re-read the node hierarchy is wrong (ParentID references a
+non-existent node); merge succeeds but the child is NOT marked Completed
+and the parent Metadata is empty; compact returns “done” but the tree’s
+serialized byte size is unchanged; verify reports “OK” on a tree with 3
+orphaned nodes; plan_branch adds a child at depth 21 (exceeds
+MaxNodeDepth) without error. Each of these maps to a unit + integration
++ Challenge phase per §5.2.</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>The package layout under <code>helix_code/internal/plantree/</code>
+is NEW (no existing collision). It is a self-contained subsystem owned
+by main.go’s startup wiring:</p>
+<pre><code>helix_code/internal/plantree/
+├── doc.go               package docstring
+├── types.go             PlanNode + PlanTree + PlanStatus + sentinels + constants + RenderTree()
+├── store.go             PlanStore Save/Load/List/Delete — filesystem JSON I/O
+├── operations.go        CreateTree + BranchNode + MergeNode — mutation helpers (pure in-memory, not I/O)
+├── verify.go            VerifyTree — consistency checks (orphans, cycles, depth, uniqueness)
+├── compact.go           CompactTree — context compaction delegating to F01 summariser
+└── plan_tools.go        Six tools.Tool implementations (plan_create, plan_branch, plan_merge, plan_list, plan_show, plan_delete)</code></pre>
+<pre><code>                     Agent (LLM loop)
+                          │
+                          ▼
+              ┌── Plan Tools (6) ──┐
+              │ plan_create        │
+              │ plan_branch        │
+              │ plan_merge         │
+              │ plan_list          │
+              │ plan_show          │
+              │ plan_delete        │
+              └────────┬───────────┘
+                       │
+                       ▼
+              ┌── PlanStore ──┐     ← .helixcode/plans/&lt;name&gt;.json
+              │  Save/Load    │
+              │  List/Delete  │
+              └───────┬───────┘
+                      │
+         ┌────────────┼───────────────┐
+         ▼            ▼               ▼
+    /plan slash   CompactTree    VerifyTree
+    (list/show/   (F01 summariser) (consistency checks)
+     compact/
+     verify)</code></pre>
+<p><strong>Why filesystem storage and NOT in-memory or
+database:</strong> Plandex’s design is fundamentally git-friendly — plan
+JSON files are meant to be committed and shared.
+<code>.helixcode/plans/</code> stores each plan as a standalone JSON
+file, one per plan. This aligns with Q3=A (project dir storage).
+In-memory-only would lose plans on restart; database would add
+unnecessary dependency weight for a simple key-value store.</p>
+<p><strong>Why atomic writes (temp-file + rename):</strong> a crash
+during <code>Save</code> must not leave a corrupt <code>.json</code>
+file that fails on the next <code>Load</code>. Writing to
+<code>&lt;name&gt;.json.tmp</code> then
+<code>os.Rename(tmp, name)</code> is the POSIX-standard atomic-file
+pattern.</p>
+<p><strong>Why PlanTree is an in-memory data structure manipulated by
+operations.go and persisted by store.go:</strong> separation of
+concerns. PlanTree/PlanNode are pure Go structs with no I/O knowledge.
+PlanStore handles filesystem persistence. Operations (Branch, Merge) are
+pure-tree transformations — unit-testable without touching disk. Verify
+walks the tree without I/O. Compact modifies the tree in-memory
+(collapsing nodes) then calls Save.</p>
+<p><strong>Why context compaction reuses F01 AutoCompactor and not a
+parallel summariser:</strong> F01 already shipped
+<code>compression.Summariser</code> with an LLM-backed summariser plus a
+deterministic fallback. F25 adds a plan-tree-specific compaction
+strategy: walk the tree, identify Completed/Failed leaf nodes at depth ≥
+3, replace their Description with a compact summary generated via
+<code>Summariser.Summarise(text, maxWords=50)</code>. This is a thin
+adapter, not a new LLM path. The compaction threshold
+(<code>CompactThreshold = 128 * 1024</code>) is checked after every plan
+tool mutation — if exceeded, the tool result includes a hint
+<code>&quot;tip: run /plan compact to reduce plan context&quot;</code>.</p>
+<p><strong>Why a <code>/plan verify</code> command:</strong> as plans
+grow and branch, structural invariants can break (especially when
+merging branches). Verify walks the entire tree asserting: (1) every
+node referenced as ParentID exists in the tree (no orphans); (2) no
+cycles (following Child→ParentID never revisits a node); (3) tree depth
+≤ MaxNodeDepth (20); (4) total node count ≤ MaxNodes (500); (5) all node
+IDs are unique. Verify returns a list of <code>PlanIssue</code>
+(Severity: Error/Warning, NodeID string, Message string) and an overall
+<code>Valid bool</code>. Integration tests deliberately inject corrupt
+trees and assert Verify catches them.</p>
+<p><strong>Why Q4=A (6 tools + /plan slash) and NOT Cobra
+subcommands:</strong> Plandex plan trees are agent-consumed, not
+user-interactive tools. The agent uses the 6 tools during task
+execution; the user inspects via <code>/plan</code> slash. Cobra
+subcommands would add surface area for a feature the user doesn’t
+directly operate. The <code>/plan</code> slash covers all user
+inspection needs.</p>
+<hr />
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 32%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Lines (est.)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/plantree/doc.go</code></td>
+<td>Package docstring referencing F25 spec + design rationale</td>
+<td>~15</td>
+</tr>
+<tr>
+<td><code>internal/plantree/doc_test.go</code></td>
+<td>Package-level doc test (verifies package compiles)</td>
+<td>~10</td>
+</tr>
+<tr>
+<td><code>internal/plantree/types.go</code></td>
+<td>PlanNode + PlanTree + PlanStatus + PlanTreeSummary + sentinels +
+constants + RenderTree</td>
+<td>~120</td>
+</tr>
+<tr>
+<td><code>internal/plantree/types_test.go</code></td>
+<td>Table-driven type tests: node creation, tree construction,
+RenderTree output format, status transitions</td>
+<td>~200</td>
+</tr>
+<tr>
+<td><code>internal/plantree/store.go</code></td>
+<td>PlanStore: Save (atomic), Load (JSON), List (readdir), Delete
+(unlink)</td>
+<td>~130</td>
+</tr>
+<tr>
+<td><code>internal/plantree/store_test.go</code></td>
+<td>Real tempdir-backed store tests: roundtrip, list, delete, atomicity,
+corrupted file</td>
+<td>~200</td>
+</tr>
+<tr>
+<td><code>internal/plantree/operations.go</code></td>
+<td>CreateTree, BranchNode, MergeNode — pure in-memory tree
+transformations</td>
+<td>~100</td>
+</tr>
+<tr>
+<td><code>internal/plantree/operations_test.go</code></td>
+<td>Tree operation tests: create, branch, multi-level branch, merge
+updates parent Metadata</td>
+<td>~180</td>
+</tr>
+<tr>
+<td><code>internal/plantree/verify.go</code></td>
+<td>VerifyTree: orphan detection, cycle check (DFS + visited set),
+depth, uniqueness</td>
+<td>~100</td>
+</tr>
+<tr>
+<td><code>internal/plantree/verify_test.go</code></td>
+<td>Injected corruption tests: orphan, cycle, depth overflow, dup IDs,
+clean tree</td>
+<td>~180</td>
+</tr>
+<tr>
+<td><code>internal/plantree/compact.go</code></td>
+<td>CompactTree: walk + identify compactible nodes + Summariser adapter
++ rescore after compact</td>
+<td>~90</td>
+</tr>
+<tr>
+<td><code>internal/plantree/compact_test.go</code></td>
+<td>Compaction tests: threshold-triggered, verify byte reduction,
+summariser call count</td>
+<td>~160</td>
+</tr>
+<tr>
+<td><code>internal/plantree/plan_tools.go</code></td>
+<td>Six tools.Tool implementations (plan_create, plan_branch,
+plan_merge, plan_list, plan_show, plan_delete)</td>
+<td>~200</td>
+</tr>
+<tr>
+<td><code>internal/plantree/plan_tools_test.go</code></td>
+<td>Per-tool unit tests with mock PlanStore (test seam: Store
+interface)</td>
+<td>~220</td>
+</tr>
+<tr>
+<td><code>internal/commands/plan_command.go</code></td>
+<td>/plan slash (list/show/compact/verify) with PlanStore + Summariser +
+editor seam</td>
+<td>~130</td>
+</tr>
+<tr>
+<td><code>internal/commands/plan_command_test.go</code></td>
+<td>Slash command tests: list, show (tree format match), compact (call
+count), verify (clean + dirty)</td>
+<td>~180</td>
+</tr>
+<tr>
+<td><code>internal/agent/base_agent.go</code></td>
+<td>(MODIFIED) No plan-tree auto-load; agent uses tools</td>
+<td>~2 (no-op verification)</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code></td>
+<td>(MODIFIED) PlanStore construction + RegisterPlanTools + /plan
+registration</td>
+<td>~12</td>
+</tr>
+<tr>
+<td><code>tests/integration/cmd/p2f25_challenge/</code></td>
+<td>Challenge harness 7 phases (A-G) + run.sh + CHALLENGE.md</td>
+<td>~400</td>
+</tr>
+</tbody>
+</table>
+<h3 id="modified-files">3.2 Modified files</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 38%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Change</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/tools/registry.go</code></td>
+<td>Register <code>plan_create</code>, <code>plan_branch</code>,
+<code>plan_merge</code>, <code>plan_list</code>, <code>plan_show</code>,
+<code>plan_delete</code> in buildToolList</td>
+<td>~10</td>
+</tr>
+<tr>
+<td><code>internal/commands/builtin/register.go</code></td>
+<td>Register <code>/plan</code> slash command</td>
+<td>~3</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code></td>
+<td>Construct PlanStore + RegisterPlanTools + /plan registration</td>
+<td>~12</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-model">4. Data Model</h2>
+<h3 id="plannode">4.1 PlanNode</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanStatus <span class="dt">int</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    StatusPending    PlanStatus <span class="op">=</span> <span class="ot">iota</span>  <span class="co">// [ ] not started</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    StatusInProgress                    <span class="co">// [▶] currently working</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    StatusCompleted                     <span class="co">// [✓] done</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    StatusFailed                        <span class="co">// [✗] failed, can be retried</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    StatusPruned                        <span class="co">// [×] removed from active plan</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanNode <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    ID          <span class="dt">string</span>            <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    Title       <span class="dt">string</span>            <span class="st">`json:&quot;title&quot;`</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>            <span class="st">`json:&quot;description&quot;`</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    Status      PlanStatus        <span class="st">`json:&quot;status&quot;`</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    Children    <span class="op">[]*</span>PlanNode       <span class="st">`json:&quot;children,omitempty&quot;`</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    ParentID    <span class="dt">string</span>            <span class="st">`json:&quot;parent_id,omitempty&quot;`</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    Metadata    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`json:&quot;metadata,omitempty&quot;`</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    CreatedAt   time<span class="op">.</span>Time         <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    UpdatedAt   time<span class="op">.</span>Time         <span class="st">`json:&quot;updated_at&quot;`</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="plantree">4.2 PlanTree</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanTree <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Name      <span class="dt">string</span>    <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Version   <span class="dt">int</span>       <span class="st">`json:&quot;version&quot;`</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Root      <span class="op">*</span>PlanNode <span class="st">`json:&quot;root&quot;`</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    CreatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    UpdatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;updated_at&quot;`</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="plantreesummary-lightweight-for-listing">4.3 PlanTreeSummary
+(lightweight for listing)</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanTreeSummary <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    Name      <span class="dt">string</span>    <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    NodeCount <span class="dt">int</span>       <span class="st">`json:&quot;node_count&quot;`</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    RootID    <span class="dt">string</span>    <span class="st">`json:&quot;root_id&quot;`</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    RootTitle <span class="dt">string</span>    <span class="st">`json:&quot;root_title&quot;`</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    CreatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    UpdatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;updated_at&quot;`</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="planissue-for-verification">4.4 PlanIssue (for
+verification)</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanIssueSeverity <span class="dt">int</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    SeverityError   PlanIssueSeverity <span class="op">=</span> <span class="ot">iota</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    SeverityWarning</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PlanIssue <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    Severity PlanIssueSeverity <span class="st">`json:&quot;severity&quot;`</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    NodeID   <span class="dt">string</span>            <span class="st">`json:&quot;node_id,omitempty&quot;`</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    Message  <span class="dt">string</span>            <span class="st">`json:&quot;message&quot;`</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifyResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    Valid  <span class="dt">bool</span>        <span class="st">`json:&quot;valid&quot;`</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    Issues <span class="op">[]</span>PlanIssue <span class="st">`json:&quot;issues&quot;`</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="sentinel-errors-and-constants">4.5 Sentinel errors and
+constants</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    ErrPlanNotFound      <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan not found&quot;</span><span class="op">)</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    ErrNodeNotFound      <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;node not found in tree&quot;</span><span class="op">)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    ErrCyclicMerge       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;merge would create a cycle&quot;</span><span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    ErrPlanAlreadyExists <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan already exists&quot;</span><span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ErrTooManyNodes      <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan tree exceeds maximum node count&quot;</span><span class="op">)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    ErrTreeCorrupt       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;plan tree is corrupt&quot;</span><span class="op">)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    MaxNodes           <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    MaxNodeDepth       <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    MaxDescriptionBytes <span class="op">=</span> <span class="dv">32</span> <span class="op">*</span> <span class="dv">1024</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    CompactThreshold   <span class="op">=</span> <span class="dv">128</span> <span class="op">*</span> <span class="dv">1024</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    StorageDir         <span class="op">=</span> <span class="st">&quot;.helixcode/plans&quot;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="planstore-interface-test-seam">4.6 PlanStore interface (test
+seam)</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Store <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    Save<span class="op">(</span>tree PlanTree<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    Load<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>PlanTree<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    List<span class="op">()</span> <span class="op">([]</span>PlanTreeSummary<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    Delete<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>A concrete <code>FileStore</code> implements this interface backed by
+<code>&lt;cwd&gt;/.helixcode/plans/</code>. Tests inject a
+<code>MockStore</code> (in-memory map) for unit tests; integration tests
+use the real <code>FileStore</code> against
+<code>t.TempDir()</code>.</p>
+<hr />
+<h2 id="operational-semantics">5. Operational Semantics</h2>
+<h3 id="plan_create">5.1 plan_create</h3>
+<pre><code>Input:  name string, title string, description string
+Output: PlanTreeSummary
+
+1. Validate name: alphanumeric + underscore + hyphen, 1-100 chars
+2. Check PlanStore.List() — if name exists, return ErrPlanAlreadyExists
+3. Create PlanTree with Root PlanNode (ID=uuid, Title=title, Description=description, Status=Pending)
+4. PlanStore.Save(tree)
+5. Return PlanTreeSummary derived from tree</code></pre>
+<h3 id="plan_branch">5.2 plan_branch</h3>
+<pre><code>Input:  plan_name string, parent_node_id string, title string, description string
+Output: PlanNode (the newly created child)
+
+1. PlanStore.Load(plan_name)
+2. Find node with ID == parent_node_id (DFS walk)
+3. If parent not found → ErrNodeNotFound
+4. If parent depth ≥ MaxNodeDepth → error &quot;max depth exceeded&quot;
+5. If tree node count ≥ MaxNodes → ErrTooManyNodes
+6. Create child PlanNode (ID=uuid, Title=title, Description=description, ParentID=parent_node_id, Status=Pending)
+7. Append child to parent.Children
+8. PlanStore.Save(tree)
+9. Return the new child PlanNode</code></pre>
+<h3 id="plan_merge">5.3 plan_merge</h3>
+<pre><code>Input:  plan_name string, child_node_id string
+Output: PlanNode (the parent, post-merge)
+
+1. PlanStore.Load(plan_name)
+2. Find child node by ID
+3. If child has no ParentID → error &quot;root node cannot be merged&quot;
+4. Find parent node by child.ParentID
+5. Cycle check: following parent chain from parent&#39;s ParentID must not reach child (would create cycle)
+6. Set parent.Metadata[&quot;merged_from&quot;] = child.ID
+7. If parent.Metadata[&quot;merged_history&quot;] exists, append child.ID (comma-separated)
+   Else set parent.Metadata[&quot;merged_history&quot;] = child.ID
+8. Set child.Status = StatusCompleted
+9. PlanStore.Save(tree)
+10. Return parent PlanNode</code></pre>
+<h3 id="plan_list">5.4 plan_list</h3>
+<pre><code>Input:  none
+Output: []PlanTreeSummary
+
+1. return PlanStore.List()</code></pre>
+<h3 id="plan_show">5.5 plan_show</h3>
+<pre><code>Input:  plan_name string
+Output: string (formatted indented tree)
+
+Format:
+  [✓] Implement user auth (abc123)     ← status marker + title + (id)
+    [✓] Add JWT middleware (def456)
+    [▶] Add session store (ghi789)
+      [ ] Implement Redis backend (jkl012)
+    [✗] Add OAuth2 flow (mno345)        ← failed
+  [ ] Write API docs (pqr678)           ← pending
+
+Status markers: [ ]=Pending, [▶]=InProgress, [✓]=Completed, [✗]=Failed, [×]=Pruned
+Indent: 2 spaces per depth level</code></pre>
+<h3 id="plan_delete">5.6 plan_delete</h3>
+<pre><code>Input:  plan_name string
+Output: confirmation + result
+
+1. Check plan exists (Load) → ErrPlanNotFound if absent
+2. PlanStore.Delete(name)
+3. Return success message</code></pre>
+<hr />
+<h2 id="context-compaction-plan-compact">6. Context Compaction (/plan
+compact)</h2>
+<h3 id="compaction-strategy">6.1 Compaction strategy</h3>
+<pre><code>CompactTree(tree *PlanTree, summariser Summariser) (PlanTree, int)
+
+1. Serialize tree to JSON bytes; if len &lt; CompactThreshold, return (tree, 0) — no-op
+2. Walk tree DFS; collect all Completed and Failed nodes at depth ≥ 3 (leaves only — no children)
+3. For each compactible node:
+   a. Generate compact summary via summariser.Summarise(node.Description, maxWords=50)
+   b. Store original Description length in node.Metadata[&quot;compacted_bytes&quot;] = strconv.Itoa(len(original))
+   c. Replace node.Description with compact summary
+   d. Set node.Metadata[&quot;compacted&quot;] = &quot;true&quot;
+4. PlanStore.Save(tree)
+5. Re-serialize; return (tree, originalBytes - newBytes)</code></pre>
+<h3 id="summariser-adapter">6.2 Summariser adapter</h3>
+<p>F25 adds a <code>Summariser</code> interface in
+<code>internal/plantree/compact.go</code> that mirrors F01’s
+<code>compression.Summariser</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Summariser <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    Summarise<span class="op">(</span>text <span class="dt">string</span><span class="op">,</span> maxWords <span class="dt">int</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>main.go</code> wiring passes the F01 summariser (or a mock for
+tests). The deterministic fallback from F01 (first N words) applies — if
+the LLM summariser is unavailable, compact still works
+deterministically.</p>
+<h3 id="rendered-tree-after-compaction">6.3 Rendered tree after
+compaction</h3>
+<p>Compacted nodes display a <code>[c]</code> marker and show the
+compact summary (not the original full description):</p>
+<pre><code>[✓] Implement user auth (abc123)
+  [✓] Add JWT middleware (def456) [c] — JWT middleware validates tokens using RS256 with key rotation every 24h
+  [✓] Add session store (ghi789) [c] — Redis session store with TTL-based expiry and refresh-on-access</code></pre>
+<hr />
+<h2 id="plan-verification-plan-verify">7. Plan Verification (/plan
+verify)</h2>
+<h3 id="checks">7.1 Checks</h3>
+<ol type="1">
+<li><strong>Orphaned children</strong>: every node with a non-empty
+ParentID must have that ParentID reference an existing node in the
+tree.</li>
+<li><strong>Cycles</strong>: no path following ParentID → parent →
+parent.ParentID… should ever revisit the same node.</li>
+<li><strong>Depth limit</strong>: maximum depth from root ≤ MaxNodeDepth
+(20).</li>
+<li><strong>Node count</strong>: total nodes in tree ≤ MaxNodes
+(500).</li>
+<li><strong>Unique IDs</strong>: no two nodes share the same ID.</li>
+<li><strong>Self-parenting</strong>: no node’s ParentID equals its own
+ID.</li>
+</ol>
+<h3 id="verifyresult">7.2 VerifyResult</h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> VerifyResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    Valid  <span class="dt">bool</span>        <span class="st">`json:&quot;valid&quot;`</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    Issues <span class="op">[]</span>PlanIssue <span class="st">`json:&quot;issues&quot;`</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Issues with Severity=Error make Valid=false. Issues with
+Severity=Warning retain Valid=true. Example: a depth overflow is an
+Error; a node with an empty title is a Warning.</p>
+<hr />
+<h2 id="anti-bluff-hot-zone">8. Anti-Bluff Hot Zone</h2>
+<p>Five critical degenerate patterns — each pinned by unit + integration
++ Challenge phase:</p>
+<h3 id="p1-plan-created-but-file-is-empty-or-invalid-json">P1: Plan
+created but file is empty or invalid JSON</h3>
+<ul>
+<li><strong>Detect:</strong> after <code>plan_create</code>,
+<code>os.Stat</code> the file + <code>json.Unmarshal</code> it</li>
+<li><strong>Unit:</strong> <code>store_test.go</code> roundtrip
+Save→Load byte equality</li>
+<li><strong>Integration:</strong> <code>plan_create</code> tool
+execution → read file → assert valid JSON with root.id + root.title</li>
+<li><strong>Challenge Phase A:</strong> create plan via tool → read JSON
+file → assert schema conformance</li>
+</ul>
+<h3 id="p2-branch-adds-child-with-wrong-parentid-orphan">P2: Branch adds
+child with wrong ParentID (orphan)</h3>
+<ul>
+<li><strong>Detect:</strong> after <code>plan_branch</code>,
+<code>VerifyTree</code> must find the child’s ParentID in the tree</li>
+<li><strong>Unit:</strong> <code>operations_test.go</code> branch → find
+parent → parent.Children contains child by ID</li>
+<li><strong>Integration:</strong> branch+branch → verify all ParentIDs
+resolve</li>
+<li><strong>Challenge Phase B:</strong> create + branch × 3 → verify
+tree with 0 orphans</li>
+</ul>
+<h3 id="p3-merge-doesnt-update-parent-metadata">P3: Merge doesn’t update
+parent Metadata</h3>
+<ul>
+<li><strong>Detect:</strong> after <code>plan_merge</code>,
+parent.Metadata[“merged_from”] must equal child.ID</li>
+<li><strong>Unit:</strong> <code>operations_test.go</code> merge →
+parent.Metadata[“merged_from”] == child.ID</li>
+<li><strong>Integration:</strong> create → branch → merge → Load tree →
+assert Metadata</li>
+<li><strong>Challenge Phase C:</strong> branch → complete → merge →
+assert parent Metadata + child.Status==Completed</li>
+</ul>
+<h3 id="p4-compact-returns-success-but-serialized-byte-count-unchanged">P4:
+Compact returns success but serialized byte count unchanged</h3>
+<ul>
+<li><strong>Detect:</strong> before compact:
+<code>jsonBytes(tree)</code>. After compact:
+<code>jsonBytes(tree2)</code>. Must differ.</li>
+<li><strong>Unit:</strong> <code>compact_test.go</code> deep tree →
+compact → byte diff ≥ 30%</li>
+<li><strong>Integration:</strong> 20-node completed tree →
+<code>/plan compact</code> → byte diff assertion</li>
+<li><strong>Challenge Phase D:</strong> create deep completed tree (30+
+nodes, all Completed) → compact → assert byte reduction ≥ 30% while root
+structure intact</li>
+</ul>
+<h3 id="p5-verify-reports-clean-on-a-corrupted-tree">P5: Verify reports
+clean on a corrupted tree</h3>
+<ul>
+<li><strong>Detect:</strong> inject orphan/cycle/depth-overflow/dup-ID
+trees → Verify MUST report invalid</li>
+<li><strong>Unit:</strong> <code>verify_test.go</code> 4 corrupt trees +
+1 clean → all corrupt detected, clean passes</li>
+<li><strong>Integration:</strong> load corrupted JSON file →
+<code>/plan verify</code> → assert Valid==false + specific issue
+count</li>
+<li><strong>Challenge Phase E:</strong> 3 deliberately corrupted plan
+files → verify each → assert issues found</li>
+</ul>
+<h3 id="p6-bonus-plan_show-output-doesnt-match-tree-structure">P6
+(bonus): plan_show output doesn’t match tree structure</h3>
+<ul>
+<li><strong>Detect:</strong> create known tree → <code>/plan show</code>
+→ regex-match status markers + node IDs</li>
+<li><strong>Challenge Phase F:</strong> create multi-level tree → show
+output → assert markers + IDs present in correct hierarchical order</li>
+</ul>
+<h3 id="p7-bonus-compaction-at-depth-3-does-nothing">P7 (bonus):
+compaction at depth &lt; 3 does nothing</h3>
+<ul>
+<li><strong>Detect:</strong> tree with Completed leaves at depth 1 →
+compact → no change</li>
+<li><strong>Challenge Phase G:</strong> create shallow completed tree →
+compact → assert byte count unchanged</li>
+</ul>
+<hr />
+<h2 id="integration-surface">9. Integration Surface</h2>
+<h3 id="agent-integration">9.1 Agent integration</h3>
+<p>Plan trees are agent-driven: the agent calls <code>plan_create</code>
+/ <code>plan_branch</code> / <code>plan_merge</code> as part of its task
+execution loop. There is NO auto-loading into system prompt — unlike F24
+(project memory) which prepends to every LLM call, F25 plan trees are
+tools the agent actively uses.</p>
+<p>However, F25 adds a lightweight hook: when <code>plan_create</code>
+is called, the tool result is appended to the LLM conversation with a
+summary. When <code>plan_branch</code> succeeds, the result includes
+<code>&quot;plan_tree_hint&quot;: &quot;use plan_show to view the full tree; use plan_merge when a branch is complete&quot;</code>.</p>
+<h3 id="plan-slash">9.2 <code>/plan</code> slash</h3>
+<pre><code>/plan list                          → default; tabular list of all saved plans
+/plan show &lt;name&gt;                   → indented tree with status markers
+/plan show &lt;name&gt; --id &lt;node-id&gt;    → subtree rooted at node-id
+/plan compact &lt;name&gt;                → compress completed leaves; report byte reduction
+/plan verify &lt;name&gt;                 → consistency check; report issues or &quot;valid&quot;</code></pre>
+<h3 id="per-tool-requiresapproval-f21-integration">9.3 Per-tool
+RequiresApproval (F21 integration)</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Approval Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>plan_create</code></td>
+<td><code>LevelEdit</code></td>
+</tr>
+<tr>
+<td><code>plan_branch</code></td>
+<td><code>LevelEdit</code></td>
+</tr>
+<tr>
+<td><code>plan_merge</code></td>
+<td><code>LevelEdit</code></td>
+</tr>
+<tr>
+<td><code>plan_list</code></td>
+<td><code>LevelReadOnly</code></td>
+</tr>
+<tr>
+<td><code>plan_show</code></td>
+<td><code>LevelReadOnly</code></td>
+</tr>
+<tr>
+<td><code>plan_delete</code></td>
+<td><code>LevelEdit</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="f22-auto-commit-integration">9.4 F22 Auto-Commit
+integration</h3>
+<p>Plan tool mutations (<code>plan_create</code>,
+<code>plan_branch</code>, <code>plan_merge</code>,
+<code>plan_delete</code>) modify files under
+<code>.helixcode/plans/</code>. If F22’s auto-commit is enabled, these
+file writes trigger auto-commits with the co-author trailer.</p>
+<h3 id="f01-autocompactor-integration">9.5 F01 AutoCompactor
+integration</h3>
+<p><code>/plan compact</code> delegates to F01’s
+<code>compression.Summariser</code>. The summariser is constructed once
+in <code>main.go</code> and passed to both the F01 AutoCompactor and the
+F25 CompactTree function. Zero new LLM dependency — reuses existing F01
+path.</p>
+<hr />
+<h2 id="file-layout-summary">10. File Layout Summary</h2>
+<pre><code>helix_code/internal/plantree/
+├── doc.go
+├── doc_test.go
+├── types.go               ← PlanNode, PlanTree, PlanStatus, PlanTreeSummary, PlanIssue, VerifyResult, sentinels, constants, RenderTree
+├── types_test.go
+├── store.go               ← FileStore (implements Store interface), atomic Save, JSON Load, List, Delete
+├── store_test.go
+├── operations.go          ← CreateTree, BranchNode, MergeNode (pure in-memory)
+├── operations_test.go
+├── verify.go              ← VerifyTree (orphans, cycles, depth, uniqueness)
+├── verify_test.go
+├── compact.go             ← CompactTree + Summariser interface
+├── compact_test.go
+├── plan_tools.go          ← plan_create, plan_branch, plan_merge, plan_list, plan_show, plan_delete (tools.Tool impls)
+└── plan_tools_test.go
+
+helix_code/internal/commands/
+└── plan_command.go        ← /plan slash (list/show/compact/verify)
+└── plan_command_test.go
+
+helix_code/tests/integration/cmd/p2f25_challenge/
+├── run.sh
+├── CHALLENGE.md
+└── main.go</code></pre>
+<hr />
+<h2 id="tech-stack">11. Tech Stack</h2>
+<ul>
+<li><strong>Go 1.24</strong> (stdlib: <code>encoding/json</code>,
+<code>os</code>, <code>sync</code>, <code>time</code>,
+<code>errors</code>, <code>fmt</code>, <code>strings</code>,
+<code>path/filepath</code>, <code>context</code>)</li>
+<li><strong>google/uuid</strong> (ALREADY direct in
+<code>helix_code/go.mod</code> for node ID generation)</li>
+<li><strong>testify v1.11</strong> (assert + require for TDD)</li>
+<li><strong>F01 compression.Summariser</strong> (already shipped — reuse
+for compaction)</li>
+<li><strong>Zero new external deps</strong> — all deps above are
+pre-existing in <code>helix_code/go.mod</code></li>
+</ul>
+<hr />
+<h2 id="task-breakdown">12. Task Breakdown</h2>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 28%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>Bootstrap</td>
+<td>F25 evidence section + advance PROGRESS + CONTINUATION</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>types.go</td>
+<td>PlanNode + PlanTree + PlanStatus + sentinels + constants +
+RenderTree (TDD)</td>
+</tr>
+<tr>
+<td>T03</td>
+<td>store.go</td>
+<td>FileStore Save/Load/List/Delete with atomic writes (TDD with real
+tempdirs)</td>
+</tr>
+<tr>
+<td>T04</td>
+<td>operations.go</td>
+<td>CreateTree + BranchNode + MergeNode pure-tree transforms (TDD)</td>
+</tr>
+<tr>
+<td>T05</td>
+<td>verify.go</td>
+<td>VerifyTree with 6 checks (orphans, cycles, depth, uniqueness,
+self-parent, count) (TDD)</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>compact.go</td>
+<td>CompactTree + Summariser adapter + F01 delegation (TDD)</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>plan_tools.go</td>
+<td>Six tools.Tool implementations with Store interface seam (TDD)</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>/plan slash</td>
+<td>plan_command.go (list/show/compact/verify) (TDD)</td>
+</tr>
+<tr>
+<td>T09</td>
+<td>main.go wiring</td>
+<td>PlanStore construct + RegisterPlanTools + /plan registration +
+integration test</td>
+</tr>
+<tr>
+<td>T10</td>
+<td>Challenge harness</td>
+<td>7 phases
+(create/branch/merge/compact/verify/show/shallow-compact)</td>
+</tr>
+<tr>
+<td>T11</td>
+<td>Close-out</td>
+<td>Push 4 remotes non-force + evidence capture</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="verification-commands">13. Verification Commands</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build ./internal/plantree/... ./internal/commands/... ./cmd/cli/...</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-race</span> ./internal/plantree/ ./internal/commands/</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration <span class="at">-run</span> TestPlanTree_Integration ./tests/integration/</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> internal/plantree internal/commands/plan_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<hr />
+<p><em>F25 spec — full plandex port with branching plan trees,
+interactive exploration, context compaction, and verification.</em></p>
+</body>
+</html>

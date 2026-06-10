@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration.agent.outline</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration.agent.outline</h1>
+</header>
+<h1 id="helixqa-full-integration-into-helixcode-system-master-plan">HelixQA
+Full Integration into HelixCode System — Master Plan</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<h3 id="purpose-and-scope">Purpose and Scope</h3>
+<h4 id="full-integration-of-helixqa-submodule-with-all-dependency-submodules-into-helixcode-enterprise-cli-agent-system-with-catalogizer-as-reference-implementation">Full
+integration of HelixQA submodule (with all dependency submodules) into
+HelixCode enterprise CLI agent system, with Catalogizer as reference
+implementation</h4>
+<h4 id="anti-bluff-guarantee-every-test-and-challenge-must-verify-real-end-user-usability-not-just-pass-green">Anti-bluff
+guarantee: every test and Challenge must verify real end-user usability,
+not just pass green</h4>
+<h4 id="coverage-target-across-all-supported-test-types-and-all-client-applications-web-desktop-mobile-cli-tui">100%
+coverage target across all supported test types and all client
+applications (Web, Desktop, Mobile, CLI, TUI)</h4>
+<h4 id="on-demand-screenshot-capability-for-all-client-apps-during-helixqa-sessions">On-demand
+screenshot capability for all client apps during HelixQA sessions</h4>
+<h3 id="key-findings-from-research">Key Findings from Research</h3>
+<h4 id="helixcode-has-6-client-applications-clicobra-tuitview-desktopfyne-androidgomobile-iosgomobile-auroraharmony-os-across-5-platform-categories">HelixCode
+has 6 client applications (CLI/Cobra, TUI/tview, Desktop/Fyne,
+Android/gomobile, iOS/gomobile, Aurora/Harmony OS) across 5 platform
+categories</h4>
+<h4 id="helixqa-has-40-go-packages-with-autonomous-qa-evidence-collection-and-llm-powered-bug-detection-but-gaps-exist-in-ios-windows-macos-desktop-clitui-visual-capture">HelixQA
+has 40+ Go packages with autonomous QA, evidence collection, and
+LLM-powered bug detection — but gaps exist in iOS, Windows, macOS
+desktop, CLI/TUI visual capture</h4>
+<h4 id="catalogizer-already-includes-helixqa-as-submodule-at-commit-35deb43-phase-27.7-but-is-2-phases-behind-upstream-0bca023-phase-29">Catalogizer
+already includes HelixQA as submodule at commit 35deb43 (Phase 27.7),
+but is ~2 phases behind upstream (0bca023, Phase 29)</h4>
+<h4 id="article-xi-11.9-user-mandate-forensic-anchor-is-missing-from-helixcode-governance-files-critical-compliance-gap">Article
+XI §11.9 user-mandate forensic anchor is MISSING from HelixCode
+governance files — critical compliance gap</h4>
+<h4 id="const-035-anti-bluff-testing-rules-are-present-in-helixqa-and-catalogizer-but-cascade-to-submodules-is-unverified">CONST-035
+anti-bluff testing rules are present in HelixQA and Catalogizer but
+cascade to submodules is unverified</h4>
+<h2 id="phase-0-constitution-governance-update-2500-words-2-tables">1.
+Phase 0: Constitution &amp; Governance Update (~2500 words, 2
+tables)</h2>
+<h3 id="article-xi-11.9-cascade-to-helixcode">1.1 Article XI §11.9
+Cascade to HelixCode</h3>
+<h4 id="gap-001-add-verbatim-user-mandate-forensic-anchor-to-helixcodeconstitution.md-at-article-xi-11.9-exact-text-to-insert-with-user-quote-about-tests-passing-but-features-broken">1.1.1
+GAP-001: Add verbatim user-mandate forensic anchor to
+HelixCode/CONSTITUTION.md at Article XI §11.9 — exact text to insert
+with user quote about tests passing but features broken</h4>
+<h4 id="gap-002-add-article-xi-11.9-operative-rule-to-helixcodeclaude.md-the-bar-for-shipping-is-not-tests-pass-but-users-can-use-the-feature">1.1.2
+GAP-002: Add Article XI §11.9 operative rule to HelixCode/CLAUDE.md —
+“the bar for shipping is not ‘tests pass’ but ‘users can use the
+feature’”</h4>
+<h4 id="gap-003-add-article-xi-11.9-reference-to-helixcodeagents.md-binding-autonomous-agents-to-anti-bluff-mandate">1.1.3
+GAP-003: Add Article XI §11.9 reference to HelixCode/AGENTS.md — binding
+autonomous agents to anti-bluff mandate</h4>
+<h3 id="const-035-naming-alignment">1.2 CONST-035 Naming Alignment</h3>
+<h4 id="helixcode-uses-const-017-for-anti-bluff-rules-rename-to-const-035-for-cross-repository-consistency">1.2.1
+HelixCode uses CONST-017 for anti-bluff rules; rename to CONST-035 for
+cross-repository consistency</h4>
+<h4 id="update-all-internal-references-from-const-017-to-const-035-in-helixcode-docs-and-code-comments">1.2.2
+Update all internal references from CONST-017 to CONST-035 in HelixCode
+docs and code comments</h4>
+<h3 id="submodule-governance-cascade">1.3 Submodule Governance
+Cascade</h3>
+<h4 id="verify-all-15-helixcode-submodules-have-constitution.md-claude.md-agents.md-with-const-035-and-article-xi-11.9">1.3.1
+Verify all 15 HelixCode submodules have CONSTITUTION.md, CLAUDE.md,
+AGENTS.md with CONST-035 and Article XI §11.9</h4>
+<h4 id="verify-all-41-catalogizer-submodules-have-governance-files-with-anti-bluff-mandates">1.3.2
+Verify all 41 Catalogizer submodules have governance files with
+anti-bluff mandates</h4>
+<h4 id="create-governance-verification-script-scriptsverify-governance-cascade.sh-checks-every-submodule-for-required-files-and-mandated-text">1.3.3
+Create governance verification script:
+scripts/verify-governance-cascade.sh — checks every submodule for
+required files and mandated text</h4>
+<h4 id="add-governance-check-to-run_all_challenges.sh-block-merge-if-any-submodule-lacks-anti-bluff-mandate">1.3.4
+Add governance check to run_all_challenges.sh — block merge if any
+submodule lacks anti-bluff mandate</h4>
+<h3 id="exact-file-changes-reference">1.4 Exact File Changes
+Reference</h3>
+<h4 id="table-every-file-to-modify-line-range-exact-insertion-text-and-verification-method">1.4.1
+Table: every file to modify, line range, exact insertion text, and
+verification method</h4>
+<h2 id="phase-1-submodule-dependency-resolution-3000-words-3-tables">2.
+Phase 1: Submodule Dependency Resolution (~3000 words, 3 tables)</h2>
+<h3 id="helixqa-dependency-map">2.1 HelixQA Dependency Map</h3>
+<h4 id="helixqa-direct-dependencies-digital.vasic.challenges-..challenges-digital.vasic.containers-..containers">2.1.1
+HelixQA direct dependencies: digital.vasic.challenges (../Challenges),
+digital.vasic.containers (../Containers)</h4>
+<h4 id="helixqa-autonomous-session-dependencies-llmsverifier-llmorchestrator-visionengine-docprocessor">2.1.2
+HelixQA autonomous session dependencies: LLMsVerifier, LLMOrchestrator,
+VisionEngine, DocProcessor</h4>
+<h4 id="helixqa-toolsopensource-submodules-25-vendored-oss-packages-with-license-audit-requirements">2.1.3
+HelixQA tools/opensource/ submodules: 25+ vendored OSS packages with
+license audit requirements</h4>
+<h3 id="submodule-registration-in-helixcode">2.2 Submodule Registration
+in HelixCode</h3>
+<h4 id="add-helixqa-to-helixcode.gitmodules-with-ssh-url-gitgithub.comhelixdevelopmenthelixqa.git">2.2.1
+Add HelixQA to HelixCode/.gitmodules with SSH URL:
+git@github.com:HelixDevelopment/HelixQA.git</h4>
+<h4 id="add-helixqa-dependency-submodules-to-.gitmodules-challenges-containers-llmsverifier-llmorchestrator-visionengine-docprocessor">2.2.2
+Add HelixQA dependency submodules to .gitmodules: Challenges,
+Containers, LLMsVerifier, LLMOrchestrator, VisionEngine,
+DocProcessor</h4>
+<h4 id="configure-submodule-paths-helixqa-at-root-dependencies-for-external-tools">2.2.3
+Configure submodule paths: HelixQA/ at root, Dependencies/ for external
+tools</h4>
+<h4 id="version-locking-strategy-pin-commits-bump-via-make-bump-submodules-with-verification">2.2.4
+Version locking strategy: pin commits, bump via make bump-submodules
+with verification</h4>
+<h3 id="catalogizer-submodule-synchronization">2.3 Catalogizer Submodule
+Synchronization</h3>
+<h4 id="bump-helixqa-from-35deb43-to-latest-0bca023-exact-git-commands-and-verification-steps">2.3.1
+Bump HelixQA from 35deb43 to latest 0bca023 — exact git commands and
+verification steps</h4>
+<h4 id="cascade-bump-to-all-helixdevelopment-submodules-docprocessor-5f1e58a-llmorchestrator-1b95823-llmprovider-0720b6e">2.3.2
+Cascade bump to all HelixDevelopment submodules: DocProcessor 5f1e58a,
+LLMOrchestrator 1b95823, LLMProvider 0720b6e</h4>
+<h4 id="verify-challenges-submodule-compatibility-catalogizer-uses-vasic-digitalchallenges-at-4390e48-helixqa-needs-digital.vasic.challenges-verify-api-compatibility">2.3.3
+Verify Challenges submodule compatibility: Catalogizer uses
+vasic-digital/Challenges at 4390e48; HelixQA needs
+digital.vasic.challenges — verify API compatibility</h4>
+<h3 id="build-system-integration">2.4 Build System Integration</h3>
+<h4 id="update-helixcodemakefile-add-helixqa-build-helixqa-test-helixqa-challenge-targets">2.4.1
+Update HelixCode/Makefile: add helixqa-build, helixqa-test,
+helixqa-challenge targets</h4>
+<h4 id="update-helixcodego.mod-add-replace-directive-for-digital.vasic.helixqa-.helixqa">2.4.2
+Update HelixCode/go.mod: add replace directive for digital.vasic.helixqa
+→ ./HelixQA</h4>
+<h4 id="update-catalogizercatalog-apigo.mod-verify-replace-directives-cover-all-helixqa-dependency-modules">2.4.3
+Update Catalogizer/catalog-api/go.mod: verify replace directives cover
+all HelixQA dependency modules</h4>
+<h4 id="docker-integration-update-docker-compose.yml-to-include-helixqa-runner-service">2.4.4
+Docker integration: update docker-compose.yml to include helixqa-runner
+service</h4>
+<h2 id="phase-2-helixqa-core-integration-into-helixcode-4000-words-4-tables-1-diagram">3.
+Phase 2: HelixQA Core Integration into HelixCode (~4000 words, 4 tables,
+1 diagram)</h2>
+<h3 id="integration-architecture">3.1 Integration Architecture</h3>
+<h4 id="design-pattern-helixqa-as-embedded-library-within-helixcode-server-not-as-external-service">3.1.1
+Design pattern: HelixQA as embedded library within HelixCode server, NOT
+as external service</h4>
+<h4 id="integration-point-internalhelixqa-package-in-helixcode-wrapper-around-helixqa-orchestrator">3.1.2
+Integration point: internal/helixqa/ package in HelixCode — wrapper
+around HelixQA orchestrator</h4>
+<h4 id="api-exposure-rest-endpoints-under-apiv1qa-for-triggering-qa-sessions-retrieving-reports-on-demand-screenshots">3.1.3
+API exposure: REST endpoints under /api/v1/qa/* for triggering QA
+sessions, retrieving reports, on-demand screenshots</h4>
+<h4 id="cli-integration-extend-cobra-command-tree-with-helixcode-qa-run-helixcode-qa-report-helixcode-qa-screenshot">3.1.4
+CLI integration: extend Cobra command tree with
+<code>helixcode qa run</code>, <code>helixcode qa report</code>,
+<code>helixcode qa screenshot</code></h4>
+<h3 id="configuration-injection">3.2 Configuration Injection</h3>
+<h4 id="extend-helixcodeconfig-to-include-qa-configuration-section-banks-path-platforms-device-ids-coverage-target">3.2.1
+Extend HelixCode/config/ to include QA configuration section: banks
+path, platforms, device IDs, coverage target</h4>
+<h4 id="merge-helixqa-.env.example-into-helixcode-.env.example-unified-environment-configuration">3.2.2
+Merge HelixQA .env.example into HelixCode .env.example — unified
+environment configuration</h4>
+<h4 id="add-qa-config-validation-verify-bank-files-exist-devices-are-reachable-llm-api-keys-are-set">3.2.3
+Add QA config validation: verify bank files exist, devices are
+reachable, LLM API keys are set</h4>
+<h3 id="server-side-qa-endpoint-implementation">3.3 Server-Side QA
+Endpoint Implementation</h3>
+<h4 id="add-post-apiv1qasession-start-new-qa-session-with-platform-selection-and-bank-specification">3.3.1
+Add POST /api/v1/qa/session — start new QA session with platform
+selection and bank specification</h4>
+<h4 id="add-get-apiv1qasessionidstatus-real-time-session-progress-with-phasemanager-integration">3.3.2
+Add GET /api/v1/qa/session/:id/status — real-time session progress with
+PhaseManager integration</h4>
+<h4 id="add-get-apiv1qasessionidreport-retrieve-completed-qa-report-in-markdownhtmljson">3.3.3
+Add GET /api/v1/qa/session/:id/report — retrieve completed QA report in
+markdown/html/json</h4>
+<h4 id="add-get-apiv1qasessionidscreenshotname-on-demand-screenshot-retrieval-with-base64-or-file-path">3.3.4
+Add GET /api/v1/qa/session/:id/screenshot/:name — on-demand screenshot
+retrieval with base64 or file path</h4>
+<h4 id="add-delete-apiv1qasessionid-cancel-running-session-with-cleanup">3.3.5
+Add DELETE /api/v1/qa/session/:id — cancel running session with
+cleanup</h4>
+<h3 id="cli-command-registration">3.4 CLI Command Registration</h3>
+<h4 id="register-qa-subcommand-in-cmdclimain.go-create-cmdcliqa.go-with-run-report-screenshot-list-subcommands">3.4.1
+Register <code>qa</code> subcommand in cmd/cli/main.go — create
+cmd/cli/qa.go with run, report, screenshot, list subcommands</h4>
+#### 3.4.2 Implement helixcode qa run –banks <path> –platforms <list>
+–output
+<dir>
+<h4 id="implement-helixcode-qa-screenshot-session-platform-output">3.4.3
+Implement helixcode qa screenshot –session <id> –platform <name> –output
+<file></h4>
+<h4 id="implement-helixcode-qa-report-session-format-markdownhtmljson">3.4.4
+Implement helixcode qa report –session <id> –format
+&lt;markdown|html|json&gt;</h4>
+<h3 id="tui-integration">3.5 TUI Integration</h3>
+<h4 id="add-qa-session-dashboard-to-terminal-ui-real-time-progress-display-with-tview-table-and-status-bars">3.5.1
+Add QA session dashboard to terminal-ui/ — real-time progress display
+with tview table and status bars</h4>
+<h4 id="add-screenshot-preview-pane-in-tui-ascii-art-thumbnail-or-external-viewer-invocation">3.5.2
+Add screenshot preview pane in TUI — ASCII-art thumbnail or external
+viewer invocation</h4>
+<h4 id="key-bindings-f5-start-session-f6-view-report-f7-view-screenshots">3.5.3
+Key bindings: F5 start session, F6 view report, F7 view screenshots</h4>
+<h2 id="phase-3-on-demand-screenshot-pipeline-3500-words-3-tables-1-diagram">4.
+Phase 3: On-Demand Screenshot Pipeline (~3500 words, 3 tables, 1
+diagram)</h2>
+<h3 id="screenshot-architecture-design">4.1 Screenshot Architecture
+Design</h3>
+<h4 id="new-package-pkgscreenshot-manager-engine-interface-per-platform-engine-implementations">4.1.1
+New package: pkg/screenshot/ — Manager, Engine interface, per-platform
+Engine implementations</h4>
+<h4 id="engine-interface-methods-capturectx-opts-byte-error-supportsplatform-bool-name-string">4.1.2
+Engine interface methods: Capture(ctx, opts) ([]byte, error),
+Supports(platform) bool, Name() string</h4>
+<h4 id="storage-interface-savename-data-path-error-loadname-byte-error-listsessionid-string">4.1.3
+Storage interface: Save(name, data) (path, error), Load(name) ([]byte,
+error), List(sessionID) []string</h4>
+<h3 id="per-platform-screenshot-implementation">4.2 Per-Platform
+Screenshot Implementation</h3>
+<h4 id="web-playwright-full-page-responsive-breakpoints-mobile-375px-tablet-768px-desktop-1440px-chromedp-alternative-for-headless">4.2.1
+Web: Playwright full-page + responsive breakpoints (mobile 375px, tablet
+768px, desktop 1440px); chromedp alternative for headless</h4>
+<h4 id="desktop-linux-x11-via-import--window-root-xwd-wayland-via-grim-multi-monitor-via-xrandr-enumeration">4.2.2
+Desktop Linux: X11 via import -window root + xwd; Wayland via grim;
+multi-monitor via xrandr enumeration</h4>
+<h4 id="desktop-macos-screencapture--x-immediate-screencapturekit-cgo-phase-5.5">4.2.3
+Desktop macOS: screencapture -x (immediate) + ScreenCaptureKit (CGO,
+Phase 5.5)</h4>
+<h4 id="desktop-windows-dxgi-desktop-duplication-api-or-bitblt-fallback-new-implementation-required">4.2.4
+Desktop Windows: DXGI Desktop Duplication API or BitBlt fallback (new
+implementation required)</h4>
+<h4 id="android-adb-exec-out-screencap--p-with-rotation-detection-scrcpy-for-high-speed-capture">4.2.5
+Android: adb exec-out screencap -p with rotation detection; scrcpy for
+high-speed capture</h4>
+<h4 id="ios-xcrun-simctl-io-screenshot-for-simulator-go-ios-webdriveragent-for-real-devices-new-implementation">4.2.6
+iOS: xcrun simctl io screenshot for simulator; go-ios / WebDriverAgent
+for real devices (new implementation)</h4>
+<h4 id="cli-asciinema-recording-ansi-to-png-renderer-tmux-capture-pane-for-tui-state-reconstruction">4.2.7
+CLI: asciinema recording + ANSI-to-PNG renderer; tmux capture-pane for
+TUI state reconstruction</h4>
+<h4 id="tui-xterm.js-terminal-state-capture-html-to-image-rendering-or-direct-terminal-buffer-dump">4.2.8
+TUI: xterm.js terminal state capture + html-to-image rendering; or
+direct terminal buffer dump</h4>
+<h3 id="on-demand-screenshot-api">4.3 On-Demand Screenshot API</h3>
+<h4 id="http-endpoint-get-apiv1qascreenshotplatformxsessionyformatbase64fileurl">4.3.1
+HTTP endpoint: GET
+/api/v1/qa/screenshot?platform=X&amp;session=Y&amp;format=base64|file|url</h4>
+<h4 id="cli-command-helixcode-qa-screenshot-platform-session-responsive-dark-mode">4.3.2
+CLI command: helixcode qa screenshot –platform <name> –session <id>
+–responsive –dark-mode</h4>
+<h4 id="real-time-streaming-websocket-wsqascreenshot-for-live-session-capture-during-autonomous-qa">4.3.3
+Real-time streaming: WebSocket /ws/qa/screenshot for live session
+capture during autonomous QA</h4>
+<h4 id="presentational-export-powerpointkeynote-ready-screenshot-packs-with-annotations-and-timestamps">4.3.4
+Presentational export: PowerPoint/Keynote-ready screenshot packs with
+annotations and timestamps</h4>
+<h3 id="anti-bluff-visual-verification">4.4 Anti-Bluff Visual
+Verification</h3>
+<h4 id="template-matching-verify-screenshot-contains-expected-ui-elements-via-opencv-template-matching-or-ssim">4.4.1
+Template matching: verify screenshot contains expected UI elements via
+OpenCV template matching or SSIM</h4>
+<h4 id="ocr-validation-extract-text-from-screenshot-via-tesseract-verify-expected-content-is-visible">4.4.2
+OCR validation: extract text from screenshot via Tesseract, verify
+expected content is visible</h4>
+<h4 id="vision-llm-validation-send-screenshot-to-vision-model-ask-does-this-show-a-working-login-screen">4.4.3
+Vision LLM validation: send screenshot to vision model, ask “does this
+show a working login screen?”</h4>
+<h4 id="deliberate-break-test-break-the-feature-screenshot-must-show-broken-state-not-cachedgreen">4.4.4
+Deliberate-break test: break the feature, screenshot MUST show broken
+state (not cached/green)</h4>
+<h2 id="phase-4-test-type-challenge-coverage-matrix-3500-words-4-tables">5.
+Phase 4: Test Type &amp; Challenge Coverage Matrix (~3500 words, 4
+tables)</h2>
+<h3 id="test-type-definitions">5.1 Test Type Definitions</h3>
+<h4 id="unit-tests-mocks-allowed-only-in-_test.go-with-go-test--short-verify-individual-functions">5.1.1
+Unit tests: mocks allowed only in *_test.go with go test -short; verify
+individual functions</h4>
+<h4 id="integration-tests-real-databases-real-http-calls-real-service-interactions-no-mocks">5.1.2
+Integration tests: real databases, real HTTP calls, real service
+interactions; no mocks</h4>
+<h4 id="e2e-tests-full-user-workflows-across-client-api-database-external-services">5.1.3
+E2E tests: full user workflows across client → API → database → external
+services</h4>
+<h4 id="functional-tests-feature-level-validation-with-real-user-actions-and-visible-outcomes">5.1.4
+Functional tests: feature-level validation with real user actions and
+visible outcomes</h4>
+<h4 id="security-tests-penetration-testing-csrf-xss-sql-injection-authentication-bypass-attempts">5.1.5
+Security tests: penetration testing, CSRF, XSS, SQL injection,
+authentication bypass attempts</h4>
+<h4 id="stress-tests-high-concurrency-large-payloads-memory-pressure-connection-exhaustion">5.1.6
+Stress tests: high concurrency, large payloads, memory pressure,
+connection exhaustion</h4>
+<h4 id="chaos-tests-random-failures-network-partitions-service-kills-database-restarts-mid-session">5.1.7
+Chaos tests: random failures, network partitions, service kills,
+database restarts mid-session</h4>
+<h4 id="benchmark-tests-performance-baselines-regression-detection-latency-percentiles">5.1.8
+Benchmark tests: performance baselines, regression detection, latency
+percentiles</h4>
+<h4 id="challenge-tests-real-life-scenario-scripts-in-challengesscripts-validate-actual-behavior-not-return-codes">5.1.9
+Challenge tests: real-life scenario scripts in challenges/scripts/ —
+validate actual behavior not return codes</h4>
+<h4 id="runtime-verification-live-system-probes-health-checks-circuit-breaker-validation">5.1.10
+Runtime verification: live system probes, health checks, circuit breaker
+validation</h4>
+<h3 id="client-app-coverage-matrix">5.2 Client App Coverage Matrix</h3>
+<h4 id="table-10-test-types-5-client-categories-web-desktop-mobile-cli-tui-50-cells-with-specific-test-approaches">5.2.1
+Table: 10 test types × 5 client categories (Web, Desktop, Mobile, CLI,
+TUI) = 50 cells with specific test approaches</h4>
+<h4 id="web-client-playwright-based-e2e-visual-regression-responsive-breakpoint-validation-accessibility-axe-core">5.2.2
+Web client: Playwright-based E2E, visual regression, responsive
+breakpoint validation, accessibility (axe-core)</h4>
+<h4 id="desktop-client-x11playwright-automation-window-state-verification-multi-monitor-capture-crash-detection">5.2.3
+Desktop client: X11/Playwright automation, window state verification,
+multi-monitor capture, crash detection</h4>
+<h4 id="mobile-client-android-adb-based-ui-automation-anrcrash-detection-geo-restriction-probing-deep-link-validation">5.2.4
+Mobile client (Android): ADB-based UI automation, ANR/crash detection,
+geo-restriction probing, deep link validation</h4>
+<h4 id="mobile-client-ios-simctl-webdriveragent-automation-screenshot-diff-app-lifecycle-testing">5.2.5
+Mobile client (iOS): simctl / WebDriverAgent automation, screenshot
+diff, app lifecycle testing</h4>
+<h4 id="cli-client-command-invocation-with-real-output-parsing-exit-code-verification-stdoutstderr-content-analysis-ansi-rendering-capture">5.2.6
+CLI client: Command invocation with real output parsing, exit code
+verification, stdout/stderr content analysis, ANSI rendering
+capture</h4>
+<h4 id="tui-client-terminal-state-capture-keyboard-interaction-simulation-screen-buffer-comparison-colorattribute-verification">5.2.7
+TUI client: Terminal state capture, keyboard interaction simulation,
+screen buffer comparison, color/attribute verification</h4>
+<h3 id="challenge-design-standards">5.3 Challenge Design Standards</h3>
+<h4 id="every-challenge-must-have-setup-execution-verification-teardown-phases">5.3.1
+Every Challenge must have: setup, execution, verification, teardown
+phases</h4>
+<h4 id="verification-must-use-protocol-layer-probes-tcp-connect-real-request-real-response-parsing-not-just-grep">5.3.2
+Verification must use protocol-layer probes: TCP connect + real request
++ real response parsing (not just grep)</h4>
+<h4 id="visual-challenges-capture-screenshot-beforeafter-action-use-ssim-0.95-or-vision-llm-to-verify-state-change">5.3.3
+Visual Challenges: capture screenshot before/after action, use SSIM &gt;
+0.95 or vision LLM to verify state change</h4>
+<h4 id="deliberate-break-validation-temporarily-break-the-feature-challenge-must-fail-restore-challenge-must-pass">5.3.4
+Deliberate-break validation: temporarily break the feature, Challenge
+MUST fail; restore, Challenge MUST pass</h4>
+<h3 id="coverage-measurement">5.4 Coverage Measurement</h3>
+<h4 id="code-coverage-go-test--coverprofile-with-100-target-for-critical-paths">5.4.1
+Code coverage: go test -coverprofile with 100% target for critical
+paths</h4>
+<h4 id="feature-coverage-map-every-user-facing-feature-to-at-least-one-challenge-and-one-e2e-test">5.4.2
+Feature coverage: map every user-facing feature to at least one
+Challenge and one E2E test</h4>
+<h4 id="platform-coverage-every-client-app-tested-on-every-supported-os-linux-macos-windows-aurora-symphonyos">5.4.3
+Platform coverage: every client app tested on every supported OS (Linux,
+macOS, Windows, Aurora, SymphonyOS)</h4>
+<h4 id="provider-coverage-every-llm-provider-tested-with-at-least-one-real-inference-call-per-release">5.4.4
+Provider coverage: every LLM provider tested with at least one real
+inference call per release</h4>
+<h2 id="phase-5-catalogizer-example-integration-3000-words-3-tables">6.
+Phase 5: Catalogizer Example Integration (~3000 words, 3 tables)</h2>
+<h3 id="current-state-assessment">6.1 Current State Assessment</h3>
+<h4 id="catalogizer-has-helixqa-at-35deb43-phase-27.7-2-phases-behind-upstream-0bca023-phase-29">6.1.1
+Catalogizer has HelixQA at 35deb43 (Phase 27.7) — 2 phases behind
+upstream 0bca023 (Phase 29)</h4>
+<h4 id="existing-qa-artifacts-60-test-banks-5-qa-session-archives-206-pass-1-skip-last-audit">6.1.2
+Existing QA artifacts: 60+ test banks, 5 QA session archives, 206 PASS /
+1 SKIP last audit</h4>
+<h4 id="integration-gaps-androidandroid-tv-autonomous-qa-blocked-installer-wizard-and-api-client-lack-helixqa-banks-ocu-cuda-sidecar-not-deployed">6.1.3
+Integration gaps: Android/Android TV autonomous QA blocked;
+installer-wizard and API client lack HelixQA banks; OCU-CUDA-Sidecar not
+deployed</h4>
+<h3 id="bump-and-synchronization-steps">6.2 Bump and Synchronization
+Steps</h3>
+<h4 id="step-1-cd-catalogizer-git-submodule-update-remote-helixqa">6.2.1
+Step 1: cd Catalogizer &amp;&amp; git submodule update –remote
+HelixQA</h4>
+<h4 id="step-2-verify-helixqa-builds-cd-helixqa-make-build-make-test">6.2.2
+Step 2: verify HelixQA builds: cd HelixQA &amp;&amp; make build
+&amp;&amp; make test</h4>
+<h4 id="step-3-bump-all-helixdevelopment-submodules-docprocessor-llmorchestrator-llmprovider-visionengine">6.2.3
+Step 3: bump all HelixDevelopment submodules: DocProcessor,
+LLMOrchestrator, LLMProvider, VisionEngine</h4>
+<h4 id="step-4-run-catalogizer-full-qa-master-cycle-make-qa-all-with-all-60-banks">6.2.4
+Step 4: run Catalogizer Full-QA Master Cycle: make qa-all with all 60+
+banks</h4>
+<h4 id="step-5-verify-no-regressions-compare-results-to-baseline-206-pass-1-skip">6.2.5
+Step 5: verify no regressions: compare results to baseline 206 PASS / 1
+SKIP</h4>
+<h3 id="new-test-bank-creation">6.3 New Test Bank Creation</h3>
+<h4 id="create-bankscatalogizer-web-functional.yaml-cover-login-media-browsing-search-favorites-settings">6.3.1
+Create banks/catalogizer-web-functional.yaml: cover login, media
+browsing, search, favorites, settings</h4>
+<h4 id="create-bankscatalogizer-desktop-e2e.yaml-cover-tauri-app-launch-window-management-protocol-connections">6.3.2
+Create banks/catalogizer-desktop-e2e.yaml: cover Tauri app launch,
+window management, protocol connections</h4>
+<h4 id="create-bankscatalogizer-api-contract.yaml-cover-all-rest-endpoints-with-real-http-requests-and-response-validation">6.3.3
+Create banks/catalogizer-api-contract.yaml: cover all REST endpoints
+with real HTTP requests and response validation</h4>
+<h4 id="create-bankscatalogizer-android-tv.yaml-cover-android-tv-channel-browsing-playback-deep-links">6.3.4
+Create banks/catalogizer-android-tv.yaml: cover Android TV channel
+browsing, playback, deep links</h4>
+<h4 id="create-bankscatalogizer-translation-workflow.yaml-cover-subtitle-management-language-settings-cyrillicunicode-handling">6.3.5
+Create banks/catalogizer-translation-workflow.yaml: cover subtitle
+management, language settings, Cyrillic/Unicode handling</h4>
+<h3 id="client-app-validation">6.4 Client App Validation</h3>
+<h4 id="web-collection-manager-react-playwright-automation-with-responsive-breakpoints-dark-mode-real-time-websocket-updates">6.4.1
+Web (Collection-Manager-React): Playwright automation with responsive
+breakpoints, dark mode, real-time WebSocket updates</h4>
+<h4 id="desktop-tauri-window-capture-menu-interaction-protocol-connection-dialogs-offlineonline-transitions">6.4.2
+Desktop (Tauri): window capture, menu interaction, protocol connection
+dialogs, offline/online transitions</h4>
+<h4 id="android-kotlin-adb-based-navigation-media-playback-search-with-cyrillic-terms-favorites-sync">6.4.3
+Android (Kotlin): ADB-based navigation, media playback, search with
+Cyrillic terms, favorites sync</h4>
+<h4 id="api-go-contract-testing-with-real-http-calls-jwt-auth-flow-websocket-subscription-lifecycle">6.4.4
+API (Go): contract testing with real HTTP calls, JWT auth flow,
+WebSocket subscription lifecycle</h4>
+<h2 id="phase-6-anti-bluff-testing-framework-3500-words-3-tables">7.
+Phase 6: Anti-Bluff Testing Framework (~3500 words, 3 tables)</h2>
+<h3 id="anti-bluff-architecture">7.1 Anti-Bluff Architecture</h3>
+<h4 id="layer-1-protocol-probes-tcp-connect-real-request-real-response-not-just-tcp-open">7.1.1
+Layer 1 — Protocol probes: TCP connect + real request + real response
+(not just TCP-open)</h4>
+<h4 id="layer-2-functional-verification-execute-real-user-action-verify-real-outcome-not-just-absence-of-error">7.1.2
+Layer 2 — Functional verification: execute real user action, verify real
+outcome (not just absence of error)</h4>
+<h4 id="layer-3-visual-verification-screenshot-beforeafter-ssim-comparison-ocr-text-extraction-vision-llm-analysis">7.1.3
+Layer 3 — Visual verification: screenshot before/after, SSIM comparison,
+OCR text extraction, vision LLM analysis</h4>
+<h4 id="layer-4-destructive-validation-deliberately-break-the-feature-confirm-test-fails-restore-confirm-test-passes">7.1.4
+Layer 4 — Destructive validation: deliberately break the feature,
+confirm test fails; restore, confirm test passes</h4>
+<h3 id="anti-bluff-test-implementation">7.2 Anti-Bluff Test
+Implementation</h3>
+<h4 id="add-pkgantibluff-to-helixqa-validator-interface-probe-implementations-breaker-harness">7.2.1
+Add pkg/antibluff/ to HelixQA: Validator interface, Probe
+implementations, Breaker harness</h4>
+<h4 id="implement-serviceprobe-start-real-service-send-real-request-parse-real-response-validate-content">7.2.2
+Implement ServiceProbe: start real service, send real request, parse
+real response, validate content</h4>
+<h4 id="implement-visualprobe-capture-screenshot-run-template-matching-ocr-vision-llm-return-confidence-score">7.2.3
+Implement VisualProbe: capture screenshot, run template matching / OCR /
+vision LLM, return confidence score</h4>
+<h4 id="implement-breakerharness-intercept-service-calls-inject-failures-timeout-500-wrong-response-verify-detection">7.2.4
+Implement BreakerHarness: intercept service calls, inject failures
+(timeout, 500, wrong response), verify detection</h4>
+<h3 id="constitution-compliance-verification">7.3 Constitution
+Compliance Verification</h3>
+<h4 id="add-make-anti-bluff-target-runs-all-tests-with-deliberate-break-validation">7.3.1
+Add make anti-bluff target: runs all tests with deliberate-break
+validation</h4>
+<h4 id="add-challengesscriptsanti_bluff_challenge.sh-comprehensive-anti-bluff-validation-suite">7.3.2
+Add challenges/scripts/anti_bluff_challenge.sh: comprehensive anti-bluff
+validation suite</h4>
+<h4 id="add-to-run_all_challenges.sh-anti-bluff-phase-after-all-other-challenges-pass">7.3.3
+Add to run_all_challenges.sh: anti-bluff phase after all other
+challenges pass</h4>
+<h4 id="verification-criteria-if-any-test-passes-while-feature-is-deliberately-broken-the-test-is-non-conformant-and-blocks-release">7.3.4
+Verification criteria: if any test passes while feature is deliberately
+broken, the test is non-conformant and blocks release</h4>
+<h3 id="synthetic-user-workflows">7.4 Synthetic User Workflows</h3>
+<h4 id="workflow-1-onboarding-new-user-registration-login-first-media-scan-dashboard-view-all-clients">7.4.1
+Workflow 1 — Onboarding: new user registration → login → first media
+scan → dashboard view (all clients)</h4>
+<h4 id="workflow-2-media-management-browse-search-титаник-add-to-favorites-export-favorites-verify-file">7.4.2
+Workflow 2 — Media Management: browse → search “Титаник” → add to
+favorites → export favorites → verify file</h4>
+<h4 id="workflow-3-translation-open-settings-change-language-verify-ui-language-change-search-in-new-language">7.4.3
+Workflow 3 — Translation: open settings → change language → verify UI
+language change → search in new language</h4>
+<h4 id="workflow-4-protocol-resilience-disconnect-smb-verify-offline-indicator-reconnect-verify-auto-sync">7.4.4
+Workflow 4 — Protocol Resilience: disconnect SMB → verify offline
+indicator → reconnect → verify auto-sync</h4>
+<h4 id="each-workflow-must-have-visual-proof-screenshots-must-fail-if-any-step-is-broken-must-cover-all-5-client-types">7.4.5
+Each workflow: must have visual proof (screenshots), must fail if any
+step is broken, must cover all 5 client types</h4>
+<h2 id="phase-7-ai-driven-qa-session-orchestration-3000-words-2-tables-1-diagram">8.
+Phase 7: AI-Driven QA Session Orchestration (~3000 words, 2 tables, 1
+diagram)</h2>
+<h3 id="autonomous-session-architecture">8.1 Autonomous Session
+Architecture</h3>
+<h4 id="sessioncoordinator-orchestrates-4-phase-lifecycle-setup-doc-driven-verification-curiosity-driven-exploration-report-cleanup">8.1.1
+SessionCoordinator orchestrates 4-phase lifecycle: Setup → Doc-Driven
+Verification → Curiosity-Driven Exploration → Report &amp; Cleanup</h4>
+<h4 id="platformworker-per-platform-acquires-agent-from-agentpool-runs-analyzer-navigator-issuedetector">8.1.2
+PlatformWorker per platform: acquires agent from AgentPool, runs
+analyzer, navigator, issueDetector</h4>
+<h4 id="llm-selection-llmsverifier-scores-providers-picks-strongest-vision-model-across-available-hosts">8.1.3
+LLM selection: LLMsVerifier scores providers, picks strongest vision
+model across available hosts</h4>
+<h4 id="feature-map-building-docprocessor-reads-project-docs-builds-coverage-map-tracks-verified-vs-unverified-features">8.1.4
+Feature map building: DocProcessor reads project docs, builds coverage
+map, tracks verified vs unverified features</h4>
+<h3 id="heavy-qa-session-design">8.2 Heavy QA Session Design</h3>
+<h4 id="session-trigger-manual-make-qa-session-scheduled-cron-like-via-orchestrator-or-event-driven-post-deploy-hook">8.2.1
+Session trigger: manual (make qa-session), scheduled (cron-like via
+orchestrator), or event-driven (post-deploy hook)</h4>
+<h4 id="platform-parallelism-run-web-desktop-mobile-cli-tui-workers-concurrently-with-isolated-evidence-dirs">8.2.2
+Platform parallelism: run Web + Desktop + Mobile + CLI + TUI workers
+concurrently with isolated evidence dirs</h4>
+<h4 id="timeout-and-resource-limits-30-40-host-resources-per-session-gomaxprocs2-nice--n-19-2h-default-timeout">8.2.3
+Timeout and resource limits: 30-40% host resources per session
+(GOMAXPROCS=2, nice -n 19), 2h default timeout</h4>
+<h4 id="graceful-degradation-if-llm-provider-unavailable-curiosity-phase-skips-not-fakes-if-device-unavailable-platform-worker-skips">8.2.4
+Graceful degradation: if LLM provider unavailable, curiosity phase skips
+(not fakes); if device unavailable, platform worker skips</h4>
+<h3 id="report-generation-and-distribution">8.3 Report Generation and
+Distribution</h3>
+<h4 id="qa-report-markdown-html-json-with-platform-results-crashanr-counts-coverage-percentage-ticket-list">8.3.1
+QA report: markdown + HTML + JSON with platform results, crash/ANR
+counts, coverage percentage, ticket list</h4>
+<h4 id="video-evidence-per-platform-video-with-timeline-event-overlays-linked-to-tickets-and-screenshots">8.3.2
+Video evidence: per-platform video with timeline event overlays, linked
+to tickets and screenshots</h4>
+<h4 id="ticket-generation-markdown-tickets-with-evidence-paths-severity-reproduction-steps-llm-suggested-fixes">8.3.3
+Ticket generation: markdown tickets with evidence paths, severity,
+reproduction steps, LLM-suggested fixes</h4>
+<h4 id="dashboard-integration-challenges-dashboard-static-html-over-qa-results-with-passfail-trends">8.3.4
+Dashboard integration: challenges-dashboard static HTML over qa-results/
+with pass/fail trends</h4>
+<h3 id="presentational-screenshots-on-demand">8.4 Presentational
+Screenshots on Demand</h3>
+<h4 id="during-autonomous-session-sessionrecorder-captures-screenshots-at-every-step-indexes-by-platformtimestampstep-name">8.4.1
+During autonomous session: SessionRecorder captures screenshots at every
+step, indexes by platform/timestamp/step-name</h4>
+<h4 id="on-demand-api-get-apiv1qascreenshotsessionxplatformystepz-returns-specific-screenshot">8.4.2
+On-demand API: GET
+/api/v1/qa/screenshot?session=X&amp;platform=Y&amp;step=Z returns
+specific screenshot</h4>
+<h4 id="presentational-export-compile-screenshots-into-annotated-gallery-with-captions-timestamps-and-passfail-status">8.4.3
+Presentational export: compile screenshots into annotated gallery with
+captions, timestamps, and pass/fail status</h4>
+<h4 id="slide-deck-generation-automated-powerpointkeynote-export-from-qa-session-evidence-for-stakeholder-presentations">8.4.4
+Slide deck generation: automated PowerPoint/Keynote export from QA
+session evidence for stakeholder presentations</h4>
+<h2 id="phase-8-enterprise-ux-validation-2500-words-2-tables">9. Phase
+8: Enterprise UX Validation (~2500 words, 2 tables)</h2>
+<h3 id="translation-tool-ux-matrix">9.1 Translation Tool UX Matrix</h3>
+<h4 id="web-ux-language-selector-dropdown-real-time-translation-preview-provider-selection-model-quality-indicator">9.1.1
+Web UX: language selector dropdown, real-time translation preview,
+provider selection, model quality indicator</h4>
+<h4 id="desktop-ux-tauri-window-with-native-os-integration-menu-shortcuts-tray-icon-status-offline-mode">9.1.2
+Desktop UX: Tauri window with native OS integration, menu shortcuts,
+tray icon status, offline mode</h4>
+<h4 id="mobile-ux-touch-optimized-interface-voice-input-camera-ocr-push-notifications-for-long-translations">9.1.3
+Mobile UX: touch-optimized interface, voice input, camera OCR, push
+notifications for long translations</h4>
+<h4 id="cli-ux-batch-translation-mode-progress-bars-provider-fallback-chains-output-formatting-jsoncsvtxt">9.1.4
+CLI UX: batch translation mode, progress bars, provider fallback chains,
+output formatting (json/csv/txt)</h4>
+<h4 id="tui-ux-interactive-provider-selection-real-time-streaming-display-keyboard-shortcuts-color-coded-quality-scores">9.1.5
+TUI UX: interactive provider selection, real-time streaming display,
+keyboard shortcuts, color-coded quality scores</h4>
+<h3 id="provider-model-coverage">9.2 Provider &amp; Model Coverage</h3>
+<h4 id="tier-1-providers-native-anthropic-openai-google-gemini-openrouter-deepseek-groq-ollama-astica-kimi-qwen-stepfun-nvidia-xai-mistral">9.2.1
+Tier 1 providers (native): Anthropic, OpenAI, Google Gemini, OpenRouter,
+DeepSeek, Groq, Ollama, Astica, Kimi, Qwen, Stepfun, NVIDIA, xAI,
+Mistral</h4>
+<h4 id="tier-2-providers-openai-compatible-30-providers-via-unified-adapter">9.2.2
+Tier 2 providers (OpenAI-compatible): 30+ providers via unified
+adapter</h4>
+<h4 id="vision-capable-providers-12-with-score-based-ranking-and-adaptive-routing">9.2.3
+Vision-capable providers: 12+ with score-based ranking and adaptive
+routing</h4>
+<h4 id="qa-must-verify-every-provider-returns-real-translation-every-model-handles-cyrillicunicode-fallback-chains-work-under-failure">9.2.4
+QA must verify: every provider returns real translation, every model
+handles Cyrillic/Unicode, fallback chains work under failure</h4>
+<h3 id="enterprise-quality-requirements">9.3 Enterprise Quality
+Requirements</h3>
+<h4 id="multi-tenancy-isolated-sessions-per-tenant-provider-quotas-usage-tracking">9.3.1
+Multi-tenancy: isolated sessions, per-tenant provider quotas, usage
+tracking</h4>
+<h4 id="reliability-99.9-uptime-target-circuit-breakers-for-all-providers-automatic-failover">9.3.2
+Reliability: 99.9% uptime target, circuit breakers for all providers,
+automatic failover</h4>
+<h4 id="cost-control-per-request-billing-budget-caps-provider-cost-optimization-caching">9.3.3
+Cost control: per-request billing, budget caps, provider cost
+optimization, caching</h4>
+<h4 id="auditability-full-requestresponse-logging-screenshot-evidence-compliance-reporting">9.3.4
+Auditability: full request/response logging, screenshot evidence,
+compliance reporting</h4>
+<h2 id="phase-9-build-automation-integration-2000-words-2-tables">10.
+Phase 9: Build &amp; Automation Integration (~2000 words, 2 tables)</h2>
+<h3 id="makefile-targets">10.1 Makefile Targets</h3>
+<h4 id="make-qa-all-run-unit-integration-e2e-screenshot-verify-anti-bluff-challenges-report">10.1.1
+make qa-all: run unit → integration → e2e → screenshot-verify →
+anti-bluff → challenges → report</h4>
+<h4 id="make-qa-session-run-full-autonomous-qa-session-with-all-platforms">10.1.2
+make qa-session: run full autonomous QA session with all platforms</h4>
+<h4 id="make-qa-anti-bluff-run-deliberate-break-validation-suite">10.1.3
+make qa-anti-bluff: run deliberate-break validation suite</h4>
+<h4 id="make-qa-screenshot-capture-screenshots-for-all-client-apps-on-demand">10.1.4
+make qa-screenshot: capture screenshots for all client apps on
+demand</h4>
+<h4 id="make-qa-report-generate-consolidated-qa-report-from-latest-session-results">10.1.5
+make qa-report: generate consolidated QA report from latest session
+results</h4>
+<h3 id="session-scripts">10.2 Session Scripts</h3>
+<h4 id="scriptsrun_full_qa.sh-orchestrates-complete-qa-cycle-with-resource-limits-and-timeout">10.2.1
+scripts/run_full_qa.sh: orchestrates complete QA cycle with resource
+limits and timeout</h4>
+<h4 id="scriptsrun_nightly_qa.sh-scheduled-heavy-qa-session-with-full-platform-coverage">10.2.2
+scripts/run_nightly_qa.sh: scheduled heavy QA session with full platform
+coverage</h4>
+<h4 id="scriptsverify_screenshots.sh-validates-all-screenshots-are-non-empty-non-uniform-contain-expected-ui-elements">10.2.3
+scripts/verify_screenshots.sh: validates all screenshots are non-empty,
+non-uniform, contain expected UI elements</h4>
+<h4 id="scriptsrun_all_challenges.sh-extended-to-include-anti-bluff-and-screenshot-challenges">10.2.4
+scripts/run_all_challenges.sh: extended to include anti-bluff and
+screenshot challenges</h4>
+<h3 id="no-cicd-compliance">10.3 No-CI/CD Compliance</h3>
+<h4 id="all-automation-via-makefile-and-shell-scripts-per-constitutional-mandate-no-.githubworkflows">10.3.1
+All automation via Makefile and shell scripts per constitutional mandate
+(NO .github/workflows/)</h4>
+<h4 id="manual-trigger-model-operator-runs-make-qa-all-after-significant-changes">10.3.2
+Manual trigger model: operator runs make qa-all after significant
+changes</h4>
+<h4 id="pre-commit-hooks-prohibited-use-local-verification-via-scriptspre-validate.sh-instead">10.3.3
+Pre-commit hooks prohibited; use local verification via
+scripts/pre-validate.sh instead</h4>
+<h4 id="build-orchestrator-make-build-.bin-owns-container-lifecycle-no-manual-docker-commands">10.3.4
+Build orchestrator (make build → ./bin/<app>) owns container lifecycle;
+no manual docker commands</h4>
+<h2 id="phase-10-monitoring-reporting-compliance-2000-words-2-tables">11.
+Phase 10: Monitoring, Reporting &amp; Compliance (~2000 words, 2
+tables)</h2>
+<h3 id="qa-results-dashboard">11.1 QA Results Dashboard</h3>
+<h4 id="static-html-dashboard-challenges-dashboard-over-qa-results-with-trend-charts-platform-coverage-issue-severity">11.1.1
+Static HTML dashboard: challenges-dashboard over qa-results/ with trend
+charts, platform coverage, issue severity</h4>
+<h4 id="ticket-viewer-static-html-renderer-for-ocu-tickets-with-inline-evidence-screenshots">11.1.2
+Ticket viewer: static HTML renderer for OCU tickets with inline evidence
+screenshots</h4>
+<h4 id="coverage-tracker-per-feature-per-platform-per-test-type-coverage-percentages-with-historical-trends">11.1.3
+Coverage tracker: per-feature, per-platform, per-test-type coverage
+percentages with historical trends</h4>
+<h3 id="compliance-reporting">11.2 Compliance Reporting</h3>
+<h4 id="anti-bluff-compliance-report-per-test-verification-method-deliberate-break-test-results-false-positive-rate">11.2.1
+Anti-bluff compliance report: per-test verification method,
+deliberate-break test results, false-positive rate</h4>
+<h4 id="governance-compliance-report-submodule-constitution-verification-cascade-status-missing-mandates">11.2.2
+Governance compliance report: submodule constitution verification,
+cascade status, missing mandates</h4>
+<h4 id="release-gate-report-all-tests-pass-all-challenges-pass-all-screenshots-verified-all-anti-bluff-checks-pass">11.2.3
+Release gate report: all tests pass + all challenges pass + all
+screenshots verified + all anti-bluff checks pass</h4>
+<h3 id="continuous-improvement">11.3 Continuous Improvement</h3>
+<h4 id="feedback-loop-failed-tests-ticket-generation-fix-new-challenge-regression-guard">11.3.1
+Feedback loop: failed tests → ticket generation → fix → new Challenge →
+regression guard</h4>
+<h4 id="test-bank-expansion-add-new-test-cases-for-every-bug-found-every-feature-added-every-provider-integrated">11.3.2
+Test bank expansion: add new test cases for every bug found, every
+feature added, every provider integrated</h4>
+<h4 id="benchmark-baselines-track-test-execution-time-screenshot-capture-latency-llm-response-time-per-provider">11.3.3
+Benchmark baselines: track test execution time, screenshot capture
+latency, LLM response time per provider</h4>
+<h4 id="monthly-review-analyze-qa-trends-coverage-gaps-most-fragile-components-highest-impact-improvements">11.3.4
+Monthly review: analyze QA trends, coverage gaps, most fragile
+components, highest-impact improvements</h4>
+<h1 id="references">References</h1>
+<h2 id="research-artifacts">Research Artifacts</h2>
+<ul>
+<li><strong>Type</strong>: Deep research outputs</li>
+<li><strong>Description</strong>: Six parallel research analyses of
+HelixCode, HelixQA, Catalogizer, governance, UX, and screenshot/testing
+strategy</li>
+<li><strong>Path</strong>: /mnt/agents/output/research/</li>
+</ul>
+<h2 id="source-repositories">Source Repositories</h2>
+<ul>
+<li><strong>HelixCode</strong>:
+https://github.com/HelixDevelopment/HelixCode</li>
+<li><strong>HelixQA</strong>:
+https://github.com/HelixDevelopment/HelixQA</li>
+<li><strong>Catalogizer</strong>:
+https://github.com/vasic-digital/Catalogizer</li>
+</ul>
+</body>
+</html>

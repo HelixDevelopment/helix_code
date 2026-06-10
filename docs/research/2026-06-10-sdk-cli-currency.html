@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-sdk-cli-currency</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-sdk-cli-currency</h1>
+</header>
+<h1 id="sdk-cli-agent-currency-research-2026-06-10">SDK &amp; CLI-Agent
+Currency Research — 2026-06-10</h1>
+<p><strong>Scope:</strong> §11.4.99 latest-source deep-web research for
+HelixCode. Two parts: PART A = Go provider/infra SDK currency (SP2 P2.3
+SDK-currency); PART B = non-interactive/scriptable invocation for
+bridged CLI agents (SP4 P4.3).</p>
+<p><strong>Method:</strong> Every version/flag below was fetched from
+the OFFICIAL source (GitHub releases, pkg.go.dev
+<code>?tab=versions</code>, vendor docs) on 2026-06-10 — never training
+memory. Honest negative findings are recorded where a page was
+unreachable. Full URL list in the
+<code>## Sources verified 2026-06-10</code> footer.</p>
+<p><strong>HelixCode current pins (read 2026-06-10):</strong> -
+<code>helix_code/go.mod</code> — aws-sdk-go-v2 v1.32.7, config v1.28.7,
+credentials v1.17.48, service/bedrockruntime v1.23.1, azcore v1.16.0,
+azidentity v1.8.0, gin v1.11.0, smacker/go-tree-sitter
+<code>v0.0.0-20240827094217-dd81d9e9be82</code>, getzep/zep-go/v3
+v3.10.0. - <code>submodules/helix_agent/go.mod</code> — gin v1.12.0,
+smacker/go-tree-sitter <code>v0.0.0-20240827094217-dd81d9e9be82</code>.
+- (<code>helix_agent/go.mod</code> at repo root does not exist; the
+submodule lives at <code>submodules/helix_agent/</code>.) - No vendor
+SDK for OpenAI/Anthropic/Gemini is pinned — HelixCode hand-rolls HTTP to
+these providers (no <code>openai/openai-go</code>,
+<code>anthropics/anthropic-sdk-go</code>, or
+<code>google.golang.org/genai</code> in either go.mod).</p>
+<hr />
+<h2 id="part-a-go-providerinfra-sdk-latest-versions">PART A — Go
+provider/infra SDK latest versions</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>HelixCode pin</th>
+<th>LATEST (2026-06-10)</th>
+<th>Released</th>
+<th>Skew</th>
+<th>Breaking major?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>github.com/aws/aws-sdk-go-v2</code> (core)</td>
+<td>v1.32.7</td>
+<td><strong>v1.42.0</strong></td>
+<td>2026-06-08</td>
+<td>10 minor behind</td>
+<td>No — same v1 line; v1.42.0 adds a preview standard-retry change
+behind <code>AWS_NEW_RETRIES_2026</code> flag (opt-in,
+non-breaking)</td>
+</tr>
+<tr>
+<td><code>.../service/bedrockruntime</code></td>
+<td>v1.23.1</td>
+<td><strong>v1.53.5</strong></td>
+<td>2026-06-08</td>
+<td>~30 minor behind</td>
+<td>No — same v1 line. <strong>Most stale provider SDK.</strong></td>
+</tr>
+<tr>
+<td><code>github.com/Azure/azure-sdk-for-go/sdk/azcore</code></td>
+<td>v1.16.0</td>
+<td><strong>v1.22.0</strong></td>
+<td>2026-06-04</td>
+<td>6 minor behind</td>
+<td>No — same v1 line</td>
+</tr>
+<tr>
+<td><code>github.com/Azure/azure-sdk-for-go/sdk/azidentity</code></td>
+<td>v1.8.0</td>
+<td><strong>v1.13.1</strong> (stable)</td>
+<td>2025-11-10</td>
+<td>5 minor behind</td>
+<td>No — same v1 line. v1.14.0 only in beta (v1.14.0-beta.3,
+2026-02-09). <strong>Security note: GO-2024-2918 (Azure Identity EoP)
+affects old azidentity — upgrading to the latest patched release is
+advisable.</strong></td>
+</tr>
+<tr>
+<td><code>github.com/gin-gonic/gin</code></td>
+<td>v1.11.0 (helix_code) / v1.12.0 (helix_agent)</td>
+<td><strong>v1.12.0</strong></td>
+<td>2026-02-28</td>
+<td>helix_code 1 minor behind; helix_agent already current</td>
+<td>No — same v1 line. <strong>Skew resolution: bump helix_code v1.11.0
+→ v1.12.0 to match helix_agent; v1.12.0 adds Protocol Buffers support,
+color latency logging, bson rendering — additive.</strong></td>
+</tr>
+<tr>
+<td><code>github.com/smacker/go-tree-sitter</code></td>
+<td><code>v0.0.0-20240827094217-dd81d9e9be82</code> (2024-08-27
+commit)</td>
+<td><strong>same commit is still HEAD</strong> (latest master commit
+dd81d9e, 2024-08-27)</td>
+<td>2024-08-27</td>
+<td>At HEAD, but repo is effectively dormant (no commits since
+Aug-2024)</td>
+<td>n/a — see migration note below</td>
+</tr>
+<tr>
+<td><code>github.com/getzep/zep-go/v3</code></td>
+<td>v3.10.0</td>
+<td><strong>v3.23.0</strong></td>
+<td>2026-06-04</td>
+<td>13 minor behind</td>
+<td>No — same v3 line</td>
+</tr>
+<tr>
+<td><code>github.com/openai/openai-go</code></td>
+<td>not used (hand-rolled HTTP)</td>
+<td><strong>v1.12.0</strong></td>
+<td>2025-07-30</td>
+<td>n/a</td>
+<td>Would be a NEW dependency; still v1.x, no v2/v3</td>
+</tr>
+<tr>
+<td><code>github.com/anthropics/anthropic-sdk-go</code></td>
+<td>not used (hand-rolled HTTP)</td>
+<td><strong>v1.50.1</strong></td>
+<td>2026-06-09</td>
+<td>n/a</td>
+<td>Would be a NEW dependency; v1.50.x adds managed-agent deployment
+APIs</td>
+</tr>
+<tr>
+<td><code>google.golang.org/genai</code> (Gemini)</td>
+<td>not used (hand-rolled HTTP)</td>
+<td><strong>v1.59.0</strong></td>
+<td>2026-06-03</td>
+<td>n/a</td>
+<td>Would be a NEW dependency; v1.59.0 is the modern unified Google
+GenAI Go SDK (supersedes the older <code>generative-ai-go</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="go-tree-sitter-migration-note-negativestructural-finding">go-tree-sitter
+migration note (negative/structural finding)</h3>
+<p><code>smacker/go-tree-sitter</code> is pinned at its HEAD commit but
+the repo has had <strong>no commits since 2024-08-27</strong> (verified
+on the commits/master page). The OFFICIAL binding
+<code>github.com/tree-sitter/go-tree-sitter</code> (in the upstream
+<code>tree-sitter</code> org) is actively released — latest tag
+<strong>v0.25.0 (2025-02-02)</strong>. The official README does NOT
+contain explicit “supersedes smacker/…” language (honest negative
+finding — I did not find a vendor statement of supersession), so the
+migration is a judgment call, not a vendor-mandated one. If HelixCode
+wants a maintained binding it would move smacker →
+<code>tree-sitter/go-tree-sitter</code> v0.25.0; note that is a
+different import path + API (Close-on-allocation requirement), so it is
+real migration work, not a version bump.</p>
+<hr />
+<h2 id="part-b-non-interactive-scriptable-invocation-for-bridge-cli-agents">PART
+B — Non-interactive / scriptable invocation for bridge CLI agents</h2>
+<p>Confirmed CURRENT (2026-06-10) command forms. “JSON output” column =
+does the agent emit machine-readable JSON in headless mode today.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>CLI agent</th>
+<th>Single non-interactive prompt</th>
+<th>JSON / machine-readable output</th>
+<th>List models</th>
+<th>Auth / env</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Claude Code</strong> (<code>claude</code>)</td>
+<td><code>claude -p &quot;&lt;prompt&gt;&quot;</code>
+(<code>--print</code>/<code>-p</code>)</td>
+<td><strong>Yes</strong> — <code>--output-format json</code> (also
+<code>text</code>, <code>stream-json</code>);
+<code>--input-format text\|stream-json</code>;
+<code>--json-schema &#39;&lt;schema&gt;&#39;</code> for validated structured
+output</td>
+<td>No dedicated <code>models</code> list command; set with
+<code>--model sonnet\|opus\|haiku\|fable\|&lt;full-name&gt;</code>;
+<code>--fallback-model</code> chain</td>
+<td><code>ANTHROPIC_API_KEY</code> or Claude subscription;
+<code>claude setup-token</code> mints a long-lived OAuth token for
+CI</td>
+</tr>
+<tr>
+<td><strong>Qwen Code</strong> (<code>qwen</code>)</td>
+<td><code>qwen -p &quot;&lt;prompt&gt;&quot;</code>
+(<code>-p</code>/<code>--prompt</code>, “headless mode”)</td>
+<td><strong>Yes</strong> —
+<code>--output-format text\|json\|stream-json</code>;
+<code>--input-format text\|stream-json</code>;
+<code>--include-partial-messages</code></td>
+<td><strong>No</strong> CLI flag to list models (config-file /
+interactive <code>/model</code> only)</td>
+<td>API-key / OAuth via <code>qwen auth</code> subcommands
+(<code>qwen auth api-key</code>, <code>qwen auth status</code>);
+<code>-y</code>/<code>--yolo</code> auto-approve</td>
+</tr>
+<tr>
+<td><strong>OpenCode</strong> (<code>opencode</code>)
+incl. <strong>Zen</strong></td>
+<td><code>opencode run &quot;&lt;prompt&gt;&quot;</code> (args or stdin);
+<code>--attach http://host:port</code> to reuse a server</td>
+<td><strong>Yes</strong> — <code>opencode run --format json</code> (raw
+JSON events; default = formatted)</td>
+<td><strong>Yes</strong> — <code>opencode models [provider]</code>
+(<code>--refresh</code>, <code>--verbose</code>); for Zen also
+<code>GET https://opencode.ai/zen/v1/models</code></td>
+<td>Zen: sign in to OpenCode Zen, copy API key, <code>/connect</code> →
+OpenCode Zen → paste key. <strong>Zen model id format =
+<code>opencode/&lt;model-id&gt;</code></strong>
+(e.g. <code>opencode/gpt-5.5</code>); Zen is a curated 40+ model gateway
+(GPT/Claude/Gemini/Qwen/DeepSeek/…)</td>
+</tr>
+<tr>
+<td><strong>Gemini CLI</strong> (<code>gemini</code>)</td>
+<td><code>gemini -p &quot;&lt;prompt&gt;&quot;</code>
+(<code>-p</code>/<code>--prompt</code>; headless also auto-triggers in
+non-TTY)</td>
+<td><strong>Yes</strong> — <code>--output-format text\|json</code>; JSON
+is a single object with <code>response</code> (string),
+<code>stats</code> (token/latency), <code>error</code> (optional)</td>
+<td>No documented list-models flag (honest negative finding); set with
+<code>-m</code>/<code>--model</code></td>
+<td>Gemini API key / Google auth env; standard Gemini CLI config</td>
+</tr>
+<tr>
+<td><strong>Crush</strong> (<code>crush</code>)</td>
+<td><code>crush run &quot;&lt;prompt&gt;&quot;</code> (args or piped stdin;
+single-turn → stdout)</td>
+<td><strong>No</strong> dedicated JSON output format found (honest
+negative finding — README + run docs show no
+<code>--format json</code>); <code>--quiet</code> suppresses spinner for
+clean stdout</td>
+<td>Models via config file (<code>.crush.json</code> /
+<code>crush.json</code> / <code>~/.config/crush/crush.json</code>);
+<code>crush update-providers</code> refreshes provider list; no
+<code>models</code> list flag found</td>
+<td>Provider keys via config/env; <code>--yolo</code> auto-approves
+tools (non-interactive); global flags <code>--debug</code>,
+<code>--cwd</code>, <code>--data-dir</code></td>
+</tr>
+<tr>
+<td><strong>Codex CLI</strong> (<code>codex</code>)</td>
+<td><code>codex exec &quot;&lt;prompt&gt;&quot;</code> (alias
+<code>codex e</code>)</td>
+<td><strong>Yes</strong> — <code>--json</code> /
+<code>--experimental-json</code> (newline-delimited JSON events);
+<code>-o</code>/<code>--output-last-message &lt;path&gt;</code> writes
+final message to file</td>
+<td>No documented list-models flag; set with
+<code>-m</code>/<code>--model</code></td>
+<td>OpenAI auth;
+<code>--sandbox read-only\|workspace-write\|danger-full-access</code>;
+<code>--ephemeral</code> for no session files</td>
+</tr>
+<tr>
+<td><strong>Goose</strong> (<code>goose</code>)</td>
+<td><code>goose run -t &quot;&lt;prompt&gt;&quot;</code>
+(<code>-t</code>/<code>--text</code>;
+<code>-i</code>/<code>--instructions &lt;file\|-&gt;</code>;
+<code>--no-session</code>)</td>
+<td><strong>Yes</strong> —
+<code>--output-format text\|json\|stream-json</code></td>
+<td>No CLI list-models flag (honest negative finding); set with
+<code>--provider</code> + <code>--model</code></td>
+<td>Provider/model via env or
+<code>--provider</code>/<code>--model</code> flags</td>
+</tr>
+<tr>
+<td><strong>GitHub Copilot CLI</strong> (<code>copilot</code>)</td>
+<td><code>copilot -p &quot;&lt;prompt&gt;&quot;</code>
+(<code>-p</code>/<code>--prompt</code>, non-interactive)</td>
+<td><strong>No</strong> JSON format flag found (honest negative
+finding); <code>-s</code>/<code>--silent</code> strips stats/decoration
+→ clean text for piping</td>
+<td><strong>No</strong> list flag; model strings are shown in the
+<code>--model</code> option description under <code>copilot help</code>;
+set with <code>--model gpt-5.2\|claude-sonnet-4.6\|…</code></td>
+<td>GitHub auth; <code>--no-ask-user</code> prevents clarifying-question
+pauses; <code>--allow-all-tools</code> for unattended runs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="line-summary">12-line summary</h2>
+<ol type="1">
+<li><strong>Most-stale SDK (priority #1):
+<code>service/bedrockruntime</code> v1.23.1 → v1.53.5</strong> — ~30
+minor versions behind; same v1 line, non-breaking.</li>
+<li><strong>Priority #2: <code>getzep/zep-go/v3</code> v3.10.0 →
+v3.23.0</strong> — 13 minor behind, same v3 line.</li>
+<li><strong>Priority #3: <code>aws-sdk-go-v2</code> core v1.32.7 →
+v1.42.0</strong> (+ config/credentials siblings) — 10 minor behind; new
+retry behavior is opt-in behind <code>AWS_NEW_RETRIES_2026</code>.</li>
+<li><strong>Priority #4: <code>azidentity</code> v1.8.0 →
+v1.13.1</strong> — 5 minor behind AND carries security relevance
+(GO-2024-2918 EoP on old releases); stay on stable, v1.14.0 is
+beta-only.</li>
+<li><strong>Priority #5: <code>azcore</code> v1.16.0 → v1.22.0</strong>
+— 6 minor behind, non-breaking.</li>
+<li><strong>gin skew fix: bump helix_code v1.11.0 → v1.12.0</strong> to
+match helix_agent (already on v1.12.0); additive features only.</li>
+<li><strong>All Part-A bumps are same-major (no breaking major bump
+required)</strong> for currently-pinned deps.</li>
+<li><strong>go-tree-sitter:</strong> pinned at smacker HEAD but that
+repo is dormant since Aug-2024; maintained path is
+<code>tree-sitter/go-tree-sitter</code> v0.25.0 — a real migration
+(different import path/API), not a version bump; no vendor supersession
+statement found.</li>
+<li><strong>Vendor SDKs HelixCode does NOT use (hand-rolled
+HTTP):</strong> openai-go v1.12.0, anthropic-sdk-go v1.50.1,
+google.golang.org/genai v1.59.0 — adopting any is net-new dependency
+work, all on v1.x.</li>
+<li><strong>CLI agents with CONFIRMED non-interactive JSON output
+today:</strong> Claude Code (<code>--output-format json</code>), Qwen
+Code (<code>--output-format json</code>), OpenCode
+(<code>run --format json</code>), Gemini CLI
+(<code>--output-format json</code>), Codex CLI
+(<code>exec --json</code>), Goose
+(<code>--output-format json</code>).</li>
+<li><strong>CLI agents WITHOUT a JSON output format (text-only, use
+<code>-s</code>/<code>--quiet</code> for clean stdout):</strong> GitHub
+Copilot CLI (<code>-p</code> + <code>-s</code>) and Crush
+(<code>run</code> + <code>--quiet</code>) — honest negative finding from
+their official docs.</li>
+<li><strong>OpenCode/Zen specifics for the bridge:</strong> Zen is the
+only agent with a first-class machine model list
+(<code>opencode models</code> + <code>GET /zen/v1/models</code>); Zen
+model ids use the <code>opencode/&lt;model-id&gt;</code> format and
+require an OpenCode Zen API key via <code>/connect</code>.</li>
+</ol>
+<hr />
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<p>PART A (SDK versions): -
+https://github.com/aws/aws-sdk-go-v2/releases -
+https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/bedrockruntime?tab=versions
+-
+https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/azcore?tab=versions
+-
+https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/azidentity?tab=versions
+- https://github.com/gin-gonic/gin/releases -
+https://github.com/smacker/go-tree-sitter/commits/master -
+https://github.com/tree-sitter/go-tree-sitter -
+https://pkg.go.dev/github.com/tree-sitter/go-tree-sitter?tab=versions -
+https://pkg.go.dev/google.golang.org/genai?tab=versions -
+https://github.com/getzep/zep-go/releases -
+https://pkg.go.dev/github.com/getzep/zep-go/v3?tab=versions -
+https://pkg.go.dev/github.com/openai/openai-go?tab=versions -
+https://pkg.go.dev/github.com/anthropics/anthropic-sdk-go?tab=versions</p>
+<p>PART B (CLI agents): - https://code.claude.com/docs/en/cli-reference
+(redirect from
+https://docs.claude.com/en/docs/claude-code/cli-reference) -
+https://qwenlm.github.io/qwen-code-docs/en/users/features/headless/ -
+https://opencode.ai/docs/cli/ - https://opencode.ai/docs/zen/ -
+https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/headless.md
+- https://geminicli.com/docs/cli/headless/ (referenced) -
+https://github.com/charmbracelet/crush -
+https://deepwiki.com/charmbracelet/crush/2.2-cli-usage (referenced for
+<code>crush run</code> flags; mintlify.com/charmbracelet/crush/cli/run
+returned HTTP 410 Gone) -
+https://developers.openai.com/codex/cli/reference -
+https://goose-docs.ai/docs/guides/goose-cli-commands/ -
+https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference
+-
+https://docs.github.com/en/copilot/how-tos/copilot-cli/automate-copilot-cli/run-cli-programmatically</p>
+<p>Unreachable / negative-finding pages (recorded honestly): -
+https://docs.claude.com/en/docs/claude-code/cli-reference — 301 →
+resolved at code.claude.com. -
+https://qwenlm.github.io/qwen-code-docs/en/cli/ , …/cli/configuration/ ,
+…/cli/headless/ — 404; correct path is
+<code>/en/users/features/headless/</code>. -
+https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/configuration.md
+and google-gemini.github.io …/configuration.html — 404; resolved via
+<code>docs/cli/headless.md</code>. -
+https://www.mintlify.com/charmbracelet/crush/cli/run — HTTP 410 Gone;
+Crush JSON-output absence confirmed from README + DeepWiki CLI-usage
+page (negative finding). -
+https://block.github.io/goose/docs/guides/goose-cli-commands/ — 404;
+resolved via goose-docs.ai.</p>
+</body>
+</html>

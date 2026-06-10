@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ux_enterprise_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ux_enterprise_analysis</h1>
+</header>
+<h1 id="enterprise-ux-translation-tool-analysis-helixqa-catalogizer-ecosystem">Enterprise
+UX &amp; Translation Tool Analysis — HelixQA / Catalogizer
+Ecosystem</h1>
+<blockquote>
+<p><strong>Analysis Date:</strong> 2026-05-01 <strong>System Under
+Analysis:</strong> HelixQA Autonomous QA Platform + Catalogizer Media
+Management System <strong>Scope:</strong> Translation capabilities, LLM
+provider ecosystem, multi-platform UX, enterprise QA validation</p>
+</blockquote>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This analysis examines the <strong>HelixQA</strong> autonomous QA
+platform and its primary test target <strong>Catalogizer</strong> to
+understand:</p>
+<ol type="1">
+<li><p><strong>What “translation” means in this ecosystem</strong> — The
+codebase contains multiple translation-related concepts that must be
+disambiguated:</p>
+<ul>
+<li><strong>Human Language Translation / Localization (i18n)</strong>:
+Features within Catalogizer (subtitle management, language settings,
+Cyrillic/Unicode support) that HelixQA validates</li>
+<li><strong>Accessibility Role Translation</strong>:
+AT-SPI/UiAutomator/UIA role codes → normalized ARIA vocabulary
+(cross-platform UI tree normalization)</li>
+<li><strong>Error Message Translation</strong>: Low-level driver errors
+→ AI-friendly natural language (for LLM navigator consumption)</li>
+<li><strong>Action Translation</strong>: Canonical coordinate-grounded
+actions → platform-specific primitives (tap, click, key press)</li>
+<li><strong>Architecture Translation</strong>: Implicit code structure →
+explicit diagrams/models (SAR - Software Architecture Recovery)</li>
+<li><strong>OCR Text Extraction + Language Detection</strong>:
+Tesseract-based text extraction with 10+ script detection</li>
+</ul></li>
+<li><p><strong>LLM Provider Ecosystem</strong>: 40+ supported providers
+with adaptive routing, fallback chains, cost tracking, and vision
+capability detection</p></li>
+<li><p><strong>Multi-Platform UX Matrix</strong>: Web, Desktop
+(Windows/macOS/Linux), Mobile (Android/iOS/Android TV), CLI, TUI — each
+with distinct interaction patterns and QA validation
+requirements</p></li>
+</ol>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-critical-finding-what-translation-actually-means">Critical
+Finding: What “Translation” Actually Means</a></li>
+<li><a href="#2-catalogizer-translation--localization-features">Catalogizer
+Translation &amp; Localization Features</a></li>
+<li><a href="#3-supported-llm-providers--models">Supported LLM Providers
+&amp; Models</a></li>
+<li><a href="#4-client-app-ux-matrix">Client App UX Matrix</a></li>
+<li><a href="#5-enterprise-grade-requirements">Enterprise Grade
+Requirements</a></li>
+<li><a href="#6-qa-session-workflows-for-translation">QA Session
+Workflows for Translation</a></li>
+<li><a href="#7-appendix-complete-provider-registry">Appendix: Complete
+Provider Registry</a></li>
+</ol>
+<hr />
+<h2 id="critical-finding-what-translation-actually-means">1. Critical
+Finding: What “Translation” Actually Means</h2>
+<h3 id="the-core-misconception">1.1 The Core Misconception</h3>
+<p><strong>HelixQA is NOT a human-language translation tool.</strong> It
+is an autonomous QA system that TESTS applications (like Catalogizer)
+which may have translation/localization features. The phrase “enterprise
+grade cutting-edge professional translation tool” must be understood in
+context:</p>
+<ul>
+<li>HelixQA uses <strong>40+ LLM providers</strong> for <strong>test
+planning, screenshot analysis, error diagnosis, and autonomous
+navigation</strong></li>
+<li>These LLMs <strong>can</strong> translate text incidentally (as
+general-purpose models), but translation is not a first-class
+feature</li>
+<li>HelixQA <strong>tests</strong> translation/i18n features in target
+applications through OCR, vision analysis, and functional test
+cases</li>
+</ul>
+<h3 id="five-types-of-translation-in-the-codebase">1.2 Five Types of
+“Translation” in the Codebase</h3>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 25%" />
+<col style="width: 23%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Type</th>
+<th>Location</th>
+<th>Purpose</th>
+<th>User-Facing?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Accessibility Role Translation</strong></td>
+<td><code>pkg/nexus/observe/axtree/</code></td>
+<td>AT-SPI codes → ARIA roles, UiAutomator classes → ARIA roles, UIA
+patterns → ARIA roles</td>
+<td>No — internal LLM consumption</td>
+</tr>
+<tr>
+<td><strong>Error Message Translation</strong></td>
+<td><code>pkg/nexus/browser/engine.go</code></td>
+<td>“no such element” → “not on the page” (AI-friendly)</td>
+<td>No — internal LLM consumption</td>
+</tr>
+<tr>
+<td><strong>Action Translation</strong></td>
+<td><code>pkg/nexus/coordinate/actions.go</code></td>
+<td>Canonical actions → platform primitives (tap/click/key)</td>
+<td>No — internal execution</td>
+</tr>
+<tr>
+<td><strong>Architecture Translation</strong></td>
+<td><code>docs/upgrade.md</code></td>
+<td>Code → Mermaid diagrams / knowledge graphs</td>
+<td>No — documentation generation</td>
+</tr>
+<tr>
+<td><strong>OCR + Language Detection</strong></td>
+<td><code>pkg/vision/text/tesseract.go</code></td>
+<td>Image → text + detected language (10 scripts)</td>
+<td>Yes — vision QA evidence</td>
+</tr>
+</tbody>
+</table>
+<h3 id="human-language-features-actual-translationi18n">1.3 Human
+Language Features (Actual Translation/i18n)</h3>
+<p>These exist in <strong>Catalogizer</strong> (the app being tested)
+and are validated by HelixQA:</p>
+<ul>
+<li><strong>Subtitle Management</strong>: <code>/subtitles</code> page,
+subtitle search, language selection, provider integration</li>
+<li><strong>Language Settings</strong>: User preference for UI language
+(dropdown in <code>/settings</code>)</li>
+<li><strong>Cyrillic/Unicode Support</strong>: Serbian, Russian text in
+media names, search, collections</li>
+<li><strong>Media Metadata Translation</strong>: AI-driven metadata
+extraction can work across languages</li>
+</ul>
+<hr />
+<h2 id="catalogizer-translation-localization-features">2. Catalogizer
+Translation &amp; Localization Features</h2>
+<h3 id="subtitle-management-system">2.1 Subtitle Management System</h3>
+<p>From test banks (<code>full-qa-web.yaml</code>,
+<code>full-qa-api.yaml</code>):</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 27%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Web Test ID</th>
+<th>API Test ID</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subtitle page load</td>
+<td>FQA-WEB-286</td>
+<td>—</td>
+<td><code>/subtitles</code> route renders SubtitleManager</td>
+</tr>
+<tr>
+<td>Video subtitle display</td>
+<td>FQA-WEB-182</td>
+<td>—</td>
+<td>Enable CC/subtitle tracks on video player</td>
+</tr>
+<tr>
+<td>Subtitle search</td>
+<td>—</td>
+<td>FQA-API-227</td>
+<td><code>GET /api/v1/subtitles/search?query=Matrix</code></td>
+</tr>
+<tr>
+<td>Subtitle by media ID</td>
+<td>—</td>
+<td>FQA-API-228</td>
+<td><code>GET /api/v1/subtitles/media/{id}</code></td>
+</tr>
+<tr>
+<td>Supported languages</td>
+<td>—</td>
+<td>FQA-API-229</td>
+<td><code>GET /api/v1/subtitles/languages</code></td>
+</tr>
+<tr>
+<td>Supported providers</td>
+<td>—</td>
+<td>FQA-API-230</td>
+<td><code>GET /api/v1/subtitles/providers</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="i18n-language-settings">2.2 i18n / Language Settings</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 37%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Web Test ID</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language dropdown</td>
+<td>FQA-WEB-215</td>
+<td>Change language in <code>/settings</code></td>
+</tr>
+<tr>
+<td>Settings sections</td>
+<td>FQA-WEB-218</td>
+<td>Verify theme, language, notifications, storage, account
+sections</td>
+</tr>
+<tr>
+<td>Cyrillic search (media)</td>
+<td>FQA-WEB-055</td>
+<td>Search with Cyrillic in media browser</td>
+</tr>
+<tr>
+<td>Cyrillic search (entity)</td>
+<td>FQA-WEB-200</td>
+<td>Search with Cyrillic in entity browser</td>
+</tr>
+<tr>
+<td>Unicode filenames</td>
+<td>FQA-WEB-079</td>
+<td>Files with spaces, parentheses, unicode display correctly</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cross-platform-i18n-validation">2.3 Cross-Platform i18n
+Validation</h3>
+<p>From <code>full-qa-cross-platform.yaml</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Feature</th>
+<th>Platforms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FQA-XP-009</td>
+<td>Browse Cyrillic category</td>
+<td>Web, Android, iOS, Desktop</td>
+</tr>
+<tr>
+<td>FQA-XP-010</td>
+<td>Cyrillic search consistency</td>
+<td>All platforms</td>
+</tr>
+</tbody>
+</table>
+<h3 id="android-specific-i18n">2.4 Android-Specific i18n</h3>
+<p>From <code>full-qa-android.yaml</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Feature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FQA-AND-044</td>
+<td>Search with Cyrillic input</td>
+</tr>
+<tr>
+<td>FQA-AND-002</td>
+<td>Login screen subtitle text verification</td>
+</tr>
+<tr>
+<td>FQA-AND-012</td>
+<td>Biometric dialog subtitle verification</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="supported-llm-providers-models">3. Supported LLM Providers &amp;
+Models</h2>
+<h3 id="provider-architecture">3.1 Provider Architecture</h3>
+<p>The LLM subsystem (<code>pkg/llm/</code>) uses a unified
+interface:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Chat<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> messages <span class="op">[]</span>Message<span class="op">)</span> <span class="op">(*</span>Response<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Vision<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> image <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Response<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    SupportsVision<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>All providers implement this interface. The system uses: -
+<strong>Adaptive Provider</strong> (<code>adaptive.go</code>): Routes
+requests to best provider based on type -
+<strong>Auto-Discovery</strong> (<code>providers_registry.go</code>):
+Scans env vars at startup - <strong>Health Tracking</strong>: Cooldown
+on rate limits (60s), errors (300s), timeouts (120s) - <strong>Cost
+Tracking</strong> (<code>cost_tracker.go</code>): Per-session token/cost
+accounting - <strong>Vision Ranking</strong>
+(<code>vision_ranking.go</code>): Score-based provider selection using
+LLMsVerifier registry</p>
+<h3 id="tier-1-primary-native-providers">3.2 Tier 1: Primary Native
+Providers</h3>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 23%" />
+<col style="width: 26%" />
+<col style="width: 14%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Env Variable</th>
+<th>Default Model</th>
+<th>Vision</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anthropic</strong></td>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td><code>claude-sonnet-4</code></td>
+<td>Yes</td>
+<td>Best vision accuracy</td>
+</tr>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td><code>OPENAI_API_KEY</code></td>
+<td><code>gpt-4o</code></td>
+<td>Yes</td>
+<td>Strong all-round</td>
+</tr>
+<tr>
+<td><strong>Google (Gemini)</strong></td>
+<td><code>GEMINI_API_KEY</code></td>
+<td><code>gemini-pro</code></td>
+<td>Yes</td>
+<td>Multimodal, long context</td>
+</tr>
+<tr>
+<td><strong>OpenRouter</strong></td>
+<td><code>OPENROUTER_API_KEY</code></td>
+<td><code>anthropic/claude-sonnet-4</code></td>
+<td>Varies</td>
+<td>100+ models via one key</td>
+</tr>
+<tr>
+<td><strong>DeepSeek</strong></td>
+<td><code>DEEPSEEK_API_KEY</code></td>
+<td><code>deepseek-chat</code></td>
+<td>No</td>
+<td>Most cost-effective</td>
+</tr>
+<tr>
+<td><strong>Groq</strong></td>
+<td><code>GROQ_API_KEY</code></td>
+<td><code>llama-3.3-70b-versatile</code></td>
+<td>No</td>
+<td>Fastest inference</td>
+</tr>
+<tr>
+<td><strong>Ollama</strong></td>
+<td><code>HELIX_OLLAMA_URL</code></td>
+<td>(local model)</td>
+<td>Optional</td>
+<td>Self-hosted, zero cost</td>
+</tr>
+<tr>
+<td><strong>Astica</strong></td>
+<td><code>ASTICA_API_KEY</code></td>
+<td>(specialized vision)</td>
+<td>Yes</td>
+<td>Highest quality vision</td>
+</tr>
+<tr>
+<td><strong>Kimi (Moonshot)</strong></td>
+<td><code>KIMI_API_KEY</code></td>
+<td><code>kimi-k2.5</code></td>
+<td>Yes</td>
+<td>Native vision, $0.60/1M</td>
+</tr>
+<tr>
+<td><strong>Qwen (Alibaba)</strong></td>
+<td><code>QWEN_API_KEY</code></td>
+<td><code>qwen-vl-max</code></td>
+<td>Yes</td>
+<td>~90% UI grounding</td>
+</tr>
+<tr>
+<td><strong>Stepfun</strong></td>
+<td><code>STEPFUN_API_KEY</code></td>
+<td><code>step-1.5v-mini</code></td>
+<td>Yes</td>
+<td>GUI-specialized</td>
+</tr>
+<tr>
+<td><strong>NVIDIA NIM</strong></td>
+<td><code>NVIDIA_API_KEY</code></td>
+<td><code>meta/llama-3.2-90b-vision-instruct</code></td>
+<td>Yes</td>
+<td>Vision + speed</td>
+</tr>
+<tr>
+<td><strong>xAI (Grok)</strong></td>
+<td><code>XAI_API_KEY</code></td>
+<td><code>grok-3</code></td>
+<td>Yes</td>
+<td>Grok vision</td>
+</tr>
+<tr>
+<td><strong>Mistral</strong></td>
+<td><code>MISTRAL_API_KEY</code></td>
+<td><code>mistral-large-latest</code></td>
+<td>No</td>
+<td>European compliance</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tier-2-openai-compatible-providers-30">3.3 Tier 2:
+OpenAI-Compatible Providers (30+)</h3>
+<p>All use <code>chat/completions</code> API format. Key providers:</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 29%" />
+<col style="width: 29%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Default Model</th>
+<th>Env Variable</th>
+<th>Vision?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI21</td>
+<td><code>jamba-1.5-mini</code></td>
+<td><code>AI21_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cerebras</td>
+<td><code>llama-3.3-70b</code></td>
+<td><code>CEREBRAS_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Chutes</td>
+<td><code>deepseek-chat</code></td>
+<td><code>CHUTES_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cloudflare</td>
+<td>(per account)</td>
+<td><code>CLOUDFLARE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Codestral</td>
+<td><code>codestral-latest</code></td>
+<td><code>CODESTRAL_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Cohere</td>
+<td><code>command-r-plus</code></td>
+<td><code>COHERE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Fireworks</td>
+<td><code>llama-v3p3-70b-instruct</code></td>
+<td><code>FIREWORKS_API_KEY</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>GitHub Models</td>
+<td><code>openai/gpt-4o</code></td>
+<td><code>GITHUB_MODELS_API_KEY</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>HuggingFace</td>
+<td>(model-dependent)</td>
+<td><code>HUGGINGFACE_API_KEY</code></td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>Hyperbolic</td>
+<td><code>deepseek-ai/DeepSeek-V3</code></td>
+<td><code>HYPERBOLIC_API_KEY</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Modal</td>
+<td>(per deployment)</td>
+<td><code>MODAL_API_KEY</code></td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>Novita</td>
+<td>(provider default)</td>
+<td><code>NOVITA_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Perplexity</td>
+<td><code>sonar</code></td>
+<td><code>PERPLEXITY_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>PublicAI</td>
+<td>(provider default)</td>
+<td><code>PUBLICAI_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Replicate</td>
+<td>(model-dependent)</td>
+<td><code>REPLICATE_API_KEY</code></td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>SambaNova</td>
+<td><code>Meta-Llama-3.3-70B-Instruct</code></td>
+<td><code>SAMBANOVA_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Sarvam</td>
+<td>(provider default)</td>
+<td><code>SARVAM_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>SiliconFlow</td>
+<td><code>deepseek-ai/DeepSeek-V3</code></td>
+<td><code>SILICONFLOW_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Together AI</td>
+<td><code>Llama-3.3-70B-Instruct-Turbo</code></td>
+<td><code>TOGETHER_API_KEY</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Upstage</td>
+<td><code>solar-pro</code></td>
+<td><code>UPSTAGE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Venice</td>
+<td>(provider default)</td>
+<td><code>VENICE_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Vulavula</td>
+<td>(provider default)</td>
+<td><code>VULAVULA_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>ZAI (BigModel)</td>
+<td><code>glm-4.5</code></td>
+<td><code>ZAI_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Zen</td>
+<td>(provider default)</td>
+<td><code>ZEN_API_KEY</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td>Zhipu</td>
+<td><code>glm-4.5</code></td>
+<td><code>ZHIPU_API_KEY</code></td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vision-capable-provider-set">3.4 Vision-Capable Provider
+Set</h3>
+<p>From <code>openai.go</code> <code>visionCapableProviders</code>
+map:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> visionCapableProviders <span class="op">=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span><span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;openai&quot;</span><span class="op">:</span>      <span class="ot">true</span><span class="op">,</span>  <span class="co">// GPT-4o, GPT-4o-mini, GPT-4-turbo</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;openrouter&quot;</span><span class="op">:</span>  <span class="ot">true</span><span class="op">,</span>  <span class="co">// 100+ models, varies by selection</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fireworks&quot;</span><span class="op">:</span>   <span class="ot">true</span><span class="op">,</span>  <span class="co">// Llama vision models</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;together&quot;</span><span class="op">:</span>    <span class="ot">true</span><span class="op">,</span>  <span class="co">// Llama vision models</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;hyperbolic&quot;</span><span class="op">:</span>  <span class="ot">true</span><span class="op">,</span>  <span class="co">// DeepSeek-V3 + vision</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;nvidia&quot;</span><span class="op">:</span>      <span class="ot">true</span><span class="op">,</span>  <span class="co">// Llama 3.2 90B vision</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;xai&quot;</span><span class="op">:</span>         <span class="ot">true</span><span class="op">,</span>  <span class="co">// Grok-3 vision</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;kimi&quot;</span><span class="op">:</span>        <span class="ot">true</span><span class="op">,</span>  <span class="co">// Moonshot K2.5 — native vision</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;qwen&quot;</span><span class="op">:</span>        <span class="ot">true</span><span class="op">,</span>  <span class="co">// Qwen3-VL — ~90% UI grounding</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;stepfun&quot;</span><span class="op">:</span>     <span class="ot">true</span><span class="op">,</span>  <span class="co">// Step-GUI — GUI-specialized</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;astica&quot;</span><span class="op">:</span>      <span class="ot">true</span><span class="op">,</span>  <span class="co">// Specialized vision API (caption, OCR, detection)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Plus native providers: <strong>Anthropic</strong> (Claude),
+<strong>Google</strong> (Gemini), <strong>Ollama</strong> (llava,
+minicpm-v, bakllava, moondream).</p>
+<h3 id="vision-provider-scoring-formula">3.5 Vision Provider Scoring
+Formula</h3>
+<pre><code>Score = (0.6 * QualityScore + 0.4 * ReliabilityScore) * AvailabilityBoost * CostBonus
+
+Where:
+  AvailabilityBoost = 1.0 if API key configured, 0.5 otherwise
+  CostBonus = 1.10 if free, 1.05 if &lt; $0.002/1k tokens, 1.0 otherwise</code></pre>
+<h3 id="fallback-chains">3.6 Fallback Chains</h3>
+<table>
+<thead>
+<tr>
+<th>Request Type</th>
+<th>Primary → Secondary → Tertiary → Fail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vision</td>
+<td>Anthropic → OpenAI → Ollama (llava) → FAIL</td>
+</tr>
+<tr>
+<td>Reasoning</td>
+<td>Groq → Cerebras → DeepSeek → OpenAI → Anthropic → FAIL</td>
+</tr>
+<tr>
+<td>General Chat</td>
+<td>Any available provider</td>
+</tr>
+</tbody>
+</table>
+<h3 id="provider-selection-for-translation-testing">3.7 Provider
+Selection for Translation Testing</h3>
+<p>For <strong>testing i18n/translation features</strong> in target
+apps, the optimal provider routing would be:</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 52%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Preferred Provider</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Screenshot analysis with Cyrillic text</td>
+<td>Anthropic Claude / Google Gemini</td>
+<td>Best OCR accuracy, handles non-Latin scripts</td>
+</tr>
+<tr>
+<td>Subtitle text verification</td>
+<td>Anthropic Claude</td>
+<td>Long context for subtitle text comparison</td>
+</tr>
+<tr>
+<td>UI navigation in non-English interfaces</td>
+<td>Anthropic Claude / OpenAI GPT-4o</td>
+<td>Strong multilingual understanding</td>
+</tr>
+<tr>
+<td>Bulk text processing (cost-sensitive)</td>
+<td>DeepSeek / Groq</td>
+<td>Lowest cost, fast</td>
+</tr>
+<tr>
+<td>Air-gapped/offline testing</td>
+<td>Ollama (llava + llama3.3)</td>
+<td>Zero API cost, local only</td>
+</tr>
+<tr>
+<td>Vision on budget</td>
+<td>Kimi K2.5 / Qwen-VL</td>
+<td>$0.60/1M tokens, ~90% accuracy</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="client-app-ux-matrix">4. Client App UX Matrix</h2>
+<h3 id="overview-five-client-types">4.1 Overview: Five Client Types</h3>
+<p>HelixQA tests applications across five surface types. The
+“translation tool” perspective applies to how HelixQA validates that
+Catalogizer’s translation/localization features work correctly on each
+surface.</p>
+<h3 id="web-client-ux">4.2 Web Client UX</h3>
+<p><strong>Platform</strong>: Browser (Chromium/Chrome/Firefox via
+Playwright, chromedp, or go-rod)</p>
+<p><strong>How Users Interact with Translation Features</strong>: -
+Navigate to <code>/settings</code> → select language from dropdown -
+Navigate to <code>/subtitles</code> → manage subtitle files, search
+subtitles - Navigate to <code>/media</code> → browse media with
+Cyrillic/Unicode names - Use search with non-Latin characters (Cyrillic,
+Chinese, Arabic) - Video player: enable/disable subtitle tracks</p>
+<p><strong>UI/UX Flow for Language Change</strong>: 1. User clicks
+Settings (gear icon) in header 2. Settings page loads with tabs: Theme,
+Language, Notifications, Storage, Account 3. User selects Language tab
+4. Dropdown shows available languages 5. Selection updates UI
+immediately + saves to preferences (localStorage/API) 6. HelixQA
+validates: text direction (LTR/RTL), font rendering, layout
+integrity</p>
+<p><strong>What Screenshots Are Needed for QA</strong>: 1. Settings page
+with Language tab active 2. Language dropdown expanded 3. Before/after
+language change (compare UI text) 4. Cyrillic text in media browser grid
+5. Subtitle manager with language list 6. Video player with subtitles
+enabled 7. Search results with Cyrillic query</p>
+<p><strong>Happy Path Translation Workflow</strong>:</p>
+<pre><code>Login → Navigate /settings → Click Language tab → Select language 
+→ Verify UI text changes → Verify layout intact → Verify API persisted
+→ Navigate /media → Verify Cyrillic names render → Search with Cyrillic 
+→ Verify results → Navigate /subtitles → Verify subtitle language list</code></pre>
+<h3 id="desktop-client-ux">4.3 Desktop Client UX</h3>
+<p><strong>Platform</strong>: Windows (UI Automation/AXTree), macOS
+(AXTree), Linux (AT-SPI2)</p>
+<p><strong>How Users Interact with Translation Features</strong>: -
+Desktop app (likely Electron or native) with same features as web -
+System-level language preferences may affect app language - Native file
+dialogs with Unicode filenames - Desktop-specific: tray menu, native
+notifications in selected language</p>
+<p><strong>UI/UX Flow</strong>: 1. App launches, respects system
+language or last saved preference 2. Settings window opens (modal or
+separate window) 3. Language selection triggers immediate re-render 4.
+Native file picker shows Cyrillic/Unicode filenames correctly</p>
+<p><strong>What Screenshots Are Needed</strong>: 1. Desktop app main
+window with localized UI 2. Settings dialog with language selection 3.
+Native file picker with Unicode filenames 4. System notification in
+selected language 5. Context menus in selected language</p>
+<p><strong>Happy Path</strong>:</p>
+<pre><code>Launch app → Verify window title localized → Open settings 
+→ Change language → Verify all menu items localized 
+→ Open file dialog → Navigate Cyrillic folder → Select file 
+→ Verify filename preserved → Save → Verify notification localized</code></pre>
+<h3 id="mobile-client-ux">4.4 Mobile Client UX</h3>
+<p><strong>Platform</strong>: Android (Appium/UiAutomator2), iOS
+(Appium/XCUITest), Android TV (Appium)</p>
+<p><strong>How Users Interact with Translation Features</strong>: -
+Android: Material3 UI with localized strings, biometric prompt subtitles
+- Settings screen with language preference - Search with on-screen
+keyboard (Cyrillic layout) - Media browser with localized thumbnail
+labels - Subtitle track selection in video player</p>
+<p><strong>UI/UX Flow for Language Change (Android)</strong>: 1. Tap
+hamburger menu → Settings 2. Scroll to “Language” card 3. Tap to open
+language selection dialog 4. Select language → dialog closes → UI
+updates 5. Verify: app bar title, button labels, toast messages all
+localized</p>
+<p><strong>What Screenshots Are Needed</strong>: 1. Login screen with
+localized subtitle 2. Settings screen showing language option 3.
+Language selection dialog 4. Media browser with Cyrillic item names 5.
+Search with Cyrillic keyboard visible 6. Biometric prompt with localized
+subtitle 7. Video player with subtitle track selector 8.
+Toast/notification in localized language</p>
+<p><strong>Happy Path</strong>:</p>
+<pre><code>Launch app → Login screen (localized subtitle visible) → Login 
+→ Open navigation drawer → Tap Settings → Tap Language 
+→ Select Serbian → Verify UI updates → Navigate to Media 
+→ Verify Cyrillic titles → Tap search → Switch to Cyrillic keyboard 
+→ Type &quot;Филмови&quot; → Verify results → Play video → Tap CC 
+→ Select Serbian subtitle → Verify overlay text</code></pre>
+<h3 id="cli-client-ux">4.5 CLI Client UX</h3>
+<p><strong>Platform</strong>: Terminal / shell (bash, zsh,
+PowerShell)</p>
+<p><strong>How Users Interact with Translation Features</strong>: -
+Catalogizer may have CLI tools for subtitle management - API client
+scripts for bulk subtitle download - Conversion tools (subtitle format
+conversion) - Text output in terminal must handle Unicode/Cyrillic
+correctly</p>
+<p><strong>UI/UX Flow</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check available subtitle languages</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> /api/v1/subtitles/languages <span class="kw">|</span> <span class="ex">jq</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Search subtitles</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="st">&quot;/api/v1/subtitles/search?query=Matrix&amp;lang=sr&quot;</span> <span class="kw">|</span> <span class="ex">jq</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Download subtitle</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> /api/v1/subtitles/download/123 <span class="op">&gt;</span> Matrix.sr.srt</span></code></pre></div>
+<p><strong>What Screenshots/Terminal Captures Are Needed</strong>: 1.
+Terminal showing <code>curl</code> response with Unicode content 2. JSON
+output with Cyrillic strings properly encoded 3. Subtitle file content
+(<code>cat Matrix.sr.srt</code>) showing Cyrillic 4. Error messages in
+localized language 5. Progress bars/indicators with Unicode
+characters</p>
+<p><strong>Happy Path</strong>:</p>
+<pre><code>Open terminal → curl languages endpoint → Verify JSON with Cyrillic 
+→ curl search with Cyrillic query → Verify response 
+→ Download subtitle → cat file → Verify Cyrillic text 
+→ Convert format → Verify output preserves encoding</code></pre>
+<h3 id="tui-client-ux">4.6 TUI Client UX</h3>
+<p><strong>Platform</strong>: Terminal User Interface (e.g.,
+<code>ranger</code>, <code>ncurses</code>, or custom TUI)</p>
+<p><strong>How Users Interact</strong>: - Keyboard-driven interface
+(arrow keys, shortcuts) - Media browser in terminal with Unicode support
+- Subtitle management via TUI panels - Real-time preview of subtitle
+text</p>
+<p><strong>UI/UX Flow</strong>: 1. Launch TUI app 2. Navigate to media
+library (arrow keys) 3. Press <code>l</code> for language settings 4.
+Select language from popup list 5. UI redraws with localized text 6.
+Navigate to subtitle panel 7. Press <code>s</code> to search subtitles
+8. Type Cyrillic query 9. Results appear in panel</p>
+<p><strong>What Screenshots Are Needed</strong>: 1. TUI main screen with
+localized borders/titles 2. Language selection popup 3. Media list with
+Cyrillic names 4. Subtitle search panel with Cyrillic input 5. Preview
+pane showing subtitle text</p>
+<p><strong>Happy Path</strong>:</p>
+<pre><code>Launch TUI → Verify border characters render → Navigate media 
+→ Verify Cyrillic names → Press &#39;l&#39; → Select language 
+→ Verify redraw → Press &#39;s&#39; → Enter Cyrillic query 
+→ Verify results panel → Select subtitle → Preview 
+→ Verify text rendering → Save → Verify confirmation</code></pre>
+<h3 id="ux-matrix-summary-table">4.7 UX Matrix Summary Table</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 12%" />
+<col style="width: 22%" />
+<col style="width: 20%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Web</th>
+<th>Desktop</th>
+<th>Mobile</th>
+<th>CLI</th>
+<th>TUI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Language Setting</strong></td>
+<td>Dropdown in /settings</td>
+<td>Modal dialog</td>
+<td>Card in Settings</td>
+<td>API call / env var</td>
+<td>Popup menu</td>
+</tr>
+<tr>
+<td><strong>Cyrillic Input</strong></td>
+<td>Keyboard native</td>
+<td>Keyboard native</td>
+<td>On-screen keyboard</td>
+<td>Terminal IME</td>
+<td>Terminal IME</td>
+</tr>
+<tr>
+<td><strong>Subtitle Display</strong></td>
+<td>Video overlay</td>
+<td>Video overlay</td>
+<td>Video overlay</td>
+<td>N/A (file output)</td>
+<td>Preview pane</td>
+</tr>
+<tr>
+<td><strong>Unicode Filename</strong></td>
+<td>Browser rendering</td>
+<td>Native file dialog</td>
+<td>System file picker</td>
+<td>Tab-completion</td>
+<td>File list</td>
+</tr>
+<tr>
+<td><strong>Text Direction</strong></td>
+<td>CSS direction</td>
+<td>OS layout</td>
+<td>OS layout</td>
+<td>Terminal bidi</td>
+<td>Terminal bidi</td>
+</tr>
+<tr>
+<td><strong>Font Support</strong></td>
+<td>Web fonts</td>
+<td>System fonts</td>
+<td>System fonts</td>
+<td>Terminal font</td>
+<td>Terminal font</td>
+</tr>
+<tr>
+<td><strong>Screenshot QA</strong></td>
+<td>Browser screenshot</td>
+<td>Window capture</td>
+<td>Device screenshot</td>
+<td>Terminal capture</td>
+<td>Terminal capture</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="enterprise-grade-requirements">5. Enterprise Grade
+Requirements</h2>
+<h3 id="what-makes-this-enterprise-grade">5.1 What Makes This
+“Enterprise Grade”</h3>
+<p>Based on the codebase analysis, HelixQA’s enterprise-grade
+characteristics include:</p>
+<table>
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Multi-tenancy</strong></td>
+<td>Per-session isolated browser profiles, device pools, session
+IDs</td>
+</tr>
+<tr>
+<td><strong>Scalability</strong></td>
+<td>Distributed llama.cpp RPC, multi-host Ollama, Kubernetes-ready
+containers</td>
+</tr>
+<tr>
+<td><strong>Reliability</strong></td>
+<td>Adaptive provider with fallback chains, health tracking, cooldown
+mechanisms</td>
+</tr>
+<tr>
+<td><strong>Cost Control</strong></td>
+<td>Per-session token tracking, cost estimates, budget limits, tiered
+provider selection</td>
+</tr>
+<tr>
+<td><strong>Auditability</strong></td>
+<td>Constitution §11.4 — all decisions require rationale + evidence;
+full session recording</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>URL allowlisting, body-size caps, isolated browser profiles,
+LD_PRELOAD shims</td>
+</tr>
+<tr>
+<td><strong>Compliance</strong></td>
+<td>SPDX headers, Apache-2.0 licensing, GDPR-ready local processing
+(Ollama)</td>
+</tr>
+<tr>
+<td><strong>Observability</strong></td>
+<td>Prometheus metrics, OpenTelemetry, structured logging, session
+reports</td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-requirements">5.2 Performance Requirements</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vision analysis latency</td>
+<td>&lt; 90s (adaptiveVisionTimeout)</td>
+<td>Timeout + fallback</td>
+</tr>
+<tr>
+<td>Chat/reasoning latency</td>
+<td>&lt; 120s (adaptivePerProviderTimeout)</td>
+<td>Timeout + fallback</td>
+</tr>
+<tr>
+<td>OCR speed</td>
+<td>50-100ms per image</td>
+<td>Tesseract with client pool</td>
+</tr>
+<tr>
+<td>Session coverage target</td>
+<td>90%</td>
+<td>Configurable via <code>HELIX_AUTONOMOUS_COVERAGE_TARGET</code></td>
+</tr>
+<tr>
+<td>Concurrent providers</td>
+<td>5 max</td>
+<td><code>LLMSVERIFIER_MAX_MODELS=5</code></td>
+</tr>
+<tr>
+<td>Provider cooldown</td>
+<td>60s (429), 300s (5xx), 120s (timeout)</td>
+<td>Exponential backoff</td>
+</tr>
+</tbody>
+</table>
+<h3 id="security-requirements">5.3 Security Requirements</h3>
+<table>
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API key isolation</td>
+<td>Per-provider env vars, never logged</td>
+</tr>
+<tr>
+<td>Data privacy</td>
+<td>Ollama self-hosted option for air-gapped environments</td>
+</tr>
+<tr>
+<td>Screenshot sanitization</td>
+<td>Body-size caps, URL allowlisting</td>
+</tr>
+<tr>
+<td>Session isolation</td>
+<td>Per-session browser profiles, incognito mode</td>
+</tr>
+<tr>
+<td>Credential handling</td>
+<td>Test banks reference <code>admin/admin123</code> for test env
+only</td>
+</tr>
+</tbody>
+</table>
+<h3 id="how-qa-must-validate-enterprise-grade-behavior">5.4 How QA Must
+Validate Enterprise-Grade Behavior</h3>
+<ol type="1">
+<li><strong>Provider Resilience</strong>: Verify fallback chains work
+when primary provider fails</li>
+<li><strong>Cost Tracking</strong>: Verify <code>llm_usage</code> JSON
+in session report matches actual API calls</li>
+<li><strong>Timeout Handling</strong>: Verify slow providers trigger
+fallback within timeout window</li>
+<li><strong>Session Isolation</strong>: Verify browser
+cookies/localStorage don’t leak between sessions</li>
+<li><strong>Concurrent Safety</strong>: Verify provider clients are
+thread-safe under parallel test execution</li>
+<li><strong>Audit Trail</strong>: Verify every decision has non-empty
+Rationale (Constitution §11.4)</li>
+<li><strong>Recovery</strong>: Verify provider marked unavailable
+returns to pool after cooldown</li>
+</ol>
+<hr />
+<h2 id="qa-session-workflows-for-translation">6. QA Session Workflows
+for Translation</h2>
+<h3 id="test-case-design-translationi18n-validation">6.1 Test Case
+Design: Translation/i18n Validation</h3>
+<h4 id="category-a-language-setting-ui-localization">Category A:
+Language Setting &amp; UI Localization</h4>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Name</th>
+<th>Steps</th>
+<th>Provider Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-I18N-001</td>
+<td>Language change updates all UI text</td>
+<td>1. Screenshot before 2. Change language 3. Screenshot after 4. OCR
+both 5. Compare</td>
+<td>Vision: Anthropic (OCR accuracy)</td>
+</tr>
+<tr>
+<td>T-I18N-002</td>
+<td>Language preference persists across sessions</td>
+<td>1. Set language 2. Logout 3. Login 4. Verify language</td>
+<td>Reasoning: Groq (fast)</td>
+</tr>
+<tr>
+<td>T-I18N-003</td>
+<td>RTL language layout integrity</td>
+<td>1. Select Arabic/Hebrew 2. Screenshot 3. Verify layout not
+broken</td>
+<td>Vision: Anthropic (layout analysis)</td>
+</tr>
+<tr>
+<td>T-I18N-004</td>
+<td>Settings page sections completeness</td>
+<td>1. Navigate settings 2. Verify all tabs present</td>
+<td>Vision: OpenAI (all-round)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="category-b-cyrillicunicode-text-handling">Category B:
+Cyrillic/Unicode Text Handling</h4>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Name</th>
+<th>Steps</th>
+<th>Provider Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-I18N-010</td>
+<td>Cyrillic search returns results</td>
+<td>1. Type “Филмови” 2. Verify results</td>
+<td>Vision: Anthropic (Cyrillic OCR)</td>
+</tr>
+<tr>
+<td>T-I18N-011</td>
+<td>Unicode filenames display correctly</td>
+<td>1. Browse folder with Unicode names 2. Screenshot 3. OCR verify</td>
+<td>Vision: Anthropic + Tesseract</td>
+</tr>
+<tr>
+<td>T-I18N-012</td>
+<td>Cyrillic collection creation</td>
+<td>1. Create collection “Музика” 2. Verify saved 3. Reopen</td>
+<td>Reasoning: Groq (API validation)</td>
+</tr>
+<tr>
+<td>T-I18N-013</td>
+<td>Special characters in search</td>
+<td>1. Search with emojis, symbols 2. Verify no errors</td>
+<td>Vision: Google Gemini (multilingual)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="category-c-subtitle-management">Category C: Subtitle
+Management</h4>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Name</th>
+<th>Steps</th>
+<th>Provider Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-I18N-020</td>
+<td>Subtitle page loads</td>
+<td>1. Navigate /subtitles 2. Screenshot 3. Verify UI</td>
+<td>Vision: OpenAI</td>
+</tr>
+<tr>
+<td>T-I18N-021</td>
+<td>Video subtitle display</td>
+<td>1. Play video 2. Enable subtitles 3. Screenshot 4. Verify overlay
+text</td>
+<td>Vision: Anthropic (detail)</td>
+</tr>
+<tr>
+<td>T-I18N-022</td>
+<td>Subtitle language API</td>
+<td>1. GET /subtitles/languages 2. Verify response</td>
+<td>Reasoning: DeepSeek (cheap)</td>
+</tr>
+<tr>
+<td>T-I18N-023</td>
+<td>Subtitle search</td>
+<td>1. Search “Matrix” 2. Verify results structure</td>
+<td>Reasoning: Groq (fast)</td>
+</tr>
+<tr>
+<td>T-I18N-024</td>
+<td>Subtitle download preserves encoding</td>
+<td>1. Download .srt 2. Verify UTF-8 encoding 3. Verify Cyrillic
+readable</td>
+<td>Reasoning: DeepSeek</td>
+</tr>
+</tbody>
+</table>
+<h4 id="category-d-cross-platform-consistency">Category D:
+Cross-Platform Consistency</h4>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 14%" />
+<col style="width: 26%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Name</th>
+<th>Platforms</th>
+<th>Provider Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-I18N-030</td>
+<td>Cyrillic category browse</td>
+<td>Web, Android, iOS, Desktop</td>
+<td>Vision per platform</td>
+</tr>
+<tr>
+<td>T-I18N-031</td>
+<td>Search consistency across platforms</td>
+<td>All</td>
+<td>Consensus provider (multi-model voting)</td>
+</tr>
+<tr>
+<td>T-I18N-032</td>
+<td>Settings sync across devices</td>
+<td>Web + Mobile</td>
+<td>Reasoning: Anthropic</td>
+</tr>
+</tbody>
+</table>
+<h3 id="providermodel-verification-matrix">6.2 Provider/Model
+Verification Matrix</h3>
+<p>For each vision provider, QA must verify:</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 15%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Cyrillic OCR</th>
+<th>Chinese OCR</th>
+<th>Arabic OCR</th>
+<th>Subtitle Text</th>
+<th>UI Navigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic Claude</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+</tr>
+<tr>
+<td>OpenAI GPT-4o</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+</tr>
+<tr>
+<td>Google Gemini</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+</tr>
+<tr>
+<td>Kimi K2.5</td>
+<td>Should verify</td>
+<td>Should verify</td>
+<td>N/A</td>
+<td>Should verify</td>
+<td>Should verify</td>
+</tr>
+<tr>
+<td>Qwen-VL</td>
+<td>Should verify</td>
+<td>Must verify</td>
+<td>N/A</td>
+<td>Should verify</td>
+<td>Should verify</td>
+</tr>
+<tr>
+<td>Ollama (llava)</td>
+<td>Good to test</td>
+<td>Good to test</td>
+<td>N/A</td>
+<td>Good to test</td>
+<td>Good to test</td>
+</tr>
+<tr>
+<td>Tesseract (OCR)</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>Must verify</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<h3 id="translation-quality-verification-beyond-test-passes">6.3
+Translation Quality Verification (Beyond “Test Passes”)</h3>
+<p>To verify translation <strong>quality</strong> (not just
+functionality):</p>
+<ol type="1">
+<li><strong>OCR Accuracy Metrics</strong>:
+<ul>
+<li>Character Error Rate (CER) for extracted text vs. ground truth</li>
+<li>Word Error Rate (WER) for subtitle text</li>
+<li>Language detection accuracy (Tesseract OSD vs. actual)</li>
+</ul></li>
+<li><strong>Visual Layout Verification</strong>:
+<ul>
+<li>SSIM (Structural Similarity) threshold: 0.95
+(<code>HELIX_VISION_SSIM_THRESHOLD</code>)</li>
+<li>Text bounding box alignment (no overlap, no truncation)</li>
+<li>RTL layout mirroring correctness</li>
+</ul></li>
+<li><strong>Semantic Verification</strong>:
+<ul>
+<li>LLM judge: “Does the localized text convey the same meaning as the
+original?”</li>
+<li>Consistency check: Same term translated consistently across all UI
+elements</li>
+<li>Context appropriateness: Technical terms correctly translated</li>
+</ul></li>
+<li><strong>Functional Verification</strong>:
+<ul>
+<li>API round-trip: Cyrillic text stored → retrieved unchanged</li>
+<li>Encoding validation: UTF-8 throughout stack</li>
+<li>Font rendering: No tofu (□) characters</li>
+</ul></li>
+</ol>
+<h3 id="automated-qa-session-flow-for-translation">6.4 Automated QA
+Session Flow for Translation</h3>
+<pre><code>[Session Start]
+  ↓
+[Discover Providers] — Scan env vars, health check each
+  ↓
+[Load Test Bank] — full-qa-web.yaml / full-qa-android.yaml / full-qa-api.yaml
+  ↓
+[Filter i18n Tests] — Tags: i18n, cyrillic, unicode, subtitles, language
+  ↓
+[For Each Test Case]
+  ├── [Vision Provider Selection] — Rank by score, pick best available
+  ├── [Execute Test Steps]
+  │   ├── [Screenshot] → [Vision Analysis] → [OCR + Language Detection]
+  │   ├── [Action Execution] → [Screenshot] → [Compare]
+  │   └── [API Validation] → [Response Check]
+  ├── [Evidence Recording] — Screenshot + rationale + verdict
+  └── [Cost Tracking] — Record tokens, cost, provider used
+  ↓
+[Consensus Validation] — Multi-provider voting on ambiguous results
+  ↓
+[Generate Report] — Markdown + HTML + JSON with cost breakdown
+  ↓
+[Create Tickets] — For failures with severity ≥ min threshold</code></pre>
+<h3 id="example-autonomous-translation-test-session">6.5 Example:
+Autonomous Translation Test Session</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start session with multiple providers</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-ant-...&quot;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">GROQ_API_KEY</span><span class="op">=</span><span class="st">&quot;gsk_...&quot;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">DEEPSEEK_API_KEY</span><span class="op">=</span><span class="st">&quot;sk-...&quot;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">HELIX_OLLAMA_URL</span><span class="op">=</span><span class="st">&quot;http://localhost:11434&quot;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run autonomous QA focused on i18n</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> autonomous <span class="dt">\</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--project</span> ./catalogizer <span class="dt">\</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--platforms</span> web,android <span class="dt">\</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--tags</span> i18n,subtitles,cyrillic <span class="dt">\</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--timeout</span> 2h <span class="dt">\</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">--curiosity</span> true <span class="dt">\</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">--env</span> .env</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected behavior:</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Auto-discovers 4 providers</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Ranks vision providers: Anthropic &gt; OpenAI &gt; Ollama</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Routes vision tests to Anthropic (best OCR)</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Routes API tests to Groq (fastest)</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Routes bulk validation to DeepSeek (cheapest)</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 6. Falls back to Ollama if all cloud providers fail</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="co"># 7. Generates report with per-provider cost breakdown</span></span></code></pre></div>
+<hr />
+<h2 id="appendix-complete-provider-registry">7. Appendix: Complete
+Provider Registry</h2>
+<h3 id="all-environment-variables">7.1 All Environment Variables</h3>
+<pre class="env"><code># Tier 1 — Native Providers
+ANTHROPIC_API_KEY=         # Claude (vision + chat)
+OPENAI_API_KEY=            # GPT-4o (vision + chat)
+GEMINI_API_KEY=            # Google Gemini (vision + chat)
+OPENROUTER_API_KEY=        # 100+ models gateway
+DEEPSEEK_API_KEY=          # DeepSeek-V3 (chat only)
+GROQ_API_KEY=              # Llama 3.3 70B (chat only, fastest)
+HELIX_OLLAMA_URL=          # Local Ollama (optional vision)
+ASTICA_API_KEY=            # Specialized vision API
+KIMI_API_KEY=              # Moonshot AI (vision + chat)
+STEPFUN_API_KEY=           # Stepfun (vision + chat)
+NVIDIA_API_KEY=            # NVIDIA NIM (vision + chat)
+MISTRAL_API_KEY=           # Mistral Large (chat)
+XAI_API_KEY=               # xAI Grok (vision + chat)
+QWEN_API_KEY=              # Alibaba Qwen (vision + chat)
+
+# Tier 2 — OpenAI-Compatible
+AI21_API_KEY=
+CEREBRAS_API_KEY=
+CHUTES_API_KEY=
+CLOUDFLARE_API_KEY=
+CODESTRAL_API_KEY=
+COHERE_API_KEY=
+FIREWORKS_API_KEY=
+GITHUB_MODELS_API_KEY=
+HUGGINGFACE_API_KEY=
+HYPERBOLIC_API_KEY=
+MODAL_API_KEY=
+NIA_API_KEY=
+NLPCLOUD_API_KEY=
+NOVITA_API_KEY=
+PERPLEXITY_API_KEY=
+PUBLICAI_API_KEY=
+REPLICATE_API_KEY=
+SAMBANOVA_API_KEY=
+SARVAM_API_KEY=
+SILICONFLOW_API_KEY=
+TOGETHER_API_KEY=
+UPSTAGE_API_KEY=
+VENICE_API_KEY=
+VULAVULA_API_KEY=
+ZAI_API_KEY=
+ZEN_API_KEY=
+ZHIPU_API_KEY=
+JUNIE_API_KEY=</code></pre>
+<h3 id="vision-model-registry-from-llmsverifier">7.2 Vision Model
+Registry (from LLMsVerifier)</h3>
+<p>The <code>vision_ranking.go</code> file sources scores dynamically
+from
+<code>digital.vasic.llmsverifier/pkg/helixqa.VisionModelRegistry()</code>.
+Key models:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Provider</th>
+<th>Quality</th>
+<th>Reliability</th>
+<th>Cost/1k</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>claude-sonnet-4</td>
+<td>Anthropic</td>
+<td>0.95</td>
+<td>0.98</td>
+<td>~$0.015</td>
+</tr>
+<tr>
+<td>gpt-4o</td>
+<td>OpenAI</td>
+<td>0.93</td>
+<td>0.97</td>
+<td>~$0.015</td>
+</tr>
+<tr>
+<td>gemini-pro</td>
+<td>Google</td>
+<td>0.92</td>
+<td>0.96</td>
+<td>~$0.005</td>
+</tr>
+<tr>
+<td>kimi-k2.5</td>
+<td>Kimi</td>
+<td>0.88</td>
+<td>0.90</td>
+<td>$0.0006</td>
+</tr>
+<tr>
+<td>qwen-vl-max</td>
+<td>Qwen</td>
+<td>0.87</td>
+<td>0.89</td>
+<td>~$0.003</td>
+</tr>
+<tr>
+<td>llava:7b</td>
+<td>Ollama</td>
+<td>0.70</td>
+<td>1.00</td>
+<td>$0</td>
+</tr>
+<tr>
+<td>minicpm-v:8b</td>
+<td>Ollama</td>
+<td>0.72</td>
+<td>1.00</td>
+<td>$0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ocr-language-support-tesseract">7.3 OCR Language Support
+(Tesseract)</h3>
+<p>From <code>pkg/vision/text/tesseract.go</code>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Script-to-language mapping for OSD (Orientation and Script Detection)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>scriptMap <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Latin&quot;</span><span class="op">:</span>      <span class="st">&quot;eng&quot;</span><span class="op">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Han&quot;</span><span class="op">:</span>        <span class="st">&quot;chi_sim&quot;</span><span class="op">,</span>     <span class="co">// Chinese Simplified</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Hangul&quot;</span><span class="op">:</span>     <span class="st">&quot;kor&quot;</span><span class="op">,</span>          <span class="co">// Korean</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Japanese&quot;</span><span class="op">:</span>   <span class="st">&quot;jpn&quot;</span><span class="op">,</span>          <span class="co">// Japanese</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Arabic&quot;</span><span class="op">:</span>     <span class="st">&quot;ara&quot;</span><span class="op">,</span>          <span class="co">// Arabic</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Cyrillic&quot;</span><span class="op">:</span>   <span class="st">&quot;rus&quot;</span><span class="op">,</span>          <span class="co">// Russian (covers Serbian, Bulgarian, etc.)</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Greek&quot;</span><span class="op">:</span>      <span class="st">&quot;ell&quot;</span><span class="op">,</span>          <span class="co">// Greek</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Hebrew&quot;</span><span class="op">:</span>     <span class="st">&quot;heb&quot;</span><span class="op">,</span>          <span class="co">// Hebrew</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Thai&quot;</span><span class="op">:</span>       <span class="st">&quot;tha&quot;</span><span class="op">,</span>          <span class="co">// Thai</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Devanagari&quot;</span><span class="op">:</span> <span class="st">&quot;hin&quot;</span><span class="op">,</span>          <span class="co">// Hindi</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Tesseract supports <strong>100+ languages</strong> total via tessdata
+packs. Configuration: - Default: <code>eng</code> - Configurable:
+<code>[]string{&quot;eng&quot;, &quot;chi_sim&quot;, &quot;fra&quot;, &quot;rus&quot;}</code> etc. - Pool size:
+4 concurrent clients - Min confidence: 60%</p>
+<hr />
+<h2 id="key-files-reference">8. Key Files Reference</h2>
+<table>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.env.example</code></td>
+<td>All provider API keys and configuration</td>
+</tr>
+<tr>
+<td><code>pkg/llm/provider.go</code></td>
+<td>Provider interface definition</td>
+</tr>
+<tr>
+<td><code>pkg/llm/providers_registry.go</code></td>
+<td>Auto-discovery registry (40+ providers)</td>
+</tr>
+<tr>
+<td><code>pkg/llm/adaptive.go</code></td>
+<td>Fallback routing, health tracking</td>
+</tr>
+<tr>
+<td><code>pkg/llm/vision_ranking.go</code></td>
+<td>Score-based vision provider selection</td>
+</tr>
+<tr>
+<td><code>pkg/vision/text/tesseract.go</code></td>
+<td>OCR with 10-script language detection</td>
+</tr>
+<tr>
+<td><code>pkg/vision/core/interfaces.go</code></td>
+<td>TextExtractor, LayoutAnalyzer interfaces</td>
+</tr>
+<tr>
+<td><code>pkg/nexus/adapter.go</code></td>
+<td>Unified platform abstraction</td>
+</tr>
+<tr>
+<td><code>pkg/nexus/ai/navigator.go</code></td>
+<td>LLM-driven UI navigation</td>
+</tr>
+<tr>
+<td><code>banks/full-qa-web.yaml</code></td>
+<td>Web i18n/subtitle test cases</td>
+</tr>
+<tr>
+<td><code>banks/full-qa-api.yaml</code></td>
+<td>API subtitle/language test cases</td>
+</tr>
+<tr>
+<td><code>banks/full-qa-android.yaml</code></td>
+<td>Android i18n test cases</td>
+</tr>
+<tr>
+<td><code>banks/full-qa-cross-platform.yaml</code></td>
+<td>Cross-platform Cyrillic tests</td>
+</tr>
+<tr>
+<td><code>website/developer/llm-providers.md</code></td>
+<td>Provider documentation</td>
+</tr>
+<tr>
+<td><code>website/providers.md</code></td>
+<td>Provider quick reference</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="recommendations-for-enterprise-translation-qa">9.
+Recommendations for Enterprise Translation QA</h2>
+<h3 id="optimal-provider-configuration-for-translation-testing">9.1
+Optimal Provider Configuration for Translation Testing</h3>
+<pre class="env"><code># Tier 1: Best vision for i18n validation
+ANTHROPIC_API_KEY=sk-ant-...        # Primary: best Cyrillic/Unicode OCR
+GEMINI_API_KEY=...                  # Secondary: multilingual, long context
+
+# Tier 2: Fast/cheap for API validation
+GROQ_API_KEY=gsk_...                # Fast inference for bulk API tests
+DEEPSEEK_API_KEY=sk-...             # Cheapest for text processing
+
+# Tier 3: Local for offline/air-gapped
+HELIX_OLLAMA_URL=http://localhost:11434
+HELIX_OLLAMA_MODEL=minicpm-v:8b     # Good vision, zero cost</code></pre>
+<h3 id="priority-test-coverage-for-translation">9.2 Priority Test
+Coverage for Translation</h3>
+<ol type="1">
+<li><strong>P0 (Critical)</strong>: Language setting change, Cyrillic
+search, subtitle display</li>
+<li><strong>P1 (High)</strong>: Unicode filenames, RTL layout, subtitle
+API, cross-platform consistency</li>
+<li><strong>P2 (Medium)</strong>: Emoji support, Chinese/Japanese text,
+bi-directional text</li>
+<li><strong>P3 (Low)</strong>: Rare script support (Thai, Devanagari,
+Greek), TUI rendering</li>
+</ol>
+<h3 id="qa-automation-strategy">9.3 QA Automation Strategy</h3>
+<ol type="1">
+<li><strong>Use Tesseract for deterministic OCR validation</strong> (not
+LLM-dependent)</li>
+<li><strong>Use LLMs for semantic validation</strong> (“does this
+translation make sense?”)</li>
+<li><strong>Use multi-provider consensus for ambiguous cases</strong>
+(<code>pkg/llm/consensus.go</code>)</li>
+<li><strong>Use Groq for rapid API regression</strong> (fast +
+cheap)</li>
+<li><strong>Use Anthropic for visual validation</strong> (highest
+accuracy)</li>
+<li><strong>Track cost per i18n test suite</strong> to optimize provider
+selection</li>
+</ol>
+<hr />
+<p><em>End of Analysis</em></p>
+</body>
+</html>

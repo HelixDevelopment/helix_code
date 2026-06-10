@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">plan</h1>
+</header>
+<h1 id="master-plan-llmsverifier-integration-into-helixcode">Master
+Plan: LLMsVerifier Integration into HelixCode</h1>
+<h2 id="objective">Objective</h2>
+<p>Create an in-depth, step-by-step integration plan for making
+LLMsVerifier the single source of truth for model provisioning in
+HelixTrack (HelixCode), with HelixAgent as the reference
+implementation.</p>
+<h2 id="stage-1-deep-repository-analysis-parallel-research-swarm">Stage
+1 — Deep Repository Analysis (Parallel Research Swarm)</h2>
+<p><strong>Skill</strong>: <code>deep-research-swarm</code> (Route B —
+Focused Search) <strong>Agents</strong>: 1.
+<strong>Repo_Analyzer_HelixCode</strong> — Analyze HelixCode repository
+structure, configuration system, model management, CLI architecture, UX
+patterns, supported platforms, existing test framework, Challenges
+system, Constitution/CLAUDE.MD/AGENTS.MD presence. 2.
+<strong>Repo_Analyzer_LLMV</strong> — Analyze LLMsVerifier repository
+structure, verification engine, scoring algorithm, provider support,
+rate limiting logic, token tracking, pricing model, configuration
+requirements, API integration patterns. 3.
+<strong>Repo_Analyzer_HelixAgent</strong> — Analyze HelixAgent as
+reference implementation: how it integrated LLMsVerifier, configuration
+options, model display UX, enable/disable mechanisms, provider
+management, API key provisioning, real-time updates handling. 4.
+<strong>Cross_Reference_Analyst</strong> — Compare findings across
+repos, identify integration touchpoints, gaps between HelixAgent and
+HelixCode architectures, configuration schema differences. 5.
+<strong>Documentation_Archaeologist</strong> — Extract all
+documentation, README, guides, manuals, configuration references,
+CLAUDE.MD, AGENTS.MD, Constitution files from all repos.</p>
+<p><strong>Deliverable</strong>: Complete research brief with exact file
+paths, line references, configuration schemas, API contracts, and
+integration points.</p>
+<h2 id="stage-2-architecture-integration-planning">Stage 2 —
+Architecture &amp; Integration Planning</h2>
+<p><strong>Skill</strong>: Orchestrator-designed (no skill needed —
+architecture synthesis) <strong>Agents</strong>: 1.
+<strong>Integration_Architect</strong> — Design the full integration
+architecture: configuration schema changes, module boundaries, API
+contracts between HelixCode and LLMsVerifier, data flow for real-time
+updates, model state management, caching strategy. 2.
+<strong>UX_Designer</strong> — Design the enterprise-grade model display
+UX for CLI (all platforms): model listing, validation badges, cooldown
+indicators, provider attribution, pricing display, rate limit status,
+filtering/sorting, help text. 3.
+<strong>Provider_Integration_Specialist</strong> — Map all providers and
+models, plan full incorporation of MCPs, LSPs, ACPs, Embeddings, RAGs,
+Skills, Plugins from all supported providers.</p>
+<p><strong>Deliverable</strong>: Architecture document, UX
+specification, provider integration matrix.</p>
+<h2 id="stage-3-phased-implementation-planning">Stage 3 — Phased
+Implementation Planning</h2>
+<p><strong>Skill</strong>: Orchestrator-designed
+<strong>Agents</strong>: 1. <strong>Phase_Planner_Core</strong> — Plan
+Phase 1: Foundation (config, dependency injection, basic integration) 2.
+<strong>Phase_Planner_ModelMgmt</strong> — Plan Phase 2: Model
+Management (LLMsVerifier as source of truth, real-time updates, state
+synchronization) 3. <strong>Phase_Planner_UX</strong> — Plan Phase 3: UX
+Implementation (model display, CLI integration, platform compatibility)
+4. <strong>Phase_Planner_AdvFeatures</strong> — Plan Phase 4: Advanced
+Features (MCPs, LSPs, ACPs, Embeddings, RAGs, Skills, Plugins) 5.
+<strong>Phase_Planner_Testing</strong> — Plan Phase 5: Testing Strategy
+(unit, integration, e2e, Challenges, anti-bluff verification, 100%
+coverage target) 6. <strong>Phase_Planner_Docs</strong> — Plan Phase 6:
+Documentation &amp; Constitution updates (all config options, guides,
+CLAUDE.MD, AGENTS.MD, Constitution files)</p>
+<p><strong>Deliverable</strong>: Six-phase implementation plan with
+fine-grained tasks, exact file references, line numbers, code snippets,
+and dependency chains.</p>
+<h2 id="stage-4-quality-assurance-constitution-integration">Stage 4 —
+Quality Assurance &amp; Constitution Integration</h2>
+<p><strong>Agents</strong>: 1. <strong>Constitution_Integrator</strong>
+— Draft Constitution amendments, CLAUDE.MD and AGENTS.MD updates for
+anti-bluff testing guarantee 2. <strong>Test_Strategist</strong> —
+Design comprehensive testing matrix ensuring every feature is testable
+and tested</p>
+<p><strong>Deliverable</strong>: Constitution updates, testing
+manifesto, challenge specifications.</p>
+<h2 id="stage-5-final-assembly">Stage 5 — Final Assembly</h2>
+<p><strong>Agents</strong>: 1. <strong>Plan_Assembler</strong> — Combine
+all outputs into single comprehensive document 2.
+<strong>Review_Verifier</strong> — Verify completeness: no skipped
+sections, no assumptions without evidence, every claim backed by repo
+analysis</p>
+<p><strong>Deliverable</strong>: Final integration plan document (.md
+then .docx)</p>
+<h2 id="output-format">Output Format</h2>
+<ul>
+<li>Markdown document with table of contents</li>
+<li>Converted to .docx for delivery</li>
+<li>All file paths, line numbers, exact code references</li>
+<li>Every phase with sub-tasks and acceptance criteria</li>
+<li>Testing strategy with 100% coverage blueprint</li>
+<li>Constitution/CLAUDE.MD/AGENTS.MD amendments</li>
+</ul>
+</body>
+</html>

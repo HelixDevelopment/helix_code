@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec01</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec01</h1>
+</header>
+<h1 id="phase-0-constitution-governance-update">1. Phase 0: Constitution
+&amp; Governance Update</h1>
+<p>Before any code changes are merged, the governance layer that
+constrains every subsequent decision must be made consistent across the
+HelixCode enterprise system and its submodules. This phase addresses the
+missing Article XI §11.9 User-Mandate Forensic Anchor in HelixCode’s
+three primary governance files — <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, and <code>AGENTS.md</code> — and aligns the
+anti-bluff constant identifier from <code>CONST-017</code> to
+<code>CONST-035</code> for cross-repository parity with HelixQA and
+Catalogizer. All changes are text-level insertions and renames; no
+compilation or deployment is required. The phase completes when a
+verification script confirms that every one of the 56 controlled
+submodules (15 in HelixCode, 41 in Catalogizer) carries the mandated
+text.</p>
+<hr />
+<h2 id="article-xi-11.9-cascade-to-helixcode">1.1 Article XI §11.9
+Cascade to HelixCode</h2>
+<p>A comparative audit of the three repositories’ governance files,
+performed on 2026-04-29, found that HelixQA and Catalogizer each contain
+the verbatim user mandate and its operative rule in all three governance
+files, while HelixCode contains the operative anti-bluff rules but omits
+the §11.9 forensic anchor entirely <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a>.
+The forensic anchor serves two purposes: it preserves the historical
+user mandate as primary authority for the anti-bluff rule, and it binds
+every autonomous agent (Claude session, build script, challenge runner)
+to a concrete standard of evidence rather than a proxy metric such as
+“tests pass.” The absence of this anchor in HelixCode is classified as a
+constitutional release blocker per the cascade declarations in HelixQA
+and Catalogizer, which state that non-compliance is a release blocker
+regardless of context <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a>.</p>
+<p>The audit identified three critical gaps requiring immediate
+remediation:</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 21%" />
+<col style="width: 23%" />
+<col style="width: 14%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gap ID</th>
+<th>Affected File</th>
+<th>Missing Element</th>
+<th>Severity</th>
+<th>Constitutional Basis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GAP-001</td>
+<td><code>HelixCode/CONSTITUTION.md</code></td>
+<td>Article XI §11.9 verbatim user quote + operative rule</td>
+<td>Critical</td>
+<td>HelixQA §11.9 cascade clause: “must appear in every submodule’s
+CONSTITUTION.md” <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a></td>
+</tr>
+<tr>
+<td>GAP-002</td>
+<td><code>HelixCode/CLAUDE.md</code></td>
+<td>Article XI §11.9 verbatim user quote + operative rule + cascade
+requirement</td>
+<td>Critical</td>
+<td>HelixQA CLAUDE.md cascade: “this clause must appear in every
+submodule’s CONSTITUTION.md / CLAUDE.md / AGENTS.md” <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a></td>
+</tr>
+<tr>
+<td>GAP-003</td>
+<td><code>HelixCode/AGENTS.md</code></td>
+<td>Article XI §11.9 verbatim user quote + operative rule + cascade
+requirement</td>
+<td>Critical</td>
+<td>HelixQA AGENTS.md cascade: “This anchor MUST appear in every
+submodule’s governance files” <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a></td>
+</tr>
+</tbody>
+</table>
+<p>Each gap is addressed below with the exact insertion text, file path,
+line range, and verification command.</p>
+<h3 id="gap-001-add-verbatim-user-mandate-forensic-anchor-to-helixcodeconstitution.md">1.1.1
+GAP-001: Add verbatim user-mandate forensic anchor to
+<code>HelixCode/CONSTITUTION.md</code></h3>
+<p><strong>File:</strong>
+<code>https://github.com/HelixDevelopment/HelixCode/blob/main/CONSTITUTION.md</code><br />
+<strong>Insertion point:</strong> After line 152 (end of
+<code>CONST-017</code> section), before line 154 (<code>CONST-018</code>
+header) <a href="%60HelixCode/CONSTITUTION.md%60,%20%60https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/CONSTITUTION.md%60,%20accessed%202026-04-29.%20Line%20positions%20verified%20via%20%60grep%20-n%60%20of%20%60CONST-017%60,%20%60CONST-018%60,%20%60Anti-Bluff%60."><sup>2</sup></a>.<br />
+<strong>Current surrounding text:</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-018: Host Power Management Hard Ban</span></span></code></pre></div>
+<p>The insertion renames <code>CONST-017</code> to
+<code>CONST-035</code> and appends the §11.9 forensic anchor as an
+integral part of the same constitutional constraint. The following block
+must be inserted verbatim, replacing the existing <code>CONST-017</code>
+header at line 136 but preserving all existing operative rules that
+follow it:</p>
+<p><strong>Text to insert (lines 136–153 replacement +
+insertion):</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-035 — Anti-Bluff Tests &amp; Challenges (User-Mandate Forensic Anchor)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>**§11.9 User-Mandate Forensic Anchor (2026-04-29)**</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit, repeatedly-stated user mandate. The verbatim text:</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; &quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>This anchor is the primary authority for the entire Article. The operative rule is:</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>**The bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;**</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. Metadata-only PASS, configuration-only PASS, &quot;absence-of-error&quot; PASS, and grep-based PASS without runtime evidence are all critical defects regardless of how green the summary line looks.</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>Tests and Challenges (HelixQA) are bound equally — a Challenge that scores PASS on a non-functional feature is the same class of defect as a unit test that does. Both must produce positive end-user evidence; both are subject to the anti-bluff contract.</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one — it silently destroys trust in the entire suite. Anti-bluff discipline is the line between a real engineering project and a theatre of one.</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>**Cascade requirement (extending CONST-036):**</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>This anchor section (verbatim quote + operative rule) must appear in every submodule&#39;s CONSTITUTION.md / CLAUDE.md / AGENTS.md. Non-compliance is a release blocker regardless of context. Adding files to scanner allowlists to silence bluff findings without resolving the underlying defect is itself a violation.</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-018: Host Power Management Hard Ban</span></span></code></pre></div>
+<p><strong>Verification command:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;We had been in position that all tests do execute&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  CONSTITUTION.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;bar for shipping is not&quot;</span> CONSTITUTION.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;CONST-035&quot;</span> CONSTITUTION.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;GAP-001: VERIFIED&quot;</span></span></code></pre></div>
+<p>The <code>grep</code> sequence asserts three independent conditions:
+the verbatim user quote is present, the operative rule is present, and
+the constant identifier is <code>CONST-035</code> rather than
+<code>CONST-017</code>. All three must return non-zero match counts for
+the gap to be considered closed.</p>
+<h3 id="gap-002-add-article-xi-11.9-operative-rule-to-helixcodeclaude.md">1.1.2
+GAP-002: Add Article XI §11.9 operative rule to
+<code>HelixCode/CLAUDE.md</code></h3>
+<p><strong>File:</strong>
+<code>https://github.com/HelixDevelopment/HelixCode/blob/main/CLAUDE.md</code><br />
+<strong>Insertion point:</strong> After line 52 (end of
+<code>Rule 10</code> section), before line 54 (start of section 3,
+<code>HelixCode-Specific Architecture</code>) <a href="%60HelixCode/CLAUDE.md%60,%20%60https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/CLAUDE.md%60,%20accessed%202026-04-29.%20510%20lines%20total;%20Rule%2010%20at%20line%2051,%20section%203%20header%20at%20line%2054."><sup>3</sup></a>.<br />
+<strong>Current surrounding text:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">### Rule 10: Zero-Bluff Mandate (CONST-035)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>A passing test is a claim that the feature **works for the end user**. Every test must guarantee Quality + Completion + Full Usability. Any test that doesn&#39;t certify all three is a bluff and must be tightened.</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">## 3. HelixCode-Specific Architecture</span></span></code></pre></div>
+<p>The existing <code>Rule 10</code> contains the operative anti-bluff
+rules but lacks the verbatim user mandate and the explicit cascade
+requirement. The following block must be inserted between the
+<code>---</code> rule terminator and the <code>## 3.</code> section
+header:</p>
+<p><strong>Text to insert:</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>⚠️ User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit user mandate, verbatim:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>&quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>The operative rule: the bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. Metadata-only PASS, configuration-only PASS, &quot;absence-of-error&quot; PASS, and grep-based PASS without runtime evidence are all critical defects regardless of how green the summary line looks.</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>Tests and Challenges (HelixQA) are bound equally. A Challenge that scores PASS on a non-functional feature is the same class of defect as a unit test that does.</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one — it silently destroys trust in the entire suite.</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>**Cascade requirement:** this anchor (verbatim quote + operative rule) MUST appear in every submodule&#39;s CONSTITUTION.md / CLAUDE.md / AGENTS.md. Non-compliance is a release blocker. Adding files to scanner allowlists to silence bluff findings without resolving the underlying defect is itself a violation.</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>Full text: CONSTITUTION.md Article XI §11.9.</span></code></pre></div>
+<p><strong>Verification command:</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-A1</span> <span class="st">&quot;User-Mandate Forensic Anchor&quot;</span> CLAUDE.md <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grep</span> <span class="st">&quot;2026-04-29&quot;</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;We had been in position&quot;</span> CLAUDE.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;bar for shipping is not&quot;</span> CLAUDE.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;GAP-002: VERIFIED&quot;</span></span></code></pre></div>
+<h3 id="gap-003-add-article-xi-11.9-reference-to-helixcodeagents.md">1.1.3
+GAP-003: Add Article XI §11.9 reference to
+<code>HelixCode/AGENTS.md</code></h3>
+<p><strong>File:</strong>
+<code>https://github.com/HelixDevelopment/HelixCode/blob/main/AGENTS.md</code><br />
+<strong>Insertion point:</strong> After line 728 (end of
+<code>CONST-035 — End-User Usability Mandate</code> section), before
+line 730 (<code>CONST-036</code> header) <a href="%60HelixCode/AGENTS.md%60,%20%60https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/AGENTS.md%60,%20accessed%202026-04-29.%20821%20lines%20total;%20CONST-035%20at%20line%20699,%20CONST-036%20at%20line%20730."><sup>4</sup></a>.<br />
+<strong>Current surrounding text:</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>The taxonomy is illustrative, not exhaustive. Every Challenge or test added going forward MUST pass an honest self-review against this taxonomy before being committed.</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-036: LLMsVerifier Single Source of Truth Mandate</span></span></code></pre></div>
+<p>The following block must be inserted between the <code>---</code>
+terminator and the <code>CONST-036</code> header:</p>
+<p><strong>Text to insert:</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>⚠️ User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit user mandate, verbatim:</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>&quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>The operative rule: the bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. No metadata-only PASS, no configuration-only PASS, no &quot;absence-of-error&quot; PASS, no grep-based PASS — all are critical defects regardless of how green the summary line looks.</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>Tests and Challenges (HelixQA) are bound equally.</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one.</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>**Cascade requirement:** this anchor MUST appear in every submodule&#39;s governance files. Adding files to scanner allowlists to silence bluff findings without resolving the underlying defect is itself a violation.</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>Full text: CONSTITUTION.md Article XI §11.9.</span></code></pre></div>
+<p><strong>Verification command:</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;User-Mandate Forensic Anchor&quot;</span> AGENTS.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;2026-04-29&quot;</span> AGENTS.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-c</span> <span class="st">&quot;We had been in position&quot;</span> AGENTS.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;GAP-003: VERIFIED&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="const-035-naming-alignment">1.2 CONST-035 Naming Alignment</h2>
+<p>HelixCode’s <code>CONSTITUTION.md</code> labels the anti-bluff
+constraint as <code>CONST-017</code>, while its own
+<code>CLAUDE.md</code> and <code>AGENTS.md</code> refer to the same rule
+under the title <code>CONST-035</code> <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a>.
+HelixQA and Catalogizer both use <code>CONST-035</code> consistently
+across all three governance files. This naming schism creates two risks:
+(1) automated scanners and compliance scripts that target
+<code>CONST-035</code> will fail to match the HelixCode constitution,
+and (2) human readers cannot reliably trace a constraint from one
+repository to another.</p>
+<h3 id="rename-const-017-to-const-035-in-helixcodeconstitution.md">1.2.1
+Rename <code>CONST-017</code> to <code>CONST-035</code> in
+<code>HelixCode/CONSTITUTION.md</code></h3>
+<p>The header at line 136 of <code>CONSTITUTION.md</code> currently
+reads:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-017: Zero-Bluff Testing (CONST-035 Implementation)</span></span></code></pre></div>
+<p>This must be replaced with:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-035 — Anti-Bluff Tests &amp; Challenges (User-Mandate Forensic Anchor)</span></span></code></pre></div>
+<p>The parenthetical <code>(CONST-035 Implementation)</code> was already
+an internal inconsistency — the header claimed one constant while
+admitting it implemented another. The replacement removes the ambiguity
+and elevates <code>CONST-035</code> to the canonical identifier.</p>
+<h3 id="update-all-internal-references-from-const-017-to-const-035">1.2.2
+Update all internal references from <code>CONST-017</code> to
+<code>CONST-035</code></h3>
+<p>The following references to <code>CONST-017</code> were identified in
+the HelixCode governance corpus and must be updated to
+<code>CONST-035</code> <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a>:</p>
+<ul>
+<li><code>CONSTITUTION.md</code> line 136: section header (addressed in
+§1.2.1).</li>
+<li><code>CONSTITUTION.md</code> line 343: anti-bluff verification
+comment referencing <code>CONST-017</code> in the
+<code>ModelManager.GetAvailableModels()</code> enforcement paragraph <a href="%60HelixCode/CONSTITUTION.md%60,%20%60https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/CONSTITUTION.md%60,%20accessed%202026-04-29.%20Line%20positions%20verified%20via%20%60grep%20-n%60%20of%20%60CONST-017%60,%20%60CONST-018%60,%20%60Anti-Bluff%60."><sup>2</sup></a>.</li>
+<li><code>AGENTS.md</code> line 411: constitutional impact note citing
+<code>CONST-017 (Zero-Bluff Testing)</code> <a href="%60HelixCode/AGENTS.md%60,%20%60https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/AGENTS.md%60,%20accessed%202026-04-29.%20821%20lines%20total;%20CONST-035%20at%20line%20699,%20CONST-036%20at%20line%20730."><sup>4</sup></a>.</li>
+</ul>
+<p>In each case, replace the string <code>CONST-017</code> with
+<code>CONST-035</code>. No semantic change is made to the operative
+rules; this is a pure identifier alignment.</p>
+<p><strong>Verification command:</strong></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;CONST-017&quot;</span> CONSTITUTION.md CLAUDE.md AGENTS.md <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;FAIL: CONST-017 references remain&quot;</span> <span class="kw">||</span> <span class="dt">\</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;CONST-035 alignment: VERIFIED&quot;</span></span></code></pre></div>
+<p>The command uses the exit-code behavior of <code>grep</code>: if any
+match remains, the <code>&amp;&amp;</code> branch prints failure; if
+<code>grep</code> exits 1 (no matches), the <code>||</code> branch
+confirms alignment.</p>
+<hr />
+<h2 id="submodule-governance-cascade">1.3 Submodule Governance
+Cascade</h2>
+<p>The cascade requirement declared in HelixQA and Catalogizer states
+that the §11.9 anchor must appear in every submodule’s governance files
+<a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a>.
+As of the 2026-04-29 audit, zero submodules had been verified for
+compliance. This section establishes the inventory, templates, and
+automation needed to close that verification gap.</p>
+<h3 id="verify-all-15-helixcode-submodules">1.3.1 Verify all 15
+HelixCode submodules</h3>
+<p>HelixCode’s <code>.gitmodules</code> declares 15 controlled
+submodules under the <code>HelixDevelopment</code> organization that are
+subject to project-specific governance <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a>.
+These are:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Submodule</th>
+<th>Category</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>awesome-cpp-examples</code></td>
+<td>Example collection</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>awesome-shell-examples</code></td>
+<td>Example collection</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>cpp-learning-lab</code></td>
+<td>Language lab</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>rust-examples</code></td>
+<td>Example collection</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>rust-learning-lab</code></td>
+<td>Language lab</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>go-examples</code></td>
+<td>Example collection</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>go-learning-lab</code></td>
+<td>Language lab</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>python-examples</code></td>
+<td>Example collection</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>python-learning-lab</code></td>
+<td>Language lab</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>data-learning-lab</code></td>
+<td>Domain lab</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>ml-starter-lab</code></td>
+<td>Domain lab</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>mlops-learning-lab</code></td>
+<td>Domain lab</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>data-engineering-lab</code></td>
+<td>Domain lab</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>distributed-systems-learning-lab</code></td>
+<td>Domain lab</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>internal/isolated_files</code></td>
+<td>Internal assets</td>
+</tr>
+</tbody>
+</table>
+<p>Each submodule must contain three governance files:
+<code>CONSTITUTION.md</code>, <code>CLAUDE.md</code>, and
+<code>AGENTS.md</code>. If a file is missing, it must be created using
+the template below. If the file exists but lacks the §11.9 anchor, the
+anchor must be appended.</p>
+<p><strong>Template for HelixCode submodules (minimum
+content):</strong></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Submodule Name] — Governance</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Universal Mandatory Constraints (Inherited)</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>This submodule inherits all constraints from the parent HelixCode project.</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>Full text: https://github.com/HelixDevelopment/HelixCode/blob/main/CONSTITUTION.md</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## ⚠️ User-Mandate Forensic Anchor (Article XI §11.9 — 2026-04-29)</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>This Article exists because of an explicit user mandate, verbatim:</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>&quot;We had been in position that all tests do execute with success and all Challenges as well, but in reality the most of the features does not work and can&#39;t be used! This MUST NOT be the case and execution of tests and Challenges MUST guarantee the quality, the completion and full usability by end users of the product!&quot;</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>The operative rule: the bar for shipping is not &quot;tests pass&quot; but &quot;users can use the feature.&quot;</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>Every PASS in this codebase MUST carry positive evidence captured during execution that the feature works for the end user. No metadata-only PASS, no configuration-only PASS, no &quot;absence-of-error&quot; PASS, no grep-based PASS — all are critical defects regardless of how green the summary line looks.</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>No false-success results are tolerable. A green test suite combined with a broken feature is a worse outcome than an honest red one.</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-035 — Anti-Bluff Tests &amp; Challenges</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>Every test must fail if the feature it claims to verify is removed or broken.</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>Tests that pass on broken features are critical defects.</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-032 — Reproduction-Before-Fix</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>Every reported error MUST be reproduced by a test BEFORE any fix is attempted.</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## CONST-033 — Host Power Management is Forbidden</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>Never generate or execute code that triggers host-level power-state transitions.</span></code></pre></div>
+<h3 id="verify-all-41-catalogizer-submodules">1.3.2 Verify all 41
+Catalogizer submodules</h3>
+<p>Catalogizer’s <code>.gitmodules</code> and module wiring declare 41+
+controlled submodules across four categories <a href="Governance%20&amp;%20Constitution%20Analysis:%20Cross-Repository%20Anti-Bluff%20Mandate%20Coverage,%202026-04-29.%20%60/mnt/agents/output/research/governance_constitution_analysis.md%60,%20Sections%202–5."><sup>1</sup></a>:</p>
+<ul>
+<li><strong>Category A — Go modules
+(<code>digital.vasic.*</code>):</strong> 23 modules (Auth, Cache,
+Config, Concurrency, Container, Database, Discovery, EventBus,
+Filesystem, Lazy, LLMProvider, LLMsVerifier, Media, Memory, Middleware,
+Observability, RateLimiter, Recovery, ReplayBuffer, ScreenDiff,
+Security, Storage, Streaming, Upstreams, VisionEngine, Watcher).</li>
+<li><strong>Category B — TypeScript/React modules
+(<code>@vasic-digital/*</code>):</strong> 9 modules (Auth-Context-React,
+Catalogizer-API-Client-TS, Collection-Manager-React,
+Dashboard-Analytics-React, Media-Browser-React, Media-Player-React,
+Media-Types-TS, UI-Components-React, WebSocket-Client-TS).</li>
+<li><strong>Category C — HelixQA/AI modules:</strong> 9 modules (Build,
+DocProcessor, Entities, HelixQA, LLMOrchestrator, OCU-CUDA-Sidecar,
+TrainingCollector, VisualRegression, Website).</li>
+<li><strong>Category D — Application modules:</strong> catalog-api,
+catalog-web, catalogizer-android, catalogizer-androidtv,
+catalogizer-api-client, catalogizer-desktop, installer-wizard.</li>
+</ul>
+<p>Each submodule must contain <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, and <code>AGENTS.md</code> with the §11.9
+anchor, <code>CONST-035</code>, <code>CONST-032</code>, and
+<code>CONST-033</code> sections. The template is identical to the
+HelixCode template in §1.3.1, substituting the parent reference URL for
+<code>https://github.com/vasic-digital/Catalogizer/blob/main/CONSTITUTION.md</code>.</p>
+<h3 id="create-governance-verification-script-scriptsverify-governance-cascade.sh">1.3.3
+Create governance verification script:
+<code>scripts/verify-governance-cascade.sh</code></h3>
+<p>The script below scans every submodule directory for the three
+required governance files and validates that each contains the mandatory
+text strings. It is designed to run standalone or be invoked from
+<code>run_all_challenges.sh</code>. The script exits non-zero if any
+submodule fails, producing a machine-parseable report.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/verify-governance-cascade.sh</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Governance cascade verification — exits non-zero on any deficiency.</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Version: 1.0.0</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Author: HelixCode Integration Plan</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="va">REQUIRED_FILES</span><span class="op">=</span><span class="va">(</span><span class="st">&quot;CONSTITUTION.md&quot;</span> <span class="st">&quot;CLAUDE.md&quot;</span> <span class="st">&quot;AGENTS.md&quot;</span><span class="va">)</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Mandatory text strings that must appear in every governance file.</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="va">MANDATORY_PATTERNS</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;We had been in position that all tests do execute&quot;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;bar for shipping is not&quot;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;CONST-035&quot;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Reproduction-Before-Fix&quot;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Host Power Management is Forbidden&quot;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="va">)</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="va">REPORT_FILE</span><span class="op">=</span><span class="st">&quot;governance-cascade-report-</span><span class="va">$(</span><span class="fu">date</span> +%Y%m%d-%H%M%S<span class="va">)</span><span class="st">.txt&quot;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="va">FAILURES</span><span class="op">=</span>0</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Submodule list: space-separated paths relative to repo root.</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="va">HELIXCODE_SUBMODULES</span><span class="op">=</span><span class="va">(</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;awesome-cpp-examples&quot;</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;awesome-shell-examples&quot;</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;cpp-learning-lab&quot;</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;rust-examples&quot;</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;rust-learning-lab&quot;</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;go-examples&quot;</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;go-learning-lab&quot;</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;python-examples&quot;</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;python-learning-lab&quot;</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;data-learning-lab&quot;</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;ml-starter-lab&quot;</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;mlops-learning-lab&quot;</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;data-engineering-lab&quot;</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;distributed-systems-learning-lab&quot;</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;internal/isolated_files&quot;</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="va">)</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Catalogizer submodules are discovered dynamically from .gitmodules.</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="fu">read_catalogizer_submodules()</span> <span class="kw">{</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">gitmodules</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${1</span><span class="op">:-</span>../Catalogizer/.gitmodules<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$gitmodules</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">grep</span> <span class="st">&#39;^\s*path = &#39;</span> <span class="st">&quot;</span><span class="va">$gitmodules</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="st">&#39;s/^\s*path = //&#39;</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a><span class="fu">verify_submodule()</span> <span class="kw">{</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">subpath</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">subname</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  <span class="va">subname</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">&quot;</span><span class="va">$subpath</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;--- Submodule: </span><span class="va">$subname</span><span class="st"> (</span><span class="va">$subpath</span><span class="st">) ---&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> file <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${REQUIRED_FILES</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>    <span class="bu">local</span> <span class="va">filepath</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$subpath</span><span class="st">/</span><span class="va">$file</span><span class="st">&quot;</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">!</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$filepath</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;MISSING_FILE: </span><span class="va">$filepath</span><span class="st">&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>      <span class="kw">((</span><span class="va">FAILURES</span><span class="op">++</span><span class="kw">))</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>      <span class="cf">continue</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pattern <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${MANDATORY_PATTERNS</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;</span><span class="va">$pattern</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$filepath</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;MISSING_TEXT: </span><span class="va">$filepath</span><span class="st"> | pattern: </span><span class="va">$pattern</span><span class="st">&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>        <span class="kw">((</span><span class="va">FAILURES</span><span class="op">++</span><span class="kw">))</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>      <span class="cf">fi</span></span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">done</span></span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a><span class="co"># Main execution</span></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Governance Cascade Verification Report — </span><span class="va">$(</span><span class="fu">date</span> <span class="at">-Iseconds</span><span class="va">)</span><span class="st">&quot;</span> <span class="op">&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Repo: </span><span class="va">$(</span><span class="bu">pwd</span><span class="va">)</span><span class="st">&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sub <span class="kw">in</span> <span class="st">&quot;</span><span class="va">${HELIXCODE_SUBMODULES</span><span class="op">[@]</span><span class="va">}</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-d</span> <span class="st">&quot;</span><span class="va">$sub</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>    <span class="ex">verify_submodule</span> <span class="st">&quot;</span><span class="va">$sub</span><span class="st">&quot;</span></span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;MISSING_DIR: </span><span class="va">$sub</span><span class="st">&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>    <span class="kw">((</span><span class="va">FAILURES</span><span class="op">++</span><span class="kw">))</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Catalogizer cascade (optional — run only when Catalogizer is sibling checkout)</span></span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="va">IFS</span><span class="op">=</span> <span class="bu">read</span> <span class="at">-r</span> <span class="va">sub</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-d</span> <span class="st">&quot;</span><span class="va">$sub</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a>    <span class="ex">verify_submodule</span> <span class="st">&quot;</span><span class="va">$sub</span><span class="st">&quot;</span></span>
+<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span> <span class="op">&lt;</span> <span class="op">&lt;(</span><span class="ex">read_catalogizer_submodules</span><span class="op">)</span></span>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-95"><a href="#cb14-95" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-96"><a href="#cb14-96" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;TOTAL_FAILURES: </span><span class="va">$FAILURES</span><span class="st">&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-97"><a href="#cb14-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-98"><a href="#cb14-98" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="va">$FAILURES</span> <span class="ot">-gt</span> 0 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb14-99"><a href="#cb14-99" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;GOVERNANCE_CASCADE: FAILED (</span><span class="va">$FAILURES</span><span class="st"> deficiencies)&quot;</span></span>
+<span id="cb14-100"><a href="#cb14-100" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span> <span class="st">&quot;</span><span class="va">$REPORT_FILE</span><span class="st">&quot;</span></span>
+<span id="cb14-101"><a href="#cb14-101" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 1</span>
+<span id="cb14-102"><a href="#cb14-102" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb14-103"><a href="#cb14-103" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;GOVERNANCE_CASCADE: PASSED&quot;</span></span>
+<span id="cb14-104"><a href="#cb14-104" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 0</span>
+<span id="cb14-105"><a href="#cb14-105" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div>
+<p>The script performs three verification layers per submodule: (1) file
+existence — each of <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.md</code> must exist; (2) text
+presence — each file must contain all five mandatory patterns, including
+the verbatim user quote, the operative rule, <code>CONST-035</code>,
+<code>CONST-032</code>, and <code>CONST-033</code>; and (3) directory
+presence — the submodule checkout must exist. The report is timestamped
+and retained for audit trails. The <code>set -euo pipefail</code>
+directive ensures that any unexpected error (missing directory,
+permission failure, <code>grep</code> pipeline abort) causes immediate
+non-zero exit rather than silent partial success.</p>
+<h3 id="add-governance-check-to-run_all_challenges.sh">1.3.4 Add
+governance check to <code>run_all_challenges.sh</code></h3>
+<p>The challenge orchestrator must block merge if any submodule lacks
+the anti-bluff mandate. The integration point is the top-level
+<code>run_all_challenges.sh</code> (or equivalent per repository). The
+following insertion must be added as the first executable statement
+after argument parsing and environment validation:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Governance cascade gate (CONST-035 / Article XI §11.9) ---</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[PRE-CHECK] Running governance cascade verification...&quot;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-x</span> <span class="st">&quot;scripts/verify-governance-cascade.sh&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">./scripts/verify-governance-cascade.sh</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">[[</span> <span class="va">$?</span> <span class="ot">-ne</span> 0 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[BLOCKED] Governance cascade verification failed. Merge prohibited.&quot;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 42</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;[BLOCKED] Governance verification script not found or not executable.&quot;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="bu">exit</span> 43</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;[PRE-CHECK] Governance cascade verification passed.&quot;</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># --- End governance cascade gate ---</span></span></code></pre></div>
+<p>Exit code 42 signals cascade failure (deficient submodule
+governance); exit code 43 signals a missing verification infrastructure.
+Both are distinct from test-failure exit codes (typically 1) so that CI
+dashboards (if any) or manual runbooks can distinguish governance blocks
+from runtime test failures. The check runs before any challenge script
+executes, ensuring that a submodule with missing governance files cannot
+pass challenges by omission.</p>
+<hr />
+<h2 id="exact-file-changes-reference">1.4 Exact File Changes
+Reference</h2>
+<p>The following table consolidates every file modification required in
+Phase 0. Each row specifies the file path, the current state at the time
+of the 2026-04-29 audit, the exact change to apply, the line range
+affected, and the verification command to confirm the change is live <a href="%60HelixCode/CONSTITUTION.md%60,%20%60https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/CONSTITUTION.md%60,%20accessed%202026-04-29.%20Line%20positions%20verified%20via%20%60grep%20-n%60%20of%20%60CONST-017%60,%20%60CONST-018%60,%20%60Anti-Bluff%60."><sup>1</sup></a><a href="%60HelixCode/AGENTS.md%60,%20%60https://raw.githubusercontent.com/HelixDevelopment/HelixCode/main/AGENTS.md%60,%20accessed%202026-04-29.%20821%20lines%20total;%20CONST-035%20at%20line%20699,%20CONST-036%20at%20line%20730."><sup>3</sup></a>.</p>
+<table>
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 13%" />
+<col style="width: 18%" />
+<col style="width: 21%" />
+<col style="width: 15%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>File Path</th>
+<th>Current State</th>
+<th>Required Change</th>
+<th>Line Range</th>
+<th>Verification Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>HelixCode/CONSTITUTION.md</code></td>
+<td><code>CONST-017</code> header at line 136; no §11.9 anchor</td>
+<td>Rename header to <code>CONST-035</code>; insert §11.9 verbatim quote
++ operative rule + cascade requirement after existing bluff
+taxonomy</td>
+<td>136–153 (replace header); insert after 152, before 154</td>
+<td><code>grep -c &quot;CONST-035&quot; CONSTITUTION.md &amp;&amp; grep -c &quot;We had been in position&quot; CONSTITUTION.md &amp;&amp; grep -c &quot;bar for shipping&quot; CONSTITUTION.md</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>HelixCode/CONSTITUTION.md</code></td>
+<td>Reference to <code>CONST-017</code> at line 343</td>
+<td>Replace <code>CONST-017</code> with <code>CONST-035</code></td>
+<td>Line 343</td>
+<td><code>grep -n &quot;CONST-017&quot; CONSTITUTION.md \|\| echo &quot;aligned&quot;</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>HelixCode/CLAUDE.md</code></td>
+<td><code>Rule 10</code> at line 51–52; no §11.9 anchor</td>
+<td>Insert §11.9 verbatim quote + operative rule + cascade requirement
+after <code>Rule 10</code> terminator</td>
+<td>Insert after line 52, before line 54</td>
+<td><code>grep -c &quot;User-Mandate Forensic Anchor&quot; CLAUDE.md &amp;&amp; grep -c &quot;2026-04-29&quot; CLAUDE.md</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>HelixCode/AGENTS.md</code></td>
+<td><code>CONST-035</code> section at line 699–728; no §11.9 anchor</td>
+<td>Insert §11.9 verbatim quote + operative rule + cascade requirement
+after <code>CONST-035</code> terminator</td>
+<td>Insert after line 728, before line 730</td>
+<td><code>grep -c &quot;User-Mandate Forensic Anchor&quot; AGENTS.md &amp;&amp; grep -c &quot;2026-04-29&quot; AGENTS.md</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>HelixCode/AGENTS.md</code></td>
+<td>Reference to <code>CONST-017</code> at line 411</td>
+<td>Replace <code>CONST-017</code> with <code>CONST-035</code></td>
+<td>Line 411</td>
+<td><code>grep -n &quot;CONST-017&quot; AGENTS.md \|\| echo &quot;aligned&quot;</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>HelixCode/scripts/verify-governance-cascade.sh</code></td>
+<td>File does not exist</td>
+<td>Create new executable script with submodule scanner and
+mandatory-text validator</td>
+<td>Lines 1–end of script</td>
+<td><code>test -x scripts/verify-governance-cascade.sh &amp;&amp; ./scripts/verify-governance-cascade.sh</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>HelixCode/challenges/scripts/run_all_challenges.sh</code> (or
+equivalent)</td>
+<td>No governance gate</td>
+<td>Insert cascade pre-check before challenge execution</td>
+<td>After env setup, before first challenge call</td>
+<td><code>grep -c &quot;verify-governance-cascade&quot; run_all_challenges.sh</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>15 HelixCode submodules</td>
+<td>Governance files unverified</td>
+<td>Create or append <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.md</code> with §11.9 anchor +
+<code>CONST-035</code> + <code>CONST-032</code> +
+<code>CONST-033</code></td>
+<td>Entire file if missing; append if incomplete</td>
+<td><code>./scripts/verify-governance-cascade.sh</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>41 Catalogizer submodules</td>
+<td>Governance files unverified</td>
+<td>Create or append <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.md</code> with §11.9 anchor +
+<code>CONST-035</code> + <code>CONST-032</code> +
+<code>CONST-033</code></td>
+<td>Entire file if missing; append if incomplete</td>
+<td><code>./scripts/verify-governance-cascade.sh</code> (when run from
+Catalogizer checkout)</td>
+</tr>
+</tbody>
+</table>
+<p>The table spans nine distinct change targets, but rows 8 and 9
+represent 56 individual submodule operations (15 + 41). The verification
+script at row 6 is the single automation artifact that validates rows
+1–5 (HelixCode parent) and rows 8–9 (all submodules). Row 7 ensures the
+script is invoked automatically on every challenge run, creating a hard
+gate that cannot be bypassed by manual execution paths.</p>
+<p>The ordering of changes matters for dependency hygiene. Rows 1–5
+(parent-repo governance) must be committed and pushed before rows 8–9
+(submodule governance), because the submodule templates reference the
+parent <code>CONSTITUTION.md</code> URLs. If the parent anchor is not
+yet live, the submodule references will resolve to a document that lacks
+the §11.9 text, creating a circular dependency in the cascade chain. The
+recommended sequence is: (1) edit and verify parent files 1–5, (2)
+create the verification script (row 6), (3) insert the challenge gate
+(row 7), (4) run the script against all submodules to generate the
+deficiency report, (5) batch-create or batch-append submodule governance
+files based on the report, and (6) re-run the script until
+<code>TOTAL_FAILURES: 0</code> is emitted.</p>
+<hr />
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>bank-classification</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">bank-classification</h1>
+</header>
+<h1 id="hxc-029-helixqa-bank-manual-review-required-deep-classification">HXC-029
+— HelixQA Bank <code>manual-review-required</code>
+Deep-Classification</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Tracked item</td>
+<td>HXC-029 (§11.4.98 full-automation anti-bluff forward sweep)</td>
+</tr>
+<tr>
+<td>Pass type</td>
+<td><strong>Static source-read + JSON action-type analysis. NO tests
+executed. NO bank/test source modified.</strong></td>
+</tr>
+<tr>
+<td>Predecessor</td>
+<td><code>docs/qa/HXC-029/compliance-ledger.md</code> (flagged these 19
+banks NEEDS-MANUAL-REVIEW)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="method">Method</h2>
+<p>§11.4.98(C) requires live tests to be self-driving (no human action
+during execution). §11.4.98(F): manual-dependency tests not rewritten
+within 30 days graduate to §11.4.90 Obsolete. The prior ledger flagged
+19 HelixQA banks under <code>helix_qa/banks/</code> carrying
+<code>_conversion_note: &quot;manual-review-required&quot;</code> steps as
+NEEDS-MANUAL-REVIEW (not confirmed violations).</p>
+<p>This pass classifies each bank by (1) the <strong>action
+content</strong> of every <code>manual-review-required</code> step —
+what action type it carries (<code>playwright:</code>,
+<code>http:</code>, <code>adb_shell:</code>, prose-with-no-prefix) and
+what the prose describes (API call / CLI run / UI tap / browser action),
+to decide whether it COULD be driven programmatically; and (2) the
+<strong>executor’s runtime behaviour</strong> for those steps, to decide
+whether any false PASS occurs today.</p>
+<h3 id="executor-semantics-established-anti-bluff-cited">Executor
+semantics established (anti-bluff, cited)</h3>
+<ul>
+<li><code>helix_qa/pkg/testbank/schema.go:285-320</code> —
+<code>ParseAction</code> recognises a step as executable only when it
+carries a known <code>type:</code> prefix (<code>adb_shell:</code>,
+<code>shell:</code>, <code>http:</code>, <code>playwright:</code>,
+<code>tap:</code>, etc.); everything else falls through to
+<code>ActionTypeDescription</code>
+(<code>schema.go:319-320</code>).</li>
+<li><code>helix_qa/pkg/autonomous/structured_executor.go:575-587</code>
+— an <code>ActionTypeDescription</code> step that begins
+<code># CONVERT: Convert to executable</code> is SKIPPED; <strong>any
+other prose returns <code>Success:false</code> → FAILS</strong> (lines
+586-587: <code>&quot;Text-only action - not executable!&quot;</code>). So
+prose-with-no-prefix does NOT silently SKIP in the structured executor —
+it FAILS. (Correction to the prior ledger’s “executor SKIPs unrecognised
+prose” for the structured-executor path.)</li>
+<li><code>structured_executor.go:551-573</code> —
+<code>ActionTypePlaywright</code> steps SKIP with
+<code>SKIP-OK: #PLAYWRIGHT-RUNTIME-PENDING</code> when no CDP URL is
+configured (honest skip).</li>
+<li><strong>Across all 19 banks: <code># CONVERT:</code>-prefixed
+actions = 0</strong> (grep, this pass). So none of the prose steps hit
+the SKIP branch — they would FAIL if the structured executor ran
+them.</li>
+</ul>
+<h3 id="why-no-false-pass-occurs-today-load-path-analysis-cited">Why no
+false PASS occurs today (load-path analysis, cited)</h3>
+<ul>
+<li>Default executor banks dir is <code>challenges/helixqa-banks</code>
+(<code>helix_qa/cmd/helixqa/main.go:655-657</code>), and the
+structured-executor fallback alt-dir is the SAME path
+(<code>structured_executor.go:99-102</code>).
+<strong><code>challenges/helixqa-banks</code> does not exist / is
+empty</strong> (verified this pass) — so the autonomous structured
+executor loads ZERO of these 19 banks by default.</li>
+<li>The 19 banks under <code>helix_qa/banks/</code> are loaded ONLY on
+an explicit <code>-banks</code> flag (<code>main.go:112,258</code>) /
+<code>config.Banks</code> (<code>pkg/config/config.go:69</code>), or by
+the one Go test that targets a single bank file directly.</li>
+<li>That test —
+<code>helix_qa/pkg/autonomous/bank_realbinary_test.go:74</code> — loads
+ONLY <code>full-qa-api.json</code>, evaluates ONLY
+<code>ActionTypeHTTP</code> steps (<code>continue</code>s past all
+prose/playwright at lines 99-101), runs against a REAL server, and SKIPs
+honestly when the server is unreachable
+(<code>bank_realbinary_test.go:62,67</code> →
+<code>SKIP-OK: #BLUFF-HELIXQA-BANKS-REWRITE-001</code>). The prose
+<code>manual-review-required</code> steps are simply not executed by
+it.</li>
+</ul>
+<p><strong>Net:</strong> today these prose steps produce NO false PASS —
+they are either not loaded (default path) or skipped-by-action-type
+(realbinary test). They are a “looks-covered-but-doesn’t-run” surface (a
+§11.4 coverage gap), not a live §11.4.98(C)
+manual-intervention-during-execution violation. The existing tracker
+ticket for the rewrite is
+<code>#BLUFF-HELIXQA-BANKS-REWRITE-001</code>.</p>
+<h3 id="classification-rubric">Classification rubric</h3>
+<ul>
+<li><strong>AUTO-EXECUTABLE-WITH-WORK</strong> — the steps describe
+actions drivable programmatically (server API call, shell/CLI run,
+headless browser, adb/uiauto) with reasonable effort. Candidate for
+rewrite to <code>http:</code>/<code>assert:</code>/<code>shell:</code>/
+<code>playwright:</code>/<code>adb_shell:</code> actions.</li>
+<li><strong>GENUINELY-MANUAL</strong> — a step intrinsically needs a
+human decision/observation no automation can supply. Candidate for
+§11.4.90 Obsolete citing §11.4.98(F).</li>
+<li><strong>ALREADY-SKIPPED-HONESTLY</strong> — executor skips with a
+clear reason, no false PASS, low priority.</li>
+</ul>
+<h2 id="classification-table">Classification table</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Bank (path)</th>
+<th>#manual-review steps</th>
+<th>Action-type mix</th>
+<th>Classification</th>
+<th>Evidence (file:line)</th>
+<th>Recommended action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_qa/banks/full-qa-web.json</code></td>
+<td>572</td>
+<td>prose=413, playwright=159</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>full-qa-web.json:24</code>
+<code>playwright: navigate http://localhost:3000/login</code>; prose
+like “Check for Catalogizer logo” is a browser-DOM assertion</td>
+<td>Wire Playwright runtime (<code>schema.go:551-573</code> CDP URL);
+convert prose to <code>playwright:</code>/<code>assert:</code>. Highest
+volume.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/atmosphere.json</code></td>
+<td>423</td>
+<td>prose=366, playwright=42, adb_shell=15</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>atmosphere.json</code> carries
+<code>adb_shell:</code>+<code>playwright:</code> already; prose are
+UI/device steps</td>
+<td>Convert prose to
+<code>adb_shell:</code>/<code>tap:</code>/<code>playwright:</code>; real
+device or emulator topology per §11.4.3.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/full-qa-android.json</code></td>
+<td>318</td>
+<td>prose=289, playwright=24, adb_shell=3, keypress=2</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>full-qa-android.json:526</code> <code>adb_shell:</code>; prose
+are Android UI taps</td>
+<td>Convert prose to
+<code>adb_shell:</code>/<code>tap:</code>/<code>keypress:</code>;
+uiautomator dispatch per §11.4.48.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/performance-validation.json</code></td>
+<td>116</td>
+<td>prose=110, playwright=6</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>performance-validation.json:27</code> “Send 3 GET
+/api/v1/health requests…”; “Ensure at least 500 entities in
+database”</td>
+<td>Convert to <code>http:</code> loops + <code>assert:</code> on
+latency; seed DB via API. Pure server-API.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/storage-configuration.json</code></td>
+<td>88</td>
+<td>prose=88</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>storage-configuration.json:31</code> “Tap/click ‘Add WebDAV
+server’”; “Enter username ‘testuser’…”</td>
+<td>Desktop/mobile GUI taps → <code>tap:</code>/<code>text:</code>
+(adb/uiauto) OR drive backend WebDAV config via <code>http:</code>.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/cli-agents-comprehensive.json</code></td>
+<td>79</td>
+<td>prose=79</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>cli-agents-comprehensive.json:100</code> “Call
+registry.GetStats()”, “Iterate through AllAgentTypes()”</td>
+<td>Go-API exercises → fold into Go integration tests OR
+<code>shell:</code> driving the CLI; no human needed.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/edge-cases-stress.json</code></td>
+<td>78</td>
+<td>prose=78</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>edge-cases-stress.json:26</code> “Open 10 different text files
+in separate tabs”, “Click/tap tabs 1,10,20”</td>
+<td>GUI stress → <code>adb_shell:</code>/<code>tap:</code> loops; aligns
+with §11.4.85 stress mandate.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/aichat-bash-tools-comprehensive.json</code></td>
+<td>72</td>
+<td>prose=72</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>aichat-bash-tools-comprehensive.json:31</code>
+“./bin/helixagent –generate-agent-config=aichat”</td>
+<td>Shell/CLI runs → <code>shell:</code> actions; deterministic, no
+human.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/cli-agents-test-helixagent.json</code></td>
+<td>71</td>
+<td>prose=71</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>cli-agents-test-helixagent.json:158</code> “aider –model
+helixagent/ensemble –architect”</td>
+<td>CLI invocations → <code>shell:</code>; needs a running helixagent
+endpoint (config bootstrap = permitted §11.4.98(B)).</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/editor-operations.json</code></td>
+<td>63</td>
+<td>prose=63</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>editor-operations.json:26</code> “Create a new .txt file”,
+“Type ‘Hello, Yole!…’”</td>
+<td>Yole editor GUI → <code>tap:</code>/<code>text:</code>
+(adb/uiauto).</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/cloud-storage-operations.json</code></td>
+<td>63</td>
+<td>prose=63</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>cloud-storage-operations.json:4</code> “Open storage selector,
+choose WebDAV server”</td>
+<td>GUI taps → <code>tap:</code> OR backend <code>http:</code>.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/file-browser.json</code></td>
+<td>61</td>
+<td>prose=61</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>file-browser.json:25</code> “Tap/click file browser icon or
+Files tab”</td>
+<td>Yole GUI navigation → <code>tap:</code> (adb/uiauto).</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/app-navigation.json</code></td>
+<td>54</td>
+<td>prose=54</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>app-navigation.json:26</code> “Open Yole application”,
+“Tap/click ‘Files’ in bottom navigation”</td>
+<td>GUI navigation → <code>adb_shell: am start</code> +
+<code>tap:</code>.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/security-validation.json</code></td>
+<td>41</td>
+<td>prose=41</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>security-validation.json:38</code> “Use a JWT token with exp
+claim in the past”; “Sign a JWT with a different secret key”</td>
+<td>Server-API security probes → <code>http:</code>+<code>assert:</code>
+(mint tokens in-test). Already has 14 honest <code>_skip</code>
+entries.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/all-formats.json</code></td>
+<td>40</td>
+<td>prose=40</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>all-formats.json:31</code> “Create new .md file”, “Type ‘#
+Title <strong>bold</strong>…’”</td>
+<td>Yole editor GUI → <code>tap:</code>/<code>text:</code> + content
+assert.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/entity-management.json</code></td>
+<td>38</td>
+<td>prose=34, playwright=4</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>entity-management.json:26</code> “POST 5 episodes with
+parent_id = season ID”</td>
+<td>Pure server-API CRUD → <code>http:</code>+<code>assert:</code>.
+Already has 38 honest <code>_skip</code> entries.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/full-qa-cross-platform.json</code></td>
+<td>37</td>
+<td>prose=37</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>full-qa-cross-platform.json:30</code> “Navigate to login page,
+enter admin/admin123, click Login”</td>
+<td>Browser/desktop login flow →
+<code>playwright:</code>/<code>adb_shell:</code> per platform (§11.4.3
+topology dispatch).</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/admin-operations.json</code></td>
+<td>29</td>
+<td>prose=29</td>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td><code>admin-operations.json:464</code> “Poll scan status until
+complete”, “Check that backup file exists and has non-zero size”</td>
+<td>Server-API + poll loop → <code>http:</code>+<code>assert:</code>.
+Already has 28 honest <code>_skip</code> entries.</td>
+</tr>
+<tr>
+<td><code>helix_qa/banks/full-qa-api.json</code></td>
+<td>27</td>
+<td>prose=26, http=1</td>
+<td>ALREADY-SKIPPED-HONESTLY (+ AUTO-EXECUTABLE-WITH-WORK
+remainder)</td>
+<td>71 <code>_skip:true</code> w/ reasons (<code>full-qa-api.json</code>
+e.g. <code>#BLUFF-HELIXQA-LOGOUT-CASCADE-001</code>); realbinary test
+runs HTTP steps only + skips honestly
+(<code>bank_realbinary_test.go:62,67</code>)</td>
+<td>Lowest priority: HTTP steps already verified by realbinary test;
+remaining prose convert to <code>http:</code>/<code>assert:</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="counts-by-classification">Counts by classification</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Classification</th>
+<th>#banks</th>
+<th>Banks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUTO-EXECUTABLE-WITH-WORK</td>
+<td>18</td>
+<td>full-qa-web, atmosphere, full-qa-android, performance-validation,
+storage-configuration, cli-agents-comprehensive, edge-cases-stress,
+aichat-bash-tools-comprehensive, cli-agents-test-helixagent,
+editor-operations, cloud-storage-operations, file-browser,
+app-navigation, security-validation, all-formats, entity-management,
+full-qa-cross-platform, admin-operations</td>
+</tr>
+<tr>
+<td>GENUINELY-MANUAL</td>
+<td>0</td>
+<td>— (no sampled step intrinsically requires a human decision; all are
+API/CLI/UI/browser actions drivable programmatically)</td>
+</tr>
+<tr>
+<td>ALREADY-SKIPPED-HONESTLY</td>
+<td>1 (primary)</td>
+<td>full-qa-api (HTTP path verified + skipped honestly; also has the
+most explicit <code>_skip</code> markers). Note: ALL 19 banks are
+currently NOT in the default executor load path, so none produce a false
+PASS today.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sub-grouping of the 18 AUTO-EXECUTABLE banks by drive
+mechanism (rewrite cost):</strong></p>
+<ul>
+<li><strong>Server-API (<code>http:</code>+<code>assert:</code>) —
+lowest cost, no GUI/device needed (5):</strong> full-qa-api,
+performance-validation, security-validation, entity-management,
+admin-operations.</li>
+<li><strong>CLI/shell (<code>shell:</code>) — low cost, needs a running
+endpoint (3):</strong> cli-agents-comprehensive,
+aichat-bash-tools-comprehensive, cli-agents-test-helixagent.</li>
+<li><strong>Web browser (<code>playwright:</code>) — needs Playwright
+CDP runtime (3):</strong> full-qa-web, full-qa-cross-platform, (web
+portion of) atmosphere/entity-management.</li>
+<li><strong>Desktop/Android GUI
+(<code>adb_shell:</code>/<code>tap:</code>/<code>text:</code> + uiauto)
+— highest cost (7):</strong> atmosphere, full-qa-android,
+storage-configuration, edge-cases-stress, editor-operations,
+cloud-storage-operations, file-browser, app-navigation, all-formats
+(overlap across topologies).</li>
+</ul>
+<h2 id="anti-bluff-caveat-11.4.6">Anti-bluff caveat (§11.4.6)</h2>
+<ul>
+<li><strong>No GENUINELY-MANUAL bank was found</strong>, but this is a
+static action-content judgement. It is <strong>UNCONFIRMED</strong>
+whether every GUI step has a reachable uiautomator node (empty
+hierarchies force the §11.4.48/§11.4.52 APK/intent fallback) — provable
+only by running against a real device/emulator, which this pass did not
+do. None is classified GENUINELY-MANUAL on that uncertainty; the GUI
+banks are AUTO-EXECUTABLE-WITH-WORK with this caveat recorded.</li>
+<li>The “no false PASS today” finding is grounded in the load-path
+analysis above (default dir empty + realbinary test skips honestly). If
+a future runner is pointed at <code>helix_qa/banks/</code> directly via
+<code>-banks</code>, the structured executor would FAIL the prose steps
+(<code>structured_executor.go:586-587</code>), not silently PASS them —
+still anti-bluff-safe, but noisy. Wiring them to a real runner before
+converting prose would manufacture failures; convert first.</li>
+</ul>
+<h2 id="prioritized-worklist-rewrite-not-obsolete">Prioritized worklist
+(rewrite, not obsolete)</h2>
+<p>Because <strong>0 banks are GENUINELY-MANUAL</strong>, the §11.4.90
+Obsolete path does NOT apply to any of the 19 — every bank is a rewrite
+candidate, not an obsolete candidate. Rewrite order favours lowest cost
++ highest coverage value first:</p>
+<ol type="1">
+<li><strong><code>full-qa-api.json</code> (27) +
+<code>entity-management.json</code> (38 skips) +
+<code>admin-operations.json</code> (29) +
+<code>security-validation.json</code> (41) +
+<code>performance-validation.json</code> (116)</strong> — pure
+server-API. Convert prose to <code>http:</code>+<code>assert:</code> (no
+GUI/device). <code>full-qa-api</code> already half-verified by
+<code>bank_realbinary_test.go</code>; extend that pattern. Closes
+<code>#BLUFF-HELIXQA-BANKS-REWRITE-001</code>.</li>
+<li>**<code>cli-agents-comprehensive.json</code> (79) +
+<code>aichat-bash-tools-comprehensive.json</code>
+<ol start="72" type="1">
+<li><ul>
+<li><code>cli-agents-test-helixagent.json</code> (71)** — CLI/Go-API.
+Convert to <code>shell:</code> (or fold Go-API steps into
+<code>helix_code</code> integration tests). High step-count,
+deterministic, no GUI.</li>
+</ul></li>
+</ol></li>
+<li><strong><code>full-qa-web.json</code> (572) +
+<code>full-qa-cross-platform.json</code> (37)</strong> — wire the
+Playwright CDP runtime (<code>structured_executor.go:551-573</code>),
+then convert the 413 prose web steps to
+<code>playwright:</code>/<code>assert:</code>. Largest single coverage
+block.</li>
+<li><strong><code>full-qa-android.json</code> (318) +
+<code>atmosphere.json</code> (423)</strong> — Android GUI. Convert prose
+to <code>adb_shell:</code>/<code>tap:</code>/<code>keypress:</code> with
+§11.4.48 uiautomator dispatch + §11.4.3 topology gating; real
+device/emulator.</li>
+<li><strong>Desktop/Yole-GUI banks: <code>storage-configuration</code>
+(88), <code>edge-cases-stress</code> (78),
+<code>editor-operations</code> (63),
+<code>cloud-storage-operations</code> (63), <code>file-browser</code>
+(61), <code>app-navigation</code> (54), <code>all-formats</code>
+(40)</strong> — convert GUI prose to
+<code>tap:</code>/<code>text:</code>/<code>adb_shell:</code> (or backend
+<code>http:</code> where a UI step has a server equivalent). Highest
+per-step cost; batch by shared Yole UI surface.</li>
+</ol>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Internal source-of-truth files read during this audit (static code
+audit — no external web sources): -
+<code>helix_qa/pkg/testbank/schema.go</code> (ActionType taxonomy,
+<code>ParseAction</code>, <code>_skip</code>/<code>_skip_reason</code>)
+- <code>helix_qa/pkg/autonomous/structured_executor.go</code> (step
+dispatch: Playwright SKIP, prose FAIL, placeholder-skip) -
+<code>helix_qa/pkg/autonomous/pipeline.go</code> (BanksDir wiring) -
+<code>helix_qa/cmd/helixqa/main.go</code> (default BanksDir =
+<code>challenges/helixqa-banks</code>) -
+<code>helix_qa/pkg/autonomous/bank_realbinary_test.go</code> (only HTTP
+steps run; honest skip) - all 19 <code>helix_qa/banks/*.json</code>
+(JSON action-type distribution of <code>manual-review-required</code>
+steps) - <code>docs/qa/HXC-029/compliance-ledger.md</code> (predecessor
+ledger)</p>
+</body>
+</html>

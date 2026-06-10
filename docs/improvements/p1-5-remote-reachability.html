@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>p1-5-remote-reachability</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">p1-5-remote-reachability</h1>
+</header>
+<h1 id="phase-1.5-submodule-remote-reachability">Phase 1.5 — Submodule
+Remote Reachability</h1>
+<p><strong>Captured:</strong> 2026-05-06 <strong>Source:</strong>
+<code>git ls-remote $url HEAD</code> for each unique submodule URL
+across both the meta-repo and HelixAgent <code>.gitmodules</code>.
+<strong>Plan task:</strong> P1.5-WP1-T01.03</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unique URLs tested</td>
+<td>181</td>
+</tr>
+<tr>
+<td>OK</td>
+<td>178 (after retry)</td>
+</tr>
+<tr>
+<td>UNREACHABLE (truly)</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Initial false-positives</td>
+<td>2 (15s timeout flake — see §False positives)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="unreachable-blocks-wp2-for-these-submodules">UNREACHABLE —
+blocks WP2 for these submodules</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>URL</th>
+<th>Submodule path(s)</th>
+<th>Status</th>
+<th>Action required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git@github.com:vasic-digital/DebateOrchestrator.git</code></td>
+<td><code>helix_agent/DebateOrchestrator</code></td>
+<td>UNREACHABLE</td>
+<td>Repo does not exist under vasic-digital. Either create the repo,
+point gitlink at correct upstream, or remove the entry from
+helix_agent/.gitmodules.</td>
+</tr>
+<tr>
+<td><code>git@github.com:stark1tty/kiro-cli.git</code></td>
+<td><code>helix_agent/cli_agents/kiro-cli</code> (will be moved to root
+in WP2)</td>
+<td>UNREACHABLE</td>
+<td>Upstream third-party fork was deleted. Already in Phase 0 §3.3 “13
+deferred to Phase 2 sub-specs” parking lot. WP2 should drop the
+entry.</td>
+</tr>
+<tr>
+<td><code>git@github.com:tcsenpai/ollama-code.git</code></td>
+<td><code>helix_agent/cli_agents/ollama-code</code> (will be moved to
+root in WP2)</td>
+<td>UNREACHABLE</td>
+<td>Upstream third-party repo was deleted. Same parking-lot
+disposition.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="reachability-impact-on-wp1-close-out">Reachability impact on WP1
+close-out</h2>
+<p><code>git submodule update --init --recursive</code> aborted on
+DebateOrchestrator (the double-failure-aborts behaviour); the recursive
+pull-loop ran against the already-initialised tree and was killed at
+helix_agent/cli_agents/HelixCode because that submodule has a
+placeholder <code>refs/heads/.invalid</code> HEAD which is not pull-able
+(see plan T02.01 — circular reference, scheduled for explicit
+removal).</p>
+<p>WP1 close-out is therefore PARTIAL pending user decision on the 3
+unreachable remotes. Per user’s STOP-protocol mandate, the agent halted
+at this point.</p>
+<h2 id="false-positives-15s-timeout-flake">False positives (15s timeout
+flake)</h2>
+<p>The first ls-remote pass with a 15-second timeout misclassified two
+URLs as UNREACHABLE. Re-test with 30s confirmed both are reachable:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>URL</th>
+<th>First-pass</th>
+<th>Retry</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git@github.com:glittercowboy/get-shit-done.git</code></td>
+<td>UNREACHABLE</td>
+<td>OK</td>
+<td>small private/cold repo, slow first SSH negotiate</td>
+</tr>
+<tr>
+<td><code>git@github.com:google-gemini/gemini-cli.git</code></td>
+<td>UNREACHABLE</td>
+<td>OK</td>
+<td>large repo, slow <code>ls-remote</code> over SSH first time</td>
+</tr>
+</tbody>
+</table>
+<p>Lesson: the <code>git ls-remote $url HEAD</code> timeout MUST be ≥30s
+for the next round of P1.5 tooling. Recorded for WP9 / WP10
+reference-update sweeps.</p>
+<h2 id="full-per-url-log">Full per-URL log</h2>
+<p>See <code>docs/improvements/p1-5-remotes.log</code> for the verbatim
+pass output (181 lines, fixed-width formatted as
+<code>&lt;url&gt; &lt;status&gt;</code>).</p>
+</body>
+</html>

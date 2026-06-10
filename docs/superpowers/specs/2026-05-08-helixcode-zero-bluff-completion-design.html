@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-08-helixcode-zero-bluff-completion-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-08-helixcode-zero-bluff-completion-design</h1>
+</header>
+<h1 id="helixcode-zero-bluff-completion-design-specification">HelixCode
+Zero-Bluff Completion — Design Specification</h1>
+<p><strong>Date</strong>: 2026-05-08 <strong>Version</strong>: 1.0.0
+<strong>Status</strong>: Draft (awaiting review)
+<strong>Author</strong>: agent (DeepSeek v4 Pro) <strong>Phase</strong>:
+Planning — pre-implementation</p>
+<hr />
+<h2 id="overview">1. Overview</h2>
+<h3 id="purpose">1.1 Purpose</h3>
+<p>Eliminate every remaining bluff, stub, simulation, and placeholder
+from the HelixCode codebase. Implement all feature gaps. Harden all
+tests and challenges to carry positive runtime evidence. Produce full
+documentation. Propagate anti-bluff governance to all submodules.</p>
+<h3 id="scope">1.2 Scope</h3>
+<table>
+<colgroup>
+<col style="width: 52%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Execution model</td>
+<td>One comprehensive 5-phase plan, sequential</td>
+</tr>
+<tr>
+<td>Stub scope</td>
+<td>All documented bluffs + GAP_ANALYSIS feature gaps</td>
+</tr>
+<tr>
+<td>Documentation</td>
+<td>Full suite: user manual, dev guide, API ref, deployment guide,
+troubleshooting, challenge authoring, inline Go docs</td>
+</tr>
+<tr>
+<td>Governance target</td>
+<td>All 60+ submodules, including third-party</td>
+</tr>
+<tr>
+<td>Approach</td>
+<td>Bottom-up: governance first, then stubs, features, tests, docs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="success-criteria">1.3 Success Criteria</h3>
+<ol type="1">
+<li>Zero <code>simulated</code>, <code>placeholder</code>,
+<code>stub</code>, <code>TODO</code> in non-test production code</li>
+<li>Every test carries positive runtime evidence (no absence-of-error
+passes)</li>
+<li>Every Challenge produces sha-256 hash or equivalent verifiable
+evidence</li>
+<li>All <code>t.Skip()</code> calls have
+<code>SKIP-OK: #&lt;ticket&gt;</code> marker</li>
+<li>All 60+ submodules have anti-bluff governance</li>
+<li>Full documentation suite covering 6 guides + inline Go docs</li>
+<li><code>go build ./...</code> passes on linux/amd64, darwin/arm64,
+windows/amd64</li>
+<li><code>make test-complete</code> runs with zero non-credential
+skips</li>
+<li><code>git status</code> clean across main repo and all owned-by-us
+submodules</li>
+</ol>
+<hr />
+<h2 id="phase-architecture">2. Phase Architecture</h2>
+<pre><code>Phase 1: GOVERNANCE ─── sets anti-bluff standard
+    ↓
+Phase 2: STUB ELIMINATION ─── removes all simulated code
+    ↓
+Phase 3: FEATURE GAPS ─── new capabilities on clean foundation
+    ↓
+Phase 4: TEST HARDENING ─── verifies everything works for real
+    ↓
+Phase 5: DOCUMENTATION ─── captures final state</code></pre>
+<p>Each phase produces a verified deliverable before the next begins. No
+code ships without runtime evidence.</p>
+<hr />
+<h2 id="phase-1-governance-propagation">3. Phase 1 — Governance
+Propagation</h2>
+<h3 id="goal">3.1 Goal</h3>
+<p>Every submodule has the anti-bluff anchor (Article XI §11.9) in its
+governance files.</p>
+<h3 id="submodule-classification">3.2 Submodule Classification</h3>
+<p><strong>Owned-by-us</strong> (~20 repos): Full cascade to
+CONSTITUTION.md / CLAUDE.md / AGENTS.md: - HelixAgent, HelixQA,
+HelixLLM, HelixCode (inner) - DocProcessor, LLMOrchestrator,
+LLMProvider, VisionEngine - LLMsVerifier, Challenges, Security,
+Containers</p>
+<p><strong>Third-party</strong> (~40+ repos): Create
+<code>.helix-governance</code> marker file with: - The verbatim
+anti-bluff anchor text - Pointer to root CONSTITUTION.md - CONST-042/043
+constraints</p>
+<h3 id="task-breakdown">3.3 Task Breakdown</h3>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1-T01</td>
+<td>Inventory all 60+ submodules with governance file state</td>
+<td>Exhaustive list of paths + existing files</td>
+</tr>
+<tr>
+<td>P1-T02</td>
+<td>Extract exact anti-bluff anchor text from root CONSTITUTION.md</td>
+<td>SHA-256 of anchor text for verification</td>
+</tr>
+<tr>
+<td>P1-T03</td>
+<td>For each owned-by-us repo: check existing files, create/update</td>
+<td>Diff of each changed file</td>
+</tr>
+<tr>
+<td>P1-T04</td>
+<td>For each third-party repo: create <code>.helix-governance</code>
+marker</td>
+<td>File exists with correct content</td>
+</tr>
+<tr>
+<td>P1-T05</td>
+<td>Update <code>verify-governance-cascade.sh</code> to cover all
+submodules</td>
+<td>Script exits 0 when all pass, non-0 on gap</td>
+</tr>
+<tr>
+<td>P1-T06</td>
+<td>Commit all changes (deepest submodules first)</td>
+<td>Clean push to all remotes</td>
+</tr>
+<tr>
+<td>P1-T07</td>
+<td>Verify cascade sweep: zero submodules missing governance</td>
+<td>Script output</td>
+</tr>
+</tbody>
+</table>
+<h3 id="anti-bluff-anchor-text-verbatim">3.4 Anti-Bluff Anchor Text
+(Verbatim)</h3>
+<blockquote>
+<p>“We had been in position that all tests do execute with success and
+all Challenges as well, but in reality the most of the features does not
+work and can’t be used! This MUST NOT be the case and execution of tests
+and Challenges MUST guarantee the quality, the completion and full
+usability by end users of the product!”</p>
+<p>Operative rule: every PASS in this codebase MUST carry positive
+runtime evidence captured during execution. Metadata-only /
+configuration-only / absence-of-error / grep-based PASS without runtime
+evidence are critical defects regardless of how green the summary line
+looks.</p>
+</blockquote>
+<hr />
+<h2 id="phase-2-stubbluff-elimination">4. Phase 2 — Stub/Bluff
+Elimination</h2>
+<h3 id="sub-phase-2a-critical-stubs-p1">4.1 Sub-phase 2A: Critical Stubs
+(P1)</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 34%" />
+<col style="width: 23%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>File(s)</th>
+<th>What</th>
+<th>TDD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P2-T01</td>
+<td><code>internal/security/security.go</code></td>
+<td>Replace <code>ScanFeature()</code> simulated result with real
+SonarQube/Snyk scanning via containers orchestration</td>
+<td>Challenge expecting real scan results</td>
+</tr>
+<tr>
+<td>P2-T02</td>
+<td><code>cmd/other_commands.go</code></td>
+<td>Wire <code>server</code>, <code>generate</code>, <code>test</code>,
+<code>worker</code>, <code>notify</code> to real implementations</td>
+<td>CLI integration tests</td>
+</tr>
+<tr>
+<td>P2-T03</td>
+<td><code>cmd/helix_config/main.go</code></td>
+<td>Audit and fix any placeholder subcommands</td>
+<td>Config subcommand tests</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-2b-memory-provider-stubs-p2">4.2 Sub-phase 2B: Memory
+Provider Stubs (P2)</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 34%" />
+<col style="width: 23%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>File(s)</th>
+<th>What</th>
+<th>TDD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P2-T04</td>
+<td><code>internal/memory/providers/faiss_provider.go</code></td>
+<td>Replace 30+ simulated methods with real FAISS via cgo or
+subprocess</td>
+<td>Challenge with known dataset</td>
+</tr>
+<tr>
+<td>P2-T05</td>
+<td><code>internal/memory/providers/character_ai_provider.go</code></td>
+<td>Replace simulated response generator with real API calls</td>
+<td>Challenge (SKIP-OK if no creds)</td>
+</tr>
+<tr>
+<td>P2-T06</td>
+<td><code>internal/memory/providers/anima_provider.go</code></td>
+<td>Replace simulated backup/restore with real file I/O</td>
+<td>Challenge with checksums</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-2c-remaining-stubs-p2-p3">4.3 Sub-phase 2C: Remaining
+Stubs (P2-P3)</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 34%" />
+<col style="width: 23%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>File(s)</th>
+<th>What</th>
+<th>TDD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P2-T07</td>
+<td><code>cmd/security_test/main.go</code></td>
+<td>Replace 12 simulated test results with real container-orchestrated
+scans</td>
+<td>Challenge with real security tests</td>
+</tr>
+<tr>
+<td>P2-T08</td>
+<td><code>internal/memory/</code> (Redis/Memcached)</td>
+<td>Wire to real go-redis and Memcached clients</td>
+<td>Integration tests against docker-compose services</td>
+</tr>
+<tr>
+<td>P2-T09</td>
+<td><code>internal/tools/mapping/treesitter.go:266</code></td>
+<td>Implement or remove placeholder</td>
+<td>Treesitter integration test</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-2d-verification">4.4 Sub-phase 2D: Verification</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P2-T10</td>
+<td>Re-verify BLUFF-004 through BLUFF-008; mark resolved in
+AGENTS.md</td>
+</tr>
+<tr>
+<td>P2-T11</td>
+<td>Remove <code>cmd/cli/main.go.old</code>; anti-bluff grep sweep;
+update AGENTS.md</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phase-3-feature-gap-implementation">5. Phase 3 — Feature Gap
+Implementation</h2>
+<h3 id="sub-phase-3a-core-infrastructure">5.1 Sub-phase 3A: Core
+Infrastructure</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 32%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P3-T01</td>
+<td><code>internal/llm/litellm/</code></td>
+<td>LiteLLM abstraction: UnifiedProvider, FormatAdapter
+(OpenAI/Anthropic/Google), ProviderRegistry, token counting, cost
+tracking</td>
+</tr>
+<tr>
+<td>P3-T02</td>
+<td><code>internal/repomap/</code></td>
+<td>Aider-style semantic codebase mapping: tree-sitter symbols, import
+graphs, compressed context maps</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-3b-quality-safety">5.2 Sub-phase 3B: Quality &amp;
+Safety</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 32%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P3-T03</td>
+<td><code>internal/quality/</code></td>
+<td>Confidence scoring: compilation success, test pass rate, lint
+compliance, score history</td>
+</tr>
+<tr>
+<td>P3-T04</td>
+<td><code>internal/clarification/</code></td>
+<td>Interactive clarification: ambiguity detection, structured
+questions, multi-turn context</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-3c-extensibility">5.3 Sub-phase 3C: Extensibility</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 32%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P3-T05</td>
+<td><code>internal/plugins/</code></td>
+<td>Plugin system: Plugin interface, YAML manifest, sandboxed loader,
+registry, hot-reload</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-3d-additional-providers">5.4 Sub-phase 3D: Additional
+Providers</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 34%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Provider</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P3-T06</td>
+<td>Cohere</td>
+<td>Real HTTP client</td>
+</tr>
+<tr>
+<td>P3-T07</td>
+<td>Replicate</td>
+<td>Real HTTP client</td>
+</tr>
+<tr>
+<td>P3-T08</td>
+<td>Together.ai</td>
+<td>Real HTTP client</td>
+</tr>
+<tr>
+<td>P3-T09</td>
+<td>HuggingFace</td>
+<td>Verify existing provider is real, fix if stubbed</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-3e-wrap-up">5.5 Sub-phase 3E: Wrap-up</h3>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P3-T10</td>
+<td>Update GAP_ANALYSIS.md with completion markers</td>
+</tr>
+<tr>
+<td>P3-T11</td>
+<td>Full build verification + anti-bluff sweep</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phase-4-testchallenge-hardening">6. Phase 4 — Test/Challenge
+Hardening</h2>
+<h3 id="sub-phase-4a-audit-classification">6.1 Sub-phase 4A: Audit &amp;
+Classification</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P4-T01</td>
+<td>Full test suite audit: classify every test, identify
+skip/silent-pass patterns</td>
+</tr>
+<tr>
+<td>P4-T02</td>
+<td>Challenge harness audit: exit-code logic, expected.json assertions,
+runtime evidence</td>
+</tr>
+<tr>
+<td>P4-T03</td>
+<td>Bluff taxonomy sweep: wrapper, contract, structural, comment, skip
+bluffs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-4b-remediation">6.2 Sub-phase 4B: Remediation</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P4-T04</td>
+<td>Fix all identified bluffs with runtime evidence</td>
+</tr>
+<tr>
+<td>P4-T05</td>
+<td>Add <code>anti_bluff_verifier</code> challenge that scans for
+forbidden patterns</td>
+</tr>
+<tr>
+<td>P4-T06</td>
+<td>Fill challenge coverage gaps for packages without challenges</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-4c-infrastructure-testing">6.3 Sub-phase 4C:
+Infrastructure Testing</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P4-T07</td>
+<td>Full infrastructure test run with docker-compose.full-test.yml</td>
+</tr>
+<tr>
+<td>P4-T08</td>
+<td>Cross-compile verification on linux/amd64, darwin/arm64,
+windows/amd64</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="phase-5-full-documentation-suite">7. Phase 5 — Full
+Documentation Suite</h2>
+<h3 id="sub-phase-5a-new-standalone-guides">7.1 Sub-phase 5A: New
+Standalone Guides</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 31%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Guide</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P5-T01</td>
+<td>User Manual</td>
+<td>Installation, getting started, CLI reference, TUI, configuration,
+providers, workflows, FAQ</td>
+</tr>
+<tr>
+<td>P5-T02</td>
+<td>Developer Guide</td>
+<td>Architecture, building, conventions, adding providers/tools,
+contributing</td>
+</tr>
+<tr>
+<td>P5-T03</td>
+<td>API Reference</td>
+<td>Generated from openapi.yaml, all endpoints, auth, WebSocket, rate
+limiting</td>
+</tr>
+<tr>
+<td>P5-T04</td>
+<td>Deployment Guide</td>
+<td>Docker, Kubernetes, env vars, SSL, monitoring, backup, scaling</td>
+</tr>
+<tr>
+<td>P5-T05</td>
+<td>Troubleshooting Guide</td>
+<td>Common errors, debug logging, health checks, connectivity,
+profiling</td>
+</tr>
+<tr>
+<td>P5-T06</td>
+<td>Challenge Authoring Guide</td>
+<td>Structure, validation layers, evidence assertions, provider gating,
+anti-bluff compliance</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-5b-go-documentation">7.2 Sub-phase 5B: Go
+Documentation</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P5-T07</td>
+<td>Go doc comments on every exported symbol in <code>internal/</code>,
+<code>cmd/</code>, <code>applications/</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-5c-existing-materials-update">7.3 Sub-phase 5C:
+Existing Materials Update</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 28%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>File</th>
+<th>Changes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P5-T08</td>
+<td><code>GAP_ANALYSIS.md</code></td>
+<td>Mark Phase 3 features COMPLETE, add evidence links</td>
+</tr>
+<tr>
+<td>P5-T09</td>
+<td><code>HELIXCODE_FEATURE_GAP_ANALYSIS.md</code></td>
+<td>Same as T08</td>
+</tr>
+<tr>
+<td>P5-T10</td>
+<td><code>docs/improvements/PROGRESS.md</code></td>
+<td>Document Phase 1-5 completion, close all tasks</td>
+</tr>
+<tr>
+<td>P5-T11</td>
+<td><code>docs/CONTINUATION.md</code></td>
+<td>Set active phase, document current state</td>
+</tr>
+<tr>
+<td>P5-T12</td>
+<td><code>AGENTS.md</code></td>
+<td>Mark all BLUFFs/STUBs FIXED, add Phase 3 features</td>
+</tr>
+<tr>
+<td>P5-T13</td>
+<td><code>HELIXCODE_GAP_ANALYSIS.md</code></td>
+<td>Sync with T08/T09</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sub-phase-5d-final-verification">7.4 Sub-phase 5D: Final
+Verification</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr>
+<th>Task</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P5-T14</td>
+<td>Documentation completeness: every feature has working challenge, no
+stale references</td>
+</tr>
+<tr>
+<td>P5-T15</td>
+<td>Final anti-bluff sweep: zero TODO/FIXME/placeholder/simulated/stub
+in production code</td>
+</tr>
+<tr>
+<td>P5-T16</td>
+<td>Final commit + push to all 4 remotes, verify clean git status</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="anti-bluff-verification-layer">8. Anti-Bluff Verification
+Layer</h2>
+<p>Every phase includes these mandatory verification steps before
+close-out:</p>
+<ol type="1">
+<li><strong>Grep sweep</strong>:
+<code>grep -rn &quot;simulated\|placeholder\|stub\|TODO\|for now&quot;</code> —
+zero hits in non-test production code</li>
+<li><strong>Skip audit</strong>: <code>grep -rn &quot;t\.Skip&quot;</code> — all
+matches have <code>SKIP-OK:</code> marker</li>
+<li><strong>Build</strong>: <code>go build ./...</code> exits 0</li>
+<li><strong>Vet</strong>: <code>go vet ./...</code> exits 0</li>
+<li><strong>Short tests</strong>: <code>go test -short ./...</code>
+exits 0</li>
+<li><strong>Challenge run</strong>: all applicable challenges pass with
+runtime evidence</li>
+<li><strong>Governance check</strong>:
+<code>verify-governance-cascade.sh</code> exits 0</li>
+</ol>
+<hr />
+<h2 id="risk-register">9. Risk Register</h2>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 29%" />
+<col style="width: 21%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Likelihood</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Third-party submodule governance rejected by owners</td>
+<td>Medium</td>
+<td>Low</td>
+<td><code>.helix-governance</code> marker is additive, non-invasive</td>
+</tr>
+<tr>
+<td>FAISS native library unavailable on all platforms</td>
+<td>High</td>
+<td>Medium</td>
+<td>Graceful fallback with explicit config flag</td>
+</tr>
+<tr>
+<td>Challenges gated on credentials cannot run</td>
+<td>High</td>
+<td>Low</td>
+<td>SKIP-OK markers with ticket links</td>
+</tr>
+<tr>
+<td>60+ submodule governance too large for single session</td>
+<td>High</td>
+<td>Medium</td>
+<td>Automate with scripts, batch commits</td>
+</tr>
+<tr>
+<td>Existing tests break during stub replacement</td>
+<td>Medium</td>
+<td>High</td>
+<td>TDD: failing test first, fix, verify</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendix-a-anti-bluff-anchor-full-text">Appendix A: Anti-Bluff
+Anchor (Full Text)</h2>
+<pre><code>Article XI §11.9 — Anti-Bluff Forensic Anchor
+
+&gt; Verbatim user mandate: &quot;We had been in position that all tests do execute
+&gt; with success and all Challenges as well, but in reality the most of the
+&gt; features does not work and can&#39;t be used! This MUST NOT be the case and
+&gt; execution of tests and Challenges MUST guarantee the quality, the
+&gt; completion and full usability by end users of the product!&quot;
+&gt;
+&gt; Operative rule: The bar for shipping is not &quot;tests pass&quot; but &quot;users can
+&gt; use the feature.&quot; Every PASS in this codebase MUST carry positive runtime
+&gt; evidence captured during execution. Metadata-only / configuration-only /
+&gt; absence-of-error / grep-based PASS without runtime evidence are critical
+&gt; defects regardless of how green the summary line looks. No false-success
+&gt; results are tolerable.
+
+### Bluff Taxonomy (each pattern observed and now forbidden)
+
+- Wrapper bluff — assertions PASS but wrapper&#39;s exit-code logic is buggy
+- Contract bluff — system advertises capability but rejects it in dispatch
+- Structural bluff — file exists but doesn&#39;t contain working code
+- Comment bluff — comment promises behavior code doesn&#39;t have
+- Skip bluff — t.Skip(&quot;not running yet&quot;) without SKIP-OK: #&lt;ticket&gt; marker
+
+The taxonomy is illustrative, not exhaustive. Every Challenge or test added
+going forward MUST pass an honest self-review against this taxonomy before
+being committed.</code></pre>
+<h2 id="appendix-b-template-files">Appendix B: Template Files</h2>
+<h3 id="helix-governance-for-third-party-submodules">.helix-governance
+(for third-party submodules)</h3>
+<pre><code># Helix Governance Marker
+#
+# This file extends the HelixCode constitutional governance to this third-party
+# submodule. The full governance documents are at:
+#
+#   https://github.com/HelixDevelopment/helix_code/blob/main/CONSTITUTION.md
+#   https://github.com/HelixDevelopment/helix_code/blob/main/AGENTS.md
+#
+# Key constraints applicable to all submodules:
+#
+#   CONST-042: No API key, token, password, certificate, or credential may be
+#   committed. All secrets live in .env files (mode 0600) listed in .gitignore.
+#
+#   CONST-043: No force push, history rewrite, branch deletion of main/master,
+#   or upstream-overwriting without explicit per-operation user approval.
+#
+#   Article XI §11.9 (Anti-Bluff): Every test PASS MUST carry positive runtime
+#   evidence. Metadata-only / configuration-only / absence-of-error / grep-based
+#   PASS without runtime evidence are critical defects. No false-success results
+#   are tolerable. Bluff taxonomy: wrapper, contract, structural, comment, skip.
+#
+# Generated: 2026-05-08 by HelixCode Zero-Bluff Completion programme
+# Do not remove this file — it is verified by verify-governance-cascade.sh</code></pre>
+</body>
+</html>

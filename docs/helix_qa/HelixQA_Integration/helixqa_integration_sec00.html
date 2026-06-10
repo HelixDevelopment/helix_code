@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa_integration_sec00</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixqa_integration_sec00</h1>
+</header>
+<h1 id="helixqa-full-integration-into-helixcode-system-master-integration-plan">HelixQA
+Full Integration into HelixCode System — Master Integration Plan</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This document presents the complete, in-depth, bluff-proof
+integration plan for embedding the HelixQA submodule—together with all
+its dependency submodules—into the HelixCode enterprise-grade
+distributed AI development platform. The plan is built on exhaustive
+analysis of three repositories (HelixCode, HelixQA, and Catalogizer),
+their source code, documentation, governance files, and existing QA
+artifacts. Every recommendation includes exact file paths, code
+references, and implementation details necessary for engineering
+execution.</p>
+<h3 id="primary-objective">Primary Objective</h3>
+<p>The integration’s paramount goal is to make the HelixCode system
+flawless and exhaustively tested through AI-driven, heavy QA sessions
+that validate every client application—Web, Desktop, Mobile, CLI, and
+TUI—and every API service. The system must deliver on-demand screenshots
+for presentational purposes, captured autonomously by HelixQA during
+active QA sessions. Testing must guarantee real end-user usability; a
+passing test suite with broken features is categorically unacceptable
+and is treated as a critical infrastructure failure per Article XI §11.9
+and CONST-035.</p>
+<h3 id="key-findings-from-deep-repository-analysis">Key Findings from
+Deep Repository Analysis</h3>
+<p><strong>HelixCode</strong> is a Go-based distributed AI development
+platform (v1.0.0, MIT) with six client applications: a Cobra CLI, a
+tview TUI, a Fyne v2 Desktop GUI, gomobile Android/iOS bindings, and
+Aurora OS / Harmony OS support. Its architecture spans 34+ internal
+packages, REST/WebSocket/MCP APIs, and a 15 KB Makefile build system. It
+already contains anti-bluff rules but under the identifier CONST-017
+rather than the cross-repository standard CONST-035, and critically
+lacks the verbatim user-mandate forensic anchor of Article XI §11.9
+found in HelixQA and Catalogizer.</p>
+<p><strong>HelixQA</strong> is an AI-driven QA orchestration framework
+(Apache-2.0, 97.6 % Go) with 40+ packages including autonomous session
+coordination, LLM-powered navigation (ADB/Playwright/X11 executors),
+visual bug detection, evidence collection, and ticket generation. It
+already embeds CONST-035 and Article XI §11.9 in its governance files.
+Its autonomous session runs a four-phase lifecycle (Setup → Doc-Driven
+Verification → Curiosity-Driven Exploration → Report &amp; Cleanup)
+across multiple platforms in parallel. However, screenshot coverage has
+significant gaps: no iOS capture, no Windows desktop capture, no native
+macOS ScreenCaptureKit integration, and no visual capture for CLI/TUI
+interfaces.</p>
+<p><strong>Catalogizer</strong> already includes HelixQA as a submodule
+at commit <code>35deb43</code> (Phase 27.7) but trails upstream by two
+full phases (<code>0bca023</code>, Phase 29). It maintains 41 submodules
+(32 vasic-digital infrastructure modules plus 9 HelixDevelopment AI/QA
+modules) and has a Full-QA Master Cycle defined in its constitution
+(Article VII). Its last audit recorded 206 PASS / 1 SKIP across 60+ test
+banks, yet integration gaps persist: Android/Android TV autonomous QA is
+blocked, the installer-wizard and API client lack dedicated HelixQA
+banks, and the OCU-CUDA-Sidecar remains undeployed.</p>
+<h3 id="the-ten-integration-phases">The Ten Integration Phases</h3>
+<p>The plan is organized into ten sequential phases, each with
+fine-grained tasks, exact file references, and anti-bluff verification
+criteria:</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 61%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Focus</th>
+<th>Critical Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>Constitution &amp; Governance</td>
+<td>Add Article XI §11.9 to HelixCode; align CONST-017→CONST-035;
+cascade mandates to all 56 submodules</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>Submodule Dependencies</td>
+<td>Register 9 submodules in <code>.gitmodules</code>; bump Catalogizer
+from <code>35deb43</code>→<code>0bca023</code>; wire <code>go.mod</code>
+replace directives</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Core Integration</td>
+<td>Create <code>internal/helixqa/</code> wrapper; expose
+<code>/api/v1/qa/*</code> endpoints; register <code>helixcode qa</code>
+CLI commands; add TUI dashboard</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Screenshot Pipeline</td>
+<td>Implement <code>pkg/screenshot/</code> with 8 platform engines;
+deliver on-demand REST/WebSocket API; add presentational export</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Test Coverage Matrix</td>
+<td>Define 10 test types × 5 client categories = 50 coverage cells;
+mandate protocol-layer probes and visual verification</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>Catalogizer Example</td>
+<td>Bump submodules; create 5 new test banks; validate
+Web/Desktop/Android/API clients with real device automation</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>Anti-Bluff Framework</td>
+<td>Implement 4-layer architecture (protocol → functional → visual →
+destructive); add <code>pkg/antibluff/</code>; design 4 synthetic user
+workflows</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>AI QA Orchestration</td>
+<td>Orchestrate 4-phase autonomous sessions across all platforms;
+generate video-evidence reports; produce slide-deck exports</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td>Enterprise UX Validation</td>
+<td>Verify translation tool UX across 5 clients; validate 42 LLM
+providers; enforce 99.9 % uptime and cost controls</td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td>Build &amp; Automation</td>
+<td>Add
+<code>make qa-all</code>/<code>qa-session</code>/<code>qa-anti-bluff</code>
+targets; create session scripts; maintain NO-CI/CD constitutional
+compliance</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td>Monitoring &amp; Compliance</td>
+<td>Deploy static HTML dashboards; publish anti-bluff compliance
+reports; establish release gates and monthly improvement reviews</td>
+</tr>
+</tbody>
+</table>
+<h3 id="anti-bluff-mandate-non-negotiable">Anti-Bluff Mandate —
+Non-Negotiable</h3>
+<p>Every phase of this plan is governed by the anti-bluff covenant. The
+operative rule, inherited from the user’s mandate and now codified in
+HelixQA’s and Catalogizer’s constitutions, states: <strong>the bar for
+shipping is not “tests pass” but “users can use the feature.”</strong>
+Every test, every Challenge, and every QA session result must carry
+positive evidence that the feature works for the end user. A green test
+suite combined with a broken feature is a worse outcome than an honest
+red suite—it silently destroys trust in the entire system. This mandate
+is cascaded to every submodule’s <code>CONSTITUTION.md</code>,
+<code>CLAUDE.md</code>, and <code>AGENTS.md</code> as a non-negotiable,
+release-blocking requirement.</p>
+<h3 id="resource-and-safety-constraints">Resource and Safety
+Constraints</h3>
+<p>All test and challenge execution is strictly limited to 30–40 % of
+host system resources (<code>GOMAXPROCS=2</code>,
+<code>nice -n 19</code>, container memory caps). No CI/CD pipelines are
+permitted per constitutional mandate; all builds and QA sessions are
+triggered manually via Makefile targets or shell scripts. Host power
+management transitions (suspend, hibernate, reboot) are categorically
+forbidden and blocked by hardened systemd configuration.</p>
+<h3 id="success-criteria">Success Criteria</h3>
+<p>The integration is complete when: 1. All 56 submodules across
+HelixCode and Catalogizer contain CONST-035 and Article XI §11.9; 2.
+HelixCode exposes REST and CLI interfaces for triggering QA sessions and
+retrieving on-demand screenshots; 3. Screenshot engines cover all 8
+client platform variants (Web responsive breakpoints, Desktop
+Linux/macOS/Windows, Android, iOS, CLI, TUI); 4. The 10 × 5 test
+coverage matrix is fully populated with anti-bluff verification methods;
+5. Catalogizer demonstrates the integration with 5 new test banks and
+206+ PASS results; 6. The anti-bluff framework detects deliberately
+broken features with 100 % accuracy; 7. Autonomous QA sessions run
+across all platforms with video evidence and ticket generation; 8. The
+release gate checklist passes: all tests + all challenges + all
+screenshots verified + all anti-bluff checks + all governance cascades
+confirmed.</p>
+<hr />
+</body>
+</html>

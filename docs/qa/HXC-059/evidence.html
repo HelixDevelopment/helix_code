@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-059-debate_orchestrator-sandbox-non-linux-process-tree-kill-11.4.81">HXC-059
+— debate_orchestrator sandbox: non-Linux process-tree kill
+(§11.4.81)</h1>
+<p><strong>Captured:</strong> 2026-06-09T16:13:17Z · Bug · Fixed (→
+Fixed.md) ## RED (pre-fix, macOS) go test ./testing:
+TestSandboxExecute_CtxCancel FAIL elapsed=30.018s;
+TestSandboxExecute_TimeoutEnforced FAIL elapsed=30.026s (no-op
+killProcessGroup → Setpgid never set → only direct child SIGKILLed,
+sleep-30 grandchild survives). ## Fix testing/sandbox_other.go (!linux):
+prepareSandboxAttr sets SysProcAttr.Setpgid=true; killProcessGroup →
+syscall.Kill(-pid, SIGKILL) — mirrors sandbox_linux.go (macOS/BSD
+support POSIX process groups). RLIMIT_AS/CPU left as honest §11.4.81 XNU
+gap. ## GREEN both tests PASS 5/5 at -count=5, 0.10s each (timeout now
+enforced); full go test ./testing ok 0.790s no regression. Commit
+c82af2f, pushed ff to all remotes.</p>
+</body>
+</html>

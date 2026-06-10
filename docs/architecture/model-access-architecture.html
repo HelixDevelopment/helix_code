@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>model-access-architecture</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">model-access-architecture</h1>
+</header>
+<h1 id="model-access-architecture-diagrams-key-recognition-unified-catalog-cli-bridge">Model-Access
+Architecture — Diagrams (Key-Recognition · Unified Catalog ·
+CLI-Bridge)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>DESIGN — describes target architecture; nodes labelled IMPLEMENTED
+vs PLANNED</td>
+</tr>
+<tr>
+<td>Maintainer</td>
+<td>DOCUMENTATION subagent (READ-ONLY on code)</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>Cascades from <code>constitution/</code> + root
+<code>CLAUDE.md</code>/<code>CONSTITUTION.md</code>; CONST-036 (verifier
+single source of truth), CONST-040 (capabilities from
+<code>VerificationResult</code>), §11.4 anti-bluff</td>
+</tr>
+<tr>
+<td>Sources</td>
+<td>SP1 plan
+(<code>docs/superpowers/specs/plans/2026-06-10-SP1-model-access-plan.md</code>),
+SP2 plan (<code>…/2026-06-10-SP2-helixagent-exposure-plan.md</code>),
+SP4 plan (<code>…/2026-06-10-SP4-cli-bridge-plan.md</code>); analyses
+B/C/D
+(<code>docs/superpowers/specs/analysis/2026-06-10-{B,C,D}-*.md</code>);
+master roadmap
+(<code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p><strong>§11.4 / §11.4.123 anti-bluff honesty note (read
+first).</strong> This document describes the <strong>target
+architecture</strong> of the model-access + provider-exposure +
+CLI-bridge system. It mixes <strong>IMPLEMENTED</strong> components
+(real code, cited <code>file:line</code>, confirmed in the analysis
+passes) with <strong>PLANNED</strong> components (specified in
+SP1/SP2/SP4 but <strong>not yet built</strong> — no captured runtime
+evidence exists). Every diagram node carries an explicit
+<code>[IMPLEMENTED …]</code> or <code>[PLANNED …]</code> tag. A node
+tagged PLANNED is a design intent, <strong>not</strong> a claim of
+working software. Diagrams are documentation, not proof of behaviour;
+the runtime-evidence bar (§11.4.5 / §11.4.69 / §11.4.107) is met only by
+the test/Challenge evidence each SP plan requires at execution time.</p>
+</blockquote>
+<p>Legend used in every diagram:</p>
+<ul>
+<li><strong>IMPLEMENTED</strong> — real code exists today; cited to a
+real <code>file:line</code> read during the 2026-06-10 analysis
+passes.</li>
+<li><strong>PLANNED</strong> — specified in an SP plan / task
+(e.g. <code>SP1·T1.2.1</code>); <strong>not built</strong>; no runtime
+evidence.</li>
+<li><strong>DEAD/UNWIRED</strong> — code exists but has zero production
+call-sites (a §11.4.124 investigate-then-wire target,
+<strong>not</strong> removed).</li>
+</ul>
+<p>Paths: inner Go app code is under <code>helix_code/</code> (module
+<code>dev.helix.code</code>); the HelixAgent exposure surface is under
+<code>submodules/helix_agent/</code> (module
+<code>dev.helix.agent</code>).</p>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#diagram-a--key-recognition--verifier--working-model-funnel-sp1">Diagram
+A — Key-recognition → verifier → working-model funnel (SP1)</a></li>
+<li><a href="#diagram-b--unified-catalog-under-one-root-sp2--sp4">Diagram B —
+Unified catalog under one root (SP2 + SP4)</a></li>
+<li><a href="#diagram-c--cli-bridge-selection--proxy-sequence-sp4">Diagram C —
+CLI-bridge selection &amp; proxy sequence (SP4)</a></li>
+<li><a href="#node-provenance-ledger-implemented-vs-planned">Node
+provenance ledger (IMPLEMENTED vs PLANNED)</a></li>
+<li><a href="#cross-references">Cross-references</a></li>
+</ul>
+<hr />
+<h2 id="diagram-a-key-recognition-verifier-working-model-funnel-sp1">Diagram
+A — Key-recognition → verifier → working-model funnel (SP1)</h2>
+<p><strong>What it shows.</strong> How a single supplied/recognized API
+key turns into the set of WORKING models a user sees. Source: SP1 plan
+§3 “Target design (the working-model funnel)”; analysis-B §4.1.</p>
+<p><strong>Working-model predicate (SP1 §3, applied in the PLANNED
+<code>GetWorkingModels</code>):</strong> <code>present[provider]</code>
+∧ <code>Verified==true</code> ∧
+<code>VerificationStatus==&quot;verified&quot;</code> ∧
+<code>OverallScore &gt;= GetMinAcceptableScore()</code> ∧
+<code>Providers[provider].Enabled != false</code>.</p>
+<pre class="mermaid"><code>flowchart TD
+    subgraph STARTUP[&quot;Process startup (cmd/server/main.go AND cmd/cli/main.go)&quot;]
+        A1[&quot;secrets.LoadAPIKeys()&lt;br/&gt;reads $HOME/api_keys.sh then walked-up .env, os.Setenv each&lt;br/&gt;&lt;b&gt;[DEAD/UNWIRED — loader.go:30; zero prod call-sites]&lt;/b&gt;&lt;br/&gt;[PLANNED WIRE — SP1·T1.1.1]&quot;]
+        A2[&quot;config.Load() (viper AutomaticEnv + SetEnvPrefix HELIX)&lt;br/&gt;8 single-alias BindEnv&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — config.go:307-345]&lt;/b&gt;&quot;]
+        A3[&quot;keyrec.PresentProviders() map[string]bool&lt;br/&gt;multi-alias {provider -&gt; []envVarAlias} + isPlaceholder()&lt;br/&gt;&lt;b&gt;[PLANNED — SP1·T1.1.2; internal/llm/keyrecognition.go]&lt;/b&gt;&lt;br/&gt;lifts decoupled from helix_agent SupportedProviders.EnvVars&lt;br/&gt;[IMPLEMENTED template — provider_types.go:348-385]&quot;]
+    end
+
+    subgraph KEYSRC[&quot;Key sources (any one ⇒ provider present)&quot;]
+        K1[&quot;$HOME/api_keys.sh (export VAR=val)&lt;br/&gt;[IMPLEMENTED reader — loader.go:33-37]&quot;]
+        K2[&quot;walked-up .env&lt;br/&gt;[IMPLEMENTED reader — loader.go:84-129]&quot;]
+        K3[&quot;shell-exported env (OPENAI_API_KEY, ANTHROPIC_API_KEY, ...)&lt;br/&gt;[IMPLEMENTED path — per-provider os.Getenv]&quot;]
+    end
+
+    subgraph VERIFIER[&quot;LLMsVerifier integration (CONST-036 single source of truth)&quot;]
+        V1[&quot;verifier.Adapter.GetVerifiedModels(ctx)&lt;br/&gt;cache -&gt; live HTTP -&gt; stale -&gt; fallback; circuit-breaker&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — adapter.go:183-224, client.go GET /api/models]&lt;/b&gt;&quot;]
+        V2[&quot;GetMinAcceptableScore() default 6.0 (HELIX_VERIFIER_MIN_SCORE)&lt;br/&gt;&lt;b&gt;[IMPLEMENTED but NEVER INVOKED — adapter.go:175 (D-4)]&lt;/b&gt;&quot;]
+        V3[&quot;GetWorkingModels(ctx, present)&lt;br/&gt;applies key-presence + Verified + status + min-score&lt;br/&gt;&lt;b&gt;[PLANNED — SP1·T1.2.1/T1.3.1; adapter.go]&lt;/b&gt;&quot;]
+        V4[&quot;filterByProviderConfig — drops only Enabled==false&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — adapter.go:277-289]&lt;/b&gt;&quot;]
+    end
+
+    subgraph EXPOSE[&quot;Exposure call-sites&quot;]
+        E1[&quot;CLI handleListModels&lt;br/&gt;P1 verifier GetVerifiedModels -&gt; printVerifiedModels (prints ALL incl. failed/pending = D-2)&lt;br/&gt;&lt;b&gt;[IMPLEMENTED-but-bluffy — main.go:1355-1414]&lt;/b&gt;&lt;br/&gt;[PLANNED switch -&gt; GetWorkingModels — SP1·T1.3.2]&quot;]
+        E2[&quot;server handlers /api/models&lt;br/&gt;&lt;b&gt;[IMPLEMENTED -&gt; GetVerifiedModels — handlers.go:1049/1140/1206]&lt;/b&gt;&lt;br/&gt;[PLANNED -&gt; GetWorkingModels — SP1·T1.3.2]&quot;]
+        E3[&quot;model_manager registry&lt;br/&gt;SetVerifierAdapter exists; registry populated from hardcoded GetModels()&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — model_manager.go:132/202]&lt;/b&gt;&lt;br/&gt;[PLANNED -&gt; funnel-populated — SP1·T1.3.2]&quot;]
+    end
+
+    subgraph FACTORY[&quot;Provider construction&quot;]
+        F1[&quot;factory.NewProvider(config) — builds ONE provider by config.Type&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — factory.go:9-101]&lt;/b&gt;&quot;]
+        F2[&quot;BuildPresentProviders(configs, present) — build EVERY key-present provider&lt;br/&gt;&lt;b&gt;[PLANNED — SP1·T1.2.2; factory.go]&lt;/b&gt;&quot;]
+        F3[&quot;per-provider GetModels() — OpenAI/Anthropic/DeepSeek/Mistral HARDCODED (CONST-036, D-5)&lt;br/&gt;OpenRouter fetchCatalog / Ollama /api/tags already DYNAMIC&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — openai_provider.go:201, anthropic_provider.go:203, openrouter_provider.go:233, ollama_provider.go:225]&lt;/b&gt;&lt;br/&gt;[PLANNED de-hardcode — SP1·T1.3.4]&quot;]
+    end
+
+    DISABLED[&quot;Verifier disabled / cold (HELIX_VERIFIER_ENABLED=false default)&lt;br/&gt;MUST NOT present FallbackModels as &#39;working&#39; (CONST-035 PASS-bluff)&lt;br/&gt;&lt;b&gt;[IMPLEMENTED bluff today — main.go:1387 prints fallback]&lt;/b&gt;&lt;br/&gt;[PLANNED honest empty/notice — SP1·T1.3.3 / DECISION-2]&quot;]
+
+    K1 --&gt; A1
+    K2 --&gt; A1
+    A1 --&gt; A2
+    K3 --&gt; A2
+    A2 --&gt; A3
+    A3 --&gt; V3
+    V1 --&gt; V3
+    V2 --&gt; V3
+    V3 --&gt; V4
+    V4 --&gt; E1
+    V4 --&gt; E2
+    V4 --&gt; E3
+    A3 --&gt; F2
+    F1 --&gt; F2
+    F2 --&gt; F3
+    A2 -. &quot;verifier off&quot; .-&gt; DISABLED
+    DISABLED -. &quot;honest list&quot; .-&gt; E1</code></pre>
+<p><strong>Defect anchors closed by SP1 (analysis-B top-5
+gaps):</strong> D-2 (CLI shows failed/pending), D-3
+(<code>LoadAPIKeys</code> dead), D-4 (min-score never applied), D-5
+(hardcoded lists), plus the no-key-presence-gate gap and the
+single-provider-factory gap.</p>
+<hr />
+<h2 id="diagram-b-unified-catalog-under-one-root-sp2-sp4">Diagram B —
+Unified catalog under one root (SP2 + SP4)</h2>
+<p><strong>What it shows.</strong> The PLANNED unified catalog that
+joins, <strong>under one root</strong>, the AI-debate ensemble +
+HelixLLM + every discovered provider + every provider’s verified model +
+(SP4) every CLI-agent bridge provider and its models — each a
+uniformly-named, individually-addressable selection target. Source: SP2
+plan §P2.1/§P2.2; analysis-C §3; master roadmap §257; SP4 plan
+§P4.1/§P4.3.</p>
+<p><strong>Naming grammar (analysis-C §3.2, master roadmap line
+257):</strong> <code>ensemble</code> ·
+<code>ensemble/&lt;preset&gt;</code> · <code>helixllm</code> ·
+<code>helixllm/&lt;model&gt;</code> · <code>&lt;provider&gt;</code> ·
+<code>&lt;provider&gt;/&lt;model_id&gt;</code> (preserving
+already-namespaced ids like <code>openrouter/x-ai/grok-4</code>) ·
+<strong>(SP4)</strong> <code>cli/&lt;agent&gt;</code> ·
+<code>cli/&lt;agent&gt;/&lt;model&gt;</code>.</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph SOURCES[&quot;Join sources (all IMPLEMENTED individually)&quot;]
+        S1[&quot;ProviderRegistry.ListProviders() + GetCapabilities().SupportedModels&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — provider_registry.go:82; router.go:773-797]&lt;/b&gt;&quot;]
+        S2[&quot;verifier ModelDiscoveryService&lt;br/&gt;DiscoveredModel.Verified / OverallScore&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — discovery.go:23,50-63]&lt;/b&gt;&quot;]
+        S3[&quot;Ensemble service GetEnsembleService().RunEnsemble&lt;br/&gt;&lt;b&gt;[IMPLEMENTED — router.go:676-767; provider_registry.go:1066]&lt;/b&gt;&quot;]
+        S4[&quot;HelixLLM gated provider &#39;helixllm&#39; (USE_HELIX_LLM=true)&lt;br/&gt;&lt;b&gt;[IMPLEMENTED-but-buried — provider_registry.go:750-764]&lt;/b&gt;&quot;]
+        S5[&quot;CLI-agent bridge providers (claude/qwen/opencode/...)&lt;br/&gt;&lt;b&gt;[PLANNED — SP4·P4.1; cli_agent_provider.go + registry]&lt;/b&gt;&lt;br/&gt;(today: clis layer real exec base.go:120-138 + STUBS qwencode.go:101)&quot;]
+    end
+
+    subgraph CATALOG[&quot;Unified catalog (the missing join layer) — ONE ROOT&quot;]
+        C1[&quot;catalog.BuildCatalog(reg, verifier, ensembleSvc[, cliRegistry])&lt;br/&gt;Entry{Name, Kind(ensemble|provider|model|cli), Provider, Verified, OverallScore, Enabled}&lt;br/&gt;&lt;b&gt;[PLANNED — SP2·T2.1.2; internal/catalog/catalog.go]&lt;/b&gt;&quot;]
+        C2[&quot;CatalogHandler.List -&gt; GET /v1/catalog&lt;br/&gt;&lt;b&gt;[PLANNED — SP2·T2.1.3 (OP-1 root path); internal/handlers/catalog.go]&lt;/b&gt;&quot;]
+        C3[&quot;Selector resolution: any catalog Name -&gt; target&lt;br/&gt;unknown -&gt; 400 + candidate list (no silent guess §11.4.6)&lt;br/&gt;&lt;b&gt;[PLANNED — SP2·T2.1.4; completion.go:28 / router.go:702]&lt;/b&gt;&quot;]
+    end
+
+    subgraph NAMES[&quot;Uniformly-named selection targets (one namespace)&quot;]
+        N0[&quot;ensemble&lt;br/&gt;ensemble/confidence_weighted&quot;]
+        N1[&quot;helixllm&lt;br/&gt;helixllm/helixllm-default&quot;]
+        N2[&quot;anthropic&lt;br/&gt;anthropic/claude-3-sonnet-20240229&quot;]
+        N3[&quot;openrouter/x-ai/grok-4 (preserved namespacing)&quot;]
+        N4[&quot;cli/claude&lt;br/&gt;cli/claude/&amp;lt;model&amp;gt; (SP4 PLANNED)&quot;]
+    end
+
+    BLUFF[&quot;GET /v1/completion/models — HARDCODED 3-model list (D-1)&lt;br/&gt;deepseek-coder / claude-3-sonnet-20240229 / gemini-pro&lt;br/&gt;&lt;b&gt;[IMPLEMENTED bluff — completion.go:411-436 (CONST-036/BLUFF-002)]&lt;/b&gt;&lt;br/&gt;[PLANNED verifier-sourced rewrite — SP2·T2.0.2]&quot;]
+
+    S1 --&gt; C1
+    S2 --&gt; C1
+    S3 --&gt; C1
+    S4 --&gt; C1
+    S5 --&gt; C1
+    C1 --&gt; C2
+    C2 --&gt; C3
+    C1 --&gt; N0
+    C1 --&gt; N1
+    C1 --&gt; N2
+    C1 --&gt; N3
+    C1 --&gt; N4
+    BLUFF -. &quot;remediated, joins same source&quot; .-&gt; C1</code></pre>
+<p><strong>Anti-bluff invariant (SP2 §7).</strong> Catalog “model”
+entries are emitted <strong>only</strong> for
+<code>DiscoveredModel.Verified == true</code> — never the static
+<code>SupportedModels</code> slice, never a hardcoded literal. HelixLLM
+is <strong>promoted, never removed</strong> (§11.4.122); all existing
+<code>/v1/*</code> routes stay intact (additive design).</p>
+<hr />
+<h2 id="diagram-c-cli-bridge-selection-proxy-sequence-sp4">Diagram C —
+CLI-bridge selection &amp; proxy sequence (SP4)</h2>
+<p><strong>What it shows.</strong> How a <code>cli/&lt;agent&gt;</code>
+selection resolves a binary (PRIMARY system-installed → FALLBACK
+submodule-built), proxies a prompt via real <code>exec</code>, parses
+the result, and surfaces power-features. Source: SP4 plan
+§P4.2/§P4.3/§P4.4; analysis-D §5.</p>
+<p><strong>Tier-1 agents system-installed today (analysis-D §2, captured
+<code>command -v</code>):</strong> claude 2.1.170, qwen 0.5.0, opencode
+1.16.2, gemini 0.1.9, crush v0.22.2, codex, goose 1.8.0, copilot 1.0.46.
+<strong>Fallback-required (absent today):</strong> aider, plandex,
+forge.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant U as User / catalog selector (cli/&amp;lt;agent&amp;gt;)
+    participant P as CLIAgentProvider (llm.Provider)&lt;br/&gt;[PLANNED — SP4·T4.1.2]
+    participant R as resolveBinary(spec)&lt;br/&gt;[PLANNED — SP4·T4.2.1]
+    participant SYS as System PATH (exec.LookPath)&lt;br/&gt;[IMPLEMENTED primitive — base.go:120]
+    participant FB as Submodule-built binary&lt;br/&gt;cli_agents/&amp;lt;agent&amp;gt;/ [PLANNED build wiring — SP4·T4.2.2]
+    participant EX as exec.CommandContext(binary, non-interactive args)&lt;br/&gt;[IMPLEMENTED primitive — base.go:127-138]
+    participant V as LLMsVerifier VerificationResult&lt;br/&gt;[IMPLEMENTED — CONST-040]
+
+    U-&gt;&gt;P: Generate(ctx, req) / GetModels() / GetCapabilities()
+    P-&gt;&gt;R: resolve binary for AgentSpec
+    R-&gt;&gt;SYS: exec.LookPath(spec.Binary) — PRIMARY
+    alt PRIMARY found (tier-1: claude/qwen/opencode/...)
+        SYS--&gt;&gt;R: /path/to/binary
+    else PRIMARY absent (aider/plandex/forge)
+        R-&gt;&gt;FB: resolve submodule-built artifact (FALLBACK)
+        FB--&gt;&gt;R: built bin path
+    else both absent
+        R--&gt;&gt;P: IsAvailable=false + SKIP-with-reason (binary_unavailable)&lt;br/&gt;[PLANNED — SP4·T4.2.3; NOT a fake PASS]
+    end
+    R--&gt;&gt;P: chosen path (recorded in GetHealth — anti-bluff provenance)
+
+    Note over P,EX: NEVER the qwencode APIKey!=&quot;&quot; bluff (qwencode.go:137)&lt;br/&gt;NEVER templated strings (qwencode.go:101 &quot;// Generated by Qwen&quot;)&lt;br/&gt;[PLANNED de-bluff — SP4·T4.0.1/T4.0.3]
+
+    P-&gt;&gt;EX: prompt via stdin / --prompt; non-interactive flag (§11.4.99 per-agent research)
+    EX--&gt;&gt;P: real stdout + real exit code
+    P-&gt;&gt;P: parse stdout -&gt; LLMResponse (GenerateStream = line-buffered)
+
+    par Power-features + dynamic models
+        P-&gt;&gt;EX: model-list subcommand -&gt; parse -&gt; []ModelInfo (CONST-036, no hardcode)&lt;br/&gt;[PLANNED — SP4·T4.3.1]
+        P-&gt;&gt;V: GetCapabilities() from VerificationResult (Vision/RAG/Memory/MCP/LSP/ACP)&lt;br/&gt;[PLANNED CONST-040 wiring — SP4·T4.3.2]; runtime-probe + honest provenance if no verifier entry
+    end
+
+    Note over P: Config re-export -&gt; INSTALL (backup-first §9.2) -&gt; LIVE post-install validate&lt;br/&gt;real proxied prompt returns real result; transcript docs/qa/&amp;lt;run-id&amp;gt;/&lt;br/&gt;[re-export+static-validate IMPLEMENTED — unified_cli_generator.go:76/263]&lt;br/&gt;[INSTALL + LIVE-validate PLANNED/ABSENT — SP4·T4.4.2/T4.4.3]
+    P--&gt;&gt;U: real result (USER-VISIBLE proof, §11.4.108 runtime signature: &quot;2+2&quot;-&gt;&quot;4&quot;)</code></pre>
+<p><strong>Wiring prerequisite (SP4 §2.3, confirmed gap D-7).</strong>
+<code>helix_code/go.mod</code> (replace block lines 194-212) has
+<strong>no</strong> <code>replace dev.helix.agent</code> — so HelixCode
+cannot import the <code>clis</code> substrate today. SP4·T4.0.5 PLANS to
+add it (or a narrow shim, decided on <code>go mod graph</code>
+evidence). The exec primitive itself (<code>base.go:120-138</code>) is
+IMPLEMENTED and real; the per-agent dispatch tier
+(<code>instance_manager.go:906+ executeClaudeCode/...</code>) and
+<code>qwencode.go:101/115/137</code> are <strong>STUBS</strong> (a §11.4
+bluff SP4·P4.0 RED-reproduces then fixes).</p>
+<hr />
+<h2 id="node-provenance-ledger-implemented-vs-planned">Node provenance
+ledger (IMPLEMENTED vs PLANNED)</h2>
+<p>A single-table audit so a reader can verify each claim against real
+code or a real SP task.</p>
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 12%" />
+<col style="width: 67%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>State</th>
+<th>Anchor (real <code>file:line</code>) or SP task</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>secrets.LoadAPIKeys</code> reader</td>
+<td>IMPLEMENTED but DEAD/UNWIRED</td>
+<td><code>helix_code/internal/secrets/loader.go:30,33-37,84-129</code></td>
+</tr>
+<tr>
+<td>Wire <code>LoadAPIKeys</code> at startup</td>
+<td>PLANNED</td>
+<td>SP1·T1.1.1 (<code>cmd/server/main.go</code>,
+<code>cmd/cli/main.go</code>)</td>
+</tr>
+<tr>
+<td>Viper <code>AutomaticEnv</code> + 8 <code>BindEnv</code></td>
+<td>IMPLEMENTED</td>
+<td><code>helix_code/internal/config/config.go:307-345</code></td>
+</tr>
+<tr>
+<td>Multi-alias key-recognition table</td>
+<td>PLANNED</td>
+<td>SP1·T1.1.2 (<code>internal/llm/keyrecognition.go</code>)</td>
+</tr>
+<tr>
+<td>helix_agent <code>SupportedProviders.EnvVars</code> (reuse
+template)</td>
+<td>IMPLEMENTED</td>
+<td><code>submodules/helix_agent/internal/verifier/provider_types.go:348-385</code></td>
+</tr>
+<tr>
+<td><code>verifier.Adapter.GetVerifiedModels</code> (real HTTP)</td>
+<td>IMPLEMENTED</td>
+<td><code>helix_code/internal/verifier/adapter.go:183-224</code>;
+<code>client.go</code> GET <code>/api/models</code></td>
+</tr>
+<tr>
+<td><code>GetMinAcceptableScore</code> (loaded, never invoked)</td>
+<td>IMPLEMENTED-unused (D-4)</td>
+<td><code>helix_code/internal/verifier/adapter.go:175-180</code></td>
+</tr>
+<tr>
+<td><code>GetWorkingModels</code> filter</td>
+<td>PLANNED</td>
+<td>SP1·T1.2.1 / T1.3.1 (<code>adapter.go</code>)</td>
+</tr>
+<tr>
+<td><code>filterByProviderConfig</code> (Enabled flag only)</td>
+<td>IMPLEMENTED</td>
+<td><code>helix_code/internal/verifier/adapter.go:277-289</code></td>
+</tr>
+<tr>
+<td>CLI <code>handleListModels</code> / <code>printVerifiedModels</code>
+(shows failed/pending, D-2)</td>
+<td>IMPLEMENTED-bluffy</td>
+<td><code>helix_code/cmd/cli/main.go:1355-1414</code></td>
+</tr>
+<tr>
+<td>Switch CLI/server/registry → <code>GetWorkingModels</code></td>
+<td>PLANNED</td>
+<td>SP1·T1.3.2</td>
+</tr>
+<tr>
+<td>Verifier-disabled honest behaviour</td>
+<td>PLANNED</td>
+<td>SP1·T1.3.3 / DECISION-2 (today bluff at
+<code>main.go:1387</code>)</td>
+</tr>
+<tr>
+<td><code>factory.NewProvider</code> (one by
+<code>config.Type</code>)</td>
+<td>IMPLEMENTED</td>
+<td><code>helix_code/internal/llm/factory.go:9-101</code></td>
+</tr>
+<tr>
+<td><code>BuildPresentProviders</code> enumerator</td>
+<td>PLANNED</td>
+<td>SP1·T1.2.2</td>
+</tr>
+<tr>
+<td>Hardcoded provider model lists (D-5/CONST-036)</td>
+<td>IMPLEMENTED (violation)</td>
+<td><code>openai_provider.go:201</code>,
+<code>anthropic_provider.go:203</code>,
+<code>deepseek_provider.go</code>, <code>mistral_provider.go</code></td>
+</tr>
+<tr>
+<td>OpenRouter <code>fetchCatalog</code> / Ollama <code>/api/tags</code>
+(dynamic templates)</td>
+<td>IMPLEMENTED</td>
+<td><code>openrouter_provider.go:233-295</code>,
+<code>ollama_provider.go:225</code></td>
+</tr>
+<tr>
+<td><code>ProviderRegistry.ListProviders</code> +
+<code>GET /v1/providers</code></td>
+<td>IMPLEMENTED</td>
+<td><code>submodules/helix_agent/internal/services/provider_registry.go:82</code>;
+<code>internal/router/router.go:773-797</code></td>
+</tr>
+<tr>
+<td>Ensemble route <code>POST /v1/ensemble/completions</code></td>
+<td>IMPLEMENTED</td>
+<td><code>submodules/helix_agent/internal/router/router.go:676-767</code></td>
+</tr>
+<tr>
+<td>HelixLLM gated provider <code>helixllm</code> (buried)</td>
+<td>IMPLEMENTED</td>
+<td><code>submodules/helix_agent/internal/services/provider_registry.go:750-764</code></td>
+</tr>
+<tr>
+<td><code>DiscoveredModel.Verified</code> / <code>OverallScore</code>
+(working flag)</td>
+<td>IMPLEMENTED</td>
+<td><code>submodules/helix_agent/internal/verifier/discovery.go:50-63</code></td>
+</tr>
+<tr>
+<td><code>GET /v1/completion/models</code> hardcoded 3-model list
+(D-1)</td>
+<td>IMPLEMENTED bluff</td>
+<td><code>submodules/helix_agent/internal/handlers/completion.go:411-436</code></td>
+</tr>
+<tr>
+<td>D-1 verifier-sourced rewrite</td>
+<td>PLANNED</td>
+<td>SP2·T2.0.2</td>
+</tr>
+<tr>
+<td><code>catalog.BuildCatalog</code> join</td>
+<td>PLANNED</td>
+<td>SP2·T2.1.2 (<code>internal/catalog/catalog.go</code>)</td>
+</tr>
+<tr>
+<td><code>GET /v1/catalog</code> handler + route</td>
+<td>PLANNED</td>
+<td>SP2·T2.1.3 (OP-1 root path)</td>
+</tr>
+<tr>
+<td>Selector resolution (Name → target)</td>
+<td>PLANNED</td>
+<td>SP2·T2.1.4</td>
+</tr>
+<tr>
+<td>HelixLLM first-class root promotion</td>
+<td>PLANNED</td>
+<td>SP2·T2.2.4</td>
+</tr>
+<tr>
+<td><code>llm.Provider</code> contract (CLI bridge target)</td>
+<td>IMPLEMENTED</td>
+<td><code>helix_code/internal/llm/missing_types.go:356-378</code></td>
+</tr>
+<tr>
+<td>CLI-exec primitive (<code>LookPath</code> +
+<code>CommandContext</code>)</td>
+<td>IMPLEMENTED</td>
+<td><code>submodules/helix_agent/internal/clis/agents/base/base.go:120-138</code></td>
+</tr>
+<tr>
+<td><code>qwencode</code> stub (templated strings, APIKey gate)</td>
+<td>IMPLEMENTED bluff (D-6)</td>
+<td><code>submodules/helix_agent/internal/clis/agents/qwencode/qwencode.go:101,115,137</code></td>
+</tr>
+<tr>
+<td><code>instance_manager</code> dispatch stubs</td>
+<td>IMPLEMENTED bluff (wider than D-6)</td>
+<td><code>submodules/helix_agent/internal/clis/instance_manager.go:906-942</code></td>
+</tr>
+<tr>
+<td><code>replace dev.helix.agent</code> wiring (D-7)</td>
+<td>PLANNED/ABSENT</td>
+<td>SP4·T4.0.5 (<code>helix_code/go.mod:194-212</code> has no such
+replace)</td>
+</tr>
+<tr>
+<td><code>CLIAgentProvider</code> + <code>AgentSpec</code> registry</td>
+<td>PLANNED</td>
+<td>SP4·T4.1.2 / T4.1.3</td>
+</tr>
+<tr>
+<td><code>resolveBinary</code> PRIMARY→FALLBACK</td>
+<td>PLANNED</td>
+<td>SP4·T4.2.1</td>
+</tr>
+<tr>
+<td>Dynamic <code>GetModels</code> per agent (CONST-036)</td>
+<td>PLANNED</td>
+<td>SP4·T4.3.1</td>
+</tr>
+<tr>
+<td>Capabilities from <code>VerificationResult</code> (CONST-040)</td>
+<td>PLANNED</td>
+<td>SP4·T4.3.2</td>
+</tr>
+<tr>
+<td>Config re-export + static <code>Validate()</code></td>
+<td>IMPLEMENTED</td>
+<td><code>submodules/helix_agent/.../unified_cli_generator.go:76,212,263</code>;
+<code>cmd/helixagent/main.go:107,4522</code></td>
+</tr>
+<tr>
+<td>Filesystem INSTALL + LIVE post-install validate</td>
+<td>PLANNED/ABSENT</td>
+<td>SP4·T4.4.2 / T4.4.3</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><strong>SQL data model</strong> for these flows: <a href="./model-access-schema.sql"><code>model-access-schema.sql</code></a>.</li>
+<li><strong>Index / metadata header:</strong> <a href="./README.md"><code>README.md</code></a>.</li>
+<li><strong>SP plans (authoritative task source):</strong>
+<code>docs/superpowers/specs/plans/2026-06-10-SP1-model-access-plan.md</code>,
+<code>…-SP2-helixagent-exposure-plan.md</code>,
+<code>…-SP4-cli-bridge-plan.md</code>.</li>
+<li><strong>Analysis (evidence base):</strong>
+<code>docs/superpowers/specs/analysis/2026-06-10-B-model-access.md</code>,
+<code>…-C-helixagent-exposure.md</code>,
+<code>…-D-cli-bridge.md</code>.</li>
+<li><strong>Master roadmap:</strong>
+<code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>.</li>
+</ul>
+<blockquote>
+<p>Per CONST-066 / §11.4.65, this <code>.md</code> should ship
+synchronized <code>.html</code>/<code>.pdf</code> siblings at
+release-prep. They are <strong>not</strong> generated by this READ-ONLY
+documentation pass.</p>
+</blockquote>
+</body>
+</html>

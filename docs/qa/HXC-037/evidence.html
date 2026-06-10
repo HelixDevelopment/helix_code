@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-037-11.4.103-141-const-048..060-anchor-cascade-backfill-into-7-owned-submodules">HXC-037
+— §11.4.103-141 + CONST-048..060 anchor cascade backfill into 7 owned
+submodules</h1>
+<h2 id="evidence-run-2026-06-09">Evidence run: 2026-06-09</h2>
+<h3 id="before-this-session-start-30-cascade-failures-across-7-submodules">BEFORE
+(this session start): 30 cascade failures across 7 submodules</h3>
+<p>(captured earlier:
+debate_orchestrator/doc_processor/event_bus/helix_agent/llm_ops/llm_orchestrator/llm_provider
+× {CONSTITUTION,CLAUDE,AGENTS}.md missing §11.9 + CONST-048..060 +
+§11.4.103-121 heading anchors)</p>
+<h3 id="after-verify-governance-cascade.sh-live-re-run">AFTER:
+verify-governance-cascade.sh (live re-run)</h3>
+<pre><code>PASS</code></pre>
+<h3 id="fix-scriptsbackfill_anchor_cascade.sh-deterministic-additive-only-11.4.122-idempotent-verbatim-golden-helix_qa-cascade">Fix:
+scripts/backfill_anchor_cascade.sh — deterministic, additive-only
+(§11.4.122), idempotent, verbatim golden (helix_qa) cascade</h3>
+<h3 id="submodule-commits-pushed-to-origin-fast-forward-no-force-11.4.113">Submodule
+commits (pushed to origin, fast-forward, no force §11.4.113):</h3>
+<ul>
+<li>helix_agent: 480fa854</li>
+<li>debate_orchestrator: c9b51f9</li>
+<li>doc_processor: ea11bbf</li>
+<li>event_bus: ac1e7aa</li>
+<li>llm_ops: 3f7bac5</li>
+<li>llm_orchestrator: 0bb1e37</li>
+<li>llm_provider: 8034101</li>
+</ul>
+</body>
+</html>

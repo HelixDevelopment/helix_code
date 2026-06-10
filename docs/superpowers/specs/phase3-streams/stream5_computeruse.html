@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stream5_computeruse</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stream5_computeruse</h1>
+</header>
+<h1 id="stream-hxc031-computeruse-capability-b-design-read-design-only-no-edit-output-text">Stream
+HXC031-COMPUTERUSE — Capability B design (read + design only; NO Edit —
+output text)</h1>
+<p>Repo: /Users/milosvasic/Projects/HelixCode, app
+<code>helix_code/</code>. HXC-031 Capability B = COMPUTER-USE LOOP,
+BROWSER-ONLY (FORK-1: browser_action screenshot-feedback loop, NOT
+OS-level). Depends on Capability A (multimodal message carriage,
+designed by another stream — assume A gives a Message that can carry an
+image block).</p>
+<p>Known (verify): a chromedp-based browser suite already exists
+(referred to as “P2-F23”). REUSE+EXTEND, do not build fresh.</p>
+<p>Tasks: 1. Find the chromedp browser suite in
+<code>helix_code/internal/</code> (chromedp usage, screenshot capture,
+click/type/navigate primitives). List files/types/exported funcs, cite
+file:line, quote the screenshot-capture fn + the action primitives. 2.
+Determine how browser actions are exposed to the agent/LLM (tool
+registry?). Quote the registration. 3. DESIGN Capability B: the
+iterative loop — capture screenshot → send to model as a multimodal
+message (via Capability A) → receive next browser_action → execute via
+the chromedp suite → repeat until goal/stop. Specify: loop control (max
+iterations, stop condition, error handling), the exact integration seam
+calling Capability A, and what is reused vs new (REUSE+EXTEND). Present
+a concrete skeleton sketch (new file(s) + functions + the call into A).
+4. TEST PLAN per CONST-050: a real-browser headless (chromedp)
+integration test driving ≥1 screenshot→action cycle; list test files +
+assertions + the captured evidence that proves real page-state change
+(not just “no error”).</p>
+<p>Output: compact markdown (existing-code map with file:line, design +
+skeleton, dependency-on-A note, test plan). Do not implement.</p>
+</body>
+</html>

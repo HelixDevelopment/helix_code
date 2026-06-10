@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-055-formatters-cat-version-go_hello-fixtures-11.4.81">HXC-055 —
+formatters cat –version + go_hello fixtures (§11.4.81)</h1>
+<p><strong>Captured:</strong> 2026-06-09T14:54:03Z · Bug · Fixed (→
+Fixed.md) <strong>Submodule:</strong> submodules/formatters ## (a) RED:
+<code>cat --version</code> on Darwin → <code>cat: illegal option</code>,
+exit 1; TestNativeFormatter_HealthCheck_Success FAILed. ## (b) RED:
+challenges/fixtures/go_hello_{en,sr}.go are package main w/o func main →
+<code>go build ./...</code> FAILed tree-wide. ## Fix (a) HealthCheck
+probe <code>&lt;bin&gt; --version</code> →
+<code>exec.LookPath(binaryPath)</code> (portable GNU/BSD/macOS/Windows;
+BinaryMissing negative contract preserved). (b) <code>git mv</code> both
+fixtures into challenges/fixtures/testdata/ (Go excludes testdata/ from
+build); runner embeds content as inline strings so files preserved
+(§11.4.124 relocate-not-delete). ## GREEN: go build ./… exit 0
+(FMT_BUILD_OK); go vet 0; go test ./… all ok; HealthCheck
+Success/Missing/WithTrue PASS; runner builds+runs. Commit
+<code>d205be3</code>, pushed ff <code>3d4f469..d205be3</code> (both
+remotes confirmed).</p>
+</body>
+</html>

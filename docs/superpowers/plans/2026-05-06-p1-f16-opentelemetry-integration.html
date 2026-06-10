@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f16-opentelemetry-integration</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f16-opentelemetry-integration</h1>
+</header>
+<h1 id="p1-f16-opentelemetry-integration-implementation-plan">P1-F16 —
+OpenTelemetry Integration Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship real, end-to-end OpenTelemetry
+<strong>tracing + metrics</strong> for the HelixCode CLI agent. F16
+wires an OTel <code>TracerProvider</code> and <code>MeterProvider</code>
+into the CLI bootstrap, decorates the three central hot paths (LLM
+provider calls, tool registry execution, agent loop iterations) with
+span + counter + histogram instrumentation, and routes telemetry to one
+of three exporters selected at startup via standard OTel environment
+variables: <strong>OTLP/gRPC</strong> (production),
+<strong>OTLP/HTTP</strong> (proxy-friendly), or <strong>stdout</strong>
+(development). When no exporter env var is set the stack collapses to a
+no-op TracerProvider + MeterProvider with zero observable cost. A
+<code>/telemetry</code> slash command (<code>status</code> /
+<code>show</code> / <code>flush</code>) provides inspection and
+force-flush. <strong>No cobra subcommand</strong> (Q5=B). <strong>No
+yaml/CLI flags</strong> (Q4=B). <strong>No logs-bridge</strong> (Q1=B;
+deferred to F16.5).</p>
+<p><strong>Architecture:</strong> New <code>internal/telemetry/</code>
+package with <code>types.go</code> (TelemetryConfig + ExporterKind enum
++ DefaultBlockedAttributeKeys + error sentinels), <code>config.go</code>
+(env-var parsing + exporter selection), <code>provider.go</code>
+(TelemetryProvider construction + Tracer/Meter accessors + ForceFlush +
+Shutdown + Stats + ring buffer), <code>llm_instrumentation.go</code>
+(TracedLLMProvider decorator using Go struct embedding so only
+Generate/GenerateStream are overridden),
+<code>tool_instrumentation.go</code> (in-place
+<code>InstrumentToolCall</code> helper used inside
+<code>ToolRegistry.Execute</code>),
+<code>agent_instrumentation.go</code> (in-place
+<code>InstrumentAgentIteration</code> helper used inside
+<code>BaseAgent.executeTaskWithLLM</code>),
+<code>attribute_filter.go</code> (CONST-042 secret-attribute blocklist)
+— each paired with <code>_test.go</code>. New slash at
+<code>internal/commands/telemetry_command.go</code>. Two existing files
+get small additions: <code>internal/tools/registry.go</code>
+(telemetryProvider field + <code>SetTelemetryProvider</code> setter +
+5-line in-place wrap of <code>Execute</code>) and
+<code>internal/agent/base_agent.go</code> (telemetryProvider field +
+<code>SetTelemetryProvider</code> setter + 5-line wrap of
+<code>executeTaskWithLLM</code>’s LLM-call site).
+<code>cmd/cli/main.go</code> adds the env-var load, provider
+construction, decorator wiring, slash registration, and deferred
+shutdown.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, spf13/cobra v1.8
+— already present. <strong>NEW external deps</strong> (all pinned to
+OTel v1.30.0; pure Go; no CGO):</p>
+<pre><code>go.opentelemetry.io/otel                                              v1.30.0
+go.opentelemetry.io/otel/sdk                                          v1.30.0
+go.opentelemetry.io/otel/sdk/metric                                   v1.30.0
+go.opentelemetry.io/otel/metric                                       v1.30.0
+go.opentelemetry.io/otel/trace                                        v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlptrace                     v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc       v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp       v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlpmetric                    v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc     v1.30.0
+go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp     v1.30.0
+go.opentelemetry.io/otel/exporters/stdout/stdouttrace                 v1.30.0
+go.opentelemetry.io/otel/exporters/stdout/stdoutmetric                v1.30.0</code></pre>
+<p>Estimated transitive footprint: ~25 new modules in
+<code>go.sum</code> (notably <code>google.golang.org/grpc</code>,
+<code>google.golang.org/protobuf</code>,
+<code>go.opentelemetry.io/proto/otlp</code>,
+<code>github.com/cenkalti/backoff/v4</code>).</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-06-p1-f16-opentelemetry-integration-design.md</code>
+(commit <code>bc07a96</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F16
+surface):</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  internal/telemetry internal/commands/telemetry_command.go <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — telemetry
+can degenerate into a no-op in four ways: (a) Tracer initialised but no
+span ever created; (b) spans created but BSP never flushes (deferred
+shutdown in wrong scope, or 0-deadline ctx); (c) Meter registered but
+Counter.Add never called; (d) MeterProvider hooked to wrong exporter so
+increments never reach the receiver. The five real-execution criteria
+(spans created, spans exported, metrics recorded, metrics exported, no
+secret-shaped attributes) are each tested with both unit assertions AND
+a Challenge phase. The Challenge harness includes an in-tree fake
+OTLP/HTTP receiver (a tiny <code>net/http.Server</code> that decodes the
+protobuf body and asserts ≥1 trace POST + ≥1 metric POST).
+Span-count-zero is a hard Challenge failure — absence-of-error is NEVER
+acceptable.</p>
+<p><strong>Why this is consequential:</strong> observability is a
+load-bearing SRE surface for any production agent. Most “telemetry on”
+defects look fine in compilation and naive tests but produce zero spans
+at the collector — silently. F16’s discriminating tests are: (i) the
+Challenge’s in-tree fake OTLP/HTTP receiver POST counter, and (ii) the
+unit-level <code>tracetest.SpanRecorder</code> assertion that a span
+named <code>llm.generate</code> actually appears after a real
+<code>Generate</code> call through the wrapped provider. Both must
+produce positive evidence; neither can be satisfied by
+absence-of-error.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F16-T01 — bootstrap
+evidence + advance PROGRESS to F16</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T02 —
+<code>go.mod</code>: add OTel v1.30.0 dep set + go.sum (TDD: failing
+import test)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T03 —
+<code>internal/telemetry/types.go</code>: TelemetryConfig + ExporterKind
++ DefaultBlockedAttributeKeys + error sentinels (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T04 —
+<code>internal/telemetry/config.go</code> +
+<code>attribute_filter.go</code>: env-var parsing + exporter selection +
+secret-attribute filter (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T05 —
+<code>internal/telemetry/provider.go</code>: TelemetryProvider
+construction (TracerProvider + MeterProvider; selects exporter;
+pre-built instruments; ForceFlush/Shutdown) (TDD with
+<code>tracetest.SpanRecorder</code> + manual metric reader)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T06 —
+<code>internal/telemetry/llm_instrumentation.go</code>:
+TracedLLMProvider decorator (TDD with FakeLLMProvider; assert span name,
+token counter, no prompt-body attribute)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T07 —
+<code>internal/telemetry/tool_instrumentation.go</code> +
+<code>internal/tools/registry.go</code> wrap:
+<code>InstrumentToolCall</code> helper + in-place wrap of
+<code>Execute</code> + <code>SetTelemetryProvider</code>
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T08 —
+<code>internal/telemetry/agent_instrumentation.go</code> +
+<code>internal/agent/base_agent.go</code> wrap:
+<code>InstrumentAgentIteration</code> helper + in-place wrap of
+<code>executeTaskWithLLM</code> + <code>SetTelemetryProvider</code>
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T09 —
+<code>/telemetry</code> slash command (status / show / flush) (TDD;
+nil-provider reports unavailable)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T10 — main.go
+wiring (env-var load + provider construct + decorator + setters + slash
++ deferred shutdown) + integration tests (stdout always; OTLP gRPC +
+HTTP gated)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T11 — Challenge
+harness with in-tree fake OTLP/HTTP receiver (5-phase: STDOUT +
+FAKE-OTLP-HTTP + FILTER + NOOP + REAL-COLLECTOR)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F16-T12 — Feature 16
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F16 evidence section header (spec <code>bc07a96</code>),
+update PROGRESS current focus to F16, insert F16 task list (12 items)
+after F15’s. Confirm <code>06_phase_1_evidence.md</code> has an F16
+anchor.</p>
+<p>Commit:
+<code>docs(P1-F16-T01): bootstrap Phase 1 / Feature 16 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-go.mod-otel-v1.30.0-dep-set-tdd">Task 2: go.mod (OTel
+v1.30.0 dep set, TDD)</h2>
+<p><strong>Files:</strong> modify <code>helix_code/go.mod</code>,
+regenerate <code>helix_code/go.sum</code>. New ephemeral file
+<code>helix_code/internal/telemetry/_deps_smoke_test.go</code>
+(TDD).</p>
+<p>Run from <code>helix_code/</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel@v1.30.0</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/sdk@v1.30.0</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/sdk/metric@v1.30.0</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/metric@v1.30.0</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/trace@v1.30.0</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/exporters/otlp/otlptrace@v1.30.0</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc@v1.30.0</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp@v1.30.0</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/exporters/otlp/otlpmetric@v1.30.0</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc@v1.30.0</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp@v1.30.0</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/exporters/stdout/stdouttrace@v1.30.0</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get go.opentelemetry.io/otel/exporters/stdout/stdoutmetric@v1.30.0</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span></code></pre></div>
+<p>Failing test FIRST (<code>_deps_smoke_test.go</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> telemetry</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel/sdk/trace&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel/sdk/metric&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel/exporters/stdout/stdouttrace&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel/exporters/stdout/stdoutmetric&quot;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc&quot;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp&quot;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp&quot;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestOTelDepsLink<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> otel<span class="op">.</span>GetTracerProvider<span class="op">()</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> trace<span class="op">.</span>NewTracerProvider</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> metric<span class="op">.</span>NewMeterProvider</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> stdouttrace<span class="op">.</span>New</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> stdoutmetric<span class="op">.</span>New</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> otlptracegrpc<span class="op">.</span>New</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> otlptracehttp<span class="op">.</span>New</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> otlpmetricgrpc<span class="op">.</span>New</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> otlpmetrichttp<span class="op">.</span>New</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Test fails on red (missing imports), passes after
+<code>go get</code>. The <code>_deps_smoke_test.go</code> file is
+removed in T03 once <code>types.go</code> lands.</p>
+<p>Commit:
+<code>feat(P1-F16-T02): add OpenTelemetry v1.30.0 dep set + dep-link smoke test</code>.</p>
+<hr />
+<h2 id="task-3-types.go-tdd">Task 3: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/telemetry/types.go</code>, new
+<code>helix_code/internal/telemetry/types_test.go</code>. Delete
+<code>_deps_smoke_test.go</code>.</p>
+<p>Define: - <code>ExporterKind</code> string enum
+(<code>ExporterNone</code>, <code>ExporterStdout</code>,
+<code>ExporterOTLPGRPC</code>, <code>ExporterOTLPHTTP</code>). -
+<code>TelemetryConfig</code> struct (Enabled, Kind, Endpoint, Protocol,
+ServiceName, ResourceAttributes, Insecure, Timeout,
+BlockedAttributeKeys). - <code>TelemetryStats</code> struct (Kind,
+Endpoint, ServiceName, SpansStarted, SpansEnded, MetricsRecord,
+StartTime, LastFlushAt). - <code>ExportedRecord</code> struct (Type
+{span|metric}, Name, Attributes, Timestamp) for the ring buffer. -
+<code>DefaultBlockedAttributeKeys</code> exported var (per spec §3.3). -
+Error sentinels: <code>ErrTelemetryDisabled</code>,
+<code>ErrUnknownExporterKind</code>,
+<code>ErrExporterUnreachable</code>.</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestExporterKind_StringValues<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;none&quot;</span><span class="op">,</span>      <span class="dt">string</span><span class="op">(</span>ExporterNone<span class="op">))</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;stdout&quot;</span><span class="op">,</span>    <span class="dt">string</span><span class="op">(</span>ExporterStdout<span class="op">))</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;otlp-grpc&quot;</span><span class="op">,</span> <span class="dt">string</span><span class="op">(</span>ExporterOTLPGRPC<span class="op">))</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;otlp-http&quot;</span><span class="op">,</span> <span class="dt">string</span><span class="op">(</span>ExporterOTLPHTTP<span class="op">))</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDefaultBlockedAttributeKeys_CoversCredentialKeys<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> k <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;api_key&quot;</span><span class="op">,</span> <span class="st">&quot;token&quot;</span><span class="op">,</span> <span class="st">&quot;bearer&quot;</span><span class="op">,</span> <span class="st">&quot;password&quot;</span><span class="op">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;secret&quot;</span><span class="op">,</span> <span class="st">&quot;authorization&quot;</span><span class="op">,</span> <span class="st">&quot;anthropic_api_key&quot;</span><span class="op">,</span> <span class="st">&quot;openai_api_key&quot;</span><span class="op">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;aws_access_key_id&quot;</span><span class="op">,</span> <span class="st">&quot;aws_secret_access_key&quot;</span><span class="op">}</span> <span class="op">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> DefaultBlockedAttributeKeys<span class="op">,</span> k<span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDefaultBlockedAttributeKeys_CoversPromptBodyKeys<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> k <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;prompt&quot;</span><span class="op">,</span> <span class="st">&quot;prompt_body&quot;</span><span class="op">,</span> <span class="st">&quot;request_body&quot;</span><span class="op">,</span> <span class="st">&quot;response_body&quot;</span><span class="op">}</span> <span class="op">{</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> DefaultBlockedAttributeKeys<span class="op">,</span> k<span class="op">)</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetryConfig_DefaultServiceName_helixcode<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    c <span class="op">:=</span> <span class="op">&amp;</span>TelemetryConfig<span class="op">{}</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>applyDefaults<span class="op">()</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;helixcode&quot;</span><span class="op">,</span> c<span class="op">.</span>ServiceName<span class="op">)</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F16-T03): TelemetryConfig + ExporterKind + DefaultBlockedAttributeKeys</code>.</p>
+<hr />
+<h2 id="task-4-config.go-attribute_filter.go-tdd">Task 4: config.go +
+attribute_filter.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/telemetry/config.go</code>, new
+<code>helix_code/internal/telemetry/config_test.go</code>, new
+<code>helix_code/internal/telemetry/attribute_filter.go</code>, new
+<code>helix_code/internal/telemetry/attribute_filter_test.go</code>.</p>
+<p><code>config.go</code> exports: -
+<code>LoadConfigFromEnv() (*TelemetryConfig, error)</code> — reads
+<code>OTEL_EXPORTER_OTLP_ENDPOINT</code>,
+<code>OTEL_EXPORTER_OTLP_PROTOCOL</code>,
+<code>OTEL_SERVICE_NAME</code>, <code>OTEL_RESOURCE_ATTRIBUTES</code>,
+<code>OTEL_EXPORTER_OTLP_INSECURE</code>,
+<code>OTEL_EXPORTER_OTLP_TIMEOUT</code>. When all are unset, returns
+<code>&amp;TelemetryConfig{Enabled: false, Kind: ExporterNone}</code>.
+Returns <code>ErrUnknownExporterKind</code> on bogus protocol. -
+<code>(*TelemetryConfig).SelectExporter() ExporterKind</code> — applies
+the disambiguation rules from spec §3.4 (stdout &gt; none-when-no-env
+&gt; http/protobuf &gt; grpc-default). -
+<code>parseResourceAttributes(s string) map[string]string</code> —
+<code>k=v,k=v</code> parser per OTel spec.</p>
+<p><code>attribute_filter.go</code> exports: -
+<code>FilterAttributes(attrs []attribute.KeyValue, blocked []string) []attribute.KeyValue</code>
+— drops KVs whose key matches any blocked entry (case-insensitive, exact
+match). - <code>IsBlockedKey(key string, blocked []string) bool</code> —
+used in tests.</p>
+<p>Failing tests FIRST (config_test.go):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfigFromEnv_NoEnv_DisablesTelemetry<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_ENDPOINT&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_SERVICE_NAME&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> cfg<span class="op">.</span>Enabled<span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ExporterNone<span class="op">,</span> cfg<span class="op">.</span>Kind<span class="op">)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfigFromEnv_EndpointOnly_DefaultsOTLPGRPC<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_ENDPOINT&quot;</span><span class="op">,</span> <span class="st">&quot;localhost:4317&quot;</span><span class="op">)</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> cfg<span class="op">.</span>Enabled<span class="op">)</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ExporterOTLPGRPC<span class="op">,</span> cfg<span class="op">.</span>Kind<span class="op">)</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfigFromEnv_ProtocolStdout_SelectsStdout<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">,</span> <span class="st">&quot;stdout&quot;</span><span class="op">)</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ExporterStdout<span class="op">,</span> cfg<span class="op">.</span>Kind<span class="op">)</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfigFromEnv_ProtocolHTTP_SelectsOTLPHTTP<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_ENDPOINT&quot;</span><span class="op">,</span> <span class="st">&quot;http://localhost:4318&quot;</span><span class="op">)</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">,</span> <span class="st">&quot;http/protobuf&quot;</span><span class="op">)</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> ExporterOTLPHTTP<span class="op">,</span> cfg<span class="op">.</span>Kind<span class="op">)</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfigFromEnv_BadProtocol_ReturnsErrUnknownExporterKind<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">,</span> <span class="st">&quot;carrier-pigeon&quot;</span><span class="op">)</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrUnknownExporterKind<span class="op">)</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfigFromEnv_ResourceAttributesParsedAsCSV<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">,</span> <span class="st">&quot;stdout&quot;</span><span class="op">)</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_RESOURCE_ATTRIBUTES&quot;</span><span class="op">,</span> <span class="st">&quot;deployment.environment=prod,team=platform&quot;</span><span class="op">)</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> _ <span class="op">:=</span> LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;prod&quot;</span><span class="op">,</span>      cfg<span class="op">.</span>ResourceAttributes<span class="op">[</span><span class="st">&quot;deployment.environment&quot;</span><span class="op">])</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;platform&quot;</span><span class="op">,</span>  cfg<span class="op">.</span>ResourceAttributes<span class="op">[</span><span class="st">&quot;team&quot;</span><span class="op">])</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (attribute_filter_test.go):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFilterAttributes_DropsBlockedKeys<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="op">[]</span>attribute<span class="op">.</span>KeyValue<span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;api_key&quot;</span><span class="op">,</span>     <span class="st">&quot;sk-abc&quot;</span><span class="op">),</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;token&quot;</span><span class="op">,</span>       <span class="st">&quot;ghp_def&quot;</span><span class="op">),</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;password&quot;</span><span class="op">,</span>    <span class="st">&quot;hunter2&quot;</span><span class="op">),</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;prompt&quot;</span><span class="op">,</span>      <span class="st">&quot;leaked prompt body&quot;</span><span class="op">),</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;model&quot;</span><span class="op">,</span>       <span class="st">&quot;gpt-4&quot;</span><span class="op">),</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> FilterAttributes<span class="op">(</span>in<span class="op">,</span> DefaultBlockedAttributeKeys<span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;model&quot;</span><span class="op">,</span> <span class="dt">string</span><span class="op">(</span>out<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Key<span class="op">))</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFilterAttributes_CaseInsensitive<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="op">[]</span>attribute<span class="op">.</span>KeyValue<span class="op">{</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;API_KEY&quot;</span><span class="op">,</span> <span class="st">&quot;1&quot;</span><span class="op">),</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;Api-Key&quot;</span><span class="op">,</span> <span class="st">&quot;2&quot;</span><span class="op">),</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;apikey&quot;</span><span class="op">,</span>  <span class="st">&quot;3&quot;</span><span class="op">),</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> FilterAttributes<span class="op">(</span>in<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;api_key&quot;</span><span class="op">,</span> <span class="st">&quot;api-key&quot;</span><span class="op">,</span> <span class="st">&quot;apikey&quot;</span><span class="op">})</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestFilterAttributes_NilBlocked_PassesThrough<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="op">[]</span>attribute<span class="op">.</span>KeyValue<span class="op">{</span>attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;api_key&quot;</span><span class="op">,</span> <span class="st">&quot;x&quot;</span><span class="op">)}</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> in<span class="op">,</span> FilterAttributes<span class="op">(</span>in<span class="op">,</span> <span class="ot">nil</span><span class="op">))</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F16-T04): env-var config parsing + exporter selection + CONST-042 attribute filter</code>.</p>
+<hr />
+<h2 id="task-5-provider.go-tdd">Task 5: provider.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/telemetry/provider.go</code>, new
+<code>helix_code/internal/telemetry/provider_test.go</code>.</p>
+<p>Implementation outline:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TelemetryProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    cfg                   <span class="op">*</span>TelemetryConfig</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    tracerProv            <span class="op">*</span>sdktrace<span class="op">.</span>TracerProvider</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    meterProv             <span class="op">*</span>sdkmetric<span class="op">.</span>MeterProvider</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    tracer                trace<span class="op">.</span>Tracer</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    meter                 metric<span class="op">.</span>Meter</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    resource              <span class="op">*</span>resource<span class="op">.</span>Resource</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    logger                <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    llmTokensCounter      metric<span class="op">.</span>Int64Counter</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    llmLatencyHist        metric<span class="op">.</span>Float64Histogram</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    toolCallsCounter      metric<span class="op">.</span>Int64Counter</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    toolLatencyHist       metric<span class="op">.</span>Float64Histogram</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    agentIterCounter      metric<span class="op">.</span>Int64Counter</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    agentIterDurationHist metric<span class="op">.</span>Float64Histogram</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    stats   TelemetryStats</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    statsMu sync<span class="op">.</span>RWMutex</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    ringBuf <span class="op">*</span>ringBuffer</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTelemetryProvider<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cfg <span class="op">*</span>TelemetryConfig<span class="op">,</span> logger <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">(*</span>TelemetryProvider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">.</span>applyDefaults<span class="op">()</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>cfg<span class="op">.</span>Enabled <span class="op">{</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> newNoOpProvider<span class="op">(</span>cfg<span class="op">,</span> logger<span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> buildResource<span class="op">(</span>ctx<span class="op">,</span> cfg<span class="op">)</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> tracerExp sdktrace<span class="op">.</span>SpanExporter</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> metricExp sdkmetric<span class="op">.</span>Exporter</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> cfg<span class="op">.</span>Kind <span class="op">{</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ExporterStdout<span class="op">:</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        tracerExp<span class="op">,</span> err <span class="op">=</span> stdouttrace<span class="op">.</span>New<span class="op">(</span>stdouttrace<span class="op">.</span>WithWriter<span class="op">(</span>stdoutTraceWriter<span class="op">()))</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        metricExp<span class="op">,</span> err <span class="op">=</span> stdoutmetric<span class="op">.</span>New<span class="op">(</span>stdoutmetric<span class="op">.</span>WithWriter<span class="op">(</span>stdoutMetricWriter<span class="op">()))</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ExporterOTLPGRPC<span class="op">:</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>        tracerExp<span class="op">,</span> err <span class="op">=</span> otlptracegrpc<span class="op">.</span>New<span class="op">(</span>ctx<span class="op">,</span> otlptracegrpc<span class="op">.</span>WithEndpoint<span class="op">(</span>cfg<span class="op">.</span>Endpoint<span class="op">),</span> …<span class="op">)</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        <span class="co">// …</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ExporterOTLPHTTP<span class="op">:</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>        <span class="co">// …</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrUnknownExporterKind</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">:=</span> sdktrace<span class="op">.</span>NewTracerProvider<span class="op">(</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        sdktrace<span class="op">.</span>WithBatcher<span class="op">(</span>tracerExp<span class="op">),</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        sdktrace<span class="op">.</span>WithResource<span class="op">(</span>res<span class="op">),</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    mp <span class="op">:=</span> sdkmetric<span class="op">.</span>NewMeterProvider<span class="op">(</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        sdkmetric<span class="op">.</span>WithReader<span class="op">(</span>sdkmetric<span class="op">.</span>NewPeriodicReader<span class="op">(</span>metricExp<span class="op">)),</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>        sdkmetric<span class="op">.</span>WithResource<span class="op">(</span>res<span class="op">),</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    tracer <span class="op">:=</span> tp<span class="op">.</span>Tracer<span class="op">(</span><span class="st">&quot;helixcode&quot;</span><span class="op">)</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    meter <span class="op">:=</span> mp<span class="op">.</span>Meter<span class="op">(</span><span class="st">&quot;helixcode&quot;</span><span class="op">)</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> <span class="op">&amp;</span>TelemetryProvider<span class="op">{</span>cfg<span class="op">:</span> cfg<span class="op">,</span> tracerProv<span class="op">:</span> tp<span class="op">,</span> meterProv<span class="op">:</span> mp<span class="op">,</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>        tracer<span class="op">:</span> tracer<span class="op">,</span> meter<span class="op">:</span> meter<span class="op">,</span> resource<span class="op">:</span> res<span class="op">,</span> logger<span class="op">:</span> logger<span class="op">}</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> out<span class="op">.</span>buildInstruments<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    out<span class="op">.</span>stats <span class="op">=</span> TelemetryStats<span class="op">{</span>Kind<span class="op">:</span> cfg<span class="op">.</span>Kind<span class="op">,</span> Endpoint<span class="op">:</span> cfg<span class="op">.</span>Endpoint<span class="op">,</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>        ServiceName<span class="op">:</span> cfg<span class="op">.</span>ServiceName<span class="op">,</span> StartTime<span class="op">:</span> time<span class="op">.</span>Now<span class="op">()}</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg<span class="op">.</span>Kind <span class="op">==</span> ExporterStdout <span class="op">{</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>        out<span class="op">.</span>ringBuf <span class="op">=</span> newRingBuffer<span class="op">(</span><span class="dv">64</span><span class="op">)</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> buildInstruments<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> err <span class="dt">error</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>llmTokensCounter<span class="op">,</span> err <span class="op">=</span> t<span class="op">.</span>meter<span class="op">.</span>Int64Counter<span class="op">(</span><span class="st">&quot;helixcode_llm_tokens_total&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>llmLatencyHist<span class="op">,</span> err <span class="op">=</span> t<span class="op">.</span>meter<span class="op">.</span>Float64Histogram<span class="op">(</span><span class="st">&quot;helixcode_llm_latency_seconds&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>toolCallsCounter<span class="op">,</span> err <span class="op">=</span> t<span class="op">.</span>meter<span class="op">.</span>Int64Counter<span class="op">(</span><span class="st">&quot;helixcode_tool_calls_total&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>toolLatencyHist<span class="op">,</span> err <span class="op">=</span> t<span class="op">.</span>meter<span class="op">.</span>Float64Histogram<span class="op">(</span><span class="st">&quot;helixcode_tool_latency_seconds&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>agentIterCounter<span class="op">,</span> err <span class="op">=</span> t<span class="op">.</span>meter<span class="op">.</span>Int64Counter<span class="op">(</span><span class="st">&quot;helixcode_agent_iterations_total&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>agentIterDurationHist<span class="op">,</span> err <span class="op">=</span> t<span class="op">.</span>meter<span class="op">.</span>Float64Histogram<span class="op">(</span><span class="st">&quot;helixcode_agent_iteration_duration_seconds&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> err <span class="op">}</span></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> IsNoOp<span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> t<span class="op">.</span>cfg <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> <span class="op">!</span>t<span class="op">.</span>cfg<span class="op">.</span>Enabled <span class="op">}</span></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> Tracer<span class="op">()</span> trace<span class="op">.</span>Tracer <span class="op">{</span> <span class="cf">return</span> t<span class="op">.</span>tracer <span class="op">}</span></span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> Meter<span class="op">()</span> metric<span class="op">.</span>Meter  <span class="op">{</span> <span class="cf">return</span> t<span class="op">.</span>meter <span class="op">}</span></span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> Stats<span class="op">()</span> TelemetryStats <span class="op">{</span> <span class="co">/* RLock + return */</span> <span class="op">}</span></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> RingBuffer<span class="op">()</span> <span class="op">[]</span>ExportedRecord <span class="op">{</span> <span class="co">/* nil-safe */</span> <span class="op">}</span></span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> ForceFlush<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span> <span class="co">/* tp.ForceFlush + mp.ForceFlush */</span> <span class="op">}</span></span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TelemetryProvider<span class="op">)</span> Shutdown<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span> <span class="co">/* ForceFlush + Shutdown both */</span> <span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNewTelemetryProvider_NoEnv_ReturnsNoOpProvider<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> <span class="op">&amp;</span>TelemetryConfig<span class="op">{</span>Enabled<span class="op">:</span> <span class="ot">false</span><span class="op">}</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    tp<span class="op">,</span> err <span class="op">:=</span> NewTelemetryProvider<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> cfg<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>IsNoOp<span class="op">())</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Tracer is non-nil but emits nothing observable</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> span <span class="op">:=</span> tp<span class="op">.</span>Tracer<span class="op">().</span>Start<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;x&quot;</span><span class="op">)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    span<span class="op">.</span>End<span class="op">()</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNewTelemetryProvider_StdoutKind_RealProvider<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> <span class="op">&amp;</span>TelemetryConfig<span class="op">{</span>Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> Kind<span class="op">:</span> ExporterStdout<span class="op">,</span> ServiceName<span class="op">:</span> <span class="st">&quot;svc&quot;</span><span class="op">}</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    tp<span class="op">,</span> err <span class="op">:=</span> NewTelemetryProvider<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> cfg<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>IsNoOp<span class="op">())</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>Tracer<span class="op">())</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>Meter<span class="op">())</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestProvider_ForceFlushDrainsBSP<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Use an in-process tracetest.SpanRecorder as the exporter:</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> tracetest<span class="op">.</span>NewSpanRecorder<span class="op">()</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> <span class="op">&amp;</span>TelemetryConfig<span class="op">{</span>Enabled<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> Kind<span class="op">:</span> ExporterStdout<span class="op">,</span> ServiceName<span class="op">:</span> <span class="st">&quot;svc&quot;</span><span class="op">}</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    tp<span class="op">,</span> _ <span class="op">:=</span> newTelemetryProviderWithExporter<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> cfg<span class="op">,</span> rec<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> span <span class="op">:=</span> tp<span class="op">.</span>Tracer<span class="op">().</span>Start<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;test-span&quot;</span><span class="op">)</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    span<span class="op">.</span>End<span class="op">()</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>ForceFlush<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    spans <span class="op">:=</span> rec<span class="op">.</span>Ended<span class="op">()</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> spans<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;test-span&quot;</span><span class="op">,</span> spans<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Name<span class="op">())</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestProvider_MetricsForceFlushDrainsReader<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Manual reader pattern from go.opentelemetry.io/otel/sdk/metric/metricdata</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> sdkmetric<span class="op">.</span>NewManualReader<span class="op">()</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">// … construct provider with this reader, increment counter, call collect, assert non-zero</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestProvider_Shutdown_RespectsCtxDeadline<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pass ctx with deadline already passed; ensure return &lt; 100ms.</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F16-T05): TelemetryProvider with exporter selection + ForceFlush + Shutdown</code>.</p>
+<hr />
+<h2 id="task-6-llm_instrumentation.go-tdd">Task 6:
+llm_instrumentation.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/telemetry/llm_instrumentation.go</code>, new
+<code>helix_code/internal/telemetry/llm_instrumentation_test.go</code>.</p>
+<p><code>TracedLLMProvider</code> uses Go struct embedding so only
+<code>Generate</code> and <code>GenerateStream</code> are overridden;
+the other 9 methods of <code>llm.Provider</code> are promoted
+automatically.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TracedLLMProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    llm<span class="op">.</span>Provider</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">*</span>TelemetryProvider</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTracedLLMProvider<span class="op">(</span>inner llm<span class="op">.</span>Provider<span class="op">,</span> tp <span class="op">*</span>TelemetryProvider<span class="op">)</span> <span class="op">(*</span>TracedLLMProvider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> inner <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;telemetry: inner provider must not be nil&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>TracedLLMProvider<span class="op">{</span>Provider<span class="op">:</span> inner<span class="op">,</span> tp<span class="op">:</span> tp<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TracedLLMProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>llm<span class="op">.</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>llm<span class="op">.</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>tp <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> t<span class="op">.</span>tp<span class="op">.</span>IsNoOp<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> t<span class="op">.</span>Provider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">)</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> span <span class="op">:=</span> t<span class="op">.</span>tp<span class="op">.</span>Tracer<span class="op">().</span>Start<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;llm.generate&quot;</span><span class="op">,</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        trace<span class="op">.</span>WithAttributes<span class="op">(</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>            attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;llm.model&quot;</span><span class="op">,</span>         req<span class="op">.</span>Model<span class="op">),</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>            attribute<span class="op">.</span>Int   <span class="op">(</span><span class="st">&quot;llm.max_tokens&quot;</span><span class="op">,</span>    req<span class="op">.</span>MaxTokens<span class="op">),</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>            attribute<span class="op">.</span>Int   <span class="op">(</span><span class="st">&quot;llm.message_count&quot;</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>req<span class="op">.</span>Messages<span class="op">)),</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">))</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> span<span class="op">.</span>End<span class="op">()</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    resp<span class="op">,</span> err <span class="op">:=</span> t<span class="op">.</span>Provider<span class="op">.</span>Generate<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">)</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    dur <span class="op">:=</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">).</span>Seconds<span class="op">()</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>tp<span class="op">.</span>llmLatencyHist <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>tp<span class="op">.</span>llmLatencyHist<span class="op">.</span>Record<span class="op">(</span>ctx<span class="op">,</span> dur<span class="op">,</span> metric<span class="op">.</span>WithAttributes<span class="op">(</span>attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;model&quot;</span><span class="op">,</span> req<span class="op">.</span>Model<span class="op">)))</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> resp <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> t<span class="op">.</span>tp<span class="op">.</span>llmTokensCounter <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>tp<span class="op">.</span>llmTokensCounter<span class="op">.</span>Add<span class="op">(</span>ctx<span class="op">,</span> <span class="dt">int64</span><span class="op">(</span>resp<span class="op">.</span>Usage<span class="op">.</span>PromptTokens<span class="op">),</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>            metric<span class="op">.</span>WithAttributes<span class="op">(</span>attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;model&quot;</span><span class="op">,</span> req<span class="op">.</span>Model<span class="op">),</span> attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;direction&quot;</span><span class="op">,</span> <span class="st">&quot;prompt&quot;</span><span class="op">)))</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>tp<span class="op">.</span>llmTokensCounter<span class="op">.</span>Add<span class="op">(</span>ctx<span class="op">,</span> <span class="dt">int64</span><span class="op">(</span>resp<span class="op">.</span>Usage<span class="op">.</span>CompletionTokens<span class="op">),</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>            metric<span class="op">.</span>WithAttributes<span class="op">(</span>attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;model&quot;</span><span class="op">,</span> req<span class="op">.</span>Model<span class="op">),</span> attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;direction&quot;</span><span class="op">,</span> <span class="st">&quot;completion&quot;</span><span class="op">)))</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        span<span class="op">.</span>SetAttributes<span class="op">(</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>            attribute<span class="op">.</span>Int<span class="op">(</span><span class="st">&quot;llm.usage.prompt_tokens&quot;</span><span class="op">,</span>     resp<span class="op">.</span>Usage<span class="op">.</span>PromptTokens<span class="op">),</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>            attribute<span class="op">.</span>Int<span class="op">(</span><span class="st">&quot;llm.usage.completion_tokens&quot;</span><span class="op">,</span> resp<span class="op">.</span>Usage<span class="op">.</span>CompletionTokens<span class="op">),</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>            attribute<span class="op">.</span>Int<span class="op">(</span><span class="st">&quot;llm.usage.total_tokens&quot;</span><span class="op">,</span>      resp<span class="op">.</span>Usage<span class="op">.</span>TotalTokens<span class="op">),</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>            attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;llm.finish_reason&quot;</span><span class="op">,</span>        resp<span class="op">.</span>FinishReason<span class="op">),</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>        span<span class="op">.</span>RecordError<span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>        span<span class="op">.</span>SetStatus<span class="op">(</span>codes<span class="op">.</span>Error<span class="op">,</span> err<span class="op">.</span>Error<span class="op">())</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> resp<span class="op">,</span> err</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>TracedLLMProvider<span class="op">)</span> GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>llm<span class="op">.</span>LLMRequest<span class="op">,</span> ch <span class="kw">chan</span><span class="op">&lt;-</span> llm<span class="op">.</span>LLMResponse<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> t<span class="op">.</span>tp <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> t<span class="op">.</span>tp<span class="op">.</span>IsNoOp<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> t<span class="op">.</span>Provider<span class="op">.</span>GenerateStream<span class="op">(</span>ctx<span class="op">,</span> req<span class="op">,</span> ch<span class="op">)</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    <span class="co">// analogous to Generate; span ends after ch closes</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Tests use a <code>tracetest.SpanRecorder</code>-backed
+TelemetryProvider and <code>subagent.FakeLLMProvider</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTracedLLMProvider_StartsSpan<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> tracetest<span class="op">.</span>NewSpanRecorder<span class="op">()</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">:=</span> newTelemetryProviderForTest<span class="op">(</span>t<span class="op">,</span> rec<span class="op">)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> subagent<span class="op">.</span>NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;hi&quot;</span><span class="op">:</span> <span class="st">&quot;hello&quot;</span><span class="op">})</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    wrapped<span class="op">,</span> err <span class="op">:=</span> NewTracedLLMProvider<span class="op">(</span>fake<span class="op">,</span> tp<span class="op">)</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">=</span> wrapped<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Model<span class="op">:</span> <span class="st">&quot;fake-1&quot;</span><span class="op">,</span> Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{{</span>Role<span class="op">:</span><span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span><span class="st">&quot;hi&quot;</span><span class="op">}}})</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>ForceFlush<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    spans <span class="op">:=</span> rec<span class="op">.</span>Ended<span class="op">()</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> spans<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;llm.generate&quot;</span><span class="op">,</span> spans<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Name<span class="op">())</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTracedLLMProvider_AddsTokensCounter<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> sdkmetric<span class="op">.</span>NewManualReader<span class="op">()</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">:=</span> newTelemetryProviderWithMetricReader<span class="op">(</span>t<span class="op">,</span> reader<span class="op">)</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> subagent<span class="op">.</span>NewFakeLLMProviderWithUsage<span class="op">(</span><span class="st">&quot;hi&quot;</span><span class="op">,</span> <span class="st">&quot;hello&quot;</span><span class="op">,</span> llm<span class="op">.</span>Usage<span class="op">{</span>PromptTokens<span class="op">:</span> <span class="dv">7</span><span class="op">,</span> CompletionTokens<span class="op">:</span> <span class="dv">3</span><span class="op">,</span> TotalTokens<span class="op">:</span> <span class="dv">10</span><span class="op">})</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    wrapped<span class="op">,</span> _ <span class="op">:=</span> NewTracedLLMProvider<span class="op">(</span>fake<span class="op">,</span> tp<span class="op">)</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> wrapped<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Model<span class="op">:</span> <span class="st">&quot;fake-1&quot;</span><span class="op">,</span> Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{{</span>Role<span class="op">:</span><span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span><span class="st">&quot;hi&quot;</span><span class="op">}}})</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> rm metricdata<span class="op">.</span>ResourceMetrics</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> reader<span class="op">.</span>Collect<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>rm<span class="op">))</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> hasCounterValue<span class="op">(</span>rm<span class="op">,</span> <span class="st">&quot;helixcode_llm_tokens_total&quot;</span><span class="op">,</span> <span class="st">&quot;model=fake-1,direction=prompt&quot;</span><span class="op">,</span> <span class="dv">7</span><span class="op">))</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> hasCounterValue<span class="op">(</span>rm<span class="op">,</span> <span class="st">&quot;helixcode_llm_tokens_total&quot;</span><span class="op">,</span> <span class="st">&quot;model=fake-1,direction=completion&quot;</span><span class="op">,</span> <span class="dv">3</span><span class="op">))</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTracedLLMProvider_DoesNotEmitPromptBodyAttribute<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> tracetest<span class="op">.</span>NewSpanRecorder<span class="op">()</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">:=</span> newTelemetryProviderForTest<span class="op">(</span>t<span class="op">,</span> rec<span class="op">)</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    wrapped<span class="op">,</span> _ <span class="op">:=</span> NewTracedLLMProvider<span class="op">(</span>subagent<span class="op">.</span>NewFakeLLMProvider<span class="op">(</span><span class="ot">nil</span><span class="op">),</span> tp<span class="op">)</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> wrapped<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Model<span class="op">:</span><span class="st">&quot;fake-1&quot;</span><span class="op">,</span> Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{{</span>Role<span class="op">:</span><span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span><span class="st">&quot;SECRET-PROMPT-BODY&quot;</span><span class="op">}}})</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> tp<span class="op">.</span>ForceFlush<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> span <span class="op">:=</span> <span class="kw">range</span> rec<span class="op">.</span>Ended<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> kv <span class="op">:=</span> <span class="kw">range</span> span<span class="op">.</span>Attributes<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>            k <span class="op">:=</span> strings<span class="op">.</span>ToLower<span class="op">(</span><span class="dt">string</span><span class="op">(</span>kv<span class="op">.</span>Key<span class="op">))</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>            require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> k<span class="op">,</span> <span class="st">&quot;prompt&quot;</span><span class="op">)</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>            require<span class="op">.</span>NotEqual<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;messages&quot;</span><span class="op">,</span> k<span class="op">)</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>            require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> kv<span class="op">.</span>Value<span class="op">.</span>AsString<span class="op">(),</span> <span class="st">&quot;SECRET-PROMPT-BODY&quot;</span><span class="op">)</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTracedLLMProvider_PassesThroughGetType<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> subagent<span class="op">.</span>NewFakeLLMProvider<span class="op">(</span><span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    wrapped<span class="op">,</span> _ <span class="op">:=</span> NewTracedLLMProvider<span class="op">(</span>fake<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> fake<span class="op">.</span>GetType<span class="op">(),</span> wrapped<span class="op">.</span>GetType<span class="op">())</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTracedLLMProvider_NoOpFastPath_ZeroAllocs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> subagent<span class="op">.</span>NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;hi&quot;</span><span class="op">:</span><span class="st">&quot;ok&quot;</span><span class="op">})</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> <span class="op">&amp;</span>TelemetryConfig<span class="op">{</span>Enabled<span class="op">:</span> <span class="ot">false</span><span class="op">}</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>    tp<span class="op">,</span> _ <span class="op">:=</span> NewTelemetryProvider<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> cfg<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>    wrapped<span class="op">,</span> _ <span class="op">:=</span> NewTracedLLMProvider<span class="op">(</span>fake<span class="op">,</span> tp<span class="op">)</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>    avg <span class="op">:=</span> testing<span class="op">.</span>AllocsPerRun<span class="op">(</span><span class="dv">50</span><span class="op">,</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>        _<span class="op">,</span> _ <span class="op">=</span> wrapped<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Model<span class="op">:</span><span class="st">&quot;fake-1&quot;</span><span class="op">,</span> Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{{</span>Role<span class="op">:</span><span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span><span class="st">&quot;hi&quot;</span><span class="op">}}})</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Less<span class="op">(</span>t<span class="op">,</span> avg<span class="op">,</span> <span class="dt">float64</span><span class="op">(</span><span class="dv">2</span><span class="op">),</span> <span class="st">&quot;no-op path must not allocate per call&quot;</span><span class="op">)</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTracedLLMProvider_RecordsErrorOnFailure<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> tracetest<span class="op">.</span>NewSpanRecorder<span class="op">()</span></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">:=</span> newTelemetryProviderForTest<span class="op">(</span>t<span class="op">,</span> rec<span class="op">)</span></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>    erroring <span class="op">:=</span> <span class="op">&amp;</span>erroringLLMProvider<span class="op">{</span>err<span class="op">:</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;boom&quot;</span><span class="op">)}</span></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>    wrapped<span class="op">,</span> _ <span class="op">:=</span> NewTracedLLMProvider<span class="op">(</span>erroring<span class="op">,</span> tp<span class="op">)</span></span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> wrapped<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Model<span class="op">:</span><span class="st">&quot;x&quot;</span><span class="op">,</span> Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{{</span>Role<span class="op">:</span><span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span><span class="st">&quot;x&quot;</span><span class="op">}}})</span></span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>ForceFlush<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>    spans <span class="op">:=</span> rec<span class="op">.</span>Ended<span class="op">()</span></span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> codes<span class="op">.</span>Error<span class="op">,</span> spans<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Status<span class="op">().</span>Code<span class="op">)</span></span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F16-T06): TracedLLMProvider decorator + token counter + latency histogram + secret-attr safety</code>.</p>
+<hr />
+<h2 id="task-7-tool_instrumentation.go-registry-wrap-tdd">Task 7:
+tool_instrumentation.go + registry wrap (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/telemetry/tool_instrumentation.go</code>, new
+<code>helix_code/internal/telemetry/tool_instrumentation_test.go</code>,
+modify <code>helix_code/internal/tools/registry.go</code>.</p>
+<p><code>tool_instrumentation.go</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> InstrumentToolCall<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tp <span class="op">*</span>TelemetryProvider<span class="op">,</span> toolName <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>context<span class="op">.</span>Context<span class="op">,</span> <span class="kw">func</span><span class="op">(</span><span class="dt">error</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tp <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> tp<span class="op">.</span>IsNoOp<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ctx<span class="op">,</span> <span class="kw">func</span><span class="op">(</span><span class="dt">error</span><span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> span <span class="op">:=</span> tp<span class="op">.</span>Tracer<span class="op">().</span>Start<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;tool.execute&quot;</span><span class="op">,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        trace<span class="op">.</span>WithAttributes<span class="op">(</span>attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;tool.name&quot;</span><span class="op">,</span> toolName<span class="op">)))</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ctx<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>err <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        dur <span class="op">:=</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">).</span>Seconds<span class="op">()</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        status <span class="op">:=</span> <span class="st">&quot;success&quot;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            status <span class="op">=</span> <span class="st">&quot;error&quot;</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            span<span class="op">.</span>RecordError<span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            span<span class="op">.</span>SetStatus<span class="op">(</span>codes<span class="op">.</span>Error<span class="op">,</span> err<span class="op">.</span>Error<span class="op">())</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> tp<span class="op">.</span>toolCallsCounter <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            tp<span class="op">.</span>toolCallsCounter<span class="op">.</span>Add<span class="op">(</span>ctx<span class="op">,</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                metric<span class="op">.</span>WithAttributes<span class="op">(</span>attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;tool&quot;</span><span class="op">,</span> toolName<span class="op">),</span> attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;status&quot;</span><span class="op">,</span> status<span class="op">)))</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> tp<span class="op">.</span>toolLatencyHist <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>            tp<span class="op">.</span>toolLatencyHist<span class="op">.</span>Record<span class="op">(</span>ctx<span class="op">,</span> dur<span class="op">,</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>                metric<span class="op">.</span>WithAttributes<span class="op">(</span>attribute<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;tool&quot;</span><span class="op">,</span> toolName<span class="op">)))</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        span<span class="op">.</span>End<span class="op">()</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>registry.go</code> modifications:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;dev.helix.code/internal/telemetry&quot;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">// add field</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>telemetryProvider <span class="op">*</span>telemetry<span class="op">.</span>TelemetryProvider</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">// new setter</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ToolRegistry<span class="op">)</span> SetTelemetryProvider<span class="op">(</span>tp <span class="op">*</span>telemetry<span class="op">.</span>TelemetryProvider<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">();</span> <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>telemetryProvider <span class="op">=</span> tp</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co">// inside Execute, after tool/Validate checks, before fireBefore:</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>ctx<span class="op">,</span> end <span class="op">:=</span> telemetry<span class="op">.</span>InstrumentToolCall<span class="op">(</span>ctx<span class="op">,</span> r<span class="op">.</span>telemetryProvider<span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> execErr <span class="dt">error</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span> end<span class="op">(</span>execErr<span class="op">)</span> <span class="op">}()</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">// existing fireBefore + tool.Execute (assigns to result, execErr) + fireAfter chain unchanged</span></span></code></pre></div>
+<p>Tests:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInstrumentToolCall_NilProvider_NoOp<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> end <span class="op">:=</span> InstrumentToolCall<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="ot">nil</span><span class="op">,</span> <span class="st">&quot;bash&quot;</span><span class="op">)</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> ctx<span class="op">)</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotPanics<span class="op">(</span>t<span class="op">,</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span> end<span class="op">(</span><span class="ot">nil</span><span class="op">)</span> <span class="op">})</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInstrumentToolCall_SuccessPath_RecordsSuccessLabel<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> tracetest<span class="op">.</span>NewSpanRecorder<span class="op">()</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> sdkmetric<span class="op">.</span>NewManualReader<span class="op">()</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">:=</span> newTelemetryProviderForTest<span class="op">(</span>t<span class="op">,</span> rec<span class="op">,</span> reader<span class="op">)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> end <span class="op">:=</span> InstrumentToolCall<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> tp<span class="op">,</span> <span class="st">&quot;bash&quot;</span><span class="op">)</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    end<span class="op">(</span><span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>ForceFlush<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    spans <span class="op">:=</span> rec<span class="op">.</span>Ended<span class="op">()</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> spans<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;tool.execute&quot;</span><span class="op">,</span> spans<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Name<span class="op">())</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> codes<span class="op">.</span>Unset<span class="op">,</span> spans<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Status<span class="op">().</span>Code<span class="op">)</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> rm metricdata<span class="op">.</span>ResourceMetrics</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> reader<span class="op">.</span>Collect<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>rm<span class="op">)</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> hasCounterValue<span class="op">(</span>rm<span class="op">,</span> <span class="st">&quot;helixcode_tool_calls_total&quot;</span><span class="op">,</span> <span class="st">&quot;tool=bash,status=success&quot;</span><span class="op">,</span> <span class="dv">1</span><span class="op">))</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInstrumentToolCall_ErrorPath_RecordsErrorAndStatus<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* end(boom); status code Error */</span> <span class="op">}</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_Execute_EmitsToolSpan<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Real registry + a no-op echo tool + tracetest.SpanRecorder TelemetryProvider</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// After Execute, span with name=tool.execute and tool.name=echo exists</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F16-T07): InstrumentToolCall helper + ToolRegistry.Execute span/counter/histogram in-place</code>.</p>
+<hr />
+<h2 id="task-8-agent_instrumentation.go-base_agent-wrap-tdd">Task 8:
+agent_instrumentation.go + base_agent wrap (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/telemetry/agent_instrumentation.go</code>, new
+<code>helix_code/internal/telemetry/agent_instrumentation_test.go</code>,
+modify <code>helix_code/internal/agent/base_agent.go</code>.</p>
+<p><code>agent_instrumentation.go</code>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> InstrumentAgentIteration<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tp <span class="op">*</span>TelemetryProvider<span class="op">)</span> <span class="op">(</span>context<span class="op">.</span>Context<span class="op">,</span> <span class="kw">func</span><span class="op">(</span><span class="dt">error</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tp <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> tp<span class="op">.</span>IsNoOp<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ctx<span class="op">,</span> <span class="kw">func</span><span class="op">(</span><span class="dt">error</span><span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    start <span class="op">:=</span> time<span class="op">.</span>Now<span class="op">()</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> span <span class="op">:=</span> tp<span class="op">.</span>Tracer<span class="op">().</span>Start<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;agent.iteration&quot;</span><span class="op">)</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ctx<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>err <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        dur <span class="op">:=</span> time<span class="op">.</span>Since<span class="op">(</span>start<span class="op">).</span>Seconds<span class="op">()</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>            span<span class="op">.</span>RecordError<span class="op">(</span>err<span class="op">)</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>            span<span class="op">.</span>SetStatus<span class="op">(</span>codes<span class="op">.</span>Error<span class="op">,</span> err<span class="op">.</span>Error<span class="op">())</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> tp<span class="op">.</span>agentIterCounter <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>            tp<span class="op">.</span>agentIterCounter<span class="op">.</span>Add<span class="op">(</span>ctx<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> tp<span class="op">.</span>agentIterDurationHist <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>            tp<span class="op">.</span>agentIterDurationHist<span class="op">.</span>Record<span class="op">(</span>ctx<span class="op">,</span> dur<span class="op">)</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        span<span class="op">.</span>End<span class="op">()</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>base_agent.go</code> modifications:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">// new field</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>telemetryProvider <span class="op">*</span>telemetry<span class="op">.</span>TelemetryProvider</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">// new setter</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>BaseAgent<span class="op">)</span> SetTelemetryProvider<span class="op">(</span>tp <span class="op">*</span>telemetry<span class="op">.</span>TelemetryProvider<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    a<span class="op">.</span>telemetryProvider <span class="op">=</span> tp</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">// inside executeTaskWithLLM, immediately before the existing `response, err := a.llmProvider.Generate(...)`:</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>ctx<span class="op">,</span> endIter <span class="op">:=</span> telemetry<span class="op">.</span>InstrumentAgentIteration<span class="op">(</span>ctx<span class="op">,</span> a<span class="op">.</span>telemetryProvider<span class="op">)</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> iterErr <span class="dt">error</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span> endIter<span class="op">(</span>iterErr<span class="op">)</span> <span class="op">}()</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">// existing Generate call assigns to response, err</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">// after processLLMResponse:</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> iterErr <span class="op">=</span> err <span class="op">}</span></span></code></pre></div>
+<p>Tests:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInstrumentAgentIteration_NilProvider_NoOp<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* … */</span> <span class="op">}</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestInstrumentAgentIteration_RecordsDuration<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">:=</span> tracetest<span class="op">.</span>NewSpanRecorder<span class="op">()</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">:=</span> sdkmetric<span class="op">.</span>NewManualReader<span class="op">()</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">:=</span> newTelemetryProviderForTest<span class="op">(</span>t<span class="op">,</span> rec<span class="op">,</span> reader<span class="op">)</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> end <span class="op">:=</span> InstrumentAgentIteration<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> tp<span class="op">)</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">2</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    end<span class="op">(</span><span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>ForceFlush<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    spans <span class="op">:=</span> rec<span class="op">.</span>Ended<span class="op">()</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;agent.iteration&quot;</span><span class="op">,</span> spans<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Name<span class="op">())</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> rm metricdata<span class="op">.</span>ResourceMetrics</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=</span> reader<span class="op">.</span>Collect<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>rm<span class="op">)</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> hasCounterValueAtLeast<span class="op">(</span>rm<span class="op">,</span> <span class="st">&quot;helixcode_agent_iterations_total&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="dv">1</span><span class="op">))</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBaseAgent_executeTaskWithLLM_EmitsAgentIterationSpan<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Construct BaseAgent with FakeLLMProvider + tracetest TelemetryProvider</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Run executeTaskWithLLM; assert span named agent.iteration exists</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F16-T08): InstrumentAgentIteration helper + BaseAgent.executeTaskWithLLM span/counter/duration in-place</code>.</p>
+<hr />
+<h2 id="task-9-telemetry-slash-command-tdd">Task 9: /telemetry slash
+command (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/telemetry_command.go</code>, new
+<code>helix_code/internal/commands/telemetry_command_test.go</code>.</p>
+<p>Mirrors F14 <code>/sandbox</code> and F15 <code>/subagents</code>
+shape: defines <code>TelemetryProviderInspector</code> interface in the
+commands package so the slash is testable with a fake.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TelemetryProviderInspector <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    Stats<span class="op">()</span> telemetry<span class="op">.</span>TelemetryStats</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    RingBuffer<span class="op">()</span> <span class="op">[]</span>telemetry<span class="op">.</span>ExportedRecord</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    ForceFlush<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    IsNoOp<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TelemetryCommand <span class="kw">struct</span> <span class="op">{</span> tp TelemetryProviderInspector <span class="op">}</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewTelemetryCommand<span class="op">(</span>tp TelemetryProviderInspector<span class="op">)</span> <span class="op">*</span>TelemetryCommand</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>TelemetryCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;telemetry&quot;</span> <span class="op">}</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>TelemetryCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c<span class="op">.</span>tp <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span> <span class="ot">false</span><span class="op">,</span> Output<span class="op">:</span> <span class="st">&quot;telemetry unavailable&quot;</span><span class="op">},</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="st">&quot;status&quot;</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>cc<span class="op">.</span>Args<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span> sub <span class="op">=</span> cc<span class="op">.</span>Args<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">}</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> sub <span class="op">{</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="cf">return</span> c<span class="op">.</span>handleStatus<span class="op">(),</span> <span class="ot">nil</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;show&quot;</span><span class="op">:</span>   <span class="cf">return</span> c<span class="op">.</span>handleShow<span class="op">(),</span> <span class="ot">nil</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;flush&quot;</span><span class="op">:</span>  <span class="cf">return</span> c<span class="op">.</span>handleFlush<span class="op">(</span>ctx<span class="op">),</span> <span class="ot">nil</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span>       <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span> <span class="ot">false</span><span class="op">,</span> Output<span class="op">:</span> c<span class="op">.</span>Usage<span class="op">()},</span> <span class="ot">nil</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Tests:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetryCommand_Status_RendersTable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake with Kind=stdout; output contains KIND, ENDPOINT, SERVICE, SPANS, METRICS */</span> <span class="op">}</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetryCommand_Status_NoOp_ReportsDisabled<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* IsNoOp=true; output contains &quot;telemetry disabled&quot; + the env-var hint */</span> <span class="op">}</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetryCommand_Show_StdoutOnly<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* RingBuffer returns 2 records; output contains both names */</span> <span class="op">}</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetryCommand_Show_NonStdout_ReportsRingBufferEmpty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake.IsNoOp=false but RingBuffer is empty (OTLP) */</span> <span class="op">}</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetryCommand_Flush_DelegatesToProviderForceFlush<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake.flushCalled=true */</span> <span class="op">}</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetryCommand_Flush_DeadlineErrorReportedToUser<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake returns context.DeadlineExceeded → output contains &quot;flush timed out&quot; */</span> <span class="op">}</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetryCommand_NilProvider_ReportsUnavailable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* nil tp → output &quot;telemetry unavailable&quot; */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F16-T09): /telemetry slash command (status/show/flush) + nil-provider unavailable</code>.</p>
+<hr />
+<h2 id="task-10-main.go-wiring-integration-tests">Task 10: main.go
+wiring + integration tests</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/cmd/cli/main.go</code>, new
+<code>helix_code/tests/integration/telemetry_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p><code>main.go</code> additions (per spec §4.1) — three blocks
+alongside the existing logger construction:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 1. Load + construct</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>telCfg<span class="op">,</span> err <span class="op">:=</span> telemetry<span class="op">.</span>LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;telemetry config invalid; continuing without telemetry&quot;</span><span class="op">,</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    telCfg <span class="op">=</span> <span class="op">&amp;</span>telemetry<span class="op">.</span>TelemetryConfig<span class="op">{</span>Enabled<span class="op">:</span> <span class="ot">false</span><span class="op">,</span> Kind<span class="op">:</span> telemetry<span class="op">.</span>ExporterNone<span class="op">}</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>tp<span class="op">,</span> err <span class="op">:=</span> telemetry<span class="op">.</span>NewTelemetryProvider<span class="op">(</span>ctx<span class="op">,</span> telCfg<span class="op">,</span> logger<span class="op">)</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;telemetry init failed; continuing without telemetry&quot;</span><span class="op">,</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">=</span> <span class="ot">nil</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tp <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">}</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    shCtx<span class="op">,</span> sc <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="dv">5</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> sc<span class="op">()</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> tp<span class="op">.</span>Shutdown<span class="op">(</span>shCtx<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;telemetry shutdown failed&quot;</span><span class="op">,</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="op">}()</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. Decorate the LLM provider (after factory builds it)</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> tp <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>tp<span class="op">.</span>IsNoOp<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> wrapped<span class="op">,</span> werr <span class="op">:=</span> telemetry<span class="op">.</span>NewTracedLLMProvider<span class="op">(</span>provider<span class="op">,</span> tp<span class="op">);</span> werr <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>        provider <span class="op">=</span> wrapped</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>        logger<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;telemetry: failed to wrap LLM provider&quot;</span><span class="op">,</span> zap<span class="op">.</span>Error<span class="op">(</span>werr<span class="op">))</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a><span class="co">// 3. Setters on registry + agent + slash registration</span></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> tp <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>    toolReg<span class="op">.</span>SetTelemetryProvider<span class="op">(</span>tp<span class="op">)</span></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    baseAgent<span class="op">.</span>SetTelemetryProvider<span class="op">(</span>tp<span class="op">)</span>   <span class="co">// wherever the BaseAgent is constructed</span></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>slashRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewTelemetryCommand<span class="op">(</span>tp<span class="op">))</span></span></code></pre></div>
+<p>Integration tests (gated):</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">// +build integration</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetry_StdoutExporter_RealLLMCall_FakeProvider<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">,</span> <span class="st">&quot;stdout&quot;</span><span class="op">)</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf bytes<span class="op">.</span>Buffer</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> _ <span class="op">:=</span> telemetry<span class="op">.</span>LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    tp<span class="op">,</span> err <span class="op">:=</span> telemetry<span class="op">.</span>NewTelemetryProviderWithStdoutWriters<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> cfg<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">(),</span> <span class="op">&amp;</span>buf<span class="op">,</span> <span class="op">&amp;</span>buf<span class="op">)</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    fake <span class="op">:=</span> subagent<span class="op">.</span>NewFakeLLMProvider<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;hi&quot;</span><span class="op">:</span><span class="st">&quot;ok&quot;</span><span class="op">})</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    wrapped<span class="op">,</span> _ <span class="op">:=</span> telemetry<span class="op">.</span>NewTracedLLMProvider<span class="op">(</span>fake<span class="op">,</span> tp<span class="op">)</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">=</span> wrapped<span class="op">.</span>Generate<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Model<span class="op">:</span><span class="st">&quot;fake-1&quot;</span><span class="op">,</span> Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{{</span>Role<span class="op">:</span><span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span><span class="st">&quot;hi&quot;</span><span class="op">}}})</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>ForceFlush<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> buf<span class="op">.</span>String<span class="op">()</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">`&quot;Name&quot;:&quot;llm.generate&quot;`</span><span class="op">)</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;helixcode_llm_tokens_total&quot;</span><span class="op">)</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetry_OTLPGRPC_RealCollector<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_ENDPOINT&quot;</span><span class="op">)</span> <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F16 OTEL_EXPORTER_OTLP_ENDPOINT unset (export OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 OTEL_EXPORTER_OTLP_PROTOCOL=grpc)&quot;</span><span class="op">)</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;grpc&quot;</span> <span class="op">{</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F16 OTEL_EXPORTER_OTLP_PROTOCOL not &#39;grpc&#39;&quot;</span><span class="op">)</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> telemetry<span class="op">.</span>LoadConfigFromEnv<span class="op">()</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>    tp<span class="op">,</span> err <span class="op">:=</span> telemetry<span class="op">.</span>NewTelemetryProvider<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> cfg<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> span <span class="op">:=</span> tp<span class="op">.</span>Tracer<span class="op">().</span>Start<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="st">&quot;test-export-grpc&quot;</span><span class="op">);</span> span<span class="op">.</span>End<span class="op">()</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>ForceFlush<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tp<span class="op">.</span>Shutdown<span class="op">(</span>context<span class="op">.</span>Background<span class="op">()))</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetry_OTLPHTTP_RealCollector<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_ENDPOINT&quot;</span><span class="op">)</span> <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F16 OTEL_EXPORTER_OTLP_ENDPOINT unset (export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf)&quot;</span><span class="op">)</span></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;OTEL_EXPORTER_OTLP_PROTOCOL&quot;</span><span class="op">)</span> <span class="op">!=</span> <span class="st">&quot;http/protobuf&quot;</span> <span class="op">{</span></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F16 OTEL_EXPORTER_OTLP_PROTOCOL not &#39;http/protobuf&#39;&quot;</span><span class="op">)</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">// analogous to gRPC test</span></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetry_ToolRegistry_InstrumentedExecute<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* stdout + real tool + assert span/counter */</span> <span class="op">}</span></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetry_AgentIteration_RealLLMCall_StdoutExport<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* stdout + BaseAgent + FakeLLMProvider */</span> <span class="op">}</span></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTelemetry_NoOp_FastPath_RealRegistry<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* 1000 calls; latency within 5% baseline */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F16-T10): wire TelemetryProvider into main.go + /telemetry + gated integration tests</code>.</p>
+<hr />
+<h2 id="task-11-challenge-with-in-tree-fake-otlphttp-receiver">Task 11:
+Challenge with in-tree fake OTLP/HTTP receiver</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p1f16_challenge/main.go</code>,
+new
+<code>challenges/p1-f16-opentelemetry-integration/CHALLENGE.md</code>,
+new <code>challenges/p1-f16-opentelemetry-integration/run.sh</code>.</p>
+<p>Harness phases (per spec §6.3): 1. <strong>STDOUT (always
+runs)</strong> — captures the stdout exporter’s writer, runs LLM + tool
++ agent through the full instrumentation path with FakeLLMProvider,
+asserts <code>&quot;Name&quot;:&quot;llm.generate&quot;</code>,
+<code>&quot;Name&quot;:&quot;tool.execute&quot;</code>,
+<code>&quot;Name&quot;:&quot;agent.iteration&quot;</code> and
+<code>helixcode_llm_tokens_total</code> in the captured bytes; asserts
+ForceFlush returns within 5 s. 2. <strong>FAKE OTLP/HTTP RECEIVER
+(always runs)</strong> — starts an in-tree <code>net/http.Server</code>
+on <code>127.0.0.1:0</code> registering <code>POST /v1/traces</code> and
+<code>POST /v1/metrics</code>. Each handler decodes the OTLP protobuf
+body using
+<code>go.opentelemetry.io/proto/otlp/collector/trace/v1</code> +
+<code>…/collector/metrics/v1</code>, increments a per-endpoint counter,
+returns 200 OK. Harness sets
+<code>OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:&lt;port&gt;</code> +
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf</code>, runs the same
+workflow, force-flushes. Asserts: receiver got ≥ 1 trace POST AND ≥ 1
+metric POST; the decoded trace body contains a span named
+<code>llm.generate</code>. <strong>Anti-bluff: real export, real HTTP,
+real protobuf.</strong> 3. <strong>SECRET-ATTRIBUTE FILTER (always
+runs)</strong> — deliberately injects a span attribute
+<code>api_key=sk-abc-123</code> via the FilterAttributes seam;
+deliberately injects <code>prompt=&lt;long body&gt;</code>; asserts the
+captured stdout export does NOT contain those keys/values. Asserts safe
+attributes (<code>model</code>, <code>tool.name</code>) survive. 4.
+<strong>NO-OP FAST PATH (always runs)</strong> — disables telemetry;
+runs 1000 tool calls; asserts wall-clock latency within 5% of the
+un-instrumented baseline (re-runs without the wrap to derive the
+baseline). 5. <strong>REAL OTLP COLLECTOR (gated)</strong> —
+<code>OTEL_EXPORTER_OTLP_ENDPOINT</code> +
+<code>OTEL_EXPORTER_OTLP_PROTOCOL=grpc</code> set → connects to a real
+collector, exports a span, asserts <code>Shutdown</code> returns no
+error. Otherwise:
+<code>[skipped: OTEL_EXPORTER_OTLP_ENDPOINT unset (export OTEL_EXPORTER_OTLP_ENDPOINT=...)]</code>.</p>
+<p>Output skeleton (verbatim per spec §6.3) ends with:</p>
+<pre><code>SUMMARY: STDOUT=6/6 PASS; OTLP-HTTP=5/5 PASS; FILTER=3/3 PASS; NOOP=2/2 PASS; REAL-COLLECTOR=&lt;n&gt;/2 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any assertion failure within
+phases that did run. Span-count-zero is treated as a hard failure.
+Anti-bluff smoke clean check appended to output. Verbatim output
+captured into <code>06_phase_1_evidence.md</code>. Dual commit
+(Challenges submodule + meta-repo bump).</p>
+<p>Subject:
+<code>feat(P1-F16-T11): challenge with runtime evidence (stdout + fake OTLP/HTTP receiver always; real-collector gated)</code>.</p>
+<hr />
+<h2 id="task-12-close-out-push">Task 12: Close-out + push</h2>
+<p>Tick all 12 items in PROGRESS, advance PROGRESS focus to F17
+candidate, run final verification:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  internal/telemetry internal/commands/telemetry_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/telemetry/... ./internal/commands/...</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration ./tests/integration/...</span></code></pre></div>
+<p>Commit
+<code>chore(P1-F16-T12): close out feature 16 — opentelemetry integration</code>.
+Push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions). Request explicit user authorization at this step
+(CONST-043).</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 deps (§3.5), T03 types + DefaultBlockedAttributeKeys (§3.3, §5.2),
+T04 config + filter (§3.3, §3.4, §5.2 CONST-042), T05 provider (§3.3,
+§4.5), T06 TracedLLMProvider (§4.2, §5.2 criteria 1+3+5), T07 tool
+instrumentation (§4.3, §5.2 criteria 1+3), T08 agent instrumentation
+(§4.4), T09 slash (§3.4), T10 main.go wiring + integration (§4.1, §6.2),
+T11 Challenge five phases (§5.2, §6.3), T12 close-out (§9).</li>
+<li><strong>TDD:</strong> every code task starts with a failing test
+that exercises real OTel SDK paths — the deps-link smoke (T02), the
+env-var cases (T04), <code>tracetest.SpanRecorder</code> + manual metric
+reader (T05/T06), the in-place wrap assertions (T07/T08), the slash with
+fake inspector (T09).</li>
+<li><strong>Type consistency:</strong> <code>TelemetryConfig</code>,
+<code>ExporterKind</code>, <code>TelemetryProvider</code>,
+<code>TracedLLMProvider</code>, <code>InstrumentToolCall</code>,
+<code>InstrumentAgentIteration</code>,
+<code>TelemetryProviderInspector</code>,
+<code>DefaultBlockedAttributeKeys</code>, env-var names — all match
+across spec §3.3 and plan T03–T09.</li>
+<li><strong>New external deps:</strong> all OTel modules pinned to
+v1.30.0 (synchronised release train); no CGO; transitive footprint
+estimated at ~25 modules in <code>go.sum</code>. T02 runs
+<code>go mod tidy</code> and reviews the diff for spurious major-version
+drift before commit.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has FIVE phases;
+STDOUT, FAKE-OTLP-HTTP, FILTER, and NOOP always run; REAL-COLLECTOR is
+gated on <code>OTEL_EXPORTER_OTLP_ENDPOINT</code>. The five
+real-execution criteria (spans created, spans exported, metrics
+recorded, metrics exported, no secret-shaped attrs) each have a
+dedicated PASS line. Span-count-zero is a hard Challenge failure —
+absence-of-error is NEVER acceptable.</li>
+<li><strong>CONST-042:</strong> <code>DefaultBlockedAttributeKeys</code>
+covers credential keys + prompt-body keys. <code>FilterAttributes</code>
+is case-insensitive. Prompt body is NEVER added as a span attribute by
+<code>TracedLLMProvider</code>.
+<code>TestTracedLLMProvider_DoesNotEmitPromptBodyAttribute</code>
+enforces this. The Challenge’s FILTER phase deliberately injects
+forbidden attributes and asserts they are dropped.</li>
+<li><strong>CONST-043:</strong> stays on <code>main</code>, non-force to
+all four remotes; explicit user authorization is requested at T12 before
+pushing.</li>
+<li><strong>Decorator vs in-place — non-obvious call</strong> (recorded
+in spec §11): <code>TracedLLMProvider</code> uses Go struct embedding so
+adding a method to <code>llm.Provider</code> does not require updating
+the wrapper. The tool registry and agent loop use in-place
+instrumentation (5 added lines each) because they are already
+chokepoints with multiple existing pre/post hooks; a parallel decorator
+hierarchy would force every test that exercises the registry to thread
+the decorator through.</li>
+<li><strong>Sampling default — non-obvious call</strong> (recorded in
+spec §11): left at OTel SDK default
+<code>parent-based(traces-and-error-codes)</code>. Users who want head
+sampling set <code>OTEL_TRACES_SAMPLER</code> per the OTel spec; the SDK
+reads it automatically. F16 does not pin a sampler.</li>
+<li><strong>Subagent helpers not instrumented in v1</strong> (deferred
+to F16.5): the subagent subprocess helper-mode constructs a minimal
+runtime that doesn’t share parent state. Threading the parent’s
+TracerProvider through the env-var payload is a non-trivial protocol
+change; documented loudly in spec §8 and §5.2.</li>
+<li><strong>No-op fast path is a real test target</strong> (not just a
+comment): <code>TestTracedLLMProvider_NoOpFastPath_ZeroAllocs</code>
+uses <code>testing.AllocsPerRun</code> to assert &lt;2 allocations per
+call when telemetry is disabled. The Challenge’s NOOP phase asserts 1000
+tool calls stay within 5% of the un-instrumented baseline.</li>
+<li><strong>Span-attribute naming</strong> — OTel semconv keys where
+they exist (<code>llm.model</code>, <code>tool.name</code>);
+<code>helixcode_*</code> snake_case prefix for metric names so the
+OTel-to-Prometheus translator preserves a HelixCode namespace.</li>
+<li><strong>Why no logs-bridge in v1</strong> — OTel Go logs API entered
+Beta in 2024; we wait for stable. zap stays the logging surface.
+Deferred to F16.5.</li>
+<li><strong>Why no Prometheus exporter</strong> — OTLP + the
+OpenTelemetry Collector covers the Prometheus consumer end-to-end
+without HelixCode owning a second exporter chain. Explicitly
+rejected.</li>
+</ol>
+</body>
+</html>

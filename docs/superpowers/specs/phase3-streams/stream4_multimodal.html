@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stream4_multimodal</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stream4_multimodal</h1>
+</header>
+<h1 id="stream-hxc031-multimodal-capability-a-design-read-design-only-no-edit-output-textdiff-sketch">Stream
+HXC031-MULTIMODAL — Capability A design (read + design only; NO Edit —
+output text/diff sketch)</h1>
+<p>Repo: /Users/milosvasic/Projects/HelixCode, app
+<code>helix_code/</code>. HXC-031 Capability A = MULTIMODAL REQUEST
+CARRIAGE. Adopted forks: FORK-2 = Anthropic/Claude provider FIRST only
+(not all providers); FORK-3 = reuse vasic-digital/vision_engine as
+encode-helpers only (no deep integration). Consumer is a browser
+screenshot loop.</p>
+<p>Known (verify): the LLM <code>Message</code> type in
+<code>helix_code/internal/llm</code> is TEXT-ONLY today; the screenshot
+tool returns a FILE PATH, not bytes. The one genuinely-new piece is
+carrying image content in a request.</p>
+<p>Tasks: 1. Read <code>helix_code/internal/llm/</code>: quote the
+current <code>Message</code> struct, the request/response types, and the
+Anthropic/Claude provider’s Generate / GenerateStream request-building
+code. Cite file:line. 2. Locate the screenshot tool (likely
+<code>helix_code/internal/tools/</code> or similar); confirm it returns
+a path; quote the signature/return. 3. DESIGN Capability A: per-message
+image content blocks carried as base64 data-URLs, mapped to Anthropic’s
+multimodal content-block request format (text|image blocks per message),
+Claude-first, backward-compatible with existing text-only callers.
+Present a concrete diff SKETCH (file + before/after) covering: the
+<code>Message</code> type change, screenshot bytes exposure (or caller
+path→base64), and the Anthropic request-mapping change. 4. TEST PLAN per
+CONST-050 (no fakes beyond unit tests): unit tests for type/encoding;
+ONE integration test making a REAL Anthropic call with an image, gated
+on the API key in <code>.env</code> (SKIP-OK marker if absent). List
+test files + assertions.</p>
+<p>Output: compact markdown (current-state quotes with file:line, diff
+sketch, test plan). Do not implement.</p>
+</body>
+</html>

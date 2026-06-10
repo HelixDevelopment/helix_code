@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f10-skill-system-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f10-skill-system-design</h1>
+</header>
+<h1 id="phase-1-feature-10-skill-system">Phase 1 / Feature 10 — Skill
+System</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Add a parallel system for <strong>agent-invoked Skills</strong>
+(distinct from F09’s user-invoked commands). Skills are
+<code>.helix/skills/*.md</code> files with YAML frontmatter
+(<code>description</code>, <code>triggers []string</code> regex,
+<code>variables map[string]string</code>,
+<code>requires_isolation bool</code>) plus a Markdown body. The agent’s
+main loop checks user input against every loaded skill’s trigger
+patterns (first match wins) and substitutes the rendered body as a
+system-prompt instruction. Skills with
+<code>requires_isolation: true</code> execute in their own F04 worktree;
+results are surfaced back to the parent session. Both
+<code>/skills</code> slash and <code>helixcode skills</code> cobra
+surfaces expose
+<code>list</code>/<code>show &lt;name&gt;</code>/<code>invoke &lt;name&gt;</code>/<code>reload</code>.</p>
+<h2 id="architecture">2. Architecture</h2>
+<p>Add <code>internal/commands/markdown_skills.go</code> (same package
+as F09 — reuses <code>parseMarkdownCommand</code>’s frontmatter/body
+splitting helper and the
+<code>substRegex</code>/<code>tokenResolver</code> machinery). New
+<code>Skill</code> type is distinct from <code>MarkdownCommand</code> —
+different lifecycle (auto-invoked vs user-invoked) and different fields
+(TriggerPatterns, RequiresIsolation). New <code>SkillLoader</code>
+(mirrors F09’s <code>MarkdownLoader</code>) scans
+<code>.helix/skills/</code> (project) and
+<code>~/.config/helixcode/skills/</code> (user) with fsnotify
+hot-reload. <code>SkillRegistry</code> holds compiled trigger regexes
+and exposes <code>FindMatching(input)</code>. Auto-invocation in the
+agent loop calls <code>FindMatching</code> before each LLM call; on
+match, the rendered skill body is injected as a system message.
+Isolation routes through <code>internal/tools/worktree/</code> (F04’s
+<code>WorktreeManager</code>) — skill runs in a fresh worktree, output
+captured.</p>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/commands/markdown_skills.go</code> —
+<code>Skill</code>, <code>SkillRegistry</code>,
+<code>SkillLoader</code>, <code>parseSkillFile</code>,
+<code>compileTriggers</code>, <code>FindMatching</code></li>
+<li><code>helix_code/internal/commands/markdown_skills_test.go</code> —
+unit tests</li>
+<li><code>helix_code/internal/commands/skills_watcher.go</code> —
+fsnotify wrapper (or extend the F09 watcher to monitor both dirs)</li>
+<li><code>helix_code/internal/commands/skills_watcher_test.go</code></li>
+<li><code>helix_code/internal/commands/skills_command.go</code> —
+<code>/skills</code> slash command</li>
+<li><code>helix_code/internal/commands/skills_command_test.go</code></li>
+<li><code>helix_code/cmd/cli/skills_cmd.go</code> — cobra
+subcommand</li>
+<li><code>helix_code/cmd/cli/skills_cmd_test.go</code></li>
+<li><code>helix_code/internal/agent/skill_dispatcher.go</code> —
+auto-invocation hook called from the agent loop</li>
+<li><code>helix_code/internal/agent/skill_dispatcher_test.go</code></li>
+<li><code>helix_code/tests/integration/skills_test.go</code> —
+<code>//go:build integration</code></li>
+<li><code>challenges/p1-f10-skills/CHALLENGE.md</code> +
+<code>run.sh</code></li>
+</ul>
+<h3 id="modified">3.2 Modified</h3>
+<ul>
+<li><code>helix_code/internal/agent/base_agent.go</code> (or wherever
+the LLM-call loop lives) — wire
+<code>skillDispatcher.Match(userInput)</code> before each LLM turn; on
+match, inject skill body as system message</li>
+<li><code>helix_code/cmd/cli/main.go</code> — construct
+<code>SkillLoader</code> + <code>SkillRegistry</code> + dispatcher;
+register <code>/skills</code> slash; wire cobra dispatcher; pass loader
+to existing watcher (or start a second watcher)</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Skill <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    name              <span class="dt">string</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    description       <span class="dt">string</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    body              <span class="dt">string</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    variables         <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    triggerPatterns   <span class="op">[]</span><span class="dt">string</span>         <span class="co">// raw strings</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    triggers          <span class="op">[]*</span>regexp<span class="op">.</span>Regexp <span class="co">// compiled</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    requiresIsolation <span class="dt">bool</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    sourcePath        <span class="dt">string</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> Render<span class="op">(</span>args <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> selection<span class="op">,</span> currentFile <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span> RequiresIsolation<span class="op">()</span> <span class="dt">bool</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SkillRegistry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    mu     sync<span class="op">.</span>RWMutex</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    skills <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Skill</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSkillRegistry<span class="op">()</span> <span class="op">*</span>SkillRegistry</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> Add<span class="op">(</span>s <span class="op">*</span>Skill<span class="op">)</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> Remove<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> Get<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Skill<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> List<span class="op">()</span> <span class="op">[]*</span>Skill</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co">// FindMatching returns the first skill whose trigger patterns match input,</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">// plus the named-capture groups extracted from the match (used as substitution</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co">// args via tokenResolver&#39;s ARG.name lookup).</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>SkillRegistry<span class="op">)</span> FindMatching<span class="op">(</span>input <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Skill<span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">bool</span><span class="op">)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SkillLoader <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    registry   <span class="op">*</span>SkillRegistry</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    projectDir <span class="dt">string</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    userDir    <span class="dt">string</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    log        <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    mu         sync<span class="op">.</span>Mutex</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    loaded     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="co">// name → source path</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSkillLoader<span class="op">(</span>reg <span class="op">*</span>SkillRegistry<span class="op">,</span> projectDir<span class="op">,</span> userDir <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>SkillLoader</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>SkillLoader<span class="op">)</span> Load<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>SkillLoader<span class="op">)</span> Reload<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>SkillLoader<span class="op">)</span> Loaded<span class="op">()</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span></code></pre></div>
+<h3 id="frontmatter-format">3.4 Frontmatter format</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> Refactor a React component</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">triggers:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">  - &quot;(?i)^refactor (.+) component$&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">  - &quot;(?i)^extract hook from (.+)&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="an">variables:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">  default_style: functional</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="an">requires_isolation:</span><span class="co"> false</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>You are refactoring <span class="in">`{{ARG1}}`</span>.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>Extract reusable hooks where the file count &gt; 200 lines.</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>Style: {{ARG.default_style}}.</span></code></pre></div>
+<h3 id="auto-invocation-flow">3.5 Auto-invocation flow</h3>
+<pre><code>agent main loop receives user input
+  └─ skillDispatcher.Match(userInput)
+       ├─ registry.FindMatching(userInput)
+       │     └─ for each skill, for each compiled regex:
+       │           if regex.FindStringSubmatch(input) != nil:
+       │             extract named capture groups → map
+       │             return (skill, captures, true)
+       ├─ if matched:
+       │     ├─ if skill.RequiresIsolation():
+       │     │     ├─ wt := worktree.Create(name=&quot;skill-&lt;id&gt;&quot;)
+       │     │     ├─ run skill body as system message in isolated session
+       │     │     └─ surface result back, optionally merge worktree
+       │     └─ else:
+       │           render skill body via tokenResolver(captures)
+       │           inject as additional system message before LLM call
+       └─ proceed with normal LLM call</code></pre>
+<h3 id="user-surface">3.6 User surface</h3>
+<p><code>/skills</code>: - <code>/skills</code> (default
+<code>list</code>) → table NAME / DESCRIPTION / TRIGGERS / SOURCE -
+<code>/skills show &lt;name&gt;</code> → render skill metadata + body -
+<code>/skills invoke &lt;name&gt; [args...]</code> → run the skill
+explicitly (bypassing trigger matching) - <code>/skills reload</code> →
+re-scan dirs</p>
+<p><code>helixcode skills</code>: <code>list</code>,
+<code>show &lt;name&gt;</code>,
+<code>invoke &lt;name&gt; [args...]</code>, <code>reload</code> — same
+operations via cobra.</p>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup">4.1 Startup</h3>
+<pre><code>main.go
+  ├─ skillReg := NewSkillRegistry()
+  ├─ skillLoader := NewSkillLoader(skillReg, &quot;.helix/skills&quot;, &quot;~/.config/helixcode/skills&quot;)
+  ├─ skillLoader.Load()  (compiles trigger regexes; logs WARN on bad regex, skips skill)
+  ├─ go fsnotifyWatch(skillLoader, both dirs)  // reuse F09 watcher pattern
+  ├─ skillDispatcher := agent.NewSkillDispatcher(skillReg, worktreeMgr)
+  ├─ baseAgent.SetSkillDispatcher(skillDispatcher)
+  ├─ cmdRegistry.Register(commands.NewSkillsCommand(skillLoader, skillReg))
+  └─ rootCmd.AddCommand(newSkillsCmd(skillsCmdDeps{...}))</code></pre>
+<h3 id="auto-invocation">4.2 Auto-invocation</h3>
+<pre><code>user message arrives at agent
+  └─ baseAgent.Run(input)
+       ├─ skill, args, matched := skillDispatcher.Match(input)
+       ├─ if matched:
+       │     ├─ rendered := skill.Render(args, selection, currentFile)
+       │     └─ injectSystemMessage(rendered) // before LLM call
+       └─ normal LLM call</code></pre>
+<h3 id="isolated-invocation-requires_isolation-true">4.3 Isolated
+invocation (<code>requires_isolation: true</code>)</h3>
+<pre><code>skillDispatcher.MatchAndRun(skill, args, ctx)
+  ├─ wt := worktreeMgr.Create(&quot;skill-&quot; + skill.Name())
+  ├─ subAgent := agent.NewSubAgent(wt.Path)
+  ├─ result := subAgent.Run(rendered)
+  └─ surface result; user decides via /skills accept|discard whether to merge</code></pre>
+<p>For F10 ship, the isolated path captures stdout/result; merging is a
+follow-up (in scope: out-of-scope for §8).</p>
+<h2 id="error-handling-edge-cases">5. Error handling, edge cases</h2>
+<ul>
+<li><strong>Bad trigger regex</strong>: log WARN, skip the skill on
+Load.</li>
+<li><strong>Skill body parse error</strong>: skip skill, log path.</li>
+<li><strong>Multiple skills match</strong>: first registered wins
+(deterministic via lexicographic sort of names).</li>
+<li><strong>Capture group naming collision with positional ARG</strong>:
+named captures take precedence over positional ARG_N (token resolver
+checks <code>ARG.name</code> first).</li>
+<li><strong><code>requires_isolation: true</code> without worktree
+manager wired</strong>: log WARN, fall back to in-session
+injection.</li>
+<li><strong>Reload while skill is mid-execution</strong>: existing
+in-flight execution finishes; next call uses new registry state.</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9">Anti-bluff (CONST-035 / §11.9)</h3>
+<ul>
+<li>Challenge writes <code>.helix/skills/refactor-button.md</code> with
+trigger <code>^refactor (.+) component$</code>, sends user input
+“refactor LoginButton component”, asserts <code>Match</code> returns the
+skill + capture group <code>&quot;LoginButton&quot;</code>, asserts rendered body
+contains the captured name.</li>
+<li>Tests use real files via <code>t.TempDir()</code> — no mocks.</li>
+<li>Anti-bluff smoke must remain clean.</li>
+</ul>
+<h2 id="testing">6. Testing</h2>
+<p>Unit tests: - <code>TestParseSkillFile_Valid</code> (frontmatter +
+triggers compile) - <code>TestParseSkillFile_BadRegexSkipped</code> -
+<code>TestSkill_Render_NamedCaptures</code> (regex group
+<code>(?P&lt;name&gt;...)</code> flows to <code>ARG.name</code>) -
+<code>TestSkill_Render_PositionalFromInput</code> (numbered args from
+match groups) - <code>TestSkillRegistry_FindMatching_FirstWins</code> -
+<code>TestSkillRegistry_AddRemove</code> -
+<code>TestSkillLoader_LoadProjectAndUser</code> -
+<code>TestSkillLoader_ReloadDiff</code> -
+<code>TestSkillLoader_BadFrontmatterSkipped</code> -
+<code>TestSkillsWatcher_DebouncesAndReloads</code> -
+<code>TestSkillsWatcher_StopsOnContextCancel</code> -
+<code>TestSlashSkills_List/Show/Invoke/Reload/UnknownSubcommandErrors</code>
+- <code>TestSkillsCmd_List/Show/Invoke</code> -
+<code>TestSkillDispatcher_Match_Injects</code> (no isolation) -
+<code>TestSkillDispatcher_Match_RequiresIsolation_RoutesToWorktree</code>
+(with mocked WorktreeManager)</p>
+<p>Integration test (real fs + real agent path): -
+<code>TestSkills_AutoInvokesOnTriggerMatch</code> -
+<code>TestSkills_IsolationCreatesWorktree</code></p>
+<p>Challenge harness exercises load → match → render → assert capture
+flows correctly.</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>Pure Go; fsnotify works on Linux/macOS/Windows. Cross-compile linux
+is the canonical check.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li>Result-merging from isolated worktrees back to the parent (currently
+isolated skills run, output is captured; merge UX is F10.5).</li>
+<li>Skill versioning / signature verification.</li>
+<li>Recursive skill invocation (skill A triggers skill B).</li>
+<li>Per-user skill marketplace / discovery.</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li>§11.9: Challenge captures real Match → Render output from real .md
+file.</li>
+<li>CONST-042: skill bodies may include <code>{{ENV.NAME}}</code>;
+loader does NOT log resolved values.</li>
+<li>CONST-043: non-force pushes to all four remotes.</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: code organisation</td>
+<td>(A) <code>internal/commands/markdown_skills.go</code> (same package
+as F09)</td>
+</tr>
+<tr>
+<td>Q2: auto-invocation</td>
+<td>(A) Single regex match per turn, first match wins</td>
+</tr>
+<tr>
+<td>Q3: fork isolation</td>
+<td>(A) Integrate with F04’s WorktreeManager</td>
+</tr>
+<tr>
+<td>Q4: user surface</td>
+<td>(A) Both <code>/skills</code> slash + <code>helixcode skills</code>
+cobra</td>
+</tr>
+<tr>
+<td>Q5: loader/watcher</td>
+<td>(A) Sibling SkillLoader + dedicated watcher mirroring F09</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

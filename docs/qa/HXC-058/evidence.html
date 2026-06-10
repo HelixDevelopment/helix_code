@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-058-helix_agent-go-build-....-third-party-fixture-out-of-scope-determination">HXC-058
+— helix_agent <code>go build ./...</code> third-party fixture
+(out-of-scope determination)</h1>
+<p><strong>Captured:</strong> 2026-06-09T15:19:18Z · Bug · Fixed (→
+Fixed.md) ## Investigation (§11.4.124 — third-party, do not modify)
+<code>cd submodules/helix_agent &amp;&amp; go build ./...</code> fails
+on exactly ONE package:
+<code>cli_agents/continue/core/autocomplete/context/root-path-context/test/files/file1.go:4:2: package ... is not in std</code>.
+<code>cli_agents/continue</code> is a git submodule of
+continuedev/continue (.gitmodules line 154) — NOT owned (not
+vasic-digital/HelixDevelopment). file1.go is upstream’s
+intentionally-non-compiling multi-language test fixture (siblings
+file1.php, base_module.py, etc.); continue has no root go.mod. Per
+CLAUDE.md §3.2 cli_agents/ holds third-party reference agents. Modifying
+it would violate §11.4.124 + §11.4.28. ## Resolution: owned build is
+GREEN — no owned-code defect helix_agent’s owned-build contract
+(Makefile): primary <code>go build -mod=mod ./cmd/helixagent</code> +
+TEST_PACKAGES
+<code>./cmd/... ./internal/... ./pkg/... ./tests/... ./challenges/...</code>.
+Captured: -
+<code>go build -mod=mod -o /tmp/helixagent_hxc058 ./cmd/helixagent</code>
+→ exit 0 -
+<code>go build -mod=mod ./cmd/... ./internal/... ./pkg/... ./tests/... ./challenges/...</code>
+→ exit 0 (zero stderr) The <code>./...</code> failure is solely the
+wildcard walking the on-disk third-party continue submodule; it is out
+of owned-build scope and NOT a defect in owned code. No code change
+made; no pointer bump.</p>
+</body>
+</html>

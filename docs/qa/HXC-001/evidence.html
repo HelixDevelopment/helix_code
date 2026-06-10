@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-001-const-052-owned-org-directory-rename-complete-no-in-scope-dirs-remain">HXC-001
+— CONST-052 owned-org directory rename: COMPLETE (no in-scope dirs
+remain)</h1>
+<p>Operator authorized “rename parent org-dirs to lowercase”.
+Investigation (subagent, §11.4.6 investigate-before-touch): - ZERO
+non-lowercase owned-org parent/grouping DIRECTORIES on disk. The rename
+programme (46 PascalCase leaf dirs + HelixDevelopment/ parent) is
+ALREADY COMPLETE in the live tree: flat lowercase submodules/<name>,
+every consumer go.mod <code>replace</code> already points there,
+dependencies/ holds only the 3 exempt third-party
+(HuggingFace_Hub/LLama_CPP/Ollama). - Verification (captured):
+verify-governance-cascade.sh → 0 failures; git submodule status
+uninitialized count → 0; consumer go.mod replace dirs pointing into
+dependencies/{vasic-digital,HelixDevelopment}/ → 0; PascalCase owned
+leaf dirs on disk → ABSENT. RESIDUAL (out of the “directory rename”
+scope, NOT done): 57 internal git SECTION-NAME KEYS
+(.gitmodules/.git/config/ .git/modules) still read
+<code>dependencies/&lt;Org&gt;/&lt;name&gt;</code>. These are git
+logical identifiers, not worktree directories, not referenced by any
+build/import/path. Normalizing them = 4 atomic touchpoints × 57 (rewrite
+section name + config key + physically move .git/modules storage subtree
++ rewrite each worktree .git gitdir pointer) — HIGH-RISK
+(submodule-detachment), ZERO functional benefit. NOT performed
+autonomously (§11.4.101 block-only-when: irreversible-ish +
+high-blast-radius + zero-benefit). Needs separate explicit operator
+authorization for that specific plumbing op if desired. Also flagged:
+docs/research/const052/rename-plan.md (rev1, round 343) is STALE —
+describes the now-completed leaf renames as “remaining”.</p>
+</body>
+</html>

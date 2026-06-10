@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f09-slash-command-system</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f09-slash-command-system</h1>
+</header>
+<h1 id="p1-f09-slash-command-system-user-defined-markdown-commands-implementation-plan">P1-F09
+— Slash Command System (user-defined Markdown commands) Implementation
+Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Add a parallel slash-command surface for
+user-defined Markdown commands stored in
+<code>.helix/commands/*.md</code> (project) and
+<code>~/.config/helixcode/commands/*.md</code> (user). YAML frontmatter,
+regex-based variable substitution (<code>{{ARG1}}</code>,
+<code>{{ARG.name}}</code>, <code>{{SELECTION}}</code>,
+<code>{{CURRENT_FILE}}</code>, <code>{{CWD}}</code>,
+<code>{{ENV.NAME}}</code>, <code>{{FILE:path}}</code>), fsnotify watcher
+hot-reloads. Both <code>/commands</code> slash and
+<code>helixcode commands</code> cobra surface inspection + reload +
+run.</p>
+<p><strong>Architecture:</strong> Add
+<code>internal/commands/markdown_commands.go</code> (same package as
+built-ins; <code>MarkdownCommand</code> implements
+<code>Command</code>). <code>MarkdownLoader</code> scans both dirs
+(project overrides user), parses frontmatter via
+<code>gopkg.in/yaml.v3</code>, registers each command.
+<code>MarkdownWatcher</code> uses fsnotify (already-direct dependency)
+with 200ms debounce. Single-pass regex
+<code>\{\{([A-Z_][A-Z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?(:[^}]+)?)\}\}</code>
+matches all token forms; <code>tokenResolver</code> dispatches
+per-class.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, gopkg.in/yaml.v3
+(in go.mod), github.com/fsnotify/fsnotify (in go.mod from F05 hooks
+reload), github.com/spf13/cobra v1.8 (in go.mod). <strong>No new
+external dependencies.</strong></p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-05-p1-f09-slash-command-system-design.md</code>
+(commit <code>79e8bd1</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/commands/markdown_commands.go internal/commands/markdown_watcher.go <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  internal/commands/commands_command.go cmd/cli/commands_cmd.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>P1-F09-T01 — bootstrap evidence +
+advance PROGRESS</label></li>
+<li><label><input type="checkbox"></input>P1-F09-T02 — markdown_commands.go:
+MarkdownCommand type + frontmatter parser + regex substitution
+(TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F09-T03 — MarkdownLoader: scan
+both dirs, project overrides user, register/unregister
+(TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F09-T04 — markdown_watcher.go:
+fsnotify watcher + 200ms debounce (TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F09-T05 — commands_command.go:
+/commands slash + cmd/cli/commands_cmd.go cobra (TDD)</label></li>
+<li><label><input type="checkbox"></input>P1-F09-T06 — cmd/cli/main.go startup
+wiring + integration test (real fs + real subprocess)</label></li>
+<li><label><input type="checkbox"></input>P1-F09-T07 — Challenge with runtime
+evidence + cross-compile check</label></li>
+<li><label><input type="checkbox"></input>P1-F09-T08 — Feature 9 close-out +
+push to 4 remotes</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap-evidence-advance-progress">Task 1: Bootstrap
+evidence + advance PROGRESS</h2>
+<p><strong>Files:</strong> modify
+<code>docs/improvements/06_phase_1_evidence.md</code> (append F09
+section header) and <code>docs/improvements/PROGRESS.md</code> (replace
+current focus + add F09 task list block of 8 items after F08’s). Commit
+subject:
+<code>docs(P1-F09-T01): bootstrap Phase 1 / Feature 9 evidence + advance PROGRESS</code>.
+Co-Authored-By trailer.</p>
+<p>The F09 evidence header:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">## P1-F09 — Slash Command System</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>**Spec:** <span class="in">`docs/superpowers/specs/2026-05-05-p1-f09-slash-command-system-design.md`</span> (commit <span class="in">`79e8bd1`</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>**Plan:** <span class="in">`docs/superpowers/plans/2026-05-05-p1-f09-slash-command-system.md`</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>**Started:** 2026-05-05</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>**Status:** active</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">### Task evidence trail</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>(filled in commit-by-commit as tasks land)</span></code></pre></div>
+<p>Current focus block:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## Current focus</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Active phase:** P1 — claude-code feature porting</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Active feature:** F09 — Slash Command System</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Active task:** P1-F09-T01 — bootstrap evidence + advance PROGRESS</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Last completed:** P1-F08-T09 — Feature 8 (Plan Mode) close-out + push</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Owner:** agent (Claude Opus 4.7)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Started:** 2026-05-04</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Last touched:** 2026-05-05</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Blocked-on:** none</span></code></pre></div>
+<p>F09 task list block (8 items, all unchecked):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## Active feature task list (P1-F09: Slash Command System)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P1-F09-T01 — bootstrap evidence + advance PROGRESS</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P1-F09-T02 — markdown_commands.go: MarkdownCommand + parser + substitution (TDD)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P1-F09-T03 — MarkdownLoader: scan dirs + register/unregister (TDD)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P1-F09-T04 — markdown_watcher.go: fsnotify + debounce (TDD)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P1-F09-T05 — /commands slash + helixcode commands cobra (TDD)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P1-F09-T06 — main.go wiring + integration test</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P1-F09-T07 — Challenge with runtime evidence + cross-compile check</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> P1-F09-T08 — Feature 9 close-out + push</span></code></pre></div>
+<hr />
+<h2 id="task-2-markdown_commands.go-markdowncommand-parser-substitution-tdd">Task
+2: markdown_commands.go — MarkdownCommand + parser + substitution
+(TDD)</h2>
+<p><strong>Files:</strong> create
+<code>helix_code/internal/commands/markdown_commands.go</code>,
+<code>helix_code/internal/commands/markdown_commands_test.go</code>.</p>
+<p>Test file (write FAILING test first):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> commands</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;path/filepath&quot;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/assert&quot;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/stretchr/testify/require&quot;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParseFrontmatter_Valid<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> <span class="st">`---</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="st">title: Refactor</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="st">description: Rename a function</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="st">variables:</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="st">  function_name: &quot;&quot;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="st">---</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="st">Body text {{ARG1}}.`</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    cmd<span class="op">,</span> err <span class="op">:=</span> parseMarkdownCommand<span class="op">(</span><span class="st">&quot;refactor&quot;</span><span class="op">,</span> body<span class="op">,</span> <span class="st">&quot;/tmp/refactor.md&quot;</span><span class="op">)</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;refactor&quot;</span><span class="op">,</span> cmd<span class="op">.</span>Name<span class="op">())</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Rename a function&quot;</span><span class="op">,</span> cmd<span class="op">.</span>Description<span class="op">())</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> cmd<span class="op">.</span>body<span class="op">,</span> <span class="st">&quot;Body text {{ARG1}}.&quot;</span><span class="op">)</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> cmd<span class="op">.</span>variables<span class="op">,</span> <span class="st">&quot;function_name&quot;</span><span class="op">)</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParseFrontmatter_NoFrontmatter<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    cmd<span class="op">,</span> err <span class="op">:=</span> parseMarkdownCommand<span class="op">(</span><span class="st">&quot;plain&quot;</span><span class="op">,</span> <span class="st">&quot;Just a body.&quot;</span><span class="op">,</span> <span class="st">&quot;/tmp/plain.md&quot;</span><span class="op">)</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;plain&quot;</span><span class="op">,</span> cmd<span class="op">.</span>Name<span class="op">())</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Just a body.&quot;</span><span class="op">,</span> cmd<span class="op">.</span>body<span class="op">)</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParseFrontmatter_Malformed<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> <span class="st">`---</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="st">title: oops</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="st">NOT YAML</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="st">---</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="st">body`</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> parseMarkdownCommand<span class="op">(</span><span class="st">&quot;bad&quot;</span><span class="op">,</span> body<span class="op">,</span> <span class="st">&quot;/tmp/bad.md&quot;</span><span class="op">)</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_PositionalArgs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;{{ARG1}} and {{ARG2}}&quot;</span><span class="op">}</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;hello&quot;</span><span class="op">,</span> <span class="st">&quot;world&quot;</span><span class="op">}})</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;hello and world&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_NamedArg<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>        name<span class="op">:</span>      <span class="st">&quot;x&quot;</span><span class="op">,</span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        body<span class="op">:</span>      <span class="st">&quot;Function: {{ARG.function_name}}&quot;</span><span class="op">,</span></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>        variables<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;function_name&quot;</span><span class="op">:</span> <span class="st">&quot;myFunc&quot;</span><span class="op">},</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="ot">nil</span><span class="op">})</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Function: myFunc&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_SelectionAndCurrentFile<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;Sel: {{SELECTION}} | File: {{CURRENT_FILE}}&quot;</span><span class="op">}</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{</span>Selection<span class="op">:</span> <span class="st">&quot;the_text&quot;</span><span class="op">,</span> CurrentFile<span class="op">:</span> <span class="st">&quot;main.go&quot;</span><span class="op">})</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Sel: the_text | File: main.go&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_CWD<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;{{CWD}}&quot;</span><span class="op">}</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{})</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>    cwd<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>Getwd<span class="op">()</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> cwd<span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_EnvVar<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span><span class="st">&quot;F09_TEST_VAR&quot;</span><span class="op">,</span> <span class="st">&quot;ok-value&quot;</span><span class="op">)</span></span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;{{ENV.F09_TEST_VAR}}&quot;</span><span class="op">}</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{})</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;ok-value&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_EnvVar_Unset<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span>Unsetenv<span class="op">(</span><span class="st">&quot;F09_THIS_IS_NOT_SET&quot;</span><span class="op">)</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;[{{ENV.F09_THIS_IS_NOT_SET}}]&quot;</span><span class="op">}</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{})</span></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;[]&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_FileToken_Exists<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>    path <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;include.txt&quot;</span><span class="op">)</span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>path<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;inserted-content&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;[{{FILE:&quot;</span> <span class="op">+</span> path <span class="op">+</span> <span class="st">&quot;}}]&quot;</span><span class="op">}</span></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{})</span></span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;[inserted-content]&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_FileToken_Missing<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;{{FILE:/tmp/this-does-not-exist-12345}}&quot;</span><span class="op">}</span></span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{})</span></span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> out<span class="op">,</span> <span class="st">&quot;FILE NOT FOUND&quot;</span><span class="op">)</span></span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSubstitute_OutOfBoundsArg_EmptyString<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;{{ARG1}}-{{ARG2}}-{{ARG3}}&quot;</span><span class="op">}</span></span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>render<span class="op">(&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;a&quot;</span><span class="op">}})</span></span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;a--&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMarkdownCommand_ImplementsInterface<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> _ Command <span class="op">=</span> <span class="op">(*</span>MarkdownCommand<span class="op">)(</span><span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMarkdownCommand_Execute<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> description<span class="op">:</span> <span class="st">&quot;test&quot;</span><span class="op">,</span> body<span class="op">:</span> <span class="st">&quot;Hi {{ARG1}}&quot;</span><span class="op">}</span></span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;there&quot;</span><span class="op">}})</span></span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Success<span class="op">)</span></span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;Hi there&quot;</span><span class="op">,</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span>res<span class="op">.</span>Output<span class="op">))</span></span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Implementation:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> commands</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;regexp&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strconv&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;gopkg.in/yaml.v3&quot;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">// MarkdownCommand is a user-defined slash command parsed from a Markdown file</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">// with optional YAML frontmatter.</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MarkdownCommand <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    name        <span class="dt">string</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    title       <span class="dt">string</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    description <span class="dt">string</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    body        <span class="dt">string</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    variables   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    sourcePath  <span class="dt">string</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>        <span class="op">{</span> <span class="cf">return</span> c<span class="op">.</span>name <span class="op">}</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span>   <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> c<span class="op">.</span>description <span class="op">}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span>       <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/&quot;</span> <span class="op">+</span> c<span class="op">.</span>name <span class="op">+</span> <span class="st">&quot; [args]&quot;</span> <span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> SourcePath<span class="op">()</span> <span class="dt">string</span>  <span class="op">{</span> <span class="cf">return</span> c<span class="op">.</span>sourcePath <span class="op">}</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cc <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        cc <span class="op">=</span> <span class="op">&amp;</span>CommandContext<span class="op">{}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>render<span class="op">(</span>cc<span class="op">)</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> Output<span class="op">:</span> out<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="co">// frontmatter is the YAML shape of a Markdown command&#39;s frontmatter block.</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> frontmatter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    Title       <span class="dt">string</span>            <span class="st">`yaml:&quot;title&quot;`</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>            <span class="st">`yaml:&quot;description&quot;`</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    Variables   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`yaml:&quot;variables&quot;`</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="co">// parseMarkdownCommand parses raw .md content into a MarkdownCommand.</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a><span class="co">// Frontmatter is optional; when present it must be valid YAML.</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> parseMarkdownCommand<span class="op">(</span>name<span class="op">,</span> raw<span class="op">,</span> sourcePath <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>MarkdownCommand<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> <span class="op">&amp;</span>MarkdownCommand<span class="op">{</span>name<span class="op">:</span> name<span class="op">,</span> sourcePath<span class="op">:</span> sourcePath<span class="op">,</span> variables<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{}}</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> raw</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>raw<span class="op">,</span> <span class="st">&quot;---</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>        end <span class="op">:=</span> strings<span class="op">.</span>Index<span class="op">(</span>raw<span class="op">[</span><span class="dv">4</span><span class="op">:],</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">---&quot;</span><span class="op">)</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> end <span class="op">==</span> <span class="op">-</span><span class="dv">1</span> <span class="op">{</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;markdown command %s: unterminated frontmatter&quot;</span><span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>        fm <span class="op">:=</span> raw<span class="op">[</span><span class="dv">4</span> <span class="op">:</span> <span class="dv">4</span><span class="op">+</span>end<span class="op">]</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>        body <span class="op">=</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>raw<span class="op">[</span><span class="dv">4</span><span class="op">+</span>end<span class="op">+</span><span class="dv">4</span><span class="op">:],</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> meta frontmatter</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> yaml<span class="op">.</span>Unmarshal<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>fm<span class="op">),</span> <span class="op">&amp;</span>meta<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;markdown command %s: parse frontmatter: %w&quot;</span><span class="op">,</span> name<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>        cmd<span class="op">.</span>title <span class="op">=</span> meta<span class="op">.</span>Title</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>        cmd<span class="op">.</span>description <span class="op">=</span> meta<span class="op">.</span>Description</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> meta<span class="op">.</span>Variables <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>            cmd<span class="op">.</span>variables <span class="op">=</span> meta<span class="op">.</span>Variables</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    cmd<span class="op">.</span>body <span class="op">=</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span>body<span class="op">)</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cmd<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="co">// substRegex matches {{TOKEN}} forms. The token name part allows letters,</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="co">// digits and underscores; an optional `.suffix` (named lookup) and an optional</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="co">// `:argument` (file path or other inline argument) are captured greedily.</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> substRegex <span class="op">=</span> regexp<span class="op">.</span>MustCompile<span class="op">(</span><span class="st">`\{\{([A-Z_][A-Z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?(?::[^}]+)?)\}\}`</span><span class="op">)</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> render<span class="op">(</span>cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> c<span class="op">.</span>tokenResolver<span class="op">(</span>cc<span class="op">)</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> substRegex<span class="op">.</span>ReplaceAllStringFunc<span class="op">(</span>c<span class="op">.</span>body<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>match <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>        token <span class="op">:=</span> match<span class="op">[</span><span class="dv">2</span> <span class="op">:</span> <span class="bu">len</span><span class="op">(</span>match<span class="op">)-</span><span class="dv">2</span><span class="op">]</span> <span class="co">// strip {{ and }}</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> r<span class="op">(</span>token<span class="op">)</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> tokenResolver<span class="op">(</span>cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="kw">func</span><span class="op">(</span>token <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>    cwd<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>Getwd<span class="op">()</span></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">func</span><span class="op">(</span>token <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>token<span class="op">,</span> <span class="st">&quot;ARG&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> rest <span class="op">:=</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>token<span class="op">,</span> <span class="st">&quot;ARG&quot;</span><span class="op">);</span> rest <span class="op">!=</span> token <span class="op">{</span></span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>rest<span class="op">,</span> <span class="st">&quot;.&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>                    name <span class="op">:=</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>rest<span class="op">,</span> <span class="st">&quot;.&quot;</span><span class="op">)</span></span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> c<span class="op">.</span>variables<span class="op">[</span>name<span class="op">]</span></span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> n<span class="op">,</span> err <span class="op">:=</span> strconv<span class="op">.</span>Atoi<span class="op">(</span>rest<span class="op">);</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> n <span class="op">&gt;=</span> <span class="dv">1</span> <span class="op">{</span></span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> n<span class="op">-</span><span class="dv">1</span> <span class="op">&lt;</span> <span class="bu">len</span><span class="op">(</span>cc<span class="op">.</span>Args<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">return</span> cc<span class="op">.</span>Args<span class="op">[</span>n<span class="op">-</span><span class="dv">1</span><span class="op">]</span></span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>                    <span class="op">}</span></span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">return</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token <span class="op">==</span> <span class="st">&quot;SELECTION&quot;</span> <span class="op">{</span></span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> cc<span class="op">.</span>Selection</span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token <span class="op">==</span> <span class="st">&quot;CURRENT_FILE&quot;</span> <span class="op">{</span></span>
+<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> cc<span class="op">.</span>CurrentFile</span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token <span class="op">==</span> <span class="st">&quot;CWD&quot;</span> <span class="op">{</span></span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> cwd</span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>token<span class="op">,</span> <span class="st">&quot;ENV.&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>            name <span class="op">:=</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>token<span class="op">,</span> <span class="st">&quot;ENV.&quot;</span><span class="op">)</span></span>
+<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> os<span class="op">.</span>Getenv<span class="op">(</span>name<span class="op">)</span></span>
+<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> strings<span class="op">.</span>HasPrefix<span class="op">(</span>token<span class="op">,</span> <span class="st">&quot;FILE:&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>            path <span class="op">:=</span> strings<span class="op">.</span>TrimPrefix<span class="op">(</span>token<span class="op">,</span> <span class="st">&quot;FILE:&quot;</span><span class="op">)</span></span>
+<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>            info<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>Stat<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;[FILE NOT FOUND: %s]&quot;</span><span class="op">,</span> path<span class="op">)</span></span>
+<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> info<span class="op">.</span>Size<span class="op">()</span> <span class="op">&gt;</span> <span class="dv">1</span><span class="op">&lt;&lt;</span><span class="dv">20</span> <span class="op">{</span></span>
+<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;[FILE TOO LARGE: %s]&quot;</span><span class="op">,</span> path<span class="op">)</span></span>
+<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a>            data<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;[FILE READ ERROR: %s: %v]&quot;</span><span class="op">,</span> path<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dt">string</span><span class="op">(</span>data<span class="op">)</span></span>
+<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;{{&quot;</span> <span class="op">+</span> token <span class="op">+</span> <span class="st">&quot;}}&quot;</span> <span class="co">// unknown token — leave verbatim</span></span>
+<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-136"><a href="#cb6-136" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>CommandContext</code> needs <code>Selection</code> and
+<code>CurrentFile</code> fields. If the existing struct doesn’t have
+them, ADD them as optional string fields (zero-value safe). If
+<code>CommandContext.Selection</code> and
+<code>CommandContext.CurrentFile</code> already exist, no change.</p>
+<p>Run failing test → impl → confirm pass → smoke clean → commit.
+Subject:
+<code>feat(P1-F09-T02): MarkdownCommand + frontmatter parser + regex variable substitution</code>.</p>
+<hr />
+<h2 id="task-3-markdownloader-scan-dirs-registerunregister-tdd">Task 3:
+MarkdownLoader — scan dirs, register/unregister (TDD)</h2>
+<p><strong>Files:</strong> modify
+<code>internal/commands/markdown_commands.go</code> (append
+<code>MarkdownLoader</code> types/methods), extend
+<code>markdown_commands_test.go</code> with loader tests.</p>
+<p>Loader test cases:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMarkdownLoader_LoadProjectAndUser<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    projectDir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    userDir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    projCmds <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>projectDir<span class="op">,</span> <span class="st">&quot;.helix&quot;</span><span class="op">,</span> <span class="st">&quot;commands&quot;</span><span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    userCmds <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>userDir<span class="op">,</span> <span class="st">&quot;.config&quot;</span><span class="op">,</span> <span class="st">&quot;helixcode&quot;</span><span class="op">,</span> <span class="st">&quot;commands&quot;</span><span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>projCmds<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>userCmds<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>userCmds<span class="op">,</span> <span class="st">&quot;shared.md&quot;</span><span class="op">),</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;---</span><span class="ch">\n</span><span class="st">description: from user</span><span class="ch">\n</span><span class="st">---</span><span class="ch">\n\n</span><span class="st">user body&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>projCmds<span class="op">,</span> <span class="st">&quot;shared.md&quot;</span><span class="op">),</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;---</span><span class="ch">\n</span><span class="st">description: from project</span><span class="ch">\n</span><span class="st">---</span><span class="ch">\n\n</span><span class="st">project body&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>userCmds<span class="op">,</span> <span class="st">&quot;user-only.md&quot;</span><span class="op">),</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;only user&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewRegistry<span class="op">()</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewMarkdownLoader<span class="op">(</span>reg<span class="op">,</span> projCmds<span class="op">,</span> userCmds<span class="op">)</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> loader<span class="op">.</span>Load<span class="op">())</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// &quot;shared&quot; registers from project (overrides user)</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    cmd<span class="op">,</span> ok <span class="op">:=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;shared&quot;</span><span class="op">)</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    mc <span class="op">:=</span> cmd<span class="op">.(*</span>MarkdownCommand<span class="op">)</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;from project&quot;</span><span class="op">,</span> mc<span class="op">.</span>Description<span class="op">())</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// &quot;user-only&quot; still loaded</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;user-only&quot;</span><span class="op">)</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMarkdownLoader_ReloadDiff_AddsRemovesUpdates<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    projectDir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    cmds <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>projectDir<span class="op">,</span> <span class="st">&quot;.helix&quot;</span><span class="op">,</span> <span class="st">&quot;commands&quot;</span><span class="op">)</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>cmds<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewRegistry<span class="op">()</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewMarkdownLoader<span class="op">(</span>reg<span class="op">,</span> cmds<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> loader<span class="op">.</span>Load<span class="op">())</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">:=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;a&quot;</span><span class="op">)</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Add file</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>cmds<span class="op">,</span> <span class="st">&quot;a.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;body a&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> loader<span class="op">.</span>Reload<span class="op">())</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;a&quot;</span><span class="op">)</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Remove file</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>Remove<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>cmds<span class="op">,</span> <span class="st">&quot;a.md&quot;</span><span class="op">)))</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> loader<span class="op">.</span>Reload<span class="op">())</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;a&quot;</span><span class="op">)</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMarkdownLoader_BadFrontmatterIsLoggedNotFatal<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>    projectDir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>    cmds <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>projectDir<span class="op">,</span> <span class="st">&quot;.helix&quot;</span><span class="op">,</span> <span class="st">&quot;commands&quot;</span><span class="op">)</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>cmds<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>cmds<span class="op">,</span> <span class="st">&quot;good.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;good body&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>cmds<span class="op">,</span> <span class="st">&quot;bad.md&quot;</span><span class="op">),</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>        <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;---</span><span class="ch">\n</span><span class="st">NOT YAML</span><span class="ch">\n</span><span class="st">---</span><span class="ch">\n</span><span class="st">body&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewRegistry<span class="op">()</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewMarkdownLoader<span class="op">(</span>reg<span class="op">,</span> cmds<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> loader<span class="op">.</span>Load<span class="op">())</span>   <span class="co">// Load succeeds despite bad file</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">:=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;good&quot;</span><span class="op">)</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> ok<span class="op">)</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> ok <span class="op">=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;bad&quot;</span><span class="op">)</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> ok<span class="op">,</span> <span class="st">&quot;bad.md must be skipped&quot;</span><span class="op">)</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMarkdownLoader_NonExistentDirsAreSkipped<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewRegistry<span class="op">()</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewMarkdownLoader<span class="op">(</span>reg<span class="op">,</span> <span class="st">&quot;/tmp/does/not/exist&quot;</span><span class="op">,</span> <span class="st">&quot;/tmp/also/does/not/exist&quot;</span><span class="op">)</span></span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> loader<span class="op">.</span>Load<span class="op">())</span></span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Implementation (append to <code>markdown_commands.go</code>):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;path/filepath&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;sync&quot;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.uber.org/zap&quot;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">// MarkdownLoader scans project + user command directories and registers each</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">// .md file as a MarkdownCommand in the supplied Registry. Project files</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">// override user files of the same name.</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MarkdownLoader <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    registry   <span class="op">*</span>Registry</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    projectDir <span class="dt">string</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    userDir    <span class="dt">string</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    mu         sync<span class="op">.</span>Mutex</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    loaded     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="co">// command name → source path</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    log        <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">// NewMarkdownLoader constructs a loader. projectDir and/or userDir may be</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">// empty or nonexistent; the loader gracefully handles either.</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMarkdownLoader<span class="op">(</span>registry <span class="op">*</span>Registry<span class="op">,</span> projectDir<span class="op">,</span> userDir <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>MarkdownLoader <span class="op">{</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>MarkdownLoader<span class="op">{</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        registry<span class="op">:</span>   registry<span class="op">,</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        projectDir<span class="op">:</span> projectDir<span class="op">,</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        userDir<span class="op">:</span>    userDir<span class="op">,</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        loaded<span class="op">:</span>     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{},</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        log<span class="op">:</span>        zap<span class="op">.</span>NewNop<span class="op">(),</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">// SetLogger replaces the no-op logger.</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MarkdownLoader<span class="op">)</span> SetLogger<span class="op">(</span>log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">{</span> l<span class="op">.</span>log <span class="op">=</span> log <span class="op">}</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">// Load scans both directories and registers each command. Project files win</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">// on name collision. Errors in individual files are logged and skipped, not</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="co">// fatal.</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MarkdownLoader<span class="op">)</span> Load<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> l<span class="op">.</span>Reload<span class="op">()</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a><span class="co">// Reload re-scans both directories and reconciles the registry: added files</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="co">// are registered, removed files are unregistered, changed files are replaced.</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MarkdownLoader<span class="op">)</span> Reload<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    l<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> l<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    want <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>MarkdownCommand<span class="op">{}</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Order matters: user first, then project (so project overrides user).</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> dir <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span>l<span class="op">.</span>userDir<span class="op">,</span> l<span class="op">.</span>projectDir<span class="op">}</span> <span class="op">{</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> dir <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        entries<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadDir<span class="op">(</span>dir<span class="op">)</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> os<span class="op">.</span>IsNotExist<span class="op">(</span>err<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>            l<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;markdown loader: read dir&quot;</span><span class="op">,</span> zap<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;dir&quot;</span><span class="op">,</span> dir<span class="op">),</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _<span class="op">,</span> entry <span class="op">:=</span> <span class="kw">range</span> entries <span class="op">{</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> entry<span class="op">.</span>IsDir<span class="op">()</span> <span class="op">||</span> <span class="op">!</span>strings<span class="op">.</span>HasSuffix<span class="op">(</span>entry<span class="op">.</span>Name<span class="op">(),</span> <span class="st">&quot;.md&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>            name <span class="op">:=</span> strings<span class="op">.</span>TrimSuffix<span class="op">(</span>entry<span class="op">.</span>Name<span class="op">(),</span> <span class="st">&quot;.md&quot;</span><span class="op">)</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>            path <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> entry<span class="op">.</span>Name<span class="op">())</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>            data<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>                l<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;markdown loader: read file&quot;</span><span class="op">,</span> zap<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;path&quot;</span><span class="op">,</span> path<span class="op">),</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>            cmd<span class="op">,</span> err <span class="op">:=</span> parseMarkdownCommand<span class="op">(</span>name<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>data<span class="op">),</span> path<span class="op">)</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>                l<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;markdown loader: parse error&quot;</span><span class="op">,</span> zap<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;path&quot;</span><span class="op">,</span> path<span class="op">),</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>            want<span class="op">[</span>name<span class="op">]</span> <span class="op">=</span> cmd</span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Remove names that disappeared</span></span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name <span class="op">:=</span> <span class="kw">range</span> l<span class="op">.</span>loaded <span class="op">{</span></span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _<span class="op">,</span> ok <span class="op">:=</span> want<span class="op">[</span>name<span class="op">];</span> <span class="op">!</span>ok <span class="op">{</span></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>            l<span class="op">.</span>registry<span class="op">.</span>Unregister<span class="op">(</span>name<span class="op">)</span></span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>            <span class="bu">delete</span><span class="op">(</span>l<span class="op">.</span>loaded<span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Add or replace</span></span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name<span class="op">,</span> cmd <span class="op">:=</span> <span class="kw">range</span> want <span class="op">{</span></span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> existing<span class="op">,</span> ok <span class="op">:=</span> l<span class="op">.</span>registry<span class="op">.</span>Get<span class="op">(</span>name<span class="op">);</span> ok <span class="op">{</span></span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> _<span class="op">,</span> isMd <span class="op">:=</span> existing<span class="op">.(*</span>MarkdownCommand<span class="op">);</span> <span class="op">!</span>isMd <span class="op">{</span></span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Don&#39;t overwrite a built-in command with a Markdown one.</span></span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>                l<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;markdown loader: name conflicts with built-in&quot;</span><span class="op">,</span></span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>                    zap<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;name&quot;</span><span class="op">,</span> name<span class="op">),</span> zap<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;source&quot;</span><span class="op">,</span> cmd<span class="op">.</span>sourcePath<span class="op">))</span></span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>            l<span class="op">.</span>registry<span class="op">.</span>Unregister<span class="op">(</span>name<span class="op">)</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> l<span class="op">.</span>registry<span class="op">.</span>Register<span class="op">(</span>cmd<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>            l<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;markdown loader: register&quot;</span><span class="op">,</span> zap<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;name&quot;</span><span class="op">,</span> name<span class="op">),</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a>        l<span class="op">.</span>loaded<span class="op">[</span>name<span class="op">]</span> <span class="op">=</span> cmd<span class="op">.</span>sourcePath</span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a><span class="co">// Loaded returns a snapshot of name → source path.</span></span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MarkdownLoader<span class="op">)</span> Loaded<span class="op">()</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a>    l<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> l<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a>    out <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>l<span class="op">.</span>loaded<span class="op">))</span></span>
+<span id="cb8-114"><a href="#cb8-114" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k<span class="op">,</span> v <span class="op">:=</span> <span class="kw">range</span> l<span class="op">.</span>loaded <span class="op">{</span></span>
+<span id="cb8-115"><a href="#cb8-115" aria-hidden="true" tabindex="-1"></a>        out<span class="op">[</span>k<span class="op">]</span> <span class="op">=</span> v</span>
+<span id="cb8-116"><a href="#cb8-116" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-117"><a href="#cb8-117" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out</span>
+<span id="cb8-118"><a href="#cb8-118" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Registry.Unregister(name string)</code> may not exist yet — add
+it (1-line method that takes mu.Lock and deletes from the map).</p>
+<p>Run TDD cycle. Subject:
+<code>feat(P1-F09-T03): MarkdownLoader scans project + user dirs, registers/unregisters Markdown commands</code>.</p>
+<hr />
+<h2 id="task-4-markdown_watcher.go-fsnotify-200ms-debounce-tdd">Task 4:
+markdown_watcher.go — fsnotify + 200ms debounce (TDD)</h2>
+<p><strong>Files:</strong> create
+<code>helix_code/internal/commands/markdown_watcher.go</code>,
+<code>helix_code/internal/commands/markdown_watcher_test.go</code>.</p>
+<p>Test cases:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWatcher_DebouncesAndReloads<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    cmds <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;.helix&quot;</span><span class="op">,</span> <span class="st">&quot;commands&quot;</span><span class="op">)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>cmds<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewRegistry<span class="op">()</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewMarkdownLoader<span class="op">(</span>reg<span class="op">,</span> cmds<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> loader<span class="op">.</span>Load<span class="op">())</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    w<span class="op">,</span> err <span class="op">:=</span> NewMarkdownWatcher<span class="op">(</span>loader<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span>cmds<span class="op">})</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    w<span class="op">.</span>SetDebounce<span class="op">(</span><span class="dv">50</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithCancel<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cancel<span class="op">()</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> w<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    time<span class="op">.</span>Sleep<span class="op">(</span><span class="dv">50</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">)</span> <span class="co">// let watcher subscribe</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Write a file; expect to be loaded after debounce</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>cmds<span class="op">,</span> <span class="st">&quot;added.md&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;hi&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Eventually<span class="op">(</span>t<span class="op">,</span> <span class="kw">func</span><span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        _<span class="op">,</span> ok <span class="op">:=</span> reg<span class="op">.</span>Get<span class="op">(</span><span class="st">&quot;added&quot;</span><span class="op">)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ok</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="dv">2</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">,</span> <span class="dv">25</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">)</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWatcher_StopsOnContextCancel<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    cmds <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;.helix&quot;</span><span class="op">,</span> <span class="st">&quot;commands&quot;</span><span class="op">)</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>cmds<span class="op">,</span> <span class="bn">0755</span><span class="op">))</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    reg <span class="op">:=</span> NewRegistry<span class="op">()</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">:=</span> NewMarkdownLoader<span class="op">(</span>reg<span class="op">,</span> cmds<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    w<span class="op">,</span> err <span class="op">:=</span> NewMarkdownWatcher<span class="op">(</span>loader<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span>cmds<span class="op">})</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithCancel<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    done <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> <span class="kw">struct</span><span class="op">{})</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span> w<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">);</span> <span class="bu">close</span><span class="op">(</span>done<span class="op">)</span> <span class="op">}()</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    cancel<span class="op">()</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">select</span> <span class="op">{</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="op">&lt;-</span>done<span class="op">:</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="op">&lt;-</span>time<span class="op">.</span>After<span class="op">(</span><span class="dv">2</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">):</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;watcher did not stop on ctx cancel&quot;</span><span class="op">)</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWatcher_HandlesMissingDirInitially<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    w<span class="op">,</span> err <span class="op">:=</span> NewMarkdownWatcher<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;/tmp/does/not/exist&quot;</span><span class="op">})</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;fsnotify cannot watch missing dir on this platform — acceptable&quot;</span><span class="op">)</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> w<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Implementation:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> commands</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;sync&quot;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/fsnotify/fsnotify&quot;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.uber.org/zap&quot;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">// MarkdownWatcher uses fsnotify to detect changes in command directories and</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">// triggers loader.Reload() with a debounce so rapid filesystem activity</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">// (editor saves) collapses to a single reload.</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MarkdownWatcher <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    loader   <span class="op">*</span>MarkdownLoader</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    dirs     <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    debounce time<span class="op">.</span>Duration</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    w        <span class="op">*</span>fsnotify<span class="op">.</span>Watcher</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    log      <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    mu       sync<span class="op">.</span>Mutex</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    pending  <span class="op">*</span>time<span class="op">.</span>Timer</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMarkdownWatcher<span class="op">(</span>loader <span class="op">*</span>MarkdownLoader<span class="op">,</span> dirs <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>MarkdownWatcher<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    w<span class="op">,</span> err <span class="op">:=</span> fsnotify<span class="op">.</span>NewWatcher<span class="op">()</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> d <span class="op">:=</span> <span class="kw">range</span> dirs <span class="op">{</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> d <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> w<span class="op">.</span>Add<span class="op">(</span>d<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Non-fatal: directory may not exist yet. Log via no-op logger.</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>MarkdownWatcher<span class="op">{</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        loader<span class="op">:</span>   loader<span class="op">,</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        dirs<span class="op">:</span>     dirs<span class="op">,</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>        debounce<span class="op">:</span> <span class="dv">200</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">,</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>        w<span class="op">:</span>        w<span class="op">,</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        log<span class="op">:</span>      zap<span class="op">.</span>NewNop<span class="op">(),</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MarkdownWatcher<span class="op">)</span> SetDebounce<span class="op">(</span>d time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">{</span> w<span class="op">.</span>debounce <span class="op">=</span> d <span class="op">}</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MarkdownWatcher<span class="op">)</span> SetLogger<span class="op">(</span>l <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span>     <span class="op">{</span> w<span class="op">.</span>log <span class="op">=</span> l <span class="op">}</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MarkdownWatcher<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span>                <span class="op">{</span> <span class="cf">return</span> w<span class="op">.</span>w<span class="op">.</span>Close<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="co">// Run blocks until ctx is cancelled, processing watcher events with a</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="co">// debounced Reload.</span></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MarkdownWatcher<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> w<span class="op">.</span>w<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">select</span> <span class="op">{</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">&lt;-</span>ctx<span class="op">.</span>Done<span class="op">():</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> ev<span class="op">,</span> ok <span class="op">:=</span> <span class="op">&lt;-</span>w<span class="op">.</span>w<span class="op">.</span>Events<span class="op">:</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">!</span>ok <span class="op">{</span></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> ev<span class="op">.</span>Op <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>            w<span class="op">.</span>scheduleReload<span class="op">()</span></span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> err<span class="op">,</span> ok <span class="op">:=</span> <span class="op">&lt;-</span>w<span class="op">.</span>w<span class="op">.</span>Errors<span class="op">:</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="op">!</span>ok <span class="op">{</span></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>            w<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;markdown watcher: error&quot;</span><span class="op">,</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>MarkdownWatcher<span class="op">)</span> scheduleReload<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>    w<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> w<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> w<span class="op">.</span>pending <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>        w<span class="op">.</span>pending<span class="op">.</span>Stop<span class="op">()</span></span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>    w<span class="op">.</span>pending <span class="op">=</span> time<span class="op">.</span>AfterFunc<span class="op">(</span>w<span class="op">.</span>debounce<span class="op">,</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> w<span class="op">.</span>loader <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> w<span class="op">.</span>loader<span class="op">.</span>Reload<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a>            w<span class="op">.</span>log<span class="op">.</span>Warn<span class="op">(</span><span class="st">&quot;markdown watcher: reload&quot;</span><span class="op">,</span> zap<span class="op">.</span>Error<span class="op">(</span>err<span class="op">))</span></span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Run TDD cycle. Subject:
+<code>feat(P1-F09-T04): markdown_watcher.go fsnotify + debounced reload</code>.</p>
+<hr />
+<h2 id="task-5-commands-slash-helixcode-commands-cobra-tdd">Task 5:
+/commands slash + helixcode commands cobra (TDD)</h2>
+<p><strong>Files:</strong> create
+<code>helix_code/internal/commands/commands_command.go</code>,
+<code>helix_code/internal/commands/commands_command_test.go</code>,
+<code>helix_code/cmd/cli/commands_cmd.go</code>,
+<code>helix_code/cmd/cli/commands_cmd_test.go</code>.</p>
+<p><code>/commands</code> slash: - <code>/commands</code> (default
+<code>list</code>) → table NAME / TITLE / SOURCE -
+<code>/commands show &lt;name&gt;</code> → renders body of that command
+(without args) - <code>/commands reload</code> → calls loader.Reload();
+reports added/removed -
+<code>/commands run &lt;name&gt; &lt;args...&gt;</code> → calls
+cmd.Execute(ctx, &amp;CommandContext{Args: args}); prints output -
+Unknown subcommand → error</p>
+<p><code>helixcode commands</code> cobra: -
+<code>helixcode commands list</code> (mirror of slash list, table) -
+<code>helixcode commands show &lt;name&gt;</code> -
+<code>helixcode commands reload</code> (no-op for one-shot CLI;
+informational) -
+<code>helixcode commands run &lt;name&gt; [args...]</code></p>
+<p>Both surfaces use the same loader. Cobra-side construction in
+<code>commands_cmd.go</code> follows the pattern from F06
+<code>mcp_cmd.go</code>.</p>
+<p>Run TDD cycle. Subject:
+<code>feat(P1-F09-T05): /commands slash + helixcode commands cobra (list/show/reload/run)</code>.</p>
+<hr />
+<h2 id="task-6-cmdclimain.go-startup-wiring-integration-test">Task 6:
+cmd/cli/main.go startup wiring + integration test</h2>
+<p>Add to main.go after F08 wiring:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>projectCmds <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span><span class="st">&quot;.&quot;</span><span class="op">,</span> <span class="st">&quot;.helix&quot;</span><span class="op">,</span> <span class="st">&quot;commands&quot;</span><span class="op">)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> userCmds <span class="dt">string</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> home<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>UserConfigDir<span class="op">();</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    userCmds <span class="op">=</span> filepath<span class="op">.</span>Join<span class="op">(</span>home<span class="op">,</span> <span class="st">&quot;helixcode&quot;</span><span class="op">,</span> <span class="st">&quot;commands&quot;</span><span class="op">)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>mdLoader <span class="op">:=</span> commands<span class="op">.</span>NewMarkdownLoader<span class="op">(</span>cmdRegistry<span class="op">,</span> projectCmds<span class="op">,</span> userCmds<span class="op">)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>mdLoader<span class="op">.</span>SetLogger<span class="op">(</span>logger<span class="op">)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">:=</span> mdLoader<span class="op">.</span>Load<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;markdown commands: load failed: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>mdWatcher<span class="op">,</span> err <span class="op">:=</span> commands<span class="op">.</span>NewMarkdownWatcher<span class="op">(</span>mdLoader<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span>projectCmds<span class="op">,</span> userCmds<span class="op">})</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    mdWatcher<span class="op">.</span>SetLogger<span class="op">(</span>logger<span class="op">)</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> mdWatcher<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> mdWatcher<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">:=</span> cmdRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewCommandsCommand<span class="op">(</span>mdLoader<span class="op">));</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;commands: register slash failed: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>rootCmd<span class="op">.</span>AddCommand<span class="op">(</span>newCommandsCmd<span class="op">(</span>commandsCmdDeps<span class="op">{</span>Loader<span class="op">:</span> mdLoader<span class="op">,</span> Registry<span class="op">:</span> cmdRegistry<span class="op">}))</span></span></code></pre></div>
+<p>Integration test
+<code>tests/integration/markdown_commands_test.go</code>
+(<code>//go:build integration</code>): - Create temp project dir with
+<code>.helix/commands/echo.md</code> body <code>Got: {{ARG1}}</code> -
+Construct loader, run command via Execute, assert output
+<code>Got: hello world</code> - Write a second file via watcher, assert
+it appears in registry within 1s</p>
+<p>Subject:
+<code>feat(P1-F09-T06): wire markdown loader + watcher into main.go + integration test</code>.</p>
+<hr />
+<h2 id="task-7-challenge-with-runtime-evidence">Task 7: Challenge with
+runtime evidence</h2>
+<p>Harness
+<code>helix_code/tests/integration/cmd/p1f09_challenge/main.go</code>:
+1. Create temp <code>.helix/commands/echo.md</code> with
+<code>Got: {{ARG1}}</code> 2. Build registry, load, run
+<code>echo</code> with arg <code>&quot;hello world&quot;</code> 3. Assert output
+contains <code>Got: hello world</code> 4. Update file body to
+<code>New: {{ARG1}}</code>, trigger reload, run again 5. Assert output
+contains <code>New: hello world</code></p>
+<p>run.sh, CHALLENGE.md, evidence in
+<code>06_phase_1_evidence.md</code>. Dual commit (submodule +
+meta-repo).</p>
+<p>Subject:
+<code>feat(P1-F09-T07): challenge with runtime evidence + cross-compile check</code>.</p>
+<hr />
+<h2 id="task-8-feature-9-close-out-push-to-4-remotes">Task 8: Feature 9
+close-out + push to 4 remotes</h2>
+<p>Tick all 8 P1-F09 task list items. Update PROGRESS current focus to
+idle (F10 candidate). Final unit + integration + smoke + cross-compile +
+go vet + challenge re-run. Commit
+<code>chore(P1-F09-T08): Feature 9 (Slash Command System) close-out</code>.
+Push origin/github/gitlab/upstream non-force (CONST-043).</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li>Spec coverage: every spec section has a task —
+types/parser/substitution (T02), loader (T03), watcher (T04), surfaces
+(T05), wiring + integration (T06), challenge (T07), close-out
+(T08).</li>
+<li>TDD: every code task starts with failing tests.</li>
+<li>Type consistency: <code>MarkdownCommand</code>,
+<code>MarkdownLoader</code>, <code>MarkdownWatcher</code>,
+<code>parseMarkdownCommand</code>, <code>tokenResolver</code>,
+<code>substRegex</code>, <code>Registry.Unregister</code>,
+<code>CommandContext.Selection</code>,
+<code>CommandContext.CurrentFile</code> — all used consistently.</li>
+<li>Cross-platform: fsnotify works on Linux+Windows; cross-compile linux
+is the canonical check.</li>
+<li>Anti-bluff: full 4-term smoke + Challenge captures real rendered
+output from a real .md file.</li>
+<li>No new external deps — fsnotify, yaml.v3, cobra, testify all in
+go.mod.</li>
+<li>Branch + push: stays on main, non-force to all four remotes.</li>
+</ol>
+</body>
+</html>

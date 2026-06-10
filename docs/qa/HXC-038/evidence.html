@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-038-docs_chain-rebaseline-affordance-engine-extend-green">HXC-038
+— docs_chain rebaseline affordance (engine extend + green)</h1>
+<p><strong>Captured:</strong> 2026-06-09T14:05:59Z
+<strong>Type:</strong> Bug · <strong>Status:</strong> Fixed (→ Fixed.md)
+<strong>Operator decision:</strong> “Extend engine + green it carefully”
+(AskUserQuestion)</p>
+<h2 id="work">Work</h2>
+<p>docs_chain <code>rebaseline</code> subcommand (db-to-md direction
+only) + <code>writeGuardStore</code> that REJECTS any write to the
+authority DB + <code>rebaseline_test.go</code>. Commit
+<code>0c297c4</code>.</p>
+<h2 id="captured-runtime-evidence-real-go-test">Captured runtime
+evidence (real <code>go test</code>)</h2>
+<pre><code>go test ./internal/runner/ -run &#39;TestReBaseline&#39; -count=1 -v
+--- PASS: TestReBaseline_NeverWritesAuthorityDB (0.00s)
+--- PASS: TestReBaseline_WriteGuardRejectsAuthorityWrite (0.01s)
+--- PASS: TestReBaseline_NeverExecutesSyncTransform (0.00s)
+PASS
+ok      digital.vasic.docs_chain/internal/runner    0.197s</code></pre>
+<p>Full runner suite regression: <code>ok ... 1.622s</code> (no
+FAIL).</p>
+<h2 id="push">Push</h2>
+<ul>
+<li>pushed <code>ae2b411..0c297c4 main</code> → origin
+(github.com:vasic-digital/docs_chain), tip confirmed 0c297c4</li>
+</ul>
+</body>
+</html>

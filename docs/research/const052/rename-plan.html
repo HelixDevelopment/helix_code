@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>rename-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">rename-plan</h1>
+</header>
+<h1 id="const-052-rename-programme-hxc-001-assessment-phased-rename-plan">CONST-052
+Rename Programme — HXC-001 Assessment + Phased Rename Plan</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-05-21T02:30:50Z <strong>Description:</strong> Current-state
+assessment of the CONST-052 lowercase-snake_case rename programme
+(HXC-001) plus a phased, atomic, low-risk→high-risk rename plan.
+<strong>Authority:</strong> Constitution §11.4.29 (CONST-052), §11.4.44
+(this header); HXC-001 in <code>docs/Issues.md</code>.
+<strong>Maintainer:</strong> Operator + AI loop per §11.4.42
+<strong>Status:</strong> Plan — research output, no renames
+executed.</p>
+<hr />
+<h2 id="scope-and-method">0. Scope and method</h2>
+<p>CONST-052 (constitution §11.4.29) mandates every directory,
+submodule, and file under HelixCode use lowercase
+<code>snake_case</code> names, with technology- preserving common-sense
+exceptions. This document assesses the current state, distinguishes work
+already done (notably commit <code>a1ea3c8</code> and its two sibling
+batch commits) from work remaining, applies the exemption carve-outs,
+maps the entanglement risk per rename candidate, and lays out a phased
+plan. <strong>No renames were performed producing this
+document.</strong></p>
+<p>A prior phased plan exists at
+<code>docs/superpowers/specs/2026-05-19-const052-rename-programme-plan.md</code>
+(commit <code>f6664104</code>, round 113). This document supersedes it
+as the current-state assessment: round-343 executed three of its batches
+and the inventory below reflects that progress.</p>
+<p>Survey commands run 2026-05-21 against HEAD <code>b4f2193</code> (4
+remotes fetched, <code>HEAD..@{u}</code> empty — local is current).</p>
+<hr />
+<h2 id="current-state-inventory">1. Current-state inventory</h2>
+<h3 id="already-compliant-no-action">1.1 Already compliant (no
+action)</h3>
+<ul>
+<li><strong>Meta-repo top-level directories</strong> — all snake_case:
+<code>helix_code/</code>, <code>helix_qa/</code>,
+<code>helix_agent/</code>, <code>assets/</code>,
+<code>challenges/</code>, <code>containers/</code>,
+<code>security/</code>, <code>constitution/</code>,
+<code>dependencies/</code>, <code>docs/</code>, <code>scripts/</code>,
+<code>cli_agents/</code>, <code>cli_agents_resources/</code>,
+<code>cli_agents_configs/</code>, <code>mcp_servers/</code>,
+<code>github_pages_website/</code>, <code>panoptic/</code>,
+<code>awesome-ai-memory/</code>, <code>implementation_guide/</code>,
+<code>upstreams/</code> (the meta-root one). Earlier rounds
+(<code>15c54316</code>
+<code>Dependencies/</code>→<code>dependencies/</code>,
+<code>cc339fc0</code> <code>HelixCode/</code>→<code>helix_code/</code>,
+<code>73cb32d2</code> <code>HelixAgent/</code>, <code>5ad402bb</code>
+<code>HelixQA/</code>, <code>3f79f72a</code> <code>Containers/</code>,
+<code>af62a8cc</code> <code>Challenges/</code>+<code>Security/</code>,
+<code>a01c7c0e</code>/<code>17f84987</code> <code>cmd/</code> +
+<code>applications/</code>) brought the top two layers into
+compliance.</li>
+<li><strong>Go module paths</strong> — abstract
+(<code>digital.vasic.auth</code>, <code>dev.helix.agent</code>, etc.);
+they do NOT embed the directory name, so a directory rename does
+<strong>not</strong> change any module path. This materially lowers the
+risk class (see §3).</li>
+</ul>
+<h3 id="already-renamed-by-a1ea3c8-and-sibling-round-343-batches">1.2
+Already renamed by <code>a1ea3c8</code> and sibling round-343
+batches</h3>
+<p>Round 343 executed the safe (zero-go.mod-replace-consumer) leaf
+batches. All three confirmed present at new paths on disk and in
+<code>.gitmodules</code>:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Renamed</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a1ea3c8</code></td>
+<td><code>submodules/models</code> → <code>models</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>416fe8e</code></td>
+<td><code>submodules/debate_orchestrator</code> →
+<code>debate_orchestrator</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>e813b5c</code></td>
+<td>11 <code>vasic-digital/*</code> leaves: <code>auto_temp</code>,
+<code>claritas</code>, <code>doc_processor</code>,
+<code>gandalf_solutions</code>, <code>hyper_tune</code>,
+<code>i_llm</code>, <code>leak_hub</code>, <code>ouroborous</code>,
+<code>plinius_common</code>, <code>veritas</code>,
+<code>vision_engine</code></td>
+<td>11</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total already done by round-343: 13 owned-org leaf directory
+renames.</strong> Each carried atomic <code>.gitmodules</code> path +
+section-name updates, <code>.git/modules/...</code> gitdir-pointer
+fixes, and ledger-row updates;
+<code>go build ./internal/... ./cmd/...</code> exit 0 was captured per
+batch.</p>
+<h3 id="what-remains-categorised">1.3 What remains — categorised</h3>
+<p><strong>(A) Owned-org PascalCase submodule directories — 46
+remaining.</strong></p>
+<p><code>dependencies/HelixDevelopment/*</code> (8 PascalCase remain):
+<code>DocProcessor</code>, <code>HelixLLM</code>,
+<code>HelixMemory</code>, <code>HelixSpecifier</code>,
+<code>LLMOrchestrator</code>, <code>LLMProvider</code>,
+<code>LLMsVerifier</code>, <code>VisionEngine</code>.</p>
+<p><code>dependencies/vasic-digital/*</code> (38 PascalCase remain):
+<code>Agentic</code>, <code>Auth</code>, <code>BackgroundTasks</code>,
+<code>Benchmark</code>, <code>Cache</code>, <code>Concurrency</code>,
+<code>Config</code>, <code>Database</code>, <code>Document</code>,
+<code>Embeddings</code>, <code>EventBus</code>, <code>Filesystem</code>,
+<code>Formatters</code>, <code>I18n</code>, <code>Lazy</code>,
+<code>LLMOps</code>, <code>LLMOrchestrator</code>,
+<code>LLMProvider</code>, <code>MCP_Module</code>, <code>Memory</code>,
+<code>Messaging</code>, <code>Middleware</code>, <code>Models</code>,
+<code>Normalize</code>, <code>Observability</code>,
+<code>Optimization</code>, <code>Planning</code>, <code>Plugins</code>,
+<code>RAG</code>, <code>RateLimiter</code>, <code>Recovery</code>,
+<code>RedTeam</code>, <code>SelfImprove</code>,
+<code>SkillRegistry</code>, <code>Storage</code>,
+<code>Streaming</code>, <code>ToolSchema</code>, <code>TOON</code>,
+<code>VectorDB</code>, <code>Watcher</code>. (40 listed;
+<code>MCP_Module</code> and <code>I18n</code> are partially-snake/mixed
+— still non-compliant. Total non-compliant under
+<code>vasic-digital/</code> = 38 once
+<code>MCP_Module</code>→<code>mcp_module</code> and
+<code>I18n</code>→<code>i18n</code> and
+<code>TOON</code>→<code>toon</code> count.)</p>
+<p>ALL 46 are <strong>go.mod-entangled</strong>: every one is referenced
+by a
+<code>replace &lt;module&gt; =&gt; ../dependencies/&lt;Org&gt;/&lt;Dir&gt;</code>
+directive in <code>helix_code/go.mod</code> and/or
+<code>helix_agent/go.mod</code> and/or <code>helix_qa/go.mod</code>
+(verified by grep of all three consumer <code>go.mod</code> files). This
+is the HIGH-RISK class — a rename without an atomic
+<code>replace</code>-path edit breaks the consumer build.</p>
+<p><strong>(B) Parent dependency directory
+<code>HelixDevelopment/</code>.</strong> Per round-343 operator decision
+D-2, the target is <code>helix_development/</code>. Renaming the parent
+dir changes the <code>../dependencies/HelixDevelopment/...</code> path
+component in EVERY consumer <code>replace</code> directive that points
+into it (12 directives across <code>helix_code/go.mod</code> +
+<code>helix_agent/go.mod</code>) plus every <code>.gitmodules</code>
+<code>path =</code> line for a <code>HelixDevelopment/*</code> submodule
+(10 entries). <code>vasic-digital/</code> is KEPT (D-3: GitHub-org
+handle / proper-noun carve-out — it matches the literal org name).</p>
+<p><strong>(C) <code>Upstreams/</code> → <code>upstreams/</code> — 59
+directories.</strong> One inside the meta-repo’s own submodule trees and
+inside owned-org submodule trees. Each <code>Upstreams/</code> lives
+INSIDE a submodule’s git tree, so each rename is a commit in that
+submodule’s repo, then a <code>.gitmodules</code> pointer bump in the
+parent. The meta-root <code>upstreams/</code> is already lowercase.
+Note: <code>constitution/install_upstreams.sh</code> already supports
+BOTH <code>Upstreams/</code> and <code>upstreams/</code> (constitution
+commit <code>45d3678</code>), so this cluster does NOT break the
+upstream-install tooling mid-flight.</p>
+<p><strong>(D) <code>.gitmodules</code> entries.</strong> Path/name
+segments tracking (A)/(B)/(C): 46 owned-org submodule sections still
+carry PascalCase <code>path =</code> and <code>[submodule &quot;...&quot;]</code>
+name segments. Third-party submodule sections
+(<code>cli_agents/*</code>, <code>cli_agents_resources/*</code>,
+<code>dependencies/LLama_CPP</code>, <code>dependencies/Ollama</code>,
+<code>dependencies/HuggingFace_Hub</code>,
+<code>awesome-ai-memory</code>) are EXEMPT (see §2).</p>
+<p><strong>(E) Files.</strong> UPPERCASE tracked <code>.md</code> files
+are widespread (<code>COMPREHENSIVE_*.md</code>,
+<code>PHASE_*.md</code>, <code>FINAL_*.md</code>, etc. — ~120 at
+meta-root, dozens under <code>helix_code/</code>). Standard-metadata
+files (<code>README.md</code>, <code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, <code>CONSTITUTION.md</code>,
+<code>LICENSE</code>, <code>CONTINUATION.md</code>) are EXEMPT per
+§11.4.44 OUT-scope + de-facto convention. The remaining UPPERCASE_SNAKE
+report/plan <code>.md</code> files at meta-root and under
+<code>helix_code/</code> are technically in CONST-052 scope for files
+but are <strong>deferred to a final low-risk cosmetic phase</strong> (no
+build/import entanglement; reference cost is internal cross-links only)
+— see Phase 6.</p>
+<hr />
+<h2 id="exemption-list-stays-as-is-technology-preserving-carve-outs">2.
+Exemption list (stays as-is — technology-preserving carve-outs)</h2>
+<p>Per CONST-052 §11.4.29 the “does renaming break the technology?” test
+trumps the rule. EXEMPT:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Why exempt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cli_agents/*</code> (45+ submodules: <code>aider</code>,
+<code>crush</code>, <code>claude-code</code>, …)</td>
+<td>Third-party vendor submodules — keep upstream repo names. Mostly
+already lowercase anyway.</td>
+</tr>
+<tr>
+<td><code>cli_agents_resources/*</code> (<code>Awesome-AI-Agents</code>,
+<code>Awesome-AI-GPTs</code>, <code>Cheshire-Cat-Ai</code>,
+<code>GitHub-Awesome-Copilot</code>, <code>OpenAI-Cookbook</code>,
+<code>Taches-CC-Resources</code>)</td>
+<td>Third-party vendor submodules (<code>github/</code>,
+<code>openai/</code>, <code>e2b-dev/</code>, …) — keep upstream
+names.</td>
+</tr>
+<tr>
+<td><code>dependencies/LLama_CPP</code>,
+<code>dependencies/Ollama</code>,
+<code>dependencies/HuggingFace_Hub</code></td>
+<td>Third-party vendor submodules (<code>ggml-org/</code>,
+<code>ollama/</code>, <code>huggingface/</code>).</td>
+</tr>
+<tr>
+<td><code>awesome-ai-memory/</code></td>
+<td>Third-party (<code>topoteretes/</code>). Already lowercase.</td>
+</tr>
+<tr>
+<td><code>vasic-digital/</code> parent dir</td>
+<td>Literal GitHub-org handle — proper-noun carve-out (operator decision
+D-3, round 343).</td>
+</tr>
+<tr>
+<td><code>README.md</code>, <code>LICENSE</code>,
+<code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>CONSTITUTION.md</code>, <code>CRUSH.md</code>,
+<code>QWEN.md</code>, <code>CONTINUATION.md</code>, <code>NOTICE</code>,
+<code>VERSION</code>, <code>OWNERS</code></td>
+<td>Standard-metadata / governance files — conventional uppercase;
+§11.4.44 lists CLAUDE/AGENTS/README as OUT-scope; renaming breaks tool
+discovery (Claude Code, golangci, etc.).</td>
+</tr>
+<tr>
+<td>Language-mandated subtrees</td>
+<td>Java/Kotlin/Android/Apple/Swift/C# source roots inside
+<code>helix_code/applications/{android,ios,aurora-os,harmony-os}</code>
+— file/dir case follows the language convention; submodule root still
+follows our convention.</td>
+</tr>
+<tr>
+<td>Build artefacts</td>
+<td><code>node_modules/</code>, <code>.git/</code>,
+<code>target/</code>, <code>build/</code>, <code>bin/</code>,
+<code>__pycache__/</code> — tool-mandated names.</td>
+</tr>
+<tr>
+<td>Go package directories already lowercase</td>
+<td>Go requires lowercase import-path segments anyway;
+<code>internal/</code> packages are compliant.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note on third-party <code>Upstreams/</code>:</strong> the
+59-count in §1.3(C) includes <code>Upstreams/</code> dirs inside
+third-party submodule trees only where those trees are owned-by-us (the
+count was taken across owned submodules).
+<code>cli_agents/claude-code-source/Upstreams</code> —
+<code>claude-code-source</code> is the operator’s own private mirror
+(<code>gitlab.com:milos85vasic/ccode-private</code>) so its
+<code>Upstreams/</code> IS in scope. Pure third-party
+<code>Upstreams/</code> (if any) are exempt.</p>
+<hr />
+<h2 id="risk-map">3. Risk map</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Rename class</th>
+<th>Entanglement</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Owned-org leaf dir (A)</td>
+<td><code>.gitmodules</code> path + section name;
+<code>.git/modules/...</code> gitdir pointer; consumer
+<code>go.mod</code> <code>replace</code> path; coverage ledgers;
+governance-doc prose</td>
+<td><strong>HIGH</strong> — <code>replace</code>-path edit must be
+atomic with the rename or the consumer build breaks. NOT a module-path
+change (paths are abstract), so <code>go list -m</code> output is
+unchanged; the break is purely <code>replace</code> filesystem-path
+resolution.</td>
+</tr>
+<tr>
+<td>Parent dir
+<code>HelixDevelopment/</code>→<code>helix_development/</code> (B)</td>
+<td>ALL 12 <code>replace</code> directives pointing into it + ALL 10
+<code>HelixDevelopment/*</code> <code>.gitmodules</code>
+<code>path=</code> lines +
+<code>.git/modules/dependencies/HelixDevelopment/</code> tree</td>
+<td><strong>HIGHEST</strong> — single rename, broad atomic fan-out
+across 2 consumer go.mod files + 10 submodule sections. Must be one
+PWU.</td>
+</tr>
+<tr>
+<td><code>Upstreams/</code>→<code>upstreams/</code> (C)</td>
+<td>Inside each submodule’s own git tree; needs an inner-repo commit
+then a parent <code>.gitmodules</code> pointer bump</td>
+<td><strong>MEDIUM</strong> — 59× (inner commit + parent bump). Low risk
+per commit, high commit count. No go.mod entanglement. Tooling already
+dual-name-safe.</td>
+</tr>
+<tr>
+<td><code>.gitmodules</code> segment (D)</td>
+<td>Folds into (A)/(B) — same commit</td>
+<td>covered by A/B</td>
+</tr>
+<tr>
+<td>UPPERCASE <code>.md</code> files (E)</td>
+<td>Internal markdown cross-links only; no build/import impact</td>
+<td><strong>LOW</strong> — cosmetic; deferred to Phase 6.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>High-risk count: 47</strong> = 46 owned-org leaf dirs (A) + 1
+parent dir (B). Every one touches a Go <code>replace</code> path and
+therefore needs a build-verified atomic commit. None changes a Go
+<em>module path</em>, so none requires editing <code>import</code>
+statements in <code>.go</code> source — that is the one piece of good
+news that keeps this from being catastrophic.</p>
+<hr />
+<h2 id="phased-rename-plan-low-risk-high-risk">4. Phased rename plan
+(low-risk → high-risk)</h2>
+<p>Each phase = a set of fine-grained atomic rename tasks. Each task
+lists the rename, every reference updated atomically, and the test
+verification (§11.4.29 mandates each batch ships a regression test
+verifying every reference resolves + a full test-type run).</p>
+<h3 id="phase-0-pre-flight-tooling-no-renames">Phase 0 — Pre-flight
+tooling (no renames)</h3>
+<ul>
+<li><strong>Task 0.1</strong> — Author
+<code>scripts/const052_rename_leaf.sh &lt;org&gt; &lt;Old&gt; &lt;new&gt;</code>:
+performs <code>git mv</code>, rewrites <code>.gitmodules</code>
+(<code>path</code> + section name), fixes <code>.git/modules/.../</code>
+gitdir + worktree pointer, rewrites the matching <code>replace</code>
+line(s) in every consumer <code>go.mod</code>, updates
+<code>docs/coverage/COVERAGE_LEDGER.md</code> +
+<code>docs/coverage/ledger.md</code> rows. Idempotent dry-run flag.</li>
+<li><strong>Task 0.2</strong> — Author
+<code>scripts/const052_verify_refs.sh</code>: the regression test —
+greps the whole tree for the OLD path string (must be 0 hits outside
+historical CONTINUATION prose), runs <code>git submodule status</code>
+(all resolve), runs
+<code>cd helix_code &amp;&amp; go build ./... &amp;&amp; cd ../helix_agent &amp;&amp; go build ./...</code>
+(exit 0).</li>
+<li><strong>Verification:</strong> dry-run the tooling against an
+already-renamed leaf (<code>models</code>) — must report “no change
+needed”. Paired-mutation: plant a stale ref, assert the verifier
+FAILs.</li>
+</ul>
+<h3 id="phase-1-upstreamsupstreams-cluster-c-59-dirs-medium-no-go.mod">Phase
+1 — <code>Upstreams/</code>→<code>upstreams/</code> cluster (C), 59 dirs
+— MEDIUM, no go.mod</h3>
+<p>Independent of the go.mod work; can run first as a low-risk warm-up.
+Group into batches of ~10 submodules.</p>
+<ul>
+<li><strong>Task 1.x (per submodule)</strong> — inside
+<code>&lt;submodule&gt;/</code>:
+<code>git mv Upstreams upstreams</code>, commit + push the submodule’s 4
+remotes, then in the parent bump the <code>.gitmodules</code> pointer
+for that submodule in the SAME parent commit. Update any
+<code>install_upstreams</code> invocation docs that hardcode
+<code>Upstreams/</code> (tooling itself is already dual-name-safe).</li>
+<li><strong>References per task:</strong> submodule-internal git tree
+only + parent <code>.gitmodules</code> SHA pointer. No
+<code>replace</code>, no import, no config.</li>
+<li><strong>Verification:</strong> <code>install_upstreams</code> from
+the renamed submodule root resolves all recipes;
+<code>git remote -v | grep -c push</code> reports expected count;
+submodule status clean. Batch ships the §11.4.29 regression test.</li>
+</ul>
+<h3 id="phase-2-owned-org-leaf-dirs-with-exactly-one-consumer-a-subset-high-but-minimal-fan-out">Phase
+2 — owned-org leaf dirs with EXACTLY ONE consumer (A subset) — HIGH but
+minimal fan-out</h3>
+<p>The §1.3(A) <code>replace</code>-count showed most
+<code>vasic-digital/*</code> leaves have a single consumer
+<code>replace</code> directive. Batch ~8–10 per round.</p>
+<ul>
+<li><strong>Task 2.x (per dir)</strong> —
+e.g. <code>vasic-digital/Cache</code>→<code>cache</code>:
+<code>git mv submodules/cache submodules/cache</code>; rewrite the ONE
+<code>replace digital.vasic.cache =&gt; ../submodules/cache</code> line
+in <code>helix_agent/go.mod</code>; rewrite <code>.gitmodules</code>
+path + section name; fix <code>.git/modules/...</code> pointer; update
+coverage ledgers; sweep governance docs (<code>CLAUDE.md</code> §3.2
+prose, <code>docs/</code> references) — active references only,
+historical CONTINUATION prose left intact.</li>
+<li><strong>Verification per batch:</strong>
+<code>const052_verify_refs.sh</code> (0 stale refs, submodule status
+resolves, <code>go build ./...</code> exit 0 for every consumer); full
+test-type run on affected consumers (<code>make test</code> in
+<code>helix_agent</code>).</li>
+</ul>
+<h3 id="phase-3-owned-org-leaf-dirs-with-multiple-consumers-a-subset-high">Phase
+3 — owned-org leaf dirs with MULTIPLE consumers (A subset) — HIGH</h3>
+<p>Leaves referenced by 2–3 consumer <code>go.mod</code> files:
+<code>VisionEngine</code>, <code>LLMOrchestrator</code>,
+<code>DocProcessor</code>, <code>Memory</code>,
+<code>LLMsVerifier</code>, <code>HelixSpecifier</code>. Each rename must
+rewrite the <code>replace</code> line in EVERY consumer atomically.</p>
+<ul>
+<li><strong>Task 3.x (per dir)</strong> — same as Phase 2 but the
+<code>replace</code>-rewrite spans all consumers
+(e.g. <code>DocProcessor</code> appears in both
+<code>helix_code/go.mod</code> and <code>helix_agent/go.mod</code>). One
+PWU per dir.</li>
+<li><strong>Verification:</strong> build ALL consumers; full test-type
+run on each.</li>
+</ul>
+<h3 id="phase-4-mcp_module-i18n-toon-llmops-rag-normalisation-high">Phase 4
+— <code>MCP_Module</code>, <code>I18n</code>, <code>TOON</code>,
+<code>LLMOps</code>, <code>RAG</code> normalisation — HIGH</h3>
+<p>Mixed/acronym dirs needing operator-blessed snake_case targets (D-6
+<code>mcp_module</code>, D-7/D-8/D-9 already decided as
+<code>i18n</code>/<code>toon</code>/<code>rag</code> style). Same atomic
+procedure as Phase 2/3.</p>
+<h3 id="phase-5-parent-dir-helixdevelopmenthelix_development-b-highest">Phase
+5 — parent dir
+<code>HelixDevelopment/</code>→<code>helix_development/</code> (B) —
+HIGHEST</h3>
+<p>Single rename, broadest atomic fan-out. ONE PWU.</p>
+<ul>
+<li><strong>Task 5.1</strong> —
+<code>git mv dependencies/HelixDevelopment dependencies/helix_development</code>;
+rewrite ALL 12 <code>replace ../dependencies/HelixDevelopment/...</code>
+lines (across <code>helix_code/go.mod</code> +
+<code>helix_agent/go.mod</code>) to
+<code>.../helix_development/...</code>; rewrite ALL 10
+<code>HelixDevelopment/*</code> <code>.gitmodules</code>
+<code>path=</code> + section-name segments; move the
+<code>.git/modules/dependencies/HelixDevelopment/</code> subtree; sweep
+all governance docs + ledgers.</li>
+<li><strong>Verification:</strong> every consumer
+<code>go build ./...</code> exit 0; all 10 submodule statuses resolve;
+full test-type matrix run; §11.4.29 regression test.</li>
+</ul>
+<h3 id="phase-6-uppercase-.md-file-renames-e-low-cosmetic">Phase 6 —
+UPPERCASE <code>.md</code> file renames (E) — LOW, cosmetic</h3>
+<p>Rename non-exempt UPPERCASE report/plan <code>.md</code> files at
+meta-root and under <code>helix_code/</code> to snake_case. Batch by
+directory.</p>
+<ul>
+<li><strong>Task 6.x</strong> —
+<code>git mv COMPREHENSIVE_ANALYSIS_REPORT.md comprehensive_analysis_report.md</code>;
+grep + rewrite every internal markdown cross-link. NO build impact.</li>
+<li><strong>Verification:</strong> link-checker confirms no broken
+relative links.</li>
+</ul>
+<hr />
+<h2 id="test-coverage-required-per-batch-const-052-11.4.29-const-050b">5.
+Test coverage required per batch (CONST-052 §11.4.29 +
+CONST-050(B))</h2>
+<p>Every rename batch ships:</p>
+<ol type="1">
+<li><strong>Regression test</strong> —
+<code>scripts/const052_verify_refs.sh</code>: 0 stale OLD-path
+references outside historical prose; all
+<code>git submodule status</code> resolve; all consumer
+<code>go build ./...</code> exit 0.</li>
+<li><strong>Full test-type run</strong> — <code>make test</code> (unit)
+on every affected consumer module; integration/E2E where the renamed
+submodule is exercised; anti-bluff captured runtime evidence (paste exit
+codes + output).</li>
+<li><strong>Paired mutation</strong> — plant a known stale reference,
+assert the regression test reports FAIL (proves the test is not a
+bluff).</li>
+</ol>
+<hr />
+<h2 id="parallel-session-coordination-risk-honest-note">6.
+Parallel-session coordination risk (honest note)</h2>
+<p>Round-343 batch-1/2/3 (<code>a1ea3c8</code>, <code>416fe8e</code>,
+<code>e813b5c</code>) were executed by a prior session. Two concrete
+risks for the next executor:</p>
+<ul>
+<li><strong>Stale local state.</strong> Per CONST-060 the first git
+action MUST be <code>git fetch --all --prune</code> +
+<code>git log HEAD..@{u}</code> + recursive submodule fetch. Acting on a
+stale tree risks re-renaming an already-renamed leaf or colliding on
+<code>.gitmodules</code>. (At the time of writing,
+<code>HEAD..@{u}</code> is empty — local is current.)</li>
+<li><strong><code>.gitmodules</code> is a single-file collision
+hotspot.</strong> Every phase edits <code>.gitmodules</code>; two
+parallel sessions WILL conflict there. Recommendation: serialise the
+rename programme to ONE session, or partition strictly by phase with an
+explicit hand-off, and always fetch-first per §11.4.71/CONST-060 before
+each batch.</li>
+<li><strong>Submodule-internal commits (Phase 1 cluster C)</strong> land
+in separate repos with their own 4-remote push; a parent
+<code>.gitmodules</code> pointer bump MUST NOT be pushed until the
+submodule push is accepted by all remotes (per the prior plan’s
+§7.4).</li>
+</ul>
+<hr />
+<h2 id="summary">7. Summary</h2>
+<ul>
+<li><strong>Rename candidates remaining:</strong> 46 owned-org leaf dirs
+(A) + 1 parent dir (B) + 59 <code>Upstreams/</code> dirs (C) + N
+UPPERCASE <code>.md</code> files (E, deferred cosmetic). Core structural
+total = <strong>106</strong> dir-level renames.</li>
+<li><strong>Already done by <code>a1ea3c8</code> + siblings:</strong> 13
+owned-org leaf renames.</li>
+<li><strong>Phases:</strong> 7 (Phase 0 pre-flight through Phase 6
+cosmetic).</li>
+<li><strong>High-risk (go.mod-<code>replace</code>-entangled):</strong>
+47 (46 leaves + 1 parent).</li>
+<li><strong>Good news:</strong> Go module paths are abstract — no
+<code>.go</code> <code>import</code> statement edits required; the
+entanglement is <code>replace</code> filesystem paths only.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="architecture-model-access-system-index">Architecture —
+Model-Access System (Index)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>DESIGN index — IMPLEMENTED vs PLANNED clearly separated in each
+doc</td>
+</tr>
+<tr>
+<td>Maintainer</td>
+<td>DOCUMENTATION subagent (READ-ONLY on code)</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>CONST-036 (LLMsVerifier single source of truth), CONST-040
+(capabilities from <code>VerificationResult</code>), §11.4
+anti-bluff</td>
+</tr>
+</tbody>
+</table>
+<p>This folder documents the <strong>model-access + provider-exposure +
+CLI-bridge</strong> system: how a recognized API key turns into the
+WORKING models a user can use, how every provider/ensemble/
+HelixLLM/CLI-agent is exposed under one uniformly-named root, and how
+the CLI-bridge proxies prompts through real CLI binaries.</p>
+<h2 id="documents-this-index">Documents (this index)</h2>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 41%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>What it covers</th>
+<th>Primary sources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./model-access-architecture.md"><code>model-access-architecture.md</code></a></td>
+<td>Mermaid diagrams: <strong>(A)</strong> key-recognition → verifier →
+working-model funnel (SP1); <strong>(B)</strong> unified catalog joining
+ensemble + HelixLLM + each provider + each verified model + each
+CLI-agent under one root (SP2/SP4) with the
+<code>ensemble</code>/<code>helixllm</code>/<code>&lt;provider&gt;/&lt;model&gt;</code>/<code>cli/&lt;agent&gt;/&lt;model&gt;</code>
+naming; <strong>(C)</strong> the CLI-bridge selection + proxy sequence
+(PRIMARY system-installed → FALLBACK submodule-built → proxy → parse →
+power-features). Includes a node-by-node IMPLEMENTED-vs-PLANNED
+provenance ledger.</td>
+<td>SP1/SP2/SP4 plans; analyses B/C/D; master roadmap</td>
+</tr>
+<tr>
+<td><a href="./model-access-schema.sql"><code>model-access-schema.sql</code></a></td>
+<td>DESIGN SQL DDL for the data model: <code>providers</code>,
+<code>models</code>, <code>verification_results</code>,
+<code>capabilities</code>, <code>catalog_entries</code>,
+<code>cli_agent_bridges</code>, <code>api_key_sources</code> + a
+<code>working_models</code> view. Each column tagged
+<code>SOT=verifier</code> (CONST-036/040 verifier-owned) or
+<code>SOT=local</code>. Grounded in the real
+<code>VerifiedModel</code>/<code>VerificationResult</code> Go
+structs.</td>
+<td><code>helix_code/internal/verifier/types.go</code>;
+<code>submodules/llms_verifier/.../llmverifier/models.go</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Other files already present in this directory
+(<code>CONST-051-tension.md</code>,
+<code>CONST046-i18n-overview.md</code>) predate this index and cover
+unrelated concerns.</p>
+</blockquote>
+<h2 id="honesty-note-11.4-11.4.123">Honesty note (§11.4 /
+§11.4.123)</h2>
+<p>Both documents describe the <strong>target architecture</strong>.
+They explicitly separate <strong>IMPLEMENTED</strong> components (real
+code, cited <code>file:line</code>) from <strong>PLANNED</strong>
+components (specified in SP1/SP2/SP4 but not yet built — no captured
+runtime evidence). A PLANNED node is a design intent, not a claim of
+working software. The runtime-evidence bar (§11.4.5 / §11.4.69 /
+§11.4.107) is met only by the tests/Challenges each SP plan requires at
+execution time — not by these diagrams or this DDL.</p>
+<p>Quick orientation on current state (from the analysis passes):</p>
+<ul>
+<li><strong>IMPLEMENTED today:</strong> real LLMsVerifier REST
+consumption (<code>verifier/client.go</code>,
+<code>adapter.go:183-224</code>); viper key binding
+(<code>config.go:307-345</code>); the CLI-exec primitive
+(<code>base.go:120-138</code>); config re-export + static
+<code>Validate()</code> (<code>unified_cli_generator.go</code>).</li>
+<li><strong>DEAD/UNWIRED (wire, don’t delete — §11.4.124):</strong>
+<code>secrets.LoadAPIKeys</code> (<code>loader.go:30</code>).</li>
+<li><strong>Known bluffs to remediate:</strong> CLI shows failed/pending
+models (D-2), <code>/v1/completion/models</code> hardcoded 3-model list
+(D-1), hardcoded provider lists (D-5/CONST-036), <code>qwencode</code>/
+<code>instance_manager</code> CLI stubs (D-6).</li>
+<li><strong>PLANNED (not built):</strong> the
+<code>GetWorkingModels</code> filter, key-presence gate, unified
+<code>GET /v1/catalog</code>, HelixLLM root promotion, the
+<code>CLIAgentProvider</code> adapter,
+<code>replace dev.helix.agent</code> wiring (D-7), filesystem INSTALL +
+LIVE post-install validation.</li>
+</ul>
+<h2 id="upstream-references">Upstream references</h2>
+<ul>
+<li>SP plans:
+<code>docs/superpowers/specs/plans/2026-06-10-SP{1,2,4}-*.md</code></li>
+<li>Analyses:
+<code>docs/superpowers/specs/analysis/2026-06-10-{B,C,D}-*.md</code></li>
+<li>Master roadmap:
+<code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code></li>
+</ul>
+<blockquote>
+<p>Per CONST-066 / §11.4.65, the <code>.md</code> documents should ship
+synchronized <code>.html</code>/<code>.pdf</code> siblings at
+release-prep. Those exports are NOT generated by this READ-ONLY
+documentation pass.</p>
+</blockquote>
+</body>
+</html>

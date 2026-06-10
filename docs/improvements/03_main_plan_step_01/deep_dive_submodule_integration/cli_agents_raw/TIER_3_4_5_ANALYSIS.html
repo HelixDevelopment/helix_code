@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>TIER_3_4_5_ANALYSIS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">TIER_3_4_5_ANALYSIS</h1>
+</header>
+<h1 id="tier-3-5-cli-agents-analysis">Tier 3-5 CLI Agents Analysis</h1>
+<blockquote>
+<p><strong>Date</strong>: 2026-04-04 <strong>Total Agents</strong>: 35+
+additional agents</p>
+</blockquote>
+<h2 id="tier-3-notableniche-agents">Tier 3: Notable/Niche Agents</h2>
+<h3 id="amazon-q">Amazon Q</h3>
+<ul>
+<li><strong>Source</strong>: AWS official CLI agent</li>
+<li><strong>Language</strong>: Rust</li>
+<li><strong>Features</strong>: AWS integration, cloud-native</li>
+<li><strong>Priority</strong>: MEDIUM</li>
+</ul>
+<h3 id="claude-plugins">Claude Plugins</h3>
+<ul>
+<li><strong>Source</strong>: Claude Code plugin system</li>
+<li><strong>Language</strong>: TypeScript</li>
+<li><strong>Features</strong>: Plugin architecture, extensibility</li>
+<li><strong>Priority</strong>: MEDIUM</li>
+</ul>
+<h3 id="claude-squad">Claude Squad</h3>
+<ul>
+<li><strong>Source</strong>: Multi-agent coordination</li>
+<li><strong>Language</strong>: TypeScript</li>
+<li><strong>Features</strong>: Agent swarms, team coordination</li>
+<li><strong>Priority</strong>: MEDIUM</li>
+</ul>
+<h3 id="open-interpreter">Open Interpreter</h3>
+<ul>
+<li><strong>Source</strong>: OpenAI interpreter alternative</li>
+<li><strong>Language</strong>: Python</li>
+<li><strong>Features</strong>: Code execution, data analysis</li>
+<li><strong>Priority</strong>: MEDIUM</li>
+</ul>
+<h3 id="plandex">Plandex</h3>
+<ul>
+<li><strong>Source</strong>: Task planning agent</li>
+<li><strong>Language</strong>: Go</li>
+<li><strong>Features</strong>: Task decomposition, planning</li>
+<li><strong>Priority</strong>: MEDIUM</li>
+</ul>
+<h3 id="ollama-code">Ollama Code</h3>
+<ul>
+<li><strong>Source</strong>: Ollama integration</li>
+<li><strong>Language</strong>: Python</li>
+<li><strong>Features</strong>: Local model support</li>
+<li><strong>Priority</strong>: LOW (HelixAgent already supports
+Ollama)</li>
+</ul>
+<h2 id="tier-4-specialized-agents">Tier 4: Specialized Agents</h2>
+<h3 id="git-mcp">Git MCP</h3>
+<ul>
+<li><strong>Source</strong>: Git Model Context Protocol</li>
+<li><strong>Language</strong>: TypeScript</li>
+<li><strong>Features</strong>: Git operations via MCP</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h3 id="postgres-mcp">Postgres MCP</h3>
+<ul>
+<li><strong>Source</strong>: PostgreSQL MCP server</li>
+<li><strong>Language</strong>: TypeScript</li>
+<li><strong>Features</strong>: Database operations</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h3 id="mistral-code">Mistral Code</h3>
+<ul>
+<li><strong>Source</strong>: Mistral AI integration</li>
+<li><strong>Language</strong>: Python</li>
+<li><strong>Features</strong>: Mistral model support</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h3 id="qwen-code">Qwen Code</h3>
+<ul>
+<li><strong>Source</strong>: Alibaba Qwen integration</li>
+<li><strong>Language</strong>: Python</li>
+<li><strong>Features</strong>: Qwen model support</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h3 id="octogen">Octogen</h3>
+<ul>
+<li><strong>Source</strong>: Code generation agent</li>
+<li><strong>Language</strong>: Python</li>
+<li><strong>Features</strong>: Multi-agent code generation</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h3 id="nanocoder">Nanocoder</h3>
+<ul>
+<li><strong>Language</strong>: TypeScript</li>
+<li><strong>Features</strong>: Lightweight coding</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h3 id="taskweaver">Taskweaver</h3>
+<ul>
+<li><strong>Source</strong>: Microsoft agent framework</li>
+<li><strong>Language</strong>: Python</li>
+<li><strong>Features</strong>: Data analytics focus</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h3 id="opencode-cli">Opencode CLI</h3>
+<ul>
+<li><strong>Language</strong>: TypeScript</li>
+<li><strong>Features</strong>: VS Code extension + CLI</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h3 id="fauxpilot">Fauxpilot</h3>
+<ul>
+<li><strong>Source</strong>: GitHub Copilot alternative</li>
+<li><strong>Language</strong>: Python</li>
+<li><strong>Features</strong>: Self-hosted completion</li>
+<li><strong>Priority</strong>: LOW</li>
+</ul>
+<h2 id="tier-5-experimentalminimal">Tier 5: Experimental/Minimal</h2>
+<ul>
+<li>AIChat, AIAgent, AIChat LLM Functions</li>
+<li>Codai, Codename Goose, Codex Skills</li>
+<li>Conduit, Copilot CLI, Crush</li>
+<li>DeepSeek CLI Youkpan, Get Shit Done</li>
+<li>Mobile Agent, Multiagent Coding</li>
+<li>Noi, Shai, Snow CLI, Superset</li>
+<li>UI/UX Pro Max, Warp, X-CMD, Xela CLI</li>
+</ul>
+<h2 id="summary">Summary</h2>
+<ul>
+<li><strong>Tier 3</strong>: 10 agents (Notable features)</li>
+<li><strong>Tier 4</strong>: 10 agents (Specialized use cases)</li>
+<li><strong>Tier 5</strong>: 15+ agents (Experimental/minimal)</li>
+</ul>
+<h2 id="porting-priority">Porting Priority</h2>
+<ol type="1">
+<li><strong>HIGH</strong>: Tier 1 + Tier 2 agents (already
+analyzed)</li>
+<li><strong>MEDIUM</strong>: Tier 3 agents (amazon-q, claude-plugins,
+open-interpreter)</li>
+<li><strong>LOW</strong>: Tier 4 agents (specialized tools)</li>
+<li><strong>VERY LOW</strong>: Tier 5 agents (minimal overlap)</li>
+</ol>
+<h2 id="recommendation">Recommendation</h2>
+<p>Focus on <strong>Tier 1 and Tier 2</strong> features first (already
+done or in progress). Tier 3-5 agents have significant overlap with
+features already identified from Tier 1-2 agents.</p>
+</body>
+</html>

@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-5-foundation-cleanup</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-5-foundation-cleanup</h1>
+</header>
+<h1 id="phase-1.5-foundation-cleanup-implementation-plan">Phase 1.5 —
+Foundation Cleanup Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<blockquote>
+<p><strong>Programme position:</strong> Phase 1.5 is the bridge between
+Phase 1 (CLI-Agent Fusion features F01–F20, complete at commit
+<code>046d802</code>) and Phase 2 (other CLI agents). It is NOT
+optional. The audit performed by the user revealed structural debt that,
+if left unresolved, would multiply across every Phase 2/3 submodule we
+touch (duplicate submodules at multiple paths, ~60 cli_agents/ entries
+trapped under HelixAgent including a circular self-reference, three
+competing <code>Documentation/</code> trees, eight <code>.env</code>
+files with API-key duplication, ad-hoc directory casing). Phase 1.5 does
+the surgery once so every later phase compounds clean.</p>
+</blockquote>
+<p><strong>Goal:</strong> Land a verifiably-clean, deduplicated,
+snake-cased, anti-bluff-anchored repository topology with a single
+canonical secret-loading path (<code>api_keys.sh</code> →
+<code>.env</code> fallback), one <code>docs/</code> tree per repo,
+root-level cli_agents/ as the single home for all CLI-agent submodules,
+and a Phase 1.5 Challenge harness that fails any future regression.</p>
+<p><strong>Scope (12 work packages, ~110 tasks total):</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>WP</th>
+<th>Title</th>
+<th>Tasks</th>
+<th>Deepest risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WP1</td>
+<td>Inventory + foundation safety</td>
+<td>5</td>
+<td>accidental destructive act before snapshot</td>
+</tr>
+<tr>
+<td>WP2</td>
+<td>Submodule restructuring</td>
+<td>~67</td>
+<td>brick the meta-repo’s submodule tree mid-move</td>
+</tr>
+<tr>
+<td>WP3</td>
+<td>Submodule deduplication</td>
+<td>5</td>
+<td>break consumers expecting old paths</td>
+</tr>
+<tr>
+<td>WP4</td>
+<td>API key loader (bash + Go)</td>
+<td>6</td>
+<td>inconsistent loader behaviour across repos</td>
+</tr>
+<tr>
+<td>WP5</td>
+<td><code>.env</code> API key dedup (USER GATE)</td>
+<td>4</td>
+<td>destructive secret removal without verified loader</td>
+</tr>
+<tr>
+<td>WP6</td>
+<td>Docs consolidation</td>
+<td>3</td>
+<td>broken internal links across docs</td>
+</tr>
+<tr>
+<td>WP7</td>
+<td>Snake_case directory normalization</td>
+<td>~10–20</td>
+<td>case-collision on case-insensitive FS</td>
+</tr>
+<tr>
+<td>WP8</td>
+<td>Anti-bluff Constitution propagation</td>
+<td>3</td>
+<td>repos drift from canonical anchors</td>
+</tr>
+<tr>
+<td>WP9</td>
+<td>Reference updates (catch-up sweep)</td>
+<td>2</td>
+<td>stale references to old paths</td>
+</tr>
+<tr>
+<td>WP10</td>
+<td>Rebuild + validation</td>
+<td>8</td>
+<td>undetected build/test regression</td>
+</tr>
+<tr>
+<td>WP11</td>
+<td>Phase 1.5 Challenge harness</td>
+<td>4</td>
+<td>bluffy harness (passes without evidence)</td>
+</tr>
+<tr>
+<td>WP12</td>
+<td>Commit + push everything</td>
+<td>5</td>
+<td>push-order dependency cascade</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Success criteria (each independently
+verifiable):</strong></p>
+<ol type="1">
+<li><code>git submodule status --recursive</code> reports each canonical
+URL at exactly one path (Phase A of harness).</li>
+<li><code>scripts/load_api_keys.sh</code> and
+<code>internal/secrets/loader.go</code> both source
+<code>~/api_keys.sh</code> when present, else fall back to local
+<code>.env</code>, else warn no-op (Phase B).</li>
+<li>No <code>Documentation/</code> directory remains anywhere in tree;
+each repo has its content under <code>docs/</code> (Phase C).</li>
+<li>Every directory under tracked content (allowlist applied) matches
+<code>^[a-z][a-z0-9_]*$</code> or is a known repo-name root (Phase
+D).</li>
+<li>CONST-035 + Article XI §11.9 anchor present in every Helix*
+submodule’s <code>CONSTITUTION.md</code> (Phase E).</li>
+<li><code>cd HelixCode &amp;&amp; make verify-compile &amp;&amp; make test</code>
+passes; <code>internal/tools/git</code> mock drift fixed (T10.08).</li>
+<li>All four meta-repo remotes (origin/github/gitlab/upstream) advanced
+to the same SHA; each Helix* submodule pushed to all its configured
+remotes.</li>
+<li>Anti-bluff smoke command at the bottom of this plan returns
+<code>clean</code> after every WP closes.</li>
+</ol>
+<p><strong>Tech Stack:</strong> bash (POSIX-portable),
+<code>git submodule</code>, <code>git mv</code>,
+<code>git rm --cached</code>, GNU sed/grep, ripgrep (<code>rg</code>),
+Go 1.26 (for the loader and harness), testify, GNU Make. <strong>Zero
+new external dependencies.</strong></p>
+<p><strong>Working directory:</strong>
+<code>/run/media/milosvasic/DATA4TB/Projects/HelixCode</code> (meta-repo
+root). Inner Go module commands run from <code>helix_code/</code>.</p>
+<p><strong>Anti-bluff smoke (run at the END of every task):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  helix_code/internal helix_code/cmd <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;BLUFF FOUND&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<hr />
+<h2 id="cross-cutting-constraints">Cross-cutting constraints</h2>
+<ul>
+<li><strong>CONST-035 / Article XI §11.9 (Anti-Bluff Forensic
+Anchor):</strong> every PASS in this plan must carry positive runtime
+evidence. Metadata-only / configuration-only / absence-of-error /
+grep-based PASS without runtime evidence is a critical defect. The Phase
+1.5 Challenge harness (WP11) is the enforcement gate.</li>
+<li><strong>CONST-042 (No-Secret-Leak):</strong> WP4 + WP5 are the
+practical implementation. <code>~/api_keys.sh</code> (mode 0600, listed
+in user’s home, never committed) is the canonical key store; local
+<code>.env</code> files (mode 0600, listed in <code>.gitignore</code>)
+hold non-overlapping config only after WP5.</li>
+<li><strong>CONST-043 (No-Force-Push):</strong> every
+<code>git push</code> in this plan is non-force. WP12 push order is
+deepest-first to avoid forcing parents to catch up. Any
+<code>--force</code> / <code>--force-with-lease</code> requires explicit
+per-operation user authorisation (none granted here).</li>
+<li><strong>CONST-033 (Host Power Management — Hard Ban):</strong> no
+<code>systemctl suspend</code>, <code>shutdown</code>,
+<code>reboot</code>, <code>loginctl suspend</code>, or any host-power
+command appears anywhere in this plan or any artefact it produces.</li>
+<li><strong>No CI/CD pipelines (Rule 1):</strong> WP11 harness is a Go
+program invoked manually or via Makefile; no GitHub Actions / GitLab CI
+artefact is created.</li>
+</ul>
+<hr />
+<h2 id="risks-read-these-before-starting-any-wp">Risks (read these
+BEFORE starting any WP)</h2>
+<ol type="1">
+<li><strong>WP2 — submodule-tree fragility.</strong> ~60 sequential
+<code>git submodule deinit</code> + <code>git rm --cached</code> +
+<code>git submodule add</code> operations. One missed step can leave
+dangling gitlinks that break
+<code>git submodule update --init --recursive</code> for fresh clones.
+<strong>Mitigation:</strong> WP1.T01.02 captures a full snapshot to
+<code>docs/improvements/p1-5-snapshot-pre.md</code>; one submodule per
+commit; verify each commit with <code>git submodule status</code> before
+moving to the next.</li>
+<li><strong>WP3 — consumer breakage.</strong> Removing the
+HelixAgent-internal copy of e.g. LLMsVerifier may break code that does
+<code>import &quot;../../helix_agent/LLMsVerifier/...&quot;</code> or
+<code>cd helix_agent/LLMsVerifier &amp;&amp; make</code>.
+<strong>Mitigation:</strong> comprehensive <code>rg</code> for the old
+path BEFORE removal; build-test the affected repo after each dedup;
+rollback recipe documented per-WP.</li>
+<li><strong>WP5 — destructive secret removal.</strong> Removing keys
+from <code>.env</code> without a verified loader leaves the user unable
+to run anything. <strong>Mitigation:</strong> explicit USER GATE at
+T05.01 (the agent stops and asks); per-key dry-run report listing
+exactly which keys-to-remove and which file each is in; only proceed on
+user OK.</li>
+<li><strong>WP7 — case-rename on case-insensitive filesystems.</strong>
+macOS default APFS is case-insensitive; <code>git mv Foo foo</code>
+looks like a no-op. <strong>Mitigation:</strong> all renames done on
+Linux (the working host is Linux 6.12 per env); document that
+contributors on macOS must use
+<code>git config core.ignorecase false</code> and clone fresh after
+Phase 1.5 lands.</li>
+<li><strong>WP12 — push-order cascade.</strong> Pushing a parent before
+its child means the parent points at a SHA the remote doesn’t have; the
+push succeeds but other clones break. <strong>Mitigation:</strong>
+deepest-first push order (cli_agents/<NAME> → helix_agent/HelixQA →
+HelixAgent → helix_qa root → meta-repo); per-remote
+<code>git ls-remote</code> verification at T12.05.</li>
+</ol>
+<hr />
+<h2 id="estimated-effort">Estimated effort</h2>
+<p>3–4 focused sessions if executed cleanly. WP2 alone is ~60 mechanical
+commits; budget one full session for WP2 + WP3. Budget one session for
+WP4–WP6 (loader + .env dedup gated on user, docs merge). Budget one
+session for WP7 + WP8 + WP9 (normalization + anchor cascade + reference
+catch-up). Budget one session for WP10 + WP11 + WP12 (rebuild/validate +
+harness + push).</p>
+<hr />
+<h2 id="open-issues-acknowledged-as-tbd-during-execution">Open issues
+acknowledged as TBD-during-execution</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Why deferred</th>
+<th>Resolution point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mcp_servers canonical location</td>
+<td>unclear whether root <code>mcp_servers/</code> exists yet, or
+whether to promote from one of the two HelixAgent locations</td>
+<td>T03.05 picks at execution time; record in evidence</td>
+</tr>
+<tr>
+<td>Example_Projects/ submodule count</td>
+<td>not enumerated in inventory; deletion may be ~40 separate
+<code>git rm --cached</code> operations</td>
+<td>T02.64 enumerates first, then deletes</td>
+</tr>
+<tr>
+<td>WP2 collision count</td>
+<td>overlap between Example_Projects/ contents and root cli_agents/
+unknown until snapshot</td>
+<td>T02.65 reconciles per-collision</td>
+</tr>
+<tr>
+<td>WP7 directory count</td>
+<td>non-conforming dirs not pre-counted across all submodules</td>
+<td>T07.01 inventories first, T07.02..T07.NN per finding</td>
+</tr>
+<tr>
+<td>Pre-existing internal/tools/git mock drift</td>
+<td>known broken since F09; specific drift unknown</td>
+<td>T10.08 reads the failing build, fixes mock to match interface</td>
+</tr>
+<tr>
+<td>Per-submodule remote count</td>
+<td>varies (Challenges has 1, meta has 4, others between)</td>
+<td>T12.02 reads each <code>.git/config</code> at push time</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cross-cutting-conventions-for-every-task">Cross-cutting
+conventions for every task</h2>
+<ul>
+<li><p><strong>Branch:</strong> stay on <code>main</code>. Phase 1.5 is
+foundation; per-task feature branches would multiply the ~110-task
+overhead.</p></li>
+<li><p><strong>Commit format:</strong></p>
+<pre><code>&lt;type&gt;(P1.5-&lt;WP&gt;-T&lt;NN&gt;): &lt;subject&gt;
+
+&lt;short description&gt;
+
+Phase: P1.5
+WP:    &lt;WP&gt; — &lt;title&gt;
+Task:  P1.5-&lt;WP&gt;-T&lt;NN&gt;
+Evidence: &lt;pasted command output OR pointer to docs/improvements/07_phase_1_5_evidence.md&gt;
+
+Co-Authored-By: Claude Opus 4.7 (1M context) &lt;noreply@anthropic.com&gt;</code></pre></li>
+<li><p><strong>Push:</strong> per WP12 — deepest-first, all configured
+remotes per repo, non-force only.</p></li>
+<li><p><strong>PROGRESS.md:</strong> every task closes by advancing
+<code>docs/improvements/PROGRESS.md</code>.</p></li>
+<li><p><strong>Anti-bluff smoke:</strong> run after every task; commit
+blocks if it prints <code>BLUFF FOUND</code>.</p></li>
+</ul>
+<hr />
+<h1 id="work-package-1-inventory-foundation-safety-5-tasks">Work Package
+1 — Inventory + foundation safety (5 tasks)</h1>
+<p><strong>Goal:</strong> Make Phase 1.5 reversible. Capture the
+pre-state in enough detail that any later mistake can be diagnosed and
+rolled back without blind reconstruction.</p>
+<h2 id="p1.5-wp1-t01.01-fetch-pull-every-submodule-recursively">P1.5-WP1-T01.01
+— Fetch + pull every submodule recursively</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span> <span class="at">--remote</span> <span class="at">--jobs</span> 8 <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tee</span> /tmp/p1-5-fetch.log</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule foreach <span class="at">--recursive</span> <span class="st">&#39;git fetch --all --prune --tags 2&gt;&amp;1&#39;</span> <span class="kw">|</span> <span class="fu">tee</span> <span class="at">-a</span> /tmp/p1-5-fetch.log</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule status <span class="at">--recursive</span> <span class="kw">|</span> <span class="fu">tee</span> /tmp/p1-5-initial-shas.txt</span></code></pre></div>
+<p>Record initial gitlink SHAs into
+<code>docs/improvements/p1-5-snapshot-pre.md</code> § “Initial
+SHAs”.</p>
+<p>Commit:
+<code>chore(P1.5-WP1-T01.01): record initial submodule SHAs pre-cleanup</code>.</p>
+<h2 id="p1.5-wp1-t01.02-snapshot-full-submodule-tree-state">P1.5-WP1-T01.02
+— Snapshot full submodule tree state</h2>
+<p>Write <code>docs/improvements/p1-5-snapshot-pre.md</code> with: -
+Full <code>.gitmodules</code> content of meta-repo + HelixAgent + every
+other parent that has one. -
+<code>git submodule status --recursive</code> output. -
+<code>git status</code> per submodule (a one-pass <code>foreach</code>).
+- The 5 duplicate sets and their decided canonical paths (from
+inventory). - The full list of cli_agents/<NAME> entries in HelixAgent
+(~60). - Rollback recipe: how to restore from this snapshot if WP2
+breaks.</p>
+<p>Commit:
+<code>docs(P1.5-WP1-T01.02): pre-cleanup snapshot for rollback reference</code>.</p>
+<h2 id="p1.5-wp1-t01.03-verify-all-submodule-remotes-are-reachable">P1.5-WP1-T01.03
+— Verify all submodule remotes are reachable</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">-f</span> .gitmodules <span class="at">--get-regexp</span> <span class="st">&#39;^submodule\..*\.url$&#39;</span> <span class="dt">\</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{print $2}&#39;</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-u</span> <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="va">url</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">printf</span> <span class="st">&quot;%-80s &quot;</span> <span class="st">&quot;</span><span class="va">$url</span><span class="st">&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">git</span> ls-remote <span class="st">&quot;</span><span class="va">$url</span><span class="st">&quot;</span> HEAD <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> OK <span class="kw">||</span> <span class="bu">echo</span> UNREACHABLE</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span> <span class="kw">|</span> <span class="fu">tee</span> docs/improvements/p1-5-remote-reachability.md</span></code></pre></div>
+<p>Same for HelixAgent’s <code>.gitmodules</code>. Any UNREACHABLE
+blocks WP2 for that submodule until resolved (out-of-scope fix recorded
+in PROGRESS.md parking lot).</p>
+<p>Commit:
+<code>docs(P1.5-WP1-T01.03): verify submodule remote reachability</code>.</p>
+<h2 id="p1.5-wp1-t01.04-construct-commit-the-deduplication-decision-list">P1.5-WP1-T01.04
+— Construct + commit the deduplication decision list</h2>
+<p>Write <code>docs/improvements/p1-5-dedup-decisions.md</code>:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Canonical path</th>
+<th>Removed paths</th>
+<th>Consumers to update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLMsVerifier</td>
+<td><code>submodules/llms_verifier</code></td>
+<td><code>helix_agent/LLMsVerifier</code></td>
+<td>helix_agent/Makefile, helix_agent/scripts/*, helix_agent/internal
+references</td>
+</tr>
+<tr>
+<td>containers</td>
+<td><code>containers/</code></td>
+<td>3 nested copies (TBD enumerate)</td>
+<td>TBD per consumer</td>
+</tr>
+<tr>
+<td>Security</td>
+<td><code>security/</code></td>
+<td>2 nested copies (TBD enumerate)</td>
+<td>TBD per consumer</td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td><code>helix_qa/</code></td>
+<td><code>helix_agent/HelixQA</code></td>
+<td>helix_agent/Makefile, HelixAgent test wiring</td>
+</tr>
+<tr>
+<td>mcp_servers</td>
+<td>TBD at T03.05</td>
+<td>TBD</td>
+<td>TBD</td>
+</tr>
+</tbody>
+</table>
+<p>Commit:
+<code>docs(P1.5-WP1-T01.04): submodule deduplication decisions</code>.</p>
+<h2 id="p1.5-wp1-t01.05-bootstrap-evidence-advance-progress">P1.5-WP1-T01.05
+— Bootstrap evidence + advance PROGRESS</h2>
+<p>Create <code>docs/improvements/07_phase_1_5_evidence.md</code> with
+section headers for WP1..WP12. Update
+<code>docs/improvements/PROGRESS.md</code>: active phase → P1.5; active
+WP → WP1; advance task list.</p>
+<p>Commit:
+<code>docs(P1.5-WP1-T01.05): bootstrap Phase 1.5 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h1 id="work-package-2-submodule-restructuring-67-tasks">Work Package 2
+— Submodule restructuring (~67 tasks)</h1>
+<p><strong>Goal:</strong> Move every cli_agents/<NAME> submodule from
+<code>helix_agent/cli_agents/</code> to root-level
+<code>cli_agents/</code>. Eliminate the circular
+<code>helix_agent/cli_agents/HelixCode</code> entry. Move
+<code>cli_agents_configs/</code> (plain content) and
+<code>Example_Resources/</code> (rename to
+<code>cli_agents_resources/</code>). Delete
+<code>Example_Projects/</code> after collision reconciliation.</p>
+<h2 id="p1.5-wp2-t02.01-delete-circular-cli_agentshelixcode-entry">P1.5-WP2-T02.01
+— Delete circular <code>cli_agents/HelixCode</code> entry</h2>
+<p>The meta-repo cannot be its own grandchild. From
+<code>helix_agent/</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixAgent</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule deinit <span class="at">-f</span> cli_agents/HelixCode <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> rm <span class="at">--cached</span> cli_agents/HelixCode <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">-f</span> .gitmodules <span class="at">--remove-section</span> submodule.cli_agents/HelixCode <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> .git/modules/cli_agents/HelixCode</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP2-T02.01): remove circular cli_agents/HelixCode submodule entry&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add HelixAgent</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP2-T02.01): bump HelixAgent gitlink after circular removal&quot;</span></span></code></pre></div>
+<p>Verify:
+<code>git submodule status --recursive | grep -c &quot;cli_agents/HelixCode&quot;</code>
+returns <code>0</code>.</p>
+<h2 id="p1.5-wp2-t02.02-..-p1.5-wp2-t02.61-move-each-cli_agentsname-to-root-cli_agents">P1.5-WP2-T02.02
+.. P1.5-WP2-T02.61 — Move each <code>cli_agents/&lt;NAME&gt;</code> to
+root <code>cli_agents/</code></h2>
+<p>For each of the ~60 entries (enumerate from
+<code>helix_agent/.gitmodules</code>), one task per submodule. Per-task
+pattern:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">NAME</span><span class="op">=&lt;</span>entry-name<span class="op">&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="va">URL</span><span class="op">=</span><span class="va">$(</span><span class="fu">git</span> config <span class="at">-f</span> helix_agent/.gitmodules <span class="at">--get</span> <span class="st">&quot;submodule.cli_agents/</span><span class="va">${NAME}</span><span class="st">.url&quot;</span><span class="va">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="va">SHA_BEFORE</span><span class="op">=</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;helix_agent/cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">git</span> rev-parse HEAD<span class="va">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Inside HelixAgent — deinit + remove</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="bu">cd</span> HelixAgent <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> submodule deinit <span class="at">-f</span> <span class="st">&quot;cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> rm <span class="at">--cached</span> <span class="st">&quot;cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> config <span class="at">-f</span> .gitmodules <span class="at">--remove-section</span> <span class="st">&quot;submodule.cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rm</span> <span class="at">-rf</span> <span class="st">&quot;.git/modules/cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span><span class="kw">)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Commit inside HelixAgent</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="bu">cd</span> HelixAgent <span class="kw">&amp;&amp;</span> <span class="fu">git</span> add .gitmodules <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP2-T02.NN): remove cli_agents/</span><span class="va">${NAME}</span><span class="st"> (moving to meta-repo root)&quot;</span><span class="kw">)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Add at meta-repo root, pinning to the same SHA</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="st">&quot;</span><span class="va">$URL</span><span class="st">&quot;</span> <span class="st">&quot;cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="bu">cd</span> <span class="st">&quot;cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">git</span> checkout <span class="st">&quot;</span><span class="va">$SHA_BEFORE</span><span class="st">&quot;</span><span class="kw">)</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Verify gitlink SHA matches pre-state</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="va">SHA_AFTER</span><span class="op">=</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="fu">git</span> rev-parse HEAD<span class="va">)</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="bu">[</span> <span class="st">&quot;</span><span class="va">$SHA_BEFORE</span><span class="st">&quot;</span> <span class="ot">=</span> <span class="st">&quot;</span><span class="va">$SHA_AFTER</span><span class="st">&quot;</span> <span class="bu">]</span> <span class="kw">||</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;SHA DRIFT for </span><span class="va">$NAME</span><span class="st">&quot;</span><span class="kw">;</span> <span class="bu">exit</span> 1<span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Bump HelixAgent gitlink + commit meta-repo</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add HelixAgent .gitmodules <span class="st">&quot;cli_agents/</span><span class="va">${NAME}</span><span class="st">&quot;</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP2-T02.NN): move cli_agents/</span><span class="va">${NAME}</span><span class="st"> to meta-repo root @ </span><span class="va">${SHA_BEFORE</span><span class="op">:</span><span class="dv">0</span><span class="op">:</span><span class="dv">12</span><span class="va">}</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Commit one submodule per commit. Numbering: T02.02 .. T02.61
+corresponds to alphabetical ordering of the 60 entries (record exact
+order in <code>docs/improvements/p1-5-wp2-order.md</code> at start of
+WP2).</p>
+<h2 id="p1.5-wp2-t02.62-git-mv-helix_agentcli_agents_configs-cli_agents_configs">P1.5-WP2-T02.62
+—
+<code>git mv helix_agent/cli_agents_configs cli_agents_configs</code></h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> mv helix_agent/cli_agents_configs cli_agents_configs</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP2-T02.62): move cli_agents_configs (plain content) to meta-repo root&quot;</span></span></code></pre></div>
+<h2 id="p1.5-wp2-t02.63-rename-example_resources-cli_agents_resources">P1.5-WP2-T02.63
+— Rename <code>Example_Resources/</code> →
+<code>cli_agents_resources/</code></h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> mv Example_Resources cli_agents_resources</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP2-T02.63): rename Example_Resources -&gt; cli_agents_resources&quot;</span></span></code></pre></div>
+<h2 id="p1.5-wp2-t02.64-delete-example_projects">P1.5-WP2-T02.64 —
+Delete <code>Example_Projects/</code></h2>
+<p>Enumerate first:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">-f</span> .gitmodules <span class="at">--get-regexp</span> <span class="st">&#39;^submodule\.Example_Projects/.*\.path$&#39;</span> <span class="dt">\</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{print $2}&#39;</span> <span class="op">&gt;</span> /tmp/p1-5-example-projects.txt</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">wc</span> <span class="at">-l</span> /tmp/p1-5-example-projects.txt</span></code></pre></div>
+<p>For each path, verify it is genuinely redundant with the new root
+<code>cli_agents/&lt;NAME&gt;</code> (compare URLs). If not redundant,
+parking-lot it and skip.</p>
+<p>Per-path removal (one commit each, OR batched if all genuinely
+redundant):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="bu">read</span> <span class="va">p</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> submodule deinit <span class="at">-f</span> <span class="st">&quot;</span><span class="va">$p</span><span class="st">&quot;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> rm <span class="at">--cached</span> <span class="st">&quot;</span><span class="va">$p</span><span class="st">&quot;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">git</span> config <span class="at">-f</span> .gitmodules <span class="at">--remove-section</span> <span class="st">&quot;submodule.</span><span class="va">$p</span><span class="st">&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rm</span> <span class="at">-rf</span> <span class="st">&quot;.git/modules/</span><span class="va">$p</span><span class="st">&quot;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span> <span class="op">&lt;</span> /tmp/p1-5-example-projects.txt</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> rm <span class="at">-r</span> Example_Projects</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP2-T02.64): delete Example_Projects (redundant with root cli_agents/)&quot;</span></span></code></pre></div>
+<h2 id="p1.5-wp2-t02.65-reconcile-collisions">P1.5-WP2-T02.65 —
+Reconcile collisions</h2>
+<p>Detect: any submodule that ended up at TWO paths (root
+cli_agents/<NAME> AND something else). Decide canonical, remove the
+other:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule status <span class="at">--recursive</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{print $2}&#39;</span> <span class="dt">\</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> <span class="at">-c</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;$1 &gt; 1&#39;</span> <span class="kw">|</span> <span class="fu">tee</span> /tmp/p1-5-collisions.txt</span></code></pre></div>
+<p>Per collision: keep root cli_agents/<NAME>; remove the other; commit
+per collision.</p>
+<h2 id="p1.5-wp2-t02.66-verify-clean-meta-repo-helixagent-state">P1.5-WP2-T02.66
+— Verify clean meta-repo + HelixAgent state</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule status <span class="at">--recursive</span> <span class="kw">|</span> <span class="fu">tee</span> /tmp/p1-5-post-wp2.txt</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span> <span class="op">&lt;(</span><span class="fu">awk</span> <span class="st">&#39;{print $2}&#39;</span> /tmp/p1-5-initial-shas.txt <span class="kw">|</span> <span class="fu">sort</span><span class="op">)</span> <span class="dt">\</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>     <span class="op">&lt;(</span><span class="fu">awk</span> <span class="st">&#39;{print $2}&#39;</span> /tmp/p1-5-post-wp2.txt <span class="kw">|</span> <span class="fu">sort</span><span class="op">)</span></span></code></pre></div>
+<p>Document the diff in <code>07_phase_1_5_evidence.md</code> § WP2.</p>
+<p>Commit:
+<code>docs(P1.5-WP2-T02.66): WP2 evidence — submodule restructure complete</code>.</p>
+<h2 id="p1.5-wp2-t02.67-helixagent-clean-up-commit-push-deepest-first-prep">P1.5-WP2-T02.67
+— HelixAgent clean-up commit + push (deepest-first prep)</h2>
+<p>HelixAgent has the most internal changes. Push it FIRST (before its
+parent meta-repo) to avoid the parent pointing at SHAs only present
+locally.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixAgent</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status                                    <span class="co"># must be clean</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> <span class="va">$(</span><span class="fu">git</span> remote<span class="va">)</span><span class="kw">;</span> <span class="cf">do</span> <span class="fu">git</span> push <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span> main<span class="kw">;</span> <span class="cf">done</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="va">r</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span> <span class="st">&quot;%-12s &quot;</span> <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span><span class="kw">;</span> <span class="fu">git</span> ls-remote <span class="at">--heads</span> <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span> main</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span></code></pre></div>
+<p>(Meta-repo push is part of WP12.)</p>
+<p>Commit:
+<code>chore(P1.5-WP2-T02.67): push HelixAgent post-restructure to all remotes</code>.</p>
+<hr />
+<h1 id="work-package-3-submodule-deduplication-5-tasks">Work Package 3 —
+Submodule deduplication (5 tasks)</h1>
+<p><strong>Goal:</strong> Per the decision list (T01.04), each
+duplicate-set is reduced to a single canonical path; consumers of the
+removed paths are updated to reference the canonical via
+parent-traversal (<code>../../...</code>) or by removing the inner
+submodule entirely if root-level access suffices.</p>
+<h2 id="p1.5-wp3-t03.01-llmsverifier-dedup">P1.5-WP3-T03.01 —
+LLMsVerifier dedup</h2>
+<p>Keep <code>submodules/llms_verifier</code>. Remove
+<code>helix_agent/LLMsVerifier</code>.</p>
+<p>Pre-flight:
+<code>rg &quot;helix_agent/LLMsVerifier&quot; -l helix_agent/</code> lists every
+consumer. Update each to <code>../../submodules/llms_verifier</code>
+(relative from <code>helix_agent/&lt;consumer&gt;</code> to root).
+Build-test HelixAgent after the rewrite. Then:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixAgent</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule deinit <span class="at">-f</span> LLMsVerifier</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> rm <span class="at">--cached</span> LLMsVerifier</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">-f</span> .gitmodules <span class="at">--remove-section</span> submodule.LLMsVerifier</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> .git/modules/LLMsVerifier</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules <span class="op">&lt;</span>consumer-files<span class="op">&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP3-T03.01): dedup LLMsVerifier; reference dependencies/HelixDevelopment/ canonical&quot;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ..</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add HelixAgent</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P1.5-WP3-T03.01): bump HelixAgent gitlink after LLMsVerifier dedup&quot;</span></span></code></pre></div>
+<h2 id="p1.5-wp3-t03.02-containers-dedup">P1.5-WP3-T03.02 — containers
+dedup</h2>
+<p>Keep root <code>containers/</code>. Enumerate the 3 nested copies.
+Per nested copy: <code>rg</code>, rewrite consumers, deinit+rm, commit
+per repo. Final HelixAgent gitlink bump.</p>
+<h2 id="p1.5-wp3-t03.03-security-dedup">P1.5-WP3-T03.03 — Security
+dedup</h2>
+<p>Keep root <code>security/</code>. 2 nested copies. Same pattern.</p>
+<h2 id="p1.5-wp3-t03.04-helix_qa-dedup">P1.5-WP3-T03.04 — helix_qa
+dedup</h2>
+<p>Keep root <code>helix_qa/</code>. Remove
+<code>helix_agent/HelixQA</code>. Same pattern.</p>
+<h2 id="p1.5-wp3-t03.05-mcp_servers-dedup-canonical-tbd">P1.5-WP3-T03.05
+— mcp_servers dedup (canonical TBD)</h2>
+<p>At execution time: - Check whether root <code>mcp_servers/</code>
+exists. If yes, keep it; remove the two HelixAgent copies. - If no: pick
+the more-current of the two HelixAgent copies, promote it to root via
+<code>git submodule add</code> at root + remove both HelixAgent entries.
+Document the decision in evidence.</p>
+<hr />
+<h1 id="work-package-4-api-key-loader-6-tasks">Work Package 4 — API key
+loader (6 tasks)</h1>
+<p><strong>Goal:</strong> One canonical secret-loader contract. Bash
+version usable from any directory in any Helix* repo. Go version usable
+inside any Helix* binary that needs to bootstrap its own env. Both
+prefer <code>~/api_keys.sh</code>, fall back to local <code>.env</code>,
+warn-and-continue on neither.</p>
+<h2 id="p1.5-wp4-t04.01-define-loader-contract">P1.5-WP4-T04.01 — Define
+loader contract</h2>
+<p>Write
+<code>docs/superpowers/specs/2026-05-06-api-keys-loader-contract.md</code>
+documenting: - Resolution order: <code>~/api_keys.sh</code> (sourced as
+shell with <code>export VAR=value</code> lines) → local
+<code>.env</code> (parsed as <code>VAR=value</code>) → no-op + warning.
+- <code>$HELIXCODE_ROOT</code> discovery: walk parents from cwd looking
+for <code>.gitmodules</code> (meta-repo) OR a
+<code>.helixcode-root</code> sentinel. - Mode requirements:
+<code>~/api_keys.sh</code> must be 0600; loader REFUSES to source a 0644
+or world-readable file (CONST-042 enforcement). - Environment cleanup:
+loader is idempotent; sourcing twice does not duplicate-export. - Test
+matrix: (a) only <code>~/api_keys.sh</code> present, (b) only
+<code>.env</code> present, (c) both present (api_keys.sh wins), (d)
+neither (warn no-op).</p>
+<p>Commit:
+<code>docs(P1.5-WP4-T04.01): api_keys.sh loader contract</code>.</p>
+<h2 id="p1.5-wp4-t04.02-implement-scriptsload_api_keys.sh">P1.5-WP4-T04.02 —
+Implement <code>scripts/load_api_keys.sh</code></h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/load_api_keys.sh — canonical secret loader (CONST-042)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Source me; do not execute. Idempotent.</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">load_api_keys()</span> <span class="kw">{</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">root</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${HELIXCODE_ROOT</span><span class="op">:-</span><span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="bu">[</span> <span class="ot">-z</span> <span class="st">&quot;</span><span class="va">$root</span><span class="st">&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">local</span> <span class="va">d</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$PWD</span><span class="st">&quot;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">&quot;</span> <span class="ot">!=</span> <span class="st">&quot;/&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">/.gitmodules&quot;</span> <span class="bu">]</span> <span class="kw">||</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">/.helixcode-root&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">root</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$d</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">break</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">fi</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>      <span class="va">d</span><span class="op">=</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">&quot;</span><span class="va">)</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">done</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/api_keys.sh&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">local</span> <span class="va">mode</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="va">mode</span><span class="op">=</span><span class="va">$(</span><span class="fu">stat</span> <span class="at">-c</span> <span class="st">&quot;%a&quot;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/api_keys.sh&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">stat</span> <span class="at">-f</span> <span class="st">&quot;%A&quot;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/api_keys.sh&quot;</span><span class="va">)</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$mode</span><span class="st">&quot;</span> <span class="ot">!=</span> <span class="st">&quot;600&quot;</span> <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$mode</span><span class="st">&quot;</span> <span class="ot">!=</span> <span class="st">&quot;0600&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>      <span class="bu">printf</span> <span class="st">&quot;load_api_keys: REFUSING ~/api_keys.sh mode=%s (must be 600)\n&quot;</span> <span class="st">&quot;</span><span class="va">$mode</span><span class="st">&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># shellcheck source=/dev/null</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">.</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/api_keys.sh&quot;</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="bu">export</span> <span class="va">HELIXCODE_KEYS_SOURCE</span><span class="op">=</span><span class="st">&quot;api_keys.sh&quot;</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="bu">[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">$root</span><span class="st">&quot;</span> <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="bu">[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$root</span><span class="st">/.env&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="bu">set</span> <span class="at">-a</span><span class="kw">;</span> <span class="bu">.</span> <span class="st">&quot;</span><span class="va">$root</span><span class="st">/.env&quot;</span><span class="kw">;</span> <span class="bu">set</span> +a</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="bu">export</span> <span class="va">HELIXCODE_KEYS_SOURCE</span><span class="op">=</span><span class="st">&quot;.env&quot;</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span> <span class="st">&quot;load_api_keys: no ~/api_keys.sh and no .env in %s; continuing without secrets\n&quot;</span> <span class="st">&quot;</span><span class="va">${root</span><span class="op">:-</span>CWD<span class="va">}</span><span class="st">&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>  <span class="bu">export</span> <span class="va">HELIXCODE_KEYS_SOURCE</span><span class="op">=</span><span class="st">&quot;none&quot;</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="ex">load_api_keys</span></span></code></pre></div>
+<p>Commit:
+<code>feat(P1.5-WP4-T04.02): scripts/load_api_keys.sh canonical bash loader</code>.</p>
+<h2 id="p1.5-wp4-t04.03-implement-go-counterpart-internalsecretsloader.go">P1.5-WP4-T04.03
+— Implement Go counterpart <code>internal/secrets/loader.go</code></h2>
+<p>In <code>helix_code/internal/secrets/loader.go</code>. TDD-first
+(failing tests in <code>loader_test.go</code>): -
+<code>Load(env Env) (Source, error)</code> where <code>Env</code> is an
+interface for <code>Getenv</code> / <code>Stat</code> /
+<code>Open</code> (so tests inject tempdirs). - Parses
+<code>export VAR=value</code> lines from <code>~/api_keys.sh</code>
+(refuses non-0600). - Parses <code>VAR=value</code> lines from
+<code>.env</code> (handles <code># comment</code> and quoted values). -
+Sets via <code>os.Setenv</code> only if not already set (idempotent). -
+Returns <code>Source</code> enum: <code>SourceAPIKeysSh</code> /
+<code>SourceDotEnv</code> / <code>SourceNone</code>.</p>
+<p>Commit:
+<code>feat(P1.5-WP4-T04.03): internal/secrets/loader.go — Go counterpart of bash loader</code>.</p>
+<h2 id="p1.5-wp4-t04.04-propagate-loader-to-every-helix-submodule">P1.5-WP4-T04.04
+— Propagate loader to every Helix* submodule</h2>
+<p>For each Helix* repo (HelixAgent, HelixQA, HelixCode-meta,
+dependencies/HelixDevelopment/{LLMsVerifier, DocProcessor,
+LLMOrchestrator, LLMProvider, VisionEngine}, plus HelixAgent’s nested
+{HelixMemory, HelixSpecifier, HelixLLM}): copy
+<code>scripts/load_api_keys.sh</code> + ensure each repo’s Makefile
+sources it before tests/build.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Per-repo Makefile addition:</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">.PHONY:</span> load-keys</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ex">load-keys:</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="ex">@.</span> ./scripts/load_api_keys.sh</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="ex">build:</span> load-keys</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="ex">go</span> build ./...</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="ex">test:</span> load-keys</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="ex">go</span> test ./...</span></code></pre></div>
+<p>One commit per repo.</p>
+<h2 id="p1.5-wp4-t04.05-test-loader-both-branches-no-secrets-branch">P1.5-WP4-T04.05
+— Test loader (both branches + no-secrets branch)</h2>
+<p><code>helix_code/internal/secrets/loader_test.go</code> covers: -
+Happy: <code>~/api_keys.sh</code> mode=0600 with 2 vars → both set,
+source=APIKeysSh. - Refusal: <code>~/api_keys.sh</code> mode=0644 →
+error, no env mutation. - Fallback: no <code>~/api_keys.sh</code>,
+<code>.env</code> present → vars set, source=DotEnv. - Idempotent:
+pre-set var is NOT overwritten. - No-op: neither file → source=None,
+warning logged, no error.</p>
+<p>Commit:
+<code>test(P1.5-WP4-T04.05): loader exercises all 4 branches with real tempdirs</code>.</p>
+<h2 id="p1.5-wp4-t04.06-cross-repo-loader-challenge">P1.5-WP4-T04.06 —
+Cross-repo loader Challenge</h2>
+<p>Build
+<code>challenges/p1-5-foundation-cleanup/loader-probe/main.go</code>:
+tiny program that calls <code>secrets.Load</code>, prints
+<code>(source, vars-set-count)</code>. Run it under each branch via
+shell harness. Capture output verbatim into
+<code>07_phase_1_5_evidence.md</code> § WP4.</p>
+<p>Commit:
+<code>feat(P1.5-WP4-T04.06): cross-repo loader Challenge with verbatim evidence</code>.</p>
+<hr />
+<h1 id="work-package-5-.env-api-key-dedup-4-tasks-gated">Work Package 5
+— <code>.env</code> API key dedup (4 tasks; <strong>GATED</strong>)</h1>
+<p><strong>Goal:</strong> Remove keys from <code>.env</code> files that
+are already present in <code>~/api_keys.sh</code>. Keep
+<code>.env</code> files (other config may live there). Per CONST-042,
+this must be reversible (the user can re-add via
+<code>api_keys.sh</code>).</p>
+<h2 id="p1.5-wp5-t05.01-user-gate-confirm-api_keys.sh-content">P1.5-WP5-T05.01
+— <strong>USER GATE</strong>: confirm <code>~/api_keys.sh</code>
+content</h2>
+<p>The agent STOPS and prints: - The list of variable names the loader
+resolves from <code>~/api_keys.sh</code>. - Per <code>.env</code> file:
+which of those names appear there (the keys-to-remove list).</p>
+<p>User must respond OK before proceeding. NO removal occurs without
+that explicit OK. Record gate decision (timestamp + response) in
+evidence.</p>
+<p>(No commit — this is an interaction step.)</p>
+<h2 id="p1.5-wp5-t05.02-per-.env-dedup">P1.5-WP5-T05.02 —
+Per-<code>.env</code> dedup</h2>
+<p>For each of the 8 <code>.env</code> files, sed-out only the lines
+whose key is in the <code>~/api_keys.sh</code> set:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="va">KEYS_FROM_HOME</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-E</span> <span class="st">&#39;^export [A-Z_]+=&#39;</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/api_keys.sh&quot;</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-E</span> <span class="st">&#39;s/^export ([A-Z_]+)=.*/\1/&#39;</span><span class="va">)</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> <span class="va">$(</span><span class="fu">find</span> . <span class="at">-name</span> .env <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;*/.git/*&quot;</span><span class="va">)</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> k <span class="kw">in</span> <span class="va">$KEYS_FROM_HOME</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sed</span> <span class="at">-i</span> <span class="st">&quot;/^</span><span class="va">${k}</span><span class="st">=/d&quot;</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>Commit each affected <code>.env</code> separately.</p>
+<h2 id="p1.5-wp5-t05.03-verify-removal-reachability">P1.5-WP5-T05.03 —
+Verify removal + reachability</h2>
+<p>Per affected <code>.env</code>: - Still parses cleanly
+(<code>bash -c &#39;set -a; . ./.env; set +a&#39;</code>). - Removed keys still
+resolve via <code>~/api_keys.sh</code> (probe with the loader Challenge
+from T04.06).</p>
+<p>Capture output in evidence.</p>
+<h2 id="p1.5-wp5-t05.04-commit-per-affected-.env">P1.5-WP5-T05.04 —
+Commit per affected <code>.env</code></h2>
+<p>Already done as part of T05.02; T05.04 is the rollup commit advancing
+PROGRESS + writing the WP5 evidence section.</p>
+<p>Commit:
+<code>docs(P1.5-WP5-T05.04): WP5 evidence — .env dedup complete</code>.</p>
+<hr />
+<h1 id="work-package-6-docs-consolidation-3-tasks">Work Package 6 — Docs
+consolidation (3 tasks)</h1>
+<p><strong>Goal:</strong> One <code>docs/</code> tree per repo. No
+<code>Documentation/</code> directory. Update internal links.</p>
+<h2 id="p1.5-wp6-t06.01-merge-root-.documentation-.docs">P1.5-WP6-T06.01
+— Merge root <code>./Documentation/</code> → <code>./docs/</code></h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rsync</span> <span class="at">-a</span> Documentation/ docs/ <span class="at">--remove-source-files</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> Documentation <span class="at">-type</span> d <span class="at">-empty</span> <span class="at">-delete</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/ Documentation/</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="ex">rg</span> <span class="at">-l</span> <span class="st">&quot;Documentation/&quot;</span> <span class="at">--type</span> md <span class="kw">|</span> <span class="fu">xargs</span> sed <span class="at">-i</span> <span class="st">&#39;s|Documentation/|docs/|g&#39;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add <span class="at">-A</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P1.5-WP6-T06.01): merge ./Documentation -&gt; ./docs (root)&quot;</span></span></code></pre></div>
+<h2 id="p1.5-wp6-t06.02-merge-helix_codedocumentation-helix_codedocs">P1.5-WP6-T06.02
+— Merge <code>helix_code/Documentation/</code> →
+<code>helix_code/docs/</code></h2>
+<p>Same pattern, scoped to <code>helix_code/</code>. Inner-module
+commit.</p>
+<h2 id="p1.5-wp6-t06.03-move-helix_agentskillsdevelopmentdocumentation-helix_agentdocsskillsdevelopment">P1.5-WP6-T06.03
+— Move <code>helix_agent/skills/development/documentation/</code> →
+<code>helix_agent/docs/skills/development/</code></h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixAgent</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> docs/skills/development</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> mv skills/development/documentation docs/skills/development/documentation</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="ex">rg</span> <span class="at">-l</span> <span class="st">&quot;skills/development/documentation&quot;</span> <span class="at">--type</span> md <span class="kw">|</span> <span class="fu">xargs</span> sed <span class="at">-i</span> <span class="st">&#39;s|skills/development/documentation|docs/skills/development/documentation|g&#39;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add <span class="at">-A</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P1.5-WP6-T06.03): move HelixAgent skills documentation under docs/&quot;</span></span></code></pre></div>
+<hr />
+<h1 id="work-package-7-snake_case-directory-normalization-1020-tasks">Work
+Package 7 — Snake_case directory normalization (~10–20 tasks)</h1>
+<p><strong>Goal:</strong> Every directory under tracked content matches
+<code>^[a-z][a-z0-9_]*$</code> or is in the allowlist (.git, .github,
+top-level repo names like <code>HelixAgent</code>, <code>HelixQA</code>,
+etc.; Go-convention dirs already lowercase; intentional test fixture
+names).</p>
+<h2 id="p1.5-wp7-t07.01-inventory-non-conforming-directories">P1.5-WP7-T07.01
+— Inventory non-conforming directories</h2>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-type</span> d <span class="dt">\</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;*/.git/*&quot;</span> <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;*/node_modules/*&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./HelixAgent&quot;</span> <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./HelixQA&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./Challenges&quot;</span> <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./Containers&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./Security&quot;</span> <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./Assets&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./dependencies/*&quot;</span> <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./mcp_servers/*&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./Github-Pages-Website&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./helix_code/cmd&quot;</span> <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./helix_code/internal&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;[A-Z]|-&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">tee</span> docs/improvements/p1-5-snakecase-inventory.md</span></code></pre></div>
+<p>Filter the inventory: drop allowlist items; drop
+Go-import-path-affecting renames inside
+<code>helix_code/internal/</code> unless trivial-case-only.</p>
+<p>Commit:
+<code>docs(P1.5-WP7-T07.01): non-conforming directory inventory</code>.</p>
+<h2 id="p1.5-wp7-t07.02-..-t07.nn-per-non-conforming-dir-rename-reference-update">P1.5-WP7-T07.02
+.. T07.NN — Per non-conforming dir, rename + reference update</h2>
+<p>Per finding:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="va">OLD</span><span class="op">=&lt;</span>old-path<span class="op">&gt;</span><span class="kw">;</span> <span class="va">NEW</span><span class="op">=&lt;</span>new-path<span class="op">&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> mv <span class="st">&quot;</span><span class="va">$OLD</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$NEW</span><span class="st">&quot;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="ex">rg</span> <span class="at">-l</span> <span class="st">&quot;</span><span class="va">$OLD</span><span class="st">&quot;</span> <span class="at">--type-add</span> <span class="st">&#39;all:*&#39;</span> <span class="at">--type</span> all <span class="kw">|</span> <span class="fu">xargs</span> <span class="at">-I{}</span> sed <span class="at">-i</span> <span class="st">&quot;s|</span><span class="va">${OLD}</span><span class="st">|</span><span class="va">${NEW}</span><span class="st">|g&quot;</span> {}</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add <span class="at">-A</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;refactor(P1.5-WP7-T07.NN): snake_case rename </span><span class="va">${OLD}</span><span class="st"> -&gt; </span><span class="va">${NEW}</span><span class="st">&quot;</span></span></code></pre></div>
+<p>NN advances per finding. Total ~10–20 depending on T07.01 result.</p>
+<hr />
+<h1 id="work-package-8-anti-bluff-constitution-propagation-3-tasks">Work
+Package 8 — Anti-bluff Constitution propagation (3 tasks)</h1>
+<p><strong>Goal:</strong> Every Helix* submodule’s
+<code>CONSTITUTION.md</code> / <code>CLAUDE.md</code> /
+<code>AGENTS.md</code> carries CONST-035 + Article XI §11.9 verbatim. A
+verification script fails the build if the anchor is missing
+anywhere.</p>
+<h2 id="p1.5-wp8-t08.01-confirm-anchors-at-meta-repo-root">P1.5-WP8-T08.01 —
+Confirm anchors at meta-repo root</h2>
+<p><code>rg &quot;11\.9&quot; CONSTITUTION.md CLAUDE.md AGENTS.md CRUSH.md QWEN.md</code>
+— all must hit. Record positive evidence.</p>
+<h2 id="p1.5-wp8-t08.02-propagate-to-every-helix-submodule">P1.5-WP8-T08.02
+— Propagate to every Helix* submodule</h2>
+<p>For each Helix* repo: if <code>CONSTITUTION.md</code> /
+<code>CLAUDE.md</code> / <code>AGENTS.md</code> lacks the anchor, append
+the verbatim <code>Article XI §11.9 — Anti-Bluff Forensic Anchor</code>
+block (copy from root <code>CONSTITUTION.md</code>). If file does not
+exist, create from the root template. Commit per repo.</p>
+<h2 id="p1.5-wp8-t08.03-add-scriptsverify-anti-bluff-cascade.sh">P1.5-WP8-T08.03
+— Add <code>scripts/verify-anti-bluff-cascade.sh</code></h2>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/verify-anti-bluff-cascade.sh</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Fails if any Helix* repo&#39;s governance files lack the anti-bluff anchor.</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-e</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="va">ANCHOR</span><span class="op">=</span><span class="st">&quot;Article XI §11.9&quot;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="va">fails</span><span class="op">=</span>0</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> repo <span class="kw">in</span> . HelixAgent helix_qa HelixCode <span class="dt">\</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>            dependencies/HelixDevelopment/<span class="dt">{LLMsVerifier</span><span class="op">,</span><span class="dt">DocProcessor</span><span class="op">,</span><span class="dt">LLMOrchestrator</span><span class="op">,</span><span class="dt">LLMProvider</span><span class="op">,</span><span class="dt">VisionEngine}</span> <span class="dt">\</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>            helix_agent/<span class="dt">{HelixMemory</span><span class="op">,</span><span class="dt">HelixSpecifier</span><span class="op">,</span><span class="dt">HelixLLM}</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> f <span class="kw">in</span> CONSTITUTION.md CLAUDE.md AGENTS.md<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="va">p</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$repo</span><span class="st">/</span><span class="va">$f</span><span class="st">&quot;</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$p</span><span class="st">&quot;</span> <span class="bu">]</span> <span class="kw">||</span> <span class="cf">continue</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;</span><span class="va">$ANCHOR</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$p</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;MISSING ANCHOR: </span><span class="va">$p</span><span class="st">&quot;</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>      <span class="va">fails</span><span class="op">=</span><span class="va">$((fails</span><span class="op">+</span><span class="dv">1</span><span class="va">))</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="bu">[</span> <span class="st">&quot;</span><span class="va">$fails</span><span class="st">&quot;</span> <span class="ot">=</span> 0 <span class="bu">]</span> <span class="kw">||</span> <span class="bu">exit</span> 1</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;all governance files carry anti-bluff anchor&quot;</span></span></code></pre></div>
+<p>Wire into root Makefile target
+<code>verify-anti-bluff-cascade</code>. Commit.</p>
+<hr />
+<h1 id="work-package-9-reference-updates-catch-up-sweep-2-tasks">Work
+Package 9 — Reference updates (catch-up sweep) (2 tasks)</h1>
+<h2 id="p1.5-wp9-t09.01-comprehensive-grep-sweep-for-old-paths">P1.5-WP9-T09.01
+— Comprehensive grep sweep for old paths</h2>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> old <span class="kw">in</span> <span class="st">&quot;Example_Projects&quot;</span> <span class="st">&quot;Example_Resources&quot;</span> <span class="st">&quot;helix_agent/cli_agents&quot;</span> <span class="dt">\</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>           <span class="st">&quot;helix_agent/LLMsVerifier&quot;</span> <span class="st">&quot;helix_agent/HelixQA&quot;</span> <span class="st">&quot;Documentation/&quot;</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;=== </span><span class="va">$old</span><span class="st"> ===&quot;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">rg</span> <span class="st">&quot;</span><span class="va">$old</span><span class="st">&quot;</span> <span class="at">--type-add</span> <span class="st">&#39;all:*&#39;</span> <span class="at">--type</span> all <span class="at">-n</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;.git/&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;(none)&quot;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span> <span class="kw">|</span> <span class="fu">tee</span> docs/improvements/p1-5-stale-refs.md</span></code></pre></div>
+<p>For each remaining hit: update to canonical path, commit per affected
+file (or batch by directory if small).</p>
+<h2 id="p1.5-wp9-t09.02-internal-docs-link-sweep">P1.5-WP9-T09.02 —
+Internal docs link sweep</h2>
+<p><code>mkdocs.yml</code> (if present), Sphinx confs, README links.
+Update + commit.</p>
+<hr />
+<h1 id="work-package-10-rebuild-validation-8-tasks">Work Package 10 —
+Rebuild + validation (8 tasks)</h1>
+<h2 id="p1.5-wp10-t10.01-meta-repo-build-tests">P1.5-WP10-T10.01 —
+Meta-repo build + tests</h2>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> ci-validate-all <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tee</span> /tmp/p1-5-meta-ci.txt</span></code></pre></div>
+<h2 id="p1.5-wp10-t10.02-inner-go-module-verify-compile-test">P1.5-WP10-T10.02
+— Inner Go module verify-compile + test</h2>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile <span class="kw">&amp;&amp;</span> <span class="fu">make</span> test <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tee</span> /tmp/p1-5-inner-test.txt</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test <span class="at">-tags</span><span class="op">=</span>integration ./... <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tee</span> <span class="at">-a</span> /tmp/p1-5-inner-test.txt</span></code></pre></div>
+<h2 id="p1.5-wp10-t10.03-..-t10.07-per-helix-submodule-build-test">P1.5-WP10-T10.03
+.. T10.07 — Per-Helix* submodule build + test</h2>
+<p>One task per repo (HelixAgent, HelixQA,
+dependencies/HelixDevelopment/{LLMsVerifier,DocProcessor,LLMOrchestrator,LLMProvider,VisionEngine}).
+Each runs the repo’s own Makefile/scripts. Failure here is a Phase 1.5
+blocker.</p>
+<h2 id="p1.5-wp10-t10.08-fix-pre-existing-internaltoolsgit-mock-drift-out-of-scope-since-f09">P1.5-WP10-T10.08
+— Fix pre-existing <code>internal/tools/git</code> mock drift
+(out-of-scope since F09)</h2>
+<p>Read the failing build output. The mock LLM provider in
+<code>internal/tools/git/...</code> is missing <code>CountTokens</code>
+(added to the real provider interface during F12 multi-provider work).
+Update the mock to match the current interface; add a unit test that
+asserts the mock satisfies the real interface via a
+<code>var _ provider.LLMProvider = (*mockProvider)(nil)</code>
+compile-time check.</p>
+<p>Commit:
+<code>fix(P1.5-WP10-T10.08): internal/tools/git mock drift — implement CountTokens to match current LLMProvider interface</code>.</p>
+<hr />
+<h1 id="work-package-11-phase-1.5-challenge-harness-4-tasks">Work
+Package 11 — Phase 1.5 Challenge harness (4 tasks)</h1>
+<p><strong>Goal:</strong> A real Go program that exercises every Phase
+1.5 invariant with positive runtime evidence. Must fail loudly on
+regression.</p>
+<h2 id="p1.5-wp11-t11.01-build-harness-testsintegrationcmdp1-5-cleanup-challengemain.go">P1.5-WP11-T11.01
+— Build harness
+<code>tests/integration/cmd/p1-5-cleanup-challenge/main.go</code></h2>
+<p>Five phases, each producing positive evidence (not
+absence-of-error):</p>
+<ul>
+<li><strong>Phase A — No duplicate submodules:</strong> parse
+<code>git submodule status --recursive</code>; build map URL→[]paths;
+fail if any URL has &gt;1 path. Print the URL→path map as evidence
+(positive).</li>
+<li><strong>Phase B — Loader works for both branches:</strong>
+synthesise tempdir with <code>~/api_keys.sh</code> mode=0600 → invoke
+loader → assert env vars set + source=APIKeysSh. Then synthesise tempdir
+with <code>.env</code> only → assert source=DotEnv. Print resolved
+(source, key-count) per branch.</li>
+<li><strong>Phase C — No <code>Documentation/</code> anywhere:</strong>
+walk tree; assert zero matches; print walked-dir count + zero-match
+assertion.</li>
+<li><strong>Phase D — All directories snake_case:</strong> walk tree
+(with allowlist); collect non-conforming; assert zero; print
+conforming-count + allowlist-applied count.</li>
+<li><strong>Phase E — Anti-bluff anchor present:</strong> call
+<code>scripts/verify-anti-bluff-cascade.sh</code>; assert exit 0; print
+per-repo OK lines.</li>
+</ul>
+<p>Each phase: <code>t.Errorf</code> on failure with the exact
+mismatched data. No bare <code>t.Skip</code>.</p>
+<h2 id="p1.5-wp11-t11.02-challenge-dir-run.sh">P1.5-WP11-T11.02 —
+Challenge dir + <code>run.sh</code></h2>
+<p><code>challenges/p1-5-foundation-cleanup/CHALLENGE.md</code> with
+stated invariants. <code>run.sh</code> invokes the harness; sets
+<code>HELIXCODE_ROOT</code>; pipes verbatim output into
+<code>docs/improvements/07_phase_1_5_evidence.md</code> § WP11.</p>
+<h2 id="p1.5-wp11-t11.03-run-harness-capture-verbatim-evidence">P1.5-WP11-T11.03
+— Run harness, capture verbatim evidence</h2>
+<div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> challenges/p1-5-foundation-cleanup <span class="kw">&amp;&amp;</span> <span class="ex">./run.sh</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="dt">\</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="fu">tee</span> <span class="at">-a</span> ../../docs/improvements/07_phase_1_5_evidence.md</span></code></pre></div>
+<p>Must show every phase’s positive evidence. Any FAIL is a Phase 1.5
+blocker until fixed.</p>
+<h2 id="p1.5-wp11-t11.04-commit-harness">P1.5-WP11-T11.04 — Commit
+harness</h2>
+<p><code>feat(P1.5-WP11-T11.04): Phase 1.5 cleanup Challenge with 5-phase positive evidence</code>.</p>
+<hr />
+<h1 id="work-package-12-commit-push-everything-5-tasks">Work Package 12
+— Commit + push everything (5 tasks)</h1>
+<h2 id="p1.5-wp12-t12.01-commit-each-submodule-individually-deepest-first">P1.5-WP12-T12.01
+— Commit each submodule individually (deepest-first)</h2>
+<p>Order: 1. Each <code>cli_agents/&lt;NAME&gt;</code> (root-level
+submodules, leaves of the tree). 2. <code>helix_agent/HelixQA</code>
+(already removed in WP3, no-op for already-clean). 3.
+<code>helix_agent/{HelixMemory,HelixSpecifier,HelixLLM}</code> (any
+pending governance commits from WP8). 4. <code>HelixAgent</code> itself.
+5. <code>HelixQA</code> root. 6.
+<code>dependencies/HelixDevelopment/*</code> (each). 7. Root
+<code>Containers</code>, <code>Security</code>, <code>Challenges</code>,
+<code>MCP-Servers</code>, <code>Assets</code>,
+<code>Github-Pages-Website</code> if any pending changes. 8. Meta-repo
+(last, in T12.04).</p>
+<p>Per-submodule: <code>git status</code> clean check, then commit any
+pending changes.</p>
+<h2 id="p1.5-wp12-t12.02-push-each-submodule-to-all-its-configured-remotes">P1.5-WP12-T12.02
+— Push each submodule to ALL its configured remotes</h2>
+<p>Per submodule (in deepest-first order):</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="op">&lt;</span>submodule-path<span class="op">&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> <span class="va">$(</span><span class="fu">git</span> remote<span class="va">)</span><span class="kw">;</span> <span class="cf">do</span> <span class="fu">git</span> push <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span> main<span class="kw">;</span> <span class="cf">done</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="va">r</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span> <span class="st">&quot;%-12s &quot;</span> <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span><span class="kw">;</span> <span class="fu">git</span> ls-remote <span class="at">--heads</span> <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span> main</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="at">-</span></span></code></pre></div>
+<p>Verify all remotes converge on the same SHA. Non-force only
+(CONST-043).</p>
+<h2 id="p1.5-wp12-t12.03-bump-gitlinks-at-each-parent">P1.5-WP12-T12.03
+— Bump gitlinks at each parent</h2>
+<p>After each submodule pushes, its parent’s gitlink may be ahead of
+what the parent’s remotes have. Per parent:
+<code>git add &lt;submodule-path&gt;; git commit -m &quot;chore(P1.5-WP12-T12.03): bump &lt;submodule&gt; gitlink&quot;</code>.</p>
+<h2 id="p1.5-wp12-t12.04-push-meta-repo-to-its-4-remotes">P1.5-WP12-T12.04 —
+Push meta-repo to its 4 remotes</h2>
+<div class="sourceCode" id="cb28"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> github gitlab origin upstream<span class="kw">;</span> <span class="cf">do</span> <span class="fu">git</span> push <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span> main<span class="kw">;</span> <span class="cf">done</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> github gitlab origin upstream<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span> <span class="st">&quot;%-10s &quot;</span> <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span><span class="kw">;</span> <span class="fu">git</span> ls-remote <span class="at">--heads</span> <span class="st">&quot;</span><span class="va">$r</span><span class="st">&quot;</span> main</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>All four must show the same SHA.</p>
+<h2 id="p1.5-wp12-t12.05-verify-every-remote-has-the-new-sha">P1.5-WP12-T12.05
+— Verify every remote has the new SHA</h2>
+<p>Final pass over every repo + every remote. Any divergence is a Phase
+1.5 blocker.</p>
+<p>Final commit (meta-repo):
+<code>chore(P1.5-WP12-T12.05): Phase 1.5 — Foundation Cleanup COMPLETE; all remotes synced</code>.</p>
+<p>Update PROGRESS.md: Phase 1.5 closed; active phase advances to Phase
+2.</p>
+<hr />
+<h2 id="final-acceptance-checklist-must-all-be-ticked-before-claiming-phase-1.5-done">Final
+acceptance checklist (must ALL be ticked before claiming Phase 1.5
+done)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>All 12 WPs commits
+landed. (WP1 through WP12 — see PROGRESS.md P1.5 work-package list for
+SHAs)</label></li>
+<li><label><input type="checkbox" checked></input>Phase 1.5 Challenge
+harness exit 0 with all 5 phases printing positive evidence.
+(<code>/tmp/p1_5_challenge</code> EXIT=0 captured in evidence
+§P1.5-WP12)</label></li>
+<li><label><input type="checkbox" checked></input><code>scripts/verify_anti_bluff_cascade.sh</code> exit 0.
+(“OK: anti-bluff anchor present in all 39 files across 13
+repos”)</label></li>
+<li><label><input type="checkbox" checked></input><code>git submodule status --recursive</code> shows each
+URL at exactly one path. (Phase A of harness)</label></li>
+<li><label><input type="checkbox" checked></input>No
+<code>Documentation/</code> directory anywhere. (Phase C of
+harness)</label></li>
+<li><label><input type="checkbox" checked></input>Every directory
+snake_case (or in allowlist). (Phase D of harness — 259 conformant, 88
+allowlisted, 0 violations)</label></li>
+<li><label><input type="checkbox" checked></input>Every <code>.env</code>
+has no overlap with <code>~/api_keys.sh</code> keys (post-WP5 USER
+GATE). (See §P1.5-WP5 evidence)</label></li>
+<li><label><input type="checkbox" checked></input><code>cd HelixCode &amp;&amp; make verify-compile &amp;&amp; make test</code>
+passes. (Inner unit tests
+<code>go test -count=1 -short ./internal/... ./cmd/...</code> all green;
+see §P1.5-WP12)</label></li>
+<li><label><input type="checkbox" checked></input><code>internal/tools/git</code> mock drift fixed (T10.08).
+(Commit <code>45be827</code>)</label></li>
+<li><label><input type="checkbox" checked></input>All meta-repo remotes
+(github/gitlab/origin/upstream) on same SHA. (See §P1.5-WP12 push
+verification table)</label></li>
+<li><label><input type="checkbox" checked></input>Each Helix* submodule
+pushed to ALL its configured remotes. (See §P1.5-WP12 per-submodule push
+status table)</label></li>
+<li><label><input type="checkbox" checked></input>PROGRESS.md advanced to
+Phase 2.</label></li>
+<li><label><input type="checkbox" checked></input>Anti-bluff smoke at end
+of every task printed <code>clean</code>.</label></li>
+</ul>
+<hr />
+<p><em>Phase 1.5 is the bridge. Build it once; build it clean.</em></p>
+</body>
+</html>

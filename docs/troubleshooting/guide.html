@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>guide</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">guide</h1>
+</header>
+<h1 id="helixcode-troubleshooting-guide">HelixCode Troubleshooting
+Guide</h1>
+<p>This comprehensive guide provides detailed troubleshooting
+information for common HelixCode issues. Each section includes specific
+error messages, step-by-step diagnosis procedures, solutions, and
+prevention tips.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-server-startup-issues">Server Startup Issues</a></li>
+<li><a href="#2-database-connection-problems">Database Connection
+Problems</a></li>
+<li><a href="#3-llm-provider-failures">LLM Provider Failures</a></li>
+<li><a href="#4-worker-registration-issues">Worker Registration
+Issues</a></li>
+<li><a href="#5-authentication-errors">Authentication Errors</a></li>
+<li><a href="#6-memory-provider-issues">Memory Provider Issues</a></li>
+<li><a href="#7-buildcompilation-problems">Build/Compilation
+Problems</a></li>
+<li><a href="#8-test-failures">Test Failures</a></li>
+</ol>
+<hr />
+<h2 id="server-startup-issues">1. Server Startup Issues</h2>
+<h3 id="common-errors-and-solutions">1.1 Common Errors and
+Solutions</h3>
+<h4 id="error-configuration-file-not-found">Error: Configuration File
+Not Found</h4>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: failed to load configuration: open config/config.yaml: no such file or directory
+Fatal: configuration loading failed</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Verify you are in the
+correct directory (<code>helix_code/</code> subdirectory) 2. Check if
+config file exists: <code>ls -la config/config.yaml</code> 3. Verify
+file permissions: <code>stat config/config.yaml</code></p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure you&#39;re in the HelixCode directory</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Copy example configuration if available</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> config/config.yaml.example config/config.yaml</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Or create minimal configuration</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> config/config.yaml <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="st">server:</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="st">  address: &quot;0.0.0.0&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="st">  port: 8080</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="st">  read_timeout: 30</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="st">  write_timeout: 30</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="st">database:</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="st">  host: &quot;&quot;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="st">  enabled: false</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="st">auth:</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="st">  jwt_secret: &quot;${HELIX_AUTH_JWT_SECRET}&quot;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="st">  token_expiry: 86400</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="st">logging:</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="st">  level: &quot;info&quot;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="st">  format: &quot;text&quot;</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Always verify working directory
+before running commands - Keep a backup of working configuration - Use
+environment-specific config files (e.g.,
+<code>config/config.dev.yaml</code>)</p>
+<hr />
+<h4 id="error-invalid-yaml-syntax">Error: Invalid YAML Syntax</h4>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: failed to parse configuration: yaml: line 45: mapping values are not allowed in this context
+Error: while parsing a block mapping at line 12, column 1</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Identify the problematic
+line from the error message 2. Check for common YAML issues: - Mixed
+tabs and spaces - Missing colons after keys - Incorrect indentation -
+Unquoted special characters</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Validate YAML syntax</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">yamllint</span> config/config.yaml</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use Python to check</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">&quot;import yaml; yaml.safe_load(open(&#39;config/config.yaml&#39;))&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Validate with HelixCode</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> <span class="at">--validate-config</span></span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Use a YAML-aware editor with
+syntax highlighting - Always use spaces (not tabs) for indentation -
+Quote strings containing special characters (<code>:</code>,
+<code>#</code>, <code>{</code>, <code>}</code>, <code>[</code>,
+<code>]</code>) - Validate config changes before deploying</p>
+<hr />
+<h3 id="port-conflicts">1.2 Port Conflicts</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: listen tcp :8080: bind: address already in use
+Fatal: failed to start HTTP server: address already in use</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Identify what process is
+using the port 2. Determine if it’s another HelixCode instance or
+different service 3. Decide whether to terminate the process or change
+ports</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Find process using port 8080</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">lsof</span> <span class="at">-i</span> :8080</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">ss</span> <span class="at">-tlnp</span> <span class="kw">|</span> <span class="fu">grep</span> 8080</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">netstat</span> <span class="at">-tlnp</span> <span class="kw">|</span> <span class="fu">grep</span> 8080</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 1: Kill the conflicting process</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">kill</span> <span class="at">-9</span> <span class="op">&lt;</span>PID<span class="op">&gt;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 2: Change HelixCode port in config</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit config/config.yaml:</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># server:</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   port: 8081</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 3: Use environment variable</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SERVER_PORT</span><span class="op">=</span>8081 <span class="ex">./bin/helixcode</span></span></code></pre></div>
+<p><strong>Common Port Conflicts:</strong> | Port | Common Service |
+|——|—————-| | 8080 | Default HTTP, Jenkins, other apps | | 5432 |
+PostgreSQL | | 6379 | Redis | | 11434 | Ollama |</p>
+<p><strong>Prevention Tips:</strong> - Document which ports your
+environment uses - Use unique ports for development vs production -
+Implement proper shutdown procedures to release ports - Add health
+checks before starting services</p>
+<hr />
+<h3 id="missing-dependencies">1.3 Missing Dependencies</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: cannot find package &quot;github.com/gin-gonic/gin&quot; in any of:
+Error: exec: &quot;chromium&quot;: executable file not found in $PATH</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check if Go modules are
+downloaded 2. Verify external dependencies are installed 3. Check PATH
+environment variable</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download Go dependencies</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod download</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use make</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> setup-deps</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Install system dependencies (Ubuntu/Debian)</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> chromium-browser</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Install system dependencies (RHEL/CentOS)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dnf install <span class="at">-y</span> chromium</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify Go installation</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> version</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span> go</span></code></pre></div>
+<p><strong>Required System Dependencies:</strong> - Go 1.26.0 or later -
+PostgreSQL client libraries (optional) - Redis client (optional) -
+Chromium/Chrome (for browser automation features) - Git (for
+development)</p>
+<p><strong>Prevention Tips:</strong> - Document all system dependencies
+in README - Use Docker for consistent environments - Run
+<code>go mod download</code> after cloning - Set up CI/CD to catch
+missing dependencies early</p>
+<hr />
+<h2 id="database-connection-problems">2. Database Connection
+Problems</h2>
+<h3 id="connection-refused">2.1 Connection Refused</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: failed to create connection pool: dial tcp 127.0.0.1:5432: connect: connection refused
+Error: failed to ping database: connection refused
+FATAL: could not connect to server: Connection refused</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Verify PostgreSQL service
+is running 2. Check if PostgreSQL is listening on the expected port 3.
+Verify network connectivity 4. Check firewall rules</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check PostgreSQL service status</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> status postgresql</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># or for Docker</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> ps <span class="kw">|</span> <span class="fu">grep</span> postgres</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Start PostgreSQL if stopped</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl start postgresql</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> start helixcode-postgres</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify PostgreSQL is listening</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="ex">ss</span> <span class="at">-tlnp</span> <span class="kw">|</span> <span class="fu">grep</span> 5432</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Test connection manually</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="ex">psql</span> <span class="at">-h</span> localhost <span class="at">-p</span> 5432 <span class="at">-U</span> helix <span class="at">-d</span> helixcode_prod</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Check PostgreSQL logs</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tail <span class="at">-f</span> /var/log/postgresql/postgresql-<span class="pp">*</span>.log</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co"># or Docker</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> logs helixcode-postgres</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="co"># If using Docker, ensure container is on correct network</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> network inspect helixcode_network</span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Configure database service to
+start on boot - Implement connection retry logic in application - Use
+health checks in Docker Compose - Monitor database availability with
+alerts</p>
+<hr />
+<h3 id="authentication-failures">2.2 Authentication Failures</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: password authentication failed for user &quot;helix&quot;
+FATAL: role &quot;helix&quot; does not exist
+Error: FATAL: database &quot;helixcode_prod&quot; does not exist
+pq: password authentication failed for user &quot;helix&quot;</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Verify database user
+exists 2. Check password is correct 3. Verify database exists 4. Check
+pg_hba.conf authentication settings</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if user exists (as postgres superuser)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">&quot;SELECT usename FROM pg_user;&quot;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create user if missing</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">&quot;CREATE USER helix WITH PASSWORD &#39;your_password&#39;;&quot;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if database exists</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">&quot;SELECT datname FROM pg_database;&quot;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create database if missing</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres createdb <span class="at">-O</span> helix helixcode_prod</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Grant privileges</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">&quot;GRANT ALL PRIVILEGES ON DATABASE helixcode_prod TO helix;&quot;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify environment variable is set</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$HELIX_DATABASE_PASSWORD</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Set password via environment</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">HELIX_DATABASE_PASSWORD</span><span class="op">=</span><span class="st">&#39;your_secure_password&#39;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Check pg_hba.conf for authentication method</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> cat /etc/postgresql/<span class="pp">*</span>/main/pg_hba.conf <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;^#&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;^$&quot;</span></span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Use environment variables for
+credentials (never commit passwords) - Document required database setup
+steps - Use database migration scripts - Implement connection validation
+on startup</p>
+<hr />
+<h3 id="schema-issues">2.3 Schema Issues</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: failed to check schema existence: relation &quot;users&quot; does not exist
+Error: failed to initialize schema: permission denied for schema public
+ERROR: column &quot;display_name&quot; of relation &quot;users&quot; does not exist</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check if tables exist in
+database 2. Verify schema permissions 3. Check for pending migrations 4.
+Verify column definitions match code expectations</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect to database and check tables</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">psql</span> <span class="at">-h</span> localhost <span class="at">-U</span> helix <span class="at">-d</span> helixcode_prod</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List all tables</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="ex">\dt</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check specific table schema</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">\d</span> users</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Grant schema permissions</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="ex">GRANT</span> ALL ON SCHEMA public TO helix<span class="kw">;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="ex">GRANT</span> ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO helix<span class="kw">;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="ex">GRANT</span> ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO helix<span class="kw">;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Run schema initialization manually</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 1: Let application initialize</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> <span class="at">--init-schema</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 2: Run SQL script directly</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="ex">psql</span> <span class="at">-U</span> helix <span class="at">-d</span> helixcode_prod <span class="at">-f</span> postgres-init.sql</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Reset database if needed (</span><span class="al">CAUTION</span><span class="co">: data loss)</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="ex">dropdb</span> helixcode_prod</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="ex">createdb</span> <span class="at">-O</span> helix helixcode_prod</span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Use database migrations (not
+auto-schema creation in production) - Keep schema versioned in source
+control - Test migrations in staging before production - Implement
+database backup before schema changes</p>
+<hr />
+<h2 id="llm-provider-failures">3. LLM Provider Failures</h2>
+<h3 id="api-key-issues">3.1 API Key Issues</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: authentication failed: invalid API key
+Error: 401 Unauthorized: Incorrect API key provided
+Error: API key not found in environment: OPENAI_API_KEY
+Error: failed to authenticate with Anthropic: invalid x-api-key</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Verify API key
+environment variable is set 2. Check API key format and validity 3. Test
+API key directly with provider 4. Check for rate limiting or account
+issues</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if API keys are set</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$OPENAI_API_KEY</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-c</span> 10</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$ANTHROPIC_API_KEY</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-c</span> 10</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$GEMINI_API_KEY</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-c</span> 10</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Set API keys</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OPENAI_API_KEY</span><span class="op">=</span><span class="st">&#39;sk-...&#39;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ANTHROPIC_API_KEY</span><span class="op">=</span><span class="st">&#39;sk-ant-...&#39;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">GEMINI_API_KEY</span><span class="op">=</span><span class="st">&#39;AI...&#39;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Test OpenAI key</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">$OPENAI_API_KEY</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>     https://api.openai.com/v1/models <span class="dt">\</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">-s</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Test Anthropic key</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;x-api-key: </span><span class="va">$ANTHROPIC_API_KEY</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">-H</span> <span class="st">&quot;anthropic-version: 2023-06-01&quot;</span> <span class="dt">\</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>     https://api.anthropic.com/v1/models <span class="dt">\</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">-s</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Check key in configuration</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-r</span> <span class="st">&quot;api_key&quot;</span> config/config.yaml</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify provider is enabled</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> llm status</span></code></pre></div>
+<p><strong>API Key Formats:</strong> | Provider | Key Prefix | Example |
+|———-|————|———| | OpenAI | <code>sk-</code> | <code>sk-abc123...</code>
+| | Anthropic | <code>sk-ant-</code> | <code>sk-ant-abc123...</code> | |
+Gemini | <code>AI</code> | <code>AIzaSy...</code> | | xAI | varies |
+Check xAI documentation |</p>
+<p><strong>Prevention Tips:</strong> - Store API keys in secure secrets
+manager - Use different keys for development/production - Monitor API
+usage to detect key compromise - Set up alerts for authentication
+failures - Rotate keys regularly</p>
+<hr />
+<h3 id="model-not-available">3.2 Model Not Available</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: model not found: gpt-5-turbo
+Error: The model &#39;claude-4-opus&#39; does not exist
+Error: no models available from provider
+Error: invalid model name: gemini-pro-ultra</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. List available models
+from provider 2. Check model name spelling and format 3. Verify account
+has access to requested model 4. Check if model is deprecated or
+renamed</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List available models</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> llm models</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check OpenAI available models</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">$OPENAI_API_KEY</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>     https://api.openai.com/v1/models <span class="kw">|</span> <span class="ex">jq</span> <span class="st">&#39;.data[].id&#39;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Anthropic models (from documentation)</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co"># claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Ollama local models</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> list</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Update model configuration</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit config/config.yaml</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="ex">llm:</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  <span class="ex">providers:</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="ex">openai:</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>      <span class="ex">enabled:</span> true</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>      <span class="ex">parameters:</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        <span class="ex">default_model:</span> <span class="st">&quot;gpt-4o&quot;</span>  <span class="co"># Use correct model name</span></span></code></pre></div>
+<p><strong>Common Model Names:</strong> | Provider | Available Models |
+|———-|—————–| | OpenAI | gpt-4o, gpt-4-turbo, gpt-3.5-turbo | |
+Anthropic | claude-3-opus-20240229, claude-3-sonnet-20240229,
+claude-3-haiku-20240307 | | Ollama | llama2, mistral, codellama, mixtral
+| | Gemini | gemini-pro, gemini-pro-vision |</p>
+<p><strong>Prevention Tips:</strong> - Use model aliases for abstraction
+- Document supported models in your deployment - Subscribe to provider
+changelogs for deprecation notices - Test model availability before
+deploying config changes</p>
+<hr />
+<h3 id="rate-limiting">3.3 Rate Limiting</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: rate limit exceeded: too many requests
+Error: 429 Too Many Requests
+Error: You exceeded your current quota
+Error: Rate limit reached for gpt-4 in organization</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check current API usage
+2. Identify which operations are consuming quota 3. Review rate limit
+headers from API responses 4. Check organization/account limits</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check rate limit headers in response</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-v</span> <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">$OPENAI_API_KEY</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>     https://api.openai.com/v1/models <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> <span class="st">&quot;x-ratelimit&quot;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure retry with backoff</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit config/config.yaml</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="ex">llm:</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">max_retries:</span> 3</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="ex">retry_delay:</span> <span class="st">&quot;2s&quot;</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="ex">retry_backoff_multiplier:</span> 2</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure fallback providers</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="ex">llm:</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="ex">selection:</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="ex">strategy:</span> <span class="st">&quot;availability&quot;</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="ex">fallback_enabled:</span> true</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Monitor usage</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> llm usage</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Implement request queuing for batch operations</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> llm queue <span class="at">--enable</span> <span class="at">--max-concurrent</span> 5</span></code></pre></div>
+<p><strong>Rate Limit Strategies:</strong> 1. <strong>Implement
+exponential backoff</strong> - Wait longer between retries 2.
+<strong>Use fallback providers</strong> - Switch to backup provider when
+limited 3. <strong>Cache responses</strong> - Avoid repeated identical
+requests 4. <strong>Batch requests</strong> - Combine multiple small
+requests 5. <strong>Upgrade tier</strong> - Contact provider for higher
+limits</p>
+<p><strong>Prevention Tips:</strong> - Monitor API usage regularly - Set
+up usage alerts before hitting limits - Implement request caching where
+appropriate - Design systems to gracefully degrade under rate limits -
+Use different API keys for different environments</p>
+<hr />
+<h2 id="worker-registration-issues">4. Worker Registration Issues</h2>
+<h3 id="ssh-connection-failures">4.1 SSH Connection Failures</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: failed to connect to worker: dial tcp 192.168.1.100:22: connect: connection refused
+Error: ssh: unable to authenticate
+Error: ssh: handshake failed: ssh: unable to authenticate
+Error: failed to add worker: connection timed out</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Verify network
+connectivity to worker host 2. Check SSH service is running on worker 3.
+Verify SSH port is correct 4. Test SSH connection manually</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test basic network connectivity</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-c</span> 3 worker-host</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if SSH port is open</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="ex">nc</span> <span class="at">-zv</span> worker-host 22</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">nmap</span> <span class="at">-p</span> 22 worker-host</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Test SSH connection manually</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-v</span> user@worker-host</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Check SSH service on worker</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> user@worker-host <span class="st">&quot;systemctl status sshd&quot;</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify SSH configuration on worker</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> user@worker-host <span class="st">&quot;cat /etc/ssh/sshd_config | grep -E &#39;^(Port|PasswordAuthentication|PubkeyAuthentication)&#39;&quot;</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Check firewall on worker</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> user@worker-host <span class="st">&quot;sudo iptables -L | grep ssh&quot;</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> user@worker-host <span class="st">&quot;sudo ufw status&quot;</span></span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Document network requirements for
+workers - Use consistent SSH port across infrastructure - Implement
+network health monitoring - Set up SSH keepalive to prevent timeouts</p>
+<hr />
+<h3 id="key-authentication-problems">4.2 Key Authentication
+Problems</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: ssh: unable to authenticate, attempted methods [none publickey]
+Error: permission denied (publickey)
+Error: failed to read private key: no such file or directory
+Error: ssh: cannot decode encrypted private key</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Verify private key file
+exists and is readable 2. Check key file permissions (should be 600) 3.
+Verify public key is in worker’s authorized_keys 4. Check key format
+compatibility</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check key file exists</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> ~/.ssh/id_rsa</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> ~/.ssh/id_ed25519</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix key permissions</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 600 ~/.ssh/id_rsa</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 700 ~/.ssh</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 644 ~/.ssh/id_rsa.pub</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Test key authentication</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-i</span> ~/.ssh/id_rsa <span class="at">-v</span> user@worker-host</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Copy public key to worker</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="ex">ssh-copy-id</span> <span class="at">-i</span> ~/.ssh/id_rsa.pub user@worker-host</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Manually add public key to worker</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="co"># On worker host:</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;&gt;</span> ~/.ssh/authorized_keys <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="st">ssh-rsa AAAAB3... your-key-here</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 600 ~/.ssh/authorized_keys</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate new key pair if needed</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span> <span class="at">-t</span> ed25519 <span class="at">-C</span> <span class="st">&quot;helixcode@example.com&quot;</span> <span class="at">-f</span> ~/.ssh/helixcode_key</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="co"># For encrypted keys, use ssh-agent</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="fu">ssh-agent</span> <span class="at">-s</span><span class="va">)</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-add</span> ~/.ssh/id_rsa</span></code></pre></div>
+<p><strong>SSH Key Configuration in HelixCode:</strong></p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">workers</span><span class="kw">:</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">ssh</span><span class="kw">:</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">private_key_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/home/helix/.ssh/id_rsa&quot;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co">    # or embed key directly (not recommended)</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="fu">    private_key</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>      -----BEGIN OPENSSH PRIVATE KEY-----</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>      ...</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>      -----END OPENSSH PRIVATE KEY-----</span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Use Ed25519 keys for better
+security and compatibility - Store SSH keys securely (e.g., in secrets
+manager) - Implement key rotation procedures - Document key distribution
+process - Use SSH certificates for large deployments</p>
+<hr />
+<h3 id="network-issues">4.3 Network Issues</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: failed to connect: network is unreachable
+Error: dial tcp: lookup worker-host: no such host
+Error: i/o timeout during SSH handshake
+Error: failed to establish worker connection: context deadline exceeded</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Verify DNS resolution 2.
+Check network routing 3. Test connectivity at various network layers 4.
+Check for VPN/firewall interference</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test DNS resolution</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="ex">nslookup</span> worker-host</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="ex">dig</span> worker-host</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="ex">host</span> worker-host</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Test network path</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="ex">traceroute</span> worker-host</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="ex">mtr</span> worker-host</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Check local network interface</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> addr show</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> route show</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Test with IP address directly (bypass DNS)</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> user@192.168.1.100</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for firewall rules blocking connection</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> iptables <span class="at">-L</span> <span class="at">-n</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;(22|DROP|REJECT)&quot;</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify VPN status if applicable</span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a><span class="ex">ip</span> route <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;(tun|tap)&quot;</span></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Test from worker side</span></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> user@worker-host <span class="st">&quot;ss -tlnp | grep 22&quot;</span></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Increase connection timeout</span></span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> worker add <span class="dt">\</span></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">--host</span> worker-host <span class="dt">\</span></span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">--connect-timeout</span> 60s</span></code></pre></div>
+<p><strong>Network Troubleshooting Checklist:</strong> - [ ] DNS
+resolves correctly - [ ] Host is reachable (ping) - [ ] SSH port is open
+(nc/nmap) - [ ] No firewall blocking - [ ] VPN connected (if required) -
+[ ] Correct network interface used - [ ] No proxy interference</p>
+<p><strong>Prevention Tips:</strong> - Use IP addresses in config for
+critical workers - Implement connection pooling with keepalives - Set up
+network monitoring between master and workers - Document network
+topology and requirements - Use internal DNS for worker hostnames</p>
+<hr />
+<h2 id="authentication-errors">5. Authentication Errors</h2>
+<h3 id="jwt-issues">5.1 JWT Issues</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: token expired
+Error: invalid token
+Error: token signature is invalid
+Error: JWT secret not configured
+Error: failed to parse JWT token: token contains an invalid number of segments</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check JWT secret is
+configured 2. Verify token has not expired 3. Check token format and
+signature 4. Verify clock synchronization</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check JWT secret is set</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$HELIX_AUTH_JWT_SECRET</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-c</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Should be at least 32 characters</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Set JWT secret</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">HELIX_AUTH_JWT_SECRET</span><span class="op">=</span><span class="st">&#39;your-secure-secret-at-least-32-chars-long&#39;</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate secure secret</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="ex">openssl</span> rand <span class="at">-base64</span> 32</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify token structure (has 3 parts separated by dots)</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;your.token.here&quot;</span> <span class="kw">|</span> <span class="fu">tr</span> <span class="st">&#39;.&#39;</span> <span class="st">&#39;\n&#39;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Should output 3</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Decode token payload (for debugging)</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;your.token.here&quot;</span> <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-d</span><span class="st">&#39;.&#39;</span> <span class="at">-f2</span> <span class="kw">|</span> <span class="fu">base64</span> <span class="at">-d</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="ex">jq</span> .</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Check token expiration</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> auth validate-token <span class="op">&lt;</span>token<span class="op">&gt;</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Check system clock</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a><span class="ex">timedatectl</span> status</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Sync clock if needed</span></span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> timedatectl set-ntp true</span></code></pre></div>
+<p><strong>JWT Configuration:</strong></p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auth</span><span class="kw">:</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">jwt_secret</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${HELIX_AUTH_JWT_SECRET}&quot;</span><span class="co">  # Min 32 characters</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">token_expiry</span><span class="kw">:</span><span class="at"> </span><span class="dv">86400</span><span class="co">  # 24 hours in seconds</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">refresh_enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">refresh_expiry</span><span class="kw">:</span><span class="at"> </span><span class="dv">604800</span><span class="co">  # 7 days</span></span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Use strong, random JWT secrets
+(32+ bytes) - Implement token refresh mechanism - Keep clocks
+synchronized (NTP) - Log authentication failures for security monitoring
+- Set appropriate token expiration times</p>
+<hr />
+<h3 id="session-problems">5.2 Session Problems</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: session not found
+Error: session expired
+Error: failed to store session: WRONGTYPE Operation against a key holding the wrong kind of value
+Error: invalid session token</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check session storage
+(Redis) is available 2. Verify session hasn’t expired 3. Check session
+data integrity 4. Verify session ID format</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Redis connectivity</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="ex">redis-cli</span> ping</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List all sessions</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="ex">redis-cli</span> keys <span class="st">&quot;session:*&quot;</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check specific session</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="ex">redis-cli</span> get <span class="st">&quot;session:&lt;session_id&gt;&quot;</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Check session TTL</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a><span class="ex">redis-cli</span> ttl <span class="st">&quot;session:&lt;session_id&gt;&quot;</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Clear specific session</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="ex">redis-cli</span> del <span class="st">&quot;session:&lt;session_id&gt;&quot;</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Clear all sessions (</span><span class="al">CAUTION</span><span class="co">: logs out all users)</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a><span class="ex">redis-cli</span> keys <span class="st">&quot;session:*&quot;</span> <span class="kw">|</span> <span class="fu">xargs</span> redis-cli del</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Check session configuration</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-A</span> 5 <span class="st">&quot;session&quot;</span> config/config.yaml</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify Redis is enabled</span></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> redis status</span></code></pre></div>
+<p><strong>Session Configuration:</strong></p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auth</span><span class="kw">:</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">session_expiry</span><span class="kw">:</span><span class="at"> </span><span class="dv">604800</span><span class="co">  # 7 days in seconds</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">session_storage</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;redis&quot;</span><span class="co">  # or &quot;memory&quot;</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">redis</span><span class="kw">:</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;localhost&quot;</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">6379</span></span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Monitor Redis memory and
+performance - Implement session cleanup for expired sessions - Use
+consistent session ID format - Log session creation/invalidation for
+audit - Implement graceful session refresh</p>
+<hr />
+<h3 id="permission-denied">5.3 Permission Denied</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: permission denied: insufficient privileges
+Error: access denied for resource: /api/v1/admin/users
+Error: role &#39;user&#39; cannot perform action &#39;delete&#39; on resource &#39;project&#39;
+Error: authorization failed: missing required scope</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check user’s assigned
+roles 2. Verify role permissions configuration 3. Check if resource
+requires specific permissions 4. Verify API endpoint authorization</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check user roles</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> user info <span class="op">&lt;</span>user_id<span class="op">&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> user roles <span class="op">&lt;</span>user_id<span class="op">&gt;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign role to user</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> user assign-role <span class="op">&lt;</span>user_id<span class="op">&gt;</span> admin</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="co"># List available roles</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> roles list</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Check role permissions</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> roles show admin</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="co"># View API endpoint permissions</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> api permissions /api/v1/admin/users</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Debug authorization</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> auth debug <span class="at">--user</span> <span class="op">&lt;</span>user_id<span class="op">&gt;</span> --resource <span class="op">&lt;</span>resource<span class="op">&gt;</span> --action <span class="op">&lt;</span>action<span class="op">&gt;</span></span></code></pre></div>
+<p><strong>Role Configuration:</strong></p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">auth</span><span class="kw">:</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">admin</span><span class="kw">:</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;read:*&quot;</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;write:*&quot;</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;delete:*&quot;</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;admin:*&quot;</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">developer</span><span class="kw">:</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;read:projects&quot;</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;write:projects&quot;</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;read:tasks&quot;</span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;write:tasks&quot;</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">viewer</span><span class="kw">:</span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;read:projects&quot;</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;read:tasks&quot;</span></span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Document required permissions for
+each feature - Use principle of least privilege - Implement permission
+inheritance carefully - Log all authorization failures - Regular audit
+of role assignments</p>
+<hr />
+<h2 id="memory-provider-issues">6. Memory Provider Issues</h2>
+<h3 id="provider-specific-troubleshooting">6.1 Provider-Specific
+Troubleshooting</h3>
+<h4 id="mem0-provider">Mem0 Provider</h4>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: operation not supported by Mem0 API
+Error: failed to connect to Mem0: connection refused
+Error: Mem0 API rate limit exceeded</code></pre>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Mem0 configuration</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-A</span> 10 <span class="st">&quot;mem0&quot;</span> config/config.yaml</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Test Mem0 API connection</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">$MEM0_API_KEY</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>     https://api.mem0.ai/v1/health</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify API key</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$MEM0_API_KEY</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-c</span> 10</span></code></pre></div>
+<hr />
+<h4 id="zep-provider">Zep Provider</h4>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: zep does not support manual index management
+Error: zep cloud does not support direct backup/restore operations
+Error: failed to create Zep session: invalid project ID</code></pre>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Zep configuration</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-A</span> 10 <span class="st">&quot;zep&quot;</span> config/config.yaml</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Test Zep connection</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-H</span> <span class="st">&quot;Authorization: Api-Key </span><span class="va">$ZEP_API_KEY</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>     <span class="va">$ZEP_API_URL</span>/api/v2/sessions</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify environment variables</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$ZEP_API_KEY</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$ZEP_API_URL</span></span></code></pre></div>
+<hr />
+<h4 id="character.ai-provider">Character.AI Provider</h4>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: Character.AI does not provide a public API
+Error: operation running in simulation mode
+Error: character not found
+Error: conversation not found</code></pre>
+<p><strong>Note:</strong> Character.AI provider operates in simulation
+mode as there is no public API.</p>
+<hr />
+<h3 id="connection-problems">6.2 Connection Problems</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: memory provider not initialized
+Error: failed to store memory: connection refused
+Error: memory retrieval timeout</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Verify provider is
+configured and enabled 2. Check provider-specific API connectivity 3.
+Verify credentials and authentication 4. Check for rate limiting</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check memory provider configuration</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-A</span> 20 <span class="st">&quot;memory:&quot;</span> config/config.yaml</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Test provider status</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> memory status</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="co"># List configured providers</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> memory providers</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Test specific provider</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> memory test <span class="at">--provider</span> zep</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Check provider logs</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> /var/log/helixcode/memory.log</span></code></pre></div>
+<p><strong>Memory Configuration:</strong></p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">memory</span><span class="kw">:</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">default_provider</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;zep&quot;</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">providers</span><span class="kw">:</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">zep</span><span class="kw">:</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${ZEP_API_URL}&quot;</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${ZEP_API_KEY}&quot;</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">mem0</span><span class="kw">:</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${MEM0_API_KEY}&quot;</span></span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Monitor memory provider health -
+Implement fallback memory storage - Cache frequently accessed memories -
+Set appropriate timeouts for memory operations - Log memory operation
+failures for debugging</p>
+<hr />
+<h2 id="buildcompilation-problems">7. Build/Compilation Problems</h2>
+<h3 id="missing-dependencies-1">7.1 Missing Dependencies</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: cannot find package &quot;github.com/gin-gonic/gin&quot;
+go: downloading error: module not found
+Error: missing go.sum entry for module</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check if Go modules are
+initialized 2. Verify go.mod and go.sum exist 3. Check network
+connectivity to module proxy 4. Verify module cache integrity</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure you&#39;re in HelixCode directory</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Download all dependencies</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod download</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Tidy dependencies</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Clear module cache (if corrupted)</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> clean <span class="at">-modcache</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify modules</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod verify</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Download specific package</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> get github.com/gin-gonic/gin@latest</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Use make target</span></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> setup-deps</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Go proxy settings</span></span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> env GOPROXY</span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Reset to default if needed</span></span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> env <span class="at">-w</span> GOPROXY=https://proxy.golang.org,direct</span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Keep go.mod and go.sum in source
+control - Run <code>go mod tidy</code> before committing - Use
+<code>go mod vendor</code> for offline builds - Document build
+dependencies in README</p>
+<hr />
+<h3 id="go-version-issues">7.2 Go Version Issues</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: go: go.mod requires go &gt;= 1.24
+Error: build constraints exclude all Go files
+Error: undefined: slices.Contains
+Error: type parameter requires go1.18 or later</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check current Go version
+2. Verify go.mod requirements 3. Check for incompatible features used 4.
+Verify GOROOT and GOPATH</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check Go version</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> version</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Required: go1.26.0 or later</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Check go.mod requirements</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span> <span class="at">-5</span> go.mod</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show: go 1.26.3</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Install correct Go version (Ubuntu/Debian)</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> rm <span class="at">-rf</span> /usr/local/go</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://go.dev/dl/go1.26.3.linux-amd64.tar.gz</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tar <span class="at">-C</span> /usr/local <span class="at">-xzf</span> go1.26.3.linux-amd64.tar.gz</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="va">$PATH</span>:/usr/local/go/bin</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Using gvm (Go Version Manager)</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a><span class="ex">gvm</span> install go1.26.3</span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="ex">gvm</span> use go1.26.3</span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Using asdf</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a><span class="ex">asdf</span> install golang 1.24.9</span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a><span class="ex">asdf</span> global golang 1.24.9</span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify environment</span></span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> env GOROOT</span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> env GOPATH</span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Document required Go version in
+README - Use Go toolchain directives in go.mod - Test builds with target
+Go version in CI - Consider using Docker for consistent build
+environment</p>
+<hr />
+<h3 id="cgo-problems">7.3 CGO Problems</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: exec: &quot;gcc&quot;: executable file not found
+Error: cgo: C compiler not found
+Error: undefined reference to &#39;sqlite3_open&#39;
+Error: cannot find -lsqlite3
+Error: #include &lt;tree_sitter/parser.h&gt; file not found</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check if CGO is required
+for the build 2. Verify C compiler is installed 3. Check for required C
+libraries 4. Verify pkg-config can find libraries</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check CGO status</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> env CGO_ENABLED</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Install C compiler (Ubuntu/Debian)</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> build-essential</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Install C compiler (RHEL/CentOS)</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> dnf groupinstall <span class="at">-y</span> <span class="st">&quot;Development Tools&quot;</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Install specific libraries (tree-sitter example)</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Ubuntu/Debian</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> libtree-sitter-dev</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Install pkg-config</span></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install <span class="at">-y</span> pkg-config</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Build without CGO (if possible)</span></span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a><span class="va">CGO_ENABLED</span><span class="op">=</span>0 <span class="ex">go</span> build <span class="at">-o</span> bin/helixcode ./cmd/server</span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Check library paths</span></span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a><span class="ex">pkg-config</span> <span class="at">--libs</span> tree-sitter</span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a><span class="ex">ldconfig</span> <span class="at">-p</span> <span class="kw">|</span> <span class="fu">grep</span> tree-sitter</span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Set library path</span></span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">LD_LIBRARY_PATH</span><span class="op">=</span><span class="va">$LD_LIBRARY_PATH</span>:/usr/local/lib</span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">CGO_LDFLAGS</span><span class="op">=</span><span class="st">&quot;-L/usr/local/lib&quot;</span></span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">CGO_CFLAGS</span><span class="op">=</span><span class="st">&quot;-I/usr/local/include&quot;</span></span></code></pre></div>
+<p><strong>CGO Dependencies for HelixCode:</strong> | Feature | Library
+| Package (Ubuntu) | |———|———|——————| | Tree-sitter | libtree-sitter |
+libtree-sitter-dev | | SQLite (optional) | libsqlite3 | libsqlite3-dev
+|</p>
+<p><strong>Prevention Tips:</strong> - Document CGO requirements clearly
+- Provide static builds when possible - Use Docker for reproducible
+builds - Consider pure Go alternatives for dependencies</p>
+<hr />
+<h2 id="test-failures">8. Test Failures</h2>
+<h3 id="common-test-issues">8.1 Common Test Issues</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: test timed out after 30s
+Error: panic: runtime error: invalid memory address
+Error: connection refused (test couldn&#39;t connect to dependency)
+Error: expected X but got Y</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Identify which test is
+failing 2. Check test dependencies (database, Redis) 3. Verify test
+configuration 4. Check for race conditions</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run all tests with verbose output</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./...</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Run specific package tests</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/auth</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Run single test</span></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/auth <span class="at">-run</span> TestSpecific</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Run with race detection</span></span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-race</span> ./...</span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Run with extended timeout</span></span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-timeout</span> 120s ./...</span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Check test coverage</span></span>
+<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-cover</span> ./...</span>
+<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate coverage report</span></span>
+<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-coverprofile</span><span class="op">=</span>coverage.out ./...</span>
+<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> tool cover <span class="at">-html</span><span class="op">=</span>coverage.out</span>
+<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-24"><a href="#cb52-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Use test configuration</span></span>
+<span id="cb52-25"><a href="#cb52-25" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_CONFIG_PATH</span><span class="op">=</span>config/test-config.yaml <span class="ex">go</span> test ./...</span></code></pre></div>
+<p><strong>Prevention Tips:</strong> - Keep tests independent and
+isolated - Use table-driven tests - Mock external dependencies - Set
+appropriate timeouts - Run tests in CI before merging</p>
+<hr />
+<h3 id="environment-setup">8.2 Environment Setup</h3>
+<p><strong>Error Message:</strong></p>
+<pre><code>Error: no such host (database connection)
+Error: Redis not available
+Error: test requires infrastructure (skipped)
+Error: missing test configuration</code></pre>
+<p><strong>Step-by-Step Diagnosis:</strong> 1. Check if test
+infrastructure is running 2. Verify test configuration file 3. Check
+environment variables for tests 4. Determine if tests require external
+services</p>
+<p><strong>Solution:</strong></p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use test configuration</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> config/test-config.yaml config/config.yaml</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Start test infrastructure with Docker</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> <span class="at">-f</span> docker-compose.test.yml up <span class="at">-d</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use make target</span></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-up</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Wait for services to be ready</span></span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> 10</span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Run tests</span></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use full test suite</span></span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-full</span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Run unit tests only (no external dependencies)</span></span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_tests.sh</span></span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Run all tests including integration</span></span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_all_tests.sh</span></span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Stop test infrastructure</span></span>
+<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-down</span>
+<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> <span class="at">-f</span> docker-compose.test.yml down</span>
+<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Check test infrastructure status</span></span>
+<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-status</span></code></pre></div>
+<p><strong>Test Configuration (config/test-config.yaml):</strong></p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">server</span><span class="kw">:</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">8081</span><span class="co">  # Different from production</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="fu">database</span><span class="kw">:</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;localhost&quot;</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">5433</span><span class="co">  # Different from production</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">dbname</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;helixcode_test&quot;</span></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a><span class="fu">redis</span><span class="kw">:</span></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">host</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;localhost&quot;</span></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">6380</span><span class="co">  # Different from production</span></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a><span class="fu">auth</span><span class="kw">:</span></span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">jwt_secret</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;test-secret-for-testing-only&quot;</span></span></code></pre></div>
+<p><strong>Test Infrastructure Checklist:</strong> - [ ] PostgreSQL test
+instance running - [ ] Redis test instance running - [ ] Test
+configuration file in place - [ ] Environment variables set - [ ]
+Network accessible between test runner and services - [ ] Sufficient
+disk space for test data</p>
+<p><strong>Prevention Tips:</strong> - Document test environment
+requirements - Use Docker Compose for consistent test infrastructure -
+Separate unit tests from integration tests - Skip integration tests in
+quick feedback loops - Use mocks for external service unit tests</p>
+<hr />
+<h2 id="quick-reference-environment-variables">Quick Reference:
+Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Purpose</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HELIX_AUTH_JWT_SECRET</code></td>
+<td>JWT token signing</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>HELIX_DATABASE_PASSWORD</code></td>
+<td>PostgreSQL password</td>
+<td>If DB enabled</td>
+</tr>
+<tr>
+<td><code>HELIX_DATABASE_HOST</code></td>
+<td>PostgreSQL host</td>
+<td>If DB enabled</td>
+</tr>
+<tr>
+<td><code>HELIX_REDIS_PASSWORD</code></td>
+<td>Redis password</td>
+<td>If Redis enabled</td>
+</tr>
+<tr>
+<td><code>OPENAI_API_KEY</code></td>
+<td>OpenAI API access</td>
+<td>If using OpenAI</td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td>Anthropic API access</td>
+<td>If using Anthropic</td>
+</tr>
+<tr>
+<td><code>GEMINI_API_KEY</code></td>
+<td>Google Gemini access</td>
+<td>If using Gemini</td>
+</tr>
+<tr>
+<td><code>ZEP_API_KEY</code></td>
+<td>Zep memory provider</td>
+<td>If using Zep</td>
+</tr>
+<tr>
+<td><code>ZEP_API_URL</code></td>
+<td>Zep API endpoint</td>
+<td>If using Zep</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="quick-reference-common-commands">Quick Reference: Common
+Commands</h2>
+<div class="sourceCode" id="cb56"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Server</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span>                     <span class="co"># Start server</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> <span class="at">--config</span> path.yaml  <span class="co"># Start with specific config</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> <span class="at">--validate-config</span>   <span class="co"># Validate configuration</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Build</span></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build                          <span class="co"># Build server</span></span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> clean                          <span class="co"># Clean build artifacts</span></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> setup-deps                     <span class="co"># Download dependencies</span></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Test</span></span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test                           <span class="co"># Run tests</span></span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-coverage                  <span class="co"># Run with coverage</span></span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./internal/auth          <span class="co"># Test specific package</span></span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Debug</span></span>
+<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> health             <span class="co"># Check system health</span></span>
+<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> llm status         <span class="co"># Check LLM providers</span></span>
+<span id="cb56-19"><a href="#cb56-19" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> worker list        <span class="co"># List workers</span></span>
+<span id="cb56-20"><a href="#cb56-20" aria-hidden="true" tabindex="-1"></a><span class="ex">./bin/helixcode</span> diagnostics collect <span class="co"># Collect diagnostic info</span></span></code></pre></div>
+<hr />
+<h2 id="getting-help">Getting Help</h2>
+<p>If this guide doesn’t resolve your issue:</p>
+<ol type="1">
+<li><strong>Check Logs</strong>:
+<code>tail -f /var/log/helixcode/server.log</code></li>
+<li><strong>Enable Debug Logging</strong>: Set
+<code>logging.level: &quot;debug&quot;</code> in config</li>
+<li><strong>Collect Diagnostics</strong>:
+<code>./bin/helixcode diagnostics collect</code></li>
+<li><strong>Review Documentation</strong>: See <code>docs/</code>
+directory for detailed guides</li>
+<li><strong>Search Issues</strong>: Check GitHub issues for similar
+problems</li>
+<li><strong>Contact Support</strong>: Open a new issue with diagnostic
+information</li>
+</ol>
+<p><strong>When Reporting Issues, Include:</strong> - HelixCode version
+(<code>./bin/helixcode --version</code>) - Go version
+(<code>go version</code>) - Operating system (<code>uname -a</code>) -
+Full error message and stack trace - Relevant configuration (redact
+secrets) - Steps to reproduce</p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest
+stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go
+1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).</p>
+</body>
+</html>

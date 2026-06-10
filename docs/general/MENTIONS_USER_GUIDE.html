@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MENTIONS_USER_GUIDE</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">MENTIONS_USER_GUIDE</h1>
+</header>
+<h1 id="mentions-user-guide">@ Mentions User Guide</h1>
+<h2 id="helixcode-context-injection-system">HelixCode Context Injection
+System</h2>
+<p><strong>Version:</strong> 1.0 <strong>Last Updated:</strong> November
+7, 2025 <strong>Feature Status:</strong> ✅ Production Ready</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#quick-start">Quick Start</a></li>
+<li><a href="#mention-types">Mention Types</a></li>
+<li><a href="#syntax-reference">Syntax Reference</a></li>
+<li><a href="#advanced-usage">Advanced Usage</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ol>
+<hr />
+<h2 id="introduction">Introduction</h2>
+<p>The @ Mentions system in HelixCode allows you to inject context from
+various sources directly into your conversation with the AI. Instead of
+copying and pasting file contents or describing your codebase, you can
+use concise @ mentions to provide the AI with exactly the context it
+needs.</p>
+<h3 id="benefits">Benefits</h3>
+<ul>
+<li><strong>Time Saving:</strong> No more copy-pasting file
+contents</li>
+<li><strong>Accuracy:</strong> AI sees actual file contents, not your
+description</li>
+<li><strong>Efficiency:</strong> Smart token management prevents context
+overflow</li>
+<li><strong>Convenience:</strong> Fuzzy search finds files even with
+partial names</li>
+<li><strong>Flexibility:</strong> 7 different mention types for
+different contexts</li>
+</ul>
+<h3 id="supported-mention-types">Supported Mention Types</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Mention</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@file</code></td>
+<td>Include file contents</td>
+<td><code>@file[src/main.go]</code></td>
+</tr>
+<tr>
+<td><code>@folder</code></td>
+<td>List folder contents</td>
+<td><code>@folder[internal](recursive=true)</code></td>
+</tr>
+<tr>
+<td><code>@url</code></td>
+<td>Fetch web content</td>
+<td><code>@url[https://docs.example.com]</code></td>
+</tr>
+<tr>
+<td><code>@git-changes</code></td>
+<td>Show uncommitted changes</td>
+<td><code>@git-changes</code></td>
+</tr>
+<tr>
+<td><code>@[commit]</code></td>
+<td>Show specific commit</td>
+<td><code>@[abc123]</code></td>
+</tr>
+<tr>
+<td><code>@terminal</code></td>
+<td>Include terminal output</td>
+<td><code>@terminal(lines=50)</code></td>
+</tr>
+<tr>
+<td><code>@problems</code></td>
+<td>Show workspace errors</td>
+<td><code>@problems(type=errors)</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="basic-file-mention">Basic File Mention</h3>
+<pre><code>Can you review the authentication logic in @file[internal/auth/handler.go]?</code></pre>
+<p>The AI will receive the full contents of <code>handler.go</code>
+along with your question.</p>
+<h3 id="fuzzy-file-search">Fuzzy File Search</h3>
+<pre><code>Fix the bug in @file[auth handler]</code></pre>
+<p>HelixCode will fuzzy search for files matching “auth handler” and use
+the best match (e.g., <code>internal/auth/handler.go</code>).</p>
+<h3 id="multiple-mentions">Multiple Mentions</h3>
+<pre><code>Compare @file[old/implementation.go] with @file[new/implementation.go] and suggest improvements.</code></pre>
+<p>You can use multiple @ mentions in a single message.</p>
+<hr />
+<h2 id="mention-types">Mention Types</h2>
+<h3 id="file---file-contents">1. <span class="citation" data-cites="file">@file</span> - File Contents</h3>
+<p><strong>Purpose:</strong> Include the complete contents of a source
+file.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>@file[path/to/file.go]
+@file[partial filename]
+@file[*.go](max_lines=100)</code></pre>
+<p><strong>Examples:</strong></p>
+<p>Basic usage:</p>
+<pre><code>@file[main.go]</code></pre>
+<p>Fuzzy search:</p>
+<pre><code>@file[auth handler]
+# Matches: internal/auth/handler.go</code></pre>
+<p>With line limit:</p>
+<pre><code>@file[large_file.go](max_lines=200)</code></pre>
+<p><strong>Features:</strong> - ✅ Absolute and relative path support -
+✅ Fuzzy file name matching - ✅ Automatic syntax detection - ✅ Token
+counting and truncation - ✅ Binary file detection</p>
+<p><strong>Supported Options:</strong> - <code>max_lines</code>: Maximum
+lines to include (default: entire file)</p>
+<hr />
+<h3 id="folder---folder-contents">2. <span class="citation" data-cites="folder">@folder</span> - Folder Contents</h3>
+<p><strong>Purpose:</strong> List files in a directory, optionally with
+file contents.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>@folder[path/to/dir]
+@folder[path](recursive=true)
+@folder[path](content=true)
+@folder[path](recursive=true,content=true)</code></pre>
+<p><strong>Examples:</strong></p>
+<p>List files in folder:</p>
+<pre><code>@folder[internal/auth]</code></pre>
+<p>Recursive listing:</p>
+<pre><code>@folder[src](recursive=true)</code></pre>
+<p>Include file contents:</p>
+<pre><code>@folder[config](content=true)</code></pre>
+<p>Both recursive and content:</p>
+<pre><code>@folder[internal/llm](recursive=true,content=true)</code></pre>
+<p><strong>Features:</strong> - ✅ Recursive and non-recursive modes -
+✅ Optional file content inclusion - ✅ Respects .gitignore patterns -
+✅ Smart token budget management - ✅ Filters out binary/generated
+files</p>
+<p><strong>Supported Options:</strong> - <code>recursive</code>: Walk
+subdirectories (default: false) - <code>content</code>: Include file
+contents (default: false)</p>
+<p><strong>Output Format:</strong></p>
+<pre><code>📁 subdir/
+📄 file1.txt (245 bytes)
+📄 file2.go (1024 bytes)
+   Content:</code></pre>
+<p>package main … <code></code></p>
+<hr />
+<h3 id="url---web-content">3. <span class="citation" data-cites="url">@url</span> - Web Content</h3>
+<p><strong>Purpose:</strong> Fetch and include content from a web
+URL.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>@url[https://example.com/page]
+@url[https://docs.site.com](format=text)</code></pre>
+<p><strong>Examples:</strong></p>
+<p>Documentation page:</p>
+<pre><code>@url[https://pkg.go.dev/github.com/gin-gonic/gin]</code></pre>
+<p>API response:</p>
+<pre><code>@url[https://api.github.com/repos/user/repo]</code></pre>
+<p><strong>Features:</strong> - ✅ HTML to text conversion - ✅ Markdown
+preservation - ✅ Open Graph metadata extraction - ✅ 15-minute caching
+(prevents duplicate fetches) - ✅ Automatic content-type detection</p>
+<p><strong>Supported Options:</strong> - <code>format</code>: Output
+format (text, html, markdown) - default: text</p>
+<p><strong>Output Includes:</strong> - Page title - URL - Content
+(converted to text) - Metadata (description, author if available)</p>
+<p><strong>Limitations:</strong> - Maximum fetch size: 1MB - Timeout: 30
+seconds - JavaScript-rendered content may not be captured</p>
+<hr />
+<h3 id="git-changes---uncommitted-changes">4. <span class="citation" data-cites="git-changes">@git-changes</span> - Uncommitted Changes</h3>
+<p><strong>Purpose:</strong> Show all uncommitted changes in the Git
+repository.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>@git-changes
+@git-changes(staged=true)
+@git-changes(unstaged=true)</code></pre>
+<p><strong>Examples:</strong></p>
+<p>All changes:</p>
+<pre><code>Review my changes: @git-changes</code></pre>
+<p>Only staged changes:</p>
+<pre><code>@git-changes(staged=true)</code></pre>
+<p>Only unstaged changes:</p>
+<pre><code>@git-changes(unstaged=true)</code></pre>
+<p><strong>Features:</strong> - ✅ Shows diff output (git diff) - ✅
+Includes file additions/deletions - ✅ Filters by staged/unstaged - ✅
+Supports both modified files and new files</p>
+<p><strong>Output Format:</strong></p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">diff --git a/internal/auth/handler.go b/internal/auth/handler.go</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>index 1234567..abcdefg 100644</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="dt">--- a/internal/auth/handler.go</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="dt">+++ b/internal/auth/handler.go</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="dt">@@ -45,7 +45,8 @@</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="st">-    if err != nil {</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="va">+    if err != nil &amp;&amp; err != ErrNotFound {</span></span></code></pre></div>
+<p><strong>Requirements:</strong> - Must be in a Git repository - Git
+must be installed and in PATH</p>
+<hr />
+<h3 id="commit---specific-commit">5. @[commit] - Specific Commit</h3>
+<p><strong>Purpose:</strong> Show the diff from a specific Git
+commit.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>@[commit-hash]
+@[HEAD~3]
+@[branch-name]</code></pre>
+<p><strong>Examples:</strong></p>
+<p>Specific commit:</p>
+<pre><code>@[abc123def]</code></pre>
+<p>Recent commit:</p>
+<pre><code>@[HEAD~1]</code></pre>
+<p>Branch:</p>
+<pre><code>@[feature/new-auth]</code></pre>
+<p><strong>Features:</strong> - ✅ Full commit diff - ✅ Commit metadata
+(author, date, message) - ✅ Supports commit references (HEAD~N, branch
+names) - ✅ Shows all changed files</p>
+<p><strong>Output Includes:</strong> - Commit hash - Author and date -
+Commit message - Full diff</p>
+<p><strong>Requirements:</strong> - Must be in a Git repository - Commit
+must exist in history</p>
+<hr />
+<h3 id="terminal---terminal-output">6. <span class="citation" data-cites="terminal">@terminal</span> - Terminal Output</h3>
+<p><strong>Purpose:</strong> Include recent terminal output in the
+conversation.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>@terminal
+@terminal(lines=50)
+@terminal(lines=100)</code></pre>
+<p><strong>Examples:</strong></p>
+<p>Last 100 lines (default):</p>
+<pre><code>The build failed, see @terminal</code></pre>
+<p>Last 50 lines:</p>
+<pre><code>@terminal(lines=50)</code></pre>
+<p><strong>Features:</strong> - ✅ Captures stdout and stderr - ✅
+Preserves ANSI colors (converted to text descriptions) - ✅ Configurable
+line count - ✅ Automatic terminal history management</p>
+<p><strong>Supported Options:</strong> - <code>lines</code>: Number of
+lines to include (default: 100, max: 1000)</p>
+<p><strong>Use Cases:</strong> - Debugging build errors - Sharing test
+output - Analyzing log output - Troubleshooting command failures</p>
+<p><strong>Note:</strong> Terminal history is session-specific and
+cleared on restart.</p>
+<hr />
+<h3 id="problems---workspace-problems">7. <span class="citation" data-cites="problems">@problems</span> - Workspace Problems</h3>
+<p><strong>Purpose:</strong> Show errors and warnings from the
+workspace.</p>
+<p><strong>Syntax:</strong></p>
+<pre><code>@problems
+@problems(type=errors)
+@problems(type=warnings)
+@problems(type=all)</code></pre>
+<p><strong>Examples:</strong></p>
+<p>All problems:</p>
+<pre><code>Fix these issues: @problems</code></pre>
+<p>Only errors:</p>
+<pre><code>@problems(type=errors)</code></pre>
+<p>Only warnings:</p>
+<pre><code>@problems(type=warnings)</code></pre>
+<p><strong>Features:</strong> - ✅ Integrates with language servers
+(LSP) - ✅ Shows file, line, and column - ✅ Categorized by severity -
+✅ Includes problem descriptions</p>
+<p><strong>Supported Options:</strong> - <code>type</code>: Problem
+filter (errors, warnings, all) - default: all</p>
+<p><strong>Output Format:</strong></p>
+<pre><code>❌ ERROR internal/auth/handler.go:45:12
+   undefined: validateToken
+
+⚠️  WARNING internal/llm/provider.go:123:5
+   variable &#39;timeout&#39; is unused
+
+ℹ️  INFO config/config.go:67:1
+   consider using a constant for this value</code></pre>
+<hr />
+<h2 id="syntax-reference">Syntax Reference</h2>
+<h3 id="basic-syntax">Basic Syntax</h3>
+<pre><code>@mention-type[target]
+@mention-type[target](option1=value1)
+@mention-type[target](option1=value1,option2=value2)</code></pre>
+<h3 id="components">Components</h3>
+<p><strong>Mention Type:</strong> The type of content to include
+(<code>file</code>, <code>folder</code>, <code>url</code>, etc.)</p>
+<p><strong>Target (optional):</strong> The path, URL, or identifier -
+Enclosed in square brackets <code>[...]</code> - Can be omitted for some
+types (e.g., <code>@git-changes</code>, <code>@terminal</code>,
+<code>@problems</code>)</p>
+<p><strong>Options (optional):</strong> Key-value pairs for
+customization - Enclosed in parentheses <code>(...)</code> -
+Comma-separated - Format: <code>key=value</code></p>
+<h3 id="examples">Examples</h3>
+<pre><code>@file[main.go]                          # Simple file
+@folder[src]                            # Simple folder
+@folder[src](recursive=true)            # Folder with option
+@folder[src](recursive=true,content=true)  # Multiple options
+@url[https://docs.example.com]          # URL
+@terminal(lines=50)                     # No target, just option
+@problems(type=errors)                  # No target, just option</code></pre>
+<hr />
+<h2 id="advanced-usage">Advanced Usage</h2>
+<h3 id="combining-multiple-mentions">Combining Multiple Mentions</h3>
+<p>You can use multiple @ mentions in a single message to provide
+comprehensive context:</p>
+<pre><code>I&#39;m refactoring the authentication system.
+Current implementation: @file[internal/auth/handler.go]
+Current tests: @file[internal/auth/handler_test.go]
+Recent changes: @git-changes
+Current issues: @problems(type=errors)
+
+Please suggest improvements and help me fix the failing tests.</code></pre>
+<h3 id="fuzzy-search-examples">Fuzzy Search Examples</h3>
+<p>The fuzzy file search is intelligent and scores matches based on: 1.
+Exact filename match (highest score) 2. Path contains query 3. Filename
+contains query 4. Sequential character match 5. Word boundary match</p>
+<pre><code>@file[auth]           → internal/auth/handler.go
+@file[auth test]      → internal/auth/handler_test.go
+@file[llm prov]       → internal/llm/provider.go
+@file[main]           → cmd/server/main.go
+@file[cfg]            → config/config.go</code></pre>
+<h3 id="token-management">Token Management</h3>
+<p>HelixCode automatically manages token counts to prevent context
+overflow:</p>
+<p><strong>Default Limits:</strong> - <code>@file</code>: Entire file
+(truncated if &gt; 10k tokens) - <code>@folder</code>: 8000 tokens max -
+<code>@folder(content=true)</code>: Files added until limit reached -
+<code>@url</code>: 5000 tokens max - <code>@git-changes</code>: No limit
+(usually small) - <code>@terminal</code>: Based on line count -
+<code>@problems</code>: No limit (usually small)</p>
+<p><strong>Override Token Limits:</strong></p>
+<pre><code>@folder[large-dir](content=true,max_tokens=15000)</code></pre>
+<hr />
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="be-specific-with-file-paths">1. Be Specific with File Paths</h3>
+<p><strong>Good:</strong></p>
+<pre><code>@file[internal/auth/jwt.go]</code></pre>
+<p><strong>Acceptable (if unique):</strong></p>
+<pre><code>@file[jwt]</code></pre>
+<p><strong>Avoid (ambiguous):</strong></p>
+<pre><code>@file[auth]  # Could match multiple files</code></pre>
+<h3 id="use-recursive-folder-scanning-wisely">2. Use Recursive Folder
+Scanning Wisely</h3>
+<p><strong>Good (specific, small directory):</strong></p>
+<pre><code>@folder[internal/auth](recursive=true)</code></pre>
+<p><strong>Avoid (too broad):</strong></p>
+<pre><code>@folder[.](recursive=true,content=true)  # Entire workspace!</code></pre>
+<h3 id="combine-mentions-for-context">3. Combine Mentions for
+Context</h3>
+<p>Instead of:</p>
+<pre><code>Can you review internal/auth/handler.go and internal/auth/handler_test.go?</code></pre>
+<p>Do this:</p>
+<pre><code>Review @file[internal/auth/handler.go] and @file[internal/auth/handler_test.go]</code></pre>
+<h3 id="use-terminal-history-for-debugging">4. Use Terminal History for
+Debugging</h3>
+<p>When asking about errors:</p>
+<pre><code>The build fails with strange errors. Here&#39;s the output: @terminal(lines=50)
+
+What&#39;s causing this?</code></pre>
+<h3 id="filter-problems-by-type">5. Filter Problems by Type</h3>
+<p>For focused debugging:</p>
+<pre><code>Let&#39;s fix the errors first: @problems(type=errors)</code></pre>
+<h3 id="cache-web-content">6. Cache Web Content</h3>
+<p>If repeatedly referencing the same URL, the 15-minute cache prevents
+duplicate fetches:</p>
+<pre><code>Per the docs at @url[https://docs.example.com], should I...
+# (later in same session)
+Also from @url[https://docs.example.com], how do I...  # Uses cache</code></pre>
+<hr />
+<h2 id="examples-1">Examples</h2>
+<h3 id="example-1-code-review-request">Example 1: Code Review
+Request</h3>
+<pre><code>Please review this authentication implementation:
+
+Implementation: @file[internal/auth/handler.go]
+Tests: @file[internal/auth/handler_test.go]
+Recent changes: @git-changes
+
+Are there any security issues or improvements you&#39;d suggest?</code></pre>
+<h3 id="example-2-bug-investigation">Example 2: Bug Investigation</h3>
+<pre><code>I&#39;m getting test failures. Here&#39;s the context:
+
+Failed test file: @file[internal/llm/provider_test.go]
+Implementation: @file[internal/llm/provider.go]
+Test output: @terminal(lines=100)
+Workspace problems: @problems(type=errors)
+
+What&#39;s wrong and how can I fix it?</code></pre>
+<h3 id="example-3-refactoring-assistance">Example 3: Refactoring
+Assistance</h3>
+<pre><code>I want to refactor the configuration system:
+
+Current config: @folder[config](content=true)
+Usage example: @file[internal/config/loader.go]
+Documentation: @url[https://github.com/spf13/viper]
+
+How should I restructure this to use Viper?</code></pre>
+<h3 id="example-4-api-integration">Example 4: API Integration</h3>
+<pre><code>Help me integrate this API:
+
+API Docs: @url[https://api.example.com/docs]
+Current implementation: @file[internal/client/api.go]
+Failing tests: @file[internal/client/api_test.go]
+Error output: @terminal(lines=50)
+
+What am I doing wrong?</code></pre>
+<h3 id="example-5-documentation-update">Example 5: Documentation
+Update</h3>
+<pre><code>Update the README to reflect these changes:
+
+Current README: @file[README.md]
+New features: @git-changes
+Project structure: @folder[.](recursive=false)
+
+Please rewrite the README to include the new features.</code></pre>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="file-not-found">File Not Found</h3>
+<p><strong>Problem:</strong></p>
+<pre><code>Error: file not found: internal/auth/handler.go</code></pre>
+<p><strong>Solutions:</strong> 1. Check the file path is correct
+(relative to workspace root) 2. Use fuzzy search:
+<code>@file[auth handler]</code> 3. List the folder first:
+<code>@folder[internal/auth]</code> 4. Verify file exists:
+<code>ls internal/auth/</code></p>
+<h3 id="fuzzy-search-returns-wrong-file">Fuzzy Search Returns Wrong
+File</h3>
+<p><strong>Problem:</strong> <code>@file[handler]</code> returns
+<code>internal/llm/handler.go</code> instead of
+<code>internal/auth/handler.go</code></p>
+<p><strong>Solutions:</strong> 1. Be more specific:
+<code>@file[auth handler]</code> 2. Use full path:
+<code>@file[internal/auth/handler.go]</code> 3. Check scoring with
+multiple attempts</p>
+<h3 id="url-fetch-timeout">URL Fetch Timeout</h3>
+<p><strong>Problem:</strong></p>
+<pre><code>Error: timeout fetching https://slow-site.com</code></pre>
+<p><strong>Solutions:</strong> 1. Check internet connection 2. Try again
+(may be temporary) 3. Use alternative documentation source 4. Download
+page manually and use <code>@file</code></p>
+<h3 id="git-commands-fail">Git Commands Fail</h3>
+<p><strong>Problem:</strong></p>
+<pre><code>Error: not a git repository</code></pre>
+<p><strong>Solutions:</strong> 1. Initialize Git: <code>git init</code>
+2. Navigate to repository root 3. Check Git is installed:
+<code>git --version</code></p>
+<h3 id="token-limit-exceeded">Token Limit Exceeded</h3>
+<p><strong>Problem:</strong></p>
+<pre><code>Warning: content truncated (exceeded token limit)</code></pre>
+<p><strong>Solutions:</strong> 1. Use smaller folders:
+<code>@folder[specific-dir]</code> instead of <code>@folder[.]</code> 2.
+Disable content: <code>@folder[dir](content=false)</code> 3. Increase
+limit: <code>@folder[dir](content=true,max_tokens=15000)</code> 4. Split
+into multiple messages</p>
+<h3 id="terminal-history-empty">Terminal History Empty</h3>
+<p><strong>Problem:</strong> <code>@terminal</code> returns no
+output</p>
+<p><strong>Causes:</strong> - New session (no terminal history yet) -
+Terminal history cleared - No commands run in this session</p>
+<p><strong>Solutions:</strong> 1. Run some commands first 2. Use
+<code>@file</code> for log files instead 3. Copy output manually if
+needed</p>
+<hr />
+<h2 id="faq">FAQ</h2>
+<p><strong>Q: Can I use @ mentions in any message?</strong> A: Yes, @
+mentions work in all chat messages to HelixCode.</p>
+<p><strong>Q: How many @ mentions can I use in one message?</strong> A:
+Unlimited, but watch the total token count. Typically 5-10 mentions per
+message is reasonable.</p>
+<p><strong>Q: Do @ mentions work with all LLM providers?</strong> A:
+Yes, @ mentions are processed before sending to any LLM provider.</p>
+<p><strong>Q: Can I create custom mention types?</strong> A: Not yet,
+but this is planned for a future release. Currently, only the 7 built-in
+types are supported.</p>
+<p><strong>Q: Are @ mentions case-sensitive?</strong> A: File paths are
+case-sensitive on Linux/Mac, case-insensitive on Windows. Mention types
+themselves are case-insensitive.</p>
+<p><strong>Q: Can @ mentions include binary files?</strong> A: Binary
+files are detected and skipped. Only text files are included.</p>
+<p><strong>Q: Do @ mentions slow down responses?</strong> A: Slightly,
+but the delay is minimal (typically &lt; 100ms per mention). File I/O
+and URL fetching are cached.</p>
+<p><strong>Q: Can I use @ mentions in slash commands?</strong> A: Yes!
+For example: <code>/newtask Fix bugs in @file[handler.go]</code></p>
+<p><strong>Q: What happens if a mentioned file changes during the
+conversation?</strong> A: The content is read fresh each time you
+mention it. If you want a snapshot, copy the content in your
+message.</p>
+<p><strong>Q: Can @ mentions access files outside the
+workspace?</strong> A: No, all file/folder mentions are restricted to
+the workspace root for security.</p>
+<p><strong>Q: Is there a performance impact with many @
+mentions?</strong> A: Minimal. HelixCode uses caching and efficient file
+I/O. Even 10+ mentions process quickly.</p>
+<hr />
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="./SLASH_COMMANDS_USER_GUIDE.md">Slash Commands User
+Guide</a></li>
+<li><a href="./CONFIGURATION.md">HelixCode Configuration Guide</a></li>
+<li><a href="./API.md">API Documentation</a></li>
+<li><a href="https://helixcode.dev/tutorials">Video Tutorials</a></li>
+</ul>
+<hr />
+<p><strong>Document Version:</strong> 1.0 <strong>Last Updated:</strong>
+November 7, 2025 <strong>Feedback:</strong> <a href="https://github.com/user/helixcode/issues">GitHub Issues</a></p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29:
+https://pkg.go.dev/github.com/gin-gonic/gin (the
+<code>@url[https://pkg.go.dev/github.com/gin-gonic/gin]</code> example
+resolves to a live, current pkg.go.dev page — the documented
+<code>@url</code> fetcher target is valid),
+https://github.com/spf13/viper (live repository — the
+documentation-mention example resolves). Confirmed: the
+<code>@url</code>, <code>@file</code>, and terminal-history mention
+syntaxes are HelixCode-internal CLI features documented against the
+product itself, not against an external service contract. Negative
+findings: (1) the example URLs <code>https://docs.example.com</code>,
+<code>https://example.com/page</code>,
+<code>https://api.example.com/docs</code> are intentional RFC-2606
+example.com placeholders, not real endpoints — correctly illustrative;
+(2) the Feedback link
+<code>https://github.com/user/helixcode/issues</code> is a placeholder
+<code>user/</code> org (the real HelixCode repos live under
+<code>vasic-digital/*</code> and <code>HelixDevelopment/*</code> per
+CLAUDE.md project-tightening note) — flagged as a stale placeholder,
+left unchanged to avoid guessing the canonical issues URL (§11.4.6
+no-guessing).</p>
+</body>
+</html>

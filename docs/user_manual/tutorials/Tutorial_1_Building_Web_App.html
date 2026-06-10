@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Tutorial_1_Building_Web_App</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Tutorial_1_Building_Web_App</h1>
+</header>
+<h1 id="tutorial-1-building-a-web-application-from-scratch">Tutorial 1:
+Building a Web Application from Scratch</h1>
+<p><strong>Duration</strong>: 45-60 minutes <strong>Level</strong>:
+Beginner <strong>Prerequisites</strong>: Basic programming knowledge,
+HelixCode installed</p>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>In this tutorial, you’ll build a complete RESTful web application
+using HelixCode’s AI assistance. You’ll learn:</p>
+<ul>
+<li>Project initialization with Plan Mode</li>
+<li>Code generation with AI</li>
+<li>Database schema design</li>
+<li>API endpoint creation</li>
+<li>Testing automation</li>
+<li>Git auto-commit</li>
+<li>Deployment</li>
+</ul>
+<p><strong>What We’re Building</strong>: A Task Management API with user
+authentication, CRUD operations, and PostgreSQL backend.</p>
+<hr />
+<h2 id="step-1-project-setup">Step 1: Project Setup</h2>
+<h3 id="create-project-directory">1.1 Create Project Directory</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> task-api</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> task-api</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> init</span></code></pre></div>
+<h3 id="initialize-helixcode-session">1.2 Initialize HelixCode
+Session</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start HelixCode interactive session</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create named session</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> session create <span class="at">--name</span> <span class="st">&quot;task-api-build&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Session created: task-api-build (id: abc123)</span></span></code></pre></div>
+<h3 id="configure-ai-provider">1.3 Configure AI Provider</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List available providers</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> llm providers</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Set provider (choose based on your setup)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> llm provider set anthropic <span class="at">--model</span> claude-3-5-sonnet-latest</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> llm models</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ✓ anthropic/claude-3-5-sonnet-latest (active)</span></span></code></pre></div>
+<hr />
+<h2 id="step-2-use-plan-mode-for-architecture">Step 2: Use Plan Mode for
+Architecture</h2>
+<h3 id="generate-project-plan">2.1 Generate Project Plan</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> plan <span class="st">&quot;Create a REST API in Go for task management with:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">- User authentication (JWT)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">- CRUD operations for tasks</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">- PostgreSQL database</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="st">- Clean architecture (handler/service/repository layers)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="st">- Comprehensive error handling</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="st">- Unit tests</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="st">- Docker support&quot;</span></span></code></pre></div>
+<p><strong>HelixCode Output</strong>:</p>
+<pre><code>📋 Plan Generated (ID: plan-001)
+
+## Project: Task Management REST API
+
+### Phase 1: Project Structure &amp; Dependencies
+- Initialize Go module
+- Create directory structure (cmd/, internal/, pkg/)
+- Add dependencies (gin, pgx, jwt-go)
+- Create Dockerfile and docker-compose.yml
+
+### Phase 2: Database Layer
+- Define schema (users, tasks tables)
+- Create migrations
+- Implement repository layer
+- Add connection pooling
+
+### Phase 3: Service Layer
+- User authentication service
+- Task CRUD service
+- Error handling middleware
+- Input validation
+
+### Phase 4: API Layer
+- HTTP handlers (gin)
+- JWT middleware
+- Request/response models
+- Route configuration
+
+### Phase 5: Testing
+- Unit tests for services
+- Integration tests for API
+- Test fixtures and helpers
+
+### Phase 6: Deployment
+- Docker containerization
+- Environment configuration
+- CI/CD pipeline
+
+Estimated time: 2-3 hours with AI assistance
+Complexity: Medium
+
+Options generated: 3</code></pre>
+<h3 id="review-options">2.2 Review Options</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> plan options plan-001</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 1: Standard REST API (recommended)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># - Gin framework</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># - PostgreSQL with pgx</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># - JWT authentication</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># - Clean architecture</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 2: Microservices Architecture</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># - Separate auth service</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># - gRPC communication</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># - Event-driven</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># - More complex</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 3: Serverless</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># - AWS Lambda</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co"># - DynamoDB</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co"># - API Gateway</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co"># - Cloud-native</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> plan select plan-001 option-1</span></code></pre></div>
+<h3 id="execute-plan">2.3 Execute Plan</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> plan execute plan-001</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># HelixCode will now execute each phase step-by-step</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># You can approve each step or let it run automatically</span></span></code></pre></div>
+<hr />
+<h2 id="step-3-project-structure-generation">Step 3: Project Structure
+Generation</h2>
+<h3 id="initialize-go-module">3.1 Initialize Go Module</h3>
+<p><strong>HelixCode generates</strong>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Automatic execution</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> go mod init task-api</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> go mod tidy</span></code></pre></div>
+<p><strong>Created <code>go.mod</code></strong>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>module task<span class="op">-</span>api</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">go</span> <span class="fl">1.26</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>require <span class="op">(</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>gin<span class="op">-</span>gonic<span class="op">/</span>gin v1<span class="fl">.9</span><span class="er">.1</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>golang<span class="op">-</span>jwt<span class="op">/</span>jwt<span class="op">/</span>v5 v5<span class="fl">.0</span><span class="er">.0</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>jackc<span class="op">/</span>pgx<span class="op">/</span>v5 v5<span class="fl">.4</span><span class="er">.3</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    github<span class="op">.</span>com<span class="op">/</span>google<span class="op">/</span>uuid v1<span class="fl">.3</span><span class="er">.1</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    golang<span class="op">.</span>org<span class="op">/</span>x<span class="op">/</span>crypto v0<span class="fl">.14</span><span class="er">.0</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="directory-structure">3.2 Directory Structure</h3>
+<p><strong>HelixCode creates</strong>:</p>
+<pre><code>task-api/
+├── cmd/
+│   └── server/
+│       └── main.go
+├── internal/
+│   ├── auth/
+│   │   ├── jwt.go
+│   │   ├── middleware.go
+│   │   └── service.go
+│   ├── task/
+│   │   ├── handler.go
+│   │   ├── service.go
+│   │   └── repository.go
+│   ├── user/
+│   │   ├── handler.go
+│   │   ├── service.go
+│   │   └── repository.go
+│   ├── database/
+│   │   └── postgres.go
+│   └── server/
+│       └── server.go
+├── pkg/
+│   ├── models/
+│   │   ├── user.go
+│   │   └── task.go
+│   └── errors/
+│       └── errors.go
+├── migrations/
+│   ├── 001_create_users_table.sql
+│   └── 002_create_tasks_table.sql
+├── tests/
+│   ├── integration/
+│   └── unit/
+├── docker-compose.yml
+├── Dockerfile
+├── .env.example
+├── .gitignore
+└── README.md</code></pre>
+<hr />
+<h2 id="step-4-database-schema-design">Step 4: Database Schema
+Design</h2>
+<h3 id="users-table-migration">4.1 Users Table Migration</h3>
+<p><strong>HelixCode generates</strong>
+<code>migrations/001_create_users_table.sql</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Create users table</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> users (</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    username <span class="dt">VARCHAR</span>(<span class="dv">50</span>) <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    email <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">UNIQUE</span> <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    password_hash <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">WITH</span> <span class="dt">TIME</span> <span class="dt">ZONE</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">WITH</span> <span class="dt">TIME</span> <span class="dt">ZONE</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">-- Create index on email for fast lookups</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_users_email <span class="kw">ON</span> users(email);</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_users_username <span class="kw">ON</span> users(username);</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">-- Trigger to update updated_at</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> update_updated_at_column()</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>RETURNS <span class="kw">TRIGGER</span> <span class="kw">AS</span> $$</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">NEW</span>.updated_at <span class="op">=</span> <span class="fu">CURRENT_TIMESTAMP</span>;</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">RETURN</span> <span class="kw">NEW</span>;</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>$$ language <span class="st">&#39;plpgsql&#39;</span>;</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TRIGGER</span> update_users_updated_at <span class="kw">BEFORE</span> <span class="kw">UPDATE</span> <span class="kw">ON</span> users</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="cf">FOR</span> <span class="kw">EACH</span> <span class="kw">ROW</span> <span class="kw">EXECUTE</span> <span class="kw">FUNCTION</span> update_updated_at_column();</span></code></pre></div>
+<h3 id="tasks-table-migration">4.2 Tasks Table Migration</h3>
+<p><strong>HelixCode generates</strong>
+<code>migrations/002_create_tasks_table.sql</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Create tasks table</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> tasks (</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> UUID <span class="kw">PRIMARY</span> <span class="kw">KEY</span> <span class="kw">DEFAULT</span> gen_random_uuid(),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    user_id UUID <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">REFERENCES</span> users(<span class="kw">id</span>) <span class="kw">ON</span> <span class="kw">DELETE</span> <span class="kw">CASCADE</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    title <span class="dt">VARCHAR</span>(<span class="dv">255</span>) <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    description TEXT,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    status <span class="dt">VARCHAR</span>(<span class="dv">20</span>) <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    priority <span class="dt">VARCHAR</span>(<span class="dv">20</span>) <span class="kw">DEFAULT</span> <span class="st">&#39;medium&#39;</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    due_date <span class="dt">TIMESTAMP</span> <span class="kw">WITH</span> <span class="dt">TIME</span> <span class="dt">ZONE</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    created_at <span class="dt">TIMESTAMP</span> <span class="kw">WITH</span> <span class="dt">TIME</span> <span class="dt">ZONE</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    updated_at <span class="dt">TIMESTAMP</span> <span class="kw">WITH</span> <span class="dt">TIME</span> <span class="dt">ZONE</span> <span class="kw">DEFAULT</span> <span class="fu">CURRENT_TIMESTAMP</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">CONSTRAINT</span> valid_status <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="st">&#39;pending&#39;</span>, <span class="st">&#39;in_progress&#39;</span>, <span class="st">&#39;completed&#39;</span>, <span class="st">&#39;cancelled&#39;</span>)),</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">CONSTRAINT</span> valid_priority <span class="kw">CHECK</span> (priority <span class="kw">IN</span> (<span class="st">&#39;low&#39;</span>, <span class="st">&#39;medium&#39;</span>, <span class="st">&#39;high&#39;</span>, <span class="st">&#39;urgent&#39;</span>))</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="co">-- Indexes for performance</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_tasks_user_id <span class="kw">ON</span> tasks(user_id);</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_tasks_status <span class="kw">ON</span> tasks(status);</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> idx_tasks_due_date <span class="kw">ON</span> tasks(due_date);</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co">-- Update trigger</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TRIGGER</span> update_tasks_updated_at <span class="kw">BEFORE</span> <span class="kw">UPDATE</span> <span class="kw">ON</span> tasks</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="cf">FOR</span> <span class="kw">EACH</span> <span class="kw">ROW</span> <span class="kw">EXECUTE</span> <span class="kw">FUNCTION</span> update_updated_at_column();</span></code></pre></div>
+<hr />
+<h2 id="step-5-implement-models">Step 5: Implement Models</h2>
+<h3 id="user-model">5.1 User Model</h3>
+<p><strong>HelixCode generates</strong>
+<code>pkg/models/user.go</code>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> models</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/google/uuid&quot;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">// User represents a user in the system</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> User <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    ID           uuid<span class="op">.</span>UUID <span class="st">`json:&quot;id&quot; db:&quot;id&quot;`</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    Username     <span class="dt">string</span>    <span class="st">`json:&quot;username&quot; db:&quot;username&quot;`</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    Email        <span class="dt">string</span>    <span class="st">`json:&quot;email&quot; db:&quot;email&quot;`</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    PasswordHash <span class="dt">string</span>    <span class="st">`json:&quot;-&quot; db:&quot;password_hash&quot;`</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    CreatedAt    time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot; db:&quot;created_at&quot;`</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    UpdatedAt    time<span class="op">.</span>Time <span class="st">`json:&quot;updated_at&quot; db:&quot;updated_at&quot;`</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">// UserCreateRequest represents user registration request</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UserCreateRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    Username <span class="dt">string</span> <span class="st">`json:&quot;username&quot; binding:&quot;required,min=3,max=50&quot;`</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    Email    <span class="dt">string</span> <span class="st">`json:&quot;email&quot; binding:&quot;required,email&quot;`</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    Password <span class="dt">string</span> <span class="st">`json:&quot;password&quot; binding:&quot;required,min=8&quot;`</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co">// UserLoginRequest represents login request</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UserLoginRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    Email    <span class="dt">string</span> <span class="st">`json:&quot;email&quot; binding:&quot;required,email&quot;`</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    Password <span class="dt">string</span> <span class="st">`json:&quot;password&quot; binding:&quot;required&quot;`</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="co">// UserResponse represents user response (without sensitive data)</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UserResponse <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    ID        uuid<span class="op">.</span>UUID <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    Username  <span class="dt">string</span>    <span class="st">`json:&quot;username&quot;`</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    Email     <span class="dt">string</span>    <span class="st">`json:&quot;email&quot;`</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    CreatedAt time<span class="op">.</span>Time <span class="st">`json:&quot;created_at&quot;`</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="co">// ToResponse converts User to UserResponse</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>u <span class="op">*</span>User<span class="op">)</span> ToResponse<span class="op">()</span> UserResponse <span class="op">{</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> UserResponse<span class="op">{</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>        ID<span class="op">:</span>        u<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>        Username<span class="op">:</span>  u<span class="op">.</span>Username<span class="op">,</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>        Email<span class="op">:</span>     u<span class="op">.</span>Email<span class="op">,</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>        CreatedAt<span class="op">:</span> u<span class="op">.</span>CreatedAt<span class="op">,</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="task-model">5.2 Task Model</h3>
+<p><strong>HelixCode generates</strong>
+<code>pkg/models/task.go</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> models</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/google/uuid&quot;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">// TaskStatus represents the status of a task</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskStatus <span class="dt">string</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    StatusPending    TaskStatus <span class="op">=</span> <span class="st">&quot;pending&quot;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    StatusInProgress TaskStatus <span class="op">=</span> <span class="st">&quot;in_progress&quot;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    StatusCompleted  TaskStatus <span class="op">=</span> <span class="st">&quot;completed&quot;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    StatusCancelled  TaskStatus <span class="op">=</span> <span class="st">&quot;cancelled&quot;</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">// TaskPriority represents the priority level</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskPriority <span class="dt">string</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    PriorityLow    TaskPriority <span class="op">=</span> <span class="st">&quot;low&quot;</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    PriorityMedium TaskPriority <span class="op">=</span> <span class="st">&quot;medium&quot;</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    PriorityHigh   TaskPriority <span class="op">=</span> <span class="st">&quot;high&quot;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    PriorityUrgent TaskPriority <span class="op">=</span> <span class="st">&quot;urgent&quot;</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="co">// Task represents a task</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Task <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    ID          uuid<span class="op">.</span>UUID    <span class="st">`json:&quot;id&quot; db:&quot;id&quot;`</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    UserID      uuid<span class="op">.</span>UUID    <span class="st">`json:&quot;user_id&quot; db:&quot;user_id&quot;`</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    Title       <span class="dt">string</span>       <span class="st">`json:&quot;title&quot; db:&quot;title&quot;`</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>       <span class="st">`json:&quot;description&quot; db:&quot;description&quot;`</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    Status      TaskStatus   <span class="st">`json:&quot;status&quot; db:&quot;status&quot;`</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    Priority    TaskPriority <span class="st">`json:&quot;priority&quot; db:&quot;priority&quot;`</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    DueDate     <span class="op">*</span>time<span class="op">.</span>Time   <span class="st">`json:&quot;due_date,omitempty&quot; db:&quot;due_date&quot;`</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    CreatedAt   time<span class="op">.</span>Time    <span class="st">`json:&quot;created_at&quot; db:&quot;created_at&quot;`</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    UpdatedAt   time<span class="op">.</span>Time    <span class="st">`json:&quot;updated_at&quot; db:&quot;updated_at&quot;`</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="co">// TaskCreateRequest represents task creation request</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskCreateRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>    Title       <span class="dt">string</span>       <span class="st">`json:&quot;title&quot; binding:&quot;required,min=1,max=255&quot;`</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span>       <span class="st">`json:&quot;description&quot;`</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    Priority    TaskPriority <span class="st">`json:&quot;priority&quot; binding:&quot;omitempty,oneof=low medium high urgent&quot;`</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    DueDate     <span class="op">*</span>time<span class="op">.</span>Time   <span class="st">`json:&quot;due_date,omitempty&quot;`</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="co">// TaskUpdateRequest represents task update request</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskUpdateRequest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>    Title       <span class="op">*</span><span class="dt">string</span>       <span class="st">`json:&quot;title,omitempty&quot; binding:&quot;omitempty,min=1,max=255&quot;`</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    Description <span class="op">*</span><span class="dt">string</span>       <span class="st">`json:&quot;description,omitempty&quot;`</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>    Status      <span class="op">*</span>TaskStatus   <span class="st">`json:&quot;status,omitempty&quot; binding:&quot;omitempty,oneof=pending in_progress completed cancelled&quot;`</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>    Priority    <span class="op">*</span>TaskPriority <span class="st">`json:&quot;priority,omitempty&quot; binding:&quot;omitempty,oneof=low medium high urgent&quot;`</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>    DueDate     <span class="op">*</span>time<span class="op">.</span>Time    <span class="st">`json:&quot;due_date,omitempty&quot;`</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="co">// TaskListFilters represents task listing filters</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TaskListFilters <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>    Status   <span class="op">*</span>TaskStatus   <span class="st">`form:&quot;status&quot;`</span></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>    Priority <span class="op">*</span>TaskPriority <span class="st">`form:&quot;priority&quot;`</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>    Page     <span class="dt">int</span>           <span class="st">`form:&quot;page,default=1&quot;`</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>    PerPage  <span class="dt">int</span>           <span class="st">`form:&quot;per_page,default=20&quot;`</span></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="step-6-implement-repository-layer">Step 6: Implement Repository
+Layer</h2>
+<p><strong>Ask HelixCode</strong>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> generate <span class="st">&quot;Implement the task repository with CRUD operations using pgx/v5&quot;</span></span></code></pre></div>
+<p><strong>HelixCode generates</strong>
+<code>internal/task/repository.go</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> task</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/google/uuid&quot;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/jackc/pgx/v5&quot;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/jackc/pgx/v5/pgxpool&quot;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/pkg/models&quot;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/pkg/errors&quot;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Repository handles task data persistence</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Repository <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    db <span class="op">*</span>pgxpool<span class="op">.</span>Pool</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co">// NewRepository creates a new task repository</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewRepository<span class="op">(</span>db <span class="op">*</span>pgxpool<span class="op">.</span>Pool<span class="op">)</span> <span class="op">*</span>Repository <span class="op">{</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Repository<span class="op">{</span>db<span class="op">:</span> db<span class="op">}</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="co">// Create inserts a new task</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Repository<span class="op">)</span> Create<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task <span class="op">*</span>models<span class="op">.</span>Task<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    query <span class="op">:=</span> <span class="st">`</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="st">        INSERT INTO tasks (id, user_id, title, description, status, priority, due_date)</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="st">        VALUES ($1, $2, $3, $4, $5, $6, $7)</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="st">        RETURNING created_at, updated_at</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="st">    `</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> r<span class="op">.</span>db<span class="op">.</span>QueryRow<span class="op">(</span>ctx<span class="op">,</span> query<span class="op">,</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>UserID<span class="op">,</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Title<span class="op">,</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Description<span class="op">,</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Status<span class="op">,</span></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Priority<span class="op">,</span></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>DueDate<span class="op">,</span></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">).</span>Scan<span class="op">(&amp;</span>task<span class="op">.</span>CreatedAt<span class="op">,</span> <span class="op">&amp;</span>task<span class="op">.</span>UpdatedAt<span class="op">)</span></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to create task: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a><span class="co">// GetByID retrieves a task by ID</span></span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Repository<span class="op">)</span> GetByID<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id uuid<span class="op">.</span>UUID<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">)</span> <span class="op">(*</span>models<span class="op">.</span>Task<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>    query <span class="op">:=</span> <span class="st">`</span></span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT id, user_id, title, description, status, priority, due_date, created_at, updated_at</span></span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM tasks</span></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a><span class="st">        WHERE id = $1 AND user_id = $2</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a><span class="st">    `</span></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>    task <span class="op">:=</span> <span class="op">&amp;</span>models<span class="op">.</span>Task<span class="op">{}</span></span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> r<span class="op">.</span>db<span class="op">.</span>QueryRow<span class="op">(</span>ctx<span class="op">,</span> query<span class="op">,</span> id<span class="op">,</span> userID<span class="op">).</span>Scan<span class="op">(</span></span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>UserID<span class="op">,</span></span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>Title<span class="op">,</span></span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>Description<span class="op">,</span></span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>Status<span class="op">,</span></span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>Priority<span class="op">,</span></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>DueDate<span class="op">,</span></span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>CreatedAt<span class="op">,</span></span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>task<span class="op">.</span>UpdatedAt<span class="op">,</span></span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> pgx<span class="op">.</span>ErrNoRows <span class="op">{</span></span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>ErrTaskNotFound</span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to get task: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> task<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a><span class="co">// List retrieves tasks for a user with filters</span></span>
+<span id="cb16-80"><a href="#cb16-80" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Repository<span class="op">)</span> List<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">,</span> filters <span class="op">*</span>models<span class="op">.</span>TaskListFilters<span class="op">)</span> <span class="op">([]*</span>models<span class="op">.</span>Task<span class="op">,</span> <span class="dt">int</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-81"><a href="#cb16-81" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Build dynamic query based on filters</span></span>
+<span id="cb16-82"><a href="#cb16-82" aria-hidden="true" tabindex="-1"></a>    query <span class="op">:=</span> <span class="st">`</span></span>
+<span id="cb16-83"><a href="#cb16-83" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT id, user_id, title, description, status, priority, due_date, created_at, updated_at</span></span>
+<span id="cb16-84"><a href="#cb16-84" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM tasks</span></span>
+<span id="cb16-85"><a href="#cb16-85" aria-hidden="true" tabindex="-1"></a><span class="st">        WHERE user_id = $1</span></span>
+<span id="cb16-86"><a href="#cb16-86" aria-hidden="true" tabindex="-1"></a><span class="st">    `</span></span>
+<span id="cb16-87"><a href="#cb16-87" aria-hidden="true" tabindex="-1"></a>    countQuery <span class="op">:=</span> <span class="st">`SELECT COUNT(*) FROM tasks WHERE user_id = $1`</span></span>
+<span id="cb16-88"><a href="#cb16-88" aria-hidden="true" tabindex="-1"></a>    args <span class="op">:=</span> <span class="op">[]</span><span class="kw">interface</span><span class="op">{}{</span>userID<span class="op">}</span></span>
+<span id="cb16-89"><a href="#cb16-89" aria-hidden="true" tabindex="-1"></a>    argPos <span class="op">:=</span> <span class="dv">2</span></span>
+<span id="cb16-90"><a href="#cb16-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-91"><a href="#cb16-91" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Apply filters</span></span>
+<span id="cb16-92"><a href="#cb16-92" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> filters<span class="op">.</span>Status <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-93"><a href="#cb16-93" aria-hidden="true" tabindex="-1"></a>        query <span class="op">+=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot; AND status = $%d&quot;</span><span class="op">,</span> argPos<span class="op">)</span></span>
+<span id="cb16-94"><a href="#cb16-94" aria-hidden="true" tabindex="-1"></a>        countQuery <span class="op">+=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot; AND status = $%d&quot;</span><span class="op">,</span> argPos<span class="op">)</span></span>
+<span id="cb16-95"><a href="#cb16-95" aria-hidden="true" tabindex="-1"></a>        args <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>args<span class="op">,</span> <span class="op">*</span>filters<span class="op">.</span>Status<span class="op">)</span></span>
+<span id="cb16-96"><a href="#cb16-96" aria-hidden="true" tabindex="-1"></a>        argPos<span class="op">++</span></span>
+<span id="cb16-97"><a href="#cb16-97" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-98"><a href="#cb16-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-99"><a href="#cb16-99" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> filters<span class="op">.</span>Priority <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-100"><a href="#cb16-100" aria-hidden="true" tabindex="-1"></a>        query <span class="op">+=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot; AND priority = $%d&quot;</span><span class="op">,</span> argPos<span class="op">)</span></span>
+<span id="cb16-101"><a href="#cb16-101" aria-hidden="true" tabindex="-1"></a>        countQuery <span class="op">+=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot; AND priority = $%d&quot;</span><span class="op">,</span> argPos<span class="op">)</span></span>
+<span id="cb16-102"><a href="#cb16-102" aria-hidden="true" tabindex="-1"></a>        args <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>args<span class="op">,</span> <span class="op">*</span>filters<span class="op">.</span>Priority<span class="op">)</span></span>
+<span id="cb16-103"><a href="#cb16-103" aria-hidden="true" tabindex="-1"></a>        argPos<span class="op">++</span></span>
+<span id="cb16-104"><a href="#cb16-104" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-105"><a href="#cb16-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-106"><a href="#cb16-106" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Get total count</span></span>
+<span id="cb16-107"><a href="#cb16-107" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> total <span class="dt">int</span></span>
+<span id="cb16-108"><a href="#cb16-108" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> r<span class="op">.</span>db<span class="op">.</span>QueryRow<span class="op">(</span>ctx<span class="op">,</span> countQuery<span class="op">,</span> args<span class="op">...).</span>Scan<span class="op">(&amp;</span>total<span class="op">)</span></span>
+<span id="cb16-109"><a href="#cb16-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-110"><a href="#cb16-110" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to count tasks: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-111"><a href="#cb16-111" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-112"><a href="#cb16-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-113"><a href="#cb16-113" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Add pagination</span></span>
+<span id="cb16-114"><a href="#cb16-114" aria-hidden="true" tabindex="-1"></a>    offset <span class="op">:=</span> <span class="op">(</span>filters<span class="op">.</span>Page <span class="op">-</span> <span class="dv">1</span><span class="op">)</span> <span class="op">*</span> filters<span class="op">.</span>PerPage</span>
+<span id="cb16-115"><a href="#cb16-115" aria-hidden="true" tabindex="-1"></a>    query <span class="op">+=</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot; ORDER BY created_at DESC LIMIT $%d OFFSET $%d&quot;</span><span class="op">,</span> argPos<span class="op">,</span> argPos<span class="op">+</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb16-116"><a href="#cb16-116" aria-hidden="true" tabindex="-1"></a>    args <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>args<span class="op">,</span> filters<span class="op">.</span>PerPage<span class="op">,</span> offset<span class="op">)</span></span>
+<span id="cb16-117"><a href="#cb16-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-118"><a href="#cb16-118" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Execute query</span></span>
+<span id="cb16-119"><a href="#cb16-119" aria-hidden="true" tabindex="-1"></a>    rows<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>db<span class="op">.</span>Query<span class="op">(</span>ctx<span class="op">,</span> query<span class="op">,</span> args<span class="op">...)</span></span>
+<span id="cb16-120"><a href="#cb16-120" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-121"><a href="#cb16-121" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to list tasks: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-122"><a href="#cb16-122" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-123"><a href="#cb16-123" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> rows<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb16-124"><a href="#cb16-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-125"><a href="#cb16-125" aria-hidden="true" tabindex="-1"></a>    tasks <span class="op">:=</span> <span class="bu">make</span><span class="op">([]*</span>models<span class="op">.</span>Task<span class="op">,</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb16-126"><a href="#cb16-126" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> rows<span class="op">.</span>Next<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb16-127"><a href="#cb16-127" aria-hidden="true" tabindex="-1"></a>        task <span class="op">:=</span> <span class="op">&amp;</span>models<span class="op">.</span>Task<span class="op">{}</span></span>
+<span id="cb16-128"><a href="#cb16-128" aria-hidden="true" tabindex="-1"></a>        err <span class="op">:=</span> rows<span class="op">.</span>Scan<span class="op">(</span></span>
+<span id="cb16-129"><a href="#cb16-129" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb16-130"><a href="#cb16-130" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>UserID<span class="op">,</span></span>
+<span id="cb16-131"><a href="#cb16-131" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>Title<span class="op">,</span></span>
+<span id="cb16-132"><a href="#cb16-132" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>Description<span class="op">,</span></span>
+<span id="cb16-133"><a href="#cb16-133" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>Status<span class="op">,</span></span>
+<span id="cb16-134"><a href="#cb16-134" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>Priority<span class="op">,</span></span>
+<span id="cb16-135"><a href="#cb16-135" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>DueDate<span class="op">,</span></span>
+<span id="cb16-136"><a href="#cb16-136" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>CreatedAt<span class="op">,</span></span>
+<span id="cb16-137"><a href="#cb16-137" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span>task<span class="op">.</span>UpdatedAt<span class="op">,</span></span>
+<span id="cb16-138"><a href="#cb16-138" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb16-139"><a href="#cb16-139" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-140"><a href="#cb16-140" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to scan task: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-141"><a href="#cb16-141" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb16-142"><a href="#cb16-142" aria-hidden="true" tabindex="-1"></a>        tasks <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>tasks<span class="op">,</span> task<span class="op">)</span></span>
+<span id="cb16-143"><a href="#cb16-143" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-144"><a href="#cb16-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-145"><a href="#cb16-145" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tasks<span class="op">,</span> total<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb16-146"><a href="#cb16-146" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-147"><a href="#cb16-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-148"><a href="#cb16-148" aria-hidden="true" tabindex="-1"></a><span class="co">// Update updates a task</span></span>
+<span id="cb16-149"><a href="#cb16-149" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Repository<span class="op">)</span> Update<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task <span class="op">*</span>models<span class="op">.</span>Task<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb16-150"><a href="#cb16-150" aria-hidden="true" tabindex="-1"></a>    query <span class="op">:=</span> <span class="st">`</span></span>
+<span id="cb16-151"><a href="#cb16-151" aria-hidden="true" tabindex="-1"></a><span class="st">        UPDATE tasks</span></span>
+<span id="cb16-152"><a href="#cb16-152" aria-hidden="true" tabindex="-1"></a><span class="st">        SET title = $1, description = $2, status = $3, priority = $4, due_date = $5</span></span>
+<span id="cb16-153"><a href="#cb16-153" aria-hidden="true" tabindex="-1"></a><span class="st">        WHERE id = $6 AND user_id = $7</span></span>
+<span id="cb16-154"><a href="#cb16-154" aria-hidden="true" tabindex="-1"></a><span class="st">        RETURNING updated_at</span></span>
+<span id="cb16-155"><a href="#cb16-155" aria-hidden="true" tabindex="-1"></a><span class="st">    `</span></span>
+<span id="cb16-156"><a href="#cb16-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-157"><a href="#cb16-157" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> r<span class="op">.</span>db<span class="op">.</span>QueryRow<span class="op">(</span>ctx<span class="op">,</span> query<span class="op">,</span></span>
+<span id="cb16-158"><a href="#cb16-158" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Title<span class="op">,</span></span>
+<span id="cb16-159"><a href="#cb16-159" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Description<span class="op">,</span></span>
+<span id="cb16-160"><a href="#cb16-160" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Status<span class="op">,</span></span>
+<span id="cb16-161"><a href="#cb16-161" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Priority<span class="op">,</span></span>
+<span id="cb16-162"><a href="#cb16-162" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>DueDate<span class="op">,</span></span>
+<span id="cb16-163"><a href="#cb16-163" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>ID<span class="op">,</span></span>
+<span id="cb16-164"><a href="#cb16-164" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>UserID<span class="op">,</span></span>
+<span id="cb16-165"><a href="#cb16-165" aria-hidden="true" tabindex="-1"></a>    <span class="op">).</span>Scan<span class="op">(&amp;</span>task<span class="op">.</span>UpdatedAt<span class="op">)</span></span>
+<span id="cb16-166"><a href="#cb16-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-167"><a href="#cb16-167" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-168"><a href="#cb16-168" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> pgx<span class="op">.</span>ErrNoRows <span class="op">{</span></span>
+<span id="cb16-169"><a href="#cb16-169" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> errors<span class="op">.</span>ErrTaskNotFound</span>
+<span id="cb16-170"><a href="#cb16-170" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb16-171"><a href="#cb16-171" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to update task: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-172"><a href="#cb16-172" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-173"><a href="#cb16-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-174"><a href="#cb16-174" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb16-175"><a href="#cb16-175" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-176"><a href="#cb16-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-177"><a href="#cb16-177" aria-hidden="true" tabindex="-1"></a><span class="co">// Delete deletes a task</span></span>
+<span id="cb16-178"><a href="#cb16-178" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Repository<span class="op">)</span> Delete<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id uuid<span class="op">.</span>UUID<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb16-179"><a href="#cb16-179" aria-hidden="true" tabindex="-1"></a>    query <span class="op">:=</span> <span class="st">`DELETE FROM tasks WHERE id = $1 AND user_id = $2`</span></span>
+<span id="cb16-180"><a href="#cb16-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-181"><a href="#cb16-181" aria-hidden="true" tabindex="-1"></a>    result<span class="op">,</span> err <span class="op">:=</span> r<span class="op">.</span>db<span class="op">.</span>Exec<span class="op">(</span>ctx<span class="op">,</span> query<span class="op">,</span> id<span class="op">,</span> userID<span class="op">)</span></span>
+<span id="cb16-182"><a href="#cb16-182" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-183"><a href="#cb16-183" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;failed to delete task: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-184"><a href="#cb16-184" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-185"><a href="#cb16-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-186"><a href="#cb16-186" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> result<span class="op">.</span>RowsAffected<span class="op">()</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb16-187"><a href="#cb16-187" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> errors<span class="op">.</span>ErrTaskNotFound</span>
+<span id="cb16-188"><a href="#cb16-188" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-189"><a href="#cb16-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-190"><a href="#cb16-190" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb16-191"><a href="#cb16-191" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="step-7-implement-service-layer">Step 7: Implement Service
+Layer</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> generate <span class="st">&quot;Implement task service layer with business logic&quot;</span></span></code></pre></div>
+<p><strong>HelixCode generates</strong>
+<code>internal/task/service.go</code>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> task</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/google/uuid&quot;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/pkg/models&quot;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/pkg/errors&quot;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Service handles task business logic</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Service <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    repo <span class="op">*</span>Repository</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="co">// NewService creates a new task service</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewService<span class="op">(</span>repo <span class="op">*</span>Repository<span class="op">)</span> <span class="op">*</span>Service <span class="op">{</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Service<span class="op">{</span>repo<span class="op">:</span> repo<span class="op">}</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="co">// CreateTask creates a new task</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Service<span class="op">)</span> CreateTask<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">,</span> req <span class="op">*</span>models<span class="op">.</span>TaskCreateRequest<span class="op">)</span> <span class="op">(*</span>models<span class="op">.</span>Task<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Validate request</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> req<span class="op">.</span>Title <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> errors<span class="op">.</span>ErrInvalidInput<span class="op">(</span><span class="st">&quot;title cannot be empty&quot;</span><span class="op">)</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set defaults</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    priority <span class="op">:=</span> req<span class="op">.</span>Priority</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> priority <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>        priority <span class="op">=</span> models<span class="op">.</span>PriorityMedium</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create task</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>    task <span class="op">:=</span> <span class="op">&amp;</span>models<span class="op">.</span>Task<span class="op">{</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>        ID<span class="op">:</span>          uuid<span class="op">.</span>New<span class="op">(),</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>        UserID<span class="op">:</span>      userID<span class="op">,</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>        Title<span class="op">:</span>       req<span class="op">.</span>Title<span class="op">,</span></span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>        Description<span class="op">:</span> req<span class="op">.</span>Description<span class="op">,</span></span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>        Status<span class="op">:</span>      models<span class="op">.</span>StatusPending<span class="op">,</span></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>        Priority<span class="op">:</span>    priority<span class="op">,</span></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>        DueDate<span class="op">:</span>     req<span class="op">.</span>DueDate<span class="op">,</span></span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> s<span class="op">.</span>repo<span class="op">.</span>Create<span class="op">(</span>ctx<span class="op">,</span> task<span class="op">)</span></span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> task<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a><span class="co">// GetTask retrieves a task</span></span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Service<span class="op">)</span> GetTask<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id uuid<span class="op">.</span>UUID<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">)</span> <span class="op">(*</span>models<span class="op">.</span>Task<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">.</span>repo<span class="op">.</span>GetByID<span class="op">(</span>ctx<span class="op">,</span> id<span class="op">,</span> userID<span class="op">)</span></span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a><span class="co">// ListTasks lists tasks with filters</span></span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Service<span class="op">)</span> ListTasks<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">,</span> filters <span class="op">*</span>models<span class="op">.</span>TaskListFilters<span class="op">)</span> <span class="op">([]*</span>models<span class="op">.</span>Task<span class="op">,</span> <span class="dt">int</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Validate pagination</span></span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> filters<span class="op">.</span>Page <span class="op">&lt;</span> <span class="dv">1</span> <span class="op">{</span></span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>        filters<span class="op">.</span>Page <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> filters<span class="op">.</span>PerPage <span class="op">&lt;</span> <span class="dv">1</span> <span class="op">||</span> filters<span class="op">.</span>PerPage <span class="op">&gt;</span> <span class="dv">100</span> <span class="op">{</span></span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a>        filters<span class="op">.</span>PerPage <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">.</span>repo<span class="op">.</span>List<span class="op">(</span>ctx<span class="op">,</span> userID<span class="op">,</span> filters<span class="op">)</span></span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a><span class="co">// UpdateTask updates a task</span></span>
+<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Service<span class="op">)</span> UpdateTask<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id uuid<span class="op">.</span>UUID<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">,</span> req <span class="op">*</span>models<span class="op">.</span>TaskUpdateRequest<span class="op">)</span> <span class="op">(*</span>models<span class="op">.</span>Task<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Get existing task</span></span>
+<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a>    task<span class="op">,</span> err <span class="op">:=</span> s<span class="op">.</span>repo<span class="op">.</span>GetByID<span class="op">(</span>ctx<span class="op">,</span> id<span class="op">,</span> userID<span class="op">)</span></span>
+<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Apply updates</span></span>
+<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> req<span class="op">.</span>Title <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Title <span class="op">=</span> <span class="op">*</span>req<span class="op">.</span>Title</span>
+<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> req<span class="op">.</span>Description <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-83"><a href="#cb18-83" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Description <span class="op">=</span> <span class="op">*</span>req<span class="op">.</span>Description</span>
+<span id="cb18-84"><a href="#cb18-84" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> req<span class="op">.</span>Status <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Status <span class="op">=</span> <span class="op">*</span>req<span class="op">.</span>Status</span>
+<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> req<span class="op">.</span>Priority <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-89"><a href="#cb18-89" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>Priority <span class="op">=</span> <span class="op">*</span>req<span class="op">.</span>Priority</span>
+<span id="cb18-90"><a href="#cb18-90" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> req<span class="op">.</span>DueDate <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a>        task<span class="op">.</span>DueDate <span class="op">=</span> req<span class="op">.</span>DueDate</span>
+<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-95"><a href="#cb18-95" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Save</span></span>
+<span id="cb18-96"><a href="#cb18-96" aria-hidden="true" tabindex="-1"></a>    err <span class="op">=</span> s<span class="op">.</span>repo<span class="op">.</span>Update<span class="op">(</span>ctx<span class="op">,</span> task<span class="op">)</span></span>
+<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-101"><a href="#cb18-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> task<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb18-102"><a href="#cb18-102" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-103"><a href="#cb18-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-104"><a href="#cb18-104" aria-hidden="true" tabindex="-1"></a><span class="co">// DeleteTask deletes a task</span></span>
+<span id="cb18-105"><a href="#cb18-105" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Service<span class="op">)</span> DeleteTask<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> id uuid<span class="op">.</span>UUID<span class="op">,</span> userID uuid<span class="op">.</span>UUID<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb18-106"><a href="#cb18-106" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">.</span>repo<span class="op">.</span>Delete<span class="op">(</span>ctx<span class="op">,</span> id<span class="op">,</span> userID<span class="op">)</span></span>
+<span id="cb18-107"><a href="#cb18-107" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="step-8-implement-http-handlers">Step 8: Implement HTTP
+Handlers</h2>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> generate <span class="st">&quot;Implement Gin HTTP handlers for task API&quot;</span></span></code></pre></div>
+<p><strong>HelixCode generates</strong>
+<code>internal/task/handler.go</code>:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> task</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;net/http&quot;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/gin-gonic/gin&quot;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/google/uuid&quot;</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/pkg/models&quot;</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/pkg/errors&quot;</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co">// Handler handles HTTP requests for tasks</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Handler <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    service <span class="op">*</span>Service</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">// NewHandler creates a new task handler</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewHandler<span class="op">(</span>service <span class="op">*</span>Service<span class="op">)</span> <span class="op">*</span>Handler <span class="op">{</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Handler<span class="op">{</span>service<span class="op">:</span> service<span class="op">}</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co">// Create handles POST /tasks</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> Create<span class="op">(</span>c <span class="op">*</span>gin<span class="op">.</span>Context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> req models<span class="op">.</span>TaskCreateRequest</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> c<span class="op">.</span>ShouldBindJSON<span class="op">(&amp;</span>req<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusBadRequest<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()})</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Get user ID from context (set by auth middleware)</span></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    userID <span class="op">:=</span> c<span class="op">.</span>GetString<span class="op">(</span><span class="st">&quot;user_id&quot;</span><span class="op">)</span></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>    userUUID<span class="op">,</span> _ <span class="op">:=</span> uuid<span class="op">.</span>Parse<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    task<span class="op">,</span> err <span class="op">:=</span> h<span class="op">.</span>service<span class="op">.</span>CreateTask<span class="op">(</span>c<span class="op">.</span>Request<span class="op">.</span>Context<span class="op">(),</span> userUUID<span class="op">,</span> <span class="op">&amp;</span>req<span class="op">)</span></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusInternalServerError<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()})</span></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusCreated<span class="op">,</span> task<span class="op">)</span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a><span class="co">// Get handles GET /tasks/:id</span></span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> Get<span class="op">(</span>c <span class="op">*</span>gin<span class="op">.</span>Context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>    id<span class="op">,</span> err <span class="op">:=</span> uuid<span class="op">.</span>Parse<span class="op">(</span>c<span class="op">.</span>Param<span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">))</span></span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusBadRequest<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> <span class="st">&quot;invalid task ID&quot;</span><span class="op">})</span></span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>    userID <span class="op">:=</span> c<span class="op">.</span>GetString<span class="op">(</span><span class="st">&quot;user_id&quot;</span><span class="op">)</span></span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    userUUID<span class="op">,</span> _ <span class="op">:=</span> uuid<span class="op">.</span>Parse<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>    task<span class="op">,</span> err <span class="op">:=</span> h<span class="op">.</span>service<span class="op">.</span>GetTask<span class="op">(</span>c<span class="op">.</span>Request<span class="op">.</span>Context<span class="op">(),</span> id<span class="op">,</span> userUUID<span class="op">)</span></span>
+<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> errors<span class="op">.</span>ErrTaskNotFound <span class="op">{</span></span>
+<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>            c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusNotFound<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> <span class="st">&quot;task not found&quot;</span><span class="op">})</span></span>
+<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusInternalServerError<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()})</span></span>
+<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusOK<span class="op">,</span> task<span class="op">)</span></span>
+<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a><span class="co">// List handles GET /tasks</span></span>
+<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> List<span class="op">(</span>c <span class="op">*</span>gin<span class="op">.</span>Context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> filters models<span class="op">.</span>TaskListFilters</span>
+<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> c<span class="op">.</span>ShouldBindQuery<span class="op">(&amp;</span>filters<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusBadRequest<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()})</span></span>
+<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a>    userID <span class="op">:=</span> c<span class="op">.</span>GetString<span class="op">(</span><span class="st">&quot;user_id&quot;</span><span class="op">)</span></span>
+<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>    userUUID<span class="op">,</span> _ <span class="op">:=</span> uuid<span class="op">.</span>Parse<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a>    tasks<span class="op">,</span> total<span class="op">,</span> err <span class="op">:=</span> h<span class="op">.</span>service<span class="op">.</span>ListTasks<span class="op">(</span>c<span class="op">.</span>Request<span class="op">.</span>Context<span class="op">(),</span> userUUID<span class="op">,</span> <span class="op">&amp;</span>filters<span class="op">)</span></span>
+<span id="cb20-78"><a href="#cb20-78" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusInternalServerError<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()})</span></span>
+<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusOK<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span></span>
+<span id="cb20-84"><a href="#cb20-84" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;data&quot;</span><span class="op">:</span>     tasks<span class="op">,</span></span>
+<span id="cb20-85"><a href="#cb20-85" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;total&quot;</span><span class="op">:</span>    total<span class="op">,</span></span>
+<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;page&quot;</span><span class="op">:</span>     filters<span class="op">.</span>Page<span class="op">,</span></span>
+<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;per_page&quot;</span><span class="op">:</span> filters<span class="op">.</span>PerPage<span class="op">,</span></span>
+<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-91"><a href="#cb20-91" aria-hidden="true" tabindex="-1"></a><span class="co">// Update handles PUT /tasks/:id</span></span>
+<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> Update<span class="op">(</span>c <span class="op">*</span>gin<span class="op">.</span>Context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a>    id<span class="op">,</span> err <span class="op">:=</span> uuid<span class="op">.</span>Parse<span class="op">(</span>c<span class="op">.</span>Param<span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">))</span></span>
+<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusBadRequest<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> <span class="st">&quot;invalid task ID&quot;</span><span class="op">})</span></span>
+<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> req models<span class="op">.</span>TaskUpdateRequest</span>
+<span id="cb20-100"><a href="#cb20-100" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> c<span class="op">.</span>ShouldBindJSON<span class="op">(&amp;</span>req<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-101"><a href="#cb20-101" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusBadRequest<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()})</span></span>
+<span id="cb20-102"><a href="#cb20-102" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-103"><a href="#cb20-103" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-104"><a href="#cb20-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-105"><a href="#cb20-105" aria-hidden="true" tabindex="-1"></a>    userID <span class="op">:=</span> c<span class="op">.</span>GetString<span class="op">(</span><span class="st">&quot;user_id&quot;</span><span class="op">)</span></span>
+<span id="cb20-106"><a href="#cb20-106" aria-hidden="true" tabindex="-1"></a>    userUUID<span class="op">,</span> _ <span class="op">:=</span> uuid<span class="op">.</span>Parse<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb20-107"><a href="#cb20-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-108"><a href="#cb20-108" aria-hidden="true" tabindex="-1"></a>    task<span class="op">,</span> err <span class="op">:=</span> h<span class="op">.</span>service<span class="op">.</span>UpdateTask<span class="op">(</span>c<span class="op">.</span>Request<span class="op">.</span>Context<span class="op">(),</span> id<span class="op">,</span> userUUID<span class="op">,</span> <span class="op">&amp;</span>req<span class="op">)</span></span>
+<span id="cb20-109"><a href="#cb20-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-110"><a href="#cb20-110" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> errors<span class="op">.</span>ErrTaskNotFound <span class="op">{</span></span>
+<span id="cb20-111"><a href="#cb20-111" aria-hidden="true" tabindex="-1"></a>            c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusNotFound<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> <span class="st">&quot;task not found&quot;</span><span class="op">})</span></span>
+<span id="cb20-112"><a href="#cb20-112" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb20-113"><a href="#cb20-113" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb20-114"><a href="#cb20-114" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusInternalServerError<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()})</span></span>
+<span id="cb20-115"><a href="#cb20-115" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-116"><a href="#cb20-116" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-117"><a href="#cb20-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-118"><a href="#cb20-118" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusOK<span class="op">,</span> task<span class="op">)</span></span>
+<span id="cb20-119"><a href="#cb20-119" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-120"><a href="#cb20-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-121"><a href="#cb20-121" aria-hidden="true" tabindex="-1"></a><span class="co">// Delete handles DELETE /tasks/:id</span></span>
+<span id="cb20-122"><a href="#cb20-122" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> Delete<span class="op">(</span>c <span class="op">*</span>gin<span class="op">.</span>Context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-123"><a href="#cb20-123" aria-hidden="true" tabindex="-1"></a>    id<span class="op">,</span> err <span class="op">:=</span> uuid<span class="op">.</span>Parse<span class="op">(</span>c<span class="op">.</span>Param<span class="op">(</span><span class="st">&quot;id&quot;</span><span class="op">))</span></span>
+<span id="cb20-124"><a href="#cb20-124" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-125"><a href="#cb20-125" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusBadRequest<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> <span class="st">&quot;invalid task ID&quot;</span><span class="op">})</span></span>
+<span id="cb20-126"><a href="#cb20-126" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-127"><a href="#cb20-127" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-128"><a href="#cb20-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-129"><a href="#cb20-129" aria-hidden="true" tabindex="-1"></a>    userID <span class="op">:=</span> c<span class="op">.</span>GetString<span class="op">(</span><span class="st">&quot;user_id&quot;</span><span class="op">)</span></span>
+<span id="cb20-130"><a href="#cb20-130" aria-hidden="true" tabindex="-1"></a>    userUUID<span class="op">,</span> _ <span class="op">:=</span> uuid<span class="op">.</span>Parse<span class="op">(</span>userID<span class="op">)</span></span>
+<span id="cb20-131"><a href="#cb20-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-132"><a href="#cb20-132" aria-hidden="true" tabindex="-1"></a>    err <span class="op">=</span> h<span class="op">.</span>service<span class="op">.</span>DeleteTask<span class="op">(</span>c<span class="op">.</span>Request<span class="op">.</span>Context<span class="op">(),</span> id<span class="op">,</span> userUUID<span class="op">)</span></span>
+<span id="cb20-133"><a href="#cb20-133" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb20-134"><a href="#cb20-134" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">==</span> errors<span class="op">.</span>ErrTaskNotFound <span class="op">{</span></span>
+<span id="cb20-135"><a href="#cb20-135" aria-hidden="true" tabindex="-1"></a>            c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusNotFound<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> <span class="st">&quot;task not found&quot;</span><span class="op">})</span></span>
+<span id="cb20-136"><a href="#cb20-136" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span></span>
+<span id="cb20-137"><a href="#cb20-137" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb20-138"><a href="#cb20-138" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusInternalServerError<span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;error&quot;</span><span class="op">:</span> err<span class="op">.</span>Error<span class="op">()})</span></span>
+<span id="cb20-139"><a href="#cb20-139" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb20-140"><a href="#cb20-140" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-141"><a href="#cb20-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-142"><a href="#cb20-142" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>JSON<span class="op">(</span>http<span class="op">.</span>StatusNoContent<span class="op">,</span> <span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb20-143"><a href="#cb20-143" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-144"><a href="#cb20-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-145"><a href="#cb20-145" aria-hidden="true" tabindex="-1"></a><span class="co">// RegisterRoutes registers task routes</span></span>
+<span id="cb20-146"><a href="#cb20-146" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>Handler<span class="op">)</span> RegisterRoutes<span class="op">(</span>router <span class="op">*</span>gin<span class="op">.</span>RouterGroup<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-147"><a href="#cb20-147" aria-hidden="true" tabindex="-1"></a>    tasks <span class="op">:=</span> router<span class="op">.</span>Group<span class="op">(</span><span class="st">&quot;/tasks&quot;</span><span class="op">)</span></span>
+<span id="cb20-148"><a href="#cb20-148" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb20-149"><a href="#cb20-149" aria-hidden="true" tabindex="-1"></a>        tasks<span class="op">.</span>POST<span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">,</span> h<span class="op">.</span>Create<span class="op">)</span></span>
+<span id="cb20-150"><a href="#cb20-150" aria-hidden="true" tabindex="-1"></a>        tasks<span class="op">.</span>GET<span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">,</span> h<span class="op">.</span>List<span class="op">)</span></span>
+<span id="cb20-151"><a href="#cb20-151" aria-hidden="true" tabindex="-1"></a>        tasks<span class="op">.</span>GET<span class="op">(</span><span class="st">&quot;/:id&quot;</span><span class="op">,</span> h<span class="op">.</span>Get<span class="op">)</span></span>
+<span id="cb20-152"><a href="#cb20-152" aria-hidden="true" tabindex="-1"></a>        tasks<span class="op">.</span>PUT<span class="op">(</span><span class="st">&quot;/:id&quot;</span><span class="op">,</span> h<span class="op">.</span>Update<span class="op">)</span></span>
+<span id="cb20-153"><a href="#cb20-153" aria-hidden="true" tabindex="-1"></a>        tasks<span class="op">.</span>DELETE<span class="op">(</span><span class="st">&quot;/:id&quot;</span><span class="op">,</span> h<span class="op">.</span>Delete<span class="op">)</span></span>
+<span id="cb20-154"><a href="#cb20-154" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-155"><a href="#cb20-155" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="step-9-implement-authentication">Step 9: Implement
+Authentication</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> generate <span class="st">&quot;Implement JWT authentication middleware with login and registration&quot;</span></span></code></pre></div>
+<p><strong>HelixCode generates authentication, JWT middleware, and user
+handlers</strong> (code omitted for brevity - see full implementation in
+generated files).</p>
+<hr />
+<h2 id="step-10-create-main-server">Step 10: Create Main Server</h2>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> generate <span class="st">&quot;Create main.go that wires everything together with Gin router&quot;</span></span></code></pre></div>
+<p><strong>HelixCode generates</strong>
+<code>cmd/server/main.go</code>:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> main</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;log&quot;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os/signal&quot;</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;syscall&quot;</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/gin-gonic/gin&quot;</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/jackc/pgx/v5/pgxpool&quot;</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/internal/auth&quot;</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/internal/task&quot;</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;task-api/internal/user&quot;</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Load configuration</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    dbURL <span class="op">:=</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;DATABASE_URL&quot;</span><span class="op">)</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> dbURL <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>        dbURL <span class="op">=</span> <span class="st">&quot;postgres://localhost/task_api?sslmode=disable&quot;</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    jwtSecret <span class="op">:=</span> os<span class="op">.</span>Getenv<span class="op">(</span><span class="st">&quot;JWT_SECRET&quot;</span><span class="op">)</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> jwtSecret <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;JWT_SECRET environment variable is required&quot;</span><span class="op">)</span></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Connect to database</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>    pool<span class="op">,</span> err <span class="op">:=</span> pgxpool<span class="op">.</span>New<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> dbURL<span class="op">)</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;Unable to connect to database: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> pool<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Initialize repositories</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>    userRepo <span class="op">:=</span> user<span class="op">.</span>NewRepository<span class="op">(</span>pool<span class="op">)</span></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>    taskRepo <span class="op">:=</span> task<span class="op">.</span>NewRepository<span class="op">(</span>pool<span class="op">)</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Initialize services</span></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>    authService <span class="op">:=</span> auth<span class="op">.</span>NewService<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>jwtSecret<span class="op">))</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>    userService <span class="op">:=</span> user<span class="op">.</span>NewService<span class="op">(</span>userRepo<span class="op">,</span> authService<span class="op">)</span></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>    taskService <span class="op">:=</span> task<span class="op">.</span>NewService<span class="op">(</span>taskRepo<span class="op">)</span></span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Initialize handlers</span></span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>    userHandler <span class="op">:=</span> user<span class="op">.</span>NewHandler<span class="op">(</span>userService<span class="op">)</span></span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>    taskHandler <span class="op">:=</span> task<span class="op">.</span>NewHandler<span class="op">(</span>taskService<span class="op">)</span></span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Setup router</span></span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a>    router <span class="op">:=</span> gin<span class="op">.</span>Default<span class="op">()</span></span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Public routes</span></span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a>    public <span class="op">:=</span> router<span class="op">.</span>Group<span class="op">(</span><span class="st">&quot;/api&quot;</span><span class="op">)</span></span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>        public<span class="op">.</span>POST<span class="op">(</span><span class="st">&quot;/register&quot;</span><span class="op">,</span> userHandler<span class="op">.</span>Register<span class="op">)</span></span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a>        public<span class="op">.</span>POST<span class="op">(</span><span class="st">&quot;/login&quot;</span><span class="op">,</span> userHandler<span class="op">.</span>Login<span class="op">)</span></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Protected routes</span></span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a>    protected <span class="op">:=</span> router<span class="op">.</span>Group<span class="op">(</span><span class="st">&quot;/api&quot;</span><span class="op">)</span></span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a>    protected<span class="op">.</span>Use<span class="op">(</span>auth<span class="op">.</span>Middleware<span class="op">(</span>authService<span class="op">))</span></span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a>        taskHandler<span class="op">.</span>RegisterRoutes<span class="op">(</span>protected<span class="op">)</span></span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a>        userHandler<span class="op">.</span>RegisterRoutes<span class="op">(</span>protected<span class="op">)</span></span>
+<span id="cb23-66"><a href="#cb23-66" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-67"><a href="#cb23-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Health check</span></span>
+<span id="cb23-69"><a href="#cb23-69" aria-hidden="true" tabindex="-1"></a>    router<span class="op">.</span>GET<span class="op">(</span><span class="st">&quot;/health&quot;</span><span class="op">,</span> <span class="kw">func</span><span class="op">(</span>c <span class="op">*</span>gin<span class="op">.</span>Context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-70"><a href="#cb23-70" aria-hidden="true" tabindex="-1"></a>        c<span class="op">.</span>JSON<span class="op">(</span><span class="dv">200</span><span class="op">,</span> gin<span class="op">.</span>H<span class="op">{</span><span class="st">&quot;status&quot;</span><span class="op">:</span> <span class="st">&quot;healthy&quot;</span><span class="op">})</span></span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Graceful shutdown</span></span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a>    srv <span class="op">:=</span> <span class="op">&amp;</span>http<span class="op">.</span>Server<span class="op">{</span></span>
+<span id="cb23-75"><a href="#cb23-75" aria-hidden="true" tabindex="-1"></a>        Addr<span class="op">:</span>    <span class="st">&quot;:8080&quot;</span><span class="op">,</span></span>
+<span id="cb23-76"><a href="#cb23-76" aria-hidden="true" tabindex="-1"></a>        Handler<span class="op">:</span> router<span class="op">,</span></span>
+<span id="cb23-77"><a href="#cb23-77" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-78"><a href="#cb23-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-79"><a href="#cb23-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb23-80"><a href="#cb23-80" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> srv<span class="op">.</span>ListenAndServe<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> err <span class="op">!=</span> http<span class="op">.</span>ErrServerClosed <span class="op">{</span></span>
+<span id="cb23-81"><a href="#cb23-81" aria-hidden="true" tabindex="-1"></a>            log<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;listen: %s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb23-82"><a href="#cb23-82" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb23-83"><a href="#cb23-83" aria-hidden="true" tabindex="-1"></a>    <span class="op">}()</span></span>
+<span id="cb23-84"><a href="#cb23-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-85"><a href="#cb23-85" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Println<span class="op">(</span><span class="st">&quot;Server started on :8080&quot;</span><span class="op">)</span></span>
+<span id="cb23-86"><a href="#cb23-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-87"><a href="#cb23-87" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Wait for interrupt signal</span></span>
+<span id="cb23-88"><a href="#cb23-88" aria-hidden="true" tabindex="-1"></a>    quit <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> os<span class="op">.</span>Signal<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb23-89"><a href="#cb23-89" aria-hidden="true" tabindex="-1"></a>    signal<span class="op">.</span>Notify<span class="op">(</span>quit<span class="op">,</span> syscall<span class="op">.</span>SIGINT<span class="op">,</span> syscall<span class="op">.</span>SIGTERM<span class="op">)</span></span>
+<span id="cb23-90"><a href="#cb23-90" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;-</span>quit</span>
+<span id="cb23-91"><a href="#cb23-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-92"><a href="#cb23-92" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Println<span class="op">(</span><span class="st">&quot;Shutting down server...&quot;</span><span class="op">)</span></span>
+<span id="cb23-93"><a href="#cb23-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-94"><a href="#cb23-94" aria-hidden="true" tabindex="-1"></a>    ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="dv">5</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">)</span></span>
+<span id="cb23-95"><a href="#cb23-95" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cancel<span class="op">()</span></span>
+<span id="cb23-96"><a href="#cb23-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-97"><a href="#cb23-97" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> srv<span class="op">.</span>Shutdown<span class="op">(</span>ctx<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb23-98"><a href="#cb23-98" aria-hidden="true" tabindex="-1"></a>        log<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;Server forced to shutdown:&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb23-99"><a href="#cb23-99" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb23-100"><a href="#cb23-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-101"><a href="#cb23-101" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Println<span class="op">(</span><span class="st">&quot;Server exited&quot;</span><span class="op">)</span></span>
+<span id="cb23-102"><a href="#cb23-102" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="step-11-auto-generate-tests">Step 11: Auto-Generate Tests</h2>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> generate <span class="st">&quot;Create comprehensive unit tests for task service&quot;</span></span></code></pre></div>
+<p><strong>HelixCode generates</strong>
+<code>tests/unit/task_service_test.go</code> with complete test
+suite.</p>
+<hr />
+<h2 id="step-12-use-git-auto-commit">Step 12: Use Git Auto-Commit</h2>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># HelixCode has been generating code - let&#39;s commit it</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="ex">helixcode</span><span class="op">&gt;</span> commit <span class="at">--auto</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="co"># HelixCode analyzes changes and generates:</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># feat: implement complete task management REST API</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="co"># - Add user authentication with JWT</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co"># - Implement task CRUD operations</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="co"># - Add PostgreSQL database layer with migrations</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="co"># - Create clean architecture (handler/service/repository)</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="co"># - Add comprehensive error handling</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a><span class="co"># - Implement request validation</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="co"># - Add pagination and filtering for task listing</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="co"># - Include unit tests for services</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 🤖 Generated with HelixCode AI</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin main</span></code></pre></div>
+<hr />
+<h2 id="step-13-docker-deployment">Step 13: Docker Deployment</h2>
+<p><strong>HelixCode generated</strong>
+<code>docker-compose.yml</code>:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;3.8&#39;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">postgres</span><span class="kw">:</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:15</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_DB</span><span class="kw">:</span><span class="at"> task_api</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_USER</span><span class="kw">:</span><span class="at"> task_api</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">POSTGRES_PASSWORD</span><span class="kw">:</span><span class="at"> password</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;5432:5432&quot;</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> postgres_data:/var/lib/postgresql/data</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./migrations:/docker-entrypoint-initdb.d</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">api</span><span class="kw">:</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span><span class="at"> .</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">&quot;8080:8080&quot;</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">DATABASE_URL</span><span class="kw">:</span><span class="at"> postgres://task_api:password@postgres:5432/task_api?sslmode=disable</span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">JWT_SECRET</span><span class="kw">:</span><span class="at"> your-secret-key-change-in-production</span></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">depends_on</span><span class="kw">:</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> postgres</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">postgres_data</span><span class="kw">:</span></span></code></pre></div>
+<p><strong>Deploy</strong>:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build and start</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> up <span class="at">-d</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check logs</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> logs <span class="at">-f</span> api</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Run migrations</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="ex">docker-compose</span> exec api ./migrate</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Test API</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:8080/health</span></code></pre></div>
+<hr />
+<h2 id="step-14-test-the-api">Step 14: Test the API</h2>
+<h3 id="register-user">Register User</h3>
+<div class="sourceCode" id="cb28"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8080/api/register <span class="dt">\</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;username&quot;: &quot;testuser&quot;,</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;email&quot;: &quot;test@example.com&quot;,</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;password&quot;: &quot;password123&quot;</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="st">  }&#39;</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Response:</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="co"># {</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   &quot;username&quot;: &quot;testuser&quot;,</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   &quot;email&quot;: &quot;test@example.com&quot;,</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   &quot;created_at&quot;: &quot;2025-11-06T10:00:00Z&quot;</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code></pre></div>
+<h3 id="login">Login</h3>
+<div class="sourceCode" id="cb29"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8080/api/login <span class="dt">\</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;email&quot;: &quot;test@example.com&quot;,</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;password&quot;: &quot;password123&quot;</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="st">  }&#39;</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Response:</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co"># {</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   &quot;token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&quot;,</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   &quot;user&quot;: {...}</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Save token</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">TOKEN</span><span class="op">=</span><span class="st">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&quot;</span></span></code></pre></div>
+<h3 id="create-task">Create Task</h3>
+<div class="sourceCode" id="cb30"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST http://localhost:8080/api/tasks <span class="dt">\</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">$TOKEN</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;title&quot;: &quot;Build REST API&quot;,</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;description&quot;: &quot;Complete the task management API&quot;,</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;priority&quot;: &quot;high&quot;,</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;due_date&quot;: &quot;2025-12-01T00:00:00Z&quot;</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="st">  }&#39;</span></span></code></pre></div>
+<h3 id="list-tasks">List Tasks</h3>
+<div class="sourceCode" id="cb31"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> GET <span class="st">&quot;http://localhost:8080/api/tasks?status=pending&amp;page=1&amp;per_page=10&quot;</span> <span class="dt">\</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">$TOKEN</span><span class="st">&quot;</span></span></code></pre></div>
+<h3 id="update-task">Update Task</h3>
+<div class="sourceCode" id="cb32"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> PUT http://localhost:8080/api/tasks/550e8400-e29b-41d4-a716-446655440000 <span class="dt">\</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Bearer </span><span class="va">$TOKEN</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;status&quot;: &quot;completed&quot;</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="st">  }&#39;</span></span></code></pre></div>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p><strong>What You’ve Built</strong>: - ✅ Complete REST API with
+authentication - ✅ PostgreSQL database with migrations - ✅ Clean
+architecture (3-layer) - ✅ Comprehensive error handling - ✅ Unit tests
+- ✅ Docker deployment - ✅ Production-ready code</p>
+<p><strong>Time Saved</strong>: With HelixCode AI assistance, this
+project took ~45 minutes instead of 6-8 hours!</p>
+<p><strong>Next Steps</strong>: - Add more endpoints (task sharing,
+comments) - Implement frontend (React/Vue) - Add CI/CD pipeline - Deploy
+to production (AWS/GCP/Azure)</p>
+<p><strong>HelixCode Features Used</strong>: - ✨ Plan Mode - ✨ Code
+Generation - ✨ Git Auto-Commit - ✨ LLM Integration (Claude 3.5)</p>
+<hr />
+<p><strong>Tutorial Complete!</strong> 🎉</p>
+<p>Continue to <a href="Tutorial_2_Refactoring_Large_Codebase.md">Tutorial 2: Refactoring
+a Large Codebase</a></p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29: https://go.dev/dl/ (go1.26.3 latest
+stable Go; 1.24 past support) ; project go.mod (root go 1.25.2, inner go
+1.26) + CLAUDE.md §3.1 (PostgreSQL 15+).</p>
+</body>
+</html>

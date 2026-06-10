@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>llm-verifier_README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">llm-verifier_README</h1>
+</header>
+<h1 id="llm-verifier">LLM Verifier</h1>
+<p align="center">
+<img role="img" aria-label="LLMsVerifier Logo" src="../assets/Logo.jpeg" alt="LLMsVerifier Logo" width="180" height="180">
+</p>
+<p align="center">
+<strong>Verify. Monitor. Optimize.</strong>
+</p>
+<p>LLM Verifier is a comprehensive tool to verify, test, and benchmark
+LLMs based on their coding capabilities and other features. It supports
+OpenAI-compatible APIs and provides detailed analysis of model
+capabilities.</p>
+<h2 id="supported-providers-12-implemented-adapters">Supported Providers
+(12 Implemented Adapters)</h2>
+<ul>
+<li><strong>OpenAI</strong>: GPT models with full API compatibility</li>
+<li><strong>Anthropic</strong>: Claude models via official API</li>
+<li><strong>DeepSeek</strong>: DeepSeek models with streaming
+support</li>
+<li><strong>Groq</strong>: Fast inference with Llama models</li>
+<li><strong>Together AI</strong>: Wide range of open-source models</li>
+<li><strong>Mistral</strong>: European provider with advanced
+models</li>
+<li><strong>xAI</strong>: Grok models from xAI</li>
+<li><strong>Replicate</strong>: Model hosting and deployment
+platform</li>
+<li><strong>Cohere</strong>: Command models with enterprise
+features</li>
+<li><strong>Cerebras</strong>: High-performance inference</li>
+<li><strong>Cloudflare Workers AI</strong>: Edge AI inference</li>
+<li><strong>SiliconFlow</strong>: Chinese AI models and services</li>
+</ul>
+<h2 id="features">Features</h2>
+<ul>
+<li><strong>Model Discovery</strong>: Automatically discover all
+available models from API endpoints</li>
+<li><strong>Comprehensive Testing</strong>: Test model existence,
+responsiveness, overload status, and capabilities</li>
+<li><strong>Feature Detection</strong>: Identify supported features like
+tool calling, embeddings, code generation, etc.</li>
+<li><strong>Coding Assessment</strong>: Evaluate coding capabilities
+across multiple programming languages</li>
+<li><strong>Performance Scoring</strong>: Calculate detailed scores for
+code capability, responsiveness, reliability, and feature richness</li>
+<li><strong>Reporting</strong>: Generate both human-readable markdown
+reports and machine-readable JSON reports</li>
+<li><strong>Rankings</strong>: Sort models by various criteria
+(strength, speed, reliability, etc.)</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clone the repository</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repository-url<span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> llm-verifier</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the application</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> llm-verifier cmd/main.go</span></code></pre></div>
+<h2 id="usage">Usage</h2>
+<h3 id="command-line-interface">Command Line Interface</h3>
+<p>The LLM Verifier provides a comprehensive CLI with multiple
+subcommands for managing models, providers, verification results, and
+system configuration.</p>
+<h4 id="global-options">Global Options</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">-c,</span> <span class="at">--config</span> string     Configuration file path <span class="er">(</span><span class="ex">default</span> <span class="st">&quot;config.yaml&quot;</span><span class="kw">)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">-s,</span> <span class="at">--server</span> string     API server URL <span class="er">(</span><span class="ex">default</span> <span class="st">&quot;http://localhost:8080&quot;</span><span class="kw">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">-u,</span> <span class="at">--username</span> string   Username for authentication</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">-p,</span> <span class="at">--password</span> string   Password for authentication</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">-o,</span> <span class="at">--output</span> string     Output directory for reports <span class="er">(</span><span class="ex">default</span> <span class="st">&quot;./reports&quot;</span><span class="kw">)</span></span></code></pre></div>
+<h4 id="available-commands">Available Commands</h4>
+<h5 id="models-management">Models Management</h5>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all models</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models list [--filter NAME] [--limit N] [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get specific model details</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models get MODEL_ID</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new model</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models create PROVIDER_ID MODEL_ID NAME</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify a specific model</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models verify MODEL_ID</span></code></pre></div>
+<p><strong>Examples:</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all models in table format</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models list <span class="at">--format</span> table</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter models by name</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models list <span class="at">--filter</span> gpt</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Get details of a specific model</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models get 123</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new model</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models create 1 gpt-4-turbo <span class="st">&quot;GPT-4 Turbo&quot;</span></span></code></pre></div>
+<h5 id="providers-management">Providers Management</h5>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all providers</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> providers list [--filter NAME] [--limit N] [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get specific provider details</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> providers get PROVIDER_ID</span></code></pre></div>
+<p><strong>Examples:</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List providers with filtering</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> providers list <span class="at">--filter</span> openai <span class="at">--format</span> table</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get provider details</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> providers get 1</span></code></pre></div>
+<h5 id="verification-results">Verification Results</h5>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all verification results</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> results list [--filter MODEL_NAME] [--limit N] [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get specific result details</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> results get RESULT_ID</span></code></pre></div>
+<p><strong>Examples:</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List recent results</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> results list <span class="at">--limit</span> 10 <span class="at">--format</span> table</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter results by model</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> results list <span class="at">--filter</span> gpt-4</span></code></pre></div>
+<h5 id="pricing-information">Pricing Information</h5>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all pricing entries</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> pricing list [--format json<span class="kw">|</span><span class="ex">table]</span></span></code></pre></div>
+<h5 id="rate-limits">Rate Limits</h5>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all rate limit entries</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> limits list [--format json<span class="kw">|</span><span class="ex">table]</span></span></code></pre></div>
+<h5 id="issues-tracking">Issues Tracking</h5>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all reported issues</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> issues list [--format json<span class="kw">|</span><span class="ex">table]</span></span></code></pre></div>
+<h5 id="system-events">System Events</h5>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all system events</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> events list [--format json<span class="kw">|</span><span class="ex">table]</span></span></code></pre></div>
+<h5 id="verification-schedules">Verification Schedules</h5>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all schedules</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> schedules list [--format json<span class="kw">|</span><span class="ex">table]</span></span></code></pre></div>
+<h5 id="configuration-exports">Configuration Exports</h5>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List all configuration exports</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> exports list [--format json<span class="kw">|</span><span class="ex">table]</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Download a specific export</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> exports download EXPORT_ID</span></code></pre></div>
+<h5 id="system-logs">System Logs</h5>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List system logs</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> logs list [--format json<span class="kw">|</span><span class="ex">table]</span></span></code></pre></div>
+<h5 id="configuration-management">Configuration Management</h5>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show current configuration</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> config show</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Export configuration in different formats</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> config export FORMAT</span></code></pre></div>
+<h5 id="user-management">User Management</h5>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new user</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> users create USERNAME PASSWORD EMAIL <span class="pp">[</span><span class="ss">FULL_NAME</span><span class="pp">]</span></span></code></pre></div>
+<h5 id="terminal-user-interface">Terminal User Interface</h5>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the interactive TUI</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> tui</span></code></pre></div>
+<p><strong>TUI Features:</strong> - Real-time dashboard with statistics
+- Model browser with filtering and sorting - Provider management
+interface - Verification results viewer - Auto-refresh every 30-60
+seconds - Keyboard navigation (arrow keys, numbers 1-4) - Progress
+indicators and visual feedback</p>
+<h4 id="tui-navigation">TUI Navigation</h4>
+<p><strong>Screen Navigation:</strong> - <code>1</code> - Dashboard
+(statistics and overview) - <code>2</code> - Models (browse and manage
+models) - <code>3</code> - Providers (manage LLM providers) -
+<code>4</code> - Verification (view verification results) -
+<code>←/→</code> or <code>h/l</code> - Navigate between screens -
+<code>q</code> or <code>Ctrl+C</code> - Quit application</p>
+<p><strong>Dashboard Screen:</strong> - <code>r</code> or <code>R</code>
+- Manual refresh of statistics - Auto-refreshes every 30 seconds - Shows
+verification progress, average scores, and system status</p>
+<p><strong>Models Screen:</strong> - <code>↑/↓</code> or
+<code>k/j</code> - Navigate through model list - <code>Enter</code> or
+<code>Space</code> - Verify selected model - <code>r</code> or
+<code>R</code> - Refresh model list - Auto-refreshes every 60 seconds -
+Shows verification status, scores, and capabilities</p>
+<p><strong>Providers Screen:</strong> - <code>↑/↓</code> or
+<code>k/j</code> - Navigate through provider list - <code>Enter</code>
+or <code>Space</code> - Toggle provider status - <code>a</code> or
+<code>A</code> - Add API key for selected provider - <code>r</code> or
+<code>R</code> - Refresh provider list - Auto-refreshes every 60
+seconds</p>
+<p><strong>Verification Screen:</strong> - <code>↑/↓</code> or
+<code>k/j</code> - Navigate through results - Shows verification history
+and status</p>
+<p><strong>Visual Indicators:</strong> - <code>●</code> -
+Pending/Inactive (gray) - <code>✓</code> - Verified/Active (green) -
+<code>✗</code> - Failed/Error (red) - Progress bars show completion
+percentages - Star ratings indicate score quality - Color-coded status
+indicators throughout</p>
+<h5 id="rest-api-server">REST API Server</h5>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the REST API server</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> server [--port PORT]</span></code></pre></div>
+<h3 id="basic-usage">Basic Usage</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./llm-verifier</span></span></code></pre></div>
+<p>This will use the default configuration file <code>config.yaml</code>
+and output reports to the <code>./reports</code> directory.</p>
+<h3 id="with-custom-configuration">With Custom Configuration</h3>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./llm-verifier</span> <span class="at">-c</span> /path/to/config.yaml <span class="at">-o</span> /path/to/output</span></code></pre></div>
+<h3 id="output-formats">Output Formats</h3>
+<p>All list commands support multiple output formats:</p>
+<ul>
+<li><strong>JSON</strong> (default): Machine-readable structured
+data</li>
+<li><strong>Table</strong>: Human-readable formatted tables with
+columns</li>
+</ul>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># JSON output (default)</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models list</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Table output</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models list <span class="at">--format</span> table</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtered results</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="ex">llm-verifier</span> models list <span class="at">--filter</span> gpt <span class="at">--limit</span> 5 <span class="at">--format</span> table</span></code></pre></div>
+<h2 id="configuration">Configuration</h2>
+<p>The tool uses a YAML configuration file. See <code>config.yaml</code>
+for a sample configuration:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">global</span><span class="kw">:</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">base_url</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://api.openai.com/v1&quot;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">api_key</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;${OPENAI_API_KEY}&quot;</span><span class="co"> # Use environment variable</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">max_retries</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">request_delay</span><span class="kw">:</span><span class="at"> 1s</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 30s</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># If no LLMs are specified, the tool will automatically discover all available models</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co"># llms: # Uncomment this section to specify specific LLMs to test</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   - name: &quot;OpenAI GPT-4&quot;</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co">#     endpoint: &quot;https://api.openai.com/v1&quot;</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="co">#     api_key: &quot;${OPENAI_API_KEY}&quot;</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="co">#     model: &quot;gpt-4-turbo&quot;</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="co">#     headers:</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="co">#       Custom-Header: &quot;value&quot;</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="co">#     features:</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="co">#       tool_calling: true</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="co">#       embeddings: false</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a><span class="co">#   - name: &quot;OpenAI GPT-3.5&quot;</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="co">#     endpoint: &quot;https://api.openai.com/v1&quot;</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="co">#     api_key: &quot;${OPENAI_API_KEY}&quot;</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a><span class="co">#     model: &quot;gpt-3.5-turbo&quot;</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a><span class="co">#     features:</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a><span class="co">#       tool_calling: true</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a><span class="co">#       embeddings: false</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a><span class="fu">concurrency</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a><span class="fu">timeout</span><span class="kw">:</span><span class="at"> 60s</span></span></code></pre></div>
+<h2 id="output">Output</h2>
+<p>The tool generates two types of reports:</p>
+<ol type="1">
+<li><strong>Markdown Report</strong>
+(<code>llm_verification_report.md</code>): Human-readable report with
+detailed analysis</li>
+<li><strong>JSON Report</strong>
+(<code>llm_verification_report.json</code>): Machine-readable report for
+programmatic use</li>
+</ol>
+<h2 id="test-suite">Test Suite</h2>
+<p>The project includes comprehensive tests:</p>
+<ul>
+<li>Unit tests: Test individual functions and scoring algorithms</li>
+<li>Integration tests: Test component interactions</li>
+<li>End-to-end tests: Test complete workflows</li>
+<li>Performance tests: Benchmark critical functions</li>
+<li>Security tests: Verify secure handling of sensitive data</li>
+<li>Automation tests: Test automated workflows</li>
+</ul>
+<p>Run all tests with:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./tests/... <span class="at">-v</span></span></code></pre></div>
+<h2 id="architecture">Architecture</h2>
+<p>The tool is organized into several packages:</p>
+<ul>
+<li><code>cmd/</code>: Main application entry point</li>
+<li><code>llmverifier/</code>: Core verification logic</li>
+<li><code>config/</code>: Configuration structures and loading</li>
+<li><code>reports/</code>: Report generation</li>
+<li><code>tests/</code>: Comprehensive test suite</li>
+</ul>
+<h2 id="capabilities-tested">Capabilities Tested</h2>
+<p>The tool evaluates models across several dimensions:</p>
+<ul>
+<li><strong>Code Generation</strong>: Ability to write code in multiple
+languages</li>
+<li><strong>Code Completion</strong>: Ability to complete partial
+code</li>
+<li><strong>Code Debugging</strong>: Ability to identify and fix code
+issues</li>
+<li><strong>Code Review</strong>: Ability to review and improve
+code</li>
+<li><strong>Code Explanation</strong>: Ability to explain code
+functionality</li>
+<li><strong>Test Generation</strong>: Ability to create unit tests</li>
+<li><strong>Documentation</strong>: Ability to create documentation</li>
+<li><strong>Refactoring</strong>: Ability to improve code structure</li>
+<li><strong>Architecture Understanding</strong>: Ability to design
+system architectures</li>
+<li><strong>Security Assessment</strong>: Ability to identify security
+issues</li>
+<li><strong>Pattern Recognition</strong>: Ability to implement design
+patterns</li>
+<li><strong>Language-Specific Tests</strong>: Performance across
+multiple programming languages</li>
+</ul>
+<h2 id="scoring-system">Scoring System</h2>
+<p>Models are scored across multiple dimensions:</p>
+<ul>
+<li><strong>Code Capability (40%)</strong>: How well the model handles
+coding tasks</li>
+<li><strong>Responsiveness (20%)</strong>: Response time and
+throughput</li>
+<li><strong>Reliability (20%)</strong>: Availability and
+consistency</li>
+<li><strong>Feature Richness (15%)</strong>: Supported features and
+capabilities</li>
+<li><strong>Value Proposition (5%)</strong>: Overall value for coding
+tasks</li>
+</ul>
+<h2 id="license">License</h2>
+<p>MIT</p>
+</body>
+</html>

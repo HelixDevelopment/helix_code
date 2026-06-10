@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stream2_buildcode</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stream2_buildcode</h1>
+</header>
+<h1 id="stream-flat-build-code-build-verify-helix_code-bash-ok-no-edit-propose-patches-as-text">Stream
+FLAT-BUILD-CODE — build-verify helix_code (Bash ok; NO Edit — propose
+patches as text)</h1>
+<p>Repo: /Users/milosvasic/Projects/HelixCode. Inner app
+<code>helix_code/</code> (module dev.helix.code, go 1.26). Phase 2
+flatten rewrote its go.mod replaces to <code>../submodules/X</code>.</p>
+<p>Pasted terminal output is REQUIRED evidence — no PASS/FAIL verdict
+without the actual output (anti-bluff, CLAUDE.md Rule 8/9).</p>
+<p>Tasks: 1. <code>cat helix_code/go.mod</code> — paste the FULL replace
+section so I can confirm every target is <code>../submodules/X</code>.
+2. Build gate (capture output): -
+<code>cd /Users/milosvasic/Projects/HelixCode/helix_code &amp;&amp; go build ./... 2&gt;&amp;1 | tail -120</code>
+-
+<code>cd /Users/milosvasic/Projects/HelixCode/helix_code &amp;&amp; go vet ./... 2&gt;&amp;1 | tail -120</code>
+Report PASS/FAIL for each with the captured tail. 3. Inspect
+<code>helix_code/internal/cache/cache.go</code> and
+<code>helix_code/internal/i18n_wiring/wiring_integration_test.go</code>
+(both flagged with stale <code>dependencies/{org}/</code> refs). Quote
+the offending lines; classify each as (a) harmless comment/string
+literal, or (b) build-breaking import/path. 4. If anything FAILS:
+root-cause (stale import? missing replace? a dropped dep
+doc_processor/llm_orchestrator/llm_provider/vision_engine now only from
+HD?) and propose the MINIMAL patch as exact
+<code>file : line : change</code>. Do not apply.</p>
+<p>Output: compact markdown (go.mod replace block, build result+output,
+vet result+output, the 2 file verdicts, patch proposals).</p>
+</body>
+</html>

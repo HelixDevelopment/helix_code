@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f17-smart-file-editing-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f17-smart-file-editing-design</h1>
+</header>
+<h1 id="phase-1-feature-17-smart-file-editing">Phase 1 / Feature 17 —
+Smart File Editing</h1>
+<p><strong>Date:</strong> 2026-05-06 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship real, end-to-end <strong>search-replace block editing</strong>
+for the HelixCode CLI agent. F17 adds a <code>smart_edit</code> tool
+(and a thin <code>/edit</code> slash for inspection) that consumes one
+or more <strong>search-replace blocks</strong> in a single string
+payload, applies them transactionally to one or more files via the
+existing F08 multiedit transaction layer, and returns both the updated
+file content and a unified diff so the caller can self-check that the
+change actually landed.</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><p><strong><code>smart_edit</code> tool</strong> — registered into
+the F09/F13 tool registry. Single parameter <code>prompt</code> (string)
+carrying one or more blocks of the form</p>
+<pre><code>path/to/file.ext
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH
+&lt;old text — must match the current file content literally&gt;
+=======
+&lt;new text — replaces the matched region&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</code></pre>
+<p>Multiple blocks per file and multiple files per <code>prompt</code>
+are both allowed. Standard claude-code/aider delimiter triplet (Q1=B).
+Returns a <code>SmartEditResult</code> with per-file
+<code>Applied</code> / <code>Diff</code> / <code>NewContent</code> /
+<code>Error</code> fields. <strong>All-or-nothing across the whole
+prompt</strong> (Q3=B; one failed block aborts the entire commit and
+writes nothing).</p></li>
+<li><p><strong><code>/edit</code> slash command</strong> (Q5=A) —
+<code>/edit status</code> / <code>/edit diff</code> /
+<code>/edit dry-run &lt;path&gt;</code> /
+<code>/edit commit &lt;path&gt;</code>. The slash is for
+<strong>inspecting the most recent smart-edit attempt</strong> plus
+running a one-shot dry-run from a file containing blocks. <strong>No
+cobra subcommand</strong> — slash only.</p></li>
+<li><p><strong>Verification dual-output</strong> (Q2=C) — every apply
+re-reads the file from disk after the multiedit commit AND returns the
+unified diff between the pre-apply and post-apply content. The caller
+sees both <code>NewContent</code> (post-write re-read, not the in-memory
+plan) and <code>Diff</code> (computed from before/after). Maximum
+visibility for agent self-check; the LLM can grep its own
+<code>Diff</code> to confirm the change actually happened on
+disk.</p></li>
+</ol>
+<p>The conflict-detection model is <strong>lenient</strong> (Q4=B): no
+mtime check, no hash check, no transaction-time snapshot. The applier
+re-searches each SEARCH block in the <strong>current</strong> file
+content at apply time. If the literal SEARCH text is absent (or appears
+more than once), the block fails with a clear error. This handles the
+common case where an external tool reformatted the file between the
+agent’s plan and the apply (e.g., <code>gofmt</code> ran in a watcher)
+without aborting the whole edit just because the file changed.</p>
+<p>The atomicity model is <strong>transactional via multiedit</strong>
+(Q3=B): F17 is <strong>non-breaking</strong> — it builds
+<code>SmartEditCommit</code> ON TOP of the existing
+<code>internal/tools/multiedit/</code> package (which is transactional
+from F08; see <code>MultiFileEditor.BeginEdit</code> /
+<code>Commit</code> / <code>Rollback</code> in
+<code>internal/tools/multiedit/multiedit.go</code>). Per-file failure
+during commit triggers <code>MultiFileEditor.Rollback</code>, which
+restores backups for any files already written. Single-file edits use a
+multiedit transaction with one <code>FileEdit</code>; multi-file edits
+use one transaction with N <code>FileEdit</code> entries.</p>
+<p>Out of scope for v1: fuzzy SEARCH matching (typos in old text), regex
+SEARCH patterns, partial-line matching, binary-aware diffs,
+auto-fix-on-conflict, structural-AST edits, undo history (already
+covered by multiedit’s <code>Rollback</code> for the in-flight
+transaction; multi-step undo across separate prompts is F17.5).</p>
+<p>Anti-bluff: a <code>smart_edit</code> tool that reports
+<code>applied=true</code> without the file content actually changing on
+disk, OR reports a successful apply when SEARCH was never found, OR
+returns a <code>Diff</code> that doesn’t match what’s actually on disk
+after the write — each is a critical defect (§5.2). The single largest
+bluff vector for F17 is “tool says edit applied but file unchanged” —
+looks correct in compilation, fails on any disk re-read.</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>Four layers, all under
+<code>helix_code/internal/tools/smartedit/</code>, plus a slash command
+under <code>helix_code/internal/commands/</code>:</p>
+<ul>
+<li><strong><code>SmartEditParser</code></strong>
+(<code>parser.go</code>) — pure function
+<code>Parse(prompt string) ([]EditBlock, error)</code>. Tokenises a
+prompt string into <code>EditBlock</code> records by scanning for the
+delimiter triplet <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</code> /
+<code>=======</code> /
+<code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</code>. Each block carries
+its file path (the line immediately preceding
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</code>), the SEARCH literal,
+and the REPLACE literal. No filesystem access; no stateful side
+effects.</li>
+<li><strong><code>SmartEditApplier</code></strong>
+(<code>applier.go</code>) — pure function
+<code>Apply(content string, blocks []EditBlock) (string, []BlockResult, error)</code>.
+Takes a file’s current content + the list of blocks targeting that file;
+for each block, locates the SEARCH literal in the current content,
+ensures it is present <strong>exactly once</strong> (lenient conflict
+detection per Q4=B; ambiguous → fail), and replaces it with REPLACE.
+Returns the new content, per-block success/failure, and an aggregate
+error (the first block failure aborts the file). No filesystem
+access.</li>
+<li><strong><code>Differ</code></strong> (<code>diff.go</code>) — pure
+function
+<code>UnifiedDiff(oldContent, newContent, path string) string</code>.
+Pure-Go, line-by-line; uses the LCS-based diff algorithm already shipped
+in
+<code>internal/tools/multiedit/diff.go::DiffManager.GenerateDiff</code>
+(re-used, not re-implemented; see §3.6). Returns a unified-diff
+<code>string</code> (not a struct) for direct printing to the caller;
+the per-file <code>EditResult.Diff</code> field is a <code>string</code>
+so the agent can grep / pattern-match it without further
+unmarshaling.</li>
+<li><strong><code>SmartEditTool</code></strong>
+(<code>smart_edit_tool.go</code>) — <code>Tool</code> interface impl
+that wires the above three together with the multiedit
+<code>MultiFileEditor</code>. On <code>Execute(ctx, params)</code>:
+<ol type="1">
+<li>Parse <code>params[&quot;prompt&quot;]</code> → <code>[]EditBlock</code>.</li>
+<li>Group blocks by file path →
+<code>map[string][]EditBlock</code>.</li>
+<li>For each file: read current content via <code>os.ReadFile</code>
+(real disk; no fs abstraction so binary-detect runs against the actual
+bytes); detect binary; refuse binary; run
+<code>SmartEditApplier.Apply</code> on the content; if any block fails,
+abort the whole prompt with <code>ErrApplyFailed</code> and return
+without writing. Capture pre-content + planned post-content per
+file.</li>
+<li>If all files succeeded in-memory: open a multiedit transaction
+(<code>MultiFileEditor.BeginEdit</code>), add one
+<code>FileEdit{Operation: OpUpdate, OldContent, NewContent}</code> per
+file, call <code>Preview</code> (drives the existing checksum pipeline;
+checksums for the lenient model are computed from the pre-content we
+just read so the multiedit checksum check trivially passes), then
+<code>Commit</code>. Multiedit’s <code>Commit</code> is atomic + rolled
+back on per-file write failure (existing F08 behaviour).</li>
+<li>After <code>Commit</code> returns success: re-read each file from
+disk (<code>os.ReadFile</code>), compute
+<code>UnifiedDiff(preContent, postReadContent, path)</code>, populate
+<code>EditResult.NewContent</code> (post-read) +
+<code>EditResult.Diff</code>. <strong>The re-read is mandatory</strong>
+— anti-bluff for “file unchanged after success” (§5.2).</li>
+</ol></li>
+<li><strong><code>/edit</code> slash command</strong>
+(<code>internal/commands/edit_command.go</code>) — mirrors F14
+<code>/sandbox</code> and F16 <code>/telemetry</code> shape: defines a
+<code>SmartEditInspector</code> interface in the commands package so the
+slash is testable with a fake while main.go passes the real
+<code>*smartedit.SmartEditTool</code>. Subcommands: <code>status</code>
+(last attempt’s per-file pass/fail summary), <code>diff</code> (last
+attempt’s diffs concatenated), <code>dry-run &lt;path&gt;</code> (parse
+blocks from <code>&lt;path&gt;</code>, apply in-memory, return diff
+WITHOUT writing), <code>commit &lt;path&gt;</code> (parse + apply +
+write; equivalent to invoking the tool directly with the file’s contents
+as <code>prompt</code>).</li>
+</ul>
+<pre><code>                                ┌───────── prompt string ──────────┐
+                                │ path/a.go                        │
+                                │ &lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH                   │
+                                │ old                              │
+                                │ =======                          │
+                                │ new                              │
+                                │ &gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE                  │
+                                │ path/b.go                        │
+                                │ &lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH ... etc           │
+                                └─────────────┬────────────────────┘
+                                              │
+                                              ▼
+                                  ┌─── SmartEditParser ────┐
+                                  │  Parse(prompt) []Block │
+                                  └────────────┬───────────┘
+                                               │ group by path
+                                               ▼
+                          ┌─────────── SmartEditTool.Execute ──────────┐
+                          │                                            │
+                          │  for each path:                            │
+                          │    1. os.ReadFile(path) → preContent       │
+                          │    2. binary-detect → refuse               │
+                          │    3. SmartEditApplier.Apply               │
+                          │       (re-search each SEARCH literal       │
+                          │        — lenient; ambiguous → fail)        │
+                          │    4. → planned newContent                 │
+                          │                                            │
+                          │  if any path failed: abort, write nothing  │
+                          │                                            │
+                          │  multiedit.BeginEdit                       │
+                          │  for each path: AddEdit(OpUpdate)          │
+                          │  multiedit.Preview  (checksum check)       │
+                          │  multiedit.Commit   (atomic; rolls back    │
+                          │                      backups on failure)   │
+                          │                                            │
+                          │  for each path:                            │
+                          │    postContent = os.ReadFile(path)         │
+                          │    diff = Differ.UnifiedDiff(pre, post)    │
+                          │    EditResult{NewContent: post, Diff: ...} │
+                          └────────────────┬───────────────────────────┘
+                                           │
+                                           ▼
+                              SmartEditResult { perFile: []EditResult }</code></pre>
+<p>Why a tool + slash + no cobra subcommand: -
+<strong><code>smart_edit</code> tool</strong> — primary surface for the
+LLM. The agent emits a tool call; the registry dispatches. Same
+lifecycle as <code>fs_edit</code> / <code>multiedit_commit</code>. -
+<strong><code>/edit</code> slash</strong> — primary surface for the
+human in the TUI. <code>dry-run</code> is the killer feature — load
+blocks from a scratch file, see the diff, decide. - <strong>No cobra
+subcommand</strong> (Q5=A) — <code>helixcode edit ...</code> would
+duplicate the slash without adding value; the file-load path of
+<code>/edit dry-run &lt;path&gt;</code> already covers scripted use via
+<code>helixcode --slash-command &quot;/edit dry-run blocks.txt&quot;</code>.</p>
+<hr />
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/tools/smartedit/types.go</code> —
+<code>EditBlock</code>, <code>EditPlan</code>, <code>BlockResult</code>,
+<code>EditResult</code>, <code>SmartEditResult</code>, marker constants
+(<code>searchMarker</code>, <code>dividerMarker</code>,
+<code>replaceMarker</code>), error sentinels.</li>
+<li><code>helix_code/internal/tools/smartedit/types_test.go</code>.</li>
+<li><code>helix_code/internal/tools/smartedit/parser.go</code> —
+<code>Parse(prompt string) ([]EditBlock, error)</code>, marker
+scanner.</li>
+<li><code>helix_code/internal/tools/smartedit/parser_test.go</code>.</li>
+<li><code>helix_code/internal/tools/smartedit/applier.go</code> —
+<code>Apply(content string, blocks []EditBlock) (string, []BlockResult, error)</code>;
+<code>findExactlyOnce(content, search string) (int, error)</code>.</li>
+<li><code>helix_code/internal/tools/smartedit/applier_test.go</code>.</li>
+<li><code>helix_code/internal/tools/smartedit/diff.go</code> —
+<code>UnifiedDiff(oldContent, newContent, path string) string</code>;
+thin wrapper around <code>multiedit.DiffManager.GenerateDiff</code>
+(re-uses existing F08 LCS implementation). Lives in this package so the
+smart-edit tool does not pull every multiedit symbol into its public
+API.</li>
+<li><code>helix_code/internal/tools/smartedit/diff_test.go</code>.</li>
+<li><code>helix_code/internal/tools/smartedit/smart_edit_tool.go</code>
+— <code>SmartEditTool</code> (Tool impl); embeds
+<code>*multiedit.MultiFileEditor</code>; tracks last attempt for
+<code>/edit status</code> / <code>/edit diff</code>.</li>
+<li><code>helix_code/internal/tools/smartedit/smart_edit_tool_test.go</code>.</li>
+<li><code>helix_code/internal/tools/smartedit/binary_detect.go</code> —
+<code>IsBinary(content []byte) bool</code> per the standard “first 8KiB
+contains a NUL byte” heuristic. Lives in this package (not in
+filesystem) so the binary-refusal contract is local to smart-edit; if
+filesystem grows its own binary-detect later they can de-duplicate.</li>
+<li><code>helix_code/internal/tools/smartedit/binary_detect_test.go</code>.</li>
+<li><code>helix_code/internal/commands/edit_command.go</code> —
+<code>/edit</code> slash (<code>status</code> / <code>diff</code> /
+<code>dry-run</code> / <code>commit</code>).</li>
+<li><code>helix_code/internal/commands/edit_command_test.go</code>.</li>
+<li><code>helix_code/tests/integration/smartedit_test.go</code> —
+<code>//go:build integration</code>. Real tempdir, real disk writes,
+full pipeline.</li>
+<li><code>helix_code/tests/integration/cmd/p1f17_challenge/main.go</code>
+— runtime evidence harness.</li>
+<li><code>challenges/p1-f17-smart-file-editing/CHALLENGE.md</code> +
+<code>run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/cmd/cli/main.go</code> — three lines: construct
+<code>SmartEditTool</code> (passes the existing
+<code>*multiedit.MultiFileEditor</code> already wired by F08), register
+into the tool registry, register <code>/edit</code> slash.</li>
+<li><code>helix_code/internal/tools/registry.go</code> — register
+<code>smart_edit</code> in the <code>Tool</code> map alongside
+<code>fs_edit</code> / <code>multiedit_commit</code> (single line in the
+existing init block; no new fields, no new setters —
+<code>SmartEditTool</code> is opaque to the registry).</li>
+</ul>
+<p><strong>No new external dependencies</strong> (§3.5).</p>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/smartedit/types.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    searchMarker   <span class="op">=</span> <span class="st">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    dividerMarker  <span class="op">=</span> <span class="st">&quot;=======&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    replaceMarker  <span class="op">=</span> <span class="st">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">// EditBlock is a single SEARCH/REPLACE pair targeting a specific file.</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EditBlock <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    Path    <span class="dt">string</span> <span class="co">// relative or absolute file path (line preceding the SEARCH marker)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    Search  <span class="dt">string</span> <span class="co">// literal text to find in the file</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    Replace <span class="dt">string</span> <span class="co">// literal text to substitute</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    Line    <span class="dt">int</span>    <span class="co">// 1-based line number of the SEARCH marker in the prompt (for error messages)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">// EditPlan groups blocks by file. Convenience type used internally.</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EditPlan <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">][]</span>EditBlock</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">// BlockResult records the outcome of a single block.</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BlockResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    Block   EditBlock</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    Applied <span class="dt">bool</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    Reason  <span class="dt">string</span> <span class="co">// populated on failure: &quot;search not found&quot;, &quot;ambiguous match&quot;, ...</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">// EditResult is the per-file outcome of a smart_edit Execute call.</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EditResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    Path        <span class="dt">string</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    Applied     <span class="dt">bool</span>          <span class="co">// true iff every block targeting this file applied AND the file was rewritten on disk</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    NewContent  <span class="dt">string</span>        <span class="co">// post-write re-read from disk (NOT the in-memory plan); empty when Applied=false</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    Diff        <span class="dt">string</span>        <span class="co">// unified diff between pre-apply and post-write content; empty when Applied=false</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    Blocks      <span class="op">[]</span>BlockResult <span class="co">// one entry per block; reflects in-memory apply (matches the disk state when Applied=true)</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    Error       <span class="dt">error</span>         <span class="co">// top-level error for this file (binary refusal, search-not-found, ambiguous, ...)</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">// SmartEditResult is the SmartEditTool.Execute return shape.</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SmartEditResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    Files      <span class="op">[]</span>EditResult</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    Applied    <span class="dt">bool</span>          <span class="co">// true iff every file in the prompt applied successfully</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    Diff       <span class="dt">string</span>        <span class="co">// concatenated diffs across all files (empty when Applied=false)</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    DurationMs <span class="dt">int64</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">// Error sentinels — wrap with %w; tests use errors.Is.</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    ErrParseEmpty         <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: prompt contains no edit blocks&quot;</span><span class="op">)</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    ErrParseMalformed     <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: malformed edit block (missing marker)&quot;</span><span class="op">)</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    ErrParseNoPath        <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: SEARCH marker without preceding file path&quot;</span><span class="op">)</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    ErrSearchNotFound     <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: search pattern not found in file&quot;</span><span class="op">)</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    ErrSearchAmbiguous    <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: search pattern matches multiple times&quot;</span><span class="op">)</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    ErrEmptySearch        <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: SEARCH block is empty&quot;</span><span class="op">)</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    ErrBinaryFile         <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: target file appears to be binary; refusing to edit&quot;</span><span class="op">)</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    ErrApplyFailed        <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: one or more blocks failed; nothing written&quot;</span><span class="op">)</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    ErrFileTooLarge       <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: file exceeds size limit&quot;</span><span class="op">)</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    ErrPromptTooLarge     <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;smartedit: prompt exceeds size limit&quot;</span><span class="op">)</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="co">// SizeLimits guard against pathological prompts.</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    MaxPromptBytes <span class="op">=</span> <span class="dv">4</span> <span class="op">*</span> <span class="dv">1024</span> <span class="op">*</span> <span class="dv">1024</span>  <span class="co">// 4 MiB; covers a multi-file refactor of a few hundred files</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    MaxFileBytes   <span class="op">=</span> <span class="dv">4</span> <span class="op">*</span> <span class="dv">1024</span> <span class="op">*</span> <span class="dv">1024</span>  <span class="co">// mirrors multiedit.DefaultConfig().MaxFileSize / 2.5</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/smartedit/parser.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Parse tokenises a prompt string into edit blocks. Lines preceding a</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">// `&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH` marker line are treated as the file path target.</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Format:</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">//     path/to/file.ext</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">//     &lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">//     &lt;old&gt;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">//     =======</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">//     &lt;new&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">//     &gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">// Multiple blocks per file and multiple files per prompt are supported.</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">// Path lines are stripped of leading/trailing whitespace.</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Parse<span class="op">(</span>prompt <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span>EditBlock<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/smartedit/applier.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Apply applies blocks to content in order. Each block&#39;s SEARCH must</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">// appear EXACTLY ONCE in the current (mutated) content. If absent →</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">// ErrSearchNotFound. If present multiple times → ErrSearchAmbiguous.</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">// On the first block-level failure, returns (currentContent, results, err)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">// — currentContent reflects partial in-memory state; the caller MUST NOT</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">// write it. The SmartEditTool only writes when the aggregate err is nil</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">// for every targeted file.</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Apply<span class="op">(</span>content <span class="dt">string</span><span class="op">,</span> blocks <span class="op">[]</span>EditBlock<span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="op">[]</span>BlockResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">// findExactlyOnce returns the byte offset of the unique occurrence of</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">// search in content, or an error if absent / ambiguous. Empty search →</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">// ErrEmptySearch.</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> findExactlyOnce<span class="op">(</span>content<span class="op">,</span> search <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">int</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/smartedit/diff.go</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">// UnifiedDiff returns a unified-format diff between oldContent and</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">// newContent for the given path. Wraps the existing F08</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">// multiedit.DiffManager.GenerateDiff to keep a single LCS implementation</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">// in the codebase.</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> UnifiedDiff<span class="op">(</span>oldContent<span class="op">,</span> newContent<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/smartedit/smart_edit_tool.go</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">// SmartEditTool is the Tool-interface implementation registered as</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;smart_edit&quot;. It owns the multiedit transaction lifecycle for the</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">// blocks parsed from a single Execute call.</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SmartEditTool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    multiEdit <span class="op">*</span>multiedit<span class="op">.</span>MultiFileEditor <span class="co">// F08 transactional editor</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    logger    <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    mu          sync<span class="op">.</span>RWMutex</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    lastResult  <span class="op">*</span>SmartEditResult <span class="co">// populated on every Execute (success or failure)</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    lastBlocks  <span class="op">[]</span>EditBlock      <span class="co">// populated on every Execute (post-Parse)</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSmartEditTool<span class="op">(</span>me <span class="op">*</span>multiedit<span class="op">.</span>MultiFileEditor<span class="op">,</span> logger <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>SmartEditTool</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">// Tool interface</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>                          <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;smart_edit&quot;</span> <span class="op">}</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>                   <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Apply SEARCH/REPLACE blocks to one or more files atomically.&quot;</span> <span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Schema<span class="op">()</span> tools<span class="op">.</span>ToolSchema</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Category<span class="op">()</span> tools<span class="op">.</span>ToolCategory          <span class="op">{</span> <span class="cf">return</span> tools<span class="op">.</span>CategoryMultiEdit <span class="op">}</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">// SmartEditInspector — interface used by /edit slash; matches /sandbox + /telemetry shape.</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SmartEditInspector <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    LastResult<span class="op">()</span> <span class="op">*</span>SmartEditResult</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    LastBlocks<span class="op">()</span> <span class="op">[]</span>EditBlock</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    DryRun<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="co">// no-write</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    Commit<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="co">// writes</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> LastResult<span class="op">()</span> <span class="op">*</span>SmartEditResult</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> LastBlocks<span class="op">()</span> <span class="op">[]</span>EditBlock</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> DryRun<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Commit<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/commands/edit_command.go</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EditCommand <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    inspector smartedit<span class="op">.</span>SmartEditInspector</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewEditCommand<span class="op">(</span>insp smartedit<span class="op">.</span>SmartEditInspector<span class="op">)</span> <span class="op">*</span>EditCommand</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;edit&quot;</span> <span class="op">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span>    <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Inspect last smart_edit attempt or run a dry-run / commit from a blocks file.&quot;</span> <span class="op">}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span>        <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/edit [status|diff|dry-run &lt;path&gt;|commit &lt;path&gt;]&quot;</span> <span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<h3 id="user-surfaces">3.4 User surfaces</h3>
+<p><strong><code>smart_edit</code> tool</strong> — single parameter
+<code>prompt</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;smart_edit&quot;</span><span class="fu">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;parameters&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;prompt&quot;</span><span class="fu">:</span> <span class="st">&quot;path/to/file.go</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">foo</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">bar</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Returns <code>SmartEditResult</code>. On <code>Applied=false</code>,
+<code>Diff</code> is empty and per-file <code>EditResult</code> carry
+the reason. The agent is expected to inspect
+<code>result.Files[i].Diff</code> to confirm the change actually landed;
+an empty diff with <code>Applied=true</code> is a contradiction the test
+suite catches (§5.2).</p>
+<p><strong><code>/edit</code> slash</strong> — TUI inspector:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Subcommand</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/edit</code> (alias <code>/edit status</code>)</td>
+<td><code>STATUS  PATH                    BLOCKS  +ADDED  -REMOVED</code>
+table for the last attempt. When no attempt yet →
+<code>no smart_edit attempts in this session</code>.</td>
+</tr>
+<tr>
+<td><code>/edit diff</code></td>
+<td>Concatenated unified diffs from the last attempt (only files that
+applied). When the last attempt failed → reports per-file failure
+reasons.</td>
+</tr>
+<tr>
+<td><code>/edit dry-run &lt;path&gt;</code></td>
+<td>Reads <code>&lt;path&gt;</code> (a file containing one or more
+SEARCH/REPLACE blocks), parses, applies in-memory, returns the diff.
+<strong>No disk writes.</strong></td>
+</tr>
+<tr>
+<td><code>/edit commit &lt;path&gt;</code></td>
+<td>Reads <code>&lt;path&gt;</code>, parses, applies, writes. Equivalent
+to invoking <code>smart_edit</code> directly with the file’s
+contents.</td>
+</tr>
+</tbody>
+</table>
+<p><code>/edit diff</code> output <strong>MUST</strong> be visible to
+the user but <strong>MUST NOT</strong> be logged at INFO level by the
+host process — see §5.2 (CONST-042). The diff is printed to the slash
+command’s response (which is a user-facing surface; if the user is
+sharing terminal screenshots that’s their decision); zap loggers only
+see a one-line
+<code>INFO smart_edit applied (n files, m bytes diff)</code> summary.
+The full diff text is logged at DEBUG only.</p>
+<p><strong>No cobra subcommand</strong> (Q5=A). Inspection and
+dry-run/commit both go through the slash.</p>
+<h3 id="new-external-dependencies">3.5 New external dependencies</h3>
+<p><strong>None.</strong> F17 is built entirely on the Go standard
+library (<code>os</code>, <code>strings</code>, <code>bufio</code>,
+<code>errors</code>, <code>fmt</code>, <code>sync</code>,
+<code>time</code>) plus the existing testify (v1.11) and zap (already in
+go.mod via every other feature). The diff is computed by re-using
+<code>internal/tools/multiedit/diff.go::DiffManager.GenerateDiff</code>
+(already in go.mod since F08). Brief justification:</p>
+<ul>
+<li>Search-replace block parsing is line-by-line text —
+<code>bufio.Scanner</code> on a string suffices.</li>
+<li>Apply is <code>strings.Index</code> + <code>strings.Count</code> + a
+single <code>strings.Replace</code> per block.</li>
+<li>Diff is delegated to the existing F08 <code>DiffManager</code>
+(LCS-based unified diff already in production) — re-use is the explicit
+anti-bluff choice (one diff implementation, one set of tests).</li>
+<li>Atomicity is delegated to F08 <code>MultiFileEditor</code> (already
+in production) — re-use, not re-implement.</li>
+</ul>
+<p><code>go mod tidy</code> after T02 must produce <strong>zero new
+entries in <code>go.sum</code></strong>. If it doesn’t, that’s a red
+flag the implementation drifted from the spec.</p>
+<h3 id="existing-code-constraints">3.6 Existing-code constraints</h3>
+<ul>
+<li><code>internal/tools/multiedit/multiedit.go::MultiFileEditor.BeginEdit / AddEdit / Preview / Commit / Rollback</code>
+— already transactional. F17 calls them in-order. The transaction’s
+<code>EditOptions.BackupEnabled</code> is left at the multiedit default
+(true) so any per-file write failure during <code>Commit</code> triggers
+backup-restore for the files that already wrote — the all-or-nothing
+guarantee (Q3=B) inherits from F08.</li>
+<li><code>internal/tools/multiedit/transaction.go::FileEdit{Operation: OpUpdate, OldContent, NewContent, Checksum}</code>
+— F17 populates <code>OldContent</code> with the pre-read bytes and
+<code>Checksum</code> with <code>calculateChecksum(OldContent)</code>.
+Because we just read the content moments earlier, the checksum check in
+<code>verifyChecksum</code> (line 489) is trivially satisfied for the
+lenient model. We do NOT use multiedit’s stricter conflict policies
+(<code>ConflictPolicyAbort</code> etc.) for SEARCH-not-found — that’s
+our own lenient-model concern handled in the applier before we ever call
+<code>BeginEdit</code>.</li>
+<li><code>internal/tools/multiedit/diff.go::DiffManager.GenerateDiff(old, new []byte, path string) (*Diff, error)</code>
+— exposes <code>Diff.Unified</code> (a <code>string</code>).
+<code>smartedit.UnifiedDiff</code> calls this and returns
+<code>Diff.Unified</code>. The wrapping is one function; the choice to
+keep a <code>string</code> return (not the full <code>*Diff</code>
+struct) is deliberate (§11 below).</li>
+<li><code>internal/tools/registry.go::ToolRegistry</code> — F17
+registers <code>smart_edit</code> exactly like F09’s
+<code>multiedit_commit</code>. No registry interface changes; no new
+setter; no new field.</li>
+<li><code>internal/commands/registry.go</code> — F17 registers
+<code>EditCommand</code> exactly like F14 <code>/sandbox</code> and F16
+<code>/telemetry</code>. No new registration mechanics.</li>
+<li><code>cmd/cli/main.go</code> — F17 wires alongside the existing
+<code>multiedit.NewMultiFileEditor(...)</code> call in
+<code>main()</code>. Three new lines:
+<code>smartTool := smartedit.NewSmartEditTool(mfe, logger)</code>,
+<code>toolReg.Register(smartTool)</code>,
+<code>slashRegistry.Register(commands.NewEditCommand(smartTool))</code>.</li>
+</ul>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="smartedittool.execute">4.1 SmartEditTool.Execute</h3>
+<pre><code>SmartEditTool.Execute(ctx, params)
+  ├─ start := time.Now()
+  ├─ prompt, ok := params[&quot;prompt&quot;].(string); if !ok || prompt == &quot;&quot; → ErrParseEmpty
+  ├─ if len(prompt) &gt; MaxPromptBytes → ErrPromptTooLarge
+  ├─ blocks, err := Parse(prompt); if err → return SmartEditResult{Applied:false}, err
+  ├─ if len(blocks) == 0 → ErrParseEmpty
+  │
+  ├─ plan := EditPlan{}
+  ├─ for _, b := range blocks: plan[b.Path] = append(plan[b.Path], b)
+  │
+  ├─ // Phase 1: in-memory apply, no disk writes yet
+  ├─ planned := map[string]planEntry{}  // path → {pre, post, blockResults}
+  ├─ for path, fileBlocks := range plan:
+  │     pre, err := os.ReadFile(path); if err → record fail; continue
+  │     if len(pre) &gt; MaxFileBytes → record fail (ErrFileTooLarge); continue
+  │     if IsBinary(pre) → record fail (ErrBinaryFile); continue
+  │     post, blockResults, applyErr := Apply(string(pre), fileBlocks)
+  │     if applyErr → record fail; continue
+  │     planned[path] = {pre: pre, post: []byte(post), blockResults: blockResults}
+  │
+  ├─ if any path failed → return SmartEditResult{Applied:false, Files: ...}, ErrApplyFailed
+  │     // NO writes; Q3=B all-or-nothing
+  │
+  ├─ // Phase 2: transactional commit through multiedit
+  ├─ tx, err := t.multiEdit.BeginEdit(ctx, multiedit.EditOptions{...}); if err → fail
+  ├─ for path, entry := range planned:
+  │     fe := &amp;multiedit.FileEdit{
+  │         FilePath:   path,
+  │         Operation:  multiedit.OpUpdate,
+  │         OldContent: entry.pre,
+  │         NewContent: entry.post,
+  │         Checksum:   sha256(entry.pre),  // lenient: trivially satisfied
+  │     }
+  │     if err := t.multiEdit.AddEdit(ctx, tx, fe); err → fail; rollback
+  │
+  ├─ if _, err := t.multiEdit.Preview(ctx, tx); err → fail; rollback
+  ├─ if err := t.multiEdit.Commit(ctx, tx); err →
+  │     // multiedit already rolled back internally
+  │     return SmartEditResult{Applied:false}, fmt.Errorf(&quot;commit failed: %w&quot;, err)
+  │
+  ├─ // Phase 3: re-read each file from disk; compute diff
+  ├─ result := SmartEditResult{Applied: true, DurationMs: ms}
+  ├─ for path, entry := range planned:
+  │     postRead, err := os.ReadFile(path); if err → mark file failed (rare; multiedit just wrote it)
+  │     diff := UnifiedDiff(string(entry.pre), string(postRead), path)
+  │     result.Files = append(result.Files, EditResult{
+  │         Path: path, Applied: true,
+  │         NewContent: string(postRead),
+  │         Diff: diff,
+  │         Blocks: entry.blockResults,
+  │     })
+  │     result.Diff += diff + &quot;\n&quot;
+  │
+  ├─ t.mu.Lock(); t.lastResult = &amp;result; t.lastBlocks = blocks; t.mu.Unlock()
+  ├─ logger.Info(&quot;smart_edit applied&quot;, zap.Int(&quot;files&quot;, len(result.Files)), zap.Int(&quot;diff_bytes&quot;, len(result.Diff)))
+  ├─ logger.Debug(&quot;smart_edit diff&quot;, zap.String(&quot;diff&quot;, result.Diff))   // CONST-042: DEBUG only
+  └─ return result, nil</code></pre>
+<h3 id="parser-data-flow">4.2 Parser data flow</h3>
+<p>The parser is a state machine over the prompt’s lines:</p>
+<pre><code>state ∈ {scanPath, scanSearch, scanReplace}
+pendingPath := &quot;&quot;
+buf := []string
+
+for each line in prompt (1-indexed):
+  switch state:
+    scanPath:
+      if line == searchMarker:
+        if pendingPath == &quot;&quot;:
+          return nil, ErrParseNoPath
+        state = scanSearch; buf = nil
+      else if !isBlankOrComment(line):
+        pendingPath = strings.TrimSpace(line)
+    scanSearch:
+      if line == dividerMarker:
+        searchText = strings.Join(buf, &quot;\n&quot;)
+        state = scanReplace; buf = nil
+      else:
+        buf = append(buf, line)
+    scanReplace:
+      if line == replaceMarker:
+        replaceText = strings.Join(buf, &quot;\n&quot;)
+        emit EditBlock{Path:pendingPath, Search:searchText, Replace:replaceText, Line:lineNo}
+        state = scanPath; buf = nil
+        // pendingPath retained for next block targeting same file (a bare second
+        // &lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH with no path line in between targets the same file)
+      else:
+        buf = append(buf, line)
+
+if state != scanPath: ErrParseMalformed</code></pre>
+<p><strong>Path-line stickiness</strong>: within a prompt, the path
+stays attached to subsequent blocks until a new path line is
+encountered. This means consecutive blocks for the same file can omit
+repeated path lines — common in the claude-code/aider conventions.</p>
+<h3 id="applier-data-flow">4.3 Applier data flow</h3>
+<pre><code>Apply(content, blocks):
+  current := content
+  results := []BlockResult{}
+  for _, b := range blocks:
+    if b.Search == &quot;&quot;:
+      results = append(results, BlockResult{Block:b, Applied:false, Reason:&quot;empty search&quot;})
+      return current, results, ErrEmptySearch
+    n := strings.Count(current, b.Search)
+    switch n {
+    case 0:
+      results = append(results, BlockResult{Block:b, Applied:false, Reason:&quot;search not found&quot;})
+      return current, results, ErrSearchNotFound
+    case 1:
+      current = strings.Replace(current, b.Search, b.Replace, 1)
+      results = append(results, BlockResult{Block:b, Applied:true})
+    default:
+      results = append(results, BlockResult{Block:b, Applied:false, Reason:fmt.Sprintf(&quot;ambiguous: %d matches&quot;, n)})
+      return current, results, ErrSearchAmbiguous
+    }
+  return current, results, nil</code></pre>
+<p>Block ordering matters: a later block’s SEARCH may be the result of
+an earlier block’s REPLACE. The applier processes blocks in the order
+they appeared in the prompt. This matches claude-code/aider behaviour
+and is what the LLM expects.</p>
+<h3 id="edit-slash-flow">4.4 /edit slash flow</h3>
+<pre><code>EditCommand.Execute(ctx, cc):
+  if c.inspector == nil: return CommandResult{Success:false, Output:&quot;smart_edit unavailable&quot;}, nil
+  sub := &quot;status&quot;
+  if len(cc.Args) &gt; 0: sub = cc.Args[0]
+  switch sub {
+    case &quot;status&quot;:   return c.handleStatus(), nil
+    case &quot;diff&quot;:     return c.handleDiff(), nil
+    case &quot;dry-run&quot;:  if len(cc.Args)&lt;2: usage; return c.handleDryRun(ctx, cc.Args[1])
+    case &quot;commit&quot;:   if len(cc.Args)&lt;2: usage; return c.handleCommit(ctx, cc.Args[1])
+    default:         return CommandResult{Success:false, Output:c.Usage()}, nil
+  }</code></pre>
+<p><code>handleDryRun(path)</code>:
+<code>os.ReadFile(path) → prompt</code>;
+<code>inspector.DryRun(ctx, prompt)</code>; format result; <strong>never
+writes</strong>. Implemented by <code>SmartEditTool.DryRun</code> which
+runs Phase 1 only (parse + in-memory apply + diff against the planned
+post-content) and returns without invoking multiedit.</p>
+<p><code>handleCommit(path)</code>:
+<code>os.ReadFile(path) → prompt</code>;
+<code>inspector.Commit(ctx, prompt)</code>; format result; equivalent to
+invoking the <code>smart_edit</code> tool with the file’s contents.</p>
+<h3 id="single-file-vs-multi-file-path">4.5 Single-file vs multi-file
+path</h3>
+<p>Single-file is a degenerate multi-file: one transaction, one
+<code>FileEdit</code>, same atomicity. There is no separate code path.
+The test suite includes a deliberate single-file Challenge phase to
+verify the degenerate case is honoured (§6.3 phase 1).</p>
+<h2 id="error-handling-edge-cases-and-anti-bluff">5. Error handling,
+edge cases, and anti-bluff</h2>
+<h3 id="error-paths">5.1 Error paths</h3>
+<ul>
+<li><strong>Empty prompt</strong> — <code>ErrParseEmpty</code> from
+<code>Parse</code>. Tool returns it with
+<code>Applied:false</code>.</li>
+<li><strong>Missing path line</strong> (a
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</code> with no preceding
+non-blank line) — <code>ErrParseNoPath</code>. The block’s line number
+is in the message.</li>
+<li><strong>Missing <code>=======</code> divider</strong> — parser stays
+in <code>scanSearch</code> past EOF →
+<code>ErrParseMalformed</code>.</li>
+<li><strong>Missing <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</code>
+terminator</strong> — same shape; <code>ErrParseMalformed</code>.</li>
+<li><strong>Empty SEARCH</strong> — <code>ErrEmptySearch</code> from
+<code>Apply</code>. Refusing prevents an unbounded
+<code>strings.Replace(&quot;&quot;, &quot;&quot;)</code> substitution that would degenerate
+to a no-op everywhere.</li>
+<li><strong>SEARCH not found in file</strong> —
+<code>ErrSearchNotFound</code>. The lenient model: re-search at apply
+time, fail this block, abort the whole prompt (Q3=B), do NOT write
+anything. The error message includes the path and the first 80 chars of
+SEARCH for debuggability.</li>
+<li><strong>SEARCH appears multiple times</strong> —
+<code>ErrSearchAmbiguous</code>. The LLM is expected to disambiguate by
+widening the SEARCH to include surrounding context. The error message
+includes the count.</li>
+<li><strong>Binary file</strong> — <code>ErrBinaryFile</code>. Detected
+by NUL byte in first 8 KiB (standard heuristic). Refused without reading
+further; never written.</li>
+<li><strong>File too large</strong> — <code>ErrFileTooLarge</code>
+(default 4 MiB; matches multiedit’s per-file cap when halved). Larger
+files require explicit override (not in v1).</li>
+<li><strong>Prompt too large</strong> — <code>ErrPromptTooLarge</code>
+(4 MiB). A multi-hundred-file refactor still fits; pathological prompts
+don’t.</li>
+<li><strong>Multiedit <code>BeginEdit</code> / <code>AddEdit</code> /
+<code>Preview</code> / <code>Commit</code> failure</strong> — propagated
+with <code>%w</code>; multiedit handles its own rollback. The tool’s
+<code>Applied</code> is <code>false</code>; nothing on disk
+changed.</li>
+<li><strong>Re-read after Commit fails</strong> — extremely rare
+(multiedit just wrote the file). Marked as a per-file failure; the file
+<em>probably</em> did get written but we can’t confirm; the test suite
+asserts re-read errors are surfaced loudly rather than swallowed.</li>
+<li><strong>External modification between <code>os.ReadFile</code> and
+multiedit <code>Commit</code></strong> — small race window. Multiedit’s
+<code>verifyChecksum</code> will fail with <code>ConflictError</code>
+(lines 489–510). The smart-edit tool propagates this as
+<code>Applied:false</code>. Documented; not closed in v1 (would require
+a multi-edit-internal lock; deferred).</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9-loud">5.2 Anti-bluff (CONST-035 /
+§11.9) — LOUD</h3>
+<p><strong>The single largest bluff vector for F17 is “tool says edit
+applied but file unchanged on disk.” This compiles, passes naive unit
+tests, and silently corrupts the agent’s mental model of the
+codebase.</strong> Common bluff variants:</p>
+<ol type="1">
+<li><strong>(a) <code>Applied=true</code> but file unchanged</strong> —
+Apply ran in-memory; the multiedit Commit failed silently or was never
+called; the tool returned <code>Applied=true</code> because the
+in-memory plan succeeded. <strong>Defence</strong>: the post-Commit
+re-read is mandatory; <code>EditResult.NewContent</code> is always
+populated from disk, never from the planned post-content; a unit test
+deliberately makes the multiedit Commit fail and asserts
+<code>Applied=false</code>.</li>
+<li><strong>(b) SEARCH not found, but tool returns success</strong> —
+the applier silently skipped the block, or the regex/index was
+off-by-one and matched the empty string. <strong>Defence</strong>:
+<code>Apply</code> returns <code>ErrSearchNotFound</code> on
+<code>strings.Count == 0</code>; the tool’s Phase-1 abort runs before
+any write; a unit test passes a SEARCH that’s literally not in the file
+and asserts the tool returns an error AND the file is byte-identical
+after the call.</li>
+<li><strong>(c) Multi-file commit reports success but only some files
+were written</strong> — a write failure on file 3 of 5 leaves files 1–2
+written and 3–5 not (partial commit; atomicity broken).
+<strong>Defence</strong>: F17 delegates to multiedit’s
+<code>Commit</code> which uses backups + reverse-order restore on
+per-file failure; an integration test deliberately inserts a
+write-permission error on file 3 and asserts ALL FIVE FILES ARE
+BYTE-IDENTICAL TO THEIR ORIGINAL CONTENT (i.e., the rollback worked).
+The Challenge harness’s “PARTIAL ROLLBACK” phase is the canonical
+assertion.</li>
+<li><strong>(d) Diff returned doesn’t match what’s actually on
+disk</strong> — the diff was computed from the planned post-content, not
+the re-read post-write content. <strong>Defence</strong>:
+<code>UnifiedDiff</code> is invoked with
+<code>(preContent, postReadFromDisk, path)</code> — never with the
+planned content. A test feeds the tool a known SEARCH/REPLACE, then
+independently runs <code>diff -u</code> (via <code>os/exec</code>) on
+the before/after files captured by the test harness, and asserts the
+tool’s <code>Diff</code> is byte-identical to the <code>diff -u</code>
+output (modulo whitespace canonicalisation).</li>
+</ol>
+<p><strong>Required real-execution criteria</strong> (these define what
+“smart edit works” means in F17):</p>
+<ol type="1">
+<li><strong>Unit tests</strong> — real tempdirs
+(<code>t.TempDir()</code>), real <code>os.WriteFile</code> /
+<code>os.ReadFile</code>. <strong>NO mocked filesystem.</strong> The
+applier and parser have pure-function tests against in-memory strings
+(allowed); the tool’s tests always go through the disk.</li>
+<li><strong>Integration tests</strong> (<code>-tags=integration</code>)
+— exercise the full pipeline (Parse → Apply → multiedit transaction →
+re-read → diff) against a real tempdir with multiple files. ALWAYS-runs
+(no infrastructure dependency). Includes:
+<ul>
+<li>Single-file edit success → file content actually changed.</li>
+<li>SEARCH-not-found rejection → file byte-identical to original.</li>
+<li>Multi-file atomic commit → all N files have the planned post-content
+on disk.</li>
+<li>Multi-file partial-failure rollback → injects a permission error
+mid-commit; asserts ALL N files are byte-identical to their
+pre-content.</li>
+<li>Diff exactness → tool’s <code>Diff</code> matches independent
+<code>diff -u</code> output.</li>
+<li>Ambiguous SEARCH rejection → file byte-identical.</li>
+<li>Binary file refusal → file byte-identical.</li>
+</ul></li>
+<li><strong>Challenge harness</strong> — the canonical CONST-039
+evidence script. Phases (§6.3): SINGLE-FILE-SUCCESS,
+SEARCH-NOT-FOUND-REJECTED, MULTI-FILE-ATOMIC, PARTIAL-FAILURE-ROLLBACK,
+DIFF-EXACTNESS, AMBIGUOUS-REJECTED, BINARY-REFUSED. Every phase asserts
+disk state with positive evidence — a <code>sha256sum</code> of the file
+before and after is captured into the harness output.</li>
+<li><strong>Challenge MUST exit non-zero on any disk-state
+mismatch.</strong> “tool returned success but file is wrong” is a hard
+failure; absence-of-error is NEVER acceptable.</li>
+</ol>
+<p><strong>Concrete forbidden phrases</strong> (anti-bluff smoke):</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/smartedit internal/commands/edit_command.go <span class="dt">\</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>CONST-042 secret-content protection</strong> (mandatory):</p>
+<p>File contents may include secrets (the user is editing source files;
+an <code>.env</code> accidentally edited would have
+<code>API_KEY=sk-…</code> lines in both SEARCH and REPLACE). The
+mechanism:</p>
+<ul>
+<li><strong>No <code>Diff</code> text at INFO level.</strong> The host
+process logs
+<code>INFO smart_edit applied (n files, m bytes diff)</code> only —
+bytes count, no text. Full diff text is logged at DEBUG only. A unit
+test runs the tool with
+<code>zaptest.NewLogger(t, zaptest.Level(zapcore.InfoLevel))</code>,
+edits a file with the literal string
+<code>SECRET_TOKEN=sk-deadbeef</code>, captures the log buffer, and
+asserts the buffer does NOT contain <code>sk-deadbeef</code>.</li>
+<li><strong>Diff returned to caller IS visible</strong> — the user
+invoked the tool; they get to see what changed. This is by design. The
+slash command’s <code>/edit diff</code> output is user-facing, not log
+output.</li>
+<li><strong>No <code>Diff</code> text in the Challenge’s saved evidence
+file</strong> — the Challenge harness records SHA-256 hashes + line
+counts of diffs, not the diff text itself, into
+<code>06_phase_1_evidence.md</code>. The harness’s stdout (which
+captures sample diffs for human inspection) is treated as transient and
+not committed.</li>
+<li><strong>Hardcoded blocklist</strong> — F17 does NOT blocklist
+content patterns inside SEARCH/REPLACE (the user is editing files; we
+cannot second-guess what they’re editing). The protection is at the
+logging layer, not the tool boundary.</li>
+</ul>
+<p><strong>Real-execution criteria summary</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Unit</th>
+<th>Integration</th>
+<th>Challenge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1) <code>Applied=true</code> ⇒ file changed on disk</td>
+<td><code>TestSmartEditTool_AppliedTrue_ImpliesFileChanged</code> (sha
+before/after)</td>
+<td><code>TestSmartEdit_SingleFile_ContentChanged</code></td>
+<td>Phase 1 asserts pre/post sha differ</td>
+</tr>
+<tr>
+<td>(2) <code>Applied=false</code> ⇒ file unchanged on disk</td>
+<td><code>TestSmartEditTool_AppliedFalse_FileUnchanged</code></td>
+<td><code>TestSmartEdit_SearchNotFound_FileUnchanged</code></td>
+<td>Phase 2 asserts pre/post sha equal</td>
+</tr>
+<tr>
+<td>(3) Multi-file atomic</td>
+<td><code>TestApplier_MultiBlock_OrderRespected</code></td>
+<td><code>TestSmartEdit_MultiFile_AllChanged</code></td>
+<td>Phase 3 asserts all N files’ sha changed</td>
+</tr>
+<tr>
+<td>(4) Partial-failure rollback</td>
+<td>n/a (needs disk)</td>
+<td><code>TestSmartEdit_MidCommitFailure_AllFilesUnchanged</code></td>
+<td>Phase 4 asserts all N files’ sha equal pre-state</td>
+</tr>
+<tr>
+<td>(5) Diff exactness</td>
+<td><code>TestUnifiedDiff_MatchesDiffU</code></td>
+<td><code>TestSmartEdit_DiffMatchesDiffU</code></td>
+<td>Phase 5 asserts <code>Diff == $(diff -u pre post)</code></td>
+</tr>
+<tr>
+<td>(6) Ambiguous rejected</td>
+<td><code>TestApplier_Ambiguous_Returns_ErrSearchAmbiguous</code></td>
+<td><code>TestSmartEdit_Ambiguous_FileUnchanged</code></td>
+<td>Phase 6</td>
+</tr>
+<tr>
+<td>(7) Binary refused</td>
+<td><code>TestIsBinary_DetectsNUL</code></td>
+<td><code>TestSmartEdit_Binary_Refused</code></td>
+<td>Phase 7</td>
+</tr>
+<tr>
+<td>(8) No diff text at INFO</td>
+<td><code>TestSmartEditTool_DoesNotLogDiffAtInfo</code></td>
+<td>n/a</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p>The Challenge harness uses positive evidence:
+<code>if sha256_post == sha256_pre AND tool_said_applied: exit 1</code>.
+Absence-of-error is NEVER acceptable — a Challenge that reports PASS
+without observed positive evidence is itself a bluff.</p>
+<h3 id="edge-case-search-block-that-contains-the-marker-triplet-itself">5.3
+Edge case: SEARCH block that contains the marker triplet itself</h3>
+<p>If the SEARCH or REPLACE text needs to literally contain
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</code> (e.g., editing a doc
+<em>about</em> the smart-edit format — yes, this very spec), the parser
+would mis-tokenise the inner marker as a block boundary.</p>
+<p><strong>v1 resolution</strong>: the parser is <strong>strict
+literal</strong> — a line that starts with
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</code> (after
+<code>TrimRight(&quot; \t&quot;)</code>) is always a marker. There is <strong>no
+escape mechanism in v1</strong>. To edit a file that contains the
+markers, the user must:</p>
+<ol type="1">
+<li>Use <code>fs_write</code> (overwrite the file with the new content
+directly), OR</li>
+<li>Avoid putting the marker literal on a line that starts at column 0
+by indenting it (the parser only treats column-0 markers as
+boundaries).</li>
+</ol>
+<p>This is the same constraint claude-code and aider apply. Adding an
+escape mechanism (e.g.,
+<code>\&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</code> at column 0 to treat
+as literal) is <strong>deferred to v2</strong> because:</p>
+<ul>
+<li>Real-world frequency is essentially zero outside spec / docs / tests
+of the smart-edit format itself.</li>
+<li>Any escape mechanism we pick now risks colliding with
+claude-code/aider conventions.</li>
+<li>The workaround (indent the literal, or use <code>fs_write</code>) is
+one keystroke.</li>
+</ul>
+<p>A unit test
+(<code>TestParser_RejectsCol0MarkerInsideBlock_DocumentingLimitation</code>)
+explicitly documents the limitation: a SEARCH block whose body contains
+<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</code> at column 0 will be
+parsed as a malformed prompt (the inner marker terminates the outer
+SEARCH prematurely; the divider check then fails). The test pins the
+failure mode so a future v2 can introduce escaping deliberately.</p>
+<p>For <em>this spec file’s</em> meta-references to the markers (which
+the spec inevitably contains), the convention is to indent every example
+marker by two spaces inside fenced code blocks — both this spec and the
+plan honour this.</p>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-mocks-not-used-real-tempdirs-for-tool-tests-pure-function-tests-for-parserapplier">6.1
+Unit (mocks not used; real tempdirs for tool tests; pure-function tests
+for parser/applier)</h3>
+<p><strong>Parser</strong> (<code>parser_test.go</code>): -
+<code>TestParse_SingleBlock_OK</code>. -
+<code>TestParse_MultipleBlocksSameFile_OK</code> (path-line stickiness).
+- <code>TestParse_MultipleFiles_OK</code>. -
+<code>TestParse_EmptyPrompt_ErrParseEmpty</code>. -
+<code>TestParse_NoBlocks_ErrParseEmpty</code>. -
+<code>TestParse_SearchWithoutPath_ErrParseNoPath</code>. -
+<code>TestParse_MissingDivider_ErrParseMalformed</code>. -
+<code>TestParse_MissingTerminator_ErrParseMalformed</code>. -
+<code>TestParse_BlankLinesBeforePath_OK</code>. -
+<code>TestParse_LineNumberRecordedInBlock_OK</code>. -
+<code>TestParse_RejectsCol0MarkerInsideBlock_DocumentingLimitation</code>.</p>
+<p><strong>Applier</strong> (<code>applier_test.go</code>): -
+<code>TestApply_SingleBlock_Replaces</code>. -
+<code>TestApply_SearchNotFound_ErrSearchNotFound</code>. -
+<code>TestApply_AmbiguousSearch_ErrSearchAmbiguous</code>. -
+<code>TestApply_EmptySearch_ErrEmptySearch</code>. -
+<code>TestApply_OrderRespected_LaterBlockSeesEarlierReplace</code>. -
+<code>TestApply_FirstFailureAborts_LaterBlocksUnattempted</code>. -
+<code>TestApply_MultilineSearchReplace_OK</code>. -
+<code>TestApply_PreservesContentOutsideMatch</code>.</p>
+<p><strong>Differ</strong> (<code>diff_test.go</code>): -
+<code>TestUnifiedDiff_MatchesDiffU</code> — runs the system
+<code>diff -u</code> on the same input via <code>os/exec</code> (skipped
+if <code>diff</code> not installed; SKIP-OK marker) and asserts
+byte-equal modulo trailing-newline canonicalisation. -
+<code>TestUnifiedDiff_EmptyOldFile_AllAdds</code>. -
+<code>TestUnifiedDiff_EmptyNewFile_AllRemoves</code>. -
+<code>TestUnifiedDiff_NoChange_EmptyDiff</code>.</p>
+<p><strong>Binary detect</strong> (<code>binary_detect_test.go</code>):
+- <code>TestIsBinary_DetectsNUL</code>. -
+<code>TestIsBinary_TextFile_False</code>. -
+<code>TestIsBinary_EmptyFile_False</code>. -
+<code>TestIsBinary_FirstByteIsNUL_True</code>.</p>
+<p><strong>Tool</strong> (<code>smart_edit_tool_test.go</code>) — these
+use real tempdirs: -
+<code>TestSmartEditTool_AppliedTrue_ImpliesFileChanged</code>
+(sha-before vs sha-after). -
+<code>TestSmartEditTool_AppliedFalse_FileUnchanged</code> (deliberately
+unfindable SEARCH; sha-before == sha-after). -
+<code>TestSmartEditTool_SingleFile_NewContentMatchesDisk</code>
+(NewContent field is byte-identical to <code>os.ReadFile</code> after
+the call). - <code>TestSmartEditTool_MultiFile_AllOrNothing</code> (one
+block fails; all files unchanged). -
+<code>TestSmartEditTool_BinaryFile_Refused</code>. -
+<code>TestSmartEditTool_LargeFile_ErrFileTooLarge</code>. -
+<code>TestSmartEditTool_LargePrompt_ErrPromptTooLarge</code>. -
+<code>TestSmartEditTool_DryRun_DoesNotWrite</code> (Phase 1 only;
+sha-before == sha-after). -
+<code>TestSmartEditTool_LastResultPopulated</code>. -
+<code>TestSmartEditTool_DoesNotLogDiffAtInfo</code> (CONST-042; uses
+<code>zaptest.NewLogger</code> with <code>zapcore.InfoLevel</code>).</p>
+<p><strong>Slash</strong> (<code>edit_command_test.go</code>): -
+<code>TestEditCommand_NilInspector_ReportsUnavailable</code>. -
+<code>TestEditCommand_Status_NoAttempt_ReportsNone</code>. -
+<code>TestEditCommand_Status_LastAttempt_RendersTable</code>. -
+<code>TestEditCommand_Diff_LastAttempt_PrintsDiffs</code>. -
+<code>TestEditCommand_DryRun_FileNotFound_ReportsError</code>. -
+<code>TestEditCommand_DryRun_ValidPrompt_ReturnsDiff_NoWrite</code>. -
+<code>TestEditCommand_Commit_ValidPrompt_Writes</code>. -
+<code>TestEditCommand_Usage_OnUnknownSub</code>.</p>
+<h3 id="integration-gobuild-integration">6.2 Integration
+(<code>//go:build integration</code>)</h3>
+<p><code>tests/integration/smartedit_test.go</code>:</p>
+<ul>
+<li><code>TestSmartEdit_SingleFile_ContentChanged</code> — ALWAYS runs
+(no infrastructure dep). Real tempdir; writes a Go source file; runs the
+tool; asserts the file’s sha changed AND
+<code>result.Files[0].NewContent == os.ReadFile(path)</code>.</li>
+<li><code>TestSmartEdit_SearchNotFound_FileUnchanged</code> — sha-before
+== sha-after.</li>
+<li><code>TestSmartEdit_MultiFile_AllChanged</code> — three files, three
+blocks; all sha values change.</li>
+<li><code>TestSmartEdit_MidCommitFailure_AllFilesUnchanged</code> —
+three files; the third’s parent directory is chmod’d to 0500 (read-only)
+before commit; asserts ALL THREE files are byte-identical to the
+pre-content. Cleanup restores 0700.</li>
+<li><code>TestSmartEdit_DiffMatchesDiffU</code> — runs
+<code>diff -u</code> via <code>exec.CommandContext</code> on the
+captured before/after content; asserts the tool’s <code>Diff</code>
+matches.</li>
+<li><code>TestSmartEdit_Ambiguous_FileUnchanged</code> — SEARCH appears
+3× in the file; tool fails; sha unchanged.</li>
+<li><code>TestSmartEdit_Binary_Refused</code> — file with NUL byte in
+first 8 KiB; tool fails; sha unchanged.</li>
+<li><code>TestSmartEdit_DryRun_NeverWrites</code> — invokes
+<code>inspector.DryRun</code>; asserts sha unchanged.</li>
+<li><code>TestSmartEdit_OrderedBlocks_LaterSeesEarlier</code> — two
+blocks, same file; the second’s SEARCH is the first’s REPLACE; tool
+succeeds; final content matches the second REPLACE.</li>
+</ul>
+<h3 id="challenge-challengesp1-f17-smart-file-editing">6.3 Challenge
+(<code>challenges/p1-f17-smart-file-editing/</code>)</h3>
+<p>Seven-phase output skeleton (every phase always runs; no gating):</p>
+<pre><code>=== SINGLE-FILE-SUCCESS (always runs) ===
+[PASS] tempdir created at /tmp/p1f17-XXXX
+[PASS] wrote sample.go (sha-before: &lt;hex&gt;)
+[PASS] smart_edit tool applied 1 block, Applied=true
+[PASS] re-read sample.go (sha-after: &lt;hex&gt;); sha-before != sha-after
+[PASS] result.Files[0].NewContent matches os.ReadFile(sample.go) byte-for-byte
+[PASS] result.Files[0].Diff is non-empty and contains the literal &quot;@@&quot;
+
+=== SEARCH-NOT-FOUND-REJECTED (always runs) ===
+[PASS] tempdir at /tmp/p1f17-XXXX
+[PASS] wrote unchanged.go (sha-before: &lt;hex&gt;)
+[PASS] smart_edit tool returned ErrSearchNotFound (Applied=false)
+[PASS] re-read unchanged.go (sha-after: &lt;hex&gt;); sha-before == sha-after  (file untouched)
+
+=== MULTI-FILE-ATOMIC (always runs) ===
+[PASS] tempdir at /tmp/p1f17-XXXX
+[PASS] wrote a.go b.go c.go d.go e.go (sha-before captured)
+[PASS] smart_edit tool applied 5 blocks across 5 files, Applied=true
+[PASS] re-read all 5 files; every sha-after differs from sha-before
+[PASS] result.Diff contains 5 unified-diff sections
+
+=== PARTIAL-FAILURE-ROLLBACK (always runs) ===
+[PASS] tempdir at /tmp/p1f17-XXXX
+[PASS] wrote a.go b.go c.go d.go e.go (sha-before captured)
+[PASS] chmod 0500 on parent dir of c.go (force write failure on c.go)
+[PASS] smart_edit tool returned commit error (Applied=false)
+[PASS] re-read all 5 files; every sha-after equals sha-before  (atomic rollback)
+[PASS] cleanup restored 0700 on parent dir
+
+=== DIFF-EXACTNESS (always runs) ===
+[PASS] tempdir at /tmp/p1f17-XXXX
+[PASS] smart_edit tool applied a known SEARCH/REPLACE
+[PASS] independently ran `diff -u pre.txt post.txt`
+[PASS] tool.Diff is byte-identical to diff -u output (after trailing-newline normalisation)
+
+=== AMBIGUOUS-REJECTED (always runs) ===
+[PASS] wrote ambig.go containing SEARCH literal 3 times
+[PASS] smart_edit tool returned ErrSearchAmbiguous (Applied=false)
+[PASS] re-read ambig.go; sha-after == sha-before
+
+=== BINARY-REFUSED (always runs) ===
+[PASS] wrote bin.dat with NUL byte at offset 16
+[PASS] smart_edit tool returned ErrBinaryFile (Applied=false)
+[PASS] re-read bin.dat; sha-after == sha-before
+
+SUMMARY: SINGLE=6/6 PASS; NOT-FOUND=4/4 PASS; MULTI=5/5 PASS; ROLLBACK=6/6 PASS; DIFF=4/4 PASS; AMBIG=3/3 PASS; BINARY=3/3 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any assertion failure. SHA
+mismatches (<code>Applied=true</code> but file unchanged, or
+<code>Applied=false</code> but file changed) are hard failures.
+Anti-bluff smoke clean check appended to harness output.</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>Pure Go (no CGO); pure stdlib filesystem (<code>os.ReadFile</code> /
+<code>os.WriteFile</code>). Runs natively on <code>linux/amd64</code>,
+<code>linux/arm64</code>, <code>darwin/amd64</code>,
+<code>darwin/arm64</code>. Windows: the multiedit
+<code>BackupManager</code> already handles Windows path semantics; F17
+inherits. The integration test that uses chmod 0500 is gated on
+<code>runtime.GOOS != &quot;windows&quot;</code> with SKIP-OK marker
+<code>SKIP-OK: P1-F17 chmod-rollback test requires unix permission semantics (Windows)</code>.</p>
+<p>The cross-compile <code>make prod</code> target (linux/macos/windows)
+is exercised in T08.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li><strong>Fuzzy SEARCH matching</strong> (typos in old text;
+whitespace-insensitive match) — F17.5. The lenient model is “re-search
+at apply time”; fuzzy is an additional layer.</li>
+<li><strong>Regex SEARCH patterns</strong> — F17.5. Many users will want
+this; keeping v1 to literal-only keeps the failure modes obvious and the
+test surface small.</li>
+<li><strong>Partial-line / block-by-line matching</strong> — F17.5.</li>
+<li><strong>Auto-fix-on-conflict</strong> — F17.5. When SEARCH is not
+found in the current content but is found in a
+<code>git blame</code>-style historical version, propose the edit
+against the new content.</li>
+<li><strong>Binary diff</strong> — F17.5. Binary files are refused in
+v1.</li>
+<li><strong>Structural / AST-aware edits</strong> — F18 candidate.</li>
+<li><strong>Multi-step undo across separate prompts</strong> — F17.5.
+Within a prompt, multiedit’s Rollback is the undo. Across prompts, the
+user uses git.</li>
+<li><strong><code>/edit history</code></strong> — F17.5. v1 keeps only
+the last attempt.</li>
+<li><strong>Marker-escape mechanism</strong> — v2 (see §5.3).</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>§11.9 / CONST-035</strong> — Challenge has SEVEN phases, all
+always-run. Every phase records sha-before and sha-after with positive
+evidence. The five real-execution criteria in §5.2 each map to a unit +
+integration + Challenge assertion. Disk-state mismatch is a hard
+failure.</li>
+<li><strong>CONST-039</strong> — Challenge at
+<code>challenges/p1-f17-smart-file-editing/</code> + evidence harness at
+<code>tests/integration/cmd/p1f17_challenge/main.go</code>. Every phase
+asserts disk content with sha-256.</li>
+<li><strong>CONST-042 (No-Secret-Leak)</strong> — full diff text is
+logged at DEBUG only; INFO-level logs carry only diff byte-count. The
+user-facing slash output is by user request and not logged. A unit test
+asserts <code>zaptest</code> at <code>InfoLevel</code> does NOT see the
+diff body. The <code>Challenge</code> harness records sha + line count,
+never diff text.</li>
+<li><strong>CONST-043 (No-Force-Push)</strong> — close-out task pushes
+to all four remotes non-force; explicit user authorization is requested
+at T10 before pushing.</li>
+<li><strong>No-Mocks-In-Production (Universal Rule 2)</strong> — every
+real disk operation goes through <code>os.ReadFile</code> /
+<code>os.WriteFile</code> and the existing F08 multiedit transactional
+layer. The only test seam is <code>SmartEditInspector</code> (interface
+used by the slash command for testability); <code>SmartEditTool</code>
+is the production impl. No filesystem abstraction; no mocked disk.</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: search-replace block format</td>
+<td>(B) standard delimiter triplet</td>
+<td><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH\n&lt;old&gt;\n=======\n&lt;new&gt;\n&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</code>
+per claude-code/aider convention</td>
+</tr>
+<tr>
+<td>Q2: verification</td>
+<td>(C) re-read + diff</td>
+<td>After every successful Commit, re-read each file from disk and
+compute the unified diff between pre-apply and post-write content; both
+returned to the caller for self-check</td>
+</tr>
+<tr>
+<td>Q3: atomicity</td>
+<td>(B) build on multiedit</td>
+<td><code>SmartEditCommit</code> wraps the existing F08
+<code>MultiFileEditor</code>; non-breaking; multi-file atomicity
+inherited; per-file failure during commit triggers backup-restore
+rollback</td>
+</tr>
+<tr>
+<td>Q4: conflict detection</td>
+<td>(B) lenient</td>
+<td>At apply time, re-search the SEARCH literal in the current file
+content; ambiguous (n&gt;1) and not-found (n=0) both fail with clear
+errors; no mtime/hash strict pre-check</td>
+</tr>
+<tr>
+<td>Q5: user surface</td>
+<td>(A) <code>/edit</code> slash only</td>
+<td><code>/edit status / diff / dry-run &lt;path&gt; / commit &lt;path&gt;</code>;
+no cobra subcommand</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="non-obvious-decisions-recorded-for-plan-time-review">11.
+Non-obvious decisions (recorded for plan-time review)</h2>
+<ol type="1">
+<li><strong>Diff is <code>string</code>, not <code>*Diff</code></strong>
+— the <code>EditResult.Diff</code> and <code>SmartEditResult.Diff</code>
+fields are plain strings (the unified-diff text). Reason: the LLM
+consumer pattern-matches the diff with <code>strings.Contains</code> /
+regex; pulling in the full <code>*multiedit.Diff</code> struct would
+force the consumer to import <code>multiedit</code> symbols just to read
+<code>.Unified</code>. A string is the lowest-coupling shape; the
+structural diff (with stats, hunks, etc.) is still available to anyone
+who calls <code>multiedit.DiffManager.GenerateDiff</code> directly.</li>
+<li><strong>No filesystem abstraction; pure <code>os.ReadFile</code> /
+<code>os.WriteFile</code> via multiedit</strong> — the spec deliberately
+does NOT introduce a <code>Filesystem</code> interface for the
+smart-edit tool. The multiedit package already wraps disk access through
+<code>filesystem.FileSystemTools</code>; adding a second seam in
+smart-edit would create two divergent abstractions. CONST-042 protection
+lives at the logging layer, not the disk layer. Tests use real tempdirs
+(<code>t.TempDir()</code>).</li>
+<li><strong>Lenient conflict detection at apply time, not
+transaction-open time</strong> — the spec rejects mtime / pre-checksum
+strict conflict detection (Q4=B). Reason: external tools (gofmt,
+prettier, the user’s editor on save) reformat files frequently; a strict
+mtime check would fail every legitimate edit when an unrelated reformat
+happened in the millisecond between the LLM’s plan and the apply.
+Re-searching the SEARCH literal at apply time correctly distinguishes
+“file reformatted but my SEARCH still matches” (success) from “file
+reformatted and my SEARCH no longer matches” (failure with a clear
+message; the LLM re-reads + re-plans).</li>
+<li><strong>All-or-nothing across the whole prompt, not
+per-file</strong> — Q3=B says transactional via multiedit. The spec
+extends this: even Phase 1 (in-memory apply) aborts if any single block
+fails on any single file. Reason: the LLM emits a coherent multi-file
+refactor; partial application of half a refactor is a worse state than
+the original. Multi-file atomicity is inherited from multiedit’s Commit;
+whole-prompt atomicity is enforced by the Phase-1 abort gate.</li>
+<li><strong>Marker triplet is hardcoded literal; no escape mechanism in
+v1</strong> — see §5.3 for the rationale. v1 punts on escaping; v2 may
+revisit. The cost of getting the escape syntax wrong (collision with
+claude-code/aider) is higher than the cost of “indent the marker, or use
+fs_write” for the rare meta-edits.</li>
+<li><strong>No multi-attempt history; only
+<code>lastResult</code></strong> — the slash command’s
+<code>/edit status</code> and <code>/edit diff</code> operate on a
+single in-memory <code>lastResult</code>. Reason: F11 session resume
+already persists the full agent transcript including tool invocations;
+smart-edit history is recoverable from the session, not from a parallel
+in-tool history. v1 keeps the in-tool state minimal.</li>
+<li><strong><code>/edit dry-run</code> reads from a file path, not from
+inline text</strong> — Q5=A specified the slash; the slash takes a path
+because TUI input rarely accepts multi-line strings cleanly. Inline-text
+dry-run is available via the tool itself (the LLM can call
+<code>smart_edit</code> with <code>dry_run=true</code> — no, wait, v1
+does not expose a dry-run param on the tool; the LLM dry-runs by parsing
++ applying in its own context. Slash users dry-run via the file path.
+Tool users commit; that’s the asymmetry).</li>
+<li><strong>Binary detect lives in smartedit, not filesystem</strong> —
+duplication is acceptable here because the binary-refusal contract is a
+smart-edit-specific guarantee (the spec says binary files are refused;
+that’s a smart-edit decision, not a filesystem decision). If filesystem
+grows its own binary-detect later, both can converge on a shared helper;
+today, locality wins.</li>
+<li><strong>Re-use multiedit’s diff, not a new diff impl</strong> — the
+spec deliberately delegates to
+<code>multiedit.DiffManager.GenerateDiff</code> (already in production
+since F08). One LCS implementation, one set of tests, one performance
+characteristic. The smart-edit <code>diff.go</code> is a 5-line
+wrapper.</li>
+<li><strong><code>SmartEditInspector</code> interface in the commands
+package, like /sandbox + /telemetry</strong> — F14 and F16 established
+the pattern: the slash command package defines a small interface (here
+<code>SmartEditInspector</code>) that the production tool satisfies;
+tests use a fake of that interface. This keeps the slash testable
+without dragging in the multiedit transaction machinery.</li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="hxc-052-background_tasks-build-fix-const-052-lowercase-replace-paths">HXC-052
+— background_tasks build fix (CONST-052 lowercase replace paths)</h1>
+<p><strong>Captured:</strong> 2026-06-09T14:05:59Z
+<strong>Type:</strong> Bug · <strong>Status:</strong> Fixed (→
+Fixed.md)</p>
+<h2 id="defect">Defect</h2>
+<p><code>submodules/background_tasks/go.mod</code> replace directives
+pointed at capitalised sibling dirs (<code>../Concurrency</code>,
+<code>../Models</code>) that no longer exist after the CONST-052
+lowercase rename → <code>go build ./...</code> failed on the
+case-sensitive layout.</p>
+<h2 id="fix">Fix</h2>
+<p>go.mod lines 38-39: <code>=&gt; ../concurrency</code>,
+<code>=&gt; ../models</code>.</p>
+<h2 id="captured-runtime-evidence-real-go-build">Captured runtime
+evidence (real <code>go build</code>)</h2>
+<pre><code>cd submodules/background_tasks &amp;&amp; go build ./...
+BT_BUILD_OK</code></pre>
+<h2 id="commit-push">Commit + push</h2>
+<ul>
+<li>commit <code>46ceedb</code> (go.mod only, §11.4.30)</li>
+<li>pushed <code>f007922..46ceedb master</code> → all upstreams
+(origin/github/upstream/gitlab)</li>
+</ul>
+</body>
+</html>

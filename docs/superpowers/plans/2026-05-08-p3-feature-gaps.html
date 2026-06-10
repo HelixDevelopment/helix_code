@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-08-p3-feature-gaps</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-08-p3-feature-gaps</h1>
+</header>
+<h1 id="phase-3-feature-gap-implementation-implementation-plan">Phase 3
+— Feature Gap Implementation — Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development or superpowers:executing-plans.
+Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Implement all missing features from
+<code>GAP_ANALYSIS.md</code>: LiteLLM abstraction, RepoMap, quality
+scoring, clarification system, plugin system, and 4 new providers
+(Cohere, Replicate, Together.ai, verify HuggingFace).</p>
+<p><strong>Architecture:</strong> Each feature is a self-contained new
+package under <code>internal/</code> with its own types, implementation,
+tests, and challenge. Packages do not depend on each other. Each follows
+the existing pattern: <code>types.go</code> +
+<code>implementation.go</code> + <code>*_test.go</code> + challenge.</p>
+<p><strong>Tech Stack:</strong> Go 1.24, tree-sitter, fsnotify, json,
+net/http</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-08-helixcode-zero-bluff-completion-design.md</code></p>
+<hr />
+<h2 id="file-structure-map">File Structure Map</h2>
+<pre><code># LiteLLM
+helix_code/internal/llm/litellm/types.go              — create
+helix_code/internal/llm/litellm/unified_provider.go   — create
+helix_code/internal/llm/litellm/adapter_openai.go     — create
+helix_code/internal/llm/litellm/adapter_anthropic.go  — create
+helix_code/internal/llm/litellm/adapter_google.go     — create
+helix_code/internal/llm/litellm/registry.go           — create
+helix_code/internal/llm/litellm/cost_tracker.go       — create
+helix_code/internal/llm/litellm/unified_provider_test.go — create
+
+# RepoMap
+helix_code/internal/repomap/types.go           — create
+helix_code/internal/repomap/scanner.go         — create
+helix_code/internal/repomap/map_builder.go     — create
+helix_code/internal/repomap/watcher.go         — create
+helix_code/internal/repomap/repomap_tool.go    — create
+helix_code/internal/repomap/repomap_test.go    — create
+
+# Quality Scoring
+helix_code/internal/quality/types.go           — create
+helix_code/internal/quality/scorer.go          — create
+helix_code/internal/quality/gate.go            — create
+helix_code/internal/quality/history.go         — create
+helix_code/internal/quality/scorer_test.go     — create
+
+# Clarification System
+helix_code/internal/clarification/types.go     — create
+helix_code/internal/clarification/engine.go    — create
+helix_code/internal/clarification/question.go  — create
+helix_code/internal/clarification/engine_test.go — create
+
+# Plugin System
+helix_code/internal/plugins/types.go           — create
+helix_code/internal/plugins/manifest.go        — create
+helix_code/internal/plugins/loader.go          — create
+helix_code/internal/plugins/registry.go        — create
+helix_code/internal/plugins/exec.go            — create
+helix_code/internal/plugins/loader_test.go     — create
+
+# New Providers
+helix_code/internal/llm/providers/cohere/client.go     — create
+helix_code/internal/llm/providers/replicate/client.go  — create
+helix_code/internal/llm/providers/together/client.go   — create</code></pre>
+<hr />
+<h3 id="task-p3-t01-litellm-abstraction-layer">Task P3-T01: LiteLLM
+Abstraction Layer</h3>
+<p><strong>Files:</strong> Create
+<code>helix_code/internal/llm/litellm/</code> package (8 files)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create
+types</strong> (<code>types.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> litellm</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;dev.helix.code/internal/llm&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ResponseFormat <span class="dt">string</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    FormatOpenAI    ResponseFormat <span class="op">=</span> <span class="st">&quot;openai&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    FormatAnthropic ResponseFormat <span class="op">=</span> <span class="st">&quot;anthropic&quot;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    FormatGoogle    ResponseFormat <span class="op">=</span> <span class="st">&quot;google&quot;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FormatAdapter <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    Format<span class="op">()</span> ResponseFormat</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    ConvertRequest<span class="op">(</span>req <span class="op">*</span>llm<span class="op">.</span>LLMRequest<span class="op">)</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    ConvertResponse<span class="op">(</span>raw <span class="kw">interface</span><span class="op">{})</span> <span class="op">(*</span>llm<span class="op">.</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    ConvertStreamChunk<span class="op">(</span>raw <span class="kw">interface</span><span class="op">{})</span> <span class="op">(*</span>llm<span class="op">.</span>LLMStreamChunk<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UnifiedProviderConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    Adapter      FormatAdapter</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    Endpoint     <span class="dt">string</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    APIKey       <span class="dt">string</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    Timeout      time<span class="op">.</span>Duration</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    DefaultModel <span class="dt">string</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    MaxTokens    <span class="dt">int</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    Temperature  <span class="dt">float64</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    CostPer1KIn  <span class="dt">float64</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    CostPer1KOut <span class="dt">float64</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderInfo <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    Name           <span class="dt">string</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    Format         ResponseFormat</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    Endpoint       <span class="dt">string</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    AuthType       <span class="dt">string</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    DefaultModel   <span class="dt">string</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    SupportsStream <span class="dt">bool</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    MaxContext     <span class="dt">int</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    Models         <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CostTracker <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    TotalCost     <span class="dt">float64</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    TotalTokens   <span class="dt">int64</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    TotalRequests <span class="dt">int64</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    BudgetLimit   <span class="dt">float64</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create OpenAI
+adapter</strong> (<code>adapter_openai.go</code>)</label></li>
+</ul>
+<p>Implements <code>FormatAdapter</code> for OpenAI-compatible APIs.
+Maps <code>llm.LLMRequest</code> → OpenAI JSON format, parses OpenAI
+response → <code>llm.LLMResponse</code>, handles stream chunks with
+<code>choices[0].delta.content</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Create Anthropic
+adapter</strong> (<code>adapter_anthropic.go</code>)</label></li>
+</ul>
+<p>Maps to Anthropic Messages API format. Handles
+<code>content_block_delta</code> and <code>message_stop</code> stream
+events.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Create Google
+adapter</strong> (<code>adapter_google.go</code>)</label></li>
+</ul>
+<p>Maps to Gemini <code>generateContent</code> format. Handles
+<code>candidates[0].content.parts[0].text</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Create
+UnifiedProvider</strong> (<code>unified_provider.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> UnifiedProvider <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    config UnifiedProviderConfig</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    client <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    cost   <span class="op">*</span>CostTracker</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>UnifiedProvider<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>llm<span class="op">.</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>llm<span class="op">.</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Convert to provider-native format via adapter</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Marshal to JSON</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. HTTP POST with Bearer auth</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. Parse response via adapter.ConvertResponse</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 5. Track cost</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>p <span class="op">*</span>UnifiedProvider<span class="op">)</span> GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>llm<span class="op">.</span>LLMRequest<span class="op">)</span> <span class="op">(&lt;-</span><span class="kw">chan</span> <span class="op">*</span>llm<span class="op">.</span>LLMStreamChunk<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Similar but returns SSE stream channel</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Full implementation in design spec §5.1 (P3-T01 Step 5).</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6: Create
+ProviderRegistry</strong> (<code>registry.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Registry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    mu       sync<span class="op">.</span>RWMutex</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    providers <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>ProviderInfo</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    adapters  <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>FormatAdapter</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Registry<span class="op">)</span> Register<span class="op">(</span>info ProviderInfo<span class="op">,</span> adapter FormatAdapter<span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Registry<span class="op">)</span> GetProvider<span class="op">(</span>provider <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>UnifiedProvider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Registry<span class="op">)</span> ListProviders<span class="op">()</span> <span class="op">[]</span>ProviderInfo <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Registry<span class="op">)</span> FromLLMsVerifier<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> verifierURL <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 7: Create
+CostTracker</strong> (<code>cost_tracker.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>CostTracker<span class="op">)</span> TrackUsage<span class="op">(</span>in<span class="op">,</span> out <span class="dt">int</span><span class="op">)</span> <span class="op">{</span> <span class="co">/* compute cost */</span> <span class="op">}</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>CostTracker<span class="op">)</span> OverBudget<span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span> <span class="cf">return</span> c<span class="op">.</span>TotalCost <span class="op">&gt;</span> c<span class="op">.</span>BudgetLimit <span class="op">}</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>CostTracker<span class="op">)</span> Reset<span class="op">()</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 8: Write tests</strong>
+(<code>unified_provider_test.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestUnifiedProvider_OpenAIAdapter_Roundtrip<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    adapter <span class="op">:=</span> <span class="op">&amp;</span>OpenAIAdapter<span class="op">{}</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    req <span class="op">:=</span> <span class="op">&amp;</span>llm<span class="op">.</span>LLMRequest<span class="op">{</span>Messages<span class="op">:</span> <span class="op">[]</span>llm<span class="op">.</span>Message<span class="op">{{</span>Role<span class="op">:</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> Content<span class="op">:</span> <span class="st">&quot;hello&quot;</span><span class="op">}}}</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    converted<span class="op">,</span> err <span class="op">:=</span> adapter<span class="op">.</span>ConvertRequest<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    convMap <span class="op">:=</span> converted<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> convMap<span class="op">[</span><span class="st">&quot;messages&quot;</span><span class="op">].([]</span>openaiMsg<span class="op">)[</span><span class="dv">0</span><span class="op">].</span>Role<span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 9: Build, test,
+commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./internal/llm/litellm/... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/llm/litellm/ <span class="at">-count</span><span class="op">=</span>1</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/llm/litellm/</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T01): add LiteLLM unified provider abstraction layer</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T01&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t02-repomap-semantic-codebase-mapping">Task P3-T02:
+RepoMap — Semantic Codebase Mapping</h3>
+<p><strong>Files:</strong> Create
+<code>helix_code/internal/repomap/</code> package (6 files)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create
+types</strong> (<code>types.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> repomap</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SymbolNode <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    Name     <span class="dt">string</span>        <span class="st">`json:&quot;name&quot;`</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    Kind     <span class="dt">string</span>        <span class="st">`json:&quot;kind&quot;`</span> <span class="co">// function, type, import, variable</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    File     <span class="dt">string</span>        <span class="st">`json:&quot;file&quot;`</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    Line     <span class="dt">int</span>           <span class="st">`json:&quot;line&quot;`</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    Children <span class="op">[]*</span>SymbolNode <span class="st">`json:&quot;children,omitempty&quot;`</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    Doc      <span class="dt">string</span>        <span class="st">`json:&quot;doc,omitempty&quot;`</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RepoMap <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    Root    <span class="dt">string</span>        <span class="st">`json:&quot;root&quot;`</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    Files   <span class="op">[]</span><span class="dt">string</span>      <span class="st">`json:&quot;files&quot;`</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    Symbols <span class="op">[]*</span>SymbolNode <span class="st">`json:&quot;symbols&quot;`</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    Summary <span class="dt">string</span>        <span class="st">`json:&quot;summary&quot;`</span> <span class="co">// compressed view for LLM context</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RepoMapConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    Root        <span class="dt">string</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    ExcludeDirs <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    Languages   <span class="op">[]</span><span class="dt">string</span> <span class="co">// go, python, typescript, rust, c</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    MaxMapSize  <span class="dt">int</span>      <span class="co">// bytes</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create
+scanner</strong> (<code>scanner.go</code>)</label></li>
+</ul>
+<p>Walks directories respecting <code>.gitignore</code>. Identifies
+files by language. Uses tree-sitter (<code>go-tree-sitter</code>) to
+parse each file into symbol tree. Extracts function signatures, type
+definitions, imports, and doc comments.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Scanner<span class="op">)</span> Scan<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cfg RepoMapConfig<span class="op">)</span> <span class="op">(*</span>RepoMap<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Walk files -&gt; filter by language -&gt; tree-sitter parse -&gt; extract symbols</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Create map
+builder</strong> (<code>map_builder.go</code>)</label></li>
+</ul>
+<p>Creates the compressed “repo map” summary string for LLM context.
+Prioritizes public symbols, extracts call graphs, limits size to
+<code>cfg.MaxMapSize</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>MapBuilder<span class="op">)</span> Build<span class="op">(</span>symbols <span class="op">[]*</span>SymbolNode<span class="op">,</span> maxBytes <span class="dt">int</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Build compressed hierarchical representation</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Format: file_path:</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">//           ClassName.funcName(arg: Type) → ReturnType</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">//           imports: [pkg1, pkg2]</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Create
+watcher</strong> (<code>watcher.go</code>)</label></li>
+</ul>
+<p>Uses <code>fsnotify</code> to watch for file changes. Re-scans
+affected files only. Debounces changes (200ms).</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Create tool</strong>
+(<code>repomap_tool.go</code>)</label></li>
+</ul>
+<p>Implements <code>tools.Tool</code> interface as <code>repomap</code>
+tool. Returns current repo map as JSON or compressed text.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6: Write tests</strong>
+(<code>repomap_test.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRepoMap_ScanGoProject<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span>WriteFile<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;main.go&quot;</span><span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;package main</span><span class="ch">\n</span><span class="st">func main() {}&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    rm<span class="op">,</span> err <span class="op">:=</span> Scan<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> RepoMapConfig<span class="op">{</span>Root<span class="op">:</span> dir<span class="op">})</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> rm<span class="op">.</span>Files<span class="op">)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    assert<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> rm<span class="op">.</span>Symbols<span class="op">)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 7: Build, test,
+commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./internal/repomap/... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/repomap/ <span class="at">-count</span><span class="op">=</span>1</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/repomap/</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T02): add RepoMap semantic codebase mapping with tree-sitter</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T02&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t03-confidence-based-quality-scoring">Task P3-T03:
+Confidence-Based Quality Scoring</h3>
+<p><strong>Files:</strong> Create
+<code>helix_code/internal/quality/</code> package (5 files)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create
+types</strong> (<code>types.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> quality</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScoreResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    Overall      <span class="dt">float64</span>           <span class="st">`json:&quot;overall&quot;`</span> <span class="co">// 0-100</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    Compilation  <span class="dt">bool</span>              <span class="st">`json:&quot;compilation&quot;`</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    TestPassRate <span class="dt">float64</span>           <span class="st">`json:&quot;test_pass_rate&quot;`</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    LintScore    <span class="dt">float64</span>           <span class="st">`json:&quot;lint_score&quot;`</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    Security     <span class="dt">int</span>               <span class="st">`json:&quot;security&quot;`</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    Details      <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`json:&quot;details&quot;`</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    Passed       <span class="dt">bool</span>              <span class="st">`json:&quot;passed&quot;`</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> QualityGate <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    MinScore      <span class="dt">float64</span> <span class="st">`yaml:&quot;min_score&quot;`</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    RequireBuild  <span class="dt">bool</span>    <span class="st">`yaml:&quot;require_build&quot;`</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    RequireTests  <span class="dt">bool</span>    <span class="st">`yaml:&quot;require_tests&quot;`</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    RequireLint   <span class="dt">bool</span>    <span class="st">`yaml:&quot;require_lint&quot;`</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create
+scorer</strong> (<code>scorer.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Scorer<span class="op">)</span> Score<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> output <span class="dt">string</span><span class="op">,</span> codeDir <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>ScoreResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Write output to temp file</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Try to compile (go build / npm build / cargo build)</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Run tests (go test / npm test / cargo test)</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. Run linter (golangci-lint / eslint / clippy)</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 5. Compute weighted score</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Create gate</strong>
+(<code>gate.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>g <span class="op">*</span>QualityGate<span class="op">)</span> Check<span class="op">(</span>result <span class="op">*</span>ScoreResult<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> g<span class="op">.</span>RequireBuild <span class="op">&amp;&amp;</span> <span class="op">!</span>result<span class="op">.</span>Compilation <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> g<span class="op">.</span>RequireTests <span class="op">&amp;&amp;</span> result<span class="op">.</span>TestPassRate <span class="op">&lt;</span> <span class="fl">1.0</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> result<span class="op">.</span>Overall <span class="op">&lt;</span> g<span class="op">.</span>MinScore <span class="op">{</span> <span class="cf">return</span> <span class="ot">false</span> <span class="op">}</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">true</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Create
+history</strong> (<code>history.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> History <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    Entries <span class="op">[]</span>ScoreResult <span class="st">`json:&quot;entries&quot;`</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    Path    <span class="dt">string</span>        <span class="st">`json:&quot;-&quot;`</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>History<span class="op">)</span> Append<span class="op">(</span>r ScoreResult<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span>  <span class="co">// JSONL append</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>h <span class="op">*</span>History<span class="op">)</span> Average<span class="op">()</span> ScoreResult <span class="op">{</span> <span class="op">...</span> <span class="op">}</span>        <span class="co">// aggregate</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Write tests, build,
+commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/quality/ <span class="at">-count</span><span class="op">=</span>1</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/quality/</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T03): add confidence-based quality scoring system</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T03&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t04-interactive-clarification-system">Task P3-T04:
+Interactive Clarification System</h3>
+<p><strong>Files:</strong> Create
+<code>helix_code/internal/clarification/</code> package (4 files)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create
+types</strong> (<code>types.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> clarification</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> QuestionType <span class="dt">string</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    YesNo       QuestionType <span class="op">=</span> <span class="st">&quot;yes_no&quot;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    MultipleChoice QuestionType <span class="op">=</span> <span class="st">&quot;multiple_choice&quot;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    FreeText    QuestionType <span class="op">=</span> <span class="st">&quot;free_text&quot;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Question <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    ID      <span class="dt">string</span>       <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    Type    QuestionType <span class="st">`json:&quot;type&quot;`</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    Text    <span class="dt">string</span>       <span class="st">`json:&quot;text&quot;`</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    Options <span class="op">[]</span><span class="dt">string</span>     <span class="st">`json:&quot;options,omitempty&quot;`</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    Default <span class="dt">string</span>       <span class="st">`json:&quot;default,omitempty&quot;`</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Answer <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    QuestionID <span class="dt">string</span> <span class="st">`json:&quot;question_id&quot;`</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    Value      <span class="dt">string</span> <span class="st">`json:&quot;value&quot;`</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Session <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    ID        <span class="dt">string</span>     <span class="st">`json:&quot;id&quot;`</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    Questions <span class="op">[]</span>Question <span class="st">`json:&quot;questions&quot;`</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>    Answers   <span class="op">[]</span>Answer   <span class="st">`json:&quot;answers&quot;`</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    Context   <span class="dt">string</span>     <span class="st">`json:&quot;context&quot;`</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    Timeout   time<span class="op">.</span>Duration</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create
+engine</strong> (<code>engine.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Engine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    sessions <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Session</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    mu       sync<span class="op">.</span>RWMutex</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>Engine<span class="op">)</span> DetectAmbiguity<span class="op">(</span>prompt <span class="dt">string</span><span class="op">)</span> <span class="op">[]</span>Question <span class="op">{</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check for: missing file paths, vague requirements, conflicting constraints</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Generate structured questions to resolve each ambiguity</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>Engine<span class="op">)</span> Resolve<span class="op">(</span>questions <span class="op">[]</span>Question<span class="op">,</span> answers <span class="op">[]</span>Answer<span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Build clarified prompt from questions + answers</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Create question
+generator</strong> (<code>question.go</code>)</label></li>
+</ul>
+<p>Pattern matching for common ambiguity types: - “fix the bug” → “Which
+file has the bug? What’s the expected behavior?” - “make it faster” →
+“Which function? What’s the current performance? What’s the target?” -
+“add a feature” → “What inputs/outputs? Where in the codebase?”</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Write tests, build,
+commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/clarification/ <span class="at">-count</span><span class="op">=</span>1</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/clarification/</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T04): add interactive clarification engine</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T04&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t05-pluginextension-system">Task P3-T05:
+Plugin/Extension System</h3>
+<p><strong>Files:</strong> Create
+<code>helix_code/internal/plugins/</code> package (6 files)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create
+types</strong> (<code>types.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> plugins</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Plugin <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    Version<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    Init<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    Shutdown<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    Tools<span class="op">()</span> <span class="op">[]</span>tools<span class="op">.</span>Tool</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    Hooks<span class="op">()</span> <span class="op">[]</span>hooks<span class="op">.</span>Hook</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    Commands<span class="op">()</span> <span class="op">[]</span>commands<span class="op">.</span>Command</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manifest <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    Name         <span class="dt">string</span>            <span class="st">`yaml:&quot;name&quot;`</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    Version      <span class="dt">string</span>            <span class="st">`yaml:&quot;version&quot;`</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    Description  <span class="dt">string</span>            <span class="st">`yaml:&quot;description&quot;`</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    Author       <span class="dt">string</span>            <span class="st">`yaml:&quot;author&quot;`</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    APIVersion   <span class="dt">string</span>            <span class="st">`yaml:&quot;api_version&quot;`</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    Dependencies <span class="op">[]</span><span class="dt">string</span>          <span class="st">`yaml:&quot;dependencies&quot;`</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    Capabilities <span class="op">[]</span><span class="dt">string</span>          <span class="st">`yaml:&quot;capabilities&quot;`</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    Entrypoint   <span class="dt">string</span>            <span class="st">`yaml:&quot;entrypoint&quot;`</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    Sandbox      <span class="dt">bool</span>              <span class="st">`yaml:&quot;sandbox&quot;`</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    Env          <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="st">`yaml:&quot;env&quot;`</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create manifest
+parser</strong> (<code>manifest.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb22"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ParseManifest<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Manifest<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="co">/* YAML parse */</span> <span class="op">}</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manifest<span class="op">)</span> Validate<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span> <span class="co">/* check required fields, API version */</span> <span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Create
+loader</strong> (<code>loader.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb23"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Loader <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    pluginDir <span class="dt">string</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    plugins   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>Plugin</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    mu        sync<span class="op">.</span>RWMutex</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>Loader<span class="op">)</span> Load<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> manifestPath <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Plugin<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Parse manifest</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Resolve dependencies (topological sort)</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. If Sandbox: load via sandbox.Manager (reuse F14)</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. Call Plugin.Init()</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Create
+registry</strong> (<code>registry.go</code>)</label></li>
+</ul>
+<div class="sourceCode" id="cb24"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Registry <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    loader <span class="op">*</span>Loader</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    tools  tools<span class="op">.</span>Registry</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    hooks  hooks<span class="op">.</span>Registry</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Registry<span class="op">)</span> Register<span class="op">(</span>plugin Plugin<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span> <span class="co">/* merge tools/hooks/commands */</span> <span class="op">}</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Registry<span class="op">)</span> List<span class="op">()</span> <span class="op">[]</span>Plugin <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>Registry<span class="op">)</span> Get<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Plugin<span class="op">,</span> <span class="dt">bool</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Create sandboxed
+executor</strong> (<code>exec.go</code>)</label></li>
+</ul>
+<p>Reuses F14 <code>sandbox.Manager</code> for plugin isolation. Each
+plugin runs in its own sandboxed process with capability
+restrictions.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6: Write tests, build,
+commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test ./internal/plugins/ <span class="at">-count</span><span class="op">=</span>1</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/plugins/</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T05): add plugin/extension system with sandboxed execution</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T05&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t06-cohere-provider">Task P3-T06: Cohere Provider</h3>
+<p><strong>Files:</strong> Create
+<code>helix_code/internal/llm/providers/cohere/client.go</code></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> cohere</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> CohereBaseURL <span class="op">=</span> <span class="st">&quot;https://api.cohere.com/v1/chat&quot;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Client <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    apiKey  <span class="dt">string</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    baseURL <span class="dt">string</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    client  <span class="op">*</span>http<span class="op">.</span>Client</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewClient<span class="op">(</span>apiKey <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>Client <span class="op">{</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>Client<span class="op">{</span>apiKey<span class="op">:</span> apiKey<span class="op">,</span> baseURL<span class="op">:</span> CohereBaseURL<span class="op">,</span> client<span class="op">:</span> <span class="op">&amp;</span>http<span class="op">.</span>Client<span class="op">{</span>Timeout<span class="op">:</span> <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">}}</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>llm<span class="op">.</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>llm<span class="op">.</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    body <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;model&quot;</span><span class="op">:</span>       req<span class="op">.</span>Model<span class="op">,</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;message&quot;</span><span class="op">:</span>     req<span class="op">.</span>Messages<span class="op">[</span><span class="bu">len</span><span class="op">(</span>req<span class="op">.</span>Messages<span class="op">)-</span><span class="dv">1</span><span class="op">].</span>Content<span class="op">,</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;chat_history&quot;</span><span class="op">:</span> buildHistory<span class="op">(</span>req<span class="op">.</span>Messages<span class="op">[:</span><span class="bu">len</span><span class="op">(</span>req<span class="op">.</span>Messages<span class="op">)-</span><span class="dv">1</span><span class="op">]),</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;max_tokens&quot;</span><span class="op">:</span>  req<span class="op">.</span>MaxTokens<span class="op">,</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;temperature&quot;</span><span class="op">:</span> req<span class="op">.</span>Temperature<span class="op">,</span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// HTTP POST to c.baseURL with Bearer c.apiKey</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Parse response</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Test, build,
+commit:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./internal/llm/providers/cohere/</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/llm/providers/cohere/</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T06): add Cohere LLM provider</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T06&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t07-replicate-provider">Task P3-T07: Replicate
+Provider</h3>
+<p><strong>Files:</strong> Create
+<code>helix_code/internal/llm/providers/replicate/client.go</code></p>
+<p>Replicate uses a different API pattern (async predictions). Client
+calls <code>/v1/predictions</code> with model + input, polls for
+completion.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Test, build,
+commit:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb28"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./internal/llm/providers/replicate/</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/llm/providers/replicate/</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T07): add Replicate LLM provider</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T07&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t08-together.ai-provider">Task P3-T08: Together.ai
+Provider</h3>
+<p><strong>Files:</strong> Create
+<code>helix_code/internal/llm/providers/together/client.go</code></p>
+<p>OpenAI-compatible endpoint at
+<code>https://api.together.xyz/v1/chat/completions</code>. Minimal
+adapter on top of existing OpenAI format.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Test, build,
+commit:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb29"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./internal/llm/providers/together/</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/llm/providers/together/</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T08): add Together.ai LLM provider</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T08&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t09-verify-huggingface-provider">Task P3-T09: Verify
+HuggingFace Provider</h3>
+<p><strong>Files:</strong> Check
+<code>helix_code/internal/llm/providers/huggingface/</code> (if
+exists)</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|stub\|placeholder\|TODO&quot;</span> helix_code/internal/llm/providers/huggingface/ <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;ISSUE FOUND&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>If stubbed: fix with real HuggingFace Inference API calls. If real:
+document as verified.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Commit:</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb31"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/internal/llm/providers/huggingface/</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P3-T09): verify HuggingFace provider is real, fix if stubbed</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T09&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t10-update-gap_analysis.md-with-completions">Task
+P3-T10: Update GAP_ANALYSIS.md with completions</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Mark all Phase 3
+implementations as COMPLETE in GAP_ANALYSIS.md</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb32"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Update provider count, add evidence links</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Mark LiteLLM, RepoMap, plugins, quality, clarification as DONE</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb33"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add GAP_ANALYSIS.md HELIXCODE_FEATURE_GAP_ANALYSIS.md</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P3-T10): update gap analysis with Phase 3 completions</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T10&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p3-t11-phase-3-build-verification">Task P3-T11: Phase 3
+build verification</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Full
+build</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb34"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build ./...</span></code></pre></div>
+<p>Expected: exit 0</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Full test
+suite</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> test <span class="at">-short</span> ./...</span></code></pre></div>
+<p>Expected: PASS (or SKIP-OK)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Anti-bluff sweep for
+new code</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb36"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|placeholder\|stub\|TODO&quot;</span> internal/llm/litellm/ internal/repomap/ internal/quality/ internal/clarification/ internal/plugins/ <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> test <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> doc <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>Expected: <code>clean</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Commit and
+push</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb37"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add . <span class="kw">&amp;&amp;</span> <span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P3-T11): Phase 3 complete — all feature gaps implemented</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 3  Task: P3-T11  Evidence: go build ./... PASS&quot;</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github main</span></code></pre></div>
+<hr />
+<h2 id="phase-3-completion-checklist">Phase 3 Completion Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>LiteLLM unified provider with 3
+format adapters</label></li>
+<li><label><input type="checkbox"></input>RepoMap with tree-sitter
+scanning</label></li>
+<li><label><input type="checkbox"></input>Quality scoring with
+gates</label></li>
+<li><label><input type="checkbox"></input>Clarification engine</label></li>
+<li><label><input type="checkbox"></input>Plugin system with sandboxed
+loading</label></li>
+<li><label><input type="checkbox"></input>Cohere, Replicate, Together.ai
+providers</label></li>
+<li><label><input type="checkbox"></input>HuggingFace verified
+real</label></li>
+<li><label><input type="checkbox"></input>GAP_ANALYSIS.md updated</label></li>
+<li><label><input type="checkbox"></input><code>go build ./...</code> exits
+0</label></li>
+<li><label><input type="checkbox"></input>New code anti-bluff sweep
+clean</label></li>
+<li><label><input type="checkbox"></input>Continue to Phase 4</label></li>
+</ul>
+</body>
+</html>

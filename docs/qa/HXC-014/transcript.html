@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>transcript</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">transcript</h1>
+</header>
+<h1 id="qa-transcript-hxc-014">QA Transcript — HXC-014</h1>
+<p><strong>Revision:</strong> 1 <strong>Created:</strong> 2026-05-28
+<strong>Last modified:</strong> 2026-05-28 <strong>Status:</strong>
+active</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Run-id</td>
+<td>HXC-014 (covers HXC-014 batches 1–11 + HXC-014b)</td>
+</tr>
+<tr>
+<td>Feature</td>
+<td>§11.4.85 stress + chaos test coverage of the in-process Go packages
++ the systemic i18n translator hardening (HXC-014b)</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>Task / Bug</td>
+</tr>
+<tr>
+<td>Tracker</td>
+<td><code>docs/Issues.md</code> (HXC-014, HXC-014b rows)</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>constitution submodule <code>Constitution.md</code> §11.4.85
+(stress+chaos) + §11.4.83 (this evidence mandate)</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>PASS — verified end-to-end under <code>-race</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#feature-exercised">Feature exercised</a></li>
+<li><a href="#captured-evidence--coverage">Captured evidence —
+coverage</a></li>
+<li><a href="#captured-evidence--real-bugs-fixed-anti-bluff">Captured
+evidence — real bugs fixed (anti-bluff)</a></li>
+<li><a href="#bidirectional-thread">Bidirectional thread</a></li>
+</ul>
+<h2 id="feature-exercised">Feature exercised</h2>
+<p>The end-user-visible guarantee of HXC-014 is <strong>resilience under
+load + failure injection</strong>: every covered in-process package now
+ships stress (sustained p50/p95/p99 + ≥10-goroutine concurrency +
+boundary) and chaos (panic / cancel / input-corruption /
+resource-pressure / state-corruption) suites that run under the Go race
+detector with captured evidence. The “user” is a maintainer running
+<code>make stress-chaos</code> before a release to confirm the platform
+does not crash, deadlock, leak, or race under adversarial
+conditions.</p>
+<p>All outputs below are real captured results from the 2026-05-28
+session — no output is fabricated. Per-run JSON evidence (latency.json /
+concurrency_report.json / recovery_trace.json) is written under
+<code>helix_code/qa-results/&lt;run-id&gt;/</code> (gitignored per
+CONST-053; the harness writes it on every run).</p>
+<h2 id="captured-evidence-coverage">Captured evidence — coverage</h2>
+<p>31 in-process packages covered across 11 subagent batches: worker,
+load_balancer, task, session, event, memory, context, rules, repomap,
+discovery, tools, workflow, hooks, agent, monitoring, commands, mcp,
+notification, performance, security, providers, llm (manager), editor,
+template, cognee, focus, config, persistence, auth, deployment,
+project.</p>
+<p>The maintainer-facing gate:</p>
+<pre><code>$ cd helix_code &amp;&amp; make stress-chaos
+🌪️  Running §11.4.85 stress + chaos suites (under -race)...
+ok  dev.helix.code/internal/worker      ...
+ok  dev.helix.code/internal/event       ...
+ok  dev.helix.code/internal/memory      ...
+ok  dev.helix.code/internal/hooks       ...
+ok  dev.helix.code/internal/agent       ...
+ok  dev.helix.code/internal/config      ...
+... (all 31 covered packages) ...
+ok  dev.helix.code/tests/stresschaos
+✅ Stress + chaos suites complete (evidence under qa-results/)</code></pre>
+<p>Result: 0 FAIL across the full target under <code>-race</code>
+(re-run by the conductor at each batch close-out). Representative
+captured latencies: event sustained publish p50=0.008ms p95=0.016ms
+p99=0.022ms (N=1500); memory create/add/get p50=0.501ms p95=1.133ms
+p99=1.373ms (N=1200); auth JWT validate p50=0.076ms p95=0.106ms
+p99=0.130ms (N=500); concurrent runs gDelta=0 deadlock=false
+throughout.</p>
+<h2 id="captured-evidence-real-bugs-fixed-anti-bluff">Captured evidence
+— real bugs fixed (anti-bluff)</h2>
+<p>The chaos suites surfaced <strong>29 real production bugs</strong>
+(full per-bug detail + file:line in the <code>docs/Issues.md</code>
+HXC-014 row and the per-batch commit bodies). Defect classes:</p>
+<ul>
+<li><strong>Panic-in-goroutine, no <code>recover()</code></strong>
+(process-wide crash): event, hooks, mcp×2, notification, monitoring,
+commands, security, template, focus, persistence.</li>
+<li><strong>Non-reentrant <code>RWMutex</code> re-locked under
+read-lock</strong> (deadlock): worker, hooks, providers.</li>
+<li><strong>Map/var mutated+read with no/unused mutex</strong> (data
+race / concurrent-map crash): agent, performance, memory, config (no
+mutex at all), project, deployment.</li>
+<li><strong>Security:</strong> auth <code>VerifyJWT</code> panicked on a
+forged-but-validly-signed token with non-string claims
+(crash-on-untrusted-input DoS).</li>
+</ul>
+<p>Each fix is anti-bluff-proven by §1.1 paired mutation. Example
+(auth):</p>
+<pre><code># revert the fix → forged-claim token crashes the process:
+$ go test -race -run TestAuth_Chaos_HostileClaims ./internal/auth
+panic: interface conversion: interface {} is float64, not string  ... FAIL
+# restore the comma-ok guard:
+$ go test -race -run TestAuth_Chaos_HostileClaims ./internal/auth
+ok  dev.helix.code/internal/auth</code></pre>
+<p><strong>HXC-014b</strong> — the same unguarded-translator defect
+(data race + panic-crash) was copy-pasted across the i18n layer; fixed
+in all 54 <code>internal/*/translator.go</code> seams
+(<code>translatorMu</code> + <code>recover()</code>), mutation-proven in
+<code>internal/logging/translator_race_test.go</code>:</p>
+<pre><code># mutated (unguarded) seam:
+WARNING: DATA RACE
+panic: HXC-014b: hostile translator panic  ... FAIL
+# restored (guarded): ok  dev.helix.code/internal/logging  1.0s</code></pre>
+<h2 id="bidirectional-thread">Bidirectional thread</h2>
+<h3 id="exchange-1-maintainer-runs-the-resilience-gate">Exchange 1 —
+maintainer runs the resilience gate</h3>
+<p><strong>Sent:</strong>
+<code>cd helix_code &amp;&amp; make stress-chaos</code></p>
+<p><strong>Received:</strong> all 31 covered packages <code>ok</code>
+under <code>-race</code>, 0 FAIL, evidence written to
+<code>qa-results/</code> (see the coverage section above for the
+captured tail).</p>
+<h3 id="exchange-2-maintainer-asks-do-the-tests-actually-catch-breakage">Exchange
+2 — maintainer asks “do the tests actually catch breakage?”</h3>
+<p><strong>Sent (for each fix):</strong> revert the fix in production
+code, re-run the matching <code>-race</code> chaos test.</p>
+<p><strong>Received:</strong> the test FAILS with the genuine defect
+signature (DATA RACE / deadlock-timeout / SIGSEGV / panic); restoring
+the fix returns <code>ok</code>. This is the §1.1 paired-mutation proof
+recorded per fix in the per-batch commit bodies.</p>
+<p>Conclusion: the resilience guarantee is real and the suites are
+non-bluffing.</p>
+</body>
+</html>

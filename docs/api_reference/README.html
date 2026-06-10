@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="helixcode-api-reference-zero-bluff-phase-5">HelixCode API
+Reference — Zero-Bluff Phase 5</h1>
+<p><strong>Audience</strong>: Developers integrating against HelixCode
+internals. <strong>Scope</strong>: 20 key <code>internal/</code>
+packages from the inner Go module (<code>helix_code/helix_code/</code>).
+<strong>Generation</strong>: Content sourced from
+<code>go doc ./internal/&lt;pkg&gt;</code> — real signatures, no
+invention (CONST-035). <strong>Companion</strong>: REST API at <a href="../COMPLETE_API_REFERENCE.md"><code>docs/COMPLETE_API_REFERENCE.md</code></a>
+(1,362 lines). <strong>Last updated</strong>: 2026-05-12</p>
+<hr />
+<h2 id="module-identity">Module Identity</h2>
+<pre><code>module dev.helix.code
+go 1.26</code></pre>
+<p>Located at <code>helix_code/helix_code/</code> (inner submodule). The
+meta-repo root has a thin module also called <code>dev.helix.code</code>
+on Go 1.25.2 used only for governance tooling.</p>
+<h2 id="package-index">Package Index</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+<th>Doc page</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>internal/approval</code></td>
+<td>Tool-approval gate, 4 modes × 4 levels</td>
+<td><a href="#1-internalapproval">§1</a></td>
+</tr>
+<tr>
+<td><code>internal/autocommit</code></td>
+<td>Aider-style per-edit git auto-commit</td>
+<td><a href="#2-internalautocommit">§2</a></td>
+</tr>
+<tr>
+<td><code>internal/clarification</code></td>
+<td>LLM-driven ambiguity detection (CONST-046)</td>
+<td><a href="#3-internalclarification">§3</a></td>
+</tr>
+<tr>
+<td><code>internal/editor</code></td>
+<td>Smart file editing — 4 formats, model-aware</td>
+<td><a href="#4-internaleditor">§4</a></td>
+</tr>
+<tr>
+<td><code>internal/task</code></td>
+<td>Distributed task management + checkpointing</td>
+<td><a href="#5-internaltask">§5</a></td>
+</tr>
+<tr>
+<td><code>internal/projectmemory</code></td>
+<td>Codex-style project memory loader + hot-reload</td>
+<td><a href="#6-internalprojectmemory">§6</a></td>
+</tr>
+<tr>
+<td><code>internal/plantree</code></td>
+<td>Plandex-style branching plan trees</td>
+<td><a href="#7-internalplantree">§7</a></td>
+</tr>
+<tr>
+<td><code>internal/kilocode</code></td>
+<td>AST-aware multi-file refactoring</td>
+<td><a href="#8-internalkilocode">§8</a></td>
+</tr>
+<tr>
+<td><code>internal/roocode</code></td>
+<td>RooCode port — delegation, generation, review</td>
+<td><a href="#9-internalroocode">§9</a></td>
+</tr>
+<tr>
+<td><code>internal/plugins</code></td>
+<td>Plugin loader + registry</td>
+<td><a href="#10-internalplugins">§10</a></td>
+</tr>
+<tr>
+<td><code>internal/repomap</code></td>
+<td>Semantic codebase mapping (tree-sitter)</td>
+<td><a href="#11-internalrepomap">§11</a></td>
+</tr>
+<tr>
+<td><code>internal/quality</code></td>
+<td>Quality gates + scoring</td>
+<td><a href="#12-internalquality">§12</a></td>
+</tr>
+<tr>
+<td><code>internal/voice</code></td>
+<td>Speech-to-text voice input</td>
+<td><a href="#13-internalvoice">§13</a></td>
+</tr>
+<tr>
+<td><code>internal/llm</code></td>
+<td>LLM provider interface + adapters</td>
+<td><a href="#14-internalllm">§14</a></td>
+</tr>
+<tr>
+<td><code>internal/providers</code></td>
+<td>15 LLM provider implementations</td>
+<td><a href="#15-internalproviders">§15</a></td>
+</tr>
+<tr>
+<td><code>internal/verifier</code></td>
+<td>LLMsVerifier integration (CONST-036–040)</td>
+<td><a href="#16-internalverifier">§16</a></td>
+</tr>
+<tr>
+<td><code>internal/telemetry</code></td>
+<td>OpenTelemetry SDK wrapper</td>
+<td><a href="#17-internaltelemetry">§17</a></td>
+</tr>
+<tr>
+<td><code>internal/session</code></td>
+<td>Session transcript + resume</td>
+<td><a href="#18-internalsession">§18</a></td>
+</tr>
+<tr>
+<td><code>internal/tools</code></td>
+<td>Tool interface + registry</td>
+<td><a href="#19-internaltools">§19</a></td>
+</tr>
+<tr>
+<td><code>internal/commands</code></td>
+<td>Slash command registry</td>
+<td><a href="#20-internalcommands">§20</a></td>
+</tr>
+</tbody>
+</table>
+<p>To regenerate any section locally:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="ex">go</span> doc ./internal/<span class="op">&lt;</span>pkg<span class="op">&gt;</span></span></code></pre></div>
+<hr />
+<h2 id="internalapproval">1. <code>internal/approval</code></h2>
+<p>Tool-approval gate. The gate is a runtime check applied to every tool
+invocation. Two inputs determine the outcome: the tool’s required action
+level (<code>read-only</code>, <code>edit</code>, <code>run</code>,
+<code>all</code>) and the user’s currently active approval mode
+(<code>suggest</code>, <code>auto-edit</code>, <code>full-auto</code>,
+<code>dangerously-bypass</code>). The gate produces a
+<code>Decision</code> (allow / deny / prompt) the executor enforces.</p>
+<p>Key exports:</p>
+<ul>
+<li><code>const EnvVarName = &quot;HELIXCODE_APPROVAL&quot;</code></li>
+<li><code>var ErrInvalidMode</code>, <code>ErrNoPromptResponder</code>,
+<code>ErrSandboxRequired</code></li>
+<li><code>func Select(input SelectorInput) (ApprovalMode, ResolvedSource, error)</code>
+— flag &gt; env &gt; config &gt; default precedence</li>
+<li><code>type ApprovalMode string</code> — constants
+<code>ModeSuggest</code>, <code>ModeAutoEdit</code>,
+<code>ModeFullAuto</code>, <code>ModeDangerouslyBypass</code></li>
+<li><code>type ApprovalLevel int</code> — <code>LevelReadOnly</code>,
+<code>LevelEdit</code>, <code>LevelRun</code>,
+<code>LevelAll</code></li>
+<li><code>type ApprovalManager struct{…}</code> —
+<code>NewApprovalManager(opts) (*ApprovalManager, error)</code></li>
+<li><code>type Decision int</code> — <code>DecisionAllow</code>,
+<code>DecisionDeny</code>, <code>DecisionPrompt</code></li>
+<li><code>type PromptResponder interface{…}</code> — user prompt adapter
+for <code>auto-edit</code> mode</li>
+</ul>
+<p>Anchor: CONST-035. All 4 modes mirror codex semantics verbatim; no
+mode is a marketing label.</p>
+<h2 id="internalautocommit">2. <code>internal/autocommit</code></h2>
+<p>Aider-style per-edit git auto-commit (F22). The registry calls
+<code>MaybeCommit(ctx, CommitContext)</code> after every successful
+edit-class tool invocation.</p>
+<p>Pipeline:</p>
+<ol type="1">
+<li>Check <code>SkipRequested</code> flag (and <code>SkipParamKey</code>
+in args).</li>
+<li>Check atomic-bool enabled flag (env at startup; mutated by
+<code>/git_auto_commit on/off</code> at runtime).</li>
+<li>Verify working dir is a git repo.</li>
+<li><code>git status --porcelain</code> — clean tree → no-op.</li>
+<li>Stage <code>MutatedPaths</code> (or all dirty paths if list
+empty).</li>
+<li><code>git diff --staged</code> →
+<code>MessageSummariser.Summarise</code> → 1-line subject (≤72
+chars).</li>
+<li>Run <code>SecretFilter</code> over the subject.</li>
+<li>Build full message:
+<code>subject + &quot;\n\n&quot; + CoAuthorTrailer</code>.</li>
+<li><code>git commit -m &lt;message&gt;</code> and read back new
+SHA.</li>
+<li>Return
+<code>CommitResult{SHA, Subject, Files, Skipped:false}</code>.</li>
+</ol>
+<p><code>SecretFilter</code> patterns: AWS access keys
+(<code>AKIA[0-9A-Z]{16}</code>), OpenAI / generic
+(<code>sk-[A-Za-z0-9]{20,}</code>), Slack tokens
+(<code>xox[baprs]-[A-Za-z0-9-]{10,}</code>), GitHub PATs
+(<code>gh[pousr]_[A-Za-z0-9]{36}</code>).</p>
+<p>Anchors: CONST-042 (no secret leak), CONST-043 (no force push — diff
+body never leaves host).</p>
+<h2 id="internalclarification">3.
+<code>internal/clarification</code></h2>
+<p>LLM-driven ambiguity detection (F19, CONST-046). All questions are
+LLM-generated to be locale-aware; no hardcoded English strings.</p>
+<p>Exports:</p>
+<ul>
+<li><code>type Engine struct{…}</code> —
+<code>NewEngine(llmProvider *litellm.UnifiedProvider) *Engine</code></li>
+<li><code>type Question struct{…}</code> —
+<code>Type QuestionType</code></li>
+<li><code>type QuestionType string</code> — <code>YesNo</code>,
+<code>OpenEnded</code>, <code>MultipleChoice</code>,
+<code>FreeForm</code></li>
+<li><code>type Answer struct{…}</code></li>
+<li><code>type Session struct{…}</code> — tracks Q&amp;A within a single
+clarification flow</li>
+<li><code>type QuestionGenerator struct{…}</code> —
+<code>NewQuestionGenerator(llmProvider)</code></li>
+</ul>
+<h2 id="internaleditor">4. <code>internal/editor</code></h2>
+<p>Smart file editing (F17). Four formats, model-aware selection:</p>
+<ul>
+<li><code>EditFormatDiff</code> — Unix unified diff</li>
+<li><code>EditFormatWhole</code> — whole-file replacement</li>
+<li><code>EditFormatSearchReplace</code> — pattern-based, optional
+regex</li>
+<li><code>EditFormatLines</code> — line-range edits</li>
+</ul>
+<p>Format selection helpers:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>format <span class="op">:=</span> editor<span class="op">.</span>SelectFormatForModel<span class="op">(</span><span class="st">&quot;gpt-4o&quot;</span><span class="op">)</span>            <span class="co">// EditFormatDiff</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>format <span class="op">=</span> editor<span class="op">.</span>SelectFormatForModel<span class="op">(</span><span class="st">&quot;claude-3-sonnet&quot;</span><span class="op">)</span>    <span class="co">// EditFormatSearchReplace</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ok <span class="op">:=</span> editor<span class="op">.</span>SupportsFormat<span class="op">(</span><span class="st">&quot;gpt-4&quot;</span><span class="op">,</span> editor<span class="op">.</span>EditFormatDiff<span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">cap</span> <span class="op">:=</span> editor<span class="op">.</span>GetModelCapability<span class="op">(</span><span class="st">&quot;claude-3-opus&quot;</span><span class="op">)</span></span></code></pre></div>
+<p>Applying edits:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ed<span class="op">,</span> _ <span class="op">:=</span> editor<span class="op">.</span>NewCodeEditor<span class="op">(</span>editor<span class="op">.</span>EditFormatDiff<span class="op">)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ed<span class="op">.</span>ApplyEdit<span class="op">(</span>editor<span class="op">.</span>Edit<span class="op">{</span>FilePath<span class="op">:</span> <span class="st">&quot;test.go&quot;</span><span class="op">,</span> Format<span class="op">:</span> editor<span class="op">.</span>EditFormatDiff<span class="op">,</span> Content<span class="op">:</span> <span class="st">&quot;...&quot;</span><span class="op">})</span></span></code></pre></div>
+<p>Built-in validation, backup support, and syntax checks. See
+<code>helix_code/internal/editor/README.md</code>.</p>
+<h2 id="internaltask">5. <code>internal/task</code></h2>
+<p>Distributed task management with checkpointing, dependencies,
+priority queueing, and Redis caching.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>db <span class="op">:=</span> database<span class="op">.</span>Connect<span class="op">(</span>cfg<span class="op">);</span> redis <span class="op">:=</span> redis<span class="op">.</span>Connect<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>manager <span class="op">:=</span> task<span class="op">.</span>NewTaskManager<span class="op">(</span>db<span class="op">,</span> redis<span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>t<span class="op">,</span> err <span class="op">:=</span> manager<span class="op">.</span>CreateTask<span class="op">(</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    task<span class="op">.</span>TaskTypeBuilding<span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">{</span><span class="st">&quot;file&quot;</span><span class="op">:</span> <span class="st">&quot;main.go&quot;</span><span class="op">},</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    task<span class="op">.</span>PriorityHigh<span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    task<span class="op">.</span>CriticalityNormal<span class="op">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">[]</span>uuid<span class="op">.</span>UUID<span class="op">{},</span> <span class="co">// deps</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>Types: <code>TaskTypePlanning</code>, <code>TaskTypeBuilding</code>,
+<code>TaskTypeTesting</code>, <code>TaskTypeRefactoring</code>,
+<code>TaskTypeDebugging</code>, <code>TaskTypeDesign</code>,
+<code>TaskTypeDiagram</code>, <code>TaskTypeDeployment</code>,
+<code>TaskTypePorting</code>.</p>
+<p>Priorities: <code>PriorityLow</code> (1), <code>PriorityNormal</code>
+(5), <code>PriorityHigh</code> (10), <code>PriorityCritical</code>
+(20).</p>
+<p>Statuses: <code>Pending</code>, <code>Assigned</code>,
+<code>Running</code>, <code>Completed</code>, <code>Failed</code>,
+<code>Paused</code>, <code>WaitingForWorker</code>,
+<code>WaitingForDeps</code>.</p>
+<p><code>TaskQueue</code> provides priority-based scheduling;
+<code>CheckpointManager</code> enables failure recovery.</p>
+<h2 id="internalprojectmemory">6.
+<code>internal/projectmemory</code></h2>
+<p>Codex-style project memory (F24). Loads a project-root Markdown file
+(<code>helixcode.md</code> / <code>codex.md</code> /
+<code>AGENTS.md</code>, first-found wins) plus a per-user overlay at
+<code>$XDG_CONFIG_HOME/helixcode/memory.md</code> into every LLM call’s
+system prompt.</p>
+<p>Components:</p>
+<ul>
+<li><code>Memory</code> — immutable value type with content, paths,
+truncation flags, load timestamp.</li>
+<li><code>MemoryLoader</code> — parent-walk discovery (cwd → parent →
+git root) + user overlay reader. Missing files are NOT errors.</li>
+<li><code>MemoryRegistry</code> — <code>atomic.Pointer[Memory]</code>;
+lock-free <code>Snapshot</code>, mu-serialised <code>Reload</code>.
+Implements <code>MemorySnapshotter</code>.</li>
+<li><code>MemoryWatcher</code> — fsnotify wrapper with 200 ms debounce;
+watches parent directories so atomic-write editors (vim, emacs) survive
+renames. Graceful degrade when fsnotify unavailable.</li>
+</ul>
+<p>Constants: <code>DebounceWindow = 200ms</code>,
+<code>MaxMemoryBytes = 64 * 1024</code>.</p>
+<p>Anchor: CONST-035 (runtime evidence) + CONST-042 (memory contents
+never logged at INFO).</p>
+<h2 id="internalplantree">7. <code>internal/plantree</code></h2>
+<p>Plandex-style branching plan trees (F25). Plans are trees of
+<code>PlanNode</code> (title, description, status, children) serialised
+to <code>.helixcode/plans/&lt;name&gt;.json</code>.</p>
+<p>Six <code>tools.Tool</code> implementations:
+<code>PlanCreateTool</code>, <code>PlanShowTool</code>,
+<code>PlanListTool</code>, <code>PlanBranchTool</code>,
+<code>PlanMergeTool</code>, <code>PlanDeleteTool</code>.</p>
+<p>Helpers:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tree<span class="op">,</span> _ <span class="op">:=</span> plantree<span class="op">.</span>CreateTree<span class="op">(</span><span class="st">&quot;feature-x&quot;</span><span class="op">,</span> <span class="st">&quot;Title&quot;</span><span class="op">,</span> <span class="st">&quot;Description&quot;</span><span class="op">)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>plantree<span class="op">.</span>BranchNode<span class="op">(</span>tree<span class="op">,</span> parentID<span class="op">,</span> <span class="st">&quot;subtask&quot;</span><span class="op">,</span> <span class="st">&quot;details&quot;</span><span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>plantree<span class="op">.</span>MergeNode<span class="op">(</span>tree<span class="op">,</span> childID<span class="op">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>plantree<span class="op">.</span>VerifyTree<span class="op">(</span>tree<span class="op">)</span>        <span class="co">// → VerifyResult{Issues: []PlanIssue}</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>plantree<span class="op">.</span>CompactTree<span class="op">(</span>tree<span class="op">,</span> summariser<span class="op">)</span> <span class="co">// reuses F01 AutoCompactor</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>plantree<span class="op">.</span>RenderTree<span class="op">(</span>node<span class="op">,</span> depth<span class="op">)</span></span></code></pre></div>
+<p>Limits: <code>MaxNodes = 500</code>.</p>
+<h2 id="internalkilocode">8. <code>internal/kilocode</code></h2>
+<p>AST-aware multi-file refactoring (F28). Cross-file rename via
+tree-sitter queries + atomic F17 smart-edits; impact analysis with call
+graph + blast radius.</p>
+<p>Exports:</p>
+<ul>
+<li><code>BuildCallGraph(rootDir) (*CallGraph, error)</code> — full repo
+call graph</li>
+<li><code>NewImpactAnalyzer(rootDir) (*ImpactAnalyzer, error)</code> —
+impact + blast radius</li>
+<li><code>NewRenameEngine(rootDir) *RenameEngine</code> — cross-file
+rename</li>
+<li><code>NewRefactorer(rootDir) *Refactorer</code> — extract / inline /
+move</li>
+</ul>
+<p>Tools: <code>KiloRenameTool</code>, <code>KiloImpactTool</code>,
+<code>KiloMultiEditTool</code>.</p>
+<p>Limits: <code>MaxRenameFiles = 500</code>.</p>
+<h2 id="internalroocode">9. <code>internal/roocode</code></h2>
+<p>RooCode port (F29). Task delegation via F15 subagents, template-based
+code generation with LLM content, diff-based code review,
+conversation-aware memory.</p>
+<p>Exports: <code>TaskDelegator</code>, <code>CodeGenerator</code>,
+<code>CodeReviewer</code>, <code>ConversationStore</code>, plus tools
+<code>RooDelegateTool</code>, <code>RooGenerateTool</code>,
+<code>RooBootstrapTool</code>.</p>
+<h2 id="internalplugins">10. <code>internal/plugins</code></h2>
+<p>Plugin loader + registry. Plugins declared by
+<code>manifest.yaml</code> with name / entry / permissions; loaded from
+<code>~/.config/helixcode/plugins/</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ldr <span class="op">:=</span> plugins<span class="op">.</span>NewLoader<span class="op">(</span><span class="st">&quot;~/.config/helixcode/plugins/&quot;</span><span class="op">)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>reg <span class="op">:=</span> plugins<span class="op">.</span>NewRegistry<span class="op">()</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>plugins<span class="op">.</span>ExecutePlugin<span class="op">(</span>ctx<span class="op">,</span> plg<span class="op">,</span> <span class="st">&quot;run&quot;</span><span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;--flag&quot;</span><span class="op">})</span></span></code></pre></div>
+<h2 id="internalrepomap">11. <code>internal/repomap</code></h2>
+<p>Semantic codebase mapping for AI context (F27). Tree-sitter
+based.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cfg <span class="op">:=</span> repomap<span class="op">.</span>DefaultConfig<span class="op">()</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>cfg<span class="op">.</span>TokenBudget <span class="op">=</span> <span class="dv">8000</span><span class="op">;</span> cfg<span class="op">.</span>MaxFiles <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>rm<span class="op">,</span> _ <span class="op">:=</span> repomap<span class="op">.</span>NewRepoMap<span class="op">(</span><span class="st">&quot;/path&quot;</span><span class="op">,</span> cfg<span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ctxs<span class="op">,</span> _ <span class="op">:=</span> rm<span class="op">.</span>GetOptimalContext<span class="op">(</span><span class="st">&quot;implement user auth&quot;</span><span class="op">,</span> changedFiles<span class="op">)</span></span></code></pre></div>
+<p>Supported languages: Go, Python, JavaScript/TypeScript, Java, C/C++,
+Rust, Ruby. Symbols: functions, methods, classes, structs, interfaces,
+enums, traits, modules, constants.</p>
+<p><code>FileRanker</code> scores by name match, doc content, recency,
+import relationships. <code>RepoCache</code> provides TTL-bounded
+caching with async disk persistence; callers MUST invoke
+<code>(*RepoCache).Close()</code> (or <code>Wait()</code>) before
+disposing the cache directory to drain in-flight writes — otherwise
+fire-and-forget save goroutines may still be writing into a doomed
+directory at process/test exit.</p>
+<h2 id="internalquality">12. <code>internal/quality</code></h2>
+<p>Quality gates + scoring.</p>
+<ul>
+<li><code>type QualityGate struct{…}</code> —
+<code>DefaultGate()</code>, <code>StrictGate()</code></li>
+<li><code>type Scorer struct{}</code> — <code>NewScorer()</code></li>
+<li><code>type ScoreResult struct{…}</code></li>
+<li><code>type History struct{…}</code> — <code>NewHistory(path)</code>
+persists scores per session</li>
+</ul>
+<h2 id="internalvoice">13. <code>internal/voice</code></h2>
+<p>Speech-to-text voice input (F27). Audio capture via
+<code>arecord</code> / <code>sox</code>, transcription via OpenAI
+Whisper API with whisper.cpp local fallback.</p>
+<p>Exports: <code>VoiceRecorder</code>, <code>VoiceTranscriber</code>,
+<code>VoiceConfig</code>, <code>TranscriptionResult</code>. Tools:
+<code>VoiceStartTool</code>, <code>VoiceStopTool</code>,
+<code>VoiceTranscribeTool</code>.</p>
+<p>Engines: <code>EngineWhisperAPI</code>,
+<code>EngineWhisperCPP</code>.</p>
+<p>Default model: <code>whisper-1</code>.</p>
+<h2 id="internalllm">14. <code>internal/llm</code></h2>
+<p>LLM provider interface used by every adapter.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(*</span>GenerateResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>GenerateRequest<span class="op">)</span> <span class="op">(&lt;-</span><span class="kw">chan</span> <span class="op">*</span>Chunk<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">([]</span>Model<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    HealthCheck<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="internalproviders">15. <code>internal/providers</code></h2>
+<p>15 provider implementations: <code>anthropic</code>,
+<code>openai</code>, <code>gemini</code>, <code>bedrock</code>,
+<code>azure_openai</code>, <code>vertexai</code>, <code>groq</code>,
+<code>mistral</code>, <code>deepseek</code>, <code>xai</code>,
+<code>openrouter</code>, <code>ollama</code>, <code>llamacpp</code>,
+<code>litellm</code>, <code>characterai</code>. Each implements
+<code>llm.Provider</code>.</p>
+<p>CONST-036–040: provider catalogue + model status MUST come from
+LLMsVerifier; hardcoded model lists are forbidden.</p>
+<h2 id="internalverifier">16. <code>internal/verifier</code></h2>
+<p>LLMsVerifier client. Provides the single source of truth for model +
+provider metadata and capability flags (MCP, LSP, ACP, Embedding, RAG,
+Skills, Plugins).</p>
+<h2 id="internaltelemetry">17. <code>internal/telemetry</code></h2>
+<p>OpenTelemetry SDK wrapper. Spans wrap every tool invocation; metrics
+expose tokens-in, tokens-out, request latency, sandbox denials,
+approval-gate denials.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">HELIXCODE_OTEL_ENDPOINT</span><span class="op">=</span>http://localhost:4317 <span class="ex">./bin/cli</span></span></code></pre></div>
+<h2 id="internalsession">18. <code>internal/session</code></h2>
+<p>Session transcript + resume (F11). Transcripts stored at
+<code>~/.local/share/helixcode/sessions/&lt;id&gt;/</code>.
+<code>cli sessions list</code> and
+<code>cli sessions resume &lt;id&gt;</code> for user-facing access.</p>
+<h2 id="internaltools">19. <code>internal/tools</code></h2>
+<p>Tool registry. The contract every tool implements:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Tool <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    Description<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    Schema<span class="op">()</span> <span class="op">*</span>jsonschema<span class="op">.</span>Schema</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    RequiresApproval<span class="op">()</span> approval<span class="op">.</span>ApprovalLevel</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    Validate<span class="op">(</span>args <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> args <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>MustRegister</code>, <code>Get</code>, <code>List</code>,
+<code>Filter</code>, <code>Execute</code> are the registry surface.</p>
+<h2 id="internalcommands">20. <code>internal/commands</code></h2>
+<p>Slash command registry. Loads built-in commands plus user-defined
+ones from <code>~/.config/helixcode/commands/*.md</code>. See <a href="../developer_guide/README.md"><code>docs/developer_guide/README.md</code></a>
+§4.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Sources verified 2026-05-29: https://go.dev/doc/devel/release (Go
+1.26.0 GA 2026-02-10, latest patch go1.26.3 — confirms the documented
+<code>go 1.26</code> inner module and <code>Go 1.25.2</code> thin root
+module match CLAUDE.md §3.1; no stale pin to fix). Negative finding:
+this API reference documents internal package signatures only — no
+external service endpoints, third-party API URLs, or
+downloadable-dependency versions are present to cross-reference; the
+version authority is the project’s own <code>go.mod</code> files and
+CLAUDE.md §3.1.</p>
+</body>
+</html>

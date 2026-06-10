@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP6-new-submodules-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP6-new-submodules-design</h1>
+</header>
+<h1 id="sp6-new-helixdevelopment-submodules-design-spec-g-2-decision-feeder">SP6
+— NEW HelixDevelopment Submodules Design Spec (G-2 decision feeder)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>DESIGN — read-only over the repo. NO code edited, NO repo created,
+NO network/mutating git performed. EVERY repo-creation recommendation is
+OPERATOR-GATED (§11.4.101 — irreversible/high-blast-radius external
+mutation).</td>
+</tr>
+<tr>
+<td>Source research</td>
+<td><code>docs/research/2026-06-10-execution-models.md</code> (SP6
+feeder),
+<code>docs/research/2026-06-10-parallel-agent-coordination.md</code>
+(SP5 feeder)</td>
+</tr>
+<tr>
+<td>Source plan</td>
+<td><code>docs/superpowers/specs/plans/2026-06-10-SP5-SP6-parallel-dynamic-plan.md</code></td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>Cascades from <code>constitution/</code> + root
+<code>CLAUDE.md</code>/<code>CONSTITUTION.md</code>. Anti-bluff §11.4
+family + §11.4.74 catalogue-first + CONST-051/054 govern every
+decision.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Anti-bluff note (§11.4.6 / §11.4.123):</strong> This is a
+DESIGN, not a claim of done work. No interface below is implemented.
+Every in-repo fact carries a real <code>file:line</code> opened this
+session; every “absent” is stated explicitly; every external claim is
+sourced from the two research docs (which themselves carry
+<code>## Sources verified</code> footers). Items that could not be
+confirmed are flagged HONEST-GAP rather than asserted. The purpose of
+this doc is solely to give the operator enough detail to make the
+<strong>G-2 decision</strong> (which new repos to create) with full
+scope.</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#0-grounding--verified-facts-fileline">0. Grounding —
+verified facts (file:line)</a></li>
+<li><a href="#1-decision-frame-create-vs-extend-vs-reuse-vs-defer">1.
+Decision frame: CREATE vs EXTEND vs REUSE vs DEFER</a></li>
+<li><a href="#2-the-shared-cross-cutting-contracts">2. The shared
+cross-cutting contracts (defined once, consumed by all)</a></li>
+<li><a href="#3-per-proposed-repo-design">3. Per-proposed-repo
+design</a>
+<ul>
+<li><a href="#31-dag_orchestrator--devhelixdag--create-now">3.1
+dag_orchestrator — <code>dev.helix.dag</code> — CREATE</a></li>
+<li><a href="#32-pipeline_runtime--devhelixpipeline--create-now">3.2
+pipeline_runtime — <code>dev.helix.pipeline</code> — CREATE</a></li>
+<li><a href="#33-flow_engine--devhelixflow--extend-agentic-first">3.3
+flow_engine — <code>dev.helix.flow</code> — EXTEND Agentic (CREATE only
+if it can’t host)</a></li>
+<li><a href="#34-saga--fold-not-a-new-repo">3.4 saga — fold into
+flow_engine / wrap Temporal — DO NOT create a repo</a></li>
+<li><a href="#35-behavior_tree--devhelixbt--defer">3.5 behavior_tree —
+<code>dev.helix.bt</code> — DEFER (small CREATE later)</a></li>
+</ul></li>
+<li><a href="#4-helix-depsyaml--flat-layout-placement">4.
+helix-deps.yaml + flat-layout placement (CONST-054 / CONST-051)</a></li>
+<li><a href="#5-refined-g-2-recommendation">5. Refined G-2
+recommendation (create-now / extend / defer)</a></li>
+<li><a href="#6-ten-line-summary">6. Ten-line summary</a></li>
+</ul>
+<hr />
+<h2 id="grounding-verified-facts-fileline">0. Grounding — verified facts
+(file:line)</h2>
+<p>Every anchor below was opened READ-ONLY this session.</p>
+<p><strong>Reuse baseline (what exists today — §11.4.74
+catalogue):</strong> -
+<code>submodules/agentic/agentic/workflow.go:48-90</code> —
+<code>WorkflowGraph{Nodes map[string]*Node, Edges []*Edge, EntryPoint, EndNodes}</code>;
+<code>Node{ID,Name,Type,Handler,Condition,Config,RetryPolicy}</code>;
+<code>NodeType ∈ {agent,tool,condition,parallel,human,subgraph}</code>
+(<code>workflow.go:67-75</code>);
+<code>Edge{From,To,Condition,Label}</code>;
+<code>NodeHandler func(ctx,*WorkflowState,*NodeInput)(*NodeOutput,error)</code>;
+<code>WorkflowState</code> at <code>workflow.go:140</code>. Module
+<code>digital.vasic.agentic</code>, files under the
+<code>agentic/agentic/</code> subdir (not repo top level). -
+<code>submodules/agentic/agentic/workflow.go:240,253</code> —
+<code>Workflow.AddNode(*Node)</code> +
+<code>Workflow.AddEdge(from,to,cond,label)</code> <strong>DO exist and
+are <code>w.mu</code>-guarded.</strong> HONEST-CORRECTION to the SP6
+research line “no runtime AddNode/AddEdge/mutate API found”: the
+<em>methods</em> exist (builder-pattern). The substantive gap is that a
+<code>NodeHandler</code> returns only <code>*NodeOutput</code> — it
+<strong>cannot name its successors or spawn new nodes</strong> (no
+LangGraph <code>Command</code>/<code>Send</code> equivalent), and there
+is no documented during-<code>Run()</code> re-planning contract. So
+“runtime-mutable topology driven by a node’s own result” is the real
+gap, not the literal absence of <code>AddNode</code>. -
+<code>submodules/concurrency/pkg/pool/pool.go:13-17</code> —
+<code>type Task interface { ID() string; Execute(ctx) (interface{}, error) }</code>
+(the minimal dispatchable-unit interface). <code>pool.go:567</code> —
+<code>func Map[T any, R any](...)</code> parallel-map.
+<code>WorkerPool</code> + <code>Submit</code>/<code>SubmitWait</code>
+confirmed via <code>pool_edge_test.go</code>. -
+<code>submodules/concurrency/pkg/queue/queue.go:14-17</code> — priority
+levels <code>Low=0 … Critical=3</code>; <code>queue.go:92</code> —
+<code>func New[T any](initialCap int) *PriorityQueue[T]</code>
+(generic). Module <code>digital.vasic.concurrency</code>. -
+<code>helix_code/internal/task/dependency.go:19,46</code> —
+<code>DependencyManager.ValidateDependencies([]uuid.UUID) error</code> +
+<code>CheckDependenciesCompleted([]uuid.UUID) (bool,error)</code>. This
+is <strong>dependency DATA + completion gating, not a
+scheduler.</strong> -
+<code>helix_code/internal/workflow/executor.go</code> +
+<code>executor_test.go</code> — a <strong>linear</strong> step runner
+(<code>ExecutePlanningWorkflow</code>/<code>ExecuteBuildingWorkflow</code>/<code>ExecuteStep_*</code>/<code>ExecuteBuildStep_Go|Node|Python|Rust</code>),
+NOT a general DAG scheduler. - <code>.gitmodules</code> — own-org
+submodules already cloned + wired: <code>submodules/agentic</code> →
+<code>git@github.com:vasic-digital/Agentic.git</code>;
+<code>submodules/concurrency</code> →
+<code>vasic-digital/Concurrency.git</code>;
+<code>submodules/planning</code> →
+<code>vasic-digital/Planning.git</code>;
+<code>submodules/llm_orchestrator</code> →
+<code>HelixDevelopment/LLMOrchestrator.git</code>;
+<code>submodules/debate_orchestrator</code> →
+<code>HelixDevelopment/DebateOrchestrator.git</code>;
+<code>submodules/helix_agent</code> →
+<code>HelixDevelopment/HelixAgent.git</code>;
+<code>submodules/event_bus</code>, <code>submodules/streaming</code>
+present. - <code>helix_code/go.mod</code> —
+<code>grep -nE &#39;agentic|concurrency|planning|dev.helix.dag|dev.helix.pipeline&#39;</code>
+→ <strong>EMPTY</strong> (confirmed this pass). HelixCode does NOT
+consume the own-org agentic/concurrency/planning substrate today — it
+re-implements coordination in
+<code>internal/{agent,worker,workflow,task}</code>. This is the D-7 gap
+and the reason CREATE/EXTEND must be paired with a
+<code>replace</code>-wiring step.</p>
+<p><strong>helix-deps.yaml schema (verified
+<code>submodules/security/helix-deps.yaml</code>):</strong>
+<code>schema_version: 1</code>; <code>deps: [...]</code>;
+<code>transitive_handling.{recursive, conflict_resolution}</code>;
+<code>language_specific_subtree</code>.
+<code>submodules/agentic/helix-deps.yaml</code> is
+<strong>absent/empty</strong> (HONEST-GAP — Agentic has no manifest yet;
+any EXTEND of Agentic should add one as part of the work).</p>
+<hr />
+<h2 id="decision-frame-create-vs-extend-vs-reuse-vs-defer">1. Decision
+frame: CREATE vs EXTEND vs REUSE vs DEFER</h2>
+<p>The research recommended at minimum <code>dag_orchestrator</code> +
+<code>pipeline_runtime</code>, and floated <code>flow_engine</code>,
+<code>saga</code>, <code>behavior_tree</code>. The §11.4.74 ruling for
+each:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Family (research §)</th>
+<th>What’s genuinely absent today</th>
+<th>Closest existing home</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DAG scheduling</strong> (exec §6)</td>
+<td>A <strong>scheduler</strong> (ready-set dispatch + parallelism cap +
+failure policy + lineage). We have dependency DATA
+(<code>task/dependency.go</code>) + a linear runner
+(<code>workflow/executor.go</code>), no scheduler. No dominant Go
+DAG-scheduler lib exists (research HONEST-GAP).</td>
+<td>none — <code>concurrency</code> is the substrate, not a
+scheduler</td>
+<td><strong>CREATE <code>dag_orchestrator</code></strong></td>
+</tr>
+<tr>
+<td><strong>Dataflow/reactive + pipeline/map-reduce</strong> (exec
+§2,§5; parallel §)</td>
+<td>Push-based streaming operators (Map/Filter/FlatMap/Window) +
+typed-port FBP wiring + backpressure ergonomics.
+<code>submodules/streaming</code> is LLM token-streaming, NOT a dataflow
+operator graph (verify-before-reuse flagged in research).</td>
+<td>none</td>
+<td><strong>CREATE <code>pipeline_runtime</code></strong></td>
+</tr>
+<tr>
+<td><strong>Dynamic flows / runtime-mutable graph</strong> (exec
+§1)</td>
+<td>Node-result-driven routing (<code>Command</code>), dynamic fan-out
+(<code>Send</code>), during-run re-planning. <code>agentic</code> covers
+typed nodes + conditional/parallel/subgraph edges (≥80%) but
+<code>NodeHandler</code> can’t name successors/spawn.</td>
+<td><code>vasic-digital/Agentic</code>
+(<code>workflow.go:48-90</code>)</td>
+<td><strong>EXTEND Agentic</strong> (new repo only if dynamic re-plan
+can’t land in Agentic)</td>
+</tr>
+<tr>
+<td><strong>Saga / compensation</strong> (exec §3)</td>
+<td>Explicit compensation/rollback (<code>Do/Undo</code>,
+reverse-order). We have retry+checkpoint, no compensation model.
+Crash-durable sagas → wrap <code>temporalio/sdk-go</code> (Go, MIT),
+don’t reimplement.</td>
+<td>belongs inside <code>flow_engine</code> (the extended Agentic)</td>
+<td><strong>FOLD — not a repo</strong></td>
+</tr>
+<tr>
+<td><strong>Behavior trees</strong> (exec §4)</td>
+<td>Tick-based reactive control
+(Success/Failure/<strong>Running</strong>) + Selector fallbacks.
+<code>agentic</code> is run-to-completion, no per-tick re-eval. Small,
+vendorable from <code>askft/go-behave</code> (MIT).</td>
+<td>none, but small + lower-priority</td>
+<td><strong>DEFER</strong> (small CREATE <code>behavior_tree</code>
+later)</td>
+</tr>
+<tr>
+<td><strong>Planning/search</strong> (parallel §)</td>
+<td>nothing — <code>vasic-digital/Planning</code> already ships
+HiPlan/MCTS/ToT at <code>submodules/planning</code></td>
+<td><code>vasic-digital/Planning</code></td>
+<td><strong>REUSE</strong> (no repo; HelixCode binding only — already
+covered in the plan, out of G-2 scope)</td>
+</tr>
+<tr>
+<td><strong>Agent-mesh / swarm</strong> (exec §7)</td>
+<td>Swarm handoff + supervisor routing</td>
+<td><code>debate_orchestrator</code> + <code>llm_orchestrator</code> +
+helix_agent <code>agents/swarm</code></td>
+<td><strong>EXTEND/FOLD into SP5 substrate</strong> (out of G-2 new-repo
+scope)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Net G-2 scope:</strong> two genuinely-new repos warrant
+creation NOW — <strong><code>dag_orchestrator</code></strong> and
+<strong><code>pipeline_runtime</code></strong>. <code>flow_engine</code>
+is an EXTEND of Agentic (repo only as a fallback). <code>saga</code>
+folds into flow_engine. <code>behavior_tree</code> defers. The smallest
+set that delivers value is therefore <strong>2 new repos</strong>.</p>
+<hr />
+<h2 id="the-shared-cross-cutting-contracts-defined-once-consumed-by-all">2.
+The shared cross-cutting contracts (defined once, consumed by all)</h2>
+<p>Per research exec §8, all execution-model families must compose on
+<strong>one</strong> scheduling substrate (<code>concurrency</code>) and
+<strong>one</strong> state model (<code>agentic.WorkflowState</code>).
+To avoid each new repo inventing its own
+<code>Executor</code>/<code>Result</code>, the contracts below live in
+the <strong>SP5 shared substrate</strong> (the
+<code>Unit</code>/<code>Scheduler</code>/<code>Dispatcher</code>/<code>Resolver</code>
+module — extend <code>Concurrency</code> per plan OD-1; out of G-2 scope
+but the new SP6 repos DEPEND on it). The new SP6 repos implement /
+consume these — they do NOT redefine them:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Owned by the SP5 substrate (extend digital.vasic.concurrency, or dev.helix.substrate).</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">// SP6 repos import these — single source of truth, no duplication (§11.4.74).</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Unit <span class="kw">interface</span> <span class="op">{</span>            <span class="co">// a self-describing dispatchable piece of work</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">()</span> <span class="dt">string</span>                  <span class="co">// (already = concurrency pool.Task.ID — pool.go:15)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="co">// (= pool.Task.Execute — pool.go:17)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Scheduler <span class="kw">interface</span> <span class="op">{</span>       <span class="co">// decides WHICH ready units run now, honoring parallelism + priority</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    Submit<span class="op">(</span>u Unit<span class="op">)</span> Handle</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    Await<span class="op">(</span>h Handle<span class="op">)</span> <span class="op">(</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    Parallelism<span class="op">()</span> <span class="dt">int</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The two new SP6 repos add <strong>their own</strong> narrow contracts
+on top:</p>
+<ul>
+<li><code>dag_orchestrator</code> exposes a <strong><code>DAG</code> +
+<code>DAGScheduler</code></strong> (topo-sort + ready-set dispatch +
+failure policy) that internally calls the shared <code>Scheduler</code>
+to actually run nodes.</li>
+<li><code>pipeline_runtime</code> exposes <strong><code>Stream[T]</code>
++ <code>Operator[T,U]</code></strong> (the dataflow contract from
+research exec §8 item 5) that internally fan-outs over
+<code>concurrency.pool.Map</code> (<code>pool.go:567</code>).</li>
+</ul>
+<p>If the operator declines the SP5 substrate at OD-1, the two SP6 repos
+fall back to depending on <code>digital.vasic.concurrency</code>
+directly (still no duplication — they consume
+<code>pool</code>/<code>queue</code>/<code>semaphore</code>).</p>
+<hr />
+<h2 id="per-proposed-repo-design">3. Per-proposed-repo design</h2>
+<h3 id="dag_orchestrator-dev.helix.dag-create-now">3.1 dag_orchestrator
+— <code>dev.helix.dag</code> — CREATE NOW</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repo name</td>
+<td><code>DagOrchestrator</code> (display) →
+<code>submodules/dag_orchestrator/</code> (path, CONST-052
+snake_case)</td>
+</tr>
+<tr>
+<td>Module path</td>
+<td><code>dev.helix.dag</code></td>
+</tr>
+<tr>
+<td>Org</td>
+<td><strong>HelixDevelopment</strong></td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td><strong>public</strong> (decoupled, reusable, CONST-051 — like every
+owned engine repo)</td>
+</tr>
+<tr>
+<td>Verdict</td>
+<td><strong>CREATE</strong> — genuinely absent in both repos; clear
+consumers; no dominant Go lib to reuse</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Purpose + what’s genuinely absent.</strong> A pure-data DAG
+<strong>scheduler</strong>: consume a directed-acyclic graph of nodes
+with declared dependencies, compute the ready-set in topological order,
+dispatch ready nodes onto a bounded worker pool honoring a parallelism
+cap + priority, apply per-node retry/backoff + a failure policy
+(fail-fast vs continue-on-error), and record per-node result/lineage.
+Today HelixCode has the dependency <strong>data</strong>
+(<code>task/dependency.go:19,46</code> validates deps + completion) and
+a <strong>linear</strong> runner (<code>workflow/executor.go</code>) —
+but <strong>no scheduler</strong> that turns “these N tasks with these
+deps” into “dispatch the ready ones in parallel, gate the rest,
+propagate failure.” The research (exec §6) confirms no single dominant
+Go-native general-purpose DAG-scheduler library exists (HONEST-GAP) — Go
+projects either embed Temporal or hand-roll topo-sort over a pool, which
+is exactly the duplication a reusable own-org repo retires. It is
+<strong>agent-free</strong> (operates on opaque node payloads) so it is
+reusable by any project, not just agentic flows.</p>
+<p><strong>Core Go interfaces it exposes.</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> dag <span class="co">// dev.helix.dag</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// A node is any work with an id + dependency list. Execute is the substrate Unit shape.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Node <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    ID<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    DependsOn<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span>                 <span class="co">// ids that must complete before this node</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> in Inputs<span class="op">)</span> <span class="op">(</span>Output<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FailurePolicy <span class="dt">int</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span> FailFast FailurePolicy <span class="op">=</span> <span class="ot">iota</span><span class="op">;</span> ContinueOnError <span class="op">)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DAG <span class="kw">struct</span><span class="op">{</span> <span class="co">/* nodes map[string]Node; validated acyclic at Build() */</span> <span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Build<span class="op">(</span>nodes <span class="op">[]</span>Node<span class="op">)</span> <span class="op">(*</span>DAG<span class="op">,</span> <span class="dt">error</span><span class="op">)</span>   <span class="co">// validates acyclicity (cycle =&gt; error)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Scheduler <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Run dispatches ready nodes onto the injected concurrency.Scheduler honoring</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Parallelism + Priority, applies RetryPolicy + FailurePolicy, returns lineage.</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> d <span class="op">*</span>DAG<span class="op">,</span> opts Options<span class="op">)</span> <span class="op">(*</span>Result<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Options <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    Parallelism   <span class="dt">int</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    Failure       FailurePolicy</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    Retry         RetryPolicy</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    Priority      <span class="kw">func</span><span class="op">(</span>Node<span class="op">)</span> queue<span class="op">.</span>Priority   <span class="co">// maps to concurrency queue.Critical..Low</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Result <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    Outputs <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>Output    <span class="co">// per-node</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    Lineage <span class="op">[]</span>Edge               <span class="co">// who-ran-after-whom (Dagster-style)</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    Failed  <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">error</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">// Dynamic DAG (bridges to flow_engine §1 Send): a completed node may emit new nodes.</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Expandable <span class="kw">interface</span><span class="op">{</span> Expand<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> out Output<span class="op">)</span> <span class="op">([]</span>Node<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">}</span></span></code></pre></div>
+<p><strong>Wiring points.</strong> - <strong>HelixCode</strong> —
+<code>helix_code/internal/workflow/</code> consumes
+<code>dag.Scheduler</code> for non-agent DAGs (replaces the linear
+<code>executor.go</code> path for branching/parallel work);
+<code>helix_code/internal/task</code> provides the dependency data
+(<code>DependencyManager</code> → <code>Node.DependsOn</code>). Requires
+the D-7
+<code>replace dev.helix.dag =&gt; ../submodules/dag_orchestrator</code>
++ <code>require</code> in <code>helix_code/go.mod</code> (currently
+absent). - <strong>HelixAgent</strong> —
+<code>submodules/helix_agent/internal/agentic</code> uses
+<code>dag.Scheduler</code> to schedule its tool-graph nodes; keeps the
+public <code>agentic</code> API stable (thin adapter, CONST-051(B)
+config-injection). - <strong>Substrate</strong> — internally calls the
+SP5 <code>Scheduler</code> (or <code>concurrency.pool.WorkerPool</code>
++ <code>queue.PriorityQueue</code> + <code>semaphore</code> directly) to
+run ready nodes. No reimplementation of the pool.</p>
+<p><strong>helix-deps.yaml (CONST-054).</strong> See §4.</p>
+<p><strong>Anti-bluff Challenge that proves it works
+(§11.4.5/§11.4.69/§11.4.135).</strong>
+<code>challenges/banks/sp6-dag-orchestrator-challenge.sh</code> — build
+a real diamond DAG <code>A → {B,C} → D</code> where B sleeps and C is
+fast; assert from captured stdout that (1) <strong>B and C ran
+concurrently</strong> (overlapping start/end timestamps captured to an
+evidence file — not a single timestamp), (2) <strong>D ran strictly
+after both B and C completed</strong> (ordering proof), (3) under
+<code>FailFast</code> a planted failure in B <strong>prevents D from
+starting</strong> and <strong>cancels C</strong> with a captured
+cancellation log, (4) under <code>ContinueOnError</code> D still runs
+and <code>Result.Failed[B]</code> is populated. Paired §1.1 mutation:
+break the ready-set gate so D dispatches before B/C finish → the
+ordering assertion FAILs. Evidence class
+<code>boot_service</code>/runtime-signature per §11.4.69; transcript
+under <code>docs/qa/&lt;run-id&gt;/</code> (§11.4.83).
+RED-on-broken-artifact polarity switch per §11.4.115.</p>
+<hr />
+<h3 id="pipeline_runtime-dev.helix.pipeline-create-now">3.2
+pipeline_runtime — <code>dev.helix.pipeline</code> — CREATE NOW</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repo name</td>
+<td><code>PipelineRuntime</code> →
+<code>submodules/pipeline_runtime/</code></td>
+</tr>
+<tr>
+<td>Module path</td>
+<td><code>dev.helix.pipeline</code></td>
+</tr>
+<tr>
+<td>Org</td>
+<td><strong>HelixDevelopment</strong></td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td><strong>public</strong></td>
+</tr>
+<tr>
+<td>Verdict</td>
+<td><strong>CREATE</strong> — push-based streaming + FBP wiring absent;
+<code>submodules/streaming</code> is LLM-token streaming, not a dataflow
+operator graph</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Purpose + what’s genuinely absent.</strong> A staged
+streaming dataflow runtime: composable push-based
+<strong>operators</strong>
+(<code>Map/Filter/FlatMap/Window/Buffer/Reduce</code>) over typed
+channels, plus a <strong>Component/Port</strong> flow-based-programming
+(FBP) layer for declaratively-wired agent pipelines, plus a
+<strong>map-reduce</strong> helper (partition → map → shuffle → reduce)
+and Unix-pipe-style stage composition. Backpressure reuses
+<code>concurrency</code>’s rate-limiter/semaphore. The research (exec
+§2, §5; parallel §) found this entirely absent:
+<code>submodules/streaming</code> is LLM token streaming
+(verify-before-reuse), and Go channels +
+<code>concurrency.pool.Map</code> cover only the low-level substrate,
+not the ergonomic operator/FBP API. Recommendation is an <strong>Rx +
+FBP subset first</strong> (RxGo/GoFlow patterns, both Go/MIT) — NOT full
+Apache Beam parity (HONEST-GAP: Beam parity is large and
+over-scoped).</p>
+<p><strong>Core Go interfaces it exposes.</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> pipeline <span class="co">// dev.helix.pipeline</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Stream<span class="op">[</span>T <span class="dt">any</span><span class="op">]</span> <span class="kw">interface</span> <span class="op">{</span>           <span class="co">// push-based observable (RxGo-shaped)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Subscribe<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> sink <span class="kw">func</span><span class="op">(</span>T<span class="op">)</span> <span class="dt">error</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Operator<span class="op">[</span>T <span class="dt">any</span><span class="op">,</span> U <span class="dt">any</span><span class="op">]</span> <span class="kw">func</span><span class="op">(</span>in Stream<span class="op">[</span>T<span class="op">])</span> Stream<span class="op">[</span>U<span class="op">]</span>   <span class="co">// composable stage</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Operator constructors:</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Map<span class="op">[</span>T<span class="op">,</span> U <span class="dt">any</span><span class="op">](</span>fn <span class="kw">func</span><span class="op">(</span>T<span class="op">)</span> <span class="op">(</span>U<span class="op">,</span> <span class="dt">error</span><span class="op">))</span> Operator<span class="op">[</span>T<span class="op">,</span> U<span class="op">]</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Filter<span class="op">[</span>T <span class="dt">any</span><span class="op">](</span>pred <span class="kw">func</span><span class="op">(</span>T<span class="op">)</span> <span class="dt">bool</span><span class="op">)</span> Operator<span class="op">[</span>T<span class="op">,</span> T<span class="op">]</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> FlatMap<span class="op">[</span>T<span class="op">,</span> U <span class="dt">any</span><span class="op">](</span>fn <span class="kw">func</span><span class="op">(</span>T<span class="op">)</span> <span class="op">[]</span>U<span class="op">)</span> Operator<span class="op">[</span>T<span class="op">,</span> U<span class="op">]</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Window<span class="op">[</span>T <span class="dt">any</span><span class="op">](</span>size <span class="dt">int</span><span class="op">,</span> every time<span class="op">.</span>Duration<span class="op">)</span> Operator<span class="op">[</span>T<span class="op">,</span> <span class="op">[]</span>T<span class="op">]</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> MapReduce<span class="op">[</span>T<span class="op">,</span> K <span class="dt">comparable</span><span class="op">,</span> R <span class="dt">any</span><span class="op">](</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    mapper <span class="kw">func</span><span class="op">(</span>T<span class="op">)</span> <span class="op">(</span>K<span class="op">,</span> R<span class="op">),</span> reducer <span class="kw">func</span><span class="op">(</span>K<span class="op">,</span> <span class="op">[]</span>R<span class="op">)</span> R<span class="op">)</span> Operator<span class="op">[</span>T<span class="op">,</span> R<span class="op">]</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">// FBP layer: named typed-port components wired into a network.</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Component <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    In<span class="op">()</span> <span class="op">[]</span>Port<span class="op">;</span> Out<span class="op">()</span> <span class="op">[]</span>Port</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Network <span class="kw">struct</span><span class="op">{</span> <span class="co">/* components + channel wiring */</span> <span class="op">}</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>n <span class="op">*</span>Network<span class="op">)</span> Connect<span class="op">(</span>from Port<span class="op">,</span> to Port<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>n <span class="op">*</span>Network<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">// Backpressure injected from concurrency (semaphore / token-bucket) — no reimplementation.</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Backpressure <span class="kw">interface</span><span class="op">{</span> Acquire<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span><span class="op">;</span> Release<span class="op">()</span> <span class="op">}</span></span></code></pre></div>
+<p><strong>Wiring points.</strong> - <strong>HelixCode</strong> —
+<code>helix_code/internal/repomap</code> + index-build use a
+<code>pipeline.Network</code> (scan → parse → embed → write stages); the
+LLM streaming path can expose a <code>pipeline.Stream[Token]</code>.
+Requires
+<code>replace dev.helix.pipeline =&gt; ../submodules/pipeline_runtime</code>
+in <code>helix_code/go.mod</code>. - <strong>HelixAgent</strong> — RAG
+ingest (chunk → embed → upsert) wires as an FBP <code>Network</code>;
+reuses <code>submodules/concurrency</code> for backpressure. -
+<strong>Substrate</strong> — <code>MapReduce</code> and parallel
+<code>Map</code> fan-out over <code>concurrency.pool.Map</code>
+(<code>pool.go:567</code>); bounded buffers + <code>semaphore</code> for
+backpressure.</p>
+<p><strong>helix-deps.yaml (CONST-054).</strong> See §4.</p>
+<p><strong>Anti-bluff Challenge (§11.4.5/§11.4.69/§11.4.135).</strong>
+<code>challenges/banks/sp6-pipeline-runtime-challenge.sh</code> — feed a
+real bounded source of 10,000 records through
+<code>Map → Filter → Window(100) → MapReduce</code> and assert from
+captured output: (1) the reducer’s emitted aggregate <strong>matches an
+independently-computed golden value</strong> (full-reference
+correctness, not “it ran”), (2) under a slow sink the source
+<strong>blocks via backpressure</strong> rather than unbounded-buffering
+— captured by an in-flight-count probe staying ≤ the semaphore weight
+(not OOM), (3) <strong>no goroutine leak</strong> after completion
+(goroutine count returns to baseline — reuse
+<code>concurrency/deadlock</code> or <code>runtime.NumGoroutine</code>
+delta), (4) cancellation mid-stream stops all stages cleanly (captured
+shutdown log). Paired §1.1 mutation: remove the backpressure
+<code>Acquire</code> → the in-flight-count assertion FAILs (unbounded
+buffering detected). §11.4.85 stress (sustained 30 s) + chaos (kill a
+stage mid-stream → clean refuse). Evidence under
+<code>docs/qa/&lt;run-id&gt;/</code>.</p>
+<hr />
+<h3 id="flow_engine-dev.helix.flow-extend-agentic-first">3.3 flow_engine
+— <code>dev.helix.flow</code> — EXTEND Agentic first</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repo name (fallback only)</td>
+<td><code>FlowEngine</code> → <code>submodules/flow_engine/</code></td>
+</tr>
+<tr>
+<td>Module path (fallback only)</td>
+<td><code>dev.helix.flow</code></td>
+</tr>
+<tr>
+<td>Org</td>
+<td><strong>HelixDevelopment</strong></td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td>public</td>
+</tr>
+<tr>
+<td>Verdict</td>
+<td><strong>EXTEND <code>vasic-digital/Agentic</code></strong> — CREATE
+a new repo only if dynamic re-planning genuinely can’t land in Agentic
+(operator decision; default: extend)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Purpose + why EXTEND not CREATE.</strong> Dynamic flows =
+runtime-mutable graph topology driven by a node’s own result: a node
+returns <em>state-patch + next-node(s)</em> in one value (LangGraph
+<strong><code>Command</code></strong>), a conditional edge dynamically
+invokes a node N times with per-branch state (LangGraph
+<strong><code>Send</code></strong>, native map-reduce), and during-run
+re-planning. The research (exec §1) measures this against
+<code>agentic</code>:
+<code>WorkflowGraph</code>/<code>Node</code>/<code>Edge</code>/<code>NodeType{agent,tool,condition,parallel,human,subgraph}</code>
+already cover <strong>≥80%</strong> of the surface
+(<code>workflow.go:48-90</code>), and
+<code>AddNode</code>/<code>AddEdge</code> already exist mutex-guarded
+(<code>workflow.go:240,253</code>). The genuine gap is narrow:
+<code>NodeHandler</code> returns only <code>*NodeOutput</code> — it
+<strong>cannot name successors or spawn nodes</strong>. Adding a
+<code>Command</code>/<code>Send</code> result shape to the
+<em>existing</em> engine is a far smaller, lower-risk change than
+standing up a parallel flow engine (which would duplicate the whole
+graph/state/checkpoint apparatus — a §11.4.74 violation). Therefore:
+<strong>extend Agentic in-place</strong> (PR upstream, bump pointer),
+and reserve a new <code>flow_engine</code> repo only as a fallback if
+the operator finds dynamic re-planning architecturally incompatible with
+Agentic.</p>
+<p><strong>Extension to land in Agentic (not a new interface set — an
+addition to the existing one).</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// ADD to digital.vasic.agentic (extend workflow.go&#39;s NodeHandler result):</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Command <span class="kw">struct</span> <span class="op">{</span>                <span class="co">// LangGraph Command — patch + routing in one value</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    StatePatch <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    GoTo       <span class="op">[]</span><span class="dt">string</span>              <span class="co">// successor node IDs (overrides static edges)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Spawn      <span class="op">[]*</span>Node               <span class="co">// dynamic nodes added at runtime (Send / map-reduce)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">// NodeHandler gains an optional Command return (additive, back-compat):</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RoutingHandler <span class="kw">func</span><span class="op">(</span>ctx<span class="op">,</span> <span class="op">*</span>WorkflowState<span class="op">,</span> <span class="op">*</span>NodeInput<span class="op">)</span> <span class="op">(*</span>NodeOutput<span class="op">,</span> <span class="op">*</span>Command<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">// Fan: dynamic map-reduce over concurrency.pool.Map (LangGraph Send).</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>w <span class="op">*</span>Workflow<span class="op">)</span> Fan<span class="op">(</span>target <span class="dt">string</span><span class="op">,</span> states <span class="op">[]*</span>WorkflowState<span class="op">)</span> <span class="op">([]*</span>NodeOutput<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p>Also lands (research exec §1, §8): a reducer-typed
+<code>WorkflowState</code> merge, and checkpoints copying
+<strong>messages+history</strong> not just variables (the §4 gap flagged
+in the SP5 research). Durable replay is OUT — research is explicit:
+<strong>do not reimplement Temporal</strong>; wrap
+<code>temporalio/sdk-go</code> (Go, MIT) behind an optional
+<code>Durability</code> adapter only where crash-durability is required
+(§3.4).</p>
+<p><strong>Wiring points.</strong>
+<code>helix_code/internal/workflow/executor.go</code> registers flow
+tools and runs branching workflows through the extended Agentic;
+<code>submodules/helix_agent/internal/agentic</code> already IS
+Agentic-shaped, so it consumes the new
+<code>Command</code>/<code>Send</code> directly. Requires
+<code>replace dev.helix.agentic</code>-equivalent wiring into
+<code>helix_code/go.mod</code> (D-7 — currently absent for agentic).</p>
+<p><strong>helix-deps.yaml.</strong> If EXTEND: add
+<code>helix-deps.yaml</code> to <code>submodules/agentic</code>
+(currently absent — HONEST-GAP) declaring its <code>concurrency</code>
+dep. If the fallback new repo is created: see §4.</p>
+<p><strong>Anti-bluff Challenge.</strong>
+<code>challenges/banks/sp6-flow-engine-challenge.sh</code> — a real flow
+where node <code>route</code> returns <code>Command{GoTo: [...]}</code>
+chosen from runtime state (assert the captured execution path matches
+the state-driven branch, and a control run with different state takes a
+<em>different</em> captured path — metamorphic relation), and a
+<code>fanout</code> node <code>Spawn</code>s N sub-nodes via
+<code>Send</code> whose results are gathered (assert all N captured
+outputs present + order-independent merge). Paired §1.1 mutation: ignore
+the <code>Command.GoTo</code> (fall back to static edge) → the
+path-match assertion FAILs. Evidence under
+<code>docs/qa/&lt;run-id&gt;/</code>.</p>
+<hr />
+<h3 id="saga-fold-not-a-new-repo">3.4 saga — FOLD, not a new repo</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Verdict</th>
+<th><strong>FOLD into flow_engine (the extended Agentic); REUSE
+<code>temporalio/sdk-go</code> for crash-durable sagas</strong></th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p><strong>Why no repo.</strong> A saga is a thin primitive: a sequence
+of steps each with a registered compensation, run forward collecting
+<code>Undo</code> closures, on error run them LIFO. Research (exec §3)
+is explicit: the <strong>lightweight</strong> in-process saga is a
+~one-file primitive that belongs <em>inside</em>
+<code>flow_engine</code>, and <strong>crash-durable</strong> sagas must
+wrap <code>temporalio/sdk-go</code> (Go, MIT, first-class saga support —
+<code>temporalio/samples-go/saga/workflow.go</code>) rather than
+reimplement durable event-sourcing. A standalone <code>saga</code> repo
+would be too small to justify the submodule overhead and would duplicate
+Temporal’s durable layer. The contract:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// inside dev.helix.flow (or the extended agentic):</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Compensable <span class="kw">interface</span><span class="op">{</span> Do<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span><span class="op">;</span> Undo<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">}</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Saga <span class="kw">struct</span><span class="op">{</span> steps <span class="op">[]</span>Compensable <span class="op">}</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Saga<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span>  <span class="co">// forward; on err runs Undo in reverse</span></span></code></pre></div>
+<p><strong>Wiring.</strong> flow_engine nodes opt into saga semantics;
+durable variant injected via the optional Temporal
+<code>Durability</code> adapter. <strong>Challenge</strong> lives with
+flow_engine: a 3-step saga where step 3 fails → assert steps 2 and 1
+<code>Undo</code> ran in reverse order (captured compensation log) + a
+paired mutation that runs Undo forward-order → FAIL.</p>
+<hr />
+<h3 id="behavior_tree-dev.helix.bt-defer">3.5 behavior_tree —
+<code>dev.helix.bt</code> — DEFER</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repo name (later)</td>
+<td><code>BehaviorTree</code> →
+<code>submodules/behavior_tree/</code></td>
+</tr>
+<tr>
+<td>Module path (later)</td>
+<td><code>dev.helix.bt</code></td>
+</tr>
+<tr>
+<td>Org</td>
+<td>HelixDevelopment</td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td>public</td>
+</tr>
+<tr>
+<td>Verdict</td>
+<td><strong>DEFER</strong> — small, lower-priority CREATE later; vendor
+<code>askft/go-behave</code> (MIT) patterns</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why defer (not never, not now).</strong> Behavior trees add
+genuinely-distinct value the current model lacks: tick-based reactive
+control returning Success/Failure/<strong>Running</strong>,
+<code>Selector</code> (OR-fallback) and <code>Sequence</code> (AND),
+decorators (Inverter/Retry/Timeout/Repeat), and a blackboard —
+<code>agentic</code> is run-to-completion graph traversal with no
+per-tick re-evaluation (research exec §4). BUT: (1) it is <strong>not on
+the critical path</strong> — <code>dag_orchestrator</code> +
+<code>pipeline_runtime</code> + flow_engine cover the dominant execution
+models the operator mandate names; (2) it is <strong>small and
+self-contained</strong> (vendorable from <code>askft/go-behave</code>,
+MIT) so it can be created cheaply later with no rework; (3) the research
+flags a <strong>license HONEST-GAP</strong> on the alternative
+<code>joeycumines/go-behaviortree</code> (SPDX unconfirmed) — confirm
+the LICENSE before vendoring. Deferring keeps the G-2 create-now set
+minimal while preserving the option. When created, BT <strong>leaves
+delegate to</strong> <code>agentic</code>/<code>llm_orchestrator</code>
+handlers (BT becomes a control layer over existing handlers, not a new
+execution substrate), and the blackboard aliases
+<code>agentic.WorkflowState.Variables</code>.</p>
+<p><strong>Contract (for the later CREATE).</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> bt <span class="co">// dev.helix.bt</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Status <span class="dt">int</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span> Success Status <span class="op">=</span> <span class="ot">iota</span><span class="op">;</span> Failure<span class="op">;</span> Running <span class="op">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Tick <span class="kw">func</span><span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(</span>Status<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Sequence<span class="op">(</span>children <span class="op">...</span>Tick<span class="op">)</span> Tick   <span class="co">// AND</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Selector<span class="op">(</span>children <span class="op">...</span>Tick<span class="op">)</span> Tick   <span class="co">// OR / fallback</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Parallel<span class="op">(</span>children <span class="op">...</span>Tick<span class="op">)</span> Tick</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">// decorators: Inverter / Retry(n) / Timeout(d) / Repeat(n)</span></span></code></pre></div>
+<p><strong>Challenge (later).</strong> A tree whose
+<code>Selector</code> falls back from a failing primary leaf to a
+succeeding secondary leaf → assert the captured tick trace shows
+primary→Failure then secondary→Success then root→Success; paired
+mutation swapping Selector for Sequence → root FAILs.</p>
+<hr />
+<h2 id="helix-deps.yaml-flat-layout-placement">4. helix-deps.yaml +
+flat-layout placement</h2>
+<p><strong>Flat layout (CONST-051(C)).</strong> Every new repo is cloned
+at the project root as a flat sibling —
+<code>&lt;repo-root&gt;/submodules/&lt;name&gt;/</code> — matching the
+existing convention (<code>submodules/agentic/</code>,
+<code>submodules/concurrency/</code>, …). <strong>NO nested own-org
+submodule chains</strong> (CONST-051(C)): a new repo’s own-org deps
+(e.g. <code>concurrency</code>) are reached from the HelixCode root,
+never via the new repo’s own nested <code>.gitmodules</code>.
+<code>.gitmodules</code> entries use <strong>SSH only</strong> (Rule 3 /
+no-HTTPS).</p>
+<p><strong><code>submodules/dag_orchestrator/helix-deps.yaml</code>:</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># helix-deps.yaml — DagOrchestrator Submodule-Dependency Manifest (CONST-054 / §11.4.31)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">schema_version</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">deps</span><span class="kw">:</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> concurrency</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ssh_url</span><span class="kw">:</span><span class="at"> git@github.com:vasic-digital/Concurrency.git</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ref</span><span class="kw">:</span><span class="at"> main</span><span class="co">            # operator pins a SHA at incorporation per §11.4.74</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">why</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;worker pool + priority queue + semaphore — the scheduling substrate the DAG dispatches onto&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">layout</span><span class="kw">:</span><span class="at"> flat</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">  # OPTIONAL (only if SP5 substrate repo is created at OD-1):</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">  # - name: agent_substrate</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">  #   ssh_url: git@github.com:HelixDevelopment/AgentSubstrate.git</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">  #   ref: main</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">  #   why: &quot;shared Unit/Scheduler contract the DAG nodes implement&quot;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">  #   layout: flat</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">transitive_handling</span><span class="kw">:</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">recursive</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">conflict_resolution</span><span class="kw">:</span><span class="at"> operator-required</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">language_specific_subtree</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span></code></pre></div>
+<p><strong><code>submodules/pipeline_runtime/helix-deps.yaml</code>:</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># helix-deps.yaml — PipelineRuntime Submodule-Dependency Manifest (CONST-054 / §11.4.31)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">schema_version</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">deps</span><span class="kw">:</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> concurrency</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ssh_url</span><span class="kw">:</span><span class="at"> git@github.com:vasic-digital/Concurrency.git</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ref</span><span class="kw">:</span><span class="at"> main</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">why</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;pool.Map fan-out + semaphore/rate-limiter backpressure for streaming stages&quot;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">layout</span><span class="kw">:</span><span class="at"> flat</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">transitive_handling</span><span class="kw">:</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">recursive</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">conflict_resolution</span><span class="kw">:</span><span class="at"> operator-required</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">language_specific_subtree</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span></code></pre></div>
+<p><strong><code>submodules/flow_engine/helix-deps.yaml</code>
+(fallback-only — if NOT extending Agentic):</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">schema_version</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">deps</span><span class="kw">:</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> agentic</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ssh_url</span><span class="kw">:</span><span class="at"> git@github.com:vasic-digital/Agentic.git</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ref</span><span class="kw">:</span><span class="at"> main</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">why</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;graph/node/state engine flow_engine builds dynamic-routing on top of&quot;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">layout</span><span class="kw">:</span><span class="at"> flat</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> concurrency</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ssh_url</span><span class="kw">:</span><span class="at"> git@github.com:vasic-digital/Concurrency.git</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ref</span><span class="kw">:</span><span class="at"> main</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">why</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Fan/Send map-reduce fan-out substrate&quot;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">layout</span><span class="kw">:</span><span class="at"> flat</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="fu">transitive_handling</span><span class="kw">:</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">recursive</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">conflict_resolution</span><span class="kw">:</span><span class="at"> operator-required</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="fu">language_specific_subtree</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span></code></pre></div>
+<blockquote>
+<p>Default path (EXTEND Agentic) instead adds a
+<code>helix-deps.yaml</code> to <code>submodules/agentic</code>
+(currently absent) declaring its <code>concurrency</code> dep — no new
+repo, no new <code>.gitmodules</code> entry.</p>
+</blockquote>
+<p>Each new repo also ships its <strong>OWN</strong> standalone full
+test matrix + Challenges (CONST-050(B), CONST-051 standalone-testable),
+and the §11.4.135 regression guard is registered per closure. Each is
+paired with an <code>incorporate-submodule</code> Challenge (CONST-054)
+that bootstraps a throwaway consuming project, runs
+<code>incorporate-submodule &lt;ssh-url&gt;</code>, and asserts the
+produced layout matches the manifest.</p>
+<hr />
+<h2 id="refined-g-2-recommendation">5. Refined G-2 recommendation</h2>
+<p>The minimal set that delivers value. Every CREATE is
+<strong>OPERATOR-GATED</strong> (§11.4.101 — repo creation is
+irreversible external mutation; perform only on explicit operator
+approval, SSH remotes only, no force-push §11.4.113).</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Repo</th>
+<th>Module</th>
+<th>Org / vis</th>
+<th>Verdict</th>
+<th>OPERATOR-GATED?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G2-1</td>
+<td><strong><code>dag_orchestrator</code></strong></td>
+<td><code>dev.helix.dag</code></td>
+<td>HelixDevelopment / public</td>
+<td><strong>CREATE NOW</strong></td>
+<td>✅ yes</td>
+</tr>
+<tr>
+<td>G2-2</td>
+<td><strong><code>pipeline_runtime</code></strong></td>
+<td><code>dev.helix.pipeline</code></td>
+<td>HelixDevelopment / public</td>
+<td><strong>CREATE NOW</strong></td>
+<td>✅ yes</td>
+</tr>
+<tr>
+<td>G2-3</td>
+<td><code>flow_engine</code></td>
+<td><code>dev.helix.flow</code></td>
+<td>HelixDevelopment / public</td>
+<td><strong>EXTEND <code>vasic-digital/Agentic</code></strong> (CREATE
+repo only as fallback if dynamic re-plan can’t land in Agentic)</td>
+<td>✅ yes (only if fallback chosen)</td>
+</tr>
+<tr>
+<td>G2-4</td>
+<td><code>saga</code></td>
+<td>—</td>
+<td>—</td>
+<td><strong>FOLD into flow_engine</strong> + REUSE
+<code>temporalio/sdk-go</code> for durable — <strong>NO
+repo</strong></td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>G2-5</td>
+<td><code>behavior_tree</code></td>
+<td><code>dev.helix.bt</code></td>
+<td>HelixDevelopment / public</td>
+<td><strong>DEFER</strong> (small CREATE later; confirm vendor LICENSE
+first)</td>
+<td>✅ yes (when un-deferred)</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>planning_search</code></td>
+<td><code>digital.vasic.planning</code></td>
+<td>(existing)</td>
+<td><strong>REUSE</strong> <code>vasic-digital/Planning</code> — NO repo
+(out of G-2 scope; plan-tracked)</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>agent_mesh</code>/swarm</td>
+<td>—</td>
+<td>—</td>
+<td><strong>EXTEND/FOLD into SP5 substrate</strong> — NO new G-2 repo
+(out of scope)</td>
+<td>n/a</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Net new public repos warranted at G-2: TWO —
+<code>dag_orchestrator</code> + <code>pipeline_runtime</code>.</strong>
+Everything else is EXTEND, FOLD, REUSE, or DEFER. This matches and
+tightens the plan’s §6.12 recommendation, with the added precision that
+<code>saga</code> is explicitly a fold (not even a deferred repo) and
+<code>behavior_tree</code> is the single deferred candidate.</p>
+<hr />
+<h2 id="ten-line-summary">6. Ten-line summary</h2>
+<ol type="1">
+<li><strong>Scope of G-2:</strong> decide which NEW HelixDevelopment
+repos to create for SP6’s execution-model families; this design gives
+full per-repo detail so the operator can decide precisely.</li>
+<li><strong>CREATE NOW (2 repos):</strong> <code>dag_orchestrator</code>
+(<code>dev.helix.dag</code>) — a real DAG <strong>scheduler</strong> (we
+have dep-data <code>task/dependency.go:19,46</code> + a linear runner
+<code>workflow/executor.go</code>, no scheduler);
+<code>pipeline_runtime</code> (<code>dev.helix.pipeline</code>) —
+push-based streaming + FBP (absent; <code>streaming</code> is
+token-streaming, not dataflow).</li>
+<li><strong>EXTEND not create:</strong> <code>flow_engine</code> →
+extend <code>vasic-digital/Agentic</code> —
+<code>workflow.go:48-90</code> already covers ≥80%; the narrow gap is a
+<code>Command</code>/<code>Send</code> (GoTo/Spawn) result shape on
+<code>NodeHandler</code>. New repo only as fallback.</li>
+<li><strong>FOLD not a repo:</strong> <code>saga</code> is a one-file
+<code>Compensable{Do,Undo}</code> primitive inside flow_engine;
+crash-durable sagas wrap <code>temporalio/sdk-go</code> (Go, MIT) —
+never reimplement Temporal.</li>
+<li><strong>DEFER:</strong> <code>behavior_tree</code>
+(<code>dev.helix.bt</code>) — genuinely distinct (tick/Running/Selector)
+but off the critical path and small; confirm
+<code>joeycumines/go-behaviortree</code> LICENSE (HONEST-GAP) before
+vendoring; default vendor <code>askft/go-behave</code> (MIT).</li>
+<li><strong>One substrate, no duplication (§11.4.74):</strong> both new
+repos consume the SP5 <code>Scheduler</code> (or
+<code>concurrency.pool</code>+<code>queue</code>+<code>semaphore</code>
+directly — <code>pool.go:13-17</code>, <code>pool.go:567</code>,
+<code>queue.go:14-17</code>); they add only their narrow
+<code>DAG</code>/<code>Stream</code> contracts.</li>
+<li><strong>CONST-051/054:</strong> each new repo is flat at
+<code>submodules/&lt;name&gt;/</code>, SSH-only, project-not-aware,
+standalone-testable, ships <code>helix-deps.yaml</code> (schema verified
+vs <code>submodules/security/helix-deps.yaml</code>) declaring its
+<code>concurrency</code> dep with no nested own-org chains.</li>
+<li><strong>D-7 wiring is mandatory:</strong>
+<code>helix_code/go.mod</code> currently has NO own-org
+agentic/concurrency/dag/pipeline
+<code>require</code>/<code>replace</code> (grep empty) — every
+CREATE/EXTEND must be paired with the
+<code>replace … =&gt; ../submodules/&lt;name&gt;</code> wiring or the
+repo sits unused.</li>
+<li><strong>Anti-bluff Challenges (§11.4.5/§11.4.69/§11.4.135):</strong>
+each repo’s Challenge proves real behavior with captured evidence + a
+paired §1.1 mutation (DAG: concurrent-then-ordered diamond; pipeline:
+golden-value + backpressure + no-leak; flow: state-driven path
+metamorphic; saga: reverse-order compensation).</li>
+<li><strong>Refined G-2 verdict:</strong> create exactly
+<strong>two</strong> repos now — <code>dag_orchestrator</code> +
+<code>pipeline_runtime</code> — EXTEND Agentic for flow_engine, FOLD
+saga, DEFER behavior_tree, REUSE Planning; every CREATE is
+OPERATOR-GATED (§11.4.101).</li>
+</ol>
+<hr />
+<h2 id="sources-verified-2026-06-10">Sources verified 2026-06-10</h2>
+<p>In-repo facts cited from real <code>file:line</code> opened this
+session (see §0). External execution-model claims (LangGraph
+Command/Send, Temporal Go SDK saga, RxGo/GoFlow, behavior-tree libs,
+OpenAI Agents SDK handoff, DAG-orchestrator landscape) are sourced from
+the two completed research docs, which carry their own
+<code>## Sources verified 2026-06-10</code> footers: -
+<code>docs/research/2026-06-10-execution-models.md</code> (§0–§9 +
+Sources footer) -
+<code>docs/research/2026-06-10-parallel-agent-coordination.md</code>
+(§1–§8 + Sources footer)</p>
+<p><strong>Honest gaps / corrections recorded in this design:</strong>
+(a) <code>agentic.Workflow.AddNode/AddEdge</code> DO exist
+(<code>workflow.go:240,253</code>) — the real dynamic-flow gap is
+<code>Command</code>/<code>Send</code> (GoTo/Spawn) on
+<code>NodeHandler</code>, not literal absence of mutation methods. (b)
+<code>submodules/agentic/helix-deps.yaml</code> is absent — an EXTEND
+must add it. (c) <code>submodules/streaming</code> scope (LLM token vs
+dataflow) should be confirmed before any reuse — assumed token-streaming
+per research. (d) <code>joeycumines/go-behaviortree</code> SPDX license
+unconfirmed — verify before vendoring (behavior_tree is deferred
+regardless). (e) full Apache Beam parity is out of scope for
+<code>pipeline_runtime</code> — Rx+FBP subset only.</p>
+</body>
+</html>

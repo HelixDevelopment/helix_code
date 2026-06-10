@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Encryption_Algs</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Encryption_Algs</h1>
+</header>
+<p>Of course. Here is a list of the strongest, most vetted encryption
+algorithms considered secure against attacks from both classical and
+quantum computers.</p>
+<p>These are primarily <strong>Post-Quantum Cryptography (PQC)</strong>
+algorithms, which are classical algorithms designed to be resistant to
+quantum computer attacks. They can be implemented in standard software
+today.</p>
+<h3 id="the-gold-standard-nist-finalists-winners">🏆 The Gold Standard:
+NIST Finalists &amp; Winners</h3>
+<p>The U.S. National Institute of Standards and Technology (NIST) has
+been running a multi-year project to standardize PQC algorithms. The
+following are the strongest candidates from this process and are the
+most recommended for new projects.</p>
+<h4 id="for-general-encryption-key-establishment-kems---key-encapsulation-mechanisms">1.
+For General Encryption &amp; Key Establishment (KEMs - Key Encapsulation
+Mechanisms)</h4>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Algorithm</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">NIST Status</th>
+<th style="text-align: left;">Security &amp; Performance</th>
+<th style="text-align: left;">Implementation Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>CRYSTALS-Kyber</strong></td>
+<td style="text-align: left;">Lattice-based</td>
+<td style="text-align: left;"><strong>Primary Winner</strong>
+(Standardized as FIPS 203)</td>
+<td style="text-align: left;">Excellent performance (fast, small keys).
+Considered the leading choice for most use cases.</td>
+<td style="text-align: left;"><strong>LibOQS</strong> (C) with wrappers
+for Python, Go, Java. Standalone implementations in various languages
+are widely available.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>NTRU</strong></td>
+<td style="text-align: left;">Lattice-based</td>
+<td style="text-align: left;">Alternate</td>
+<td style="text-align: left;">Very conservative security design with a
+long history. Slightly larger keys than Kyber.</td>
+<td style="text-align: left;">Available in <strong>LibOQS</strong>. Also
+has a well-known standalone implementation
+(<code>ntru-crypto</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Classic McEliece</strong></td>
+<td style="text-align: left;">Code-based</td>
+<td style="text-align: left;">Alternate</td>
+<td style="text-align: left;">Extremely well-studied and considered very
+secure, but has very large public keys (hundreds of KB to MB).</td>
+<td style="text-align: left;">Available in <strong>LibOQS</strong>. Best
+for scenarios where key size is not a constraint.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="for-digital-signatures">2. For Digital Signatures</h4>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Algorithm</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">NIST Status</th>
+<th style="text-align: left;">Security &amp; Performance</th>
+<th style="text-align: left;">Implementation Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>CRYSTALS-Dilithium</strong></td>
+<td style="text-align: left;">Lattice-based</td>
+<td style="text-align: left;"><strong>Primary Winner</strong>
+(Standardized as FIPS 204)</td>
+<td style="text-align: left;">Excellent balance of security,
+performance, and signature size. The recommended default.</td>
+<td style="text-align: left;"><strong>LibOQS</strong> (C) with wrappers
+for Python, Go, Java.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Falcon</strong></td>
+<td style="text-align: left;">Lattice-based</td>
+<td style="text-align: left;"><strong>Secondary Winner</strong>
+(Standardized as FIPS 205)</td>
+<td style="text-align: left;">Produces the smallest signatures, but
+algorithm is more complex to implement correctly (requires
+floating-point arithmetic).</td>
+<td style="text-align: left;">Available in <strong>LibOQS</strong>. A
+popular standalone implementation is <code>falcon-crypto</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>SPHINCS+</strong></td>
+<td style="text-align: left;">Hash-based</td>
+<td style="text-align: left;"><strong>Secondary Winner</strong></td>
+<td style="text-align: left;">Based on the security of hash functions, a
+very conservative and well-understood assumption. Slower and larger
+signatures than lattice-based schemes.</td>
+<td style="text-align: left;">Available in <strong>LibOQS</strong>. A
+good backup choice if you distrust lattice math.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="additional-strong-candidates-backup-options">🔬 Additional
+Strong Candidates (Backup Options)</h3>
+<p>These are also highly secure and may be suitable for specific
+needs.</p>
+<ul>
+<li><strong>FrodoKEM</strong> (Lattice-based): A more conservative
+lattice-based scheme than Kyber. It’s slower and uses larger keys but is
+designed to be a fallback if the advanced optimizations in Kyber are
+ever broken.</li>
+<li><strong>Picnic</strong> (Signature, based on symmetric crypto): A
+signature scheme whose security relies on the difficulty of solving
+problems related to symmetric-key algorithms (like block ciphers). A
+good alternative to SPHINCS+.</li>
+</ul>
+<hr />
+<h3 id="how-to-incorporate-them-into-your-project">🛠 How to Incorporate
+Them Into Your Project</h3>
+<p>You have two main paths for implementation:</p>
+<h4 id="path-1-use-a-production-ready-library-recommended">Path 1: Use a
+Production-Ready Library (Recommended)</h4>
+<p>The easiest and safest way is to use a library that provides a stable
+API for these algorithms.</p>
+<ul>
+<li><strong>Open Quantum Safe (OQS) Project</strong>: The definitive
+source for open-source implementations.
+<ul>
+<li><strong>liboqs</strong>: A C library that implements all the leading
+PQC algorithms.</li>
+<li><strong>oqs-provider</strong>: An OpenSSL 3 provider that allows you
+to use PQC algorithms in any software that uses OpenSSL (e.g., via the
+<code>openssl</code> command line or in languages like Python that bind
+to it).</li>
+<li><strong>Language-specific wrappers</strong>: OQS provides wrappers
+for Python, Go, Java, and more, making integration straightforward.</li>
+</ul></li>
+</ul>
+<p><strong>Example (Using <code>liboqs</code> Python
+bindings):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> oqs <span class="im">import</span> KeyEncapsulation</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize Kyber</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>kem <span class="op">=</span> KeyEncapsulation(<span class="st">&#39;Kyber512&#39;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>public_key <span class="op">=</span> kem.generate_keypair()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># On the sender&#39;s side</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>ciphertext, shared_secret_sender <span class="op">=</span> kem.encap_secret(public_key)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># On the receiver&#39;s side</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>shared_secret_receiver <span class="op">=</span> kem.decap_secret(ciphertext)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Now both parties have the same shared secret</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> shared_secret_sender <span class="op">==</span> shared_secret_receiver</span></code></pre></div>
+<h4 id="path-2-use-a-specific-cryptographic-library">Path 2: Use a
+Specific Cryptographic Library</h4>
+<p>Many mainstream crypto libraries are now integrating PQC winners.</p>
+<ul>
+<li><strong>Bouncy Castle</strong> (Java &amp; C#): Already has support
+for Kyber, Dilithium, etc., in its beta/pre-release versions.</li>
+<li><strong>libsodium</strong> (C, with many bindings): While its PQC
+support is currently limited, it’s a project to watch as it focuses on
+ease of use and security.</li>
+</ul>
+<hr />
+<h3 id="final-recommendation-checklist">📜 Final Recommendation &amp;
+Checklist</h3>
+<p>For a new project in 2024, here is a simple decision matrix:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Your Need</th>
+<th style="text-align: left;">Recommended Algorithm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Default for Encryption/Key
+Exchange</strong></td>
+<td style="text-align: left;"><strong>CRYSTALS-Kyber</strong> (use the
+strongest parameter set available, e.g., Kyber768 or Kyber1024)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Default for Digital
+Signatures</strong></td>
+<td style="text-align: left;"><strong>CRYSTALS-Dilithium</strong> (use
+Dilithium3 or Dilithium5)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Need the smallest
+signatures</strong></td>
+<td style="text-align: left;"><strong>Falcon</strong> (use Falcon-512 or
+Falcon-1024)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Ultra-conservative, distrust
+lattices</strong></td>
+<td style="text-align: left;"><strong>SPHINCS+</strong> (for signatures)
+or <strong>FrodoKEM</strong> (for encryption)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Before you deploy:</strong></p>
+<ol type="1">
+<li><strong>Use Official Sources</strong>: Always get implementations
+from official repositories like the OQS project or the algorithm
+designers’ own pages.</li>
+<li><strong>Check for Audits</strong>: Look for libraries that have
+undergone third-party security audits.</li>
+<li><strong>Stay Updated</strong>: The PQC field is still young.
+Subscribe to updates from NIST and your chosen library to be aware of
+any new developments or vulnerabilities.</li>
+</ol>
+<p>By choosing from this list and following the implementation guidance,
+you can confidently build a system that is secure against both the
+computers of today and the quantum computers of tomorrow.</p>
+</body>
+</html>

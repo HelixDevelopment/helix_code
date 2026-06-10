@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP7-testing-qa-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP7-testing-qa-plan</h1>
+</header>
+<h1 id="sp7-testing-qa-cross-cutting-implementation-plan">SP7 — Testing
+&amp; QA (cross-cutting) — Implementation Plan</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>draft</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>master roadmap
+<code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>
+§SP7 + analysis
+<code>docs/superpowers/specs/analysis/2026-06-10-F-parallel-dynamic-testing.md</code>
+§3</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td><code>helix_code/</code> (inner Go app <code>dev.helix.code</code>)
++ <code>submodules/helix_qa</code> + <code>submodules/challenges</code>,
+cross-cutting over SP1/SP2/SP4/SP5/SP6</td>
+</tr>
+<tr>
+<td>Evidence rule</td>
+<td>every claim cites a real <code>file:line</code> / <code>dir/</code>.
+ABSENT marked explicitly. No fabrication. PLANNING only — nothing
+executed.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Constraints binding every task below:</strong> anti-bluff
+§11.4 family (captured evidence on every PASS;
+metadata-only/config-only/absence-of-error/grep-without-runtime PASS
+forbidden); §11.4.98 fully-automated (no human-in-loop during test
+exec); §11.4.123 rock-solid-proof-or-deep-research; §11.4.116
+sync-channel; §11.4.125/§11.4.134 code-review gate iterate-until-GO;
+§11.4.135 regression-guard per fixed defect; §11.4.85 stress+chaos
+floors; §1.1 paired-mutation per harness/gate; §11.4.71 + §11.4.113
+fetch→investigate→merge-onto-latest-main→fast-forward push (no force).
+Each task = <strong>RED → impl → GREEN+evidence → rollback</strong>.</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of contents</h2>
+<ol type="1">
+<li><a href="#1-verified-ground-truth">Verified ground truth</a></li>
+<li><a href="#2-test-type-coverage-matrix-15-types">Test-type coverage
+matrix (15 types)</a></li>
+<li><a href="#3-phase-a--close-ddosscalinguxthin-ui-local-gaps">Phase A
+— close ddos/scaling/ux/thin-ui local gaps</a></li>
+<li><a href="#4-phase-b--helixqa-fetchpull-to-latest--pointer-bump">Phase B —
+HelixQA fetch/pull-to-latest + pointer bump</a></li>
+<li><a href="#5-phase-c--autonomous-qa-session-wiring-114-98--114-116">Phase C
+— autonomous-QA-session wiring (§11.4.98 + §11.4.116)</a></li>
+<li><a href="#6-phase-d--independent-code-review-agent-gate-per-closure">Phase
+D — independent code-review-agent gate per closure</a></li>
+<li><a href="#7-phase-e--regression-guard-registration-per-fixed-defect-incl-d-1d-7">Phase
+E — regression-guard registration per fixed defect
+(incl. D-1..D-7)</a></li>
+<li><a href="#8-operator-decisions-required">Operator decisions
+required</a></li>
+<li><a href="#9-summary">Summary</a></li>
+</ol>
+<hr />
+<h2 id="verified-ground-truth">1. Verified ground truth</h2>
+<p>Confirmed by direct inspection this session:</p>
+<ul>
+<li><strong>Strong HelixCode-local coverage:</strong> unit
+(<code>helix_code/tests/unit/</code>, Makefile <code>test:107</code>),
+integration (<code>helix_code/tests/integration/</code>,
+<code>test-integration-full:222</code>, <code>-tags=integration</code>),
+e2e (<code>helix_code/tests/e2e/</code> +
+<code>tests/e2e/challenges/executor.go</code>,
+<code>test-e2e-full:228</code>), security
+(<code>helix_code/tests/security/{owasp_test.go,authentication_test.go,authorization_test.go,tools_security_test.go}</code>
++ scanners Makefile <code>security-scan*:751-775</code>), chaos+stress
+(<code>helix_code/tests/stresschaos/{chaos.go,stresschaos.go}</code> +
+~30 per-pkg <code>*_stress_test.go</code>/<code>*_chaos_test.go</code>,
+Makefile <code>stress-chaos:114</code>), performance/benchmarking
+(<code>helix_code/tests/performance/{benchmark_test.go,competitor_baseline_test.go,pgo_test.go,pprof_harness_test.go,scenarios/}</code>,
+<code>test-benchmark:157</code>, <code>pgo-refresh:90</code>).</li>
+<li><strong>Anti-bluff meta-tests EXIST and are real:</strong>
+<code>helix_code/tests/stresschaos/stresschaos_meta_test.go:80-193</code>
+plants deadlock/leak/error-rate/below-floor/chaos-panic and asserts
+detection; Makefile <code>stress-chaos-meta:121</code>. This is the
+canonical §1.1 paired-mutation pattern every new harness in this plan
+MUST replicate.</li>
+<li><strong>Regression dir EXISTS:</strong>
+<code>helix_code/tests/regression/{critical_paths_test.go,server_timeout_test.go}</code>
+— but is NOT yet a standing per-defect §11.4.135 guard registry (no
+RED_MODE polarity switch, no D-N guard rows).</li>
+<li><strong>HelixQA is STALE:</strong> <code>submodules/helix_qa</code>
+at pin <code>v4.0.0-393-g4d2dcb2</code>; README banner
+<code>submodules/helix_qa/README.md:3</code> and ledger
+<code>submodules/helix_qa/docs/test-coverage.md</code> both say
+<strong>round 219, 2026-05-19</strong> → 22 days stale vs 2026-06-10.
+Ledger declares all 15 slots FILLED (rows 1-15,
+<code>test-coverage.md:50-66</code>).</li>
+<li><strong>ddos/scaling/ux/ui assets live ONLY in HelixQA</strong>, NOT
+in <code>helix_code/tests/</code>:
+<code>submodules/helix_qa/challenges/scripts/{ddos_health_flood_challenge.sh,scaling_horizontal_challenge.sh,ux_end_to_end_flow_challenge.sh,ui_terminal_interaction_challenge.sh}</code>
++ bank <code>banks/ddos-ratelimit-comprehensive.yaml</code>.
+<code>find helix_code/tests -iname &#39;*ddos*&#39; -o -iname &#39;*scaling*&#39; -o -iname &#39;*ux*&#39;</code>
+→ <strong>empty</strong>. This is the coverage-bluff risk per
+CONST-050(B): a delegated slot is acceptable ONLY if the HelixQA asset
+truly exercises HelixCode with captured evidence.</li>
+<li><strong>Bridge EXISTS:</strong>
+<code>helix_code/internal/helixqa/{wrapper.go,translator.go}</code>;
+Makefile <code>helixqa-build:694</code>, <code>helixqa-test:707</code>,
+<code>helixqa-challenge:710</code>,
+<code>helixqa-bump-submodules:720</code>; <code>helix_code/go.mod</code>
+requires <code>digital.vasic.helixqa</code> (replace →
+<code>../submodules/helix_qa</code>).</li>
+<li><strong>Real defects (roadmap ledger lines 43-49):</strong> D-1
+hardcoded 3-model list
+<code>helix_agent/internal/handlers/completion.go:406</code> (SP2); D-2
+CLI lists failed/pending as available
+<code>helix_code/.../cmd/cli/main.go:1361</code> (SP1); D-3 dead
+<code>secrets.LoadAPIKeys</code>
+<code>helix_code/internal/secrets/loader.go:30</code> (SP1); D-4
+working-model filter loaded-never-applied <code>adapter.go:175</code>
+(SP1); D-5 hardcoded provider lists
+<code>openai_provider.go:203</code>,<code>anthropic_provider.go:205</code>,…
+(SP1); D-6 stub CLI-agent returns hardcoded strings
+<code>helix_agent/internal/clis/agents/qwencode/qwencode.go:101/115/137</code>
+(SP4); D-7 <code>helix_code/go.mod</code> lacks
+<code>replace dev.helix.agent</code> (SP4/SP5).</li>
+</ul>
+<hr />
+<h2 id="test-type-coverage-matrix-15-types">2. Test-type coverage matrix
+(15 types)</h2>
+<p>Columns: <strong>exists-where today</strong> (<code>file:line</code>
+or ABSENT) · <strong>gap</strong> · <strong>owning-SP feature the type
+must cover</strong>. SP map: SP1 model-access, SP2 HelixAgent-exposure,
+SP4 CLI-bridge, SP5 parallel/subagent, SP6 dynamic-flows.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Test type</th>
+<th>Exists-where today (helix_code-local + delegated)</th>
+<th>Gap</th>
+<th>Owning-SP feature(s) it must cover</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>unit</td>
+<td><code>helix_code/internal/**/*_test.go</code>,
+<code>tests/unit/</code>; Makefile <code>test:107</code></td>
+<td>none (strong)</td>
+<td>SP1 (selection/filter logic), SP4 (provider adapters), SP5
+(scheduler/resolver), SP6 (each new flow submodule unit layer)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>integration</td>
+<td><code>helix_code/tests/integration/</code>
+(<code>api_integration_test.go</code>, <code>approval_test.go</code>);
+<code>test-integration-full:222</code>
+<code>-tags=integration</code></td>
+<td>none</td>
+<td>SP1 (real verifier data CONST-037 + real provider HTTP), SP2
+(HelixCode↔︎helix_agent <code>clis/event_bus</code>), SP4 (spawn real
+CLI), SP5 (subagent spawn in-proc+subproc+SSH)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>e2e</td>
+<td><code>helix_code/tests/e2e/</code>
+(<code>complete_workflow_test.go</code>,
+<code>challenges/executor.go</code>,
+<code>comprehensive_matrix_test.go</code>);
+<code>test-e2e-full:228</code></td>
+<td>none</td>
+<td>SP1 (<code>/api/v1/llm/generate</code> real output), SP2 (full
+agent-driven flow), SP4 (prompt→edit→commit round-trip), SP5/SP6
+(multi-agent/flow completes)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>full-automation</td>
+<td>delegated → HelixQA <code>cmd/helixqa autonomous</code> +
+<code>helix_code/tests/automation/{comprehensive_test_suite.sh,hardware_test.go}</code>;
+<code>test-complete:246</code></td>
+<td>thin local; autonomous-session not wired to a HelixCode sync-channel
+(Phase C)</td>
+<td>ALL SPs (end-to-end autonomous validation)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>security</td>
+<td><code>helix_code/tests/security/{owasp,authn,authz,tools}_test.go</code>
++ scanners <code>security-scan*:751-775</code>;
+<code>test-security-full:234</code></td>
+<td>none for code; SP1 needs new key-leak/no-CONST-042 cases</td>
+<td>SP1 (key handling CONST-042), SP4 (sandboxed shell exec), SP2
+(cross-module authz)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>ddos</strong></td>
+<td><strong>ABSENT local</strong> → only HelixQA
+<code>challenges/scripts/ddos_health_flood_challenge.sh</code> +
+<code>banks/ddos-ratelimit-comprehensive.yaml</code></td>
+<td><strong>GAP-1</strong>: no HelixCode-local harness; delegated asset
+must be proven to hit HelixCode endpoints with captured p50/p95/p99</td>
+<td>SP1 (rate-limit + concurrent <code>/generate</code> flood), SP2
+(exposure endpoint flood)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>scaling</strong></td>
+<td><strong>ABSENT local</strong> → only HelixQA
+<code>challenges/scripts/scaling_horizontal_challenge.sh</code></td>
+<td><strong>GAP-2</strong>: no HelixCode-local harness; horizontal
+worker scale-out unproven against HelixCode
+<code>internal/worker</code></td>
+<td>SP5 (SSH worker-pool horizontal scale-out), SP1 (provider-fanout
+throughput vs N)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>chaos</td>
+<td><code>helix_code/tests/stresschaos/chaos.go</code> + per-pkg
+<code>*_chaos_test.go</code> (~15 pkgs);
+<code>stress-chaos:114</code></td>
+<td>extend for new features only</td>
+<td>SP5 (kill agent/worker mid-flight → consensus recovery), SP4 (CLI
+crash mid-task), SP6 (node/partial-DAG failure injection)</td>
+</tr>
+<tr>
+<td>9</td>
+<td>stress</td>
+<td><code>helix_code/tests/stresschaos/stresschaos.go</code> + per-pkg
+<code>*_stress_test.go</code>
+(<code>internal/worker/worker_pool_stress_test.go</code>,
+<code>task/</code>, <code>agent/</code>, <code>workflow/</code>)</td>
+<td>extend for new features only</td>
+<td>SP5 (N≥10 parallel §11.4.85), SP4 (N concurrent CLI), SP6 (wide
+fan-out/deep nesting)</td>
+</tr>
+<tr>
+<td>10</td>
+<td>performance</td>
+<td><code>helix_code/tests/performance/{benchmark_test.go,competitor_baseline_test.go,pprof_harness_test.go,scenarios/runner.go}</code>;
+<code>test-benchmark:157</code></td>
+<td>add SP1 tokens/latency + SP5 throughput-vs-parallelism
+scenarios</td>
+<td>SP1 (tokens/latency, ties §11.4.141), SP5 (throughput vs
+parallelism)</td>
+</tr>
+<tr>
+<td>11</td>
+<td>benchmarking</td>
+<td>same as 10 + PGO <code>pgo-refresh:90</code> + HelixQA
+<code>banks/benchmarking-baselines.yaml</code></td>
+<td>baseline rows for new features ABSENT</td>
+<td>SP1 (provider baselines), SP5 (parallelism baselines), SP6
+(flow-engine baselines)</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>ui</strong></td>
+<td><strong>THIN local</strong> →
+<code>helix_code/applications/{terminal-ui,desktop}</code> tests +
+delegated HelixQA <code>ui_terminal_interaction_challenge.sh</code></td>
+<td><strong>GAP-3</strong>: HelixCode-local TUI/desktop interaction
+harness thin; CV/OCR pixel-oracle (§11.4.117) absent for
+non-introspectable UI</td>
+<td>SP4 (terminal interaction for CLI-bridge), SP6 (human-in-loop flow
+node UI)</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>ux</strong></td>
+<td><strong>ABSENT local</strong> → only HelixQA
+<code>challenges/scripts/ux_end_to_end_flow_challenge.sh</code></td>
+<td><strong>GAP-4</strong>: no HelixCode-local journey harness</td>
+<td>SP4 (end-user CLI journey), SP6 (human-in-loop UX node flows)</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Challenges</td>
+<td><code>submodules/challenges/{banks,challenges,cmd}</code>
+(<code>p1-f06..p2-f24</code>) +
+<code>helix_code/tests/e2e/challenges/</code></td>
+<td>new banks per new feature/submodule ABSENT</td>
+<td>ALL SPs (each new feature + each new flow submodule needs a
+Challenge)</td>
+</tr>
+<tr>
+<td>15</td>
+<td>HelixQA-banks / autonomous-QA-session</td>
+<td>delegated → HelixQA <code>cmd/helixqa autonomous</code> +
+<code>pkg/{autonomous,issuedetector,session}</code> +
+<code>banks/helixcode-*.yaml</code>; ledger
+<code>test-coverage.md:66</code></td>
+<td><strong>GAP-5</strong>: STALE (round 219); not wired to a
+HelixCode-side §11.4.116 sync-channel; banks for new features
+ABSENT</td>
+<td>ALL SPs (autonomous bank execution with captured wire evidence)</td>
+</tr>
+<tr>
+<td>(mut)</td>
+<td>§1.1 paired-mutation meta</td>
+<td><code>helix_code/tests/stresschaos/stresschaos_meta_test.go:80-193</code>;
+<code>stress-chaos-meta:121</code></td>
+<td>each NEW harness/gate in this plan needs its own paired
+mutation</td>
+<td>every SP harness + gate</td>
+</tr>
+<tr>
+<td>(regr)</td>
+<td>regression-guard</td>
+<td><code>helix_code/tests/regression/{critical_paths_test.go,server_timeout_test.go}</code></td>
+<td><strong>GAP-6</strong>: no standing per-defect §11.4.135 registry w/
+RED_MODE switch; D-1..D-7 guards ABSENT</td>
+<td>every fixed defect across all SPs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Coverage gaps found: 6</strong> — GAP-1 ddos-local, GAP-2
+scaling-local, GAP-3 ui-thin (+pixel-oracle), GAP-4 ux-local, GAP-5
+HelixQA-stale/no-sync-channel, GAP-6 regression-guard-registry/D-1..D-7.
+(ddos/scaling/ux/ui = 4 local-harness gaps per the matrix;
++HelixQA-stale +regression-registry = 6 total.)</p>
+<hr />
+<h2 id="phase-a-close-ddosscalinguxthin-ui-local-gaps">3. Phase A —
+close ddos/scaling/ux/thin-ui local gaps</h2>
+<p><strong>Principle (no delegation-bluff):</strong> per CONST-050(B) a
+delegated HelixQA/challenge slot is acceptable ONLY if it truly
+exercises HelixCode and captures evidence. Phase A gives EACH of
+ddos/scaling/ux/ui a <strong>real HelixCode-local harness</strong> AND a
+<code>CM-*-EVIDENCE</code> gate proving the delegated asset hit a live
+HelixCode endpoint — not a config-only PASS. Harnesses follow the
+<code>stresschaos.go</code>/<code>stresschaos_meta_test.go</code>
+pattern: Go harness writing captured artefacts under
+<code>qa-results/&lt;run-id&gt;/</code>, plus a paired §1.1 meta-test
+that plants a defect and asserts detection. <strong>§11.4.81
+cross-platform:</strong> each harness branches
+<code>case &quot;$(uname -s)&quot;</code> (Linux primary, Darwin
+adjacent-equivalent or honest SKIP-with-reason).</p>
+<h3 id="task-a1-ddos-harness-gap-1-owning-sp1sp2">Task A1 — ddos harness
+(GAP-1) · owning: SP1/SP2</h3>
+<ul>
+<li><strong>New:</strong>
+<code>helix_code/tests/ddos/ddos_harness.go</code> (sustained request
+flood vs a real booted HelixCode HTTP server using
+<code>httptest</code>/real <code>internal/server</code>, concurrent
+flood N≥100, capture p50/p95/p99 + rate-limit-rejection ratio to
+<code>qa-results/&lt;run-id&gt;/ddos_latency.json</code>) +
+<code>ddos_meta_test.go</code> (plant a server with NO rate-limit →
+assert harness FLAGS unbounded acceptance; plant a 100%-429 server →
+assert harness records the rejection ratio). Makefile target
+<code>test-ddos</code>.</li>
+<li><strong>RED:</strong> write <code>ddos_meta_test.go</code> first;
+assert it FAILS against a stub harness that always returns “pass”
+(proves the harness isn’t a bluff).</li>
+<li><strong>impl:</strong> real harness driving
+<code>internal/server</code> rate-limit middleware.</li>
+<li><strong>GREEN+evidence:</strong> <code>make test-ddos</code> stdout
+with real p50/p95/p99 numbers + <code>ddos_latency.json</code>
+non-empty; meta-test detects planted defects.</li>
+<li><strong>rollback:</strong>
+<code>git checkout -- helix_code/tests/ddos helix_code/Makefile</code>
+(new files removable; no prod code touched).</li>
+</ul>
+<h3 id="task-a2-scaling-harness-gap-2-owning-sp5">Task A2 — scaling
+harness (GAP-2) · owning: SP5</h3>
+<ul>
+<li><strong>New:</strong>
+<code>helix_code/tests/scaling/scaling_harness.go</code> exercising
+<code>helix_code/internal/worker</code> SSH worker-pool horizontal
+scale-out (spawn N in-process workers, measure throughput vs N=1,2,4,8;
+assert near-linear within tolerance; capture
+<code>qa-results/&lt;run-id&gt;/scaling_throughput.json</code>) +
+<code>scaling_meta_test.go</code> (plant a pool that ignores added
+workers → assert harness detects flat throughput). Makefile
+<code>test-scaling</code>.</li>
+<li><strong>RED→impl→GREEN+evidence→rollback</strong> as A1; GREEN =
+throughput table showing scale-out + meta detects the flat-throughput
+plant.</li>
+</ul>
+<h3 id="task-a3-ux-journey-harness-gap-4-owning-sp4sp6">Task A3 — ux
+journey harness (GAP-4) · owning: SP4/SP6</h3>
+<ul>
+<li><strong>New:</strong>
+<code>helix_code/tests/ux/ux_journey_test.go</code> driving a full
+end-user CLI journey programmatically (no human-in-loop, §11.4.98): init
+→ list-models → generate → command-exec → assert each step’s real
+output; capture transcript to <code>docs/qa/&lt;run-id&gt;/</code>
+(§11.4.83 bidirectional transcript). Meta: plant a step that prints a
+canned string → assert journey asserts on REAL output and FAILS the
+canned plant.</li>
+<li><strong>GREEN+evidence:</strong> captured transcript dir + per-step
+real-output assertions.</li>
+</ul>
+<h3 id="task-a4-ui-pixel-oracle-harness-gap-3-owning-sp4sp6">Task A4 —
+ui pixel-oracle harness (GAP-3) · owning: SP4/SP6</h3>
+<ul>
+<li><strong>New:</strong>
+<code>helix_code/tests/ui/tui_interaction_test.go</code> driving the
+tview/tcell TUI via <code>tcell.SimulationScreen</code> (inject keys,
+assert rendered cells) for introspectable UI; for non-introspectable
+surfaces add a §11.4.117 CV/OCR pixel-oracle fallback (self-validated
+golden-good/golden-bad fixture pair per §11.4.107(10) — analyzer that
+PASSes golden-bad → gate FAILs). Honest boundary: where neither
+hierarchy nor pixel oracle works → SKIP-with-reason (§11.4.3) + tracked
+operator-attended item (§11.4.52), never fake-PASS.</li>
+<li><strong>GREEN+evidence:</strong> rendered-cell assertions + OCR
+analyzer self-validation passing golden-good / failing golden-bad.</li>
+</ul>
+<h3 id="task-a5-delegated-asset-evidence-gates-anti-delegation-bluff">Task
+A5 — delegated-asset evidence gates (anti-delegation-bluff)</h3>
+<ul>
+<li><strong>New:</strong> pre-build gates
+<code>CM-DDOS-HITS-HELIXCODE</code>,
+<code>CM-SCALING-HITS-HELIXCODE</code>,
+<code>CM-UX-HITS-HELIXCODE</code>, <code>CM-UI-HITS-HELIXCODE</code>
+that assert the corresponding HelixQA
+<code>challenges/scripts/*.sh</code> emitted captured evidence
+referencing a live HelixCode endpoint/binary in its last run (parse
+<code>qa-results/</code>), not a config-only PASS. Each gate gets a
+paired §1.1 mutation (strip the endpoint-hit assertion → gate FAILs).
+These convert the “delegated” matrix rows from coverage-bluff risk into
+evidence-backed delegation.</li>
+</ul>
+<blockquote>
+<p><strong>Catalogue-check (§11.4.74) for Phase A:</strong> before
+writing each harness, survey
+<code>vasic-digital</code>/<code>HelixDevelopment</code> for an existing
+load/chaos harness submodule (the <code>stresschaos</code> package is
+the in-repo precedent to extend, not duplicate). Record
+<code>Catalogue-Check: extend|no-match</code> in each tracker row.</p>
+</blockquote>
+<hr />
+<h2 id="phase-b-helixqa-fetchpull-to-latest-pointer-bump-gap-5">4. Phase
+B — HelixQA fetch/pull-to-latest + pointer bump (GAP-5)</h2>
+<p>Per §11.4.71 (fetch→investigate→integrate) + §11.4.113
+(merge-onto-latest-main, <strong>no force-push</strong>) + CONST-055
+(post-pull re-verify). Current pin:
+<code>submodules/helix_qa @ v4.0.0-393-g4d2dcb2</code> (round 219 /
+2026-05-19, STALE).</p>
+<h3 id="task-b1-fetch-investigate">Task B1 — fetch + investigate</h3>
+<ul>
+<li><code>git -C submodules/helix_qa fetch --all --prune --tags</code>
+(capture stdout).</li>
+<li><code>git -C submodules/helix_qa log --oneline HEAD..@{u}</code> —
+read EVERY foreign commit body; document
+what/why/how-it-affects-HelixCode (§11.4.71 step 3). <strong>Do NOT
+auto-merge blind.</strong></li>
+</ul>
+<h3 id="task-b2-integrate-to-latest-on-a-branch-merge-onto-latest-main">Task
+B2 — integrate to latest on a branch, merge-onto-latest-main</h3>
+<ul>
+<li>In the submodule: base on latest <code>main</code> tip, merge local
+(if any) per §11.4.113 6-step; resolve conflicts by judgment (never auto
+<code>--ours</code>/<code>--theirs</code>); fast-forward push to all
+upstreams (no force).</li>
+<li>Bump the meta-repo pointer:
+<code>git -C &lt;root&gt; add submodules/helix_qa</code> in the SAME
+commit as any dependent doc/ledger update (§11.4.71 step + CONST-044
+CONTINUATION sync).</li>
+</ul>
+<h3 id="task-b3-const-055-post-pull-re-verify">Task B3 — CONST-055
+post-pull re-verify</h3>
+<ul>
+<li>Re-run HelixQA’s own ledger round: confirm
+<code>submodules/helix_qa/docs/test-coverage.md</code> still shows all
+15 slots FILLED post-pull; if any slot regressed to
+<code>NOT_YET_FILLED</code>, open a tracked issue (§11.4.15
+Reopened/Bug) before relying on it.</li>
+<li>Re-run <code>helixqa-build:694</code> (build HelixQA +
+DocProcessor/LLMOrchestrator/LLMProvider/VisionEngine) and
+<code>helixqa-test:707</code> (<code>-race</code>) to confirm the new
+pin compiles + green.</li>
+<li><strong>RED here = the pre-bump state</strong>: capture round-219
+staleness as the defect; <strong>GREEN = round updated, ledger
+re-verified, build+test green, pointer bumped</strong>. Evidence: fetch
+stdout + <code>log HEAD..@{u}</code> + helixqa-test output. Rollback:
+<code>git -C &lt;root&gt; checkout -- submodules/helix_qa .gitmodules</code>
+(revert pointer).</li>
+</ul>
+<blockquote>
+<p><strong>Operator decision flagged (D-B1):</strong> B2 force-push is
+FORBIDDEN (§11.4.113) — but if the submodule’s mirrors have diverged,
+the merge-onto-latest-main may surface conflicts needing operator
+judgment on conflicting cross-session edits. Surface via §11.4.66
+AskUserQuestion before merging.</p>
+</blockquote>
+<hr />
+<h2 id="phase-c-autonomous-qa-session-wiring-11.4.98-11.4.116">5. Phase
+C — autonomous-QA-session wiring (§11.4.98 + §11.4.116)</h2>
+<p><strong>Goal:</strong> fully-automated (§11.4.98 — zero human action
+after startup) autonomous QA sessions executing every registered bank
+with captured wire evidence, exposed over a real-time §11.4.116
+sync-channel the conductor tails live.</p>
+<h3 id="task-c1-11.4.98-full-automation-audit-of-existing-banks">Task C1
+— §11.4.98 full-automation audit of existing banks</h3>
+<ul>
+<li>Classify every HelixCode-facing bank
+(<code>submodules/helix_qa/banks/helixcode-*.yaml</code>) COMPLIANT vs
+NON-COMPLIANT: a bank requiring a human action mid-run (typing,
+clicking, hand-triggered webhook) is a §11.4.98 PASS-bluff. Drive
+programmatically (second account / webhook fixture / loopback).
+Re-runnability proof: PASS at <code>-count=3</code> consecutive
+automated invocations with self-cleaning state.</li>
+<li><strong>RED:</strong> add a meta-assertion that fails if any
+in-scope bank contains a manual-step marker. <strong>GREEN:</strong> all
+banks self-driving; evidence = 3× consecutive clean runs.</li>
+</ul>
+<h3 id="task-c2-11.4.116-sync-channel-on-the-helixcodehelixqa-bridge">Task
+C2 — §11.4.116 sync-channel on the HelixCode↔︎HelixQA bridge</h3>
+<ul>
+<li><strong>Extend</strong>
+<code>helix_code/internal/helixqa/wrapper.go</code> to emit a structured
+append-only JSONL event stream (one event/line, never rewritten):
+session-start / phase-transition / per-bank-start /
+captured-evidence-path / external-call (LLM/vision/sink-probe) / error /
+per-bank-verdict — verdict vocab PASS/FAIL/SKIP/OPERATOR-BLOCKED — PLUS
+an atomically-rewritten status snapshot (write-temp-then-rename)
+carrying current session/phase/bank + counters + last verdict.</li>
+<li><strong>Anti-bluff invariant (§11.4.116):</strong> a verdict event
+MUST carry the evidence path backing it; a PASS event with no evidence
+path = channel-layer bluff; a snapshot reporting PASS while the stream
+shows no evidence event for that bank = contradiction → treat as
+FAIL.</li>
+<li><strong>RED:</strong> <code>wrapper_syncchannel_test.go</code>
+asserting (a) a PASS verdict without an evidence-path event FAILS
+validation; (b) a torn status write is never observed (rename
+atomicity). <strong>impl:</strong> JSONL emitter + atomic snapshot.
+<strong>GREEN+evidence:</strong> captured
+<code>qa-results/&lt;run-id&gt;/events.jsonl</code> +
+<code>status.json</code> with backing evidence paths; meta detects the
+planted no-evidence PASS. <strong>rollback:</strong> revert
+<code>wrapper.go</code> diff.</li>
+</ul>
+<h3 id="task-c3-autonomous-session-runner-wired-to-sync-channel">Task C3
+— autonomous-session runner wired to sync-channel</h3>
+<ul>
+<li>New Makefile <code>test-autonomous-qa</code>: boots infra
+(<code>test-infra-up:182</code>), runs
+<code>cmd/helixqa autonomous</code> against the live HelixCode stack
+with <code>--banks banks/</code> <code>--validate</code>
+<code>--tickets</code>, tailing the C2 sync-channel; the conductor
+(§11.4.103) tails it live and can §11.4.4-interrupt on a fresh
+defect.</li>
+<li><strong>GREEN+evidence:</strong> recorded session timeline +
+LLM-discovered tickets + per-bank verdicts each with evidence path;
+re-runnable <code>-count=3</code>.</li>
+</ul>
+<blockquote>
+<p><strong>Catalogue-check:</strong> the sync-channel format SHOULD
+reuse the §11.4.116 reference shape if a
+<code>vasic-digital</code>/<code>HelixDevelopment</code> framework
+already defines it (record <code>Catalogue-Check:</code> in the tracker
+row); else it is new HelixCode-side wiring on the existing bridge (no
+new submodule).</p>
+</blockquote>
+<hr />
+<h2 id="phase-d-independent-code-review-agent-gate-per-closure-11.4.12511.4.134">6.
+Phase D — independent code-review-agent gate per closure
+(§11.4.125/§11.4.134)</h2>
+<p>Every SP1/SP2/SP4/SP5/SP6 batch closure routes through a
+<strong>structurally-separated</strong> code-review agent
+(subagent-driven §11.4.70) BEFORE the pre-build sweep + any
+build/tag.</p>
+<h3 id="task-d1-code-review-gate-marker-script">Task D1 — code-review
+gate marker + script</h3>
+<ul>
+<li><strong>New:</strong>
+<code>helix_code/scripts/testing/code_review_gate.sh</code> producing a
+fresh <code>qa-results/code_review/&lt;batch-id&gt;.ok</code> marker
+ONLY after a code-review agent analysed: (1) the batch diff + stated
+intent; (2) captured evidence (§11.4.5/§11.4.69/§11.4.107) + the
+§11.4.108 runtime-signature registry; (3) blast radius (§11.4.92); (4)
+git history (reproduces a known-broken pattern? §11.4.114/§11.4.124);
+(5) quality+safety+will-it-REALLY-work; (6) <strong>every covering test
+genuinely catches its negation</strong> — a test that PASSes on
+broken-for-user work, or a gate whose paired §1.1 mutation does NOT make
+it FAIL, is a finding.</li>
+<li><strong>New gate:</strong>
+<code>CM-CODE-REVIEW-GATE-BEFORE-BUILD</code> — pre-build sweep + main
+build refuse to start without a fresh marker for the current batch
+(produced after the LAST fix). Paired §1.1 mutation: backdate/remove the
+marker → gate FAILs.</li>
+</ul>
+<h3 id="task-d2-11.4.134-iterate-until-go-loop">Task D2 — §11.4.134
+iterate-until-GO loop</h3>
+<ul>
+<li>On ANY finding (blocking, nit, OR warning) the batch is
+fixed/improved/test-covered (four-layer §11.4.4(b), RED-first
+§11.4.43/§11.4.115) and the review is <strong>RE-RUN</strong>; loop
+terminates ONLY on a clean GO with ZERO findings AND ZERO warnings.
+Every round’s verdict carries rock-solid PHYSICAL captured evidence
+(§11.4.5/§11.4.69/§11.4.107); a GO unbacked by captured evidence is
+itself a §11.4 review-loop bluff.</li>
+<li><strong>RED:</strong> meta-test plants a residual warning → asserts
+the loop does NOT emit the <code>.ok</code> marker.
+<strong>GREEN:</strong> marker emitted only on zero-finding GO.
+<strong>rollback:</strong> remove script + gate (no prod code).</li>
+<li>Use the repo’s <code>code-review</code> /
+<code>superpowers:requesting-code-review</code> skill as the reviewing
+agent; the review conclusions are captured under
+<code>qa-results/code_review/&lt;batch-id&gt;/</code>.</li>
+</ul>
+<hr />
+<h2 id="phase-e-regression-guard-registration-per-fixed-defect-incl.-d-1..d-7-11.4.135">7.
+Phase E — regression-guard registration per fixed defect
+(incl. D-1..D-7) §11.4.135</h2>
+<p><strong>Goal:</strong> a STANDING regression-guard suite that runs on
+EVERY build+deploy, runs FIRST (highest-risk set, §11.4.132), and BLOCKS
+the tag on any failure. Every closed defect registers a permanent
+§11.4.115 RED-on-broken-artifact guard in the SAME commit as its fix
+(extending the §11.4.43 DOCUMENT step). Closure without a guard =
+§11.4.123 violation.</p>
+<h3 id="task-e1-guard-registry-scaffold-gap-6">Task E1 — guard registry
+scaffold (GAP-6)</h3>
+<ul>
+<li><strong>New:</strong>
+<code>helix_code/tests/regression/guards/</code> registry +
+<code>guard_registry_test.go</code> runner; each guard is
+<code>&lt;DEFECT-ID&gt;_guard_test.go</code> with a single
+<strong><code>RED_MODE</code> polarity switch</strong> (env, default
+<code>1</code> = reproduce-the-defect-on-pre-fix-artifact + assert
+present; <code>0</code> = standing GREEN guard asserting defect ABSENT).
+One source, two roles (§11.4.115). Makefile
+<code>test-regression-guards</code> (runs <code>RED_MODE=0</code> set;
+gated into <code>test-full</code>/release).</li>
+<li><strong>New gates:</strong>
+<code>CM-REGRESSION-GUARD-REGISTERED</code> (every closed defect id has
+a guard file) + <code>CM-REGRESSION-GUARD-SUITE-WIRED</code> (suite runs
+in release gate) + paired §1.1 mutation (delete a guard → gate
+FAILs).</li>
+</ul>
+<h3 id="task-e2-d-1..d-7-guards-each-redimplgreenevidencerollback">Task
+E2 — D-1..D-7 guards (each = RED→impl→GREEN+evidence→rollback)</h3>
+<p>Each guard’s RED captures the historical defect on the pre-fix
+artifact; GREEN asserts absence on the fixed artifact (clean target,
+§11.4.108/§11.4.139). These are authored alongside the owning SP’s fix
+but the GUARD rows are SP7’s deliverable.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Guard</th>
+<th>Defect</th>
+<th>RED (RED_MODE=1) reproduces</th>
+<th>GREEN (RED_MODE=0) asserts</th>
+<th>Owning-SP fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>D1_completion_models_guard_test.go</code></td>
+<td>D-1 hardcoded 3-model list
+<code>helix_agent/internal/handlers/completion.go:406</code></td>
+<td><code>/v1/completion/models</code> returns the static 3-item
+list</td>
+<td>endpoint returns LLMsVerifier-sourced models (CONST-036);
+count≠hardcoded set</td>
+<td>SP2</td>
+</tr>
+<tr>
+<td><code>D2_cli_listmodels_guard_test.go</code></td>
+<td>D-2 <code>cmd/cli/main.go:1361</code> lists failed/pending as
+available</td>
+<td>a <code>failed</code>/<code>pending</code> model appears in
+<code>handleListModels</code> output</td>
+<td>only <code>Verified ∧ score≥min</code> models listed</td>
+<td>SP1</td>
+</tr>
+<tr>
+<td><code>D3_loadapikeys_wired_guard_test.go</code></td>
+<td>D-3 dead <code>secrets.LoadAPIKeys</code>
+<code>internal/secrets/loader.go:30</code></td>
+<td>call-graph proof <code>LoadAPIKeys</code> unreferenced in prod
+path</td>
+<td>prod startup path invokes <code>LoadAPIKeys</code> (real key
+load)</td>
+<td>SP1</td>
+</tr>
+<tr>
+<td><code>D4_working_model_filter_guard_test.go</code></td>
+<td>D-4 filter loaded-never-applied <code>adapter.go:175</code></td>
+<td>filter config loaded but output includes non-working models</td>
+<td>filter APPLIED — non-working models excluded from results</td>
+<td>SP1</td>
+</tr>
+<tr>
+<td><code>D5_provider_hardcode_guard_test.go</code></td>
+<td>D-5 hardcoded lists
+<code>openai_provider.go:203</code>,<code>anthropic_provider.go:205</code>,…</td>
+<td>provider <code>GetModels</code> returns a static literal slice</td>
+<td><code>GetModels</code> issues a real provider HTTP query
+(CONST-036/BLUFF-002)</td>
+<td>SP1</td>
+</tr>
+<tr>
+<td><code>D6_cli_agent_exec_guard_test.go</code></td>
+<td>D-6 stub returns hardcoded strings
+<code>clis/agents/qwencode/qwencode.go:101/115/137</code></td>
+<td>method returns the canned string without exec</td>
+<td>method actually <code>os/exec</code>s the real binary + surfaces
+real exit code (BLUFF-003)</td>
+<td>SP4</td>
+</tr>
+<tr>
+<td><code>D7_replace_dev_helix_agent_guard_test.go</code></td>
+<td>D-7 <code>helix_code/go.mod</code> lacks
+<code>replace dev.helix.agent</code></td>
+<td>go.mod has no <code>replace dev.helix.agent</code>; real
+<code>clis</code>/<code>agentic</code> un-importable</td>
+<td><code>replace</code> present; a HelixCode test imports the real
+helix_agent <code>clis</code> substrate and runs it</td>
+<td>SP4/SP5</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Anti-bluff:</strong> each guard’s RED MUST genuinely FAIL on
+the current (pre-fix) artifact (§11.4.115) — a RED that passes on the
+known-broken artifact is a blind test (finding). D-1/D-6 guards live
+partly in <code>helix_agent</code> (its own regression suite per
+CONST-047) with a HelixCode integration mirror once D-7’s
+<code>replace</code> lands.</li>
+<li><strong>rollback:</strong> each guard is additive test-only;
+<code>git checkout -- helix_code/tests/regression/guards/&lt;file&gt;</code>.</li>
+</ul>
+<h3 id="task-e3-risk-ordered-execution-11.4.132">Task E3 — risk-ordered
+execution (§11.4.132)</h3>
+<ul>
+<li>Wire the guard suite to run FIRST in the post-deploy cycle, ordered
+by recency × problematic-history × reopen-count; D-1..D-7
+(most-recently-worked) run before the broader suite. Only after the
+guard set is GREEN with captured evidence does the rest of
+<code>test-full</code> run.</li>
+</ul>
+<hr />
+<h2 id="operator-decisions-required">8. Operator decisions required</h2>
+<ul>
+<li><strong>D-OP-1 (delegation vs local for
+ddos/scaling/ux/ui):</strong> Phase A builds REAL HelixCode-local
+harnesses for all four. Confirm this (vs. accepting evidence-backed
+HelixQA delegation via the Task A5 gates only). <em>Recommended: build
+local harnesses</em> — removes the CONST-050(B) coverage-bluff risk
+permanently. (§11.4.66)</li>
+<li><strong>D-OP-2 (HelixQA merge conflicts):</strong> if Phase B2’s
+merge-onto-latest-main surfaces conflicting cross-session edits in the
+submodule, operator judgment is needed (force-push is forbidden
+§11.4.113). Surface via AskUserQuestion before merging.</li>
+<li><strong>D-OP-3 (new flow-submodule QA scope, SP6):</strong> each new
+flow submodule
+(<code>flow_engine</code>/<code>dag_orchestrator</code>/<code>pipeline_runtime</code>/<code>agent_mesh</code>)
+needs its OWN full 15-type matrix + banks + Challenges
+(CONST-050B/CONST-051). Confirm SP7 owns authoring those, or each SP6
+submodule owns its own QA. <em>Recommended: each submodule owns its
+standalone matrix; SP7 owns the cross-cutting autonomous-session + guard
+registry.</em></li>
+<li><strong>D-OP-4 (pixel-oracle dependency, Task A4):</strong>
+§11.4.117 CV/OCR fallback may need an OCR/CV dependency
+(tesseract/opencv). Confirm install
+vs. SKIP-with-operator-attended-migration for non-introspectable UI
+surfaces.</li>
+<li><strong>D-OP-5 (autonomous-session compute budget, Phase
+C):</strong> full autonomous banks at <code>-count=3</code> + live infra
+is compute-heavy; confirm it runs in background (§11.4.89) per cycle
+vs. release-gate-only.</li>
+</ul>
+<hr />
+<h2 id="summary">9. Summary</h2>
+<ol type="1">
+<li>SP7 is cross-cutting QA binding SP1/SP2/SP4/SP5/SP6; verified
+against analysis-F §3 + master-roadmap §SP7 by direct file
+inspection.</li>
+<li>HelixCode-local coverage is STRONG for
+unit/integration/e2e/security/chaos/stress/performance/benchmarking,
+with a real §1.1 meta-test harness
+(<code>stresschaos_meta_test.go:80-193</code>).</li>
+<li><strong>Coverage gaps found: 6</strong> — GAP-1 ddos-local, GAP-2
+scaling-local, GAP-3 ui-thin(+pixel-oracle), GAP-4 ux-local, GAP-5
+HelixQA-stale/no-sync-channel, GAP-6
+regression-guard-registry(+D-1..D-7).</li>
+<li>ddos/scaling/ux assets exist ONLY as HelixQA challenge scripts —
+delegated slots that risk a CONST-050(B) coverage-bluff unless
+evidence-backed.</li>
+<li>Phase A builds REAL HelixCode-local ddos/scaling/ux/ui harnesses
+(stresschaos pattern) + <code>CM-*-HITS-HELIXCODE</code>
+anti-delegation-bluff gates, each with paired §1.1 mutation.</li>
+<li>Phase B fetches/pulls HelixQA to latest (round 219 → current) via
+§11.4.71 + §11.4.113 merge-onto-latest-main (no force), bumps the
+<code>.gitmodules</code> pointer, and CONST-055 re-verifies the 15-slot
+ledger.</li>
+<li>Phase C audits banks for §11.4.98 full-automation (no human-in-loop,
+<code>-count=3</code> re-runnable) and wires a §11.4.116 JSONL
+sync-channel + atomic status snapshot onto
+<code>internal/helixqa/wrapper.go</code>, with the
+evidence-path-backed-verdict invariant.</li>
+<li>Phase D adds the §11.4.125 code-review gate
+(<code>CM-CODE-REVIEW-GATE-BEFORE-BUILD</code>) and §11.4.134
+iterate-until-GO loop (zero findings AND zero warnings, physical
+evidence per round).</li>
+<li>Phase E builds the §11.4.135 standing regression-guard registry with
+RED_MODE polarity switch (§11.4.115) and authors D-1..D-7 guards, run
+FIRST risk-ordered (§11.4.132) and tag-blocking.</li>
+<li>Every task is RED→impl→GREEN+evidence→rollback; new harnesses/guards
+are additive test-only (clean rollback); no production code is removed
+(§11.4.122).</li>
+<li>Catalogue-check (§11.4.74) precedes each new harness; the in-repo
+<code>stresschaos</code> package is the extend-precedent — no duplicate
+load/chaos engine.</li>
+<li>5 operator decisions flagged (D-OP-1 local-vs-delegated, D-OP-2
+HelixQA merge conflicts, D-OP-3 SP6 submodule QA ownership, D-OP-4
+pixel-oracle dependency, D-OP-5 autonomous-session compute budget).</li>
+</ol>
+<p><strong>Coverage gaps found: 6.</strong></p>
+</body>
+</html>

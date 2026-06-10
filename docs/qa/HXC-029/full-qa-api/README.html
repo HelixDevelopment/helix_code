@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">README</h1>
+</header>
+<h1 id="hxc-029-full-qa-api-bank-self-driving-verified-vs-live-server">HXC-029
+— full-qa-api Bank: Self-Driving + Verified vs Live Server</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-29</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Tracked item</td>
+<td>HXC-029 (§11.4.98 full-automation anti-bluff forward sweep)</td>
+</tr>
+<tr>
+<td>Pass type</td>
+<td><strong>Real runtime execution against the LIVE HelixCode
+server</strong> (real PostgreSQL + Redis backed). Captured evidence
+below.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#what-this-is">What this is</a></li>
+<li><a href="#critical-finding-the-original-bank-targets-a-different-product">Critical
+finding: the original bank targets a different product</a></li>
+<li><a href="#what-was-produced">What was produced</a></li>
+<li><a href="#runner-invocation">Runner invocation</a></li>
+<li><a href="#three-run-results-1149-8-re-runnability">Three-run results
+(§11.4.98 re-runnability)</a></li>
+<li><a href="#anti-bluff-mutation-proof">Anti-bluff mutation
+proof</a></li>
+<li><a href="#real-endpoints-exercised">Real endpoints
+exercised</a></li>
+<li><a href="#honest-skips">Honest skips</a></li>
+<li><a href="#evidence-files">Evidence files</a></li>
+<li><a href="#repeatability-for-the-other-banks">Repeatability for the
+other banks</a></li>
+</ul>
+<h2 id="what-this-is">What this is</h2>
+<p>The HXC-029 deliverable: take ONE HelixQA bank and make it genuinely
+self-driving and §11.4.98-compliant against the live HelixCode server on
+<code>http://localhost:8080</code>, with captured evidence, establishing
+the rewrite pattern for the remaining banks.</p>
+<h2 id="critical-finding-the-original-bank-targets-a-different-product">Critical
+finding: the original bank targets a different product</h2>
+<p><code>helix_qa/banks/full-qa-api.json</code> declares
+<code>metadata.app = &quot;Catalogizer&quot;</code> and was machine-converted
+(<code>converted-by-bank-prose-to-http.py</code>) for the
+<strong>Catalogizer catalog-api</strong>. Its 331 <code>http:</code>
+steps hit endpoints such as <code>/api/v1/entities</code>,
+<code>/api/v1/collections</code>, <code>/api/v1/scans</code> and expect
+a <code>session_token</code> login with <code>admin/admin123</code>.
+Probed live against HelixCode:</p>
+<ul>
+<li><code>POST /api/v1/auth/login</code> with
+<code>admin/admin123</code> → <strong>401</strong> (no such user)</li>
+<li><code>GET /api/v1/entities</code> → <strong>404</strong> (route does
+not exist on HelixCode)</li>
+</ul>
+<p>So the Catalogizer bank cannot honestly run against HelixCode —
+rewriting its 27 <code>manual-review-required</code> prose steps in
+place would leave 331 catalog-api <code>http:</code> steps failing en
+masse, which is not a clean §11.4.98 demonstration. The original bank is
+left untouched (it is valid for its own product).</p>
+<p>Instead, a <strong>new HelixCode-targeted API bank</strong> was
+authored against HelixCode’s real route table
+(<code>helix_code/internal/server/server.go</code>), discovered by live
+probing. This is the correct §11.4.98 artefact for the running
+server.</p>
+<h2 id="what-was-produced">What was produced</h2>
+<ul>
+<li><strong><code>helix_qa/banks/helixcode-full-qa-api.json</code></strong>
+— 30 test cases / 34 steps: 32 self-driving <code>http:</code>+assert
+steps against real HelixCode endpoints, 2 honest <code>_skip</code>
+steps (JWT-mint, WebSocket) with reasons. No
+<code>manual-review-required</code> prose, no human action after
+startup, read-only / negative paths only (self-cleaning — no state to
+clean up).</li>
+<li><strong><code>runner/main.go</code></strong> — a stdlib-only
+standalone runner that implements the documented HelixQA
+<code>http:</code>/assert executor contract (see
+<code>helix_qa/pkg/testbank/schema.go</code> +
+<code>helix_qa/pkg/autonomous/http_executor.go</code>) and drives the
+live server. Needed because <code>helix_qa/pkg/autonomous</code> does
+not compile in this checkout (its module <code>replace</code> directives
+point at owned submodules — DocProcessor, LLMOrchestrator, LLMProvider,
+VisionEngine — that are not checked out; a topology issue unrelated to
+the HTTP bank). The runner makes REAL HTTP calls and REAL assertions —
+it is not a mock.</li>
+</ul>
+<h2 id="runner-invocation">Runner invocation</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> docs/qa/HXC-029/full-qa-api/runner</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build <span class="at">-o</span> /tmp/hxc029runner .</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">HELIXQA_HTTP_BASE_URL</span><span class="op">=</span>http://localhost:8080 <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">/tmp/hxc029runner</span> <span class="at">-bank</span> ../../../../../helix_qa/banks/helixcode-full-qa-api.json</span></code></pre></div>
+<p>(The same bank JSON is consumed by the real <code>helix_qa</code>
+HTTPExecutor / <code>TestBankRealBinary_FullQAAPI</code> path once the
+missing submodules are checked out — the action schema is
+identical.)</p>
+<h2 id="three-run-results-11.4.98-re-runnability">Three-run results
+(§11.4.98 re-runnability)</h2>
+<p><code>run_1.txt</code>, <code>run_2.txt</code>,
+<code>run_3.txt</code> — three consecutive automated invocations, no
+human action between or during:</p>
+<pre><code>=== summary: 32 PASS, 0 FAIL, 2 SKIP (of 34 steps) ===   (run 1, exit 0)
+=== summary: 32 PASS, 0 FAIL, 2 SKIP (of 34 steps) ===   (run 2, exit 0)
+=== summary: 32 PASS, 0 FAIL, 2 SKIP (of 34 steps) ===   (run 3, exit 0)</code></pre>
+<p>Deterministic and identical across runs (the <code>-count=3</code>
+equivalent). Self-cleaning: every step is read-only or a negative path,
+so state is identical at the start of each run.</p>
+<h2 id="anti-bluff-mutation-proof">Anti-bluff mutation proof</h2>
+<p><code>mutation-proof.txt</code>: a copy of the bank with
+<code>HXC-API-001</code>’s <code>expect_status</code> changed
+<code>200 → 999</code> was run against the same live server. The runner
+reported <strong>FAIL</strong> with exit code 1:</p>
+<pre><code>FAIL [HXC-API-001] GET /health — GET /health -&gt; status 200, expected 999 ...
+=== summary: 31 PASS, 1 FAIL, 2 SKIP (of 34 steps) ===</code></pre>
+<p>This proves the PASSes are real assertions against the live server —
+when the expectation disagrees with reality, the run fails.</p>
+<h2 id="real-endpoints-exercised">Real endpoints exercised</h2>
+<p><code>endpoint-probes.txt</code> captures the raw <code>curl</code>
+probes proving each endpoint is real. The bank asserts on:</p>
+<ul>
+<li><code>GET /health</code>, <code>GET /api/v1/health</code> → 200,
+<code>status=healthy</code>, <code>version</code></li>
+<li><code>GET /api/v1/server/info</code> → 200,
+<code>info.database</code></li>
+<li><code>GET /api/v1/metrics</code> → 200, <code>metrics</code></li>
+<li><code>GET /api/v1/llm/providers</code>, <code>/llm/models</code>,
+<code>/llm/providers/ollama</code> → 200</li>
+<li><code>GET /api/v1/llm/providers/&lt;unknown&gt;</code> → 404
+(<code>unknown LLM provider</code>)</li>
+<li><code>GET /api/v1/memory/systems</code>, <code>/memory/stats</code>
+→ 200</li>
+<li><code>POST /api/v1/auth/login</code> empty body → 400 validation;
+bad creds → 401</li>
+<li><code>POST /api/v1/auth/logout</code> (no header) → 400;
+<code>POST /auth/refresh</code> → 401</li>
+<li><code>GET</code> on
+<code>/tasks /projects /workers /sessions /users/me /system/stats /system/status /qa/sessions /screenshot/engines</code>
+(no auth) → 401</li>
+<li>garbage bearer token → 401; unknown route → 404;
+<code>OPTIONS /tasks</code> → 204</li>
+<li>five sequential <code>/health</code> probes (load smoke) all
+200</li>
+</ul>
+<h2 id="honest-skips">Honest skips</h2>
+<ul>
+<li><strong>HXC-API-029 (JWT-mint/decode)</strong> —
+<code>/api/v1/auth/register</code> returns 400
+<code>internal_auth_failed_create_user</code> on this live DB, so no JWT
+can be minted in-test. Honest SKIP, not a fabricated PASS. This is a
+real, separate HelixCode defect (register broken) worth its own tracker
+item.</li>
+<li><strong>HXC-API-030 (WebSocket)</strong> — the HelixQA
+<code>http:</code> action type drives HTTP only, and HelixCode’s
+<code>internal/server</code> route table registers no WebSocket upgrade
+route. WebSocket coverage needs a dedicated <code>ws:</code> driver.
+Honest SKIP.</li>
+</ul>
+<h2 id="evidence-files">Evidence files</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run_1.txt</code> / <code>run_2.txt</code> /
+<code>run_3.txt</code></td>
+<td>Three consecutive full run transcripts</td>
+</tr>
+<tr>
+<td><code>mutation-proof.txt</code></td>
+<td>Anti-bluff: wrong expectation → FAIL exit 1</td>
+</tr>
+<tr>
+<td><code>endpoint-probes.txt</code></td>
+<td>Raw curl proof every asserted endpoint is real</td>
+</tr>
+<tr>
+<td><code>runner/main.go</code> + <code>runner/go.mod</code></td>
+<td>The standalone stdlib runner</td>
+</tr>
+</tbody>
+</table>
+<h2 id="repeatability-for-the-other-banks">Repeatability for the other
+banks</h2>
+<p>The pattern is repeatable for the other pure-server-API banks
+(<code>entity-management</code>, <code>admin-operations</code>,
+<code>security-validation</code>, <code>performance-validation</code>)
+<strong>but with two structural caveats discovered here</strong>:</p>
+<ol type="1">
+<li>Several banks (full-qa-api, and presumably the entity/admin ones)
+target the <strong>Catalogizer</strong> product, not HelixCode. They
+cannot be “rewritten in place” against HelixCode — they need either (a)
+running against a live Catalogizer catalog-api, or (b) a fresh
+HelixCode-targeted bank like this one. The cheap step-prose conversion
+alone is not sufficient when the whole API surface differs.</li>
+<li>The canonical <code>helix_qa/pkg/autonomous</code> runner does not
+build in a partial checkout (missing owned submodules in its
+<code>replace</code> set). Either check out
+DocProcessor/LLMOrchestrator/LLMProvider/VisionEngine, or use a
+stdlib-only runner like this one. The bank JSON is portable across
+both.</li>
+</ol>
+<p>For the GUI/CLI/WebSocket banks, the <code>http:</code>-only approach
+does not apply — they need the Playwright CDP runtime,
+<code>shell:</code> driving, or a <code>ws:</code> driver respectively
+(none of which exist wired today).</p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>Internal source-of-truth files read during this work (no external web
+sources — this is a code/runtime audit, not service-documentation
+authoring):</p>
+<ul>
+<li><code>helix_code/internal/server/server.go</code> (live route
+table)</li>
+<li><code>helix_code/internal/server/handlers.go</code> +
+<code>internal/auth/auth.go</code> (login/register)</li>
+<li><code>helix_qa/pkg/testbank/schema.go</code> (action + assertion
+schema)</li>
+<li><code>helix_qa/pkg/autonomous/http_executor.go</code> (executor
+contract this runner mirrors)</li>
+<li><code>helix_qa/pkg/autonomous/bank_realbinary_test.go</code>
+(existing HTTP-step test)</li>
+<li>live <code>http://localhost:8080</code> probes (captured in
+<code>endpoint-probes.txt</code>)</li>
+</ul>
+</body>
+</html>

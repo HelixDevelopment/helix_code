@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f17-smart-file-editing</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f17-smart-file-editing</h1>
+</header>
+<h1 id="p1-f17-smart-file-editing-implementation-plan">P1-F17 — Smart
+File Editing Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship real, end-to-end <strong>search-replace
+block editing</strong> for the HelixCode CLI agent. F17 adds a
+<code>smart_edit</code> tool that consumes one or more
+<strong>search-replace blocks</strong> in a single string payload,
+applies them transactionally to one or more files via the existing F08
+multiedit transaction layer, and returns both the updated file content
+(re-read from disk) and a unified diff so the caller can self-check that
+the change actually landed. A <code>/edit</code> slash command
+(<code>status</code> / <code>diff</code> /
+<code>dry-run &lt;path&gt;</code> / <code>commit &lt;path&gt;</code>)
+provides inspection and a one-shot dry-run / commit from a file
+containing blocks. <strong>No cobra subcommand</strong> (Q5=A).
+<strong>No mtime/hash strict conflict check</strong> (Q4=B; lenient —
+re-search at apply time). <strong>No new external dependencies</strong>
+(§Tech Stack). <strong>All-or-nothing across the whole prompt</strong>
+(Q3=B; one failed block aborts the entire commit and writes nothing).
+Multi-file atomicity inherits from F08 multiedit’s transactional Commit
++ backup-restore rollback.</p>
+<p><strong>Architecture:</strong> New
+<code>internal/tools/smartedit/</code> package with
+<code>types.go</code> (EditBlock + EditPlan + BlockResult + EditResult +
+SmartEditResult + marker constants + error sentinels + size limits),
+<code>parser.go</code> (state-machine tokeniser over the prompt’s lines;
+path-line stickiness across consecutive blocks for the same file),
+<code>applier.go</code> (re-search each SEARCH literal in current
+content; ambiguous → fail; not-found → fail; in-order block application
+so a later block sees an earlier replace), <code>diff.go</code> (5-line
+wrapper around <code>multiedit.DiffManager.GenerateDiff</code> so we
+re-use the F08 LCS impl), <code>binary_detect.go</code> (NUL-byte
+heuristic; refuse binaries), <code>smart_edit_tool.go</code> (Tool impl
+wrapping parser + applier + multiedit transaction; tracks
+<code>lastResult</code> for the slash command’s status/diff inspection;
+exposes <code>DryRun</code> + <code>Commit</code> for the slash). Slash
+command at <code>internal/commands/edit_command.go</code> mirroring F14
+<code>/sandbox</code> and F16 <code>/telemetry</code> shape (defines
+<code>SmartEditInspector</code> interface in the commands package so the
+slash is testable with a fake). Two existing files get tiny additions:
+<code>internal/tools/registry.go</code> (one line: register
+<code>smart_edit</code> in the tool map) and
+<code>cmd/cli/main.go</code> (three lines: construct the tool, register
+it, register the slash).</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, zap (already in
+<code>go.mod</code>) — already present. <strong>NO new external
+deps.</strong> Brief justification: (1) parser is line-by-line text →
+stdlib <code>bufio.Scanner</code> on a string suffices; (2) applier is
+<code>strings.Index</code> / <code>strings.Count</code> /
+<code>strings.Replace</code> per block; (3) diff is delegated to the
+existing F08 <code>multiedit.DiffManager</code> (LCS-based unified diff
+already in production — re-use is the explicit anti-bluff choice); (4)
+atomicity is delegated to F08 <code>MultiFileEditor</code> (already in
+production); (5) binary detect is the standard “first 8 KiB contains
+NUL” heuristic. <code>go mod tidy</code> after T02 must produce
+<strong>zero new entries in <code>go.sum</code></strong> — if it
+doesn’t, the implementation drifted from the spec.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-06-p1-f17-smart-file-editing-design.md</code>
+(commit <code>fa77f09</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F17
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/smartedit internal/commands/edit_command.go <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — smart_edit
+can degenerate into a no-op or a partial-write in four ways: (a)
+<code>Applied=true</code> but file unchanged on disk (multiedit Commit
+failed silently or the post-write re-read was skipped); (b) SEARCH not
+found but tool returned success (the applier silently skipped the
+block); (c) multi-file commit reports success but only some files were
+written (atomicity broken — multiedit rollback didn’t restore); (d)
+returned <code>Diff</code> doesn’t match what’s actually on disk
+(computed from the planned post-content, not the re-read). The eight
+real-execution criteria (Applied=true ⇒ disk changed; Applied=false ⇒
+disk unchanged; multi-file atomic; partial-failure rollback; diff
+exactness; ambiguous rejected; binary refused; no diff text at INFO log
+level) are each tested with both unit assertions AND a Challenge phase.
+The Challenge harness uses sha-256 before-and-after as positive evidence
+— disk-state mismatch is a hard Challenge failure. Absence-of-error is
+NEVER acceptable.</p>
+<p><strong>Why this is consequential:</strong> every coding agent’s
+primary destructive operation is editing files. A smart-edit tool that
+quietly says “applied” without actually writing is the worst class of
+bug — the LLM proceeds to its next step on a false premise. F17’s
+discriminating tests are: (i) the Challenge’s PARTIAL-FAILURE-ROLLBACK
+phase (chmod 0500 on file 3’s parent dir; assert all 5 files’ sha-256
+values are byte-identical to their pre-content), and (ii) the unit-level
+<code>TestSmartEditTool_AppliedFalse_FileUnchanged</code> (deliberately
+unfindable SEARCH; assert sha-before == sha-after). Both must produce
+positive evidence; neither can be satisfied by absence-of-error.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F17-T01 — bootstrap
+evidence + advance PROGRESS to F17</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T02 —
+<code>internal/tools/smartedit/types.go</code>: EditBlock + EditPlan +
+BlockResult + EditResult + SmartEditResult + marker constants + error
+sentinels + size limits (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T03 —
+<code>internal/tools/smartedit/parser.go</code>: parse SEARCH/REPLACE
+blocks from prompt string; path-line stickiness; line-number tracking
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T04 —
+<code>internal/tools/smartedit/applier.go</code> +
+<code>binary_detect.go</code>: in-order block apply with lenient
+re-search; ambiguity detection; binary refusal (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T05 —
+<code>internal/tools/smartedit/diff.go</code>: pure-Go unified-diff
+wrapper around <code>multiedit.DiffManager.GenerateDiff</code>; assert
+byte-exact match with system <code>diff -u</code> (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T06 —
+<code>internal/tools/smartedit/smart_edit_tool.go</code>: Tool impl
+wrapping parser + applier + multiedit transaction; post-write re-read;
+<code>DryRun</code> / <code>Commit</code> / <code>LastResult</code> /
+<code>LastBlocks</code> (TDD with real <code>MultiFileEditor</code>
+against tempdirs)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T07 —
+<code>internal/commands/edit_command.go</code>: <code>/edit</code> slash
+(status / diff / dry-run / commit); <code>SmartEditInspector</code>
+interface in commands package (TDD with fake)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T08 —
+<code>cmd/cli/main.go</code> wiring +
+<code>internal/tools/registry.go</code> registration + integration tests
+(<code>-tags=integration</code>; always-runs against real
+tempdir)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T09 — Challenge
+harness (7-phase: SINGLE-FILE-SUCCESS + SEARCH-NOT-FOUND-REJECTED +
+MULTI-FILE-ATOMIC + PARTIAL-FAILURE-ROLLBACK + DIFF-EXACTNESS +
+AMBIGUOUS-REJECTED + BINARY-REFUSED) with sha-256 positive evidence per
+phase</label></li>
+<li><label><input type="checkbox" checked></input>P1-F17-T10 — Feature 17
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F17 evidence section header (spec <code>fa77f09</code>),
+update PROGRESS current focus to F17, insert F17 task list (10 items)
+after F16’s. Confirm <code>06_phase_1_evidence.md</code> has an F17
+anchor.</p>
+<p>Commit:
+<code>docs(P1-F17-T01): bootstrap Phase 1 / Feature 17 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/smartedit/types.go</code>, new
+<code>helix_code/internal/tools/smartedit/types_test.go</code>.</p>
+<p>Define: - Marker constants
+(<code>searchMarker = &quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH&quot;</code>,
+<code>dividerMarker = &quot;=======&quot;</code>,
+<code>replaceMarker = &quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE&quot;</code>). -
+<code>EditBlock{Path, Search, Replace string; Line int}</code>. -
+<code>EditPlan map[string][]EditBlock</code>. -
+<code>BlockResult{Block EditBlock; Applied bool; Reason string}</code>.
+-
+<code>EditResult{Path string; Applied bool; NewContent string; Diff string; Blocks []BlockResult; Error error}</code>.
+-
+<code>SmartEditResult{Files []EditResult; Applied bool; Diff string; DurationMs int64}</code>.
+- Error sentinels (<code>ErrParseEmpty</code>,
+<code>ErrParseMalformed</code>, <code>ErrParseNoPath</code>,
+<code>ErrSearchNotFound</code>, <code>ErrSearchAmbiguous</code>,
+<code>ErrEmptySearch</code>, <code>ErrBinaryFile</code>,
+<code>ErrApplyFailed</code>, <code>ErrFileTooLarge</code>,
+<code>ErrPromptTooLarge</code>). - Size limits
+(<code>MaxPromptBytes = 4 MiB</code>,
+<code>MaxFileBytes = 4 MiB</code>).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMarkerConstants_ExactValues<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH&quot;</span><span class="op">,</span>  searchMarker<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;=======&quot;</span><span class="op">,</span>         dividerMarker<span class="op">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE&quot;</span><span class="op">,</span> replaceMarker<span class="op">)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestErrorSentinels_DistinctErrorsIs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">error</span><span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        ErrParseEmpty<span class="op">,</span> ErrParseMalformed<span class="op">,</span> ErrParseNoPath<span class="op">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        ErrSearchNotFound<span class="op">,</span> ErrSearchAmbiguous<span class="op">,</span> ErrEmptySearch<span class="op">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        ErrBinaryFile<span class="op">,</span> ErrApplyFailed<span class="op">,</span> ErrFileTooLarge<span class="op">,</span> ErrPromptTooLarge<span class="op">,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="op">{</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        wrapped <span class="op">:=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;wrapped: %w&quot;</span><span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> wrapped<span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSizeLimits_NonZero<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> MaxPromptBytes<span class="op">,</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> MaxFileBytes<span class="op">,</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditResult_FieldsZeroValueOK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    r <span class="op">:=</span> EditResult<span class="op">{}</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Applied<span class="op">)</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>NewContent<span class="op">)</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> r<span class="op">.</span>Diff<span class="op">)</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F17-T02): EditBlock + EditResult + marker constants + error sentinels</code>.</p>
+<hr />
+<h2 id="task-3-parser.go-tdd">Task 3: parser.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/smartedit/parser.go</code>, new
+<code>helix_code/internal/tools/smartedit/parser_test.go</code>.</p>
+<p><code>parser.go</code> exports: -
+<code>Parse(prompt string) ([]EditBlock, error)</code> — state-machine
+over lines: <code>scanPath</code> → on marker → <code>scanSearch</code>
+→ on divider → <code>scanReplace</code> → on terminator → emit block,
+back to <code>scanPath</code> (path-line sticky for next block targeting
+same file). Reject malformed prompts (missing markers, marker without
+preceding path, EOF mid-block).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> blocksOK <span class="op">=</span> <span class="st">&quot;&quot;</span> <span class="op">+</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;path/a.go</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;old line</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;=======</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;new line</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_SingleBlock_OK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    bs<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span>blocksOK<span class="op">)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> bs<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;path/a.go&quot;</span><span class="op">,</span> bs<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Path<span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;old line&quot;</span><span class="op">,</span>  bs<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Search<span class="op">)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;new line&quot;</span><span class="op">,</span>  bs<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Replace<span class="op">)</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">2</span><span class="op">,</span>           bs<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Line<span class="op">)</span> <span class="co">// SEARCH marker is line 2</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_MultipleBlocksSameFile_PathSticky<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> blocksOK <span class="op">+</span> <span class="co">// first block</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;old2</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;=======</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;new2</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    bs<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span>in<span class="op">)</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> bs<span class="op">,</span> <span class="dv">2</span><span class="op">)</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;path/a.go&quot;</span><span class="op">,</span> bs<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Path<span class="op">)</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;path/a.go&quot;</span><span class="op">,</span> bs<span class="op">[</span><span class="dv">1</span><span class="op">].</span>Path<span class="op">)</span> <span class="co">// sticky</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_MultipleFiles_OK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> blocksOK <span class="op">+</span> <span class="st">&quot;path/b.go</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    bs<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span>in<span class="op">)</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> bs<span class="op">,</span> <span class="dv">2</span><span class="op">)</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;path/a.go&quot;</span><span class="op">,</span> bs<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Path<span class="op">)</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;path/b.go&quot;</span><span class="op">,</span> bs<span class="op">[</span><span class="dv">1</span><span class="op">].</span>Path<span class="op">)</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_EmptyPrompt_ErrParseEmpty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrParseEmpty<span class="op">)</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_NoBlocks_ErrParseEmpty<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span><span class="st">&quot;just some text</span><span class="ch">\n</span><span class="st">with no markers</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrParseEmpty<span class="op">)</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_SearchWithoutPath_ErrParseNoPath<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="st">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">foo</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">bar</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span>in<span class="op">)</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrParseNoPath<span class="op">)</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_MissingDivider_ErrParseMalformed<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="st">&quot;p</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">foo</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span>in<span class="op">)</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrParseMalformed<span class="op">)</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_MissingTerminator_ErrParseMalformed<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="st">&quot;p</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">foo</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">bar</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span>in<span class="op">)</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrParseMalformed<span class="op">)</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_LineNumberRecordedInBlock<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="st">&quot;</span><span class="ch">\n\n</span><span class="st">path/a.go</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">x</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">y</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>    bs<span class="op">,</span> _ <span class="op">:=</span> Parse<span class="op">(</span>in<span class="op">)</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">4</span><span class="op">,</span> bs<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Line<span class="op">)</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestParse_RejectsCol0MarkerInsideBlock_DocumentingLimitation<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Documents v1 limitation: SEARCH body containing the marker triplet at col 0</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>    <span class="co">// is parsed as a malformed prompt. v2 may add escaping.</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="st">&quot;p</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">bar</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> Parse<span class="op">(</span>in<span class="op">)</span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F17-T03): SmartEditParser with path-line stickiness + line tracking</code>.</p>
+<hr />
+<h2 id="task-4-applier.go-binary_detect.go-tdd">Task 4: applier.go +
+binary_detect.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/smartedit/applier.go</code>, new
+<code>helix_code/internal/tools/smartedit/applier_test.go</code>, new
+<code>helix_code/internal/tools/smartedit/binary_detect.go</code>, new
+<code>helix_code/internal/tools/smartedit/binary_detect_test.go</code>.</p>
+<p><code>applier.go</code>: -
+<code>Apply(content string, blocks []EditBlock) (string, []BlockResult, error)</code>
+— for each block, <code>strings.Count(current, b.Search)</code> decides
+outcome: <code>0 → ErrSearchNotFound</code>;
+<code>1 → strings.Replace</code> and continue;
+<code>&gt;1 → ErrSearchAmbiguous</code>. Empty <code>Search</code> →
+<code>ErrEmptySearch</code>. First block-level failure aborts the file
+(returns the failing block result + sentinel error). -
+<code>findExactlyOnce(content, search string) (int, error)</code> — used
+internally; exposed for tests.</p>
+<p><code>binary_detect.go</code>: -
+<code>IsBinary(content []byte) bool</code> —
+<code>bytes.IndexByte(content[:min(8192, len(content))], 0x00) &gt;= 0</code>.</p>
+<p>Failing tests FIRST (<code>applier_test.go</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApply_SingleBlock_Replaces<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> results<span class="op">,</span> err <span class="op">:=</span> Apply<span class="op">(</span><span class="st">&quot;hello world&quot;</span><span class="op">,</span> <span class="op">[]</span>EditBlock<span class="op">{{</span>Path<span class="op">:</span><span class="st">&quot;x&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;world&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;there&quot;</span><span class="op">}})</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;hello there&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> results<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> results<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Applied<span class="op">)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApply_SearchNotFound_ErrSearchNotFound_AbortsFile<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> results<span class="op">,</span> err <span class="op">:=</span> Apply<span class="op">(</span><span class="st">&quot;hello world&quot;</span><span class="op">,</span> <span class="op">[]</span>EditBlock<span class="op">{{</span>Path<span class="op">:</span><span class="st">&quot;x&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;xyz&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;abc&quot;</span><span class="op">}})</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrSearchNotFound<span class="op">)</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;hello world&quot;</span><span class="op">,</span> out<span class="op">)</span> <span class="co">// unchanged</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> results<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> results<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Applied<span class="op">)</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> results<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Reason<span class="op">,</span> <span class="st">&quot;not found&quot;</span><span class="op">)</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApply_AmbiguousSearch_ErrSearchAmbiguous<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> results<span class="op">,</span> err <span class="op">:=</span> Apply<span class="op">(</span><span class="st">&quot;xx xx xx&quot;</span><span class="op">,</span> <span class="op">[]</span>EditBlock<span class="op">{{</span>Path<span class="op">:</span><span class="st">&quot;y&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;xx&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;yy&quot;</span><span class="op">}})</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrSearchAmbiguous<span class="op">)</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;xx xx xx&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> results<span class="op">[</span><span class="dv">0</span><span class="op">].</span>Reason<span class="op">,</span> <span class="st">&quot;ambiguous&quot;</span><span class="op">)</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApply_EmptySearch_ErrEmptySearch<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> Apply<span class="op">(</span><span class="st">&quot;anything&quot;</span><span class="op">,</span> <span class="op">[]</span>EditBlock<span class="op">{{</span>Path<span class="op">:</span><span class="st">&quot;z&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;x&quot;</span><span class="op">}})</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrEmptySearch<span class="op">)</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApply_OrderRespected_LaterBlockSeesEarlierReplace<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    blocks <span class="op">:=</span> <span class="op">[]</span>EditBlock<span class="op">{</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Path<span class="op">:</span><span class="st">&quot;f&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;A&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;B&quot;</span><span class="op">},</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Path<span class="op">:</span><span class="st">&quot;f&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;B&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;C&quot;</span><span class="op">},</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> Apply<span class="op">(</span><span class="st">&quot;A&quot;</span><span class="op">,</span> blocks<span class="op">)</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;C&quot;</span><span class="op">,</span> out<span class="op">)</span> <span class="co">// A→B then B→C</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApply_FirstFailureAborts_LaterBlocksUnattempted<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    blocks <span class="op">:=</span> <span class="op">[]</span>EditBlock<span class="op">{</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Path<span class="op">:</span><span class="st">&quot;f&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;NOPE&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;x&quot;</span><span class="op">},</span> <span class="co">// fails</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Path<span class="op">:</span><span class="st">&quot;f&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;hello&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;y&quot;</span><span class="op">},</span> <span class="co">// would succeed</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> results<span class="op">,</span> err <span class="op">:=</span> Apply<span class="op">(</span><span class="st">&quot;hello world&quot;</span><span class="op">,</span> blocks<span class="op">)</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrSearchNotFound<span class="op">)</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;hello world&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> results<span class="op">,</span> <span class="dv">1</span><span class="op">)</span> <span class="co">// only first attempted</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestApply_MultilineSearchReplace_OK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    in <span class="op">:=</span> <span class="st">&quot;first</span><span class="ch">\n</span><span class="st">second</span><span class="ch">\n</span><span class="st">third</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    bs <span class="op">:=</span> <span class="op">[]</span>EditBlock<span class="op">{{</span>Path<span class="op">:</span><span class="st">&quot;f&quot;</span><span class="op">,</span> Search<span class="op">:</span><span class="st">&quot;first</span><span class="ch">\n</span><span class="st">second&quot;</span><span class="op">,</span> Replace<span class="op">:</span><span class="st">&quot;FIRST</span><span class="ch">\n</span><span class="st">SECOND&quot;</span><span class="op">}}</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> _<span class="op">,</span> err <span class="op">:=</span> Apply<span class="op">(</span>in<span class="op">,</span> bs<span class="op">)</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;FIRST</span><span class="ch">\n</span><span class="st">SECOND</span><span class="ch">\n</span><span class="st">third</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> out<span class="op">)</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (<code>binary_detect_test.go</code>):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestIsBinary_DetectsNUL<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> IsBinary<span class="op">([]</span><span class="dt">byte</span><span class="op">{</span><span class="ch">&#39;a&#39;</span><span class="op">,</span> <span class="ch">&#39;b&#39;</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="ch">&#39;c&#39;</span><span class="op">}))</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestIsBinary_TextFile_False<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> IsBinary<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;package main</span><span class="ch">\n\n</span><span class="st">func main() {}</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">)))</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestIsBinary_EmptyFile_False<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> IsBinary<span class="op">(</span><span class="ot">nil</span><span class="op">))</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> IsBinary<span class="op">([]</span><span class="dt">byte</span><span class="op">{}))</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestIsBinary_NULBeyond8KiB_False<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    buf <span class="op">:=</span> <span class="bu">make</span><span class="op">([]</span><span class="dt">byte</span><span class="op">,</span> <span class="dv">9000</span><span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="kw">range</span> buf <span class="op">{</span> buf<span class="op">[</span>i<span class="op">]</span> <span class="op">=</span> <span class="ch">&#39;a&#39;</span> <span class="op">}</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    buf<span class="op">[</span><span class="dv">8500</span><span class="op">]</span> <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> IsBinary<span class="op">(</span>buf<span class="op">))</span> <span class="co">// only first 8 KiB scanned</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F17-T04): SmartEditApplier + binary detect; lenient re-search + ambiguity detection</code>.</p>
+<hr />
+<h2 id="task-5-diff.go-tdd">Task 5: diff.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/smartedit/diff.go</code>, new
+<code>helix_code/internal/tools/smartedit/diff_test.go</code>.</p>
+<p><code>diff.go</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;dev.helix.code/internal/tools/multiedit&quot;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">// UnifiedDiff returns a unified-format diff between old and new for path.</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Wraps the existing F08 multiedit.DiffManager.GenerateDiff so the codebase</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">// has exactly one LCS-based unified-diff implementation.</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> UnifiedDiff<span class="op">(</span>oldContent<span class="op">,</span> newContent<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    dm <span class="op">:=</span> multiedit<span class="op">.</span>NewDiffManager<span class="op">(</span>multiedit<span class="op">.</span>FormatUnified<span class="op">)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    d<span class="op">,</span> err <span class="op">:=</span> dm<span class="op">.</span>GenerateDiff<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>oldContent<span class="op">),</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span>newContent<span class="op">),</span> path<span class="op">)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">||</span> d <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> d<span class="op">.</span>Unified</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestUnifiedDiff_NoChange_EmptyOrNoOpDiff<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    d <span class="op">:=</span> UnifiedDiff<span class="op">(</span><span class="st">&quot;hello</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;hello</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;f.txt&quot;</span><span class="op">)</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// multiedit may return an empty unified diff for unchanged content; either is fine</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> d<span class="op">,</span> <span class="st">&quot;+hello&quot;</span><span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> d<span class="op">,</span> <span class="st">&quot;-hello&quot;</span><span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestUnifiedDiff_ReplaceLine_HasAddAndRemove<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    d <span class="op">:=</span> UnifiedDiff<span class="op">(</span><span class="st">&quot;foo</span><span class="ch">\n</span><span class="st">bar</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;foo</span><span class="ch">\n</span><span class="st">BAR</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;f.txt&quot;</span><span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> d<span class="op">,</span> <span class="st">&quot;-bar&quot;</span><span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> d<span class="op">,</span> <span class="st">&quot;+BAR&quot;</span><span class="op">)</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestUnifiedDiff_MatchesDiffU<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;diff&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F17 system `diff` not installed&quot;</span><span class="op">)</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;pre.txt&quot;</span><span class="op">)</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    post <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;post.txt&quot;</span><span class="op">)</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>pre<span class="op">,</span>  <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;a</span><span class="ch">\n</span><span class="st">b</span><span class="ch">\n</span><span class="st">c</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>post<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;a</span><span class="ch">\n</span><span class="st">B</span><span class="ch">\n</span><span class="st">c</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> _ <span class="op">:=</span> exec<span class="op">.</span>Command<span class="op">(</span><span class="st">&quot;diff&quot;</span><span class="op">,</span> <span class="st">&quot;-u&quot;</span><span class="op">,</span> pre<span class="op">,</span> post<span class="op">).</span>CombinedOutput<span class="op">()</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    got <span class="op">:=</span> UnifiedDiff<span class="op">(</span><span class="st">&quot;a</span><span class="ch">\n</span><span class="st">b</span><span class="ch">\n</span><span class="st">c</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;a</span><span class="ch">\n</span><span class="st">B</span><span class="ch">\n</span><span class="st">c</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="st">&quot;f.txt&quot;</span><span class="op">)</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Compare structurally: both must contain the same -/+/@@ lines for the changed hunk</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;-b&quot;</span><span class="op">)</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> got<span class="op">,</span> <span class="st">&quot;+B&quot;</span><span class="op">)</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>out<span class="op">),</span> <span class="st">&quot;-b&quot;</span><span class="op">)</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>out<span class="op">),</span> <span class="st">&quot;+B&quot;</span><span class="op">)</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F17-T05): unified-diff wrapper re-using F08 multiedit DiffManager</code>.</p>
+<hr />
+<h2 id="task-6-smart_edit_tool.go-tdd-real-disk-via-tempdirs-real-multifileeditor">Task
+6: smart_edit_tool.go (TDD; real disk via tempdirs + real
+<code>MultiFileEditor</code>)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/smartedit/smart_edit_tool.go</code>, new
+<code>helix_code/internal/tools/smartedit/smart_edit_tool_test.go</code>.</p>
+<p>Implementation outline:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SmartEditTool <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    multiEdit <span class="op">*</span>multiedit<span class="op">.</span>MultiFileEditor</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    logger    <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    mu         sync<span class="op">.</span>RWMutex</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    lastResult <span class="op">*</span>SmartEditResult</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    lastBlocks <span class="op">[]</span>EditBlock</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewSmartEditTool<span class="op">(</span>me <span class="op">*</span>multiedit<span class="op">.</span>MultiFileEditor<span class="op">,</span> logger <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>SmartEditTool <span class="op">{</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> logger <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> logger <span class="op">=</span> zap<span class="op">.</span>NewNop<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>SmartEditTool<span class="op">{</span>multiEdit<span class="op">:</span> me<span class="op">,</span> logger<span class="op">:</span> logger<span class="op">}</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;smart_edit&quot;</span> <span class="op">}</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Apply SEARCH/REPLACE blocks to one or more files atomically.&quot;</span> <span class="op">}</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Category<span class="op">()</span> tools<span class="op">.</span>ToolCategory <span class="op">{</span> <span class="cf">return</span> tools<span class="op">.</span>CategoryMultiEdit <span class="op">}</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Schema<span class="op">()</span> tools<span class="op">.</span>ToolSchema <span class="op">{</span> <span class="co">/* one required string param: prompt */</span> <span class="op">}</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span> <span class="op">{</span> <span class="co">/* require prompt:string */</span> <span class="op">}</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">,</span> _ <span class="op">:=</span> params<span class="op">[</span><span class="st">&quot;prompt&quot;</span><span class="op">].(</span><span class="dt">string</span><span class="op">)</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> t<span class="op">.</span>commit<span class="op">(</span>ctx<span class="op">,</span> prompt<span class="op">,</span> <span class="ot">false</span> <span class="co">/* dryRun */</span><span class="op">)</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> DryRun<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> t<span class="op">.</span>commit<span class="op">(</span>ctx<span class="op">,</span> prompt<span class="op">,</span> <span class="ot">true</span><span class="op">)</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> Commit<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> t<span class="op">.</span>commit<span class="op">(</span>ctx<span class="op">,</span> prompt<span class="op">,</span> <span class="ot">false</span><span class="op">)</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> LastResult<span class="op">()</span> <span class="op">*</span>SmartEditResult <span class="op">{</span> <span class="co">/* RLock */</span> <span class="op">}</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> LastBlocks<span class="op">()</span> <span class="op">[]</span>EditBlock      <span class="op">{</span> <span class="co">/* RLock */</span> <span class="op">}</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co">// commit is the shared pipeline: parse → group → in-memory apply →</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">// (if !dryRun) multiedit transaction → re-read → diff. dryRun returns</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co">// the planned diff against the planned post-content WITHOUT writing.</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>SmartEditTool<span class="op">)</span> commit<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">,</span> dryRun <span class="dt">bool</span><span class="op">)</span> <span class="op">(*</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (every test uses <code>t.TempDir()</code> + real
+disk):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> newTestTool<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">(*</span>SmartEditTool<span class="op">,</span> <span class="dt">string</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Helper<span class="op">()</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> multiedit<span class="op">.</span>DefaultConfig<span class="op">()</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">.</span>WorkspaceRoot <span class="op">=</span> dir</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">.</span>RequirePreview <span class="op">=</span> <span class="ot">false</span>   <span class="co">// we drive Preview ourselves</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    me<span class="op">,</span> err <span class="op">:=</span> multiedit<span class="op">.</span>NewMultiFileEditor<span class="op">(</span>multiedit<span class="op">.</span>WithConfig<span class="op">(</span>cfg<span class="op">))</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> NewSmartEditTool<span class="op">(</span>me<span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">()),</span> dir</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> sha<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">,</span> p <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Helper<span class="op">()</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    b<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>p<span class="op">);</span> require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    h <span class="op">:=</span> sha256<span class="op">.</span>Sum256<span class="op">(</span>b<span class="op">);</span> <span class="cf">return</span> hex<span class="op">.</span>EncodeToString<span class="op">(</span>h<span class="op">[:])</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_AppliedTrue_ImpliesFileChanged<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    tool<span class="op">,</span> dir <span class="op">:=</span> newTestTool<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;a.go&quot;</span><span class="op">)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;package x</span><span class="ch">\n</span><span class="st">var foo = 1</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">:=</span> sha<span class="op">(</span>t<span class="op">,</span> p<span class="op">)</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> p <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">var foo = 1</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">var foo = 42</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;prompt&quot;</span><span class="op">:</span> prompt<span class="op">})</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> out<span class="op">.(*</span>SmartEditResult<span class="op">)</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Applied<span class="op">)</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEqual<span class="op">(</span>t<span class="op">,</span> pre<span class="op">,</span> sha<span class="op">(</span>t<span class="op">,</span> p<span class="op">))</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_AppliedFalse_FileUnchanged<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    tool<span class="op">,</span> dir <span class="op">:=</span> newTestTool<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;a.go&quot;</span><span class="op">)</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;package x</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">:=</span> sha<span class="op">(</span>t<span class="op">,</span> p<span class="op">)</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> p <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">NOT IN FILE</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">x</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;prompt&quot;</span><span class="op">:</span> prompt<span class="op">})</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> pre<span class="op">,</span> sha<span class="op">(</span>t<span class="op">,</span> p<span class="op">))</span> <span class="co">// file untouched</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_NewContentMatchesDisk<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    tool<span class="op">,</span> dir <span class="op">:=</span> newTestTool<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;a.go&quot;</span><span class="op">)</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;foo</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> p <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">foo</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">bar</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> _ <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;prompt&quot;</span><span class="op">:</span> prompt<span class="op">})</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> out<span class="op">.(*</span>SmartEditResult<span class="op">)</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    onDisk<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>onDisk<span class="op">),</span> res<span class="op">.</span>Files<span class="op">[</span><span class="dv">0</span><span class="op">].</span>NewContent<span class="op">)</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_MultiFile_AllOrNothing_OneBlockFails<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    tool<span class="op">,</span> dir <span class="op">:=</span> newTestTool<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>    a <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;a.go&quot;</span><span class="op">);</span> b <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;b.go&quot;</span><span class="op">)</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>a<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;foo</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>b<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;baz</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>    preA<span class="op">,</span> preB <span class="op">:=</span> sha<span class="op">(</span>t<span class="op">,</span> a<span class="op">),</span> sha<span class="op">(</span>t<span class="op">,</span> b<span class="op">)</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>        a <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">foo</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">FOO</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>        b <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">NOPE</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">x</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;prompt&quot;</span><span class="op">:</span> prompt<span class="op">})</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> preA<span class="op">,</span> sha<span class="op">(</span>t<span class="op">,</span> a<span class="op">))</span> <span class="co">// a NOT written even though its block would succeed</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> preB<span class="op">,</span> sha<span class="op">(</span>t<span class="op">,</span> b<span class="op">))</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_BinaryFile_Refused<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>    tool<span class="op">,</span> dir <span class="op">:=</span> newTestTool<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;bin.dat&quot;</span><span class="op">)</span></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">{</span><span class="ch">&#39;a&#39;</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="ch">&#39;b&#39;</span><span class="op">},</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">:=</span> sha<span class="op">(</span>t<span class="op">,</span> p<span class="op">)</span></span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> p <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">a</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">A</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;prompt&quot;</span><span class="op">:</span> prompt<span class="op">})</span></span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrBinaryFile<span class="op">)</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> pre<span class="op">,</span> sha<span class="op">(</span>t<span class="op">,</span> p<span class="op">))</span></span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_DryRun_DoesNotWrite<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>    tool<span class="op">,</span> dir <span class="op">:=</span> newTestTool<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;a.go&quot;</span><span class="op">)</span></span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;foo</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">:=</span> sha<span class="op">(</span>t<span class="op">,</span> p<span class="op">)</span></span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> p <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">foo</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">FOO</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>DryRun<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> prompt<span class="op">)</span></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Applied<span class="op">)</span>              <span class="co">// planned-apply succeeded in-memory</span></span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEmpty<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Diff<span class="op">)</span></span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> pre<span class="op">,</span> sha<span class="op">(</span>t<span class="op">,</span> p<span class="op">))</span>          <span class="co">// BUT the file is byte-identical</span></span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_LastResultPopulated<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a>    tool<span class="op">,</span> dir <span class="op">:=</span> newTestTool<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;a.go&quot;</span><span class="op">)</span></span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;x</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> p <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">x</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">y</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;prompt&quot;</span><span class="op">:</span> prompt<span class="op">})</span></span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>LastResult<span class="op">())</span></span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>LastBlocks<span class="op">(),</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_DoesNotLogDiffAtInfo<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a>    obs<span class="op">,</span> logs <span class="op">:=</span> observer<span class="op">.</span>New<span class="op">(</span>zapcore<span class="op">.</span>InfoLevel<span class="op">)</span></span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a>    logger <span class="op">:=</span> zap<span class="op">.</span>New<span class="op">(</span>obs<span class="op">)</span></span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> multiedit<span class="op">.</span>DefaultConfig<span class="op">();</span> cfg<span class="op">.</span>RequirePreview <span class="op">=</span> <span class="ot">false</span></span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a>    me<span class="op">,</span> _ <span class="op">:=</span> multiedit<span class="op">.</span>NewMultiFileEditor<span class="op">(</span>multiedit<span class="op">.</span>WithConfig<span class="op">(</span>cfg<span class="op">))</span></span>
+<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> NewSmartEditTool<span class="op">(</span>me<span class="op">,</span> logger<span class="op">)</span></span>
+<span id="cb9-111"><a href="#cb9-111" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb9-112"><a href="#cb9-112" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;a.go&quot;</span><span class="op">)</span></span>
+<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;SECRET_TOKEN=sk-deadbeef</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb9-114"><a href="#cb9-114" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">:=</span> p <span class="op">+</span> <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">SECRET_TOKEN=sk-deadbeef</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">SECRET_TOKEN=sk-rotated</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb9-115"><a href="#cb9-115" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;prompt&quot;</span><span class="op">:</span> prompt<span class="op">})</span></span>
+<span id="cb9-116"><a href="#cb9-116" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> logs<span class="op">.</span>All<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb9-117"><a href="#cb9-117" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> e<span class="op">.</span>Message <span class="op">+</span> e<span class="op">.</span>ContextMap<span class="op">()[</span><span class="st">&quot;diff&quot;</span><span class="op">].(</span><span class="dt">string</span><span class="op">),</span> <span class="st">&quot;sk-deadbeef&quot;</span><span class="op">)</span></span>
+<span id="cb9-118"><a href="#cb9-118" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-119"><a href="#cb9-119" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-120"><a href="#cb9-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-121"><a href="#cb9-121" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_LargePrompt_ErrPromptTooLarge<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* prompt &gt; MaxPromptBytes */</span> <span class="op">}</span></span>
+<span id="cb9-122"><a href="#cb9-122" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEditTool_LargeFile_ErrFileTooLarge<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>     <span class="op">{</span> <span class="co">/* file &gt; MaxFileBytes */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F17-T06): SmartEditTool with multiedit transaction + post-write re-read + diff</code>.</p>
+<hr />
+<h2 id="task-7-edit-slash-command-tdd">Task 7: /edit slash command
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/edit_command.go</code>, new
+<code>helix_code/internal/commands/edit_command_test.go</code>.</p>
+<p>Mirrors F14 <code>/sandbox</code> and F16 <code>/telemetry</code>
+shape: defines <code>SmartEditInspector</code> interface in the commands
+package so the slash is testable with a fake.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SmartEditInspector <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    LastResult<span class="op">()</span> <span class="op">*</span>smartedit<span class="op">.</span>SmartEditResult</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    LastBlocks<span class="op">()</span> <span class="op">[]</span>smartedit<span class="op">.</span>EditBlock</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    DryRun<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    Commit<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> EditCommand <span class="kw">struct</span> <span class="op">{</span> insp SmartEditInspector <span class="op">}</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewEditCommand<span class="op">(</span>insp SmartEditInspector<span class="op">)</span> <span class="op">*</span>EditCommand</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;edit&quot;</span> <span class="op">}</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Inspect last smart_edit attempt or run a dry-run / commit from a blocks file.&quot;</span> <span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span>        <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/edit [status|diff|dry-run &lt;path&gt;|commit &lt;path&gt;]&quot;</span> <span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>EditCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> c<span class="op">.</span>insp <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span> <span class="ot">false</span><span class="op">,</span> Output<span class="op">:</span> <span class="st">&quot;smart_edit unavailable&quot;</span><span class="op">},</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="st">&quot;status&quot;</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>cc<span class="op">.</span>Args<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span> sub <span class="op">=</span> cc<span class="op">.</span>Args<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">}</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> sub <span class="op">{</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;status&quot;</span><span class="op">:</span>   <span class="cf">return</span> c<span class="op">.</span>handleStatus<span class="op">(),</span> <span class="ot">nil</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;diff&quot;</span><span class="op">:</span>     <span class="cf">return</span> c<span class="op">.</span>handleDiff<span class="op">(),</span> <span class="ot">nil</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;dry-run&quot;</span><span class="op">:</span>  <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>cc<span class="op">.</span>Args<span class="op">)&lt;</span><span class="dv">2</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span><span class="ot">false</span><span class="op">,</span> Output<span class="op">:</span>c<span class="op">.</span>Usage<span class="op">()},</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>                     <span class="cf">return</span> c<span class="op">.</span>handleDryRun<span class="op">(</span>ctx<span class="op">,</span> cc<span class="op">.</span>Args<span class="op">[</span><span class="dv">1</span><span class="op">])</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;commit&quot;</span><span class="op">:</span>   <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>cc<span class="op">.</span>Args<span class="op">)&lt;</span><span class="dv">2</span> <span class="op">{</span> <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span><span class="ot">false</span><span class="op">,</span> Output<span class="op">:</span>c<span class="op">.</span>Usage<span class="op">()},</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>                     <span class="cf">return</span> c<span class="op">.</span>handleCommit<span class="op">(</span>ctx<span class="op">,</span> cc<span class="op">.</span>Args<span class="op">[</span><span class="dv">1</span><span class="op">])</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span>         <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Success<span class="op">:</span><span class="ot">false</span><span class="op">,</span> Output<span class="op">:</span>c<span class="op">.</span>Usage<span class="op">()},</span> <span class="ot">nil</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> fakeInspector <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    last       <span class="op">*</span>smartedit<span class="op">.</span>SmartEditResult</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    blocks     <span class="op">[]</span>smartedit<span class="op">.</span>EditBlock</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    dryFn      <span class="kw">func</span><span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    commitFn   <span class="kw">func</span><span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakeInspector<span class="op">)</span> LastResult<span class="op">()</span> <span class="op">*</span>smartedit<span class="op">.</span>SmartEditResult <span class="op">{</span> <span class="cf">return</span> f<span class="op">.</span>last <span class="op">}</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakeInspector<span class="op">)</span> LastBlocks<span class="op">()</span> <span class="op">[]</span>smartedit<span class="op">.</span>EditBlock      <span class="op">{</span> <span class="cf">return</span> f<span class="op">.</span>blocks <span class="op">}</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakeInspector<span class="op">)</span> DryRun<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> f<span class="op">.</span>dryFn<span class="op">(</span>ctx<span class="op">,</span> prompt<span class="op">)</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>f <span class="op">*</span>fakeInspector<span class="op">)</span> Commit<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> f<span class="op">.</span>commitFn<span class="op">(</span>ctx<span class="op">,</span> prompt<span class="op">)</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditCommand_NilInspector_ReportsUnavailable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    c <span class="op">:=</span> NewEditCommand<span class="op">(</span><span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> _ <span class="op">:=</span> c<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{})</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Success<span class="op">)</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;unavailable&quot;</span><span class="op">)</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditCommand_Status_NoAttempt_ReportsNone<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    c <span class="op">:=</span> NewEditCommand<span class="op">(&amp;</span>fakeInspector<span class="op">{})</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> _ <span class="op">:=</span> c<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{})</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;no smart_edit attempts&quot;</span><span class="op">)</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditCommand_Status_LastAttempt_RendersTable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    f <span class="op">:=</span> <span class="op">&amp;</span>fakeInspector<span class="op">{</span>last<span class="op">:</span> <span class="op">&amp;</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">{</span>Applied<span class="op">:</span> <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>        Files<span class="op">:</span> <span class="op">[]</span>smartedit<span class="op">.</span>EditResult<span class="op">{{</span>Path<span class="op">:</span><span class="st">&quot;a.go&quot;</span><span class="op">,</span> Applied<span class="op">:</span><span class="ot">true</span><span class="op">,</span> Diff<span class="op">:</span><span class="st">&quot;@@ -1 +1 @@</span><span class="ch">\n</span><span class="st">-x</span><span class="ch">\n</span><span class="st">+y</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">}}}}</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    c <span class="op">:=</span> NewEditCommand<span class="op">(</span>f<span class="op">)</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> _ <span class="op">:=</span> c<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;status&quot;</span><span class="op">}})</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;a.go&quot;</span><span class="op">)</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditCommand_Diff_LastAttempt_PrintsDiff<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditCommand_DryRun_FileNotFound_ReportsError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>    c <span class="op">:=</span> NewEditCommand<span class="op">(&amp;</span>fakeInspector<span class="op">{})</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> _ <span class="op">:=</span> c<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;dry-run&quot;</span><span class="op">,</span> <span class="st">&quot;/no/such/file&quot;</span><span class="op">}})</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Success<span class="op">)</span></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;no such file&quot;</span><span class="op">)</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditCommand_DryRun_ValidPrompt_ReturnsDiff_NoWrite<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>    blocksFile <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;blocks.txt&quot;</span><span class="op">)</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>blocksFile<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;p</span><span class="ch">\n</span><span class="st">&lt;&lt;&lt;&lt;&lt;&lt;&lt; SEARCH</span><span class="ch">\n</span><span class="st">x</span><span class="ch">\n</span><span class="st">=======</span><span class="ch">\n</span><span class="st">y</span><span class="ch">\n</span><span class="st">&gt;&gt;&gt;&gt;&gt;&gt;&gt; REPLACE</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    f <span class="op">:=</span> <span class="op">&amp;</span>fakeInspector<span class="op">{</span>dryFn<span class="op">:</span> <span class="kw">func</span><span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> prompt <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>smartedit<span class="op">.</span>SmartEditResult<span class="op">{</span>Applied<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> Diff<span class="op">:</span> <span class="st">&quot;diff-text&quot;</span><span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>    <span class="op">}}</span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>    c <span class="op">:=</span> NewEditCommand<span class="op">(</span>f<span class="op">)</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> _ <span class="op">:=</span> c<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;dry-run&quot;</span><span class="op">,</span> blocksFile<span class="op">}})</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Success<span class="op">)</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;diff-text&quot;</span><span class="op">)</span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditCommand_Commit_ValidPrompt_DelegatesCommit<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* analogous; assert commitFn called */</span> <span class="op">}</span></span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEditCommand_Usage_OnUnknownSub<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>    c <span class="op">:=</span> NewEditCommand<span class="op">(&amp;</span>fakeInspector<span class="op">{})</span></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> _ <span class="op">:=</span> c<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;explode&quot;</span><span class="op">}})</span></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Success<span class="op">)</span></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;/edit&quot;</span><span class="op">)</span></span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F17-T07): /edit slash command (status/diff/dry-run/commit) + SmartEditInspector</code>.</p>
+<hr />
+<h2 id="task-8-main.go-wiring-registry-registration-integration-tests">Task
+8: main.go wiring + registry registration + integration tests</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/cmd/cli/main.go</code>, modify
+<code>helix_code/internal/tools/registry.go</code>, new
+<code>helix_code/tests/integration/smartedit_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p><code>main.go</code> additions (alongside the existing
+<code>multiedit.NewMultiFileEditor(...)</code> call):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;dev.helix.code/internal/tools/smartedit&quot;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">// after multiedit editor is constructed (already named `mfe` in main):</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>smartTool <span class="op">:=</span> smartedit<span class="op">.</span>NewSmartEditTool<span class="op">(</span>mfe<span class="op">,</span> logger<span class="op">)</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>toolReg<span class="op">.</span>Register<span class="op">(</span>smartTool<span class="op">)</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>slashRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewEditCommand<span class="op">(</span>smartTool<span class="op">))</span></span></code></pre></div>
+<p><code>registry.go</code> — register <code>smart_edit</code> in the
+existing tool init block alongside <code>multiedit_commit</code> (no new
+fields, no new setters).</p>
+<p>Integration tests (<code>-tags=integration</code>; ALWAYS-RUN, no
+infra dep):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">// +build integration</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_SingleFile_ContentChanged<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>         <span class="op">{</span> <span class="co">/* sha-before != sha-after */</span> <span class="op">}</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_SearchNotFound_FileUnchanged<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>      <span class="op">{</span> <span class="co">/* sha-before == sha-after */</span> <span class="op">}</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_MultiFile_AllChanged<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>              <span class="op">{</span> <span class="co">/* 3 files, all sha changed */</span> <span class="op">}</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_MidCommitFailure_AllFilesUnchanged<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> runtime<span class="op">.</span>GOOS <span class="op">==</span> <span class="st">&quot;windows&quot;</span> <span class="op">{</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F17 chmod-rollback test requires unix permission semantics (Windows)&quot;</span><span class="op">)</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// chmod 0500 on parent dir of file 3; assert all 5 files byte-identical to pre-state</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_DiffMatchesDiffU<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>                  <span class="op">{</span> <span class="co">/* compare against `diff -u` via os/exec */</span> <span class="op">}</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_Ambiguous_FileUnchanged<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>           <span class="op">{</span> <span class="co">/* 3× SEARCH literal; sha unchanged */</span> <span class="op">}</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_Binary_Refused<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>                    <span class="op">{</span> <span class="co">/* NUL in first 8 KiB; sha unchanged */</span> <span class="op">}</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_DryRun_NeverWrites<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>                <span class="op">{</span> <span class="co">/* sha unchanged */</span> <span class="op">}</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSmartEdit_OrderedBlocks_LaterSeesEarlier<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>    <span class="op">{</span> <span class="co">/* A→B then B→C; final = C */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F17-T08): wire SmartEditTool + /edit slash into main + always-run integration tests</code>.</p>
+<hr />
+<h2 id="task-9-challenge-harness-7-phase-sha-256-positive-evidence">Task
+9: Challenge harness (7-phase, sha-256 positive evidence)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p1f17_challenge/main.go</code>,
+new <code>challenges/p1-f17-smart-file-editing/CHALLENGE.md</code>, new
+<code>challenges/p1-f17-smart-file-editing/run.sh</code>.</p>
+<p>Harness phases (per spec §6.3):</p>
+<ol type="1">
+<li><strong>SINGLE-FILE-SUCCESS (always runs)</strong> — tempdir; write
+<code>sample.go</code>; capture sha-before; run tool with one block;
+assert <code>Applied=true</code> AND sha-after differs AND
+<code>result.Files[0].NewContent</code> matches
+<code>os.ReadFile(sample.go)</code> byte-for-byte AND
+<code>result.Files[0].Diff</code> contains <code>@@</code>.</li>
+<li><strong>SEARCH-NOT-FOUND-REJECTED (always runs)</strong> — tempdir;
+write <code>unchanged.go</code>; capture sha-before; run tool with
+deliberately-unfindable SEARCH; assert tool returned
+<code>ErrSearchNotFound</code> AND sha-after equals sha-before (file
+untouched).</li>
+<li><strong>MULTI-FILE-ATOMIC (always runs)</strong> — 5 files; capture
+sha-before for each; run tool with 5 blocks; assert
+<code>Applied=true</code> AND every sha-after differs from
+sha-before.</li>
+<li><strong>PARTIAL-FAILURE-ROLLBACK (always runs; gated on unix
+permissions)</strong> — 5 files; capture sha-before for each; chmod 0500
+on parent dir of file 3 (force write failure); run tool with 5 blocks;
+assert tool returned commit error AND every sha-after EQUALS sha-before
+(atomic rollback). Cleanup restores 0700.</li>
+<li><strong>DIFF-EXACTNESS (always runs)</strong> — apply a known
+SEARCH/REPLACE; independently invoke
+<code>diff -u pre.txt post.txt</code> via
+<code>exec.CommandContext</code>; assert tool’s <code>Diff</code>
+matches the system output (modulo trailing-newline normalisation).</li>
+<li><strong>AMBIGUOUS-REJECTED (always runs)</strong> — file with SEARCH
+literal repeated 3 times; capture sha-before; run tool; assert
+<code>ErrSearchAmbiguous</code> AND sha-after equals sha-before.</li>
+<li><strong>BINARY-REFUSED (always runs)</strong> — write
+<code>bin.dat</code> with NUL byte at offset 16; capture sha-before; run
+tool; assert <code>ErrBinaryFile</code> AND sha-after equals
+sha-before.</li>
+</ol>
+<p>Output skeleton (verbatim per spec §6.3) ends with:</p>
+<pre><code>SUMMARY: SINGLE=6/6 PASS; NOT-FOUND=4/4 PASS; MULTI=5/5 PASS; ROLLBACK=6/6 PASS; DIFF=4/4 PASS; AMBIG=3/3 PASS; BINARY=3/3 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any assertion failure. SHA-256
+mismatches (<code>Applied=true</code> but file unchanged, or
+<code>Applied=false</code> but file changed) are hard failures.
+Anti-bluff smoke clean check appended to harness output. Verbatim output
+captured into <code>06_phase_1_evidence.md</code>. Dual commit
+(Challenges submodule + meta-repo bump).</p>
+<p>Subject:
+<code>feat(P1-F17-T09): challenge with sha-256 positive evidence per phase (7 always-run phases)</code>.</p>
+<hr />
+<h2 id="task-10-close-out-push">Task 10: Close-out + push</h2>
+<p>Tick all 10 items in PROGRESS, advance PROGRESS focus to F18
+candidate, run final verification:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  internal/tools/smartedit internal/commands/edit_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/tools/smartedit/... ./internal/commands/...</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration ./tests/integration/...</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy <span class="kw">&amp;&amp;</span> <span class="fu">git</span> diff <span class="at">--exit-code</span> go.mod go.sum  <span class="co"># MUST be no-op (no new deps)</span></span></code></pre></div>
+<p>Commit
+<code>chore(P1-F17-T10): close out feature 17 — smart file editing</code>.
+Push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions). Request explicit user authorization at this step
+(CONST-043).</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types (§3.3), T03 parser (§4.2), T04 applier + binary detect (§4.3,
+§5.1), T05 diff (§3.6, §11 #9), T06 SmartEditTool (§4.1, §5.2 criteria
+1+2+3+4+8), T07 slash (§3.4, §4.4), T08 main.go wiring + integration
+tests (§3.6, §6.2), T09 Challenge seven phases (§5.2, §6.3), T10
+close-out (§9).</li>
+<li><strong>TDD:</strong> every code task starts with a failing test.
+Parser/applier/diff use pure-function tests against in-memory strings;
+SmartEditTool tests always go through real tempdirs with
+<code>t.TempDir()</code> +
+<code>os.WriteFile</code>/<code>os.ReadFile</code>; the
+<code>multiedit.MultiFileEditor</code> is the real production type, not
+a mock. The slash uses a hand-rolled <code>fakeInspector</code>
+(CONST-035 allows interface fakes for slash tests; the production tool
+is real).</li>
+<li><strong>Type consistency:</strong> <code>EditBlock</code>,
+<code>EditPlan</code>, <code>BlockResult</code>,
+<code>EditResult</code>, <code>SmartEditResult</code>,
+<code>SmartEditTool</code>, <code>SmartEditInspector</code>, marker
+constants, error sentinels, size limits — all match across spec §3.3 and
+plan T02–T07.</li>
+<li><strong>Zero new external deps:</strong> stdlib + existing
+testify/zap. <code>go mod tidy</code> after T02 produces no new entries
+in <code>go.sum</code>. T10’s verification step asserts this
+loudly.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has SEVEN phases, all
+always-run. Every phase records sha-256 before and after. The eight
+real-execution criteria (Applied=true ⇒ disk changed; Applied=false ⇒
+disk unchanged; multi-file atomic; partial-failure rollback; diff
+exactness; ambiguous rejected; binary refused; no diff text at INFO log
+level) each have dedicated unit + integration + Challenge assertions.
+Disk-state mismatch is a hard Challenge failure.</li>
+<li><strong>CONST-042:</strong> full diff text is logged at DEBUG only;
+INFO-level logs carry only diff byte-count.
+<code>TestSmartEditTool_DoesNotLogDiffAtInfo</code> enforces this with
+<code>zaptest</code>/<code>observer</code>. The Challenge’s saved
+evidence file records sha-256 + line counts, never diff text.</li>
+<li><strong>CONST-043:</strong> stays on <code>main</code>, non-force to
+all four remotes; explicit user authorization is requested at T10 before
+pushing.</li>
+<li><strong>Lenient conflict detection (Q4=B) — non-obvious
+call</strong> (recorded in spec §11 #3): re-search the SEARCH literal at
+apply time; ambiguous (n&gt;1) and not-found (n=0) both fail with clear
+errors. No mtime/hash strict pre-check. Reason: external tools (gofmt,
+prettier) reformat files frequently; a strict mtime check would fail
+every legitimate edit when an unrelated reformat happened in the
+millisecond between the LLM’s plan and the apply.</li>
+<li><strong>All-or-nothing across the whole prompt (Q3=B) — non-obvious
+call</strong>: Phase-1 abort gate runs BEFORE the multiedit transaction
+opens. If any block on any file fails the in-memory apply, NO files are
+written. Multi-file atomicity is inherited from multiedit; whole-prompt
+atomicity is enforced by the smart-edit tool itself.</li>
+<li><strong>Diff is <code>string</code>, not <code>*Diff</code> —
+non-obvious call</strong> (recorded in spec §11 #1): the
+<code>EditResult.Diff</code> and <code>SmartEditResult.Diff</code>
+fields are plain strings. Reason: lowest-coupling shape for LLM
+consumers; the structural diff is still available to anyone who calls
+<code>multiedit.DiffManager.GenerateDiff</code> directly.</li>
+<li><strong>No marker-escape mechanism in v1</strong> (recorded in spec
+§5.3 + §11 #5): a SEARCH or REPLACE that contains the literal marker
+triplet at column 0 will be parsed as malformed.
+<code>TestParser_RejectsCol0MarkerInsideBlock_DocumentingLimitation</code>
+pins this so a future v2 can introduce escaping deliberately. The v1
+workaround is “indent the marker literal, or use
+<code>fs_write</code>”.</li>
+<li><strong>No multi-attempt history; only
+<code>lastResult</code></strong> (recorded in spec §11 #6): F11 session
+resume already persists the full agent transcript including tool
+invocations; smart-edit history is recoverable from the session, not
+from a parallel in-tool history. v1 keeps the in-tool state
+minimal.</li>
+<li><strong>Re-use multiedit’s diff, not a new diff impl</strong>
+(recorded in spec §11 #9): one LCS-based unified-diff implementation in
+the codebase, one set of tests, one performance characteristic. The
+smart-edit <code>diff.go</code> is a 5-line wrapper around
+<code>multiedit.DiffManager.GenerateDiff</code>.</li>
+<li><strong>Why a tool + slash but no cobra</strong> (Q5=A): the LLM’s
+primary surface is the tool; the human’s primary surface is the slash. A
+cobra subcommand <code>helixcode edit ...</code> would duplicate the
+slash without adding value; scripted use is covered by
+<code>helixcode --slash-command &quot;/edit dry-run blocks.txt&quot;</code>.</li>
+</ol>
+</body>
+</html>

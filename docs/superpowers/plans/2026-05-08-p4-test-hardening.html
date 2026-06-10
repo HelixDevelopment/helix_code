@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-08-p4-test-hardening</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-08-p4-test-hardening</h1>
+</header>
+<h1 id="phase-4-testchallenge-hardening-implementation-plan">Phase 4 —
+Test/Challenge Hardening — Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development or superpowers:executing-plans.
+Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Every test and Challenge carries positive
+runtime evidence. Zero false-success results. All <code>t.Skip()</code>
+have <code>SKIP-OK:</code> markers. New anti-bluff verifier
+challenge.</p>
+<p><strong>Architecture:</strong> Audit → classify → fix. Each bluff
+type (wrapper/contract/structural/comment/skip) has a specific detection
+and remediation pattern. New <code>anti_bluff_verifier</code> challenge
+gate-keeps all future changes.</p>
+<p><strong>Tech Stack:</strong> Go testing, testify, bash, sha256sum</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-08-helixcode-zero-bluff-completion-design.md</code></p>
+<hr />
+<h2 id="file-structure-map">File Structure Map</h2>
+<pre><code>docs/improvements/test_audit_p4.md                  — create (audit report)
+tests/e2e/challenges/anti_bluff_verifier/challenge.go — create
+tests/e2e/challenges/anti_bluff_verifier/expected.json — create
+helix_code/**/*_test.go                               — modify (fix identified bluffs)</code></pre>
+<hr />
+<h3 id="task-p4-t01-full-test-suite-audit">Task P4-T01: Full test suite
+audit</h3>
+<p><strong>Files:</strong> - Create:
+<code>docs/improvements/test_audit_p4.md</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Run full test suite,
+capture output</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-v</span> ./... <span class="at">-count</span><span class="op">=</span>1 <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">tee</span> /tmp/full_test_output.txt</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Classify every
+test</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> /tmp/audit.sh <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">#!/bin/bash</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">echo &quot;# Test Suite Audit Report&quot; &gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">echo &quot;## $(date)&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="st">echo &quot;&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">echo &quot;### Skip Bluffs (no SKIP-OK marker)&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">grep -rn &#39;t\.Skip(&#39; --include=&quot;*_test.go&quot; . | grep -v &quot;SKIP-OK&quot; | while read line; do</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="st">  echo &quot;- BAD: $line&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">done</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st">echo &quot;&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="st">echo &quot;### Silent Passes (tests with zero assertions)&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="st">grep -rn &#39;func Test&#39; --include=&quot;*_test.go&quot; . -l | while read f; do</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="st">  count=$(grep -c &#39;assert\.\|require\.\|t\.Error\|t\.Fatal&#39; &quot;$f&quot; 2&gt;/dev/null || echo 0)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="st">  testCount=$(grep -c &#39;func Test&#39; &quot;$f&quot; 2&gt;/dev/null || echo 0)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="st">  if [ &quot;$count&quot; -lt &quot;$testCount&quot; ]; then</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="st">    echo &quot;- SUSPECT: $f — $testCount test funcs, $count assertions&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="st">  fi</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="st">done</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="st">echo &quot;&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="st">echo &quot;### Integration/Challenge Files With Mocks&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="st">grep -rn &quot;testify/mock\|\.On(\&quot; --include=&quot;*_test.go&quot; . | grep -v &quot;/internal/&quot; | while read line; do</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="st">  echo &quot;- BAD (mock in non-unit test): $line&quot; &gt;&gt; docs/improvements/test_audit_p4.md</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="st">done</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> /tmp/audit.sh</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Review audit
+report</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> docs/improvements/test_audit_p4.md</span></code></pre></div>
+<p>Note all issues that need fixing.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Commit
+audit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/improvements/test_audit_p4.md</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P4-T01): full test suite audit — skip/silent/mock patterns</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 4  Task: P4-T01&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p4-t02-challenge-harness-audit">Task P4-T02: Challenge
+harness audit</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Audit challenge
+runner for exit-code bugs (wrapper bluff)</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/helix_code/tests/e2e/challenges</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;os.Exit\|exitCode\|exit code\|PASS.*but\|FAIL.*but&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> . <span class="kw">|</span> <span class="fu">head</span> <span class="at">-20</span></span></code></pre></div>
+<p>Check the runner’s exit-code logic. The pattern to verify:</p>
+<pre><code>if all assertions pass AND runtime evidence collected → exit 0
+if any assertion fails → exit non-zero</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Audit expected.json
+for real assertions</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> <span class="va">$(</span><span class="fu">find</span> . <span class="at">-name</span> <span class="st">&quot;expected.json&quot;</span><span class="va">)</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;PASS\|SUCCESS\|OK&quot;</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="ot">! </span><span class="fu">grep</span> <span class="at">-q</span> <span class="st">&quot;sha256\|checksum\|runtime&quot;</span> <span class="st">&quot;</span><span class="va">$f</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;CONCERN (pass-by-absence): </span><span class="va">$f</span><span class="st">&quot;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>Expected: zero CONCERN entries (every challenge has positive evidence
+assertions)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Document findings in
+audit report</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;&gt;</span> docs/improvements/test_audit_p4.md <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="st">## Challenge Harness Audit</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">### Exit-Code Logic</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">[audit result]</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="st">### expected.json Assertions</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="st">[audit result]</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/improvements/test_audit_p4.md</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P4-T02): audit challenge harness for wrapper/contract bluffs</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 4  Task: P4-T02&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p4-t03-bluff-taxonomy-sweep">Task P4-T03: Bluff taxonomy
+sweep</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Automated bluff
+pattern scan</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Wrapper Bluff: exit-code masking ===&quot;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;os.Exit(0)&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*_test.go&quot;</span> . <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;warn: tests should not os.Exit(0)&quot;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Comment Bluff: comment vs code mismatch ===&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;should\|must\|will&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> internal/ cmd/ <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;// &quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;test\|doc&quot;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;=== Structural Bluff: committed but broken ===&quot;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-name</span> <span class="st">&quot;*.go&quot;</span> <span class="at">-not</span> <span class="at">-name</span> <span class="st">&quot;*_test.go&quot;</span> <span class="at">-exec</span> grep <span class="at">-l</span> <span class="st">&quot;FIXME\|BROKEN\|DOES NOT WORK&quot;</span> {} <span class="dt">\;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-10</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Document findings,
+commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;&gt;</span> helix_code/docs/improvements/test_audit_p4.md <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="st">## Bluff Taxonomy Sweep</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="st">- Wrapper: [findings]</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">- Contract: [findings]</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">- Structural: [findings]</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">- Comment: [findings]</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="st">- Skip: [findings]</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/improvements/test_audit_p4.md</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P4-T03): bluff taxonomy sweep across test suite</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 4  Task: P4-T03&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p4-t04-fix-all-identified-bluffs">Task P4-T04: Fix all
+identified bluffs</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Fix skip
+bluffs</strong> — Add <code>SKIP-OK: #&lt;ticket&gt;</code> to every
+bare <code>t.Skip()</code></label></li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># For each skip without marker, add: t.Skip(&quot;SKIP-OK: #&lt;ticket&gt; &lt;reason&gt;&quot;)</span></span></code></pre></div>
+<ul class="task-list">
+<li><p><label><input type="checkbox"></input><strong>Step 2: Fix silent
+passes</strong> — Add real assertions to tests with zero
+assertions</label></p></li>
+<li><p><label><input type="checkbox"></input><strong>Step 3: Fix mock usage in
+non-unit tests</strong> — Replace mocks with real
+services</label></p></li>
+<li><p><label><input type="checkbox"></input><strong>Step 4: Fix exit-code
+bugs in challenge runner</strong></label></p></li>
+</ul>
+<p>If the runner returns 0 even when assertions fail, fix it.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 5: Verify fixes: re-run
+audit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Repeat P4-T01 audit, confirm zero issues</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 6: Commit all
+fixes</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;fix(P4-T04): fix all identified test bluffs — skip markers, assertions, mocks</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 4  Task: P4-T04&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p4-t05-anti-bluff-verifier-challenge">Task P4-T05:
+Anti-bluff verifier challenge</h3>
+<p><strong>Files:</strong> - Create:
+<code>helix_code/tests/e2e/challenges/anti_bluff_verifier/challenge.go</code>
+- Create:
+<code>helix_code/tests/e2e/challenges/anti_bluff_verifier/expected.json</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Create the
+challenge</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> main</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;crypto/sha256&quot;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;encoding/hex&quot;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os&quot;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;os/exec&quot;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;strings&quot;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    patterns <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;simulated&quot;</span><span class="op">,</span> <span class="st">&quot;placeholder&quot;</span><span class="op">,</span> <span class="st">&quot;stub&quot;</span><span class="op">,</span> <span class="st">&quot;TODO&quot;</span><span class="op">,</span> <span class="st">&quot;FIXME&quot;</span><span class="op">,</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    root <span class="op">:=</span> <span class="st">&quot;../../../..&quot;</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    pass <span class="op">:=</span> <span class="ot">true</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    evidence <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">)</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> p <span class="op">:=</span> <span class="kw">range</span> patterns <span class="op">{</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>        cmd <span class="op">:=</span> exec<span class="op">.</span>Command<span class="op">(</span><span class="st">&quot;grep&quot;</span><span class="op">,</span> <span class="st">&quot;-rn&quot;</span><span class="op">,</span> p<span class="op">,</span> <span class="st">&quot;--include=*.go&quot;</span><span class="op">,</span> <span class="st">&quot;--exclude=*_test.go&quot;</span><span class="op">,</span> <span class="st">&quot;--exclude=*.bak*&quot;</span><span class="op">,</span> <span class="st">&quot;--exclude-dir=vendor&quot;</span><span class="op">,</span> root<span class="op">)</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        out<span class="op">,</span> _ <span class="op">:=</span> cmd<span class="op">.</span>Output<span class="op">()</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>out<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>            fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;BLUFF FOUND (%s):</span><span class="ch">\n</span><span class="st">%s</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> p<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>out<span class="op">))</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>            pass <span class="op">=</span> <span class="ot">false</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>            fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;PASS: no &#39;%s&#39; in production code</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> p<span class="op">)</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        evidence<span class="op">[</span>p<span class="op">]</span> <span class="op">=</span> hex<span class="op">.</span>EncodeToString<span class="op">(</span>sha256<span class="op">.</span>New<span class="op">().</span>Sum<span class="op">(</span>out<span class="op">))</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> pass <span class="op">{</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Println<span class="op">(</span><span class="st">&quot;ANTI-BLUFF: ALL CLEAN&quot;</span><span class="op">)</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        os<span class="op">.</span>Exit<span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Println<span class="op">(</span><span class="st">&quot;ANTI-BLUFF: FAILED&quot;</span><span class="op">)</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>    os<span class="op">.</span>Exit<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create
+expected.json</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;expected_result&quot;</span><span class="fu">:</span> <span class="st">&quot;PASS&quot;</span><span class="fu">,</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;evidence_type&quot;</span><span class="fu">:</span> <span class="st">&quot;sha256&quot;</span><span class="fu">,</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;bluff_patterns_checked&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;simulated&quot;</span><span class="ot">,</span> <span class="st">&quot;placeholder&quot;</span><span class="ot">,</span> <span class="st">&quot;stub&quot;</span><span class="ot">,</span> <span class="st">&quot;TODO&quot;</span><span class="ot">,</span> <span class="st">&quot;FIXME&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;skip_markers_checked&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;runtime_evidence_required&quot;</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Run challenge,
+verify it passes</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> helix_code/tests/e2e/challenges/anti_bluff_verifier <span class="kw">&amp;&amp;</span> <span class="ex">go</span> run challenge.go</span></code></pre></div>
+<p>Expected: <code>ANTI-BLUFF: ALL CLEAN</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/tests/e2e/challenges/anti_bluff_verifier/</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P4-T05): add anti_bluff_verifier challenge gate</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 4  Task: P4-T05&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p4-t06-fill-challenge-coverage-gaps">Task P4-T06: Fill
+challenge coverage gaps</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Identify packages
+lacking challenges</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> pkg <span class="kw">in</span> <span class="va">$(</span><span class="ex">go</span> list ./internal/... <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> test <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> mock<span class="va">)</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">pkgPath</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="va">$pkg</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="st">&#39;s|dev.helix.code/||&#39;</span><span class="va">)</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="bu">[</span> <span class="ot">!</span> <span class="ot">-d</span> <span class="st">&quot;tests/e2e/challenges/</span><span class="va">${pkgPath</span><span class="op">//</span><span class="dt">\/</span><span class="op">/</span>_<span class="va">}</span><span class="st">&quot;</span> <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;MISSING CHALLENGE: </span><span class="va">$pkg</span><span class="st">&quot;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Create challenges
+for each missing package</strong></label></li>
+</ul>
+<p>For each package without a challenge: 1. Create challenge directory
+with <code>challenge.go</code> 2. Create <code>expected.json</code> with
+positive evidence assertions 3. Write the challenge to exercise the
+package’s core functionality 4. Ensure it produces sha-256 evidence or
+equivalent</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Run all new
+challenges, verify they pass</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> challenge <span class="kw">in</span> tests/e2e/challenges/<span class="pp">*</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$challenge</span><span class="st">/expected.json&quot;</span> <span class="bu">]</span> <span class="kw">||</span> <span class="cf">continue</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Running: </span><span class="va">$challenge</span><span class="st">&quot;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">(</span><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$challenge</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="ex">go</span> run challenge.go<span class="kw">)</span> <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;PASS&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;FAIL&quot;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add helix_code/tests/e2e/challenges/</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat(P4-T06): fill challenge coverage gaps for all internal packages</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 4  Task: P4-T06&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p4-t07-full-infrastructure-test-run">Task P4-T07: Full
+infrastructure test run</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Start full test
+infrastructure</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-up</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Run complete test
+suite</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-complete</span></code></pre></div>
+<p>Expected: zero failures (credential-gated SKIP-OK allowed)</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 3: Tear
+down</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-down</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 4: Document
+results</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> helix_code/docs/improvements/full_infra_test_results_p4.md <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="st"># Full Infrastructure Test Results (P4-T07)</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="st">Date: $(date)</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="st">Command: make test-complete</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="st">Result: [PASS/FAIL]</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="st">Skip markers: [count SKIP-OK]</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="st">Failures: [count]</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/improvements/full_infra_test_results_p4.md</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;docs(P4-T07): full infrastructure test run results</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 4  Task: P4-T07&quot;</span></span></code></pre></div>
+<hr />
+<h3 id="task-p4-t08-cross-compile-verification">Task P4-T08:
+Cross-compile verification</h3>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 1: Build for all target
+platforms</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/helix_code/HelixCode</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="va">GOOS</span><span class="op">=</span>linux <span class="va">GOARCH</span><span class="op">=</span>amd64 <span class="ex">go</span> build ./... <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;linux/amd64: PASS&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;linux/amd64: FAIL&quot;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="va">GOOS</span><span class="op">=</span>darwin <span class="va">GOARCH</span><span class="op">=</span>arm64 <span class="ex">go</span> build ./... <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;darwin/arm64: PASS&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;darwin/arm64: FAIL&quot;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="va">GOOS</span><span class="op">=</span>windows <span class="va">GOARCH</span><span class="op">=</span>amd64 <span class="ex">go</span> build ./... <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;windows/amd64: PASS&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;windows/amd64: FAIL&quot;</span></span></code></pre></div>
+<p>Expected: PASS for all three</p>
+<ul class="task-list">
+<li><label><input type="checkbox"></input><strong>Step 2: Commit Phase 4
+close-out</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /run/media/milosvasic/DATA4TB/Projects/HelixCode</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;chore(P4-T08): Phase 4 complete — cross-compile verified, infrastructure tests pass</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="st">Phase: 4  Task: P4-T08&quot;</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github main</span></code></pre></div>
+<hr />
+<h2 id="phase-4-completion-checklist">Phase 4 Completion Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>Test audit complete, all bluffs
+classified</label></li>
+<li><label><input type="checkbox"></input>All skip bluffs fixed (SKIP-OK
+markers)</label></li>
+<li><label><input type="checkbox"></input>All silent-pass tests have real
+assertions</label></li>
+<li><label><input type="checkbox"></input>Challenge runner exit-code logic
+verified correct</label></li>
+<li><label><input type="checkbox"></input>Anti-bluff verifier challenge passes
+(ALL CLEAN)</label></li>
+<li><label><input type="checkbox"></input>Challenge coverage at 100% for
+internal packages</label></li>
+<li><label><input type="checkbox"></input>Full infrastructure test run
+passes</label></li>
+<li><label><input type="checkbox"></input>Cross-compile for
+linux/darwin/windows passes</label></li>
+<li><label><input type="checkbox"></input>Continue to Phase 5</label></li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f28-kilocode-refactoring</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f28-kilocode-refactoring</h1>
+</header>
+<h1 id="p2-f28-kilo-code-ast-aware-refactoring-plan">P2-F28 — Kilo-code
+AST-Aware Refactoring Plan</h1>
+<p><strong>Goal:</strong> Ship cross-file rename, impact analysis, and
+refactoring suite. New <code>internal/kilocode/</code> package. Reuses
+F17, repomap, F25.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-07-p2-f28-kilocode-refactoring-design.md</code>
+<strong>Q1-Q5:</strong> Kilo-code / Core+refactoring /
+Tree-sitter+atomic edits / Call graph+blast radius / 3 tools+slash</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"></input>P2-F28-T01 — bootstrap F28 evidence
++ advance PROGRESS</label></li>
+<li><label><input type="checkbox"></input>P2-F28-T02 —
+<code>internal/kilocode/types.go</code> + <code>callgraph.go</code>:
+CallGraph, SymbolRef, BuildCallGraph (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F28-T03 —
+<code>internal/kilocode/rename.go</code>: rename engine (tree-sitter
+query + atomic F17 edits) (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F28-T04 —
+<code>internal/kilocode/impact.go</code>: ImpactAnalyzer (call graph +
+blast radius) (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F28-T05 —
+<code>internal/kilocode/refactor.go</code>: extract method, move, inline
+(TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F28-T06 —
+<code>internal/kilocode/kilocode_tools.go</code>: 3 tools + /kilocode
+slash (TDD)</label></li>
+<li><label><input type="checkbox"></input>P2-F28-T07 — main.go
+wiring</label></li>
+<li><label><input type="checkbox"></input>P2-F28-T08 — Challenge harness 5
+phases + close-out + push 4 remotes</label></li>
+</ul>
+<hr />
+<h2 id="t02-types.go-callgraph.go">T02: types.go + callgraph.go</h2>
+<ul>
+<li>CallGraph: nodes (functions, methods, classes), edges (calls,
+references)</li>
+<li>BuildCallGraph via tree-sitter: for each file, parse AST, find
+function declarations and call sites</li>
+<li>Tests with real tempdirs containing multi-file Go projects</li>
+</ul>
+<h2 id="t03-rename.go">T03: rename.go</h2>
+<ul>
+<li>Query tree-sitter for all occurrences of a symbol across the
+codebase</li>
+<li>Apply renames via F17 smart-edit (search/replace blocks)</li>
+<li>Validate post-rename: no broken references</li>
+</ul>
+<h2 id="t04-impact.go">T04: impact.go</h2>
+<ul>
+<li>Given a symbol, traverse call graph to find all callers/callees</li>
+<li>Report blast radius: files affected, risk score</li>
+<li>Tests with connected Go files</li>
+</ul>
+<h2 id="t05-refactor.go">T05: refactor.go</h2>
+<ul>
+<li>Extract method: move a code block into a new function</li>
+<li>Move symbol: relocate function between files with import
+updates</li>
+<li>Inline: replace function call with its body</li>
+</ul>
+<h2 id="t06-kilocode_tools.go">T06: kilocode_tools.go</h2>
+<ul>
+<li>kilocode_rename (category=kilocode, LevelEdit)</li>
+<li>kilocode_impact (category=kilocode, LevelReadOnly)</li>
+<li>kilocode_multi_edit (category=kilocode, LevelEdit)</li>
+<li>/kilocode slash (rename/impact/edit subcommands)</li>
+</ul>
+<h2 id="t07-main.go-wiring">T07: main.go wiring</h2>
+<p>Register 3 tools + /kilocode slash in main.go startup.</p>
+<h2 id="t08-challenge-harness">T08: Challenge harness</h2>
+<p>5 phases: rename verification, impact analysis, multi-edit atomicity,
+extract method, inline refactoring.</p>
+<hr />
+<p><em>Execute via TDD starting with T01.</em></p>
+</body>
+</html>

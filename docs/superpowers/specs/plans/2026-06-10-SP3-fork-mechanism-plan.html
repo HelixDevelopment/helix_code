@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP3-fork-mechanism-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP3-fork-mechanism-plan</h1>
+</header>
+<h1 id="sp3-fork-all-cli-agents-auto-merge-implementation-plan">SP3 —
+Fork-ALL CLI agents + auto-merge — Implementation Plan</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Maintainer</td>
+<td>CLI-Agent Fusion programme</td>
+</tr>
+<tr>
+<td>Phase</td>
+<td>PLANNING (read-only; no fork created, no submodule swapped, nothing
+committed or pushed to produce this plan)</td>
+</tr>
+<tr>
+<td>Parent roadmap</td>
+<td><code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>
+§SP3 (lines 151-163)</td>
+</tr>
+<tr>
+<td>Source analysis</td>
+<td><code>docs/superpowers/specs/analysis/2026-06-10-E-fork-mechanism.md</code></td>
+</tr>
+<tr>
+<td>Scripts home</td>
+<td><strong><code>scripts/caf/</code></strong> (LOCAL to HelixCode —
+operator descoped the constitution submodule 2026-06-10; scripts do NOT
+go in <code>constitution/scripts/</code>)</td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>Decomposition complete; 50 forks (49 top-level + 1 nested); 4 bash
+files + 3 Challenges; every external mutation OPERATOR-GATED (G-1)</td>
+</tr>
+<tr>
+<td>Issues</td>
+<td>docs/Issues.md (ATM-NNN assigned at execution kickoff)</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>none yet</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-goal--scope">1. Goal &amp; scope</a></li>
+<li><a href="#2-re-verified-facts-live-gitmodules-this-session">2.
+Re-verified facts (live <code>.gitmodules</code> this session)</a></li>
+<li><a href="#3-full-fork-mapping-table-50-forks">3. Full fork mapping
+table (50 forks)</a></li>
+<li><a href="#4-script-architecture-scriptscaf">4. Script architecture
+(<code>scripts/caf/</code>)</a></li>
+<li><a href="#5-submodule-swap-procedure--buildability-validation">5.
+Submodule-swap procedure + buildability validation</a></li>
+<li><a href="#6-anti-bluff-challenge-per-script">6. Anti-bluff Challenge
+per script</a></li>
+<li><a href="#7-auto-merge-scheduling-design-host-local-no-ci">7.
+Auto-merge scheduling design (host-local, NO CI)</a></li>
+<li><a href="#8-config-re-export--install--validate-tie-in--sp4">8.
+Config re-export + install + validate tie-in (→ SP4)</a></li>
+<li><a href="#9-files-to-create-all-under-scriptscaf">9. Files to create
+(all under <code>scripts/caf/</code>)</a></li>
+<li><a href="#10-ordered-task-list-redimplgreenevidencerollback">10.
+Ordered task list (RED→impl→GREEN+evidence→rollback)</a></li>
+<li><a href="#11-operator-decisions--gates">11. Operator decisions /
+gates</a></li>
+<li><a href="#12-risks-7">12. Risks (7)</a></li>
+<li><a href="#13-12-line-summary">13. 12-line summary</a></li>
+</ul>
+<hr />
+<h2 id="goal-scope">1. Goal &amp; scope</h2>
+<p>Fork <strong>every</strong> third-party <code>cli_agents/*</code>
+submodule under the <strong><code>vasic-digital</code></strong> org with
+prefix <strong><code>caf-</code></strong> (cli-agent-fork) →
+<code>git@github.com:vasic-digital/caf-&lt;name&gt;.git</code>, swap
+each submodule’s <code>url</code> in the root <code>.gitmodules</code>
+to our fork, recursively handle nested third-party deps, and keep every
+fork current by automatically merging upstream
+<code>main</code>/<code>master</code> on a host-local schedule.</p>
+<p><strong>Binding constraints (cited, never weakened):</strong> -
+<strong>§11.4.113</strong> — absolute no-force-push;
+merge-onto-latest-main only. Every push to every fork is fast-forward. -
+<strong>§11.4.30 / CONST-053</strong> — only minimal files
+(<code>.gitignore</code>, governance siblings,
+nested-<code>.gitmodules</code> rewrites) committed to forks; never a
+blanket <code>git add -A</code>; never upstream application-code edits.
+- <strong>§11.4.28(B) (CONST-051)</strong> — forks stay decoupled /
+project-not-aware; the ONLY edits we make to a fork are non-source
+remote-config / gitignore / governance-pointer /
+nested-<code>.gitmodules</code>-SSH-rewrite. - <strong>Rule 1 (No
+CI/CD)</strong> — NO <code>.github/workflows</code>,
+<code>.gitlab-ci.yml</code>, etc.; auto-merge is host-local
+(launchd/cron) only. - <strong>Rule 3 (SSH only)</strong> — every fork
+URL and rewritten nested URL is <code>git@…</code> SSH; the one HTTPS
+upstream (<code>cline-bench</code>) becomes SSH in our fork. -
+<strong>§11.4.101</strong> — every irreversible external-mutation step
+(fork creation, push) is OPERATOR-GATED behind <strong>G-1</strong>; the
+agent makes only reversible local decisions autonomously. -
+<strong>CONST-044 (§13.1)</strong> — CONTINUATION updated in the same
+commit as any state-advancing change.</p>
+<p><strong>Out of scope:</strong> <code>cli_agents_resources/*</code>
+(resources, not agents); <code>cli_agents/claude-code-source</code>
+(already an own GitLab mirror); de-bluffing the agent bridge providers
+(that is SP4).</p>
+<hr />
+<h2 id="re-verified-facts-live-.gitmodules-this-session">2. Re-verified
+facts (live <code>.gitmodules</code> this session)</h2>
+<p>Re-parsed the root
+<code>/Volumes/T7/Projects/HelixCode/.gitmodules</code> and the one
+nested manifest this session (not copied from analysis-E):</p>
+<ul>
+<li><p><code>git config -f .gitmodules --get-regexp &#39;cli_agents/.*\.url&#39; | wc -l</code>
+→ <strong>50</strong> url entries under
+<code>cli_agents/</code>.</p></li>
+<li><p><code>submodule.cli_agents/claude-code-source.url</code> →
+<code>git@gitlab.com:milos85vasic/ccode-private.git</code> →
+<strong>own/private GitLab mirror → SKIP</strong> (default-excluded). ⇒
+<strong>49</strong> top-level third-party forks.</p></li>
+<li><p><code>cli_agents/cline/.gitmodules</code> exists and contains
+exactly ONE entry:</p>
+<pre><code>[submodule &quot;evals/cline-bench&quot;]
+  path = evals/cline-bench
+  url = https://github.com/cline/cline-bench.git</code></pre>
+<p>→ <strong>HTTPS</strong> third-party nested dep → fork to
+<code>caf-cline-bench</code>, rewrite to SSH (Rule 3). ⇒
+<strong>+1</strong> nested fork.</p></li>
+<li><p><strong>Fork count total = 50</strong> (49 top-level + 1
+nested).</p></li>
+<li><p>Spot-checked verbatim URLs: <code>cli_agents/codex</code> →
+<code>git@github.com:openai/codex.git</code>;
+<code>cli_agents/warp</code> →
+<code>git@github.com:warpdotdev/Warp.git</code>;
+<code>cli_agents/zeroshot</code> →
+<code>git@github.com:covibes/zeroshot.git</code>;
+<code>cli_agents/x-cmd</code> →
+<code>git@github.com:x-cmd/x-cmd.git</code>;
+<code>cli_agents/vtcode</code> →
+<code>git@github.com:vinhnx/vtcode.git</code>. All match the mapping
+table below.</p></li>
+<li><p><code>cli_agents_resources/OpenAI-Cookbook</code> uses the
+per-machine SSH-alias form
+<code>org-14957082@github.com:openai/openai-cookbook.git</code> —
+<strong>out of scope</strong> (resources dir), but the URL parser MUST
+normalize <code>org-NNNN@github.com:</code> → <code>github.com:</code>
+before deriving <code>owner/repo</code> so it is never mistaken for a
+different host.</p></li>
+<li><p><strong>No nested own-org chains</strong> under
+<code>cli_agents/*</code> (only <code>cline-bench</code>, which is
+third-party) → CONST-051 has no <code>cli_agents</code> violation to
+remediate; the resolver script still enforces the rule generically for
+future nesting.</p></li>
+</ul>
+<hr />
+<h2 id="full-fork-mapping-table-50-forks">3. Full fork mapping table (50
+forks)</h2>
+<h3 id="top-level-cli_agents-vasic-digitalcaf-name-49">3.1 Top-level
+<code>cli_agents/*</code> → <code>vasic-digital/caf-&lt;name&gt;</code>
+(49)</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 32%" />
+<col style="width: 50%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>submodule path</th>
+<th>upstream url (verbatim)</th>
+<th>fork</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>cli_agents/agent-deck</td>
+<td>git@github.com:asheshgoplani/agent-deck.git</td>
+<td>git@github.com:vasic-digital/caf-agent-deck.git</td>
+</tr>
+<tr>
+<td>2</td>
+<td>cli_agents/aiagent</td>
+<td>git@github.com:Xiaoccer/AIAgent.git</td>
+<td>git@github.com:vasic-digital/caf-aiagent.git</td>
+</tr>
+<tr>
+<td>3</td>
+<td>cli_agents/aichat</td>
+<td>git@github.com:sigoden/aichat.git</td>
+<td>git@github.com:vasic-digital/caf-aichat.git</td>
+</tr>
+<tr>
+<td>4</td>
+<td>cli_agents/aichat-llm-functions</td>
+<td>git@github.com:sigoden/llm-functions.git</td>
+<td>git@github.com:vasic-digital/caf-aichat-llm-functions.git</td>
+</tr>
+<tr>
+<td>5</td>
+<td>cli_agents/aider</td>
+<td>git@github.com:Aider-AI/aider.git</td>
+<td>git@github.com:vasic-digital/caf-aider.git</td>
+</tr>
+<tr>
+<td>6</td>
+<td>cli_agents/amazon-q</td>
+<td>git@github.com:aws/amazon-q-developer-cli.git</td>
+<td>git@github.com:vasic-digital/caf-amazon-q.git</td>
+</tr>
+<tr>
+<td>7</td>
+<td>cli_agents/bridle</td>
+<td>git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git</td>
+<td>git@github.com:vasic-digital/caf-bridle.git</td>
+</tr>
+<tr>
+<td>8</td>
+<td>cli_agents/claude-code</td>
+<td>git@github.com:anthropics/claude-code.git</td>
+<td>git@github.com:vasic-digital/caf-claude-code.git</td>
+</tr>
+<tr>
+<td>9</td>
+<td>cli_agents/claude-squad</td>
+<td>git@github.com:smtg-ai/claude-squad.git</td>
+<td>git@github.com:vasic-digital/caf-claude-squad.git</td>
+</tr>
+<tr>
+<td>10</td>
+<td>cli_agents/cli-agent</td>
+<td>git@github.com:NathanGr33n/CLI_Tool.git</td>
+<td>git@github.com:vasic-digital/caf-cli-agent.git</td>
+</tr>
+<tr>
+<td>11</td>
+<td>cli_agents/cline</td>
+<td>git@github.com:cline/cline.git</td>
+<td>git@github.com:vasic-digital/caf-cline.git</td>
+</tr>
+<tr>
+<td>12</td>
+<td>cli_agents/codai</td>
+<td>git@github.com:meysamhadeli/codai.git</td>
+<td>git@github.com:vasic-digital/caf-codai.git</td>
+</tr>
+<tr>
+<td>13</td>
+<td>cli_agents/codename-goose</td>
+<td>git@github.com:jgenerali/codename-goose.git</td>
+<td>git@github.com:vasic-digital/caf-codename-goose.git</td>
+</tr>
+<tr>
+<td>14</td>
+<td>cli_agents/codex</td>
+<td>git@github.com:openai/codex.git</td>
+<td>git@github.com:vasic-digital/caf-codex.git</td>
+</tr>
+<tr>
+<td>15</td>
+<td>cli_agents/codex-skills</td>
+<td>git@github.com:openai/skills.git</td>
+<td>git@github.com:vasic-digital/caf-codex-skills.git</td>
+</tr>
+<tr>
+<td>16</td>
+<td>cli_agents/conduit</td>
+<td>git@github.com:lostintangent/conduit-release.git</td>
+<td>git@github.com:vasic-digital/caf-conduit.git</td>
+</tr>
+<tr>
+<td>17</td>
+<td>cli_agents/copilot-cli</td>
+<td>git@github.com:github/copilot-cli.git</td>
+<td>git@github.com:vasic-digital/caf-copilot-cli.git</td>
+</tr>
+<tr>
+<td>18</td>
+<td>cli_agents/crush</td>
+<td>git@github.com:charmbracelet/crush.git</td>
+<td>git@github.com:vasic-digital/caf-crush.git</td>
+</tr>
+<tr>
+<td>19</td>
+<td>cli_agents/deepseek-cli</td>
+<td>git@github.com:holasoymalva/deepseek-cli.git</td>
+<td>git@github.com:vasic-digital/caf-deepseek-cli.git</td>
+</tr>
+<tr>
+<td>20</td>
+<td>cli_agents/deepseek-cli-youkpan</td>
+<td>git@github.com:youkpan/deepseek-cli.git</td>
+<td>git@github.com:vasic-digital/caf-deepseek-cli-youkpan.git</td>
+</tr>
+<tr>
+<td>21</td>
+<td>cli_agents/fauxpilot</td>
+<td>git@github.com:fauxpilot/fauxpilot.git</td>
+<td>git@github.com:vasic-digital/caf-fauxpilot.git</td>
+</tr>
+<tr>
+<td>22</td>
+<td>cli_agents/forge</td>
+<td>git@github.com:antinomyhq/forge.git</td>
+<td>git@github.com:vasic-digital/caf-forge.git</td>
+</tr>
+<tr>
+<td>23</td>
+<td>cli_agents/gemini-cli</td>
+<td>git@github.com:google-gemini/gemini-cli.git</td>
+<td>git@github.com:vasic-digital/caf-gemini-cli.git</td>
+</tr>
+<tr>
+<td>24</td>
+<td>cli_agents/get-shit-done</td>
+<td>git@github.com:glittercowboy/get-shit-done.git</td>
+<td>git@github.com:vasic-digital/caf-get-shit-done.git</td>
+</tr>
+<tr>
+<td>25</td>
+<td>cli_agents/git-mcp</td>
+<td>git@github.com:idosal/git-mcp.git</td>
+<td>git@github.com:vasic-digital/caf-git-mcp.git</td>
+</tr>
+<tr>
+<td>26</td>
+<td>cli_agents/gpt-engineer</td>
+<td>git@github.com:AntonOsika/gpt-engineer.git</td>
+<td>git@github.com:vasic-digital/caf-gpt-engineer.git</td>
+</tr>
+<tr>
+<td>27</td>
+<td>cli_agents/gptme</td>
+<td>git@github.com:ErikBjare/gptme.git</td>
+<td>git@github.com:vasic-digital/caf-gptme.git</td>
+</tr>
+<tr>
+<td>28</td>
+<td>cli_agents/junie</td>
+<td>git@github.com:JetBrains/junie.git</td>
+<td>git@github.com:vasic-digital/caf-junie.git</td>
+</tr>
+<tr>
+<td>29</td>
+<td>cli_agents/mistral-code</td>
+<td>git@github.com:Wylgrif/Mistral-code.git</td>
+<td>git@github.com:vasic-digital/caf-mistral-code.git</td>
+</tr>
+<tr>
+<td>30</td>
+<td>cli_agents/multiagent-coding</td>
+<td>git@github.com:Danau5tin/multi-agent-coding-system.git</td>
+<td>git@github.com:vasic-digital/caf-multiagent-coding.git</td>
+</tr>
+<tr>
+<td>31</td>
+<td>cli_agents/nanocoder</td>
+<td>git@github.com:Nano-Collective/nanocoder.git</td>
+<td>git@github.com:vasic-digital/caf-nanocoder.git</td>
+</tr>
+<tr>
+<td>32</td>
+<td>cli_agents/noi</td>
+<td>git@github.com:lencx/Noi.git</td>
+<td>git@github.com:vasic-digital/caf-noi.git</td>
+</tr>
+<tr>
+<td>33</td>
+<td>cli_agents/octogen</td>
+<td>git@github.com:dbpunk-labs/octogen.git</td>
+<td>git@github.com:vasic-digital/caf-octogen.git</td>
+</tr>
+<tr>
+<td>34</td>
+<td>cli_agents/open-interpreter</td>
+<td>git@github.com:KillianLucas/open-interpreter.git</td>
+<td>git@github.com:vasic-digital/caf-open-interpreter.git</td>
+</tr>
+<tr>
+<td>35</td>
+<td>cli_agents/plandex</td>
+<td>git@github.com:plandex-ai/plandex.git</td>
+<td>git@github.com:vasic-digital/caf-plandex.git</td>
+</tr>
+<tr>
+<td>36</td>
+<td>cli_agents/postgres-mcp</td>
+<td>git@github.com:timescale/pg-aiguide.git</td>
+<td>git@github.com:vasic-digital/caf-postgres-mcp.git</td>
+</tr>
+<tr>
+<td>37</td>
+<td>cli_agents/qwen-code</td>
+<td>git@github.com:QwenLM/qwen-code.git</td>
+<td>git@github.com:vasic-digital/caf-qwen-code.git</td>
+</tr>
+<tr>
+<td>38</td>
+<td>cli_agents/shai</td>
+<td>git@github.com:ovh/shai.git</td>
+<td>git@github.com:vasic-digital/caf-shai.git</td>
+</tr>
+<tr>
+<td>39</td>
+<td>cli_agents/snow-cli</td>
+<td>git@github.com:MayDay-wpf/snow-cli.git</td>
+<td>git@github.com:vasic-digital/caf-snow-cli.git</td>
+</tr>
+<tr>
+<td>40</td>
+<td>cli_agents/swe-agent</td>
+<td>git@github.com:princeton-nlp/SWE-agent.git</td>
+<td>git@github.com:vasic-digital/caf-swe-agent.git</td>
+</tr>
+<tr>
+<td>41</td>
+<td>cli_agents/taskweaver</td>
+<td>git@github.com:microsoft/TaskWeaver.git</td>
+<td>git@github.com:vasic-digital/caf-taskweaver.git</td>
+</tr>
+<tr>
+<td>42</td>
+<td>cli_agents/ui-ux-pro-max</td>
+<td>git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git</td>
+<td>git@github.com:vasic-digital/caf-ui-ux-pro-max.git</td>
+</tr>
+<tr>
+<td>43</td>
+<td>cli_agents/vtcode</td>
+<td>git@github.com:vinhnx/vtcode.git</td>
+<td>git@github.com:vasic-digital/caf-vtcode.git</td>
+</tr>
+<tr>
+<td>44</td>
+<td>cli_agents/warp</td>
+<td>git@github.com:warpdotdev/Warp.git</td>
+<td>git@github.com:vasic-digital/caf-warp.git</td>
+</tr>
+<tr>
+<td>45</td>
+<td>cli_agents/x-cmd</td>
+<td>git@github.com:x-cmd/x-cmd.git</td>
+<td>git@github.com:vasic-digital/caf-x-cmd.git</td>
+</tr>
+<tr>
+<td>46</td>
+<td>cli_agents/xela-cli</td>
+<td>git@github.com:xelauvas/codeclau.git</td>
+<td>git@github.com:vasic-digital/caf-xela-cli.git</td>
+</tr>
+<tr>
+<td>47</td>
+<td>cli_agents/zeroshot</td>
+<td>git@github.com:covibes/zeroshot.git</td>
+<td>git@github.com:vasic-digital/caf-zeroshot.git</td>
+</tr>
+<tr>
+<td>48</td>
+<td>cli_agents/spec-kit</td>
+<td>git@github.com:github/spec-kit.git</td>
+<td>git@github.com:vasic-digital/caf-spec-kit.git</td>
+</tr>
+<tr>
+<td>49</td>
+<td>cli_agents/superset</td>
+<td>git@github.com:superset-sh/superset.git</td>
+<td>git@github.com:vasic-digital/caf-superset.git</td>
+</tr>
+</tbody>
+</table>
+<h3 id="nested-third-party-fork-1">3.2 Nested third-party → fork
+(1)</h3>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 24%" />
+<col style="width: 47%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>nested path</th>
+<th>upstream url (verbatim)</th>
+<th>fork</th>
+<th>note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>50</td>
+<td>cli_agents/cline → evals/cline-bench</td>
+<td>https://github.com/cline/cline-bench.git</td>
+<td>git@github.com:vasic-digital/caf-cline-bench.git</td>
+<td><strong>HTTPS</strong> upstream → Rule 3 ⇒ must be SSH in our fork.
+After <code>caf-cline</code> exists, rewrite <code>caf-cline</code>’s
+<code>.gitmodules</code> <code>evals/cline-bench</code> →
+<code>caf-cline-bench</code> (committed to the fork as a
+<code>.gitmodules</code>-only minimal change).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="excluded-special-cased-do-not-fork">3.3 Excluded / special-cased
+(do NOT fork)</h3>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 18%" />
+<col style="width: 29%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>path</th>
+<th>url</th>
+<th>reason</th>
+<th>action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cli_agents/claude-code-source</td>
+<td>git@gitlab.com:milos85vasic/ccode-private.git</td>
+<td>Already an own private GitLab mirror — not a public third-party
+upstream.</td>
+<td><strong>Skip fork</strong> (default <code>--exclude</code> +
+<code>caf_is_own_org</code> guard). Re-homing under
+<code>vasic-digital</code> is out of scope for the fork-all pass.</td>
+</tr>
+<tr>
+<td>cli_agents_resources/OpenAI-Cookbook</td>
+<td>org-14957082@github.com:openai/openai-cookbook.git</td>
+<td>Resources dir (out of <code>--src-dir cli_agents</code> scope);
+SSH-alias form.</td>
+<td>Not forked. Listed only so the parser normalizes
+<code>org-NNNN@github.com:</code> → <code>github.com:</code>.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Naming policy (G-1b, default applied):</strong> fork names
+preserve the existing kebab submodule <strong>directory</strong> name
+(<code>caf-gpt-engineer</code>, <code>caf-x-cmd</code>), NOT the
+upstream repo name (which is sometimes CamelCase like <code>Warp</code>,
+<code>AIAgent</code>, <code>TaskWeaver</code>). This keeps fork ↔︎
+submodule traceability and is CONST-052-consistent with the kebab paths
+already in <code>.gitmodules</code>. No two <code>caf-*</code> names
+collide across the 50-entry set (verified). Operator may override the
+prefix via <code>--prefix</code>.</p>
+</blockquote>
+<hr />
+<h2 id="script-architecture-scriptscaf">4. Script architecture
+(<code>scripts/caf/</code>)</h2>
+<p>Four bash files, house style matched to
+<code>constitution/scripts/codegraph_update.sh</code> (verified this
+session): <code>#!/usr/bin/env bash</code>,
+<code>set -uo pipefail</code>,
+<code>SCRIPT_DIR</code>/<code>REPO_ROOT</code> resolution, documented
+exit codes, append-only <code>docs/caf/Status.md</code> ledger, and
+<strong>anti-bluff PASS that observes real post-state</strong> (the
+remote, the merge SHA, the git trace) — never just a CLI exit code.</p>
+<p><strong>Naming reconciliation (roadmap P3.7):</strong> analysis-E
+proposed <code>caf_fork_all.sh</code> / <code>caf_update_merge.sh</code>
+/ <code>caf_resolve_nested_submodules.sh</code>; the roadmap SP0 list
+and this task use <code>fork_third_party_submodule.sh</code> /
+<code>update_fork_from_upstream.sh</code> /
+<code>resolve_recursive_fork_deps.sh</code>. <strong>This plan adopts
+the latter (task-specified) names</strong> + a shared
+<code>caf_lib.sh</code>. All four live at <code>scripts/caf/</code>
+LOCAL to HelixCode (operator descoped the constitution submodule —
+scripts do NOT land in <code>constitution/scripts/</code>).</p>
+<h3 id="shared-parameter-surface-all-flags-env-nothing-hardcoded">4.0
+Shared parameter surface (all flags / env; NOTHING hardcoded)</h3>
+<pre><code>--org &lt;name&gt;            default: vasic-digital            (env CAF_ORG)
+--prefix &lt;str&gt;          default: caf-                     (env CAF_PREFIX)
+--src-dir &lt;path&gt;        default: cli_agents               (env CAF_SRC_DIR — submodule scan root)
+--gitmodules &lt;path&gt;     default: &lt;repo-root&gt;/.gitmodules  (env CAF_GITMODULES)
+--providers &lt;csv&gt;       default: github,gitlab            (env CAF_PROVIDERS — dual-remote fan-out)
+--gitlab-group &lt;name&gt;   default: vasic-digital            (env CAF_GITLAB_GROUP)
+--branch &lt;name&gt;         default: &quot;&quot; → auto-detect remote HEAD (main|master)
+--dry-run               print planned actions, mutate nothing  (DEFAULT in PLANNING / pre-G-1)
+--only &lt;name[,name]&gt;    restrict to a subset (testing / resumable retry)
+--exclude &lt;name[,name]&gt; skip-list (DEFAULT includes claude-code-source)
+--recursive             follow nested third-party submodules (depth-limited)
+--depth &lt;n&gt;             default: 3 (recursion bound)
+--workdir &lt;path&gt;        scratch clones dir (default: mktemp -d)
+--map-file &lt;path&gt;       default: docs/caf/map.tsv  (the name|upstream|fork_gh|fork_gl ledger)</code></pre>
+<h3 id="caf_lib.sh-shared-helpers-sourced-by-all-three">4.1
+<code>caf_lib.sh</code> — shared helpers (sourced by all three)</h3>
+<p>Pure functions, no side effects beyond logging. Helpers: -
+<code>caf_normalize_url &lt;url&gt;</code> — strip
+<code>org-NNNN@</code>, host-normalize
+(<code>gitlab.com</code>/<code>github.com</code>), strip trailing
+<code>.git</code>, emit canonical <code>host/owner/repo</code>. -
+<code>caf_is_own_org &lt;norm&gt;</code> — TRUE if the normalized owner
+∈ {vasic-digital, HelixDevelopment, red-elf, ATMOSphere1234321,
+Bear-Suite, BoatOS123456, Helix-Flow, Helix-Track, Server-Factory} OR
+host is the operator’s own GitLab namespace (<code>milos85vasic</code>).
+Used to SKIP (top-level) or flag CONST-051 (nested). -
+<code>caf_fork_name &lt;submodule-dir-name&gt;</code> —
+<code>&lt;CAF_PREFIX&gt;&lt;dir-name&gt;</code> (kebab dir name, per
+§3.3 policy). -
+<code>caf_detect_default_branch &lt;remote-or-url&gt;</code> —
+<code>git ls-remote --symref &lt;x&gt; HEAD</code> →
+<code>main|master</code>. -
+<code>caf_log &lt;LEVEL&gt; &lt;args...&gt;</code> — append
+<code>TS LEVEL args</code> to <code>docs/caf/Status.md</code> + echo to
+stdout. - <code>caf_provider_remotes &lt;fork&gt;</code> — expand
+<code>--providers</code> csv to the set of fork remote URLs. -
+<code>caf_in_csv &lt;needle&gt; &lt;csv&gt;</code> — membership test for
+<code>--only</code> / <code>--exclude</code> /
+<code>--providers</code>.</p>
+<h3 id="fork_third_party_submodule.sh-fork-or-create-remote-wiring-g-1">4.2
+<code>fork_third_party_submodule.sh</code> — fork-or-create + remote
+wiring (G-1)</h3>
+<p><strong>Purpose:</strong> for every submodule under
+<code>--src-dir</code>, create
+<code>&lt;org&gt;/&lt;prefix&gt;&lt;name&gt;</code> on each provider,
+seed from upstream, wire remotes (<code>origin</code>=our fork,
+<code>upstream</code>=original), and record <code>--map-file</code>.
+Idempotent: re-running detects an existing fork and skips creation.</p>
+<p>Drafted body (illustrative — final lands in
+<code>scripts/caf/</code>):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># fork_third_party_submodule.sh — SP3 fork-all. §11.4.113-safe (empty-target seed only).</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Exit codes: 0 all-handled | 1 partial (some FAIL logged) | 2 env problem (gh/glab/git missing)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-uo</span> pipefail</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="va">SCRIPT_DIR</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">${BASH_SOURCE</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="va">REPO_ROOT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">${SCRIPT_DIR}</span><span class="st">/../..&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> <span class="st">&quot;</span><span class="va">${SCRIPT_DIR}</span><span class="st">/caf_lib.sh&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="ex">caf_parse_args</span> <span class="st">&quot;</span><span class="va">$@</span><span class="st">&quot;</span>          <span class="co"># fills CAF_ORG/PREFIX/SRC_DIR/PROVIDERS/DRY_RUN/...</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">command</span> <span class="at">-v</span> gh   <span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;gh CLI required&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span><span class="kw">;</span> <span class="bu">exit</span> 2<span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ex">caf_in_csv</span> gitlab <span class="st">&quot;</span><span class="va">$CAF_PROVIDERS</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="kw">{</span> <span class="bu">command</span> <span class="at">-v</span> glab <span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;glab required&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span><span class="kw">;</span> <span class="bu">exit</span> 2<span class="kw">;</span> <span class="kw">};</span> <span class="kw">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="va">rc</span><span class="op">=</span>0</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">-f</span> <span class="st">&quot;</span><span class="va">$CAF_GITMODULES</span><span class="st">&quot;</span> <span class="at">--get-regexp</span> <span class="st">&quot;submodule\.</span><span class="va">${CAF_SRC_DIR}</span><span class="st">/.*\.url&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="at">-r</span> <span class="va">key</span> <span class="va">url</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="va">name</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">$key</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span>          <span class="co"># cli_agents/&lt;name&gt;.url -&gt; &lt;name&gt;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="va">norm</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">caf_normalize_url</span> <span class="st">&quot;</span><span class="va">$url</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="ex">caf_is_own_org</span> <span class="st">&quot;</span><span class="va">$norm</span><span class="st">&quot;</span>        <span class="kw">&amp;&amp;</span> <span class="kw">{</span> <span class="ex">caf_log</span> SKIP own-org <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span><span class="kw">;</span>   <span class="cf">continue</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="ex">caf_in_csv</span> <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$CAF_EXCLUDE</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="kw">{</span> <span class="ex">caf_log</span> SKIP excluded <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">continue</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">$CAF_ONLY</span><span class="st">&quot;</span> <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="ot">! </span><span class="ex">caf_in_csv</span> <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$CAF_ONLY</span><span class="st">&quot;</span> <span class="kw">&amp;&amp;</span> <span class="cf">continue</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="va">fork</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">caf_fork_name</span> <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$CAF_DRY_RUN</span><span class="st">&quot;</span> <span class="ot">=</span> 1 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        <span class="ex">caf_log</span> PLAN <span class="st">&quot;gh repo fork </span><span class="va">$norm</span><span class="st"> --org </span><span class="va">$CAF_ORG</span><span class="st"> --fork-name </span><span class="va">$fork</span><span class="st"> --clone=false&quot;</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$name</span><span class="st"> </span><span class="va">$url</span><span class="st">    git@github.com:</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">.git   git@gitlab.com:</span><span class="va">$CAF_GITLAB_GROUP</span><span class="st">/</span><span class="va">$fork</span><span class="st">.git&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$CAF_MAP_FILE</span><span class="st">&quot;</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (a) GitHub fork-or-create (gh fork keeps the upstream link; create+mirror-push fallback for HTTPS-only / archived / non-forkable)</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="ex">gh</span> repo view <span class="st">&quot;</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        <span class="ex">caf_log</span> EXISTS <span class="st">&quot;</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> <span class="ex">gh</span> repo fork <span class="st">&quot;</span><span class="va">$norm</span><span class="st">&quot;</span> <span class="at">--org</span> <span class="st">&quot;</span><span class="va">$CAF_ORG</span><span class="st">&quot;</span> <span class="at">--fork-name</span> <span class="st">&quot;</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="at">--clone</span><span class="op">=</span>false<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        <span class="ex">caf_poll_fork_ready</span> <span class="st">&quot;</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span>          <span class="co"># async fork readiness (Risk 1)</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>        <span class="ex">caf_log</span> FORKED <span class="st">&quot;</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>        <span class="ex">gh</span> repo create <span class="st">&quot;</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="at">--private</span> <span class="at">--disable-wiki</span> <span class="kw">||</span> <span class="kw">{</span> <span class="ex">caf_log</span> FAIL create <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span><span class="kw">;</span> <span class="va">rc</span><span class="op">=</span>1<span class="kw">;</span> <span class="cf">continue</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">tmp</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="fu">mktemp</span> <span class="at">-d</span><span class="va">)</span><span class="st">&quot;</span><span class="kw">;</span> <span class="fu">git</span> clone <span class="at">--mirror</span> <span class="st">&quot;</span><span class="va">$url</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$tmp</span><span class="st">/.git&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>          <span class="kw">&amp;&amp;</span> <span class="fu">git</span> <span class="at">-C</span> <span class="st">&quot;</span><span class="va">$tmp</span><span class="st">/.git&quot;</span> push <span class="at">--mirror</span> <span class="st">&quot;git@github.com:</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">.git&quot;</span>   <span class="co"># empty-target seed: §11.4.113-safe (no existing refs overwritten)</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rm</span> <span class="at">-rf</span> <span class="st">&quot;</span><span class="va">$tmp</span><span class="st">&quot;</span><span class="kw">;</span> <span class="ex">caf_log</span> SEEDED <span class="st">&quot;</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (b) GitLab mirror of the fork (dual-remote)</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="ex">caf_in_csv</span> gitlab <span class="st">&quot;</span><span class="va">$CAF_PROVIDERS</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        <span class="ex">glab</span> repo view <span class="st">&quot;</span><span class="va">$CAF_GITLAB_GROUP</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="dt">\</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>          <span class="kw">||</span> <span class="ex">glab</span> repo create <span class="st">&quot;</span><span class="va">$CAF_GITLAB_GROUP</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="at">--private</span> <span class="kw">||</span> <span class="ex">caf_log</span> FAIL gitlab <span class="st">&quot;</span><span class="va">$name</span><span class="st">&quot;</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">fi</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (c) record mapping for swap + merge</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$name</span><span class="st"> </span><span class="va">$url</span><span class="st">    git@github.com:</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">.git   git@gitlab.com:</span><span class="va">$CAF_GITLAB_GROUP</span><span class="st">/</span><span class="va">$fork</span><span class="st">.git&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$CAF_MAP_FILE</span><span class="st">&quot;</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span> <span class="va">$rc</span></span></code></pre></div>
+<p><strong>Anti-bluff / §11.4.113:</strong> the mirror-push fallback
+targets an <strong>empty</strong> fork (no existing refs) → not a force,
+not a history overwrite. Every <code>gh</code>/<code>glab</code> call is
+wrapped; non-zero → <code>caf_log FAIL</code> + <code>continue</code>
+(one bad repo never aborts the batch). Rate-limit handling: exponential
+backoff on HTTP 403/429 via <code>gh api rate_limit</code> polling;
+resumable with <code>--only</code> from the partial
+<code>--map-file</code>. <strong>OPERATOR-GATED (G-1):</strong> any
+non-<code>--dry-run</code> invocation creates irreversible external
+state and is run only after explicit operator go.</p>
+<h3 id="update_fork_from_upstream.sh-fetch-merge-onto-latest-upstream-g-1-for-push">4.3
+<code>update_fork_from_upstream.sh</code> — fetch + merge-onto-latest
+upstream (G-1 for push)</h3>
+<p><strong>Purpose:</strong> keep every fork current by merging upstream
+<code>main</code>/<code>master</code> INTO the fork,
+fast-forward-preferred, <strong>never force</strong> (§11.4.113). Drives
+the auto-merge schedule (§7).</p>
+<p>Drafted per-fork loop (over <code>--map-file</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="st">&quot;</span><span class="va">$fork_origin</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$wd</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$wd</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote add upstream <span class="st">&quot;</span><span class="va">$upstream_url</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">git</span> remote set-url upstream <span class="st">&quot;</span><span class="va">$upstream_url</span><span class="st">&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch <span class="at">--all</span> <span class="at">--prune</span> <span class="at">--tags</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="va">base</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">caf_detect_default_branch</span> upstream<span class="va">)</span><span class="st">&quot;</span>           <span class="co"># main|master</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="st">&quot;</span><span class="va">$base</span><span class="st">&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># §11.4.113 merge-onto-latest-main: base = latest fork main; merge upstream on top.</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="fu">git</span> merge <span class="at">--ff-only</span> <span class="st">&quot;upstream/</span><span class="va">$base</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="ex">caf_log</span> FF <span class="st">&quot;</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$base</span><span class="st">&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">git</span> merge <span class="at">--no-edit</span> <span class="st">&quot;upstream/</span><span class="va">$base</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">||</span> <span class="kw">{</span> <span class="ex">caf_log</span> CONFLICT <span class="st">&quot;</span><span class="va">$fork</span><span class="st">&quot;</span><span class="kw">;</span> <span class="ex">caf_record_conflict</span> <span class="st">&quot;</span><span class="va">$fork</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">continue</span><span class="kw">;</span> <span class="kw">}</span>   <span class="co"># NEVER -s ours / -X theirs</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="ex">caf_log</span> MERGE <span class="st">&quot;</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$base</span><span class="st">&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> remote <span class="kw">in</span> <span class="va">$(</span><span class="ex">caf_provider_remotes</span> <span class="st">&quot;</span><span class="va">$fork</span><span class="st">&quot;</span><span class="va">)</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">git</span> push <span class="st">&quot;</span><span class="va">$remote</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$base</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="ex">caf_log</span> PUSHFAIL <span class="st">&quot;</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$remote</span><span class="st">&quot;</span>             <span class="co"># fast-forward only</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>Flags add <code>--strategy ff-only|merge</code> (default
+<code>merge</code>, union-preserving) and <code>--push/--no-push</code>
+(default <code>--push</code>). Conflicts are <strong>never</strong>
+auto-resolved — a conflicted fork is logged to
+<code>docs/caf/conflicts/&lt;fork&gt;_&lt;ts&gt;.md</code> with the
+conflicting paths and parked for operator review; the loop continues
+(zero-idle §11.4.94). Because the fork’s
+<code>origin/&lt;base&gt;</code> is always the merge base and the merge
+commit descends from it, <strong>every push is a fast-forward → no force
+ever needed</strong>. An upstream history-rewrite is logged
+<code>UPSTREAM-REWRITE</code> and parked — never force-resolved.</p>
+<h3 id="resolve_recursive_fork_deps.sh-recursive-nested-dep-classifier">4.4
+<code>resolve_recursive_fork_deps.sh</code> — recursive nested-dep
+classifier</h3>
+<p><strong>Purpose:</strong> enforce the recursive rule. Inside each
+fork / checked-out submodule, scan for nested <code>.gitmodules</code>;
+<strong>third-party</strong> nested deps → fork (delegate to
+<code>fork_third_party_submodule.sh</code> with <code>--src-dir</code> =
+the nested manifest’s dir) + rewrite the fork’s nested
+<code>.gitmodules</code> to our SSH fork URL; <strong>own-org</strong>
+nested deps → flag as a CONST-051 violation and emit a PULL_TO_ROOT
+remediation row (NEVER silently rewrite an own-org chain).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">scan_for_nested()</span> <span class="kw">{</span>              <span class="co"># dir depth</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">local</span> <span class="va">dir</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span> <span class="va">depth</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$2</span><span class="st">&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">[</span> <span class="st">&quot;</span><span class="va">$depth</span><span class="st">&quot;</span> <span class="ot">-le</span> 0 <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="cf">return</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">[</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$dir</span><span class="st">/.gitmodules&quot;</span> <span class="bu">]</span> <span class="kw">||</span> <span class="cf">return</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">git</span> config <span class="at">-f</span> <span class="st">&quot;</span><span class="va">$dir</span><span class="st">/.gitmodules&quot;</span> <span class="at">--get-regexp</span> <span class="st">&#39;\.url$&#39;</span> <span class="kw">|</span> <span class="cf">while</span> <span class="bu">read</span> <span class="at">-r</span> <span class="va">key</span> <span class="va">url</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">norm</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">caf_normalize_url</span> <span class="st">&quot;</span><span class="va">$url</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">sub</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$key</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-E</span> <span class="st">&#39;s/^submodule\.//; s/\.url$//&#39;</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="ex">caf_is_own_org</span> <span class="st">&quot;</span><span class="va">$norm</span><span class="st">&quot;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            <span class="ex">caf_log</span> CONST051 <span class="st">&quot;</span><span class="va">$dir</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$url</span><span class="st">&quot;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$dir</span><span class="st">  </span><span class="va">$url</span><span class="st">    PULL_TO_ROOT&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$CAF_NESTED_REPORT</span><span class="st">&quot;</span>          <span class="co"># hard report, never auto-rewritten</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="va">fork</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">caf_fork_name</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">&quot;</span><span class="va">$sub</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$dir</span><span class="st">  </span><span class="va">$url</span><span class="st">    FORK:</span><span class="va">$CAF_ORG</span><span class="st">/</span><span class="va">$fork</span><span class="st">&quot;</span> <span class="op">&gt;&gt;</span> <span class="st">&quot;</span><span class="va">$CAF_NESTED_REPORT</span><span class="st">&quot;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            <span class="co"># delegate fork (idempotent) + SSH-rewrite the fork&#39;s nested .gitmodules</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">done</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># recurse one level deeper over each checked-out nested submodule, depth-1</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span></code></pre></div>
+<p>For <code>cline</code>: scan finds <code>evals/cline-bench</code>
+(HTTPS, third-party) → emits
+<code>FORK: vasic-digital/caf-cline-bench</code> and, after
+<code>caf-cline-bench</code> exists, rewrites <code>caf-cline</code>’s
+<code>evals/cline-bench</code> URL to
+<code>git@github.com:vasic-digital/caf-cline-bench.git</code> (SSH per
+Rule 3), committed to <code>caf-cline</code> as a
+<code>.gitmodules</code>-only minimal change (§11.4.30-clean).
+Depth-bounded (<code>--depth</code>, default 3); cycle guard via a
+visited-set on normalized URLs.</p>
+<hr />
+<h2 id="submodule-swap-procedure-buildability-validation">5.
+Submodule-swap procedure + buildability validation</h2>
+<p>After forks exist and are seeded (§4.2) and <code>--map-file</code>
+is populated:</p>
+<ol type="1">
+<li><p><strong>Rewrite <code>.gitmodules</code> URLs</strong>
+(idempotent, per-line; NEVER a blanket <code>git add -A</code> per
+§11.4.30):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="va">IFS</span><span class="op">=</span><span class="st">$&#39;</span><span class="dt">\t</span><span class="st">&#39;</span> <span class="bu">read</span> <span class="at">-r</span> <span class="va">name</span> <span class="va">upstream</span> <span class="va">fork_gh</span> <span class="va">fork_gl</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">git</span> config <span class="at">-f</span> .gitmodules <span class="st">&quot;submodule.cli_agents/</span><span class="va">$name</span><span class="st">.url&quot;</span> <span class="st">&quot;</span><span class="va">$fork_gh</span><span class="st">&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span> <span class="op">&lt;</span> docs/caf/map.tsv          <span class="co"># skips claude-code-source (never in the map file)</span></span></code></pre></div></li>
+<li><p><strong><code>git submodule sync --recursive</code></strong> —
+propagates the new URLs into <code>.git/config</code> and each
+submodule’s <code>.git/config</code>.
+(<code>git submodule set-url</code> is the per-entry alternative;
+<code>sync</code> is the bulk path.)</p></li>
+<li><p><strong>Nested swap:</strong> for <code>cline</code>, the nested
+<code>evals/cline-bench</code> URL is rewritten INSIDE the
+<code>caf-cline</code> fork’s <code>.gitmodules</code> (not the parent
+meta-repo), then that fork commits the change.</p></li>
+<li><p><strong>Per-fork buildability validation</strong>
+(<code>caf_validate.sh</code> step — captured-evidence gate, NOT
+grep-only):</p>
+<ul>
+<li>assert every <code>cli_agents/*</code> URL in
+<code>.gitmodules</code> now resolves to
+<code>vasic-digital/caf-*</code> (except the flagged
+<code>claude-code-source</code> skip);</li>
+<li><code>git ls-remote &lt;fork&gt;</code> succeeds for each (the
+remote really exists);</li>
+<li>cross-provider parity: <code>git ls-remote</code> tips on GitHub ==
+GitLab per fork;</li>
+<li>re-init the swapped submodule and run its native build smoke
+(language-appropriate: <code>go build ./...</code> /
+<code>npm ci &amp;&amp; npm run build</code> / <code>cargo build</code>
+/ <code>pip install -e .</code> per fork) — captured stdout under
+<code>docs/qa/&lt;run-id&gt;/</code>. A fork that fails to build is
+logged <code>BUILDFAIL</code> and parked (does not block the
+others).</li>
+</ul></li>
+<li><p><strong>Commit discipline:</strong> the <code>.gitmodules</code>
+rewrite + submodule pointer updates land in ONE meta-repo commit;
+CONTINUATION updated in the same commit (CONST-044). Forks receive ONLY
+<code>.gitignore</code> / governance / nested-<code>.gitmodules</code>
+minimal commits — never upstream code edits.</p></li>
+</ol>
+<hr />
+<h2 id="anti-bluff-challenge-per-script">6. Anti-bluff Challenge per
+script</h2>
+<p>Each script ships an anti-bluff Challenge that bootstraps a
+<strong>throwaway</strong> repo / temp dir and asserts the
+<strong>real</strong> post-state (§107 / §11.4.5 / §11.4.98 fully
+automated), with evidence under
+<code>docs/qa/&lt;run-id&gt;/</code>.</p>
+<ul>
+<li><strong><code>fork_third_party_submodule.challenge.sh</code></strong>
+— temp dir with a fixture <code>.gitmodules</code> pointing at one tiny
+public repo (e.g. <code>octocat/Hello-World</code>) under
+<code>--src-dir=fixtures</code>; <strong>dry-run path</strong> asserts
+the exact <code>gh</code>/<code>glab</code> command lines emitted;
+<strong>live path</strong> (disposable test org/group) asserts
+<code>gh repo view &lt;org&gt;/caf-hello-world</code> exits 0 AND
+<code>git ls-remote git@github.com:&lt;org&gt;/caf-hello-world.git</code>
+returns refs AND the <code>upstream</code> remote resolves to the
+original. Negative case: a fixture entry whose URL is an own-org /
+GitLab-own URL MUST be SKIPPED (proves the
+<code>claude-code-source</code> guard). Teardown deletes the test fork.
+PASS observes the <strong>real remote</strong>, never just the CLI exit
+code.</li>
+<li><strong><code>update_fork_from_upstream.challenge.sh</code></strong>
+— create a throwaway “upstream” repo + a “fork” clone in temp; add a
+commit to upstream; run
+<code>update_fork_from_upstream.sh --only fixture --workdir &lt;tmp&gt;</code>;
+assert the fork’s <code>main</code> now contains the upstream commit SHA
+(<code>git log</code> grep), assert <code>fork/main</code> is a
+fast-forward descendant of the pre-merge tip, and assert
+<strong>no</strong> <code>--force</code> /
+<code>--force-with-lease</code> / <code>+ref</code> appears in the
+captured <code>GIT_TRACE</code> log (§11.4.113 paired mutation: inject a
+<code>--force</code> → Challenge MUST FAIL). Then plant a conflicting
+edit on both sides → assert the script logs <code>CONFLICT</code> +
+parks (does NOT silently resolve).</li>
+<li><strong><code>resolve_recursive_fork_deps.challenge.sh</code></strong>
+— temp parent with a nested <code>.gitmodules</code> containing one
+third-party + one fake own-org URL; run <code>--dry-run</code>; assert
+the third-party row is classified <code>FORK:</code> and the own-org row
+<code>PULL_TO_ROOT</code>/<code>CONST051</code>; flip the fixture (move
+the own-org dep to root) → assert NO <code>CONST051</code> emitted.
+Paired §1.1 mutation: make <code>caf_is_own_org</code> always-false →
+the own-org row mis-classifies as <code>FORK:</code> → Challenge
+FAILs.</li>
+</ul>
+<hr />
+<h2 id="auto-merge-scheduling-design-host-local-no-ci-per-rule-1">7.
+Auto-merge scheduling design (host-local, NO CI per Rule 1)</h2>
+<p><strong>NO <code>.github/workflows</code>,
+<code>.gitlab-ci.yml</code>, Jenkinsfile, or any pipeline.</strong> The
+auto-merge runs host-local only.</p>
+<ul>
+<li><strong>Mechanism:</strong>
+<code>update_fork_from_upstream.sh</code> is the unit of work; it is
+scheduled by a host scheduler the operator already uses —
+<strong>launchd</strong> on macOS
+(<code>~/Library/LaunchAgents/digital.vasic.caf-update.plist</code>,
+<code>StartCalendarInterval</code> weekly) or <strong>cron</strong> on
+Linux (<code>@weekly</code>). The plist/cron line is documented in
+<code>docs/caf/README.md</code>; it is NOT committed as a project
+pipeline and NEVER touches host power state (CONST-033).</li>
+<li><strong>Cadence:</strong> weekly floor (§11.4.45 / §11.4.80 pattern
+— same cadence as the existing
+<code>codegraph_update.sh</code>/<code>codegraph_sync.sh</code>
+automation). On-demand manual invocation always available.</li>
+<li><strong>Background execution (§11.4.89):</strong> the scheduled run
+launches detached
+(<code>nohup … &gt; qa-results/caf/update_&lt;ts&gt;.log 2&gt;&amp;1 &amp;</code>
++ <code>disown</code>); per-fork flock serializes same-fork invocations
+while different forks run in parallel. Push fan-out to all providers is
+fast-forward-only (§11.4.113).</li>
+<li><strong>Failure surfacing:</strong> conflicts →
+<code>docs/caf/conflicts/&lt;fork&gt;_&lt;ts&gt;.md</code>; push
+failures →
+<code>qa-results/caf/push_failures/&lt;ts&gt;_&lt;remote&gt;.log</code>;
+the next tick checks per the zero-idle “no external dependency
+in-flight” gate (§11.4.87 / §11.4.94). NO auto-resolution; conflicts
+park for operator review.</li>
+<li><strong>Status ledger:</strong> every run appends to
+<code>docs/caf/Status.md</code> + <code>Status_Summary.md</code>,
+exported to <code>.html</code>/<code>.pdf</code> per §11.4.65 (Docs
+Chain §11.4.106 where wired).</li>
+</ul>
+<hr />
+<h2 id="config-re-export-install-validate-tie-in-sp4">8. Config
+re-export + install + validate tie-in (→ SP4)</h2>
+<p>After the swap (§5) the existing governance/config pipeline is re-run
+so the new remotes propagate, and the forward-bridge config install (SP4
+P4.4) consumes the swapped tree:</p>
+<ol type="1">
+<li><code>./scripts/init-submodules.sh</code> — re-init against the
+swapped fork URLs.</li>
+<li><code>./scripts/propagate-governance.sh</code> — cascade
+Constitution/CLAUDE/AGENTS into each new fork (each fork receives the
+CONST-047/051 governance siblings — a permitted minimal commit,
+§11.4.30-clean).</li>
+<li><code>./scripts/verify-governance-cascade.sh</code> — confirm the
+anchors are present in every fork.</li>
+<li><code>install_upstreams</code> from each fork root
+<strong>iff</strong> it has an <code>upstreams/</code> recipe dir
+(CONST-056); the fork’s origin push URLs fan out to all configured
+providers.</li>
+<li><strong>SP4 hand-off:</strong> SP4’s config re-export
+(<code>helixagent --generate-all-agents</code>) + the new
+filesystem-install + LIVE post-install validation (each installed config
+drives a real proxied prompt → real result, captured evidence) run
+against the swapped fork tree. SP3 produces the fork substrate; SP4
+consumes it. The <code>caf_validate.sh</code> resolve+build gate (§5.4)
+is the explicit SP3→SP4 readiness boundary — SP4 does not start the
+bridge install until every <code>caf-*</code> fork resolves and
+builds.</li>
+</ol>
+<hr />
+<h2 id="files-to-create-all-under-scriptscaf">9. Files to create (all
+under <code>scripts/caf/</code>)</h2>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 22%" />
+<col style="width: 62%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Mutates external state?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/caf/caf_lib.sh</code></td>
+<td>shared helpers (normalize/own-org/fork-name/log/branch-detect)
+sourced by all three</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>scripts/caf/fork_third_party_submodule.sh</code></td>
+<td>fork-or-create on GitHub+GitLab, wire
+<code>origin</code>+<code>upstream</code>, record map-file</td>
+<td><strong>YES — G-1 gated</strong></td>
+</tr>
+<tr>
+<td><code>scripts/caf/update_fork_from_upstream.sh</code></td>
+<td>fetch + merge upstream main/master into each fork, ff-only push,
+no-force</td>
+<td><strong>YES (push) — G-1 gated</strong></td>
+</tr>
+<tr>
+<td><code>scripts/caf/resolve_recursive_fork_deps.sh</code></td>
+<td>recursive nested-dep classifier (third-party→fork,
+own-org→PULL_TO_ROOT report)</td>
+<td>delegates fork (G-1); report-only otherwise</td>
+</tr>
+<tr>
+<td><code>scripts/caf/caf_validate.sh</code></td>
+<td>post-swap resolve + cross-provider parity + per-fork buildability
+gate</td>
+<td>no (read-only probes)</td>
+</tr>
+<tr>
+<td><code>scripts/caf/fork_third_party_submodule.challenge.sh</code></td>
+<td>anti-bluff Challenge (throwaway repo → assert remotes)</td>
+<td>disposable test org only</td>
+</tr>
+<tr>
+<td><code>scripts/caf/update_fork_from_upstream.challenge.sh</code></td>
+<td>anti-bluff Challenge (assert merge SHA, ff-only, no-force in
+trace)</td>
+<td>temp dirs only</td>
+</tr>
+<tr>
+<td><code>scripts/caf/resolve_recursive_fork_deps.challenge.sh</code></td>
+<td>anti-bluff Challenge (assert FORK vs PULL_TO_ROOT
+classification)</td>
+<td>temp dirs only</td>
+</tr>
+<tr>
+<td><code>scripts/caf/README.md</code></td>
+<td>usage, launchd/cron schedule snippet, exit codes, evidence
+layout</td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>docs/caf/Status.md</code> +
+<code>Status_Summary.md</code></td>
+<td>append-only run ledgers (.html/.pdf siblings per §11.4.65)</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>The <code>.gitmodules</code> URL rewrite +
+<code>git submodule sync</code> (§5) is performed by
+<code>caf_validate.sh</code>’s sibling swap step OR a thin
+<code>caf_swap_submodules.sh</code>; the rewrite edits the meta-repo’s
+tracked <code>.gitmodules</code> (one commit, CONST-044) — flagged here
+as the only SP3 change to the meta-repo itself.</p>
+</blockquote>
+<hr />
+<h2 id="ordered-task-list-redimplgreenevidencerollback">10. Ordered task
+list (RED→impl→GREEN+evidence→rollback)</h2>
+<p>Each task: RED (failing assertion on current state) → implementation
+→ GREEN with captured evidence → rollback note. Tasks T3.0–T3.4 are
+author-time (local, reversible); T3.5–T3.7 are the OPERATOR-GATED
+external-mutation tasks.</p>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 14%" />
+<col style="width: 11%" />
+<col style="width: 42%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>RED</th>
+<th>GREEN + evidence</th>
+<th>Rollback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T3.0</td>
+<td><code>caf_lib.sh</code> helpers</td>
+<td>unit RED:
+<code>caf_normalize_url &#39;org-14957082@github.com:openai/openai-cookbook.git&#39;</code>
+≠ <code>github.com/openai/openai-cookbook</code></td>
+<td>unit GREEN: normalize/own-org/fork-name truth-table passes; captured
+under <code>docs/qa/&lt;run-id&gt;/</code></td>
+<td>delete file (no external state)</td>
+</tr>
+<tr>
+<td>T3.1</td>
+<td><code>fork_third_party_submodule.sh</code> + its Challenge</td>
+<td>Challenge RED on empty impl: no fork created / claude-code-source
+NOT skipped</td>
+<td>dry-run GREEN: emits exactly 49 <code>gh repo fork</code> plans + 0
+for claude-code-source; live fixture GREEN:
+<code>git ls-remote caf-hello-world</code> returns refs</td>
+<td><code>gh repo delete</code> test fork; dry-run leaves zero
+state</td>
+</tr>
+<tr>
+<td>T3.2</td>
+<td><code>update_fork_from_upstream.sh</code> + its Challenge</td>
+<td>Challenge RED: fork main lacks upstream SHA; mutation injecting
+<code>--force</code> must be caught</td>
+<td>GREEN: fork main contains upstream SHA, ff-only, no
+<code>--force</code> in <code>GIT_TRACE</code>; conflict fixture
+parks</td>
+<td>drop scratch <code>--workdir</code>; pushes are ff-only (revert =
+reset fork to pre-merge tip locally, never force remote)</td>
+</tr>
+<tr>
+<td>T3.3</td>
+<td><code>resolve_recursive_fork_deps.sh</code> + its Challenge</td>
+<td>Challenge RED: cline-bench not classified; own-org
+mis-classified</td>
+<td>GREEN: <code>evals/cline-bench</code>→<code>FORK:</code>, fake
+own-org→<code>PULL_TO_ROOT</code>; depth/cycle guard proven</td>
+<td>report-only; delete <code>docs/caf/nested_report.tsv</code></td>
+</tr>
+<tr>
+<td>T3.4</td>
+<td><code>caf_validate.sh</code> resolve+build gate</td>
+<td>RED: validate against current tree FAILs (URLs still upstream)</td>
+<td>GREEN (post-swap): all <code>caf-*</code> resolve + cross-provider
+parity + per-fork build smoke captured</td>
+<td>read-only; no rollback needed</td>
+</tr>
+<tr>
+<td><strong>T3.5 (G-1)</strong></td>
+<td>Execute fork-all (49 + cline-bench)</td>
+<td>n/a (external)</td>
+<td><code>gh repo view</code> 0 + <code>git ls-remote</code> refs for
+all 50 forks; map-file complete; captured</td>
+<td><code>gh/glab repo delete</code> each <code>caf-*</code>
+(irreversible-ish — operator-gated for this reason)</td>
+</tr>
+<tr>
+<td><strong>T3.6 (G-1)</strong></td>
+<td>Submodule swap + nested cline-bench SSH rewrite</td>
+<td>RED: <code>.gitmodules</code> still points at upstreams</td>
+<td>GREEN: every <code>cli_agents/*</code> URL = <code>caf-*</code>;
+<code>git submodule sync --recursive</code> clean; one meta-repo commit
++ CONTINUATION</td>
+<td><code>git checkout .gitmodules</code> +
+<code>git submodule sync</code> (fully reversible local)</td>
+</tr>
+<tr>
+<td><strong>T3.7 (G-1)</strong></td>
+<td>Wire auto-merge schedule + governance cascade</td>
+<td>RED: no schedule; forks lack governance siblings</td>
+<td>GREEN: launchd/cron installed;
+<code>verify-governance-cascade.sh</code> passes for every fork; first
+scheduled run logged</td>
+<td><code>launchctl unload</code> / remove cron line; governance commits
+revertible per-fork</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="operator-decisions-gates">11. Operator decisions / gates</h2>
+<p><strong>OPERATOR-GATED (G-1) — irreversible external state, agent
+will NOT proceed without explicit go (§11.4.101):</strong> - <strong>G-1
+(primary):</strong> execute the fork-all of 49 top-level repos + 1
+nested (<code>caf-cline-bench</code>) under
+<code>vasic-digital/caf-*</code> (T3.5) — creates 50 (×2 providers ≈
+100) external repos. <em>Maps to roadmap decision-register G-1.</em> -
+<strong>G-1-push:</strong> the first non-<code>--dry-run</code>
+<code>update_fork_from_upstream.sh</code> run that pushes to forks
+(T3.7).</p>
+<p><strong>Reversible — agent proceeds on these defaults unless operator
+objects (§11.4.101):</strong> - <strong>D-1 Naming:</strong> fork name =
+<code>caf-&lt;kebab-submodule-dir-name&gt;</code> (not upstream
+CamelCase repo name) for traceability — §3.3. Override via
+<code>--prefix</code>. - <strong>D-2 Visibility:</strong> forks created
+<code>--private</code> (matches existing private own-org posture).
+Operator may choose public. - <strong>D-3 Providers:</strong>
+dual-remote GitHub + GitLab (<code>--providers github,gitlab</code>,
+both under <code>vasic-digital</code>). Operator may drop GitLab via
+<code>--providers github</code>. - <strong>D-4 Cadence:</strong> weekly
+auto-merge (matches codegraph automation). Operator may set
+<code>@daily</code>. - <strong>D-5 Merge strategy:</strong>
+<code>merge</code> (union-preserving) default vs <code>ff-only</code>.
+Conflicts always park — never auto-resolve. - <strong>D-6 Buildability
+scope:</strong> per-fork build smoke runs at swap time (T3.4); operator
+may defer heavy builds (<code>warp</code>, <code>superset</code>,
+<code>amazon-q</code>) to background batches.</p>
+<p><strong>Flagged anomalies (no decision needed, recorded):</strong>
+<code>claude-code-source</code> skipped (own GitLab mirror);
+<code>OpenAI-Cookbook</code> out of scope (resources dir +
+<code>org-NNNN@</code> alias normalized).</p>
+<hr />
+<h2 id="risks-7">12. Risks (7)</h2>
+<ol type="1">
+<li><strong>API rate limits + async fork readiness.</strong> ~50 forks ×
+2 providers ≈ 100 create/fork calls + per-fork clone/fetch. GitHub’s
+fork endpoint is rate-limited AND async — <code>gh repo view</code> may
+404 briefly after <code>gh repo fork</code>. <em>Mitigation:</em>
+exponential backoff on 403/429, <code>gh api rate_limit</code> polling,
+<code>caf_poll_fork_ready</code> before wiring remotes, resumable
+<code>--only</code> retry from the partial map-file.</li>
+<li><strong>Scale / disk / time.</strong> Mirror-clone fallback for
+non-forkable upstreams (HTTPS-only <code>cline-bench</code>, archived
+repos) plus large repos (<code>warp</code>, <code>superset</code>,
+<code>amazon-q</code>) is bandwidth/disk heavy. <em>Mitigation:</em>
+<code>--workdir</code> on a roomy volume, <code>--only</code> batching,
+background execution (§11.4.89), cleanup <code>trap</code>.</li>
+<li><strong>GitHub↔︎GitLab dual-remote divergence.</strong> Two mirrors
+of each fork can drift if a push lands on one and fails the other.
+<em>Mitigation:</em> <code>update_fork_from_upstream.sh</code> fans out
+to ALL provider remotes every run + logs <code>PUSHFAIL</code>
+per-remote; <code>caf_validate.sh</code> parity-checks
+<code>git ls-remote</code> tips across providers; ff-only keeps both
+linear (§11.4.113).</li>
+<li><strong>Recursive depth / hidden / HTTPS nested deps.</strong> Only
+<code>cline</code> nests today (depth 1, HTTPS), but upstreams can add
+submodules anytime, some via HTTPS (Rule 3). <em>Mitigation:</em>
+<code>--recursive --depth 3</code> scan, URL normalization to SSH, cycle
+guard, CONST-051 hard-report for any nested own-org chain.</li>
+<li><strong>Keeping forks’ upstream CODE unchanged.</strong> We do not
+control upstream source and must not diverge it (or merges conflict
+forever and we lose “track upstream”). <em>Mitigation:</em> forks
+receive ONLY <code>.gitignore</code> + governance siblings +
+nested-<code>.gitmodules</code> SSH rewrites (all non-source,
+§11.4.30/§11.4.28(B)-clean); merge is always upstream→fork (never
+reverse); conflicts park; merge-onto-latest-main (§11.4.113) keeps
+pushes ff-only so no upstream history is ever rewritten.</li>
+<li><strong><code>claude-code-source</code> mis-fork.</strong> A naive
+“fork everything” would create a pointless
+<code>caf-claude-code-source</code> over the operator’s own GitLab
+mirror. <em>Mitigation:</em> <code>caf_is_own_org</code> + default
+<code>--exclude claude-code-source</code>; asserted by the §6 Challenge
+negative case.</li>
+<li><strong>No-CI constraint vs scheduling reliability (Rule
+1).</strong> Auto-merge must run reliably without any pipeline.
+<em>Mitigation:</em> host-local launchd/cron only (documented, not
+committed as a project pipeline), background + detached
+(§11.4.88/§11.4.89), append-only Status ledger + failure logs the next
+tick reconciles; never touches host power (CONST-033).</li>
+</ol>
+<hr />
+<h2 id="line-summary">13. 12-line summary</h2>
+<ol type="1">
+<li>Re-verified live root <code>.gitmodules</code> this session:
+<strong>50</strong> <code>cli_agents/*</code> URL entries
+(<code>git config --get-regexp … | wc -l</code> = 50).</li>
+<li><strong>Fork count = 50:</strong> 49 top-level third-party
+<code>cli_agents/*</code> → <code>vasic-digital/caf-&lt;name&gt;</code>,
+plus <strong>1 nested</strong> (<code>cline-bench</code>).</li>
+<li><strong>Skipped:</strong> <code>cli_agents/claude-code-source</code>
+→ <code>git@gitlab.com:milos85vasic/ccode-private.git</code> (own GitLab
+mirror, default-excluded).</li>
+<li><strong>Nested:</strong>
+<code>cli_agents/cline/.gitmodules → evals/cline-bench</code>
+<code>https://github.com/cline/cline-bench.git</code> (HTTPS → SSH
+<code>caf-cline-bench</code>, Rule 3); max fleet depth 1, no own-org
+nested chains (CONST-051 clean).</li>
+<li><code>OpenAI-Cookbook</code> (<code>org-14957082@github.com:</code>)
+is out of scope (resources dir) — parser normalizes
+<code>org-NNNN@github.com:</code> → <code>github.com:</code>.</li>
+<li><strong>Scripts live LOCAL at <code>scripts/caf/</code></strong>
+(operator descoped the constitution; NOT
+<code>constitution/scripts/</code>), fully parameterized
+(org/prefix/src-dir/providers/branch/depth — nothing hardcoded), sharing
+<code>caf_lib.sh</code>.</li>
+<li><strong><code>fork_third_party_submodule.sh</code></strong> —
+gh+glab fork-or-create under <code>--org</code>/<code>--prefix</code>,
+wire <code>origin</code>(fork)+<code>upstream</code>(original), record
+map-file; idempotent, rate-limit backoff, empty-target mirror-push
+fallback (§11.4.113-safe).</li>
+<li><strong><code>update_fork_from_upstream.sh</code></strong> — fetch +
+merge upstream main/master INTO each fork, ff-preferred, <strong>never
+force</strong> (§11.4.113), conflicts parked (never
+<code>-s ours</code>/<code>-X theirs</code>), fan-out push to all
+providers.</li>
+<li><strong><code>resolve_recursive_fork_deps.sh</code></strong> —
+recursive (<code>--depth 3</code>) classifier:
+third-party→fork+SSH-rewrite, own-org→hard CONST-051 PULL_TO_ROOT report
+(never auto-rewritten).</li>
+<li>Each script ships an anti-bluff Challenge (throwaway repo → assert
+real remotes / merge SHA / ff-only / no-<code>--force</code> in git
+trace; evidence under <code>docs/qa/&lt;run-id&gt;/</code>); swap =
+per-line <code>.gitmodules</code> URL rewrite +
+<code>git submodule sync --recursive</code> + per-fork buildability gate
+(<code>caf_validate.sh</code>).</li>
+<li><strong>Every external mutation (fork creation, push) is
+OPERATOR-GATED behind G-1</strong> (§11.4.101); only local/reversible
+steps run autonomously; SP3 hands the swapped fork tree to SP4’s config
+re-export+install+validate at the <code>caf_validate.sh</code>
+boundary.</li>
+<li>Auto-merge is <strong>host-local launchd/cron only (NO CI, Rule
+1)</strong>, weekly, detached/background (§11.4.89); 7 risks tracked
+(rate-limit/async, scale/disk, dual-remote drift, recursive/HTTPS
+nesting, keep-upstream-code-clean, mis-fork guard, no-CI
+scheduling).</li>
+</ol>
+<p><strong>Fork count: 50</strong> (49 top-level + 1 nested
+<code>cline-bench</code>; <code>claude-code-source</code> skipped).
+<strong>The 3 scripts: <code>fork_third_party_submodule.sh</code>,
+<code>update_fork_from_upstream.sh</code>,
+<code>resolve_recursive_fork_deps.sh</code></strong> (+ shared
+<code>caf_lib.sh</code>), all at <code>scripts/caf/</code>.</p>
+</body>
+</html>

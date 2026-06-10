@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-impl-batch2-review</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-impl-batch2-review</h1>
+</header>
+<h1 id="wave-2-batch-independent-code-review-report-11.4.125-11.4.142">Wave-2
+Batch — Independent Code-Review Report (§11.4.125 / §11.4.142)</h1>
+<ul>
+<li><strong>Date:</strong> 2026-06-10</li>
+<li><strong>Reviewer:</strong> Independent code-review subagent
+(READ-ONLY on code; no edits/commits/push)</li>
+<li><strong>Repo root:</strong>
+<code>/Volumes/T7/Projects/HelixCode</code></li>
+<li><strong>Scope:</strong> UNCOMMITTED wave-2 batch — SP4 (helix_agent
+real os/exec), SP1-cont (helix_code/internal/llm dynamic GetModels +
+keyrecognition + honest-empty), F1 (git hooks), docs-SQL (architecture
+docs).</li>
+</ul>
+<hr />
+<h2 id="verdict-go-with-fixes">VERDICT: GO-WITH-FIXES</h2>
+<p>The batch is functionally sound, anti-bluff-genuine, and free of
+regressions. All required verifications PASS. Two non-blocking
+correctness findings and one scope-hygiene finding warrant attention but
+do NOT block the commit. There are <strong>zero BLOCKERs</strong>.</p>
+<ul>
+<li><strong>Finding counts:</strong> 0 BLOCKER · 2 SHOULD-FIX
+(non-blocking) · 2 NICE-TO-HAVE · 1 SCOPE-NOTE</li>
+</ul>
+<hr />
+<h2 id="builds-vet-pass">1. Builds + vet — PASS</h2>
+<pre><code>helix_agent: go build ./internal/clis/...   BUILD_EXIT=0
+helix_agent: go vet   ./internal/clis/...    VET_EXIT=0
+helix_code : go build ./internal/llm/...     BUILD_EXIT=0
+helix_code : go vet   ./internal/llm/...     VET_EXIT=0</code></pre>
+<h2 id="redgreen-real-pass">2. RED→GREEN real — PASS</h2>
+<p>SP4 standing pin guards (default GREEN polarity):</p>
+<pre><code>--- PASS: TestD6_QwenCode_GenerateExecsRealBinary (0.45s)   [fake-binary marker present, template absent, prompt forwarded]
+--- PASS: TestD6_QwenCode_AbsentBinaryIsHonestError (0.00s)
+--- PASS: TestD9_InstanceManager_ExecuteExecsRealBinary (aider/claude_code/codex/cline/openhands all PASS)
+--- PASS: TestD9_InstanceManager_AbsentBinaryIsHonestError (all 5 PASS)</code></pre>
+<p>SP4 under <code>PIN_STUB_BLUFF=1</code> (§11.4.115 RED reproduction;
+honest-error path on fixed artifact) — <strong>PASS</strong>:</p>
+<pre><code>--- PASS: TestD6_QwenCode_GenerateIsStubBluff (1.08s)
+--- PASS: TestD9_InstanceManager_ExecuteStubsAreBluffs (9.48s)   [claude_code subtest exec&#39;d the real `claude` on PATH → non-literal output → bluff absent]</code></pre>
+<p>SP1-cont new tests (RED_MODE=0 default GREEN):</p>
+<pre><code>--- PASS: TestKeyRecognition_MultiAliasTable_T112
+--- PASS: TestKeyRecognition_PresentProviders_AliasMatch_T112
+--- PASS: TestKeyRecognition_PresentProviders_AbsenceAndPlaceholder_T112
+--- PASS: TestKeyRecognition_IsPlaceholder_T112
+--- PASS: TestFetchExternalModels_NoVerifier_HonestEmpty_D5
+--- PASS: TestOpenAI_DynamicModels_D5 / DeepSeek / Mistral / Anthropic _DynamicModels_D5</code></pre>
+<p>F1 hook suite:</p>
+<pre><code>RESULT: 27 PASS / 0 FAIL   (includes the embedded paired §1.1 mutation test)</code></pre>
+<h2 id="anti-bluff-soundness-pass-guards-are-genuine-not-tautologies">3.
+Anti-bluff soundness — PASS (guards are genuine, not tautologies)</h2>
+<ul>
+<li><strong>SP4 §1.1 live mutation (performed + reverted):</strong>
+reverted <code>qwencode.go</code> <code>generate()</code> to its
+templated literal → <code>TestD6_QwenCode_GenerateExecsRealBinary</code>
+<strong>FAILED</strong> with “marker absent … BLUFF-001 reintroduced”.
+Source restored + rebuilt clean. Guard is real.</li>
+<li><strong>SP1-cont polarity (verified):</strong>
+<code>RED_MODE=1</code> on the FIXED tree <strong>FAILS</strong>
+<code>TestFetchExternalModels_NoVerifier_HonestEmpty_D5</code> + all
+four <code>*_DynamicModels_D5</code> (the fix is present, so the
+RED-reproduction assertion correctly inverts) — proving the polarity
+switch is genuinely wired, not a constant-true test.</li>
+<li><strong>F1 mutation:</strong> suite’s own paired mutation (“broken
+sibling-assertion no longer blocks” → restored “blocks again”) PASSED
+inside the 27/0 run.</li>
+<li><strong>No INTRODUCED bluffs:</strong> scan of <code>+</code> lines
+across all production source (helix_code llm + helix_agent clis, new +
+modified, excluding <code>_test.go</code>) for
+<code>simulated|for now|TODO implement|in production this would</code> →
+<strong>clean</strong>. The only <code>+</code> match anywhere is a
+doc-comment in <code>instance_manager.go:913</code> that QUOTES the
+removed bluff (<code>&quot;&lt;Agent&gt; execution completed&quot;</code>), which
+the constitutional anti-bluff smoke-check explicitly excludes.</li>
+<li><strong>Pre-existing <code>instance_manager.go:389</code> “For
+now”</strong> confirmed NOT newly introduced (it appears only as
+unchanged diff context; the diff touches lines ~906–1030 only).</li>
+</ul>
+<h2 id="no-regression-pass">4. No regression — PASS</h2>
+<ul>
+<li>Full <code>dev.helix.code/internal/llm</code> suite: <strong>ok
+(63.07s)</strong>, 0 fail.</li>
+<li>Full <code>dev.helix.agent/internal/clis/...</code> suite: <strong>0
+FAIL</strong> across all packages (qwencode 12.2s incl. new guards;
+aider/claude/codex/cline/kiro/openhands all ok).</li>
+<li><strong>no-network-on-construction contract preserved:</strong>
+<code>NewOpenAIProvider</code> / <code>NewDeepSeekProvider</code> /
+<code>NewMistralProvider</code> call only
+<code>initializeModels()</code> (seed, no network);
+<code>NewAnthropicProvider</code> seeds via
+<code>getAnthropicModels()</code>. The live <code>/models</code> fetch
+is deferred to the first <code>GetModels()</code> call via
+<code>sync.Once</code> (<code>refreshCatalogOnce</code>). No constructor
+calls <code>refreshCatalogOnce</code> /
+<code>fetchModelCatalog</code>.</li>
+<li><strong>model_discovery honest-empty reconciled, not
+deleted:</strong> the removed <code>verifier</code> import is no longer
+referenced in <code>model_discovery.go</code>;
+<code>ConvertVerifiedToModelInfo</code> remains used by
+<code>verifier_integration.go:32</code> (not orphaned); the sibling
+behaviour is covered by the NEW
+<code>model_discovery_fallback_test.go</code> (reconciliation test), so
+no test was silently deleted (§11.4.120 satisfied).</li>
+<li><strong>F1 hooks NOT installed into
+<code>.git/hooks</code>:</strong>
+<code>.git/hooks/{pre-commit,commit-msg,post-commit}</code> all ABSENT;
+<code>submodules/helix_agent/.git/hooks</code> clean.
+<code>install_git_hooks.sh</code> is operator-gated (“NOT run
+automatically”); <code>test_hooks.sh</code> exercises hooks in isolated
+temp dirs only.</li>
+</ul>
+<h2 id="scope-const-042-pass">5. Scope + CONST-042 — PASS</h2>
+<ul>
+<li><strong>No <code>go.mod</code> / <code>go.sum</code> edits</strong>
+in root, helix_code, or helix_agent.</li>
+<li><strong>Lane discipline:</strong> SP4 → helix_agent only; SP1-cont →
+helix_code/internal/llm only; F1 → scripts/git_hooks + installer;
+docs-SQL → docs/architecture. No cross-lane bleed.</li>
+<li><strong>CONST-042 no-secret-leak:</strong>
+<code>keyrecognition.go</code> does NO logging of any kind
+(presence-only; reads env, never prints a value). Provider refresh
+<code>log.Printf</code> lines log only model COUNTS — none reference
+key/token/secret/apiKey. In <code>openai_compatible_catalog.go</code>
+the <code>apiKey</code> flows ONLY into the
+<code>Authorization: Bearer</code> header, never logged. No secret
+literals in the new docs.</li>
+<li><strong>docs-SQL:</strong> schema self-declares “Target engine:
+PostgreSQL 15+ … DESIGN — NOT a deployed migration” with a §11.4.44
+revision header. sqlite3 parse “errors” are expected Postgres-dialect
+mismatch (<code>TIMESTAMPTZ</code>, <code>COMMENT ON TABLE</code>,
+<code>now()</code>), not real defects.</li>
+</ul>
+<hr />
+<h2 id="findings">Findings</h2>
+<h3 id="should-fix-non-blocking">SHOULD-FIX (non-blocking)</h3>
+<ol type="1">
+<li><p><strong><code>keyrecognition.go:90</code> — over-broad
+placeholder token <code>&quot;xxx&quot;</code>.</strong>
+<code>placeholderTokens</code> contains the bare substring
+<code>&quot;xxx&quot;</code>, matched case-insensitively via
+<code>strings.Contains</code>. Any REAL provider key that happens to
+contain <code>xxx</code> as a substring would be wrongly classified as a
+placeholder and the provider reported absent (false-negative key
+presence). <code>sk-xxx</code> in the same list is already subsumed by
+<code>&quot;xxx&quot;</code> (redundant). Errs toward honest-empty (safe
+direction, not a false-positive), hence non-blocking — but tighten to an
+anchored/standalone match (e.g. exact
+<code>&quot;xxx&quot;</code>/<code>&quot;sk-xxx&quot;</code> token or a regex) so legitimate
+keys are not dropped. File:line —
+<code>helix_code/internal/llm/keyrecognition.go:90</code>.</p></li>
+<li><p><strong><code>provider_dynamic_models_test.go</code> — does not
+assert the construction contract.</strong> The four
+<code>*_DynamicModels_D5</code> tests build providers via struct literal
++ direct <code>initializeModels()</code>, never via
+<code>New*Provider</code>, so they prove the live-fetch path but do NOT
+regression-guard “no network at construction.” The contract is correct
+by design (verified manually in §4), but a future refactor that moved
+the fetch into the constructor would not be caught by these tests. Add
+one assertion that <code>New*Provider</code> performs no
+<code>/models</code> request (e.g. an httptest server with a request
+counter that must read 0 immediately after construction). File —
+<code>helix_code/internal/llm/provider_dynamic_models_test.go</code>.</p></li>
+</ol>
+<h3 id="nice-to-have">NICE-TO-HAVE</h3>
+<ol start="3" type="1">
+<li><p><strong>Partial executor conversion in
+<code>instance_manager.go</code> (pre-existing,
+in-scope-adjacent).</strong> This batch converts 5 executors to real
+exec (Aider, ClaudeCode, Codex, Cline, OpenHands) plus Qwen via
+<code>qwencode.go</code>. The remaining ~34 <code>execute*</code>
+methods (<code>executeKiro</code> … <code>executeLlamaCode</code>, lines
+~1033–1270+) STILL return hardcoded
+<code>&quot;&lt;Agent&gt; execution completed&quot;</code> templates —
+pre-existing stub bluffs, NOT newly introduced by this batch (the diff
+only removes 5 such templates). Out of the stated D-6/D-9 scope, but
+these remain live BLUFF-003-class stubs and should be tracked for a
+follow-up wave so the conversion is not left half-applied.</p></li>
+<li><p><strong><code>openai_compatible_catalog.go</code> default token
+limits are heuristic seeds.</strong>
+<code>defaultContext</code>/<code>defaultMaxTokens</code> (e.g. OpenAI
+128000/4096) are applied uniformly to every live-fetched model id.
+Acceptable as a metadata seed (the model NAMES are live per CONST-036),
+but per-model context/limits remain approximate until the verifier
+funnel enriches them. Documented honestly in-comment; no action required
+beyond awareness.</p></li>
+</ol>
+<h3 id="scope-note">SCOPE-NOTE</h3>
+<ol start="5" type="1">
+<li><strong>Untracked <code>docs/caf/</code> (<code>Status.md</code>,
+<code>map.tsv</code>) is NOT part of the 4 stated streams.</strong> It
+is a repo-fork PLAN log
+(<code>gh repo fork … --org vasic-digital …</code>) from unrelated work
+present in the working tree. Harmless and untracked, but it must NOT be
+swept into this batch’s commit (§11.4.84 quiescence / §11.4.30 staging
+discipline) — stage the batch files explicitly, never
+<code>git add -A</code>.</li>
+</ol>
+<hr />
+<h2 id="captured-buildtest-pass-fail-summary">Captured build/test
+PASS-FAIL summary</h2>
+<pre><code>BUILD  helix_agent  go build ./internal/clis/...      PASS (exit 0)
+VET    helix_agent  go vet   ./internal/clis/...       PASS (exit 0)
+BUILD  helix_code   go build ./internal/llm/...        PASS (exit 0)
+VET    helix_code   go vet   ./internal/llm/...         PASS (exit 0)
+TEST   SP4 pin guards (default GREEN)                  PASS (D6 + D9, all subtests)
+TEST   SP4 pin guards PIN_STUB_BLUFF=1                 PASS (D6 + D9)
+TEST   SP4 §1.1 live mutation (revert generate→stub)   FAIL-as-required → restored → PASS (guard genuine)
+TEST   SP1-cont new tests (RED_MODE=0)                 PASS (KeyRecognition×4, HonestEmpty_D5, DynamicModels×4)
+TEST   SP1-cont polarity RED_MODE=1 (fixed tree)       FAIL-as-required (×5 → polarity wired, not tautology)
+TEST   F1 scripts/git_hooks/test_hooks.sh              PASS (27 PASS / 0 FAIL, incl. paired mutation)
+TEST   FULL internal/llm regression                    PASS (ok, 63.07s, 0 fail)
+TEST   FULL internal/clis regression                   PASS (0 FAIL across all packages)
+CHECK  .git/hooks NOT polluted                         PASS (pre-commit/commit-msg/post-commit absent)
+CHECK  go.mod/go.sum untouched                         PASS (none)
+CHECK  anti-bluff INTRODUCED-line scan                 PASS (clean; only a quoted-bluff doc-comment)
+CHECK  CONST-042 no-secret-leak                        PASS (presence-only; apiKey header-only, never logged)</code></pre>
+<p><strong>VERDICT: GO-WITH-FIXES</strong> — 0 BLOCKER, 2 SHOULD-FIX, 2
+NICE-TO-HAVE, 1 SCOPE-NOTE.</p>
+</body>
+</html>

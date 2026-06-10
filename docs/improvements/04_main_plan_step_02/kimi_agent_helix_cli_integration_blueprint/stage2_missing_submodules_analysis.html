@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage2_missing_submodules_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage2_missing_submodules_analysis</h1>
+</header>
+<h1 id="missing-submodules-comprehensive-integration-analysis-for-helixcode">4
+MISSING Submodules: Comprehensive Integration Analysis for
+HelixCode</h1>
+<p><strong>Analysis Date:</strong> 2026-04-26<br />
+<strong>Analyst:</strong> AI Codebase Analyst<br />
+<strong>Target:</strong> Integration of 4 MISSING submodules into
+<code>github.com/HelixDevelopment/HelixCode</code></p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>HelixCode is a CLI agent that exists as a <strong>submodule</strong>
+within the larger HelixAgent ecosystem (confirmed via
+<code>.gitmodules</code> path: <code>cli_agents/HelixCode</code>). Four
+critical repositories—HelixLLM, HelixMemory, HelixSpecifier, and
+HelixAgent itself—must be integrated to unlock the full power of the
+Helix platform. This report maps each repository’s architecture,
+interfaces, dependencies, and provides concrete integration paths.</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 32%" />
+<col style="width: 17%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Integration Complexity</th>
+<th>Criticality</th>
+<th>Go Module Namespace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixLLM</td>
+<td><strong>HIGH</strong></td>
+<td>Critical</td>
+<td><code>digital.vasic.helixllm</code></td>
+</tr>
+<tr>
+<td>HelixMemory</td>
+<td><strong>MEDIUM</strong></td>
+<td>Critical</td>
+<td><code>digital.vasic.helixmemory</code></td>
+</tr>
+<tr>
+<td>HelixSpecifier</td>
+<td><strong>MEDIUM</strong></td>
+<td>High</td>
+<td><code>digital.vasic.helixspecifier</code></td>
+</tr>
+<tr>
+<td>HelixAgent</td>
+<td><strong>VERY HIGH</strong></td>
+<td>Critical</td>
+<td><code>dev.helix.agent</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="helixllm">1. HelixLLM</h2>
+<h3 id="repository">Repository</h3>
+<ul>
+<li><strong>URL:</strong>
+<code>https://github.com/HelixDevelopment/HelixLLM</code></li>
+<li><strong>Language:</strong> Go 1.23.4</li>
+<li><strong>Module:</strong> <code>digital.vasic.helixllm</code></li>
+<li><strong>Framework:</strong> Gin Gonic (web), quic-go (HTTP/3)</li>
+</ul>
+<h3 id="architecture-overview">Architecture Overview</h3>
+<p>HelixLLM is an <strong>enterprise-grade distributed LLM
+system</strong> that compiles to a single binary with a 6-mode
+deployment system. It provides fully compatible OpenAI and Anthropic
+APIs, local inference via llama.cpp, RAG pipelines, ReAct agents, and
+multi-host cluster control—all over HTTP/3 (QUIC) with automatic HTTP/2
+fallback.</p>
+<h4 id="operating-modes">6 Operating Modes</h4>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Role</th>
+<th>Network Overhead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>full</code></td>
+<td>All-in-one single process</td>
+<td>Zero (direct Go calls)</td>
+</tr>
+<tr>
+<td><code>gateway</code></td>
+<td>API surface: HTTP/3, auth, streaming, SSE</td>
+<td>HTTP/3 or gRPC</td>
+</tr>
+<tr>
+<td><code>brain</code></td>
+<td>LLM coordination: routing, llama.cpp RPC, cloud providers</td>
+<td>gRPC/SSE</td>
+</tr>
+<tr>
+<td><code>knowledge</code></td>
+<td>RAG pipeline: retrieval, embeddings, vector store</td>
+<td>gRPC/Kafka</td>
+</tr>
+<tr>
+<td><code>agents</code></td>
+<td>Agent system: ReAct loop, tools, conversation context</td>
+<td>gRPC/SSE</td>
+</tr>
+<tr>
+<td><code>control</code></td>
+<td>Cluster management: host probing, scheduling, deployment</td>
+<td>SSH/gRPC</td>
+</tr>
+</tbody>
+</table>
+<h4 id="internal-directory-structure">Internal Directory Structure</h4>
+<pre><code>internal/
+├── agents/          # ReAct agent system with tool calling
+├── brain/           # LLM coordination, provider routing, fallback chains
+├── control/         # Multi-host cluster control plane
+├── fallback/        # Automatic failover mechanisms
+├── gateway/         # HTTP/3 API surface, OpenAI/Anthropic compat
+│   ├── openai.go    # OpenAI-compatible chat/completions/embeddings
+│   ├── routes.go    # Route registration
+│   └── orchestrator.go # Multi-provider orchestration
+├── knowledge/       # RAG pipeline, document ingestion, vector search
+├── mode/            # Mode registry and execution
+├── server/          # HTTP/3 QUIC server with TLS 1.3
+│   └── server.go    # QUIC transport, certificate management
+└── shared/          # 14 shared subsystems:
+    ├── analytics, config, events, hardware, health
+    ├── i18n, logging, messaging, metrics, observability
+    ├── plugins, proxy, rpc</code></pre>
+<h3 id="submodules-replace-directives">43 Submodules (Replace
+Directives)</h3>
+<p>HelixLLM’s <code>go.mod</code> contains <strong>34 replace
+directives</strong> that point to <code>../&lt;name&gt;</code> paths,
+integrating:</p>
+<p><strong>Core Infrastructure (24):</strong> <code>Architecture</code>,
+<code>BackgroundTasks</code>, <code>Benchmark</code>,
+<code>BigData</code>, <code>BuildCheck</code>, <code>Cache</code>,
+<code>Concurrency</code>, <code>Config</code>, <code>Database</code>,
+<code>Debate</code>, <code>DocProcessor</code>, <code>Embeddings</code>,
+<code>EventBus</code>, <code>Formatters</code>, <code>Grammar</code>,
+<code>Http</code>, <code>I18n</code>, <code>Infrastructure</code>,
+<code>LLM</code>, <code>LLMOrchestrator</code>,
+<code>LLMProvider</code>, <code>LLMsVerifier</code>,
+<code>Models</code>, <code>MCP</code>, <code>Optimization</code>,
+<code>Plugins</code>, <code>Proxy</code>, <code>RAG</code>,
+<code>Routing</code>, <code>Security</code>, <code>Serialization</code>,
+<code>Streaming</code>, <code>Templates</code>, <code>Utils</code>,
+<code>VectorDB</code>, <code>Visualization</code></p>
+<p><strong>Additional Subsystems (7):</strong> <code>Analytics</code>,
+<code>Auth</code>, <code>ConsoleUI</code>, <code>Functional</code>,
+<code>Messaging</code>, <code>Observability</code>,
+<code>Storage</code></p>
+<h3 id="key-interfaces-and-apis">Key Interfaces and APIs</h3>
+<h4 id="openai-compatible-api-surface">OpenAI-Compatible API
+Surface</h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/chat/completions</code></td>
+<td>Chat completions with SSE streaming</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/completions</code></td>
+<td>Text completions</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/models</code></td>
+<td>List available models</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/models/:id</code></td>
+<td>Model details</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/embeddings</code></td>
+<td>Generate embeddings</td>
+</tr>
+</tbody>
+</table>
+<h4 id="anthropic-compatible-api-surface">Anthropic-Compatible API
+Surface</h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/messages</code></td>
+<td>Messages API with SSE streaming</td>
+</tr>
+</tbody>
+</table>
+<h4 id="agent-api-surface">Agent API Surface</h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/v1/agents/chat</code></td>
+<td>ReAct agent loop with session tracking</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/agents/tools</code></td>
+<td>List available tools</td>
+</tr>
+</tbody>
+</table>
+<h4 id="internal-cluster-api">Internal Cluster API</h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/internal/cluster/status</code></td>
+<td>Cluster health</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/internal/cluster/probe</code></td>
+<td>Probe all hosts</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/internal/cluster/deploy</code></td>
+<td>Schedule and deploy</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/internal/cluster/rebalance</code></td>
+<td>Rebalance services</td>
+</tr>
+</tbody>
+</table>
+<h3 id="multi-provider-fallback-chain">Multi-Provider Fallback
+Chain</h3>
+<ol type="1">
+<li><strong>Auto-discovery</strong> – discovers free models from 7+
+cloud providers (Chutes, OpenRouter, HuggingFace, Nvidia, Cerebras,
+SambaNova, Together)</li>
+<li><strong>Scoring</strong> – ranks via LLMsVerifier scores (refreshed
+every 5 min)</li>
+<li><strong>Fallback</strong> – on 429/5xx, rotates to next provider
+automatically</li>
+<li><strong>Local fallback</strong> – llama.cpp is guaranteed last
+resort</li>
+<li><strong>Rate limit tracking</strong> – parses response headers
+proactively</li>
+</ol>
+<h3 id="integration-points-with-helixcode">Integration Points with
+HelixCode</h3>
+<ol type="1">
+<li><strong>Direct Go Module Import:</strong> HelixCode can import
+<code>digital.vasic.helixllm</code> packages to use the LLM routing,
+fallback, and inference capabilities natively</li>
+<li><strong>HTTP/3 Client:</strong> HelixCode can act as a client to a
+local or remote HelixLLM gateway</li>
+<li><strong>Shared Submodules:</strong> Both projects use the same
+<code>digital.vasic.*</code> submodule ecosystem—shared concurrency,
+logging, auth, and streaming modules reduce duplication</li>
+<li><strong>Mode Co-existence:</strong> HelixLLM can run in
+<code>full</code> mode alongside HelixCode on the same host, or in
+<code>gateway</code> mode as a remote service</li>
+</ol>
+<h3 id="what-features-it-adds">What Features It Adds</h3>
+<ul>
+<li><strong>Universal LLM Access:</strong> 47+ providers through a
+single OpenAI-compatible interface</li>
+<li><strong>Local Inference:</strong> llama.cpp with CUDA/Metal/ROCm—no
+API keys needed</li>
+<li><strong>Intelligent Routing:</strong> Auto-discovery and scoring of
+free models</li>
+<li><strong>HTTP/3 Transport:</strong> QUIC with 0-RTT, automatic HTTP/2
+fallback</li>
+<li><strong>RAG Pipeline:</strong> Document ingestion, chunking,
+embedding, vector search</li>
+<li><strong>ReAct Agents:</strong> Tool-calling agents with conversation
+sessions</li>
+<li><strong>Cluster Distribution:</strong> Scale from single-host to
+multi-host production</li>
+</ul>
+<h3 id="build-and-test-requirements">Build and Test Requirements</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires Go 1.23.4+</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires TLS certificates (auto-generated for dev)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires submodule initialization</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="at">--recurse-submodules</span> https://github.com/HelixDevelopment/HelixLLM.git</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixLLM</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> dev  <span class="co"># Starts on https://localhost:8443</span></span></code></pre></div>
+<h3 id="recommended-helixcode-integration-path">Recommended HelixCode
+Integration Path</h3>
+<p><strong>Phase 1:</strong> Add
+<code>replace digital.vasic.helixllm =&gt; ../HelixLLM</code> to
+HelixCode’s <code>go.mod</code><br />
+<strong>Phase 2:</strong> Use <code>internal/gateway/client.go</code> as
+the HTTP/3 client interface<br />
+<strong>Phase 3:</strong> Import <code>internal/brain</code> for local
+inference routing<br />
+<strong>Phase 4:</strong> Share <code>internal/shared/config</code> and
+<code>internal/shared/logging</code> to unify configuration</p>
+<p><strong>Complexity:</strong> <strong>HIGH</strong> – 34 replace
+directives create a deep dependency tree. Full integration requires all
+submodules to be present and compilable. The QUIC transport layer adds
+build complexity (requires CGO for TLS).</p>
+<hr />
+<h2 id="helixmemory">2. HelixMemory</h2>
+<h3 id="repository-1">Repository</h3>
+<ul>
+<li><strong>URL:</strong>
+<code>https://github.com/HelixDevelopment/HelixMemory</code></li>
+<li><strong>Language:</strong> Go 1.23.4</li>
+<li><strong>Module:</strong> <code>digital.vasic.helixmemory</code></li>
+<li><strong>Dependency:</strong> <code>digital.vasic.memory</code>
+(../Memory submodule)</li>
+</ul>
+<h3 id="architecture-overview-1">Architecture Overview</h3>
+<p>HelixMemory is a <strong>Unified Cognitive Memory Engine</strong>
+that fuses four best-in-class memory backends into a single orchestrated
+system. It implements the
+<code>digital.vasic.memory/pkg/store.MemoryStore</code> interface as a
+drop-in replacement for the default Memory module.</p>
+<pre><code>┌─────────────────────────────────────────┐
+│       UnifiedMemoryProvider              │
+│  ┌──────┐ ┌──────┐ ┌──────┐ ┌────────┐ │
+│  │ Mem0 │ │Cognee│ │Letta │ │Graphiti│ │
+│  └──┬───┘ └──┬───┘ └──┬───┘ └───┬────┘ │
+│     └────────┴────────┴─────────┘       │
+│              Fusion Engine               │
+│     ┌────────┬──────────┬──────┐        │
+│     │Collect │Deduplicate│Rerank│        │
+│     └────────┴──────────┴──────┘        │
+└─────────────────────────────────────────┘</code></pre>
+<h3 id="memory-backends">4 Memory Backends</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 16%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Role</th>
+<th>Interface Extension</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mem0</strong></td>
+<td>Dynamic fact extraction, preference management</td>
+<td>Standard <code>MemoryProvider</code></td>
+</tr>
+<tr>
+<td><strong>Cognee</strong></td>
+<td>Semantic knowledge graphs via ECL pipelines</td>
+<td>Standard <code>MemoryProvider</code></td>
+</tr>
+<tr>
+<td><strong>Letta</strong></td>
+<td>Stateful agent runtime, editable memory blocks</td>
+<td><code>CoreMemoryProvider</code></td>
+</tr>
+<tr>
+<td><strong>Graphiti</strong></td>
+<td>Temporal knowledge graph, bi-temporal modeling</td>
+<td><code>TemporalProvider</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="stage-fusion-engine">3-Stage Fusion Engine</h3>
+<p><strong>Stage 1 – Collection &amp; Normalization:</strong> Gathers
+entries, normalizes relevance scores to [0, 1]</p>
+<p><strong>Stage 2 – Deduplication:</strong> Cosine similarity on
+embeddings (threshold 0.92) or Jaccard fallback</p>
+<p><strong>Stage 3 – Cross-Source Re-Ranking:</strong></p>
+<pre><code>score = relevance * 0.40 + recency * 0.25 + source * 0.20 + type * 0.15</code></pre>
+<ul>
+<li>Recency uses exponential decay with ~7-day half-life</li>
+<li>Source trust: 0.50 (unknown) to 0.95 (Letta)</li>
+</ul>
+<h3 id="write-routing-intelligent-classification">Write Routing
+(Intelligent Classification)</h3>
+<table>
+<thead>
+<tr>
+<th>Memory Type</th>
+<th>Primary Backend</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fact</code></td>
+<td>Mem0</td>
+<td>Dynamic fact extraction</td>
+</tr>
+<tr>
+<td><code>graph</code></td>
+<td>Cognee</td>
+<td>Knowledge graph relations</td>
+</tr>
+<tr>
+<td><code>core</code></td>
+<td>Letta</td>
+<td>Stateful agent memory</td>
+</tr>
+<tr>
+<td><code>temporal</code></td>
+<td>Graphiti</td>
+<td>Time-aware storage</td>
+</tr>
+<tr>
+<td><code>episodic</code></td>
+<td>Letta</td>
+<td>Conversation history</td>
+</tr>
+<tr>
+<td><code>procedural</code></td>
+<td>Cognee</td>
+<td>Workflow patterns</td>
+</tr>
+</tbody>
+</table>
+<h3 id="power-features">12 Power Features</h3>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Feature</th>
+<th>Package</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Codebase DNA Profiling</td>
+<td><code>codebase_dna</code></td>
+<td>Coding pattern memory from codebase interactions</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Memory-Augmented AI Debate</td>
+<td><code>debate_memory</code></td>
+<td>Context injection for debate agents</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Adaptive Context Window</td>
+<td><code>context_window</code></td>
+<td>Dynamic memory selection within token limits</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Multi-Agent Memory Mesh</td>
+<td><code>mesh</code></td>
+<td>Shared memories with scope isolation</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Temporal Reasoning</td>
+<td><code>temporal</code></td>
+<td>Bi-temporal queries, “what was true at T?”</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Confidence Scoring</td>
+<td><code>confidence</code></td>
+<td>5-factor scoring with provenance</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Self-Improving Quality Loop</td>
+<td><code>quality_loop</code></td>
+<td>Stale/contradictory detection</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Memory Snapshots</td>
+<td><code>snapshots</code></td>
+<td>Point-in-time backup/rollback</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Procedural Memory</td>
+<td><code>procedural</code></td>
+<td>Learned workflows, debugging strategies</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Cross-Project Transfer</td>
+<td><code>cross_project</code></td>
+<td>Pattern transfer between projects</td>
+</tr>
+<tr>
+<td>11</td>
+<td>MCP Bridge</td>
+<td><code>mcp_bridge</code></td>
+<td>MCP-compatible memory endpoints</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Memory-Driven Code Generation</td>
+<td><code>code_gen</code></td>
+<td>Context-aware code generation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-interfaces">Key Interfaces</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// MemoryProvider -- implemented by all 4 backends</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryProvider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    Add<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> entry <span class="op">*</span>MemoryEntry<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    Search<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> query <span class="dt">string</span><span class="op">,</span> opts SearchOptions<span class="op">)</span> <span class="op">([]*</span>MemoryEntry<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    Health<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">// CoreMemoryProvider -- Letta extension</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CoreMemoryProvider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    MemoryProvider</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    UpdateCoreMemory<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> blocks CoreMemoryBlocks<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    GetCoreMemory<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>CoreMemoryBlocks<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">// TemporalProvider -- Graphiti extension</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> TemporalProvider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    MemoryProvider</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    QueryAtTime<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> query <span class="dt">string</span><span class="op">,</span> t time<span class="op">.</span>Time<span class="op">)</span> <span class="op">([]*</span>MemoryEntry<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    InvalidateBefore<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> t time<span class="op">.</span>Time<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="integration-points-with-helixcode-1">Integration Points with
+HelixCode</h3>
+<ol type="1">
+<li><strong>Drop-in Replacement:</strong> HelixMemory implements
+<code>digital.vasic.memory/pkg/store.MemoryStore</code>—HelixCode can
+replace its Memory module with zero code changes</li>
+<li><strong>Fusion Engine Access:</strong> HelixCode can use
+<code>pkg/fusion/engine.go</code> directly for multi-backend memory
+queries</li>
+<li><strong>Context Injection:</strong> HelixCode can leverage
+<code>pkg/features/context_window</code> for intelligent memory packing
+into LLM prompts</li>
+<li><strong>Codebase DNA:</strong>
+<code>pkg/features/codebase_dna</code> builds persistent profiles of
+coding patterns—perfect for a CLI coding agent</li>
+</ol>
+<h3 id="what-features-it-adds-1">What Features It Adds</h3>
+<ul>
+<li><strong>Persistent Memory:</strong> Cross-session memory that
+survives restarts</li>
+<li><strong>Multi-Backend Resilience:</strong> If Cognee is down, Mem0
+and Letta continue serving</li>
+<li><strong>Sleep-Time Compute:</strong> Background consolidation every
+30 minutes</li>
+<li><strong>Temporal Reasoning:</strong> “What did we decide about X
+last Tuesday?”</li>
+<li><strong>Confidence Scoring:</strong> Know when to trust a memory
+vs. verify it</li>
+<li><strong>MCP Bridge:</strong> Expose memory to any MCP-compatible
+tool</li>
+</ul>
+<h3 id="build-and-test-requirements-1">Build and Test Requirements</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires 4 backend services (Docker)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> docker <span class="kw">&amp;&amp;</span> <span class="ex">docker</span> compose up <span class="at">-d</span>  <span class="co"># Starts Mem0, Cognee, Letta, Graphiti</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Tests require all backends to be healthy</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./... <span class="at">-race</span></span></code></pre></div>
+<h3 id="recommended-helixcode-integration-path-1">Recommended HelixCode
+Integration Path</h3>
+<p><strong>Phase 1:</strong> Replace <code>digital.vasic.memory</code>
+with <code>digital.vasic.helixmemory</code> via replace directive<br />
+<strong>Phase 2:</strong> Use <code>pkg/provider/adapter.go</code> as
+the bridge—it converts between <code>MemoryEntry</code> and
+<code>Memory</code> types<br />
+<strong>Phase 3:</strong> Enable <code>pkg/features/codebase_dna</code>
+to auto-build coding profiles from HelixCode’s interactions<br />
+<strong>Phase 4:</strong> Configure <code>pkg/fusion/router.go</code> to
+route code-related memories to Cognee, preferences to Mem0</p>
+<p><strong>Complexity:</strong> <strong>MEDIUM</strong> – The adapter
+pattern makes integration straightforward, but requires 4 backend Docker
+services for full operation. Can operate in degraded mode with partial
+backends.</p>
+<hr />
+<h2 id="helixspecifier">3. HelixSpecifier</h2>
+<h3 id="repository-2">Repository</h3>
+<ul>
+<li><strong>URL:</strong>
+<code>https://github.com/HelixDevelopment/HelixSpecifier</code></li>
+<li><strong>Language:</strong> Go 1.23.4</li>
+<li><strong>Module:</strong>
+<code>digital.vasic.helixspecifier</code></li>
+<li><strong>Size:</strong> 27 packages (21 core + 6 test suites), 835+
+tests</li>
+</ul>
+<h3 id="architecture-overview-2">Architecture Overview</h3>
+<p>HelixSpecifier is a <strong>Spec-Driven Development (SDD) Fusion
+Engine</strong> that fuses three development pillars into a unified,
+adaptive workflow. It classifies work by effort level, scales ceremony
+accordingly, executes debate-backed specification phases, and learns
+from completed flows.</p>
+<pre><code>┌──────────────────────────────────────────┐
+│           FusionEngine                    │
+│  ┌─────────┐ ┌───────────┐ ┌──────────┐ │
+│  │ SpecKit │ │Superpowers│ │   GSD    │ │
+│  │ (7-ph)  │ │ (TDD+par) │ │(milestones│ │
+│  └────┬────┘ └─────┬─────┘ └────┬─────┘ │
+│       └─────────────┴────────────┘        │
+│              CeremonyScaler                │
+│              SpecMemory                    │
+└──────────────────────────────────────────┘</code></pre>
+<h3 id="pillar-engine">3-Pillar Engine</h3>
+<h4 id="speckit-pillar-pkgspeckit">SpecKit Pillar
+(<code>pkg/speckit/</code>)</h4>
+<p>7-phase Spec-Driven Development workflow: 1.
+<strong>Constitution</strong> – Analyze request, create/update project
+constitution 2. <strong>Specify</strong> – Create detailed specification
+3. <strong>Clarify</strong> – Resolve ambiguities, validate spec 4.
+<strong>Plan</strong> – Create implementation plan 5.
+<strong>Tasks</strong> – Break plan into executable tasks 6.
+<strong>Analyze</strong> – Pre-implementation analysis 7.
+<strong>Implement</strong> – Execute implementation</p>
+<p><strong>Phase selection by ceremony level:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Ceremony</th>
+<th>Phases Executed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimal</td>
+<td>Implement only</td>
+</tr>
+<tr>
+<td>Light</td>
+<td>Specify, Plan, Implement</td>
+</tr>
+<tr>
+<td>Standard</td>
+<td>All 7 phases</td>
+</tr>
+<tr>
+<td>Heavy</td>
+<td>All 7 + extended reviews</td>
+</tr>
+</tbody>
+</table>
+<h4 id="superpowers-pillar-pkgsuperpowers">Superpowers Pillar
+(<code>pkg/superpowers/</code>)</h4>
+<ul>
+<li><code>ExecuteWithTDD</code> – Sequential execution with TDD
+discipline</li>
+<li><code>DispatchSubagents</code> – Parallel task dispatch with bounded
+concurrency (channel semaphore)</li>
+<li><code>ReviewCode</code> – Aggregate task results, identify critical
+failures</li>
+</ul>
+<h4 id="gsd-pillar-pkggsd">GSD Pillar (<code>pkg/gsd/</code>)</h4>
+<p>Milestone lifecycle: <code>queued</code> -&gt; <code>active</code>
+-&gt; <code>completed</code> (or
+<code>blocked</code>/<code>failed</code>) - Groups tasks by priority:
+critical -&gt; high -&gt; medium -&gt; low - Tracks progress as task
+results arrive - Dependency chains between milestones</p>
+<h3 id="effort-classification">Effort Classification</h3>
+<p><strong>Signal-based keyword analysis:</strong> -
+<strong>Quick:</strong> “fix typo”, “add log”, “rename” -&gt; Minimal
+ceremony - <strong>Large:</strong> “implement service”, “build api”
+(&gt;200 chars) -&gt; Standard ceremony - <strong>Epic:</strong> “entire
+system”, “complete rewrite” -&gt; Heavy ceremony - <strong>Refactoring
+boost:</strong> Any refactoring bumps to at least Large</p>
+<h3 id="power-features-1">10 Power Features</h3>
+<ol type="1">
+<li><strong>Parallel Execution</strong> – Bounded-concurrency task
+dispatch</li>
+<li><strong>Constitution as Code</strong> – Machine-readable project
+constitution with enforcement</li>
+<li><strong>Nyquist TDD</strong> – Minimum 2x test-to-implementation
+ratio enforcement</li>
+<li><strong>Debate Architecture</strong> – Multi-round, multi-agent
+debate orchestration (5 positions x 5 LLMs = 25 total)</li>
+<li><strong>Skill Learning</strong> – Adaptive proficiency tracking with
+running-average improvement</li>
+<li><strong>Brownfield Analysis</strong> – Legacy codebase pattern
+detection and constraint-aware specs</li>
+<li><strong>Predictive Specification</strong> – Future requirement
+prediction from historical patterns</li>
+<li><strong>Cross-Project Transfer</strong> – Shared knowledge base
+between projects</li>
+<li><strong>Adaptive Ceremony</strong> – Dynamic ceremony adjustment
+based on real-time quality</li>
+<li><strong>Spec Memory</strong> – Persistent specification index with
+semantic search</li>
+</ol>
+<h3 id="key-interfaces-1">Key Interfaces</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SpecEngine <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    ExecuteFlow<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request FlowRequest<span class="op">)</span> <span class="op">(*</span>FlowResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    ResumeFlow<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> flowID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>FlowResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    ClassifyEffort<span class="op">(</span>request <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>EffortClassification</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    GetFlowStatus<span class="op">(</span>flowID <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>FlowStatus<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    Health<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    Version<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SpecKitPillar <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    ExecutePhase<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> phase SpecKitPhase<span class="op">,</span> input PhaseInput<span class="op">)</span> <span class="op">(*</span>PhaseResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    GetPhaseOrder<span class="op">(</span>ceremony CeremonyLevel<span class="op">)</span> <span class="op">[]</span>SpecKitPhase</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    ValidateTransition<span class="op">(</span>from<span class="op">,</span> to SpecKitPhase<span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SuperpowersPillar <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    ExecuteWithTDD<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tasks <span class="op">[]*</span>Task<span class="op">)</span> <span class="op">([]*</span>TaskResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    DispatchSubagents<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> tasks <span class="op">[]*</span>Task<span class="op">)</span> <span class="op">([]*</span>TaskResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    ReviewCode<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> results <span class="op">[]*</span>TaskResult<span class="op">)</span> <span class="op">(*</span>ReviewResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="integration-points-with-helixcode-2">Integration Points with
+HelixCode</h3>
+<ol type="1">
+<li><strong>Flow Execution:</strong> HelixCode can call
+<code>engine.ExecuteFlow()</code> for any user request, automatically
+getting the right level of ceremony</li>
+<li><strong>Effort Classification:</strong> HelixCode’s command parser
+can use <code>engine.ClassifyEffort()</code> to decide how deeply to
+analyze a request</li>
+<li><strong>CLI Agent Adapters:</strong>
+<code>pkg/adapters/adapters.go</code> formats output for specific CLI
+agents including OpenCode, Crush, Claude, Cursor, Windsurf, Cline,
+Roo</li>
+<li><strong>Debate Integration:</strong> HelixCode can inject its LLM
+providers as <code>DebateFunc</code> for real multi-LLM specification
+refinement</li>
+</ol>
+<h3 id="what-features-it-adds-2">What Features It Adds</h3>
+<ul>
+<li><strong>Auto-Ceremony:</strong> Small changes get minimal process;
+big changes get full SDD</li>
+<li><strong>Constitution Enforcement:</strong> Project rules are
+machine-readable and auto-enforced</li>
+<li><strong>TDD Discipline:</strong> 2:1 test ratio minimum prevents
+under-tested code</li>
+<li><strong>Multi-LLM Debate:</strong> 25 LLM positions debate before
+committing to a spec</li>
+<li><strong>Cross-Project Learning:</strong> Patterns from one project
+improve another</li>
+<li><strong>Spec Memory:</strong> Never rewrite the same spec twice</li>
+</ul>
+<h3 id="build-and-test-requirements-2">Build and Test Requirements</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Standalone module, minimal external deps</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test ./...  <span class="co"># 835+ tests</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-tags</span> nohelixspecifier ./...  <span class="co"># Opt-out build tag</span></span></code></pre></div>
+<h3 id="recommended-helixcode-integration-path-2">Recommended HelixCode
+Integration Path</h3>
+<p><strong>Phase 1:</strong> Add
+<code>digital.vasic.helixspecifier</code> as a module dependency<br />
+<strong>Phase 2:</strong> Wrap HelixCode’s command handler with
+<code>engine.ClassifyEffort()</code> +
+<code>engine.ExecuteFlow()</code><br />
+<strong>Phase 3:</strong> Register HelixCode’s LLM providers as the
+<code>DebateFunc</code> for SpecKit phases<br />
+<strong>Phase 4:</strong> Use <code>pkg/adapters</code> to format output
+for HelixCode’s specific UI<br />
+<strong>Phase 5:</strong> Enable <code>SpecMemory</code> to persist
+specs and learn from HelixCode’s usage patterns</p>
+<p><strong>Complexity:</strong> <strong>MEDIUM</strong> – Pure Go module
+with minimal external dependencies. The 27-package internal structure is
+complex but well-isolated. Integration is primarily about wiring the
+engine into HelixCode’s command loop.</p>
+<hr />
+<h2 id="helixagent">4. HelixAgent</h2>
+<h3 id="repository-3">Repository</h3>
+<ul>
+<li><strong>URL:</strong>
+<code>https://github.com/HelixDevelopment/HelixAgent</code></li>
+<li><strong>Language:</strong> Go 1.24+ (main), 1.24.11 (Toolkit)</li>
+<li><strong>Module:</strong> <code>dev.helix.agent</code> (main),
+<code>github.com/HelixDevelopment/helix_agent/Toolkit</code></li>
+<li><strong>Submodules:</strong> 90+ git submodules (confirmed via
+<code>.gitmodules</code>)</li>
+</ul>
+<h3 id="critical-discovery-helixcode-is-a-submodule-of-helixagent">Critical
+Discovery: HelixCode is a Submodule of HelixAgent</h3>
+<p><code>.gitmodules</code> contains:</p>
+<pre><code>[submodule &quot;cli_agents/HelixCode&quot;]
+    path = cli_agents/HelixCode
+    url = git@github.com:HelixDevelopment/HelixCode.git
+    branch = main</code></pre>
+<p><strong>This confirms HelixAgent is the ANCESTOR/PARENT project and
+HelixCode is one of its 48+ CLI agent submodules.</strong> Integration
+means bringing HelixAgent’s capabilities INTO HelixCode, or
+equivalently, ensuring HelixCode can leverage the parent project’s
+infrastructure.</p>
+<h3 id="architecture-overview-3">Architecture Overview</h3>
+<p>HelixAgent is a <strong>production-ready ensemble LLM
+service</strong> that combines responses from multiple LLMs for accuracy
+and reliability. It serves as the orchestration layer for the entire
+Helix ecosystem.</p>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                        HelixAgent                            │
+│  ┌──────────┐  ┌──────────────┐  ┌────────────────────────┐ │
+│  │ Web API  │  │  AI Debate   │  │   LLMsVerifier        │ │
+│  │  (Gin)   │  │ Orchestrator │  │   (Dynamic Scoring)   │ │
+│  └────┬─────┘  └──────┬───────┘  └──────────┬─────────────┘ │
+│       └─────────────────┴─────────────────────┘              │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐     │
+│  │PostgreSQL│ │  Redis   │ │ 47+ LLM │ │ 32+ MCP      │     │
+│  │Sessions  │ │ Caching  │ │Providers│ │ Servers      │     │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="git-submodules-complete-list-from-.gitmodules">90+ Git
+Submodules (Complete List from .gitmodules)</h3>
+<p><strong>Helix Ecosystem (4 target submodules):</strong>
+<code>HelixLLM</code>, <code>HelixMemory</code>,
+<code>HelixSpecifier</code>, <code>HelixQA</code></p>
+<p><strong>vasic-digital Infrastructure (20):</strong>
+<code>Containers</code>, <code>Challenges</code>, <code>EventBus</code>,
+<code>Concurrency</code>, <code>Observability</code>, <code>Auth</code>,
+<code>Storage</code>, <code>Streaming</code>, <code>Security</code>,
+<code>VectorDB</code>, <code>Embeddings</code>, <code>Database</code>,
+<code>Cache</code>, <code>Messaging</code>, <code>Formatters</code>,
+<code>MCP_Module</code>, <code>RAG</code>, <code>Memory</code>,
+<code>Optimization</code>, <code>Plugins</code></p>
+<p><strong>Toolkit Providers (2):</strong> <code>SiliconFlow</code>,
+<code>Chutes</code></p>
+<p><strong>MCP Ecosystem (30+):</strong> Official MCP SDKs
+(<code>python-sdk</code>, <code>typescript-sdk</code>,
+<code>registry</code>, <code>inspector</code>),<br />
+Vendor servers: <code>brave-search</code>, <code>notion</code>,
+<code>sentry</code>, <code>github</code>, <code>playwright</code>,
+<code>browserbase</code>, <code>qdrant</code>, <code>supabase</code>,
+<code>redis</code>, <code>elasticsearch</code>, <code>obsidian</code>,
+<code>firecrawl</code>, <code>cloudflare</code>, <code>workers</code>,
+<code>aws</code>, <code>kubernetes</code>, <code>slack</code>,
+<code>telegram</code>, <code>airtable</code>, <code>trello</code>,
+<code>heroku</code>, <code>mongodb</code>, <code>atlassian</code>,
+<code>perplexity</code>, <code>omnisearch</code>, <code>context7</code>,
+<code>langchain</code>, <code>llamaindex</code>, <code>docs</code></p>
+<p><strong>CLI Agents (48+ including HelixCode):</strong>
+<code>cline</code>, <code>claude-squad</code>, <code>gemini-cli</code>,
+<code>fauxpilot</code>, <code>codex</code>, <code>aider</code>,
+<code>conduit</code>, <code>claude-code</code>,
+<code>codename-goose</code>, <code>amazon-q</code>, <code>forge</code>,
+<code>noi</code>, <code>kilo-code</code>, <code>octogen</code>,
+<code>ollama-code</code>, <code>plandex</code>,
+<code>get-shit-done</code>, <code>nanocoder</code>,
+<code>git-mcp</code>, <code>postgres-mcp</code>,
+<code>agent-deck</code>, <code>multiagent-coding</code>,
+<code>openhands</code>, <code>deepseek-cli</code>,
+<code>gpt-engineer</code>, <code>bridle</code>,
+<code>copilot-cli</code>, <code>superset</code>, <code>kiro-cli</code>,
+<code>snow-cli</code>, <code>vtcode</code>, <code>claude-plugins</code>,
+<code>gptme</code>, <code>codex-skills</code>,
+<code>ui-ux-pro-max</code>, <code>shai</code>, <code>qwen-code</code>,
+<code>taskweaver</code>, <code>warp</code>, <code>mobile-agent</code>,
+<code>codai</code>, <code>mistral-code</code>, <code>spec-kit</code>,
+<code>opencode-cli</code>, <code>junie</code>, <code>aichat</code>,
+<code>aichat-llm-functions</code>, <code>cli-agent</code>,
+<code>xela-cli</code>, <code>aiagent</code>,
+<code>deepseek-cli-youkpan</code>, <code>zeroshot</code>,
+<code>crush</code>, <code>x-cmd</code>, <code>roo-code</code>,
+<code>open-interpreter</code>, <code>continue</code>,
+<code>swe-agent</code>, <code>continueagent</code></p>
+<p><strong>Research/RedTeam (8):</strong> <code>CL4R1T4S</code>,
+<code>AutoRedTeam</code>, <code>LEAKHUB</code>,
+<code>Gandalf-Solutions</code>,
+<code>CLAUDE-CODE-SYSTEM-PROMPT</code></p>
+<p><strong>Additional Modules (15+):</strong> <code>Agentic</code>,
+<code>LLMOps</code>, <code>SelfImprove</code>, <code>Planning</code>,
+<code>Benchmark</code>, <code>ToolSchema</code>,
+<code>SkillRegistry</code>, <code>ConversationContext</code>,
+<code>Models</code>, <code>LLMProvider</code>,
+<code>DebateOrchestrator</code>, <code>BackgroundTasks</code>,
+<code>DocProcessor</code>, <code>LLMOrchestrator</code>,
+<code>VisionEngine</code>, <code>Normalize</code>, <code>RedTeam</code>,
+<code>PliniusCommon</code>, <code>GandalfSolutions</code>,
+<code>AutoTemp</code>, <code>HyperTune</code>, <code>I-LLM</code>,
+<code>Veritas</code>, <code>LeakHub</code>, <code>Claritas</code>,
+<code>Ouroborous</code></p>
+<h3 id="key-entry-points">Key Entry Points</h3>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 26%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Binary</th>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helixagent</code></td>
+<td><code>cmd/helixagent/main.go</code></td>
+<td>Main production server</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td><code>cmd/api/main.go</code></td>
+<td>Demo REST API server</td>
+</tr>
+<tr>
+<td><code>grpc-server</code></td>
+<td><code>cmd/grpc-server/main.go</code></td>
+<td>gRPC service</td>
+</tr>
+<tr>
+<td><code>cognee-mock</code></td>
+<td><code>cmd/cognee-mock/main.go</code></td>
+<td>Cognee mock for testing</td>
+</tr>
+<tr>
+<td><code>generate-constitution</code></td>
+<td><code>cmd/generate-constitution/main.go</code></td>
+<td>Constitution generator</td>
+</tr>
+<tr>
+<td><code>audit</code></td>
+<td><code>cmd/audit/main.go</code></td>
+<td>Audit tool</td>
+</tr>
+<tr>
+<td><code>toolkit</code></td>
+<td><code>Toolkit/cmd/toolkit/main.go</code></td>
+<td>Toolkit CLI</td>
+</tr>
+</tbody>
+</table>
+<h3 id="main-production-server-cmdhelixagentmain.go">Main Production
+Server (<code>cmd/helixagent/main.go</code>)</h3>
+<p>This is a <strong>massive monolithic entry point</strong> (~1000+
+lines in the portion read) that:</p>
+<ol type="1">
+<li><p><strong>Initializes 47+ LLM Providers:</strong> Claude, DeepSeek,
+Gemini, Mistral, Qwen, xAI, Cohere, Perplexity, Groq, Venice, ZAI, Zen,
+AI21, Cerebras, Chutes, Cloudflare, Codestral, Fireworks, GitHubModels,
+HuggingFace, Nvidia, Ollama, OpenAI, OpenRouter, Replicate, Together,
+Upstage</p></li>
+<li><p><strong>Manages Container Infrastructure:</strong> Docker/Podman
+auto-detection, compose orchestration, remote host partitioning</p></li>
+<li><p><strong>MCP Server Management:</strong> 32+ containerized MCP
+servers on ports 9101-9999</p></li>
+<li><p><strong>Mandatory Dependency Verification:</strong> PostgreSQL,
+Redis, Cognee, ChromaDB — all must pass health checks or startup
+fails</p></li>
+<li><p><strong>48 CLI Agent Config Generators:</strong> Auto-generates
+configs for all supported CLI agents</p></li>
+<li><p><strong>Challenge Framework:</strong> 193+ validation scripts
+with categories: provider, security, debate, cli, mcp, bigdata, memory,
+performance, grpc, release, speckit, subscription, verification,
+fallback, semantic, integration, shell, userflow</p></li>
+</ol>
+<h3 id="toolkit-architecture">Toolkit Architecture</h3>
+<pre><code>Toolkit/
+├── cmd/toolkit/main.go         # Toolkit CLI entry
+├── pkg/toolkit/
+│   ├── toolkit.go              # Registry for providers and agents
+│   ├── interfaces.go           # Provider + Agent interfaces
+│   ├── agents/
+│   │   ├── generic.go          # Generic AI agent implementation
+│   │   └── codereview.go       # Code review specialist agent
+│   └── common/
+│       ├── discovery/          # Service discovery
+│       ├── http/               # HTTP client utilities
+│       └── ratelimit/          # Rate limiting
+├── Providers/
+│   ├── Chutes/                 # Chutes provider impl
+│   └── SiliconFlow/            # SiliconFlow provider impl
+└── Commons/
+    ├── auth/                   # Authentication
+    ├── config/                 # Configuration
+    ├── errors/                 # Error handling
+    ├── http/                   # HTTP utilities
+    ├── response/               # Response formatting
+    └── testing/                # Test helpers</code></pre>
+<h3 id="provider-interface-toolkit">Provider Interface (Toolkit)</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    Chat<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req ChatRequest<span class="op">)</span> <span class="op">(</span>ChatResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    Embed<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req EmbeddingRequest<span class="op">)</span> <span class="op">(</span>EmbeddingResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    Rerank<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req RerankRequest<span class="op">)</span> <span class="op">(</span>RerankResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    DiscoverModels<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">([]</span>ModelInfo<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    ValidateConfig<span class="op">(</span>config <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Agent <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    Name<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> task <span class="dt">string</span><span class="op">,</span> config <span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    ValidateConfig<span class="op">(</span>config <span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    Capabilities<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="playwright-integration">Playwright Integration</h3>
+<p>HelixAgent includes <code>playwright-mcp</code> as a submodule —
+Microsoft’s Playwright MCP server for browser automation. This enables:
+- Web page scraping and navigation - Screenshot capture for visual
+verification - Form interaction and data extraction - End-to-end testing
+of web applications</p>
+<h3 id="integration-points-with-helixcode-3">Integration Points with
+HelixCode</h3>
+<ol type="1">
+<li><strong>Parent-Child Relationship:</strong> HelixCode IS a submodule
+of HelixAgent. Integration is about activating the parent project’s
+services within the child</li>
+<li><strong>Provider Registry:</strong> HelixCode can register itself as
+an <code>Agent</code> in the Toolkit registry</li>
+<li><strong>Shared LLM Infrastructure:</strong> HelixCode can use
+HelixAgent’s 47+ provider connections instead of managing its own</li>
+<li><strong>MCP Bridge:</strong> HelixCode can expose its capabilities
+as an MCP server to the HelixAgent ecosystem</li>
+<li><strong>Challenge Framework:</strong> HelixCode’s test suite can be
+registered as HelixAgent challenges for CI/CD validation</li>
+</ol>
+<h3 id="what-features-it-adds-3">What Features It Adds</h3>
+<ul>
+<li><strong>47+ LLM Provider Access:</strong> One connection, all
+providers</li>
+<li><strong>AI Debate System:</strong> 25 LLM positions debate for
+consensus</li>
+<li><strong>Ensemble Responses:</strong> Combine multiple LLM outputs
+for accuracy</li>
+<li><strong>32+ MCP Servers:</strong> Browser, database, search, cloud
+integrations</li>
+<li><strong>Container Orchestration:</strong> Auto-start required
+infrastructure</li>
+<li><strong>Challenge Validation:</strong> 193+ automated validation
+scripts</li>
+<li><strong>48 CLI Agent Ecosystem:</strong> Interoperate with aider,
+codex, claude-code, continue, etc.</li>
+<li><strong>Red Team Research:</strong> Security research submodules for
+adversarial testing</li>
+</ul>
+<h3 id="build-and-test-requirements-3">Build and Test Requirements</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires Go 1.24+</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires Docker &amp; Docker Compose</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires 90+ submodules</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="at">--recurse-submodules</span> https://github.com/HelixDevelopment/HelixAgent.git</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixAgent</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> install-deps</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> setup-dev</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run-dev</span></code></pre></div>
+<h3 id="recommended-helixcode-integration-path-3">Recommended HelixCode
+Integration Path</h3>
+<p><strong>Phase 1:</strong> Recognize HelixCode’s position as
+<code>cli_agents/HelixCode</code> within HelixAgent<br />
+<strong>Phase 2:</strong> Import
+<code>dev.helix.agent/internal/llm/providers</code> for unified provider
+access<br />
+<strong>Phase 3:</strong> Use
+<code>Toolkit/pkg/toolkit/interfaces.go</code> to register HelixCode as
+an Agent in the ecosystem<br />
+<strong>Phase 4:</strong> Connect to HelixAgent’s
+PostgreSQL/Redis/Cognee infrastructure for shared state<br />
+<strong>Phase 5:</strong> Implement MCP server mode so HelixCode can be
+called by other agents<br />
+<strong>Phase 6:</strong> Register HelixCode tests in the Challenge
+framework for validation</p>
+<p><strong>Complexity:</strong> <strong>VERY HIGH</strong> – 90+
+submodules, 47+ LLM providers, mandatory Docker infrastructure
+(PostgreSQL, Redis, Cognee, ChromaDB), and a massive monolithic main.go.
+Integration requires the entire HelixAgent ecosystem to be
+functional.</p>
+<hr />
+<h2 id="cross-repository-dependency-map">Cross-Repository Dependency
+Map</h2>
+<pre><code>┌──────────────────────────────────────────────────────────────────────┐
+│                         HelixAgent (Parent)                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+│  │  HelixLLM   │  │ HelixMemory │  │HelixSpecifier│  │   helix_qa   │  │
+│  │  submodule  │  │  submodule  │  │  submodule   │  │  submodule  │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  │
+│         │                │                │                │        │
+│  ┌──────┴────────────────┴────────────────┴────────────────┴──────┐  │
+│  │                     HelixCode (cli_agents/HelixCode)             │  │
+│  │                        (The Target for Integration)             │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="shared-submodule-infrastructure">Shared Submodule
+Infrastructure</h3>
+<p>All 4 repositories share the <code>digital.vasic.*</code> and
+<code>dev.helix.agent</code> module namespaces:</p>
+<table>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Used By</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Concurrency</code></td>
+<td>All</td>
+<td>Safe primitives, errgroup patterns</td>
+</tr>
+<tr>
+<td><code>Observability</code></td>
+<td>All</td>
+<td>Prometheus, OpenTelemetry</td>
+</tr>
+<tr>
+<td><code>Auth</code></td>
+<td>All</td>
+<td>JWT, OAuth, API keys</td>
+</tr>
+<tr>
+<td><code>Storage</code></td>
+<td>All</td>
+<td>File/DB abstractions</td>
+</tr>
+<tr>
+<td><code>Streaming</code></td>
+<td>All</td>
+<td>SSE, WebSocket, gRPC streaming</td>
+</tr>
+<tr>
+<td><code>Security</code></td>
+<td>All</td>
+<td>Guardrails, PII detection</td>
+</tr>
+<tr>
+<td><code>Database</code></td>
+<td>HelixAgent, HelixMemory</td>
+<td>PostgreSQL adapter</td>
+</tr>
+<tr>
+<td><code>Cache</code></td>
+<td>HelixAgent, HelixMemory</td>
+<td>Redis adapter</td>
+</tr>
+<tr>
+<td><code>Messaging</code></td>
+<td>HelixAgent, HelixLLM</td>
+<td>Kafka, NATS, in-memory</td>
+</tr>
+<tr>
+<td><code>MCP_Module</code></td>
+<td>HelixAgent</td>
+<td>MCP protocol implementation</td>
+</tr>
+<tr>
+<td><code>RAG</code></td>
+<td>HelixAgent, HelixLLM</td>
+<td>Retrieval pipeline</td>
+</tr>
+<tr>
+<td><code>Memory</code></td>
+<td>HelixAgent, HelixMemory</td>
+<td>Base memory interface</td>
+</tr>
+<tr>
+<td><code>LLMProvider</code></td>
+<td>HelixAgent, HelixLLM</td>
+<td>Provider abstractions</td>
+</tr>
+<tr>
+<td><code>DebateOrchestrator</code></td>
+<td>HelixAgent, HelixSpecifier</td>
+<td>Multi-LLM debate</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="integration-priority-matrix">Integration Priority Matrix</h2>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 18%" />
+<col style="width: 36%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Repository</th>
+<th>Integration Action</th>
+<th>Effort</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P0</strong></td>
+<td>HelixAgent</td>
+<td>Wire as parent project, use infrastructure</td>
+<td>4 weeks</td>
+<td>Maximum</td>
+</tr>
+<tr>
+<td><strong>P0</strong></td>
+<td>HelixMemory</td>
+<td>Replace Memory module with unified engine</td>
+<td>1 week</td>
+<td>High</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>HelixLLM</td>
+<td>Add LLM routing/fallback via gateway client</td>
+<td>2 weeks</td>
+<td>High</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>HelixSpecifier</td>
+<td>Wrap command loop with SDD engine</td>
+<td>1 week</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="risk-assessment">Risk Assessment</h2>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 35%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Severity</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>90+ submodules cause build fragility</td>
+<td>High</td>
+<td>Pin submodule commits, use <code>go.work</code> for workspace
+mode</td>
+</tr>
+<tr>
+<td>Mandatory Docker services (DB, Redis, Cognee)</td>
+<td>Medium</td>
+<td>Provide <code>docker-compose.dev.yml</code> with health checks</td>
+</tr>
+<tr>
+<td>QUIC/HTTP3 build complexity</td>
+<td>Medium</td>
+<td>Fall back to HTTP/2 client mode for development</td>
+</tr>
+<tr>
+<td>Monolithic main.go in HelixAgent</td>
+<td>High</td>
+<td>Extract interfaces, mock in tests</td>
+</tr>
+<tr>
+<td>Private submodule repositories</td>
+<td>High</td>
+<td>Ensure SSH keys and GitHub access are configured</td>
+</tr>
+<tr>
+<td>Version skew between Go 1.23.4 and 1.24+</td>
+<td>Low</td>
+<td>Use Go 1.24+ for all modules</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>The 4 MISSING submodules form a <strong>cohesive AI agent
+ecosystem</strong>:</p>
+<ul>
+<li><strong>HelixAgent</strong> is the orchestration parent containing
+all other projects as submodules</li>
+<li><strong>HelixLLM</strong> provides the LLM brain with 47+ providers,
+local inference, and intelligent routing</li>
+<li><strong>HelixMemory</strong> provides persistent cognitive memory
+across sessions and projects</li>
+<li><strong>HelixSpecifier</strong> provides spec-driven development
+discipline with adaptive ceremony</li>
+<li><strong>HelixCode</strong> is the CLI agent that should consume all
+three to become a fully-powered development assistant</li>
+</ul>
+<p>The recommended integration path is <strong>bottom-up</strong>: start
+with HelixMemory (drop-in replacement), then HelixSpecifier (wrap the
+command loop), then HelixLLM (add provider routing), and finally wire
+everything through HelixAgent’s infrastructure.</p>
+<hr />
+<p><em>Report generated from direct analysis of repository source code,
+go.mod files, .gitmodules, and architecture documentation.</em></p>
+</body>
+</html>

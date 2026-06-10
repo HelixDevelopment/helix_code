@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>doc-staleness-inventory</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">doc-staleness-inventory</h1>
+</header>
+<h1 id="hxc-030-11.4.99-documentation-staleness-inventory-scoping-pass">HXC-030
+— §11.4.99 Documentation Staleness Inventory (Scoping Pass)</h1>
+<p><strong>Item:</strong> HXC-030 — §11.4.99 latest-source documentation
+cross-reference forward sweep <strong>Date:</strong> 2026-05-29
+<strong>Author method:</strong> Read-only inventory. Enumerated every
+operator-facing doc under <code>docs/</code>, <code>README.md</code>,
+and <code>helix_code/README.md</code>; for each, extracted referenced
+external services/libraries via pattern scan (<code>grep -oiE</code>
+over version/service tokens), checked for an existing
+<code>## Sources verified</code> footer
+(<code>grep -rl &quot;Sources verified&quot;</code>), captured git last-commit
+dates for the high-risk setup docs, and flagged stale version signals
+(notably <code>Go 1.24</code>, which contradicts <code>CLAUDE.md</code>
+§3.1’s mandated Go 1.26 inner / Go 1.25.2 root).</p>
+<blockquote>
+<p><strong>SCOPE NOTE — THIS IS A SCOPING INVENTORY, NOT THE FULL
+§11.4.99 VERIFICATION.</strong> No external official documentation was
+fetched in this pass. NO doc below is claimed verified. The actual
+§11.4.99 pass (separate deliverable) MUST WebFetch the latest official
+online docs for each referenced service/library, cross-reference every
+instruction step, document negative findings, and add the
+<code>## Sources verified &lt;date&gt;: &lt;urls&gt;</code> footer +
+commit-message footer. This document only scopes WHAT needs verifying
+and in WHAT ORDER.</p>
+</blockquote>
+<p><strong>Exclusions (per task scope):</strong> tracker/governance docs
+(<code>Issues.md</code>, <code>Fixed.md</code>,
+<code>CONTINUATION.md</code>, <code>*_Summary.md</code>), pure-internal
+audit/research/evidence trees (<code>docs/audits/</code>,
+<code>docs/qa_evidence/</code>, <code>docs/research/</code>,
+<code>docs/improvements/</code>, <code>docs/superpowers/</code>,
+<code>docs/coverage/</code>, <code>docs/adr/</code>,
+<code>docs/codegraph/</code>, <code>docs/architecture/</code>,
+<code>docs/exports/</code>), and the large internal integration-plan
+blobs (<code>docs/llms_verifier/**</code>,
+<code>docs/helix_qa/**</code>,
+<code>docs/bluff_proofing/full_plan/**</code>) which are internal
+planning material rather than operator-facing instructions.</p>
+<h2 id="risk-classified-service-categories-per-11.4.99d-90-day-max-staleness">Risk-classified
+service categories (per §11.4.99(D), 90-day max staleness)</h2>
+<p>AI/LLM providers (OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral,
+xAI, OpenRouter, Ollama, Llama.cpp), cloud APIs (AWS Bedrock, Azure),
+code-hosting (GitHub/GitLab), package managers / language toolchains
+(Go), and container runtimes (podman/docker) all fall in or adjacent to
+risk-classified categories. PostgreSQL/Redis are infrastructure
+(standard 6-month staleness).</p>
+<h2 id="inventory-table">Inventory table</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Doc (path)</th>
+<th>Referenced services/libs</th>
+<th>“Sources verified” footer?</th>
+<th>Risk-classified?</th>
+<th>Priority</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>README.md</code></td>
+<td>Go 1.24/1.25/1.26, Ollama, pgx, PostgreSQL 15/17, Redis 7</td>
+<td><strong>Y</strong> (2026-05-29, go.dev release page + repo
+cross-ref)</td>
+<td>Yes (Go, LLM, DB)</td>
+<td><strong>Done</strong></td>
+<td>Already §11.4.99-footered this date; verify footer URLs remain
+current at next sweep.</td>
+</tr>
+<tr>
+<td><code>helix_code/README.md</code></td>
+<td>docker, podman, Kubernetes, Ollama</td>
+<td>N</td>
+<td>Yes (containers, LLM)</td>
+<td>High</td>
+<td>Build/run instructions; container runtime guidance (Rule 4 /
+podman). No footer.</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_DEPLOYMENT_GUIDE.md</code></td>
+<td>Azure, docker, Kubernetes</td>
+<td>N</td>
+<td>Yes (cloud, containers)</td>
+<td>High</td>
+<td>Setup/deploy doc; git last-commit <strong>2025-12-11</strong> (&gt;5
+mo — near 6-mo stale floor).</td>
+</tr>
+<tr>
+<td><code>docs/DEPLOYMENT_GUIDE.md</code></td>
+<td>Azure, docker, Kubernetes, <strong>postgresql-15</strong></td>
+<td>N</td>
+<td>Yes (cloud, containers, DB)</td>
+<td>High</td>
+<td>1782-line deploy doc; git last-commit <strong>2025-12-11</strong>;
+contains a stale <code>Go 1.24</code> ref.</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md</code></td>
+<td>Azure, Ollama</td>
+<td>N</td>
+<td>Yes (cloud, LLM)</td>
+<td>High</td>
+<td>Config reference incl. provider config; version-bearing.</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_SECURITY_GUIDE.md</code></td>
+<td>Azure, docker, Kubernetes</td>
+<td>N</td>
+<td>Yes (cloud, containers)</td>
+<td>Med</td>
+<td>Security/deploy guidance.</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_API_REFERENCE.md</code></td>
+<td>docker, Kubernetes</td>
+<td>N</td>
+<td>Yes (containers)</td>
+<td>Med</td>
+<td>API ref; light external-version surface.</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_CLI_REFERENCE.md</code></td>
+<td>docker</td>
+<td>N</td>
+<td>Yes (containers)</td>
+<td>Med</td>
+<td>CLI ref.</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_EXAMPLES_TUTORIALS.md</code></td>
+<td>docker, Kubernetes</td>
+<td>N</td>
+<td>Yes (containers)</td>
+<td>Med</td>
+<td>Examples/tutorials.</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_PERFORMANCE_TUNING_GUIDE.md</code></td>
+<td>docker, Kubernetes</td>
+<td>N</td>
+<td>Yes (containers)</td>
+<td>Med</td>
+<td>Perf tuning.</td>
+</tr>
+<tr>
+<td><code>docs/COMPLETE_TROUBLESHOOTING_GUIDE.md</code></td>
+<td>docker</td>
+<td>N</td>
+<td>Yes (containers)</td>
+<td>Med</td>
+<td>Troubleshooting.</td>
+</tr>
+<tr>
+<td><code>docs/troubleshooting/guide.md</code></td>
+<td>Anthropic, docker, Gemini, gin, <strong>Go 1.24</strong>, llama,
+mistral, Ollama, OpenAI</td>
+<td>N</td>
+<td>Yes (LLM, containers, Go)</td>
+<td>High</td>
+<td>1422 lines; broad LLM-provider + stale <code>Go 1.24</code>;
+last-commit 2026-05-16.</td>
+</tr>
+<tr>
+<td><code>docs/general/DEVELOPER_GUIDE.md</code></td>
+<td>Anthropic, docker, Gemini, Ollama, OpenAI, Podman</td>
+<td>N</td>
+<td>Yes (LLM, containers)</td>
+<td>Med</td>
+<td>Dev guide incl. stale <code>Go 1.24</code>; last-commit
+2026-05-16.</td>
+</tr>
+<tr>
+<td><code>docs/general/PROVIDER_FEATURES.md</code></td>
+<td>OpenAI, Anthropic, Azure, Bedrock, DeepSeek, Gemini, Groq, llama,
+Ollama</td>
+<td>N</td>
+<td>Yes (LLM, cloud)</td>
+<td>High</td>
+<td>Per-provider feature claims — high §11.4.99 + CONST-036/039
+surface.</td>
+</tr>
+<tr>
+<td><code>docs/general/MENTIONS_USER_GUIDE.md</code></td>
+<td>(none detected)</td>
+<td>N</td>
+<td>No</td>
+<td>Low</td>
+<td>Feature usage doc; no external-version surface.</td>
+</tr>
+<tr>
+<td><code>docs/general/SLASH_COMMANDS_USER_GUIDE.md</code></td>
+<td>(contains a stale <code>Go 1.24</code> ref)</td>
+<td>N</td>
+<td>Borderline (Go)</td>
+<td>Low</td>
+<td>Mostly internal commands; one stray Go version.</td>
+</tr>
+<tr>
+<td><code>docs/general/PROVIDER_UPDATE_SUMMARY.md</code></td>
+<td>(not deep-scanned)</td>
+<td>N</td>
+<td>Yes (LLM)</td>
+<td>Med</td>
+<td>Provider summary; scan in verify pass.</td>
+</tr>
+<tr>
+<td><code>docs/general/FEATURE_IMPLEMENTATION_COMPLETE.md</code></td>
+<td>(not deep-scanned)</td>
+<td>N</td>
+<td>No</td>
+<td>Low</td>
+<td>Status-flavored; confirm operator-facing in verify pass.</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/README.md</code></td>
+<td>all 7 LLM providers, Azure, Bedrock, docker, Kubernetes,
+postgresql-14, <strong>Go 1.24</strong></td>
+<td>N</td>
+<td>Yes (LLM, cloud, containers, DB, Go)</td>
+<td>High</td>
+<td>3240 lines; broadest external surface; <code>postgresql-14</code> +
+stale <code>Go 1.24</code>.</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/INDEX.md</code></td>
+<td>all 7 LLM providers, Azure, Bedrock, docker, Kubernetes</td>
+<td>N</td>
+<td>Yes (LLM, cloud, containers)</td>
+<td>Med</td>
+<td>Index/landing for user manual.</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/ZERO_BLUFF_USER_MANUAL.md</code></td>
+<td>all 7 LLM providers, Azure, Bedrock, Go 1.26, PostgreSQL 15, Redis
+7</td>
+<td>N</td>
+<td>Yes (LLM, cloud, DB, Go)</td>
+<td>High</td>
+<td>Flagship user manual; Go 1.26 is current — good signal but no
+footer.</td>
+</tr>
+<tr>
+<td><code>docs/user_manual/SUMMARY.md</code></td>
+<td>(not deep-scanned)</td>
+<td>N</td>
+<td>Borderline</td>
+<td>Low</td>
+<td>TOC/summary.</td>
+</tr>
+<tr>
+<td><code>docs/api_reference/README.md</code></td>
+<td>all 7 LLM providers, Bedrock, gin, <strong>Go 1.25 + go
+1.26</strong></td>
+<td>N</td>
+<td>Yes (LLM, cloud, Go)</td>
+<td>Med</td>
+<td>API ref landing; Go versions current.</td>
+</tr>
+<tr>
+<td><code>docs/deployment_guide/README.md</code></td>
+<td>Anthropic, docker, gin, LLama, Ollama, podman</td>
+<td>N</td>
+<td>Yes (LLM, containers)</td>
+<td>High</td>
+<td>Deploy guide landing; container runtime guidance.</td>
+</tr>
+<tr>
+<td><code>docs/developer_guide/README.md</code></td>
+<td>Docker, gin, Ollama</td>
+<td>N</td>
+<td>Yes (LLM, containers)</td>
+<td>Med</td>
+<td>Dev guide landing.</td>
+</tr>
+<tr>
+<td><code>docs/materials/LLMs_Optimization.md</code></td>
+<td>Anthropic, DeepSeek, gin, groq, llama, Ollama, OpenAI</td>
+<td>N</td>
+<td>Yes (LLM)</td>
+<td>Med</td>
+<td>LLM optimization material; provider-version sensitive.</td>
+</tr>
+<tr>
+<td><code>docs/materials/Encryption_Algs.md</code></td>
+<td>(none detected)</td>
+<td>N</td>
+<td>No</td>
+<td>Low</td>
+<td>Crypto-algorithm reference; conceptual, not service
+instructions.</td>
+</tr>
+<tr>
+<td><code>docs/platforms/README.md</code></td>
+<td>(none detected)</td>
+<td>N</td>
+<td>No</td>
+<td>Low</td>
+<td>53-line platform index.</td>
+</tr>
+<tr>
+<td><code>docs/LLMsVerifier_User_Guide.md</code></td>
+<td>Ollama</td>
+<td>N</td>
+<td>Yes (LLM)</td>
+<td>Med</td>
+<td>LLMsVerifier user guide.</td>
+</tr>
+<tr>
+<td><code>docs/HOST_POWER_MANAGEMENT.md</code></td>
+<td>(none detected)</td>
+<td>N</td>
+<td>No</td>
+<td>Low</td>
+<td>CONST-033 policy doc; no external service instructions.</td>
+</tr>
+<tr>
+<td><code>docs/bluff_proofing/README.md</code></td>
+<td>(not deep-scanned)</td>
+<td>N</td>
+<td>No</td>
+<td>Low</td>
+<td>Bluff-proofing overview.</td>
+</tr>
+<tr>
+<td><code>docs/bluff_proofing/STEP_BY_STEP_GUIDE.md</code></td>
+<td>Anthropic, docker, <strong>Go 1.24</strong>, llama, Ollama, OpenAI,
+PostgreSQL 15, Redis 7</td>
+<td>N</td>
+<td>Yes (LLM, containers, DB, Go)</td>
+<td>Med</td>
+<td>Step-by-step setup-flavored guide; stale <code>Go 1.24</code>;
+last-commit 2026-05-16.</td>
+</tr>
+<tr>
+<td><code>docs/bluff_proofing/MASTER_ACTION_PLAN.md</code></td>
+<td>(contains stale <code>Go 1.24</code>)</td>
+<td>N</td>
+<td>Borderline</td>
+<td>Low</td>
+<td>Plan doc; mostly internal.</td>
+</tr>
+<tr>
+<td><code>docs/troubleshooting/guide.md</code></td>
+<td>(listed above)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>(same as troubleshooting row above)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="counts">Counts</h2>
+<ul>
+<li><strong>Total operator-facing docs inventoried:</strong> 30
+(excluding the duplicate troubleshooting row).</li>
+<li><strong>Already carrying a <code>## Sources verified</code>
+footer:</strong> <strong>1</strong> — <code>README.md</code> only.
+(Other <code>Sources verified</code> matches found by grep —
+<code>docs/Issues.md</code>, <code>docs/Issues_Summary.md</code>, and
+their HTML exports — are governance/tracker docs and are OUT OF
+SCOPE.)</li>
+<li><strong>Risk-classified (touch
+LLM/cloud/code-hosting/package-manager/container categories):</strong>
+<strong>22</strong> of 30.</li>
+<li><strong>Stale-version signal (<code>Go 1.24</code>, contradicting
+CLAUDE.md §3.1 Go 1.26/1.25.2):</strong> present in operator docs
+<code>docs/DEPLOYMENT_GUIDE.md</code>,
+<code>docs/troubleshooting/guide.md</code>,
+<code>docs/general/DEVELOPER_GUIDE.md</code>,
+<code>docs/general/SLASH_COMMANDS_USER_GUIDE.md</code>,
+<code>docs/user_manual/README.md</code>,
+<code>docs/user_manual/tutorials/Tutorial_1_Building_Web_App.md</code>,
+<code>docs/user_manual/tutorials/Tutorial_9_Custom_Provider.md</code>,
+<code>docs/user_manual/tutorials/Tutorial_10_Adding_a_Tool.md</code>,
+<code>docs/bluff_proofing/STEP_BY_STEP_GUIDE.md</code>,
+<code>docs/bluff_proofing/MASTER_ACTION_PLAN.md</code>.</li>
+<li><strong>Date-stale signal (git last-commit &gt; 5 months, near the
+6-month staleness floor):</strong>
+<code>docs/COMPLETE_DEPLOYMENT_GUIDE.md</code> and
+<code>docs/DEPLOYMENT_GUIDE.md</code> (both 2025-12-11).</li>
+</ul>
+<h2 id="prioritized-verification-worklist-verify-these-first">Prioritized
+verification worklist (verify these first)</h2>
+<p>Priority rule (§11.4.99(D)): risk-classified + version-bearing
+setup/deploy docs first; docs with both a stale signal AND a missing
+footer rank highest.</p>
+<ol type="1">
+<li><strong><code>docs/DEPLOYMENT_GUIDE.md</code></strong> — deploy doc,
+Azure + docker + Kubernetes + postgresql-15, stale <code>Go 1.24</code>,
+git-stale (2025-12-11), no footer. Highest blast radius (operators run
+it).</li>
+<li><strong><code>docs/COMPLETE_DEPLOYMENT_GUIDE.md</code></strong> —
+companion deploy doc, Azure + containers, git-stale (2025-12-11), no
+footer.</li>
+<li><strong><code>docs/user_manual/README.md</code></strong> — flagship
+3240-line user manual; all 7 LLM providers + Azure + Bedrock +
+containers + postgresql-14 + stale <code>Go 1.24</code>; broadest
+external surface.</li>
+<li><strong><code>docs/general/PROVIDER_FEATURES.md</code></strong> —
+per-provider feature/capability claims across all LLM providers +
+Bedrock + Azure; intersects CONST-036/037/039 (verifier-sourced
+metadata).</li>
+<li><strong><code>docs/troubleshooting/guide.md</code></strong> —
+1422-line troubleshooting doc; broad LLM-provider + docker + stale
+<code>Go 1.24</code>; operators consult under failure conditions where
+bad advice is costly.</li>
+</ol>
+<p>Next tier (verify after top 5): <code>helix_code/README.md</code>,
+<code>docs/deployment_guide/README.md</code>,
+<code>docs/COMPLETE_CONFIGURATION_DOCUMENTATION.md</code>,
+<code>docs/user_manual/ZERO_BLUFF_USER_MANUAL.md</code>, then the
+remaining COMPLETE_*, user_manual, and materials docs.</p>
+<h2 id="what-the-actual-11.4.99-verification-pass-still-requires-live-work-not-done-here">What
+the actual §11.4.99 verification pass still requires (live work, NOT
+done here)</h2>
+<p>For each doc above (starting with the top-5 worklist) the
+verification pass MUST: 1. WebFetch the LATEST official online docs for
+each referenced service/library (go.dev release page; PostgreSQL/Redis
+release notes; Ollama docs; podman/Docker docs; AWS Bedrock + Azure
+docs; each LLM provider’s official API docs; gin/pgx upstreams). 2.
+Cross-reference every instruction step against that source; correct the
+stale <code>Go 1.24</code> references to the mandated Go 1.26 (inner) /
+1.25.2 (root) and reconcile <code>postgresql-14</code> vs
+<code>postgresql-15</code>/<code>17</code>. 3. Document negative
+findings (gaps/silences/contradictions) explicitly. 4. Add a
+<code>## Sources verified &lt;date&gt;: &lt;urls&gt;</code> footer to
+each doc + a matching
+<code>Sources verified &lt;date&gt;: &lt;urls&gt;</code> commit-message
+footer.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<p>N/A — this is a read-only scoping inventory, not an operator-facing
+instruction doc. No external sources were fetched; no instruction in
+this file directs an operator to act on a third-party service. The
+§11.4.99 footer obligation applies to the docs listed above when they
+are verified, not to this inventory.</p>
+</body>
+</html>

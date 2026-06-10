@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f14-sandboxed-shell-execution</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f14-sandboxed-shell-execution</h1>
+</header>
+<h1 id="p1-f14-sandboxed-shell-execution-implementation-plan">P1-F14 —
+Sandboxed Shell Execution Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, kernel-enforced Linux sandbox for
+shell commands invoked by the agent. New <code>shell_sandboxed</code>
+tool wraps every command in either bubblewrap (preferred when on PATH)
+or a native Go <code>Cloneflags</code>-based namespace fallback.
+Default-DENY network. CONST-033 power-management deny-list rejected
+BEFORE any subprocess spawns. Fail-closed on hosts without bubblewrap
+AND without unprivileged user namespaces — never a silent unsandboxed
+run. User surfaces: tool <code>shell_sandboxed</code>, slash command
+<code>/sandbox</code>
+(<code>status</code>/<code>test</code>/<code>policy</code>), and config
+file <code>~/.config/helixcode/sandbox.yaml</code> (mode 0600).</p>
+<p><strong>Architecture:</strong> New
+<code>internal/tools/sandbox/</code> package with <code>types.go</code>,
+<code>detector.go</code>, <code>bubblewrap_backend.go</code>,
+<code>native_backend.go</code> (+ <code>native_backend_other.go</code>
+for non-Linux), <code>manager.go</code>,
+<code>sandboxed_shell_tool.go</code>, <code>config_loader.go</code>,
+plus a small re-exec helper at
+<code>internal/tools/sandbox/cmd/native_helper/main.go</code>. Slash
+command at <code>internal/commands/sandbox_command.go</code>.
+<code>internal/tools/registry.go</code> gets a single new method
+<code>SetSandboxManager(*sandbox.SandboxManager)</code> (mirrors F13’s
+<code>SetLSPManager</code>) which lazily registers the tool.
+<code>cmd/cli/main.go</code> runs <code>sandbox.Detect()</code> once,
+loads the config, builds the manager, wires it into the registry and
+slash registry. <strong>The existing <code>internal/tools/shell/</code>
+package is left untouched</strong> (pre-existing build failures predate
+F09 and are out of scope per Q4=B).</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, spf13/cobra v1.8
+— all already present. <strong>NO new external deps</strong>: bubblewrap
+is invoked as a subprocess via <code>os/exec</code>; native namespace
+setup uses <code>syscall.SysProcAttr.Cloneflags</code> from the standard
+library; YAML loading uses the already-present
+<code>gopkg.in/yaml.v3 v3.0.1</code>. Confirmed: <code>go.mod</code>
+already carries <code>gopkg.in/yaml.v3 v3.0.1</code> and
+<code>github.com/fsnotify/fsnotify v1.9.0</code>; nothing new
+needed.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-05-p1-f14-sandboxed-shell-execution-design.md</code>
+(commit <code>067e5d9</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F14
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/sandbox internal/commands/sandbox_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — bubblewrap
+and unprivileged user namespaces may BOTH be missing on the test
+machine. The Challenge MUST present THREE clearly separated sections:
+<code>DETECTOR + FAIL-CLOSED (always runs)</code>,
+<code>BUBBLEWRAP (gated)</code>, <code>NATIVE (gated)</code>. Phase A is
+non-negotiable: it asserts the fail-closed error message verbatim, AND
+it asserts the CONST-033 deny-list rejects
+<code>systemctl suspend</code> BEFORE any backend is invoked (counter on
+a fake backend stays at 0). Real-backend tests skip with
+<code>SKIP-OK: P1-F14 &lt;missing capability&gt; (install: &lt;hint&gt;)</code>.
+Bare skips break <code>make no-silent-skips</code>.</p>
+<p><strong>Why this is the most consequential anti-bluff in the
+programme:</strong> an unsandboxed run that claims to be sandboxed is a
+security failure with the agent’s full FS + network reach. Phase A’s
+fail-closed assertion (against a forced-empty
+<code>SandboxCapabilities</code>) is the single most important test in
+F14.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F14-T01 — bootstrap
+evidence + advance PROGRESS to F14</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T02 —
+<code>internal/tools/sandbox/types.go</code>: SandboxConfig +
+SandboxPolicy + SandboxCapabilities + SandboxRequest + SandboxResult +
+SandboxBackend interface + ConstitutionalDenyList constants
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T03 —
+<code>internal/tools/sandbox/detector.go</code>: Detect() probes bwrap +
+userns + cgroups v2 + GOOS via injected Probe interface
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T04 —
+<code>internal/tools/sandbox/bubblewrap_backend.go</code>: argv builder
++ Run via os/exec.CommandContext (TDD with synthetic argv assertions on
+a fake SubprocessRunner)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T05 —
+<code>internal/tools/sandbox/native_backend.go</code> (+
+<code>native_backend_other.go</code>): SysProcAttr.Cloneflags setup +
+small re-exec helper (TDD; gated tests when userns enabled)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T06 —
+<code>internal/tools/sandbox/manager.go</code>: backend selection +
+CONST-033 deny-list + user deny-list + network gating + timeout (TDD
+with fake backend + spawn-counter)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T07 —
+<code>internal/tools/sandbox/sandboxed_shell_tool.go</code>: Tool
+interface impl, registered name <code>shell_sandboxed</code>
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T08 —
+<code>internal/tools/sandbox/config_loader.go</code>: YAML loader for
+<code>~/.config/helixcode/sandbox.yaml</code> + secret-safe writer (mode
+0600, parent 0700; mirrors F12 wizard_writer) (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T09 —
+<code>/sandbox</code> slash command at
+<code>internal/commands/sandbox_command.go</code> (status/test/policy)
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T10 — main.go
+wiring (Detector + Manager + tool registration + slash registration) +
+integration tests (gated, SKIP-OK on missing bwrap/userns)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T11 — Challenge
+harness (Phase A always-runs detector + fail-closed; Phase B
+bwrap-gated; Phase C native-gated)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F14-T12 — Feature 14
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F14 evidence section header (spec <code>067e5d9</code>),
+update PROGRESS current focus to F14, insert F14 task list (12 items)
+after F13’s. Commit
+<code>docs(P1-F14-T01): bootstrap Phase 1 / Feature 14 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-types.go-tdd">Task 2: types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/sandbox/types.go</code>, new
+<code>helix_code/internal/tools/sandbox/types_test.go</code>.</p>
+<p>Define <code>SandboxBackendKind</code> enum (None/Bubblewrap/Native)
+with <code>String()</code>, <code>SandboxCapabilities</code>,
+<code>SandboxPolicy</code>, <code>SandboxRequest</code>,
+<code>SandboxResult</code>, <code>SandboxBackend</code> interface,
+<code>SandboxConfig</code>, and the <code>ConstitutionalDenyList</code>
+slice from spec §3.3. Add <code>DefaultSandboxConfig()</code>,
+<code>DefaultSandboxPolicy()</code>, and
+<code>MergedDenyList(cfg SandboxConfig) []string</code> (CONST-033 +
+user, deduped, marker-prefixed for <code>[CONST-033]</code>
+rendering).</p>
+<p>Failing test FIRST:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestConstitutionalDenyList_ContainsAllPowerStateCommands<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    must <span class="op">:=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;systemctl suspend&quot;</span><span class="op">,</span> <span class="st">&quot;systemctl hibernate&quot;</span><span class="op">,</span> <span class="st">&quot;systemctl poweroff&quot;</span><span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;systemctl reboot&quot;</span><span class="op">,</span> <span class="st">&quot;shutdown&quot;</span><span class="op">,</span> <span class="st">&quot;halt&quot;</span><span class="op">,</span> <span class="st">&quot;poweroff&quot;</span><span class="op">,</span> <span class="st">&quot;reboot&quot;</span><span class="op">,</span> <span class="st">&quot;kexec&quot;</span><span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;pm-suspend&quot;</span><span class="op">,</span> <span class="st">&quot;loginctl suspend&quot;</span><span class="op">,</span> <span class="st">&quot;loginctl poweroff&quot;</span><span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> m <span class="op">:=</span> <span class="kw">range</span> must <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> ConstitutionalDenyList<span class="op">,</span> m<span class="op">,</span> <span class="st">&quot;CONST-033 missing %q&quot;</span><span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMergedDenyList_DedupsAndMarksConstitutional<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> SandboxConfig<span class="op">{</span>DenyList<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;rm -rf /&quot;</span><span class="op">,</span> <span class="st">&quot;shutdown&quot;</span><span class="op">}}</span> <span class="co">// shutdown overlaps CONST-033</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    merged <span class="op">:=</span> MergedDenyList<span class="op">(</span>cfg<span class="op">)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">:=</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">int</span><span class="op">{}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> merged <span class="op">{</span> seen<span class="op">[</span>stripMarker<span class="op">(</span>e<span class="op">)]++</span> <span class="op">}</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> seen<span class="op">[</span><span class="st">&quot;shutdown&quot;</span><span class="op">],</span> <span class="st">&quot;shutdown must appear once even though both lists contain it&quot;</span><span class="op">)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> seen<span class="op">[</span><span class="st">&quot;rm -rf /&quot;</span><span class="op">])</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDefaultSandboxPolicy_NetworkDeniedByDefault<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> DefaultSandboxPolicy<span class="op">()</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> p<span class="op">.</span>AllowNetwork<span class="op">,</span> <span class="st">&quot;Q3=A: network MUST default to deny&quot;</span><span class="op">)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">30</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">,</span> p<span class="op">.</span>Timeout<span class="op">)</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T02): sandbox types + ConstitutionalDenyList + default-DENY policy</code>.</p>
+<hr />
+<h2 id="task-3-detector.go-tdd">Task 3: detector.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/sandbox/detector.go</code>, new
+<code>helix_code/internal/tools/sandbox/detector_test.go</code>.</p>
+<p><code>Detect() SandboxCapabilities</code> calls a small
+<code>Probe</code> interface so unit tests inject canned responses:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Probe <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    LookPath<span class="op">(</span>name <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    ReadSysctl<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="co">// returns trimmed contents of /proc/sys/...</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    StatExists<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    GOOS<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Getuid<span class="op">()</span> <span class="dt">int</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> Detect<span class="op">()</span> SandboxCapabilities                           <span class="co">// uses defaultProbe (real syscalls)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DetectWith<span class="op">(</span>p Probe<span class="op">)</span> SandboxCapabilities                <span class="co">// injectable for tests</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> SelectBackend<span class="op">(</span>caps SandboxCapabilities<span class="op">,</span> runner SubprocessRunner<span class="op">)</span> <span class="op">(</span>SandboxBackend<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p>Test:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetect_BubblewrapPresent_FillsPath<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> fakeProbe<span class="op">{</span>lookPath<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;bwrap&quot;</span><span class="op">:</span> <span class="st">&quot;/usr/bin/bwrap&quot;</span><span class="op">},</span> gooss<span class="op">:</span> <span class="st">&quot;linux&quot;</span><span class="op">,</span> uid<span class="op">:</span> <span class="dv">1000</span><span class="op">}</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    caps <span class="op">:=</span> DetectWith<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;/usr/bin/bwrap&quot;</span><span class="op">,</span> caps<span class="op">.</span>BubblewrapPath<span class="op">)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;linux&quot;</span><span class="op">,</span> caps<span class="op">.</span>GOOS<span class="op">)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetect_UnprivilegedUserns_FromSysctl<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> fakeProbe<span class="op">{</span>sysctl<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;/proc/sys/kernel/unprivileged_userns_clone&quot;</span><span class="op">:</span> <span class="st">&quot;1&quot;</span><span class="op">},</span> gooss<span class="op">:</span> <span class="st">&quot;linux&quot;</span><span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> DetectWith<span class="op">(</span>p<span class="op">).</span>UnprivilegedUserns<span class="op">)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    p<span class="op">.</span>sysctl<span class="op">[</span><span class="st">&quot;/proc/sys/kernel/unprivileged_userns_clone&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="st">&quot;0&quot;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> DetectWith<span class="op">(</span>p<span class="op">).</span>UnprivilegedUserns<span class="op">)</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDetect_CgroupsV2_FromControllersFile<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> fakeProbe<span class="op">{</span>stat<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">bool</span><span class="op">{</span><span class="st">&quot;/sys/fs/cgroup/cgroup.controllers&quot;</span><span class="op">:</span> <span class="ot">true</span><span class="op">},</span> gooss<span class="op">:</span> <span class="st">&quot;linux&quot;</span><span class="op">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> DetectWith<span class="op">(</span>p<span class="op">).</span>CgroupsV2Mounted<span class="op">)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelectBackend_PrefersBubblewrap<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    caps <span class="op">:=</span> SandboxCapabilities<span class="op">{</span>GOOS<span class="op">:</span> <span class="st">&quot;linux&quot;</span><span class="op">,</span> BubblewrapPath<span class="op">:</span> <span class="st">&quot;/usr/bin/bwrap&quot;</span><span class="op">,</span> UnprivilegedUserns<span class="op">:</span> <span class="ot">true</span><span class="op">}</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    b<span class="op">,</span> err <span class="op">:=</span> SelectBackend<span class="op">(</span>caps<span class="op">,</span> fakeRunner<span class="op">{})</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> BackendBubblewrap<span class="op">,</span> b<span class="op">.</span>Kind<span class="op">())</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelectBackend_FallsBackToNative<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    caps <span class="op">:=</span> SandboxCapabilities<span class="op">{</span>GOOS<span class="op">:</span> <span class="st">&quot;linux&quot;</span><span class="op">,</span> BubblewrapPath<span class="op">:</span> <span class="st">&quot;&quot;</span><span class="op">,</span> UnprivilegedUserns<span class="op">:</span> <span class="ot">true</span><span class="op">}</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    b<span class="op">,</span> err <span class="op">:=</span> SelectBackend<span class="op">(</span>caps<span class="op">,</span> fakeRunner<span class="op">{})</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> BackendNative<span class="op">,</span> b<span class="op">.</span>Kind<span class="op">())</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelectBackend_FailsClosed_NoBwrap_NoUserns<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> SelectBackend<span class="op">(</span>SandboxCapabilities<span class="op">{</span>GOOS<span class="op">:</span> <span class="st">&quot;linux&quot;</span><span class="op">},</span> fakeRunner<span class="op">{})</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrSandboxUnavailable<span class="op">)</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;install bubblewrap&quot;</span><span class="op">)</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;unprivileged_userns_clone&quot;</span><span class="op">)</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSelectBackend_FailsClosed_NonLinux<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> SelectBackend<span class="op">(</span>SandboxCapabilities<span class="op">{</span>GOOS<span class="op">:</span> <span class="st">&quot;darwin&quot;</span><span class="op">,</span> BubblewrapPath<span class="op">:</span> <span class="st">&quot;/opt/homebrew/bin/bwrap&quot;</span><span class="op">},</span> fakeRunner<span class="op">{})</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrSandboxUnavailable<span class="op">)</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;Linux only&quot;</span><span class="op">)</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T03): SandboxDetector + SelectBackend with explicit fail-closed semantics</code>.</p>
+<hr />
+<h2 id="task-4-bubblewrap_backend.go-tdd">Task 4: bubblewrap_backend.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/sandbox/bubblewrap_backend.go</code>,
+new
+<code>helix_code/internal/tools/sandbox/bubblewrap_backend_test.go</code>.</p>
+<p><code>BubblewrapBackend</code> builds argv from
+<code>SandboxRequest</code> and runs via injected
+<code>SubprocessRunner</code> (interface boundary so unit tests don’t
+spawn real subprocesses).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> SubprocessRunner <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">,</span> args <span class="op">[]</span><span class="dt">string</span><span class="op">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        stdin io<span class="op">.</span>Reader<span class="op">,</span> env <span class="op">[]</span><span class="dt">string</span><span class="op">,</span> cwd <span class="dt">string</span><span class="op">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        maxBytes <span class="dt">int64</span><span class="op">)</span> <span class="op">(</span>stdout<span class="op">,</span> stderr <span class="op">[]</span><span class="dt">byte</span><span class="op">,</span> exit <span class="dt">int</span><span class="op">,</span> truncated <span class="dt">bool</span><span class="op">,</span> err <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BubblewrapBackend <span class="kw">struct</span> <span class="op">{</span> Path <span class="dt">string</span><span class="op">;</span> Runner SubprocessRunner <span class="op">}</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>BubblewrapBackend<span class="op">)</span> Kind<span class="op">()</span> SandboxBackendKind <span class="op">{</span> <span class="cf">return</span> BackendBubblewrap <span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>BubblewrapBackend<span class="op">)</span> BuildArgv<span class="op">(</span>req <span class="op">*</span>SandboxRequest<span class="op">)</span> <span class="op">[]</span><span class="dt">string</span>  <span class="co">// pure, deterministic</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>BubblewrapBackend<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>SandboxRequest<span class="op">)</span> <span class="op">(*</span>SandboxResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+<p>Argv shape (per spec §4.3) is asserted by tests against the pure
+<code>BuildArgv</code>. Run delegates to
+<code>Runner.Run(ctx, b.Path, argv, …)</code>.</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBubblewrapBackend_ArgvShape_DefaultDeniesNetwork<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    b <span class="op">:=</span> <span class="op">&amp;</span>BubblewrapBackend<span class="op">{</span>Path<span class="op">:</span> <span class="st">&quot;/usr/bin/bwrap&quot;</span><span class="op">}</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    req <span class="op">:=</span> <span class="op">&amp;</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;echo hi&quot;</span><span class="op">,</span> Policy<span class="op">:</span> DefaultSandboxPolicy<span class="op">()}</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    argv <span class="op">:=</span> b<span class="op">.</span>BuildArgv<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> argv<span class="op">,</span> <span class="st">&quot;--unshare-net&quot;</span><span class="op">)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> argv<span class="op">,</span> <span class="st">&quot;--unshare-pid&quot;</span><span class="op">)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> argv<span class="op">,</span> <span class="st">&quot;--unshare-user&quot;</span><span class="op">)</span>  <span class="co">// userns</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> argv<span class="op">,</span> <span class="st">&quot;--die-with-parent&quot;</span><span class="op">)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBubblewrapBackend_ArgvShape_NetworkAllowedDropsUnshareNet<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    b <span class="op">:=</span> <span class="op">&amp;</span>BubblewrapBackend<span class="op">{</span>Path<span class="op">:</span> <span class="st">&quot;/usr/bin/bwrap&quot;</span><span class="op">}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    pol <span class="op">:=</span> DefaultSandboxPolicy<span class="op">();</span> pol<span class="op">.</span>AllowNetwork <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    argv <span class="op">:=</span> b<span class="op">.</span>BuildArgv<span class="op">(&amp;</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;curl x&quot;</span><span class="op">,</span> Policy<span class="op">:</span> pol<span class="op">})</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotContains<span class="op">(</span>t<span class="op">,</span> argv<span class="op">,</span> <span class="st">&quot;--unshare-net&quot;</span><span class="op">)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBubblewrapBackend_ArgvShape_RootIsReadOnly_CwdIsReadWrite<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    pol <span class="op">:=</span> DefaultSandboxPolicy<span class="op">();</span> pol<span class="op">.</span>Cwd <span class="op">=</span> <span class="st">&quot;/tmp/work&quot;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    argv <span class="op">:=</span> <span class="op">(&amp;</span>BubblewrapBackend<span class="op">{</span>Path<span class="op">:</span> <span class="st">&quot;/usr/bin/bwrap&quot;</span><span class="op">}).</span>BuildArgv<span class="op">(&amp;</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;x&quot;</span><span class="op">,</span> Policy<span class="op">:</span> pol<span class="op">})</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    requireSliceContainsPair<span class="op">(</span>t<span class="op">,</span> argv<span class="op">,</span> <span class="st">&quot;--ro-bind&quot;</span><span class="op">,</span> <span class="st">&quot;/&quot;</span><span class="op">)</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    requireSliceContainsPair<span class="op">(</span>t<span class="op">,</span> argv<span class="op">,</span> <span class="st">&quot;--bind&quot;</span><span class="op">,</span> <span class="st">&quot;/tmp/work&quot;</span><span class="op">)</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    requireSliceContainsPair<span class="op">(</span>t<span class="op">,</span> argv<span class="op">,</span> <span class="st">&quot;--chdir&quot;</span><span class="op">,</span> <span class="st">&quot;/tmp/work&quot;</span><span class="op">)</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBubblewrapBackend_Run_DelegatesToRunnerWithBwrapPath<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    runner <span class="op">:=</span> <span class="op">&amp;</span>recordingRunner<span class="op">{</span>stdout<span class="op">:</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;hi</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> exit<span class="op">:</span> <span class="dv">0</span><span class="op">}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    b <span class="op">:=</span> <span class="op">&amp;</span>BubblewrapBackend<span class="op">{</span>Path<span class="op">:</span> <span class="st">&quot;/usr/bin/bwrap&quot;</span><span class="op">,</span> Runner<span class="op">:</span> runner<span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> b<span class="op">.</span>Run<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;echo hi&quot;</span><span class="op">,</span> Policy<span class="op">:</span> DefaultSandboxPolicy<span class="op">()})</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;/usr/bin/bwrap&quot;</span><span class="op">,</span> runner<span class="op">.</span>lastName<span class="op">)</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> res<span class="op">.</span>ExitCode<span class="op">)</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;hi</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> res<span class="op">.</span>Stdout<span class="op">)</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T04): BubblewrapBackend with deterministic argv builder</code>.</p>
+<hr />
+<h2 id="task-5-native_backend.go-tdd-gated-tests">Task 5:
+native_backend.go (TDD; gated tests)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/sandbox/native_backend.go</code>
+(<code>//go:build linux</code>), new
+<code>helix_code/internal/tools/sandbox/native_backend_other.go</code>
+(<code>//go:build !linux</code>), new
+<code>helix_code/internal/tools/sandbox/native_backend_test.go</code>
+(<code>//go:build linux</code>), new
+<code>helix_code/internal/tools/sandbox/cmd/native_helper/main.go</code>
+(the re-exec helper).</p>
+<p><code>NativeBackend</code> sets
+<code>cmd.SysProcAttr.Cloneflags</code> to
+<code>CLONE_NEWPID|CLONE_NEWNS|CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWUSER</code>,
+plus <code>CLONE_NEWNET</code> when network denied.
+UidMappings/GidMappings map container UID 0 to the host’s current
+UID/GID. The re-exec helper at
+<code>internal/tools/sandbox/cmd/native_helper/main.go</code> runs with
+PID 1 in the new namespaces, remounts <code>/proc</code>, then
+<code>execve</code>s <code>/bin/sh -c &lt;command&gt;</code>. Helper
+path resolved at startup via sibling lookup near
+<code>os.Executable()</code>; if absent, native backend’s
+<code>Run</code> returns <code>ErrNativeHelperMissing</code>.</p>
+<p>Non-Linux stub:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build !linux</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> sandbox</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> NativeBackend <span class="kw">struct</span><span class="op">{}</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>NativeBackend<span class="op">)</span> Kind<span class="op">()</span> SandboxBackendKind <span class="op">{</span> <span class="cf">return</span> BackendNative <span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>b <span class="op">*</span>NativeBackend<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>SandboxRequest<span class="op">)</span> <span class="op">(*</span>SandboxResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;%w: native backend requires Linux&quot;</span><span class="op">,</span> ErrSandboxUnavailable<span class="op">)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Tests (Linux only, gated on userns):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build linux</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> skipIfNoUserns<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    b<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>ReadFile<span class="op">(</span><span class="st">&quot;/proc/sys/kernel/unprivileged_userns_clone&quot;</span><span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> strings<span class="op">.</span>TrimSpace<span class="op">(</span><span class="dt">string</span><span class="op">(</span>b<span class="op">))</span> <span class="op">!=</span> <span class="st">&quot;1&quot;</span> <span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F14 unprivileged user namespaces disabled (echo 1 &gt; /proc/sys/kernel/unprivileged_userns_clone)&quot;</span><span class="op">)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNativeBackend_Cloneflags_IncludeUserns<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    skipIfNoUserns<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    cf <span class="op">:=</span> nativeCloneflags<span class="op">(</span>DefaultSandboxPolicy<span class="op">())</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotZero<span class="op">(</span>t<span class="op">,</span> cf <span class="op">&amp;</span> syscall<span class="op">.</span>CLONE_NEWUSER<span class="op">)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotZero<span class="op">(</span>t<span class="op">,</span> cf <span class="op">&amp;</span> syscall<span class="op">.</span>CLONE_NEWPID<span class="op">)</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotZero<span class="op">(</span>t<span class="op">,</span> cf <span class="op">&amp;</span> syscall<span class="op">.</span>CLONE_NEWNS<span class="op">)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNativeBackend_Cloneflags_AddsNewnetWhenNetDenied<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    skipIfNoUserns<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    pol <span class="op">:=</span> DefaultSandboxPolicy<span class="op">()</span>           <span class="co">// AllowNetwork=false</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotZero<span class="op">(</span>t<span class="op">,</span> nativeCloneflags<span class="op">(</span>pol<span class="op">)</span> <span class="op">&amp;</span> syscall<span class="op">.</span>CLONE_NEWNET<span class="op">)</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    pol<span class="op">.</span>AllowNetwork <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Zero<span class="op">(</span>t<span class="op">,</span> nativeCloneflags<span class="op">(</span>pol<span class="op">)</span> <span class="op">&amp;</span> syscall<span class="op">.</span>CLONE_NEWNET<span class="op">)</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNativeBackend_RunsEcho<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    skipIfNoUserns<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    helper <span class="op">:=</span> buildNativeHelper<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    b <span class="op">:=</span> <span class="op">&amp;</span>NativeBackend<span class="op">{</span>HelperPath<span class="op">:</span> helper<span class="op">}</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> b<span class="op">.</span>Run<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;echo p1f14-native-ok&quot;</span><span class="op">,</span> Policy<span class="op">:</span> DefaultSandboxPolicy<span class="op">()})</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> res<span class="op">.</span>ExitCode<span class="op">)</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>res<span class="op">.</span>Stdout<span class="op">),</span> <span class="st">&quot;p1f14-native-ok&quot;</span><span class="op">)</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T05): NativeBackend with Cloneflags userns + native_helper re-exec</code>.</p>
+<hr />
+<h2 id="task-6-manager.go-tdd-with-fake-backend-spawn-counter">Task 6:
+manager.go (TDD with fake backend + spawn-counter)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/sandbox/manager.go</code>, new
+<code>helix_code/internal/tools/sandbox/manager_test.go</code>.</p>
+<p><code>SandboxManager.Execute</code> (per spec §4.2): backend-nil
+check → CONST-033 deny-list → user deny-list → ctx timeout →
+<code>Backend.Run</code>. Both deny-list checks use tokenised argv-head
+match AND word-boundary regex on the raw command (so
+<code>systemctl   suspend; ls</code> and
+<code>bash -c &#39;systemctl suspend&#39;</code> are both caught).</p>
+<p>Tests use a <code>countingBackend</code> so we can assert the
+deny-list rejected the command BEFORE spawn:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> countingBackend <span class="kw">struct</span> <span class="op">{</span> runs <span class="dt">int</span><span class="op">;</span> result <span class="op">*</span>SandboxResult <span class="op">}</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>countingBackend<span class="op">)</span> Kind<span class="op">()</span> SandboxBackendKind <span class="op">{</span> <span class="cf">return</span> BackendBubblewrap <span class="op">}</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>countingBackend<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> req <span class="op">*</span>SandboxRequest<span class="op">)</span> <span class="op">(*</span>SandboxResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span>runs<span class="op">++;</span> <span class="cf">return</span> c<span class="op">.</span>result<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_FailsClosed_WhenBackendNil<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewSandboxManager<span class="op">(</span>SandboxManagerOptions<span class="op">{</span>Capabilities<span class="op">:</span> SandboxCapabilities<span class="op">{</span>GOOS<span class="op">:</span> <span class="st">&quot;darwin&quot;</span><span class="op">},</span> Config<span class="op">:</span> DefaultSandboxConfig<span class="op">(),</span> Backend<span class="op">:</span> <span class="ot">nil</span><span class="op">})</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;echo hi&quot;</span><span class="op">,</span> Policy<span class="op">:</span> DefaultSandboxPolicy<span class="op">()})</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrSandboxUnavailable<span class="op">)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_RejectsConstitutionalDenyList_BeforeSpawn<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    cb <span class="op">:=</span> <span class="op">&amp;</span>countingBackend<span class="op">{</span>result<span class="op">:</span> <span class="op">&amp;</span>SandboxResult<span class="op">{</span>ExitCode<span class="op">:</span> <span class="dv">0</span><span class="op">}}</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewSandboxManager<span class="op">(</span>SandboxManagerOptions<span class="op">{</span>Backend<span class="op">:</span> cb<span class="op">,</span> Config<span class="op">:</span> DefaultSandboxConfig<span class="op">()})</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> cmd <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;systemctl suspend&quot;</span><span class="op">,</span> <span class="st">&quot;systemctl   suspend&quot;</span><span class="op">,</span> <span class="st">&quot;shutdown -h now&quot;</span><span class="op">,</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;bash -c &#39;systemctl suspend&#39;&quot;</span><span class="op">,</span> <span class="st">&quot;ls &amp;&amp; systemctl reboot&quot;</span><span class="op">}</span> <span class="op">{</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        _<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> cmd<span class="op">,</span> Policy<span class="op">:</span> DefaultSandboxPolicy<span class="op">()})</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrConstitutionalDeny<span class="op">,</span> <span class="st">&quot;cmd %q must be CONST-033 rejected&quot;</span><span class="op">,</span> cmd<span class="op">)</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> cb<span class="op">.</span>runs<span class="op">,</span> <span class="st">&quot;no subprocess must be spawned for CONST-033 hits&quot;</span><span class="op">)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_RejectsUserDenyList<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    cb <span class="op">:=</span> <span class="op">&amp;</span>countingBackend<span class="op">{}</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    cfg <span class="op">:=</span> DefaultSandboxConfig<span class="op">();</span> cfg<span class="op">.</span>DenyList <span class="op">=</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;rm -rf&quot;</span><span class="op">}</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewSandboxManager<span class="op">(</span>SandboxManagerOptions<span class="op">{</span>Backend<span class="op">:</span> cb<span class="op">,</span> Config<span class="op">:</span> cfg<span class="op">})</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;rm -rf /tmp/foo&quot;</span><span class="op">,</span> Policy<span class="op">:</span> DefaultSandboxPolicy<span class="op">()})</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrPolicyDeny<span class="op">)</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> cb<span class="op">.</span>runs<span class="op">)</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_AppliesTimeout<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* ctx cancel propagates to backend */</span> <span class="op">}</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_TruncatesOutputAtMaxBytes<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake backend returns long stdout */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T06): SandboxManager with CONST-033 deny-list + user deny-list + fail-closed gate</code>.</p>
+<hr />
+<h2 id="task-7-sandboxed_shell_tool.go-tdd">Task 7:
+sandboxed_shell_tool.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/sandbox/sandboxed_shell_tool.go</code>,
+new
+<code>helix_code/internal/tools/sandbox/sandboxed_shell_tool_test.go</code>.</p>
+<p><code>SandboxedShellTool</code> implements the <code>Tool</code>
+interface from <code>internal/tools/registry.go</code>. Tool name:
+<code>shell_sandboxed</code>. Schema: <code>command</code> (string,
+required), <code>network</code> (bool, default false),
+<code>timeout_seconds</code> (int, default 30; max 600),
+<code>cwd</code> (string, optional). Execute builds
+<code>SandboxRequest</code> from params, calls
+<code>manager.Execute</code>, returns a result map.</p>
+<p>Note the Tool interface lives in package <code>tools</code>, but our
+tool is in package <code>sandbox</code> — to avoid the name collision
+noted in spec §3.5 we define an adapter in
+<code>internal/tools/registry.go</code> that wraps
+<code>*sandbox.SandboxedShellTool</code> and satisfies
+<code>tools.Tool</code>. The wrapper is trivial (just forwards calls);
+it exists so <code>internal/tools/sandbox</code> does not need to import
+<code>internal/tools</code> (no circular dep).</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandboxedShellTool_Name_IsShellSandboxed<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;shell_sandboxed&quot;</span><span class="op">,</span> <span class="op">(&amp;</span>SandboxedShellTool<span class="op">{}).</span>Name<span class="op">())</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandboxedShellTool_NetworkDefaultsFalse<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    fb <span class="op">:=</span> <span class="op">&amp;</span>countingBackend<span class="op">{</span>result<span class="op">:</span> <span class="op">&amp;</span>SandboxResult<span class="op">{</span>ExitCode<span class="op">:</span> <span class="dv">0</span><span class="op">,</span> Stdout<span class="op">:</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;ok&quot;</span><span class="op">)}}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewSandboxManager<span class="op">(</span>SandboxManagerOptions<span class="op">{</span>Backend<span class="op">:</span> fb<span class="op">,</span> Config<span class="op">:</span> DefaultSandboxConfig<span class="op">()})</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> NewSandboxedShellTool<span class="op">(</span>m<span class="op">)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;command&quot;</span><span class="op">:</span> <span class="st">&quot;echo ok&quot;</span><span class="op">})</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> fb<span class="op">.</span>runs<span class="op">)</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> fb<span class="op">.</span>lastReq<span class="op">.</span>Policy<span class="op">.</span>AllowNetwork<span class="op">,</span> <span class="st">&quot;network MUST default to false&quot;</span><span class="op">)</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandboxedShellTool_NetworkOptIn<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    fb <span class="op">:=</span> <span class="op">&amp;</span>countingBackend<span class="op">{</span>result<span class="op">:</span> <span class="op">&amp;</span>SandboxResult<span class="op">{</span>ExitCode<span class="op">:</span> <span class="dv">0</span><span class="op">}}</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewSandboxManager<span class="op">(</span>SandboxManagerOptions<span class="op">{</span>Backend<span class="op">:</span> fb<span class="op">,</span> Config<span class="op">:</span> DefaultSandboxConfig<span class="op">()})</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> NewSandboxedShellTool<span class="op">(</span>m<span class="op">)</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;command&quot;</span><span class="op">:</span> <span class="st">&quot;curl x&quot;</span><span class="op">,</span> <span class="st">&quot;network&quot;</span><span class="op">:</span> <span class="ot">true</span><span class="op">})</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> fb<span class="op">.</span>lastReq<span class="op">.</span>Policy<span class="op">.</span>AllowNetwork<span class="op">)</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandboxedShellTool_ResultMapShape<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    fb <span class="op">:=</span> <span class="op">&amp;</span>countingBackend<span class="op">{</span>result<span class="op">:</span> <span class="op">&amp;</span>SandboxResult<span class="op">{</span>ExitCode<span class="op">:</span> <span class="dv">0</span><span class="op">,</span> Stdout<span class="op">:</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;hi&quot;</span><span class="op">),</span> Backend<span class="op">:</span> BackendBubblewrap<span class="op">,</span> Duration<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">}}</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewSandboxManager<span class="op">(</span>SandboxManagerOptions<span class="op">{</span>Backend<span class="op">:</span> fb<span class="op">,</span> Config<span class="op">:</span> DefaultSandboxConfig<span class="op">()})</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> NewSandboxedShellTool<span class="op">(</span>m<span class="op">)</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    out<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;command&quot;</span><span class="op">:</span> <span class="st">&quot;echo hi&quot;</span><span class="op">})</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> out<span class="op">.(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> res<span class="op">[</span><span class="st">&quot;exit_code&quot;</span><span class="op">])</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;hi&quot;</span><span class="op">,</span> res<span class="op">[</span><span class="st">&quot;stdout&quot;</span><span class="op">])</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;bubblewrap&quot;</span><span class="op">,</span> res<span class="op">[</span><span class="st">&quot;backend&quot;</span><span class="op">])</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T07): SandboxedShellTool implementing Tool interface as shell_sandboxed</code>.</p>
+<hr />
+<h2 id="task-8-config_loader.go-tdd-mirrors-f12-wizard_writer">Task 8:
+config_loader.go (TDD; mirrors F12 wizard_writer)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/sandbox/config_loader.go</code>, new
+<code>helix_code/internal/tools/sandbox/config_loader_test.go</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> LoadConfig<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>SandboxConfig<span class="op">,</span> <span class="dt">error</span><span class="op">)</span>        <span class="co">// &quot;&quot; → ~/.config/helixcode/sandbox.yaml; missing OK → defaults</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> WriteConfig<span class="op">(</span>path <span class="dt">string</span><span class="op">,</span> cfg SandboxConfig<span class="op">)</span> <span class="dt">error</span>     <span class="co">// O_CREATE|O_WRONLY|O_EXCL, 0o600; parent 0o700</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DefaultConfigPath<span class="op">()</span> <span class="dt">string</span>                            <span class="co">// XDG_CONFIG_HOME aware</span></span></code></pre></div>
+<p>Loader rejects files with permissions wider than <code>0o600</code>
+with <code>ErrInsecurePerms</code>. Mirrors F12
+<code>wizard_writer.go</code> exactly.</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfig_MissingFile_ReturnsDefaults_NoError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> LoadConfig<span class="op">(</span>filepath<span class="op">.</span>Join<span class="op">(</span>t<span class="op">.</span>TempDir<span class="op">(),</span> <span class="st">&quot;absent.yaml&quot;</span><span class="op">))</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> cfg<span class="op">.</span>DefaultPolicy<span class="op">.</span>AllowNetwork<span class="op">)</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfig_ParsesYAML<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>t<span class="op">.</span>TempDir<span class="op">(),</span> <span class="st">&quot;s.yaml&quot;</span><span class="op">)</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;deny_list:</span><span class="ch">\n</span><span class="st">  - rm -rf</span><span class="ch">\n</span><span class="st">max_output_bytes: 4096</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0o600</span><span class="op">))</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> LoadConfig<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;rm -rf&quot;</span><span class="op">},</span> cfg<span class="op">.</span>DenyList<span class="op">)</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dt">int64</span><span class="op">(</span><span class="dv">4096</span><span class="op">),</span> cfg<span class="op">.</span>MaxOutputBytes<span class="op">)</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLoadConfig_RejectsWorldReadable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>t<span class="op">.</span>TempDir<span class="op">(),</span> <span class="st">&quot;s.yaml&quot;</span><span class="op">)</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>p<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;{}&quot;</span><span class="op">),</span> <span class="bn">0o644</span><span class="op">))</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> LoadConfig<span class="op">(</span>p<span class="op">)</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrInsecurePerms<span class="op">)</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWriteConfig_EnforcesMode0600_AndParent0700<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;deep&quot;</span><span class="op">,</span> <span class="st">&quot;sandbox.yaml&quot;</span><span class="op">)</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> WriteConfig<span class="op">(</span>p<span class="op">,</span> DefaultSandboxConfig<span class="op">()))</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    info<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>Stat<span class="op">(</span>p<span class="op">);</span>          require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> fs<span class="op">.</span>FileMode<span class="op">(</span><span class="bn">0o600</span><span class="op">),</span> info<span class="op">.</span>Mode<span class="op">().</span>Perm<span class="op">())</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    parent<span class="op">,</span> _ <span class="op">:=</span> os<span class="op">.</span>Stat<span class="op">(</span>filepath<span class="op">.</span>Dir<span class="op">(</span>p<span class="op">));</span> require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> fs<span class="op">.</span>FileMode<span class="op">(</span><span class="bn">0o700</span><span class="op">),</span> parent<span class="op">.</span>Mode<span class="op">().</span>Perm<span class="op">())</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestWriteConfig_FailsIfFileAlreadyExists<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* O_EXCL */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T08): sandbox.yaml YAML loader + secret-safe writer (0600/0700)</code>.</p>
+<hr />
+<h2 id="task-9-sandbox-slash-command-tdd">Task 9: /sandbox slash command
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/sandbox_command.go</code>, new
+<code>helix_code/internal/commands/sandbox_command_test.go</code>.</p>
+<p>Mirrors F13 <code>lsp_command.go</code> pattern: defines a small
+<code>SandboxManager</code> interface in the commands package so the
+slash command is testable with a fake while still letting
+<code>main.go</code> pass the real
+<code>*sandbox.SandboxManager</code>.</p>
+<p>Subcommands: - <code>/sandbox status</code> — capabilities table
+(GOOS, bwrap path or “not installed”, userns yes/no, cgroups v2 yes/no,
+selected backend, selection reason). - <code>/sandbox test</code> — runs
+<code>/bin/echo p1f14-sandbox-ok</code> via manager.Execute with default
+policy; prints exit code, captured stdout (trim, truncate to 256 bytes),
+backend used. - <code>/sandbox policy</code> — prints active
+<code>SandboxPolicy</code> + the merged deny-list with
+<code>[CONST-033]</code> markers.</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandboxCommand_Status_RendersCapabilitiesTable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake mgr returns canned caps */</span> <span class="op">}</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandboxCommand_Test_RunsEchoAndPrintsExitCode<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fake mgr returns SandboxResult */</span> <span class="op">}</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandboxCommand_Policy_PrintsConstitutionalEntriesWithMarker<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    res <span class="op">:=</span> <span class="co">/* exec /sandbox policy with default config */</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;[CONST-033]&quot;</span><span class="op">)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;systemctl suspend&quot;</span><span class="op">)</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T09): /sandbox slash command (status / test / policy)</code>.</p>
+<hr />
+<h2 id="task-10-main.go-wiring-integration-test">Task 10: main.go wiring
++ integration test</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/cmd/cli/main.go</code>, modify
+<code>helix_code/internal/tools/registry.go</code>, new
+<code>helix_code/tests/integration/sandbox_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p><code>registry.go</code> modifications:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sandboxManager <span class="op">*</span>sandbox<span class="op">.</span>SandboxManager <span class="co">// optional; nil disables shell_sandboxed registration</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ToolRegistry<span class="op">)</span> SetSandboxManager<span class="op">(</span>m <span class="op">*</span>sandbox<span class="op">.</span>SandboxManager<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">();</span> <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>sandboxManager <span class="op">=</span> m</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>tools<span class="op">[</span><span class="st">&quot;shell_sandboxed&quot;</span><span class="op">]</span> <span class="op">=</span> newSandboxedShellToolAdapter<span class="op">(</span>m<span class="op">)</span>  <span class="co">// adapter wraps *sandbox.SandboxedShellTool</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>main.go</code> startup wiring (per spec §4.1):</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>caps <span class="op">:=</span> sandbox<span class="op">.</span>Detect<span class="op">()</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>cfg<span class="op">,</span> cfgErr <span class="op">:=</span> sandbox<span class="op">.</span>LoadConfig<span class="op">(</span><span class="st">&quot;&quot;</span><span class="op">)</span>          <span class="co">// missing OK</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> cfgErr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>errors<span class="op">.</span>Is<span class="op">(</span>cfgErr<span class="op">,</span> fs<span class="op">.</span>ErrNotExist<span class="op">)</span> <span class="op">{</span> log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;WARN: %v&quot;</span><span class="op">,</span> cfgErr<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>runner <span class="op">:=</span> sandbox<span class="op">.</span>NewExecRunner<span class="op">()</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>backend<span class="op">,</span> selErr <span class="op">:=</span> sandbox<span class="op">.</span>SelectBackend<span class="op">(</span>caps<span class="op">,</span> runner<span class="op">)</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> selErr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;INFO: %v&quot;</span><span class="op">,</span> selErr<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>mgr <span class="op">:=</span> sandbox<span class="op">.</span>NewSandboxManager<span class="op">(</span>sandbox<span class="op">.</span>SandboxManagerOptions<span class="op">{</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    Capabilities<span class="op">:</span> caps<span class="op">,</span> Config<span class="op">:</span> cfg<span class="op">,</span> Backend<span class="op">:</span> backend<span class="op">,</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> mgr<span class="op">.</span>Close<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>registry<span class="op">.</span>SetSandboxManager<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>slashRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewSandboxCommand<span class="op">(</span>mgr<span class="op">))</span></span></code></pre></div>
+<p>Integration test (gated, per spec §5.2):</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">// +build integration</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandbox_Bubblewrap_RunsEcho<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;bwrap&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F14 bubblewrap not on PATH (install: apt install bubblewrap OR dnf install bubblewrap)&quot;</span><span class="op">)</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    caps <span class="op">:=</span> sandbox<span class="op">.</span>Detect<span class="op">()</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    backend<span class="op">,</span> err <span class="op">:=</span> sandbox<span class="op">.</span>SelectBackend<span class="op">(</span>caps<span class="op">,</span> sandbox<span class="op">.</span>NewExecRunner<span class="op">())</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> sandbox<span class="op">.</span>BackendBubblewrap<span class="op">,</span> backend<span class="op">.</span>Kind<span class="op">())</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> sandbox<span class="op">.</span>NewSandboxManager<span class="op">(</span>sandbox<span class="op">.</span>SandboxManagerOptions<span class="op">{</span>Capabilities<span class="op">:</span> caps<span class="op">,</span> Config<span class="op">:</span> sandbox<span class="op">.</span>DefaultSandboxConfig<span class="op">(),</span> Backend<span class="op">:</span> backend<span class="op">})</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>sandbox<span class="op">.</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;echo p1f14-bwrap-ok&quot;</span><span class="op">,</span> Policy<span class="op">:</span> sandbox<span class="op">.</span>DefaultSandboxPolicy<span class="op">()})</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> res<span class="op">.</span>ExitCode<span class="op">)</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>res<span class="op">.</span>Stdout<span class="op">),</span> <span class="st">&quot;p1f14-bwrap-ok&quot;</span><span class="op">)</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandbox_Bubblewrap_NetworkDeniedByDefault<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* curl --max-time 2 https://example.com → non-zero */</span> <span class="op">}</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandbox_Native_RunsEcho<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* SKIP-OK on userns=0 */</span> <span class="op">}</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandbox_FailsClosedWhenNoBackend<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Never skipped — proves fail-closed semantics regardless of host capabilities.</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> sandbox<span class="op">.</span>NewSandboxManager<span class="op">(</span>sandbox<span class="op">.</span>SandboxManagerOptions<span class="op">{</span>Capabilities<span class="op">:</span> sandbox<span class="op">.</span>SandboxCapabilities<span class="op">{},</span> Config<span class="op">:</span> sandbox<span class="op">.</span>DefaultSandboxConfig<span class="op">(),</span> Backend<span class="op">:</span> <span class="ot">nil</span><span class="op">})</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>sandbox<span class="op">.</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;echo hi&quot;</span><span class="op">,</span> Policy<span class="op">:</span> sandbox<span class="op">.</span>DefaultSandboxPolicy<span class="op">()})</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> sandbox<span class="op">.</span>ErrSandboxUnavailable<span class="op">)</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> err<span class="op">.</span>Error<span class="op">(),</span> <span class="st">&quot;install bubblewrap&quot;</span><span class="op">)</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSandbox_RejectsConstitutionalDenyList<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Never skipped — proves CONST-033 enforcement.</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    cb <span class="op">:=</span> <span class="op">&amp;</span>countingBackend<span class="op">{</span>result<span class="op">:</span> <span class="op">&amp;</span>sandbox<span class="op">.</span>SandboxResult<span class="op">{</span>ExitCode<span class="op">:</span> <span class="dv">0</span><span class="op">}}</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> sandbox<span class="op">.</span>NewSandboxManager<span class="op">(</span>sandbox<span class="op">.</span>SandboxManagerOptions<span class="op">{</span>Backend<span class="op">:</span> cb<span class="op">,</span> Config<span class="op">:</span> sandbox<span class="op">.</span>DefaultSandboxConfig<span class="op">()})</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>sandbox<span class="op">.</span>SandboxRequest<span class="op">{</span>Command<span class="op">:</span> <span class="st">&quot;systemctl suspend&quot;</span><span class="op">,</span> Policy<span class="op">:</span> sandbox<span class="op">.</span>DefaultSandboxPolicy<span class="op">()})</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> sandbox<span class="op">.</span>ErrConstitutionalDeny<span class="op">)</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> cb<span class="op">.</span>runs<span class="op">)</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F14-T10): wire SandboxManager into main.go + /sandbox + gated integration tests</code>.</p>
+<hr />
+<h2 id="task-11-challenge-with-runtime-evidence">Task 11: Challenge with
+runtime evidence</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p1f14_challenge/main.go</code>,
+new
+<code>challenges/p1-f14-sandboxed-shell-execution/CHALLENGE.md</code>,
+new <code>challenges/p1-f14-sandboxed-shell-execution/run.sh</code>.</p>
+<p>Output skeleton:</p>
+<pre><code>=== DETECTOR + FAIL-CLOSED (always runs) ===
+[PASS] detector: GOOS=linux, bwrap=/usr/bin/bwrap (or &quot;not installed&quot;), userns=true (or false), cgroups2=true (or false)
+[PASS] select-backend: chose bubblewrap (or native, or fail-closed)
+[PASS] fail-closed: forced empty SandboxCapabilities returns ErrSandboxUnavailable with documented message
+[PASS] fail-closed: error message contains &quot;install bubblewrap&quot; AND &quot;unprivileged_userns_clone&quot;
+[PASS] CONST-033: &quot;systemctl suspend&quot; rejected with ErrConstitutionalDeny BEFORE backend.Run is invoked (counter=0)
+[PASS] CONST-033: nested form &quot;bash -c &#39;systemctl suspend&#39;&quot; also rejected (counter=0)
+
+=== BUBBLEWRAP (gated) ===
+[PASS|skipped: bubblewrap not on PATH (install: apt install bubblewrap OR dnf install bubblewrap)]
+[PASS] bwrap: /bin/echo runs in sandbox, stdout=p1f14-bwrap-ok
+[PASS] bwrap: network denied by default (curl --max-time 2 https://example.com fails)
+[PASS] bwrap: network allowed when policy.AllowNetwork=true (curl returns 2xx)
+[PASS] bwrap: deny-list rejection happens before bwrap is invoked
+
+=== NATIVE (gated) ===
+[PASS|skipped: unprivileged userns disabled (echo 1 &gt; /proc/sys/kernel/unprivileged_userns_clone)]
+[PASS] native: /bin/echo runs in sandbox, stdout=p1f14-native-ok
+[PASS] native: network denied by default
+[PASS] native: deny-list rejection happens before helper is invoked
+
+SUMMARY: DETECTOR=6/6 PASS; BWRAP=&lt;n&gt;/4 PASS; NATIVE=&lt;n&gt;/3 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any assertion failure within
+phases that did run. Anti-bluff smoke clean check appended to harness
+output. Verbatim output captured into
+<code>06_phase_1_evidence.md</code>. Dual commit (Challenges submodule +
+meta-repo bump).</p>
+<p>Subject:
+<code>feat(P1-F14-T11): challenge with runtime evidence (detector/fail-closed always; bwrap + native gated)</code>.</p>
+<hr />
+<h2 id="task-12-close-out-push">Task 12: Close-out + push</h2>
+<p>Tick all 12 items in PROGRESS, advance PROGRESS focus to F15
+candidate, run final verification (<code>make verify-compile</code>,
+anti-bluff smoke,
+<code>go test -count=1 ./internal/tools/sandbox/... ./internal/commands/...</code>),
+commit
+<code>chore(P1-F14-T12): close out feature 14 — sandboxed shell execution</code>,
+push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions).</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types + CONST-033 (§3.3, §9), T03 detector + SelectBackend (§3.3,
+§5.2), T04 bubblewrap argv (§3.3, §4.3), T05 native cloneflags (§3.3,
+§4.4, §7), T06 manager policy enforcement (§4.2, §4.6, §5.1), T07 tool
+(§3.3, §3.4), T08 config loader (§3.3, §9 CONST-042), T09 slash (§3.4),
+T10 wiring + integration (§4.1, §5.2, §6.2), T11 Challenge three phases
+(§5.2, §6.3), T12 close-out (§9).</li>
+<li><strong>TDD:</strong> every code task starts with a failing test
+that exercises real code paths (CONST-033 deny-list with spawn-counter;
+argv builder pure-function tests; fail-closed gate against forced-empty
+capabilities; YAML loader against real tempdir files).</li>
+<li><strong>Type consistency:</strong> <code>SandboxConfig</code>,
+<code>SandboxPolicy</code>, <code>SandboxCapabilities</code>,
+<code>SandboxRequest</code>, <code>SandboxResult</code>,
+<code>SandboxBackend</code>, <code>SandboxManager</code>,
+<code>SandboxedShellTool</code>, <code>BubblewrapBackend</code>,
+<code>NativeBackend</code>, <code>ConstitutionalDenyList</code> — names
+match across spec §3.3 and plan T02–T08.</li>
+<li><strong>No new external deps:</strong> bubblewrap is invoked as a
+subprocess via <code>os/exec</code> (stdlib); native namespace setup
+uses <code>syscall.SysProcAttr.Cloneflags</code> (stdlib); YAML loading
+reuses <code>gopkg.in/yaml.v3 v3.0.1</code> already in
+<code>go.mod</code>. Confirmed via
+<code>grep -E &quot;yaml.v3|fsnotify&quot; helix_code/go.mod</code>. No
+<code>go get</code> needed.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has THREE sections;
+Phase A always runs and asserts the verbatim fail-closed message +
+CONST-033 spawn-counter rejection; Phases B and C are explicitly gated
+with
+<code>SKIP-OK: P1-F14 &lt;missing capability&gt; (install: &lt;hint&gt;)</code>.
+The fail-closed assertion is the single most consequential test in the
+feature.</li>
+<li><strong>CONST-033 deny-list:</strong> rejected BEFORE backend.Run is
+invoked; verified by <code>countingBackend.runs == 0</code> in unit +
+Challenge tests. List covers
+<code>systemctl {suspend|hibernate|hybrid-sleep|suspend-then-hibernate|poweroff|halt|reboot|kexec}</code>,
+bare <code>shutdown|halt|poweroff|reboot|kexec</code>,
+<code>pm-suspend|pm-hibernate|pm-suspend-hybrid</code>, and
+<code>loginctl {suspend|hibernate|hybrid-sleep|poweroff|reboot}</code>.
+Tokenised + word-boundary regex match catches whitespace, chained, and
+nested-shell variants.</li>
+<li><strong>CONST-042:</strong> sandbox.yaml written via
+<code>os.OpenFile(O_CREATE|O_WRONLY|O_EXCL, 0o600)</code>, parent dir at
+<code>0o700</code>. Loader rejects perms wider than 0600 with
+<code>ErrInsecurePerms</code>. Mirrors F12 wizard_writer pattern.</li>
+<li><strong>Cross-platform:</strong> Linux-only v1; non-Linux
+short-circuits to <code>ErrSandboxUnavailable</code> with platform note
+in §7. Build tag splits <code>native_backend.go</code> (linux) and
+<code>native_backend_other.go</code> (!linux); the rest of the package
+builds on every GOOS so <code>/sandbox status</code> works
+everywhere.</li>
+<li><strong>Existing-code constraint:</strong> spec §3.5 documents that
+<code>internal/tools/shell/</code> already defines a
+<code>SandboxConfig</code> (and friends) but is left untouched per Q4=B.
+No symbol clash because the new code lives in a different package
+(<code>internal/tools/sandbox</code>). The <code>bash</code> tool stays
+as-is; F14 is purely additive.</li>
+<li><strong>Branch + push:</strong> stays on <code>main</code>,
+non-force to all four remotes (per CONST-043); explicit user
+authorization is requested at T12 before pushing.</li>
+<li><strong>Reality check:</strong> the existing <code>Tool</code>
+interface in <code>internal/tools/registry.go</code>
+(<code>Name</code>/<code>Description</code>/<code>Schema</code>/<code>Execute</code>/<code>Category</code>/<code>Validate</code>)
+is fully compatible with the new tool. The
+<code>SetSandboxManager</code> shape matches the existing F13
+<code>SetLSPManager</code>, so the registry change is one method + one
+lazy-registration line. No registry redesign.</li>
+</ol>
+</body>
+</html>

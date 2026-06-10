@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>recursive-dedup-audit</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">recursive-dedup-audit</h1>
+</header>
+<h1 id="recursive-submodule-deduplication-audit-post-phase-1.5">Recursive
+Submodule Deduplication Audit (post-Phase 1.5)</h1>
+<p>Date: 2026-05-06<br />
+Scope: All 6 reachable <code>.gitmodules</code> in the meta-repo tree
+(excluding third-party trees: <code>cli_agents/</code>,
+<code>cli_agents_resources/</code>,
+<code>dependencies/HuggingFace_Hub</code>,
+<code>dependencies/Ollama</code>,
+<code>dependencies/LLama_CPP</code>).</p>
+<h2 id="inventory">Inventory</h2>
+<ul>
+<li>Total recursive submodules: <strong>241</strong></li>
+<li><code>.gitmodules</code> files inspected: 6
+<ul>
+<li><code>./.gitmodules</code> (meta-repo root)</li>
+<li><code>./challenges/.gitmodules</code></li>
+<li><code>./helix_agent/.gitmodules</code></li>
+<li><code>./helix_agent/HelixLLM/.gitmodules</code></li>
+<li><code>./helix_qa/.gitmodules</code></li>
+<li><code>./helix_qa/tools/opensource/skyvern/.gitmodules</code></li>
+</ul></li>
+<li>(URL, path) entries collected: <strong>244</strong></li>
+<li>URLs appearing at &gt;1 path (potential duplicates):
+<strong>27</strong></li>
+</ul>
+<h2 id="categorization-of-the-27-multi-path-urls">Categorization of the
+27 multi-path URLs</h2>
+<h3 id="category-a-in-tree-third-party-legitimately-at-two-locations-1">Category
+A — IN-TREE third-party legitimately at two locations (1)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 28%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th>URL</th>
+<th>Paths</th>
+<th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git</code></td>
+<td><code>cli_agents/bridle</code>,
+<code>cli_agents/claude-plugins</code></td>
+<td><strong>SKIP</strong> — both paths are inside
+<code>cli_agents/</code> (third-party), excluded from removal per task
+constraints.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="category-b-orphan-.gitmodules-entries-with-no-tracked-gitlink-3">Category
+B — Orphan <code>.gitmodules</code> entries with NO tracked gitlink
+(3)</h3>
+<p>These are stale <code>[submodule]</code> blocks in
+<code>helix_agent/.gitmodules</code>. The corresponding directories are
+tracked as plain files (not gitlinks), or are not tracked at all. Safe
+to remove.</p>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 31%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr>
+<th>Name</th>
+<th>Path</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Toolkit/SiliconFlow</code></td>
+<td><code>helix_agent/Toolkit/SiliconFlow</code></td>
+<td><code>helix_agent/Toolkit/</code> is checked in as plain files. No
+gitlink.</td>
+</tr>
+<tr>
+<td><code>Toolkit/Chutes</code></td>
+<td><code>helix_agent/Toolkit/Chutes</code></td>
+<td>Same. URL also has duplicate (next row).</td>
+</tr>
+<tr>
+<td><code>Toolkit/Toolkit/Chutes</code></td>
+<td><code>helix_agent/Toolkit/Toolkit/Chutes</code></td>
+<td>Pathological double-nest. Path doesn’t exist on disk.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="category-c-vendored-dependency-layout-via-go.mod-replace-23-do-not-remove">Category
+C — Vendored dependency layout via <code>go.mod</code>
+<code>replace</code> (23) — <strong>DO NOT REMOVE</strong></h3>
+<p>These look like duplicates by URL but are <strong>legitimate vendored
+dependency trees</strong> required for compilation:</p>
+<h4 id="c1-helix_agenthelixllmsubmodules-22-entries">C1:
+<code>helix_agent/HelixLLM/submodules/*</code> (22 entries)</h4>
+<p>Wired into <code>helix_agent/HelixLLM/go.mod</code> via
+<code>replace</code> directives. Removing them breaks HelixLLM’s
+build:</p>
+<pre><code>replace digital.vasic.agentic       =&gt; ./submodules/Agentic
+replace digital.vasic.auth          =&gt; ./submodules/Auth
+replace digital.vasic.background    =&gt; ./submodules/BackgroundTasks
+replace digital.vasic.cache         =&gt; ./submodules/Cache
+replace digital.vasic.challenges    =&gt; ./submodules/Challenges
+replace digital.vasic.concurrency   =&gt; ./submodules/Concurrency
+replace digital.vasic.database      =&gt; ./submodules/Database
+replace digital.vasic.embeddings    =&gt; ./submodules/Embeddings
+replace digital.vasic.eventbus      =&gt; ./submodules/EventBus
+replace digital.vasic.formatters    =&gt; ./submodules/Formatters
+replace digital.vasic.helixqa       =&gt; ./submodules/HelixQA
+replace digital.vasic.llmorchestrator =&gt; ./submodules/LLMOrchestrator
+replace digital.vasic.llmprovider   =&gt; ./submodules/LLMProvider
+replace digital.vasic.mcp           =&gt; ./submodules/MCP_Module
+replace digital.vasic.memory        =&gt; ./submodules/Memory
+replace digital.vasic.observability =&gt; ./submodules/Observability
+replace digital.vasic.optimization  =&gt; ./submodules/Optimization
+replace digital.vasic.planning      =&gt; ./submodules/Planning
+replace digital.vasic.rag           =&gt; ./submodules/RAG
+replace digital.vasic.streaming     =&gt; ./submodules/Streaming
+replace digital.vasic.toolschema    =&gt; ./submodules/ToolSchema
+replace digital.vasic.vectordb      =&gt; ./submodules/VectorDB
+replace digital.vasic.conversation  =&gt; ./submodules/conversation</code></pre>
+<h4 id="c2-helix_agentname-paired-with-root-or-helix_agenttoolkit-1">C2:
+<code>helix_agent/&lt;Name&gt;</code> paired with root or
+helix_agent/Toolkit (1)</h4>
+<p><code>helix_agent/Challenges</code> (160000 gitlink) is wired into
+<code>helix_agent/go.mod</code>:</p>
+<pre><code>replace digital.vasic.challenges =&gt; ./Challenges</code></pre>
+<p>It is duplicated by URL with the root <code>challenges/</code>
+submodule, but removal would break HelixAgent’s build. The two paths
+represent <strong>different dependency-resolution roots</strong>.</p>
+<h4 id="architectural-decision-required-not-performed">Architectural
+decision required (NOT performed)</h4>
+<p>Promoting <code>helix_agent/HelixLLM</code> to consume
+<code>../../../Containers</code>, <code>../../../Security</code>,
+<code>../../helix_agent/Auth</code>, etc. via root canonicals requires:
+1. Rewriting all <code>replace</code> paths in HelixLLM’s
+<code>go.mod</code>. 2. Verifying <code>go mod tidy</code> + full
+HelixLLM build still pass. 3. Same for helix_agent/go.mod. 4. Confirming
+with the user that <strong>submodule reuse via parent-traversal
+<code>replace</code> paths</strong> is the desired architecture
+(vs. each module having its own vendored dep tree, which is the current
+— and arguably intentional — state).</p>
+<p>This is <strong>out of scope for a mechanical dedup pass</strong> and
+demands a Phase 2 architectural ticket.</p>
+<h2 id="what-was-removed-this-wp">What was removed (this WP)</h2>
+<p>Only the 3 orphan <code>Toolkit/*</code> entries from
+<code>helix_agent/.gitmodules</code>. They had no corresponding tracked
+gitlinks, so removal is purely a config cleanup with zero functional
+impact.</p>
+<h2 id="possibly-unused-submodules-report-only-not-removed">Possibly-unused
+submodules (REPORT ONLY — NOT removed)</h2>
+<p>A grep-based “is anything referencing this submodule?” pass would be
+misleading because Go <code>replace</code> directives reach via go.mod,
+which is itself a reference. Determining “unused” requires:</p>
+<ol type="1">
+<li><code>go mod tidy</code> per module to detect unused replace
+targets.</li>
+<li>Build + test each module to confirm.</li>
+<li>Walk Challenge scripts that may exercise submodules outside the Go
+build.</li>
+</ol>
+<p>This is deferred to a dedicated WP. The current state is
+intentionally conservative: nothing removed without proof of
+redundancy.</p>
+<h2 id="summary">Summary</h2>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 30%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr>
+<th>Bucket</th>
+<th>Count</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total URL duplicates flagged</td>
+<td>27</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Truly safe to remove</td>
+<td>3 (orphan <code>.gitmodules</code> entries)</td>
+<td>Removed</td>
+</tr>
+<tr>
+<td>Vendored dependency layout (legitimate)</td>
+<td>23</td>
+<td>Preserved; needs architectural decision</td>
+</tr>
+<tr>
+<td>Third-party (out of scope)</td>
+<td>1</td>
+<td>Skipped</td>
+</tr>
+</tbody>
+</table>
+<p><strong>No nested submodules were physically removed.</strong> The
+audit revealed that the remaining “duplicates” are intentional vendored
+dependency trees, not redundant copies. Phase 1.5 WP3 already handled
+the simpler cases.</p>
+</body>
+</html>

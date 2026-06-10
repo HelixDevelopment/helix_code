@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f02-permission-rules-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f02-permission-rules-design</h1>
+</header>
+<h1 id="p1-f02-permission-rule-system-design-spec">P1-F02 — Permission
+Rule System — Design Spec</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Author:</strong> Claude
+Opus 4.7 (1M context) + user (milos85vasic.2nd@gmail.com) <strong>Phase
+/ Feature:</strong> Phase 1, Feature 2 of
+<code>docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>
+<strong>Status:</strong> APPROVED in brainstorming, awaiting user review
+of written spec <strong>Successor:</strong> to be handed to
+<code>superpowers:writing-plans</code> for executable plan
+<strong>Predecessor:</strong> Feature 1 (Auto-Compaction) — closed
+2026-05-05 (commits <code>f0b9b15</code>…<code>d78465c</code>)</p>
+<hr />
+<h2 id="goals-non-goals-success-criteria">1. Goals, non-goals, success
+criteria</h2>
+<h3 id="what-were-building">1.1 What we’re building</h3>
+<p>A claude-code-style permission rule system for HelixCode tool
+execution: every tool call (Read, Edit, Write, Bash, …) is checked
+against a layered ruleset that combines a <strong>named mode
+preset</strong> with <strong>explicit user rules</strong> and
+<strong>wildcard patterns</strong>
+(e.g. <code>Bash(git status:*)</code>). Compound shell commands
+(<code>echo $(rm -rf /)</code>, <code>ls &amp;&amp; git push</code>,
+heredocs, pipelines) are decomposed and <strong>every</strong> leaf call
+must independently satisfy the rules — closing the smuggling vector that
+a naive splitter leaves open.</p>
+<p>This feature is the substrate that makes the autonomy gradient
+(<code>none</code> → <code>full_auto</code>) safe to use in practice:
+users can leave HelixCode in <code>semi_auto</code> and still know that
+<code>rm -rf</code> will always prompt while <code>git status</code>
+never will.</p>
+<h3 id="goals-priority-order">1.2 Goals (priority order)</h3>
+<ul>
+<li><strong>G1 — No bluff.</strong> A passing test/Challenge guarantees
+end-user usability per Constitution Article XI §11.9. Specifically: a
+“denied” rule must demonstrably block a real <code>os/exec</code>-issued
+command, verified by a filesystem-state diff.</li>
+<li><strong>G2 — Extend, don’t parallelise.</strong> Build on the
+existing <code>internal/tools/confirmation/PolicyEngine</code> (which
+already has Policy → Rule → Condition with priorities) and the existing
+<code>internal/workflow/autonomy/PermissionManager</code>. Same lesson
+learned in F01.</li>
+<li><strong>G3 — Smuggle-resistant compound parsing.</strong> Use
+<code>mvdan.cc/sh/v3/syntax</code> to extract every call expression from
+a Bash command, including command substitutions, backticks, heredocs,
+pipelines, and quoted operators.</li>
+<li><strong>G4 — File-first, no DB.</strong> Rules live in
+<code>~/.helixcode/permissions.yaml</code> (user-global) and
+<code>&lt;project&gt;/.helixcode/permissions.yaml</code>
+(project-local). No PostgreSQL, no Redis. Tests stay cheap, users can
+grep/diff their rules.</li>
+<li><strong>G5 — Discoverable CLI.</strong> Both a Cobra subcommand
+group (<code>helixcode permissions {list,add,remove,check}</code>) and
+an in-session slash command (<code>/permissions …</code>) over the
+existing <code>internal/commands/</code> dispatcher.</li>
+</ul>
+<h3 id="non-goals-explicit-out-of-scope-for-f02">1.3 Non-goals (explicit
+out-of-scope for F02)</h3>
+<ul>
+<li><strong>N1.</strong> Database-backed rule store. Deferred; the
+file-only design is sufficient until team/multi-tenant scenarios
+appear.</li>
+<li><strong>N2.</strong> REST API for rule management. No consumer.</li>
+<li><strong>N3.</strong> Per-MCP-server rule scoping. Belongs to F06
+(MCP Full Lifecycle).</li>
+<li><strong>N4.</strong> Replacing <code>AutonomyMode</code>. The five
+claude-code permission modes become <strong>named rule presets</strong>
+that compose with the existing autonomy gradient — not a parallel mode
+taxonomy.</li>
+<li><strong>N5.</strong> Rule import/export, rule profiles,
+organisation-level policies. Defer until requested.</li>
+</ul>
+<h3 id="success-criteria">1.4 Success criteria</h3>
+<ul>
+<li><strong>S1.</strong> <code>make verify-compile</code> exits 0 with
+the new package and all consumers wired.</li>
+<li><strong>S2.</strong> Unit tests for the new package and the extended
+<code>confirmation.Condition</code> pass with <code>-race</code>.</li>
+<li><strong>S3.</strong> Integration test
+(<code>-tags=integration</code>, no mocks) demonstrates that a
+<code>Bash(rm -rf *)</code> deny rule blocks a real <code>os/exec</code>
+invocation against a temp filesystem.</li>
+<li><strong>S4.</strong> Challenge under
+<code>tests/e2e/challenges/permissions/</code> passes three end-to-end
+scenarios (read auto-allow, destructive deny under
+<code>--permission-mode auto</code>, command-substitution smuggle
+denied) with stdout transcript + filesystem-state diff pasted into the
+close-out commit body.</li>
+<li><strong>S5.</strong> Anti-bluff smoke
+(<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/tools/permissions/</code>)
+returns zero hits.</li>
+<li><strong>S6.</strong>
+<code>helixcode --permission-mode &lt;preset&gt;</code> and
+<code>helixcode permissions {list,add,remove,check}</code> work
+end-to-end against a real filesystem.</li>
+<li><strong>S7.</strong> <code>/permissions</code> slash command
+registered and dispatched via existing
+<code>internal/commands/</code>.</li>
+</ul>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<h3 id="topology">2.1 Topology</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│ cmd/cli/main.go  │  /permissions slash cmd (internal/commands)  │
+│  --permission-mode               helixcode permissions {add,…}   │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │
+                ┌──────────────▼──────────────┐
+                │ internal/tools/permissions/ │  ← NEW package, thin
+                │   - rule_engine.go          │
+                │   - mode_presets.go         │
+                │   - rule_loader.go          │
+                │   - shell_splitter.go       │
+                │   - permissions.go (facade) │
+                └──────────────┬──────────────┘
+                               │ produces confirmation.Policy
+                ┌──────────────▼─────────────────────┐
+                │ internal/tools/confirmation/       │  ← extend
+                │   - policies.go (add Wildcard cond)│
+                │   - confirmer.go (unchanged)       │
+                └──────────────┬─────────────────────┘
+                               │
+                ┌──────────────▼─────────────────────┐
+                │ internal/tools/registry.go         │
+                │ executor calls confirmer.Confirm() │  (already wired)
+                └────────────────────────────────────┘</code></pre>
+<h3 id="why-this-shape">2.2 Why this shape</h3>
+<ul>
+<li><strong>One new package, narrow responsibility.</strong>
+<code>internal/tools/permissions/</code> only loads/parses/dispatches;
+the actual ask-or-not logic stays in the existing
+<code>confirmation.Confirmer</code>.</li>
+<li><strong>One field added to existing types.</strong>
+<code>confirmation.Condition</code> gets a <code>Wildcard string</code>
+field; <code>Condition.Matches</code> is extended to evaluate it. No
+other package signature changes.</li>
+<li><strong>No new mode enum.</strong> The 5 claude-code modes are
+package-private rule slices in <code>mode_presets.go</code>. The
+user-facing <code>AutonomyMode</code> (<code>none</code>,
+<code>basic</code>, <code>basic_plus</code>, <code>semi_auto</code>,
+<code>full_auto</code>) is unchanged.</li>
+<li><strong>No new persistence layer.</strong> Files only. The existing
+audit log (<code>internal/tools/confirmation/audit.go</code>) records
+rule matches.</li>
+</ul>
+<h3 id="component-responsibilities">2.3 Component responsibilities</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rule_engine.go</code></td>
+<td>parse rule patterns, sort by priority, evaluate against a
+<code>ToolCallRequest</code>, resolve to
+<code>confirmation.Action</code></td>
+</tr>
+<tr>
+<td><code>mode_presets.go</code></td>
+<td>the five built-in <code>[]Rule</code> slices (<code>default</code>,
+<code>auto</code>, <code>acceptEdits</code>, <code>dontAsk</code>,
+<code>bypassPermissions</code>) and the conservative read-only / write
+command lists</td>
+</tr>
+<tr>
+<td><code>rule_loader.go</code></td>
+<td>load YAML from user + project paths, fail-fast on malformed YAML or
+unknown preset, produce a <code>RuleSet</code> with <code>Source</code>
+provenance</td>
+</tr>
+<tr>
+<td><code>shell_splitter.go</code></td>
+<td><code>mvdan.cc/sh/v3/syntax</code> walker that extracts every call
+expression from a Bash string, recursing into command substitutions and
+backticks</td>
+</tr>
+<tr>
+<td><code>permissions.go</code></td>
+<td>facade: <code>NewEngine(loader, mode)</code> returns an engine that
+registers <code>confirmation.Policy</code>s with the existing
+<code>PolicyEngine</code></td>
+</tr>
+<tr>
+<td><code>confirmation/policies.go</code> (extended)</td>
+<td>add <code>Wildcard string</code> to <code>Condition</code>;
+<code>Matches</code> evaluates it against
+<code>req.Parameters[&quot;command&quot;]</code> (or the relevant arg) using
+<code>shell_splitter</code></td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code> (extended)</td>
+<td>parse <code>--permission-mode</code> flag; on startup, load files
+and register policy with the confirmer</td>
+</tr>
+<tr>
+<td><code>helixcode permissions</code> Cobra group</td>
+<td>subcommands <code>list</code>, <code>add</code>,
+<code>remove</code>, <code>check</code>; writes/reads YAML files</td>
+</tr>
+<tr>
+<td><code>/permissions</code> slash command</td>
+<td>registers a <code>commands.Command</code> that dispatches to the
+same Cobra runners; updates the in-memory rule engine for the rest of
+the session</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-shapes">3. Data shapes</h2>
+<h3 id="yaml-on-disk">3.1 YAML on disk</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ~/.helixcode/permissions.yaml  (user-global)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># &lt;project&gt;/.helixcode/permissions.yaml  (project-local; takes precedence on conflict)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mode</span><span class="kw">:</span><span class="at"> acceptEdits</span><span class="co">          # one of: default | auto | acceptEdits | dontAsk | bypassPermissions</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rules</span><span class="kw">:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">pattern</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Bash(git status:*)&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">action</span><span class="kw">:</span><span class="at"> allow</span><span class="co">            # allow | ask | deny</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">            # higher wins; default 0</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;git status is read-only&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">pattern</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Bash(rm -rf *)&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">action</span><span class="kw">:</span><span class="at"> deny</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">priority</span><span class="kw">:</span><span class="at"> </span><span class="dv">1000</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">pattern</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Edit(internal/secrets/*)&quot;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">action</span><span class="kw">:</span><span class="at"> ask</span></span></code></pre></div>
+<h3 id="pattern-grammar">3.2 Pattern grammar</h3>
+<pre><code>pattern ::= ToolName &quot;(&quot; arg-pattern &quot;)&quot;
+ToolName  ::= [A-Za-z][A-Za-z0-9_]*
+arg-pattern ::= glob (with `*`, `?`, `[abc]`)</code></pre>
+<p>Examples: <code>Read(*.go)</code>,
+<code>Write(internal/auth/*)</code>, <code>Bash(git status:*)</code>,
+<code>Edit(*.md)</code>.</p>
+<p>For Bash, the pattern’s <code>arg-pattern</code> matches the command
+<strong>after</strong> compound splitting;
+<code>Bash(git status:*)</code> allows every leaf call whose normalised
+string starts with <code>git status</code>. The <code>:</code> separator
+after the verb is preserved from the porting doc for compatibility with
+documented claude-code patterns.</p>
+<h3 id="go-types-excerpt">3.3 Go types (excerpt)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/permissions/rule_engine.go</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Rule <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Pattern     <span class="dt">string</span>                  <span class="co">// &quot;Bash(git status:*)&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Action      confirmation<span class="op">.</span>Action     <span class="co">// ActionAllow / ActionAsk / ActionDeny</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Priority    <span class="dt">int</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Description <span class="dt">string</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Source      <span class="dt">string</span>                  <span class="co">// &quot;project&quot; | &quot;user&quot; | &quot;preset&quot; | &quot;cli&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> RuleSet <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    Mode    <span class="dt">string</span>   <span class="co">// &quot;acceptEdits&quot; etc.</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Rules   <span class="op">[]</span>Rule</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    Sources <span class="op">[]</span><span class="dt">string</span> <span class="co">// resolved file paths in load order</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> FileLoader <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    UserPath    <span class="dt">string</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    ProjectPath <span class="dt">string</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>FileLoader<span class="op">)</span> Load<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>RuleSet<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>FileLoader<span class="op">)</span> Save<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> scope Scope<span class="op">,</span> r Rule<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Scope <span class="dt">int</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    ScopeUser Scope <span class="op">=</span> <span class="ot">iota</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    ScopeProject</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    ScopeSession</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="resolution-order">3.4 Resolution order</h3>
+<p>Layer order (earliest layer wins on identical patterns): 1. CLI flag
+(session) 2. Project file
+(<code>&lt;project&gt;/.helixcode/permissions.yaml</code>) 3. User file
+(<code>~/.helixcode/permissions.yaml</code>) 4. Preset’s built-in rules
+(selected by <code>mode:</code> or <code>--permission-mode</code>) 5.
+Default action — <code>ActionAsk</code></p>
+<p><strong>Identical-pattern rule:</strong> if two layers contain the
+<em>same</em> pattern string, the earlier layer’s rule replaces the
+later layer’s rule (priority is irrelevant to the override). Different
+patterns from different layers all coexist in the resolved set.</p>
+<p><strong>Within the resolved set:</strong> evaluation is
+priority-sorted (highest first); the first rule whose pattern matches
+the request wins.</p>
+<p>The resolved <code>RuleSet</code> is materialised as a single
+<code>confirmation.Policy</code> registered with the
+<code>PolicyEngine</code> at engine construction time and on every
+reload.</p>
+<hr />
+<h2 id="mode-preset-semantics">4. Mode preset semantics</h2>
+<p>Each preset is a fixed <code>[]Rule</code> slice in
+<code>mode_presets.go</code>:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Preset</th>
+<th>Built-in rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default</code></td>
+<td>(no rules) → falls through to <code>ActionAsk</code> for every tool
+call</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td><code>*(*) → allow</code> at priority 0 (overridden by any explicit
+user <code>deny</code>)</td>
+</tr>
+<tr>
+<td><code>acceptEdits</code></td>
+<td><code>Edit(*) → allow</code>, <code>Write(*) → allow</code>,
+<code>MultiEdit(*) → allow</code>,
+<code>Bash(&lt;write commands&gt;) → allow</code></td>
+</tr>
+<tr>
+<td><code>dontAsk</code></td>
+<td><code>Read(*) → allow</code>, <code>Glob(*) → allow</code>,
+<code>Grep(*) → allow</code>,
+<code>Bash(&lt;read-only commands&gt;) → allow</code></td>
+</tr>
+<tr>
+<td><code>bypassPermissions</code></td>
+<td><code>*(*) → allow</code> at priority 1_000_000 (highest);
+operator-only safety hatch</td>
+</tr>
+</tbody>
+</table>
+<p><code>&lt;read-only commands&gt;</code> and
+<code>&lt;write commands&gt;</code> are conservative package-private
+lists derived from the porting doc. Examples: - read-only:
+<code>ls</code>, <code>cat</code>, <code>find</code>, <code>grep</code>,
+<code>git status</code>, <code>git log</code>, <code>git diff</code>,
+<code>pwd</code>, <code>echo</code>, <code>head</code>,
+<code>tail</code>, <code>wc</code>, <code>ps</code>, <code>env</code>,
+<code>which</code>, <code>whoami</code>, <code>date</code>,
+<code>go version</code>, <code>node --version</code>, … - write:
+<code>git add</code>, <code>git commit</code>, <code>git push</code>,
+<code>git checkout</code>, <code>git reset</code>, <code>rm</code>,
+<code>mv</code>, <code>cp</code>, <code>mkdir</code>,
+<code>chmod</code>, <code>chown</code>, <code>tar</code>,
+<code>wget</code>, <code>curl</code>, <code>make</code>,
+<code>docker</code>, <code>kubectl</code>, …</p>
+<p>A command is auto-allowed only if its <strong>leaf call</strong>
+starts with one of the listed prefixes. We err on the side of asking —
+every preset that auto-allows can be overridden by an explicit
+<code>deny</code> rule.</p>
+<hr />
+<h2 id="compound-command-splitting-g3">5. Compound-command splitting
+(G3)</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/permissions/shell_splitter.go</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> SplitCommands<span class="op">(</span>input <span class="dt">string</span><span class="op">)</span> <span class="op">([]</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    parser <span class="op">:=</span> syntax<span class="op">.</span>NewParser<span class="op">()</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    f<span class="op">,</span> err <span class="op">:=</span> parser<span class="op">.</span>Parse<span class="op">(</span>strings<span class="op">.</span>NewReader<span class="op">(</span>input<span class="op">),</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> cmds <span class="op">[]</span><span class="dt">string</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    syntax<span class="op">.</span>Walk<span class="op">(</span>f<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>n syntax<span class="op">.</span>Node<span class="op">)</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> call<span class="op">,</span> ok <span class="op">:=</span> n<span class="op">.(*</span>syntax<span class="op">.</span>CallExpr<span class="op">);</span> ok <span class="op">&amp;&amp;</span> <span class="bu">len</span><span class="op">(</span>call<span class="op">.</span>Args<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            cmds <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>cmds<span class="op">,</span> syntax<span class="op">.</span>NodeString<span class="op">(</span>call<span class="op">))</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">true</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cmds<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Wildcard match runs against <strong>every</strong> extracted call
+expression independently. Each leaf call resolves to one of
+<code>allow</code> / <code>ask</code> / <code>deny</code> via the normal
+evaluation pipeline (§3.4).</p>
+<p><strong>Aggregation rule</strong> (compound → single decision): - if
+<strong>any</strong> leaf resolves to <code>deny</code> → compound is
+<strong>denied</strong> (most-restrictive wins) - else if
+<strong>any</strong> leaf resolves to <code>ask</code> → compound is
+<strong>asked</strong> (single prompt that lists all leaves) - else
+(every leaf resolved to <code>allow</code>) → compound is
+<strong>allowed</strong></p>
+<p>Command substitutions (<code>$(...)</code>, backticks) are walked
+recursively by <code>syntax.Walk</code> — <code>echo $(rm -rf /)</code>
+extracts <code>echo</code> and <code>rm -rf /</code> as two separate
+call expressions, both of which independently feed into the aggregation.
+This closes the smuggling vector that the porting doc’s simple splitter
+leaves open.</p>
+<p>A shell parser error (malformed input) <strong>denies</strong> the
+request (fail-closed) and emits an audit-log event. We never silently
+drop a malformed input on the assumption that “we couldn’t parse it, so
+it must be safe.”</p>
+<hr />
+<h2 id="cli-surface">6. CLI surface</h2>
+<h3 id="startup-flag">6.1 Startup flag</h3>
+<pre><code>helixcode --permission-mode &lt;preset&gt; ...</code></pre>
+<p><code>&lt;preset&gt;</code> is one of <code>default</code>,
+<code>auto</code>, <code>acceptEdits</code>, <code>dontAsk</code>,
+<code>bypassPermissions</code>. Unknown values fail fast with the list
+of valid names. The flag overrides the <code>mode:</code> key in YAML
+files for the current session only.</p>
+<h3 id="cobra-subcommand-group">6.2 Cobra subcommand group</h3>
+<pre><code>helixcode permissions list [--scope all|user|project|preset]
+helixcode permissions add &quot;Bash(git status:*)&quot; allow [--scope user|project] [--priority 100]
+helixcode permissions remove &quot;Bash(git status:*)&quot; [--scope user|project]
+helixcode permissions check Bash --command &quot;git status -sb&quot;</code></pre>
+<p><code>check</code> is a dry-run: it runs the full evaluation against
+the current ruleset and prints the matched rule + decision
+<strong>without invoking any tool</strong>.</p>
+<h3 id="in-session-slash-command">6.3 In-session slash command</h3>
+<pre><code>/permissions                                # show effective rules (same as `list`)
+/permissions mode acceptEdits               # change mode for the rest of the session
+/permissions add Bash(git push:*) ask
+/permissions remove Bash(git push:*)</code></pre>
+<p>Registered with <code>internal/commands/</code> (existing dispatcher;
+F09 will standardise the user-facing slash-command experience further).
+Mutations in this scope are session-only — they do <strong>not</strong>
+write to disk unless the user runs the equivalent
+<code>helixcode permissions add</code> form.</p>
+<hr />
+<h2 id="error-handling-and-edge-cases">7. Error handling and edge
+cases</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Case</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Malformed YAML in user file</td>
+<td>startup fails fast with line:col error pointer; never silently fall
+back</td>
+</tr>
+<tr>
+<td>Malformed pattern (unparseable)</td>
+<td>rule is rejected at load; logged with file:line; engine continues
+with valid rules</td>
+</tr>
+<tr>
+<td>Unknown preset name</td>
+<td>startup fails fast with the list of valid names</td>
+</tr>
+<tr>
+<td>Shell parser error on input</td>
+<td>request is <strong>denied</strong> (fail-closed); event emitted to
+audit log</td>
+</tr>
+<tr>
+<td>File missing</td>
+<td>treated as empty ruleset (not an error)</td>
+</tr>
+<tr>
+<td>Conflicting rules at same priority</td>
+<td>last-loaded wins; warning logged once at startup</td>
+</tr>
+<tr>
+<td>User passes <code>--permission-mode bypassPermissions</code></td>
+<td>log a <code>WARN</code>-level event with timestamp + session ID;
+record in audit log; require no extra confirmation
+(operator-explicit)</td>
+</tr>
+<tr>
+<td><code>permissions add</code> writes to a missing config dir</td>
+<td>dir auto-created with mode 0700; file mode 0600 (matches
+<code>.env</code> precedent in CONST-042)</td>
+</tr>
+</tbody>
+</table>
+<p>Audit logging reuses
+<code>internal/tools/confirmation/audit.go</code>. Every rule match and
+every fallback decision is recorded with: timestamp, tool name, raw
+input, matched rule (or <code>default</code>), action taken, scope
+source.</p>
+<hr />
+<h2 id="testing-strategy-const-035-article-xi-11.9">8. Testing strategy
+(CONST-035 / Article XI §11.9)</h2>
+<p>Three layers, mirroring F01:</p>
+<h3 id="unit-internaltoolspermissions_test.go">8.1 Unit
+(<code>internal/tools/permissions/*_test.go</code>)</h3>
+<p>Table tests covering: - Pattern parsing (valid, malformed, edge cases
+like empty arg-pattern). - Wildcard matching (<code>*</code>,
+<code>?</code>, <code>[abc]</code>, escaped chars, anchored vs
+unanchored). - Compound splitting: <code>&amp;&amp;</code>,
+<code>||</code>, <code>;</code>, <code>|</code>, <code>$(...)</code>,
+backticks, heredocs, quoted operators
+(<code>echo &quot;foo &amp;&amp; bar&quot;</code> → 1 leaf, not 2), escaped
+operators, multi-line scripts. - Mode-preset rule generation: each
+preset produces the documented rule set. - File loader: missing file =
+empty, malformed YAML = error, unknown preset = error, project overrides
+user, source provenance preserved. - Rule engine <code>Evaluate</code>:
+priority sort, allow/deny/ask resolution, fall-through to default.</p>
+<p>Mocks are allowed at this layer.</p>
+<h3 id="integration-testsintegrationpermissionspermissions_integration_test.go--tagsintegration">8.2
+Integration
+(<code>tests/integration/permissions/permissions_integration_test.go</code>,
+<code>-tags=integration</code>)</h3>
+<p>Runs the real <code>confirmation.Confirmer</code> + real file loader
+against a temp <code>XDG_CONFIG_HOME</code>. Asserts: - A
+<code>Bash(rm -rf *)</code> deny rule blocks a real tool registry call
+(the target file is <strong>not</strong> deleted). - A
+<code>Bash(git status:*)</code> allow rule lets <code>git status</code>
+execute and return real output. - The smuggle case:
+<code>Bash(echo *)</code> allow + a destructive substitution → denied
+with audit-log entry.</p>
+<p><strong>No mocks at this layer</strong> (per CLAUDE.md / Constitution
+Rule 5).</p>
+<h3 id="challenge-testse2echallengespermissions">8.3 Challenge
+(<code>tests/e2e/challenges/permissions/</code>)</h3>
+<p>Full CLI invocation under the docker-compose-full-test stack.
+<code>expected.json</code> lists three scenarios:</p>
+<ol type="1">
+<li><strong>Read auto-allowed under <code>dontAsk</code>.</strong>
+<code>helixcode --permission-mode dontAsk -p &quot;list files&quot;</code> runs
+<code>ls</code> without prompting; transcript captured.</li>
+<li><strong>Destructive denied under <code>default</code>.</strong>
+<code>helixcode --permission-mode default -p &quot;delete the marker&quot;</code>
+is asked to confirm; the test rejects; the marker file is untouched
+(verified by stat).</li>
+<li><strong>Smuggle denied.</strong>
+<code>helixcode --permission-mode auto -p &quot;echo &#39;hello&#39; &amp;&amp; rm -rf /tmp/marker&quot;</code>
+is denied because <code>rm -rf</code> matches the deny rule;
+<code>/tmp/marker</code> is untouched (verified by stat).</li>
+</ol>
+<p>Runtime evidence: stdout transcript + <code>stat /tmp/marker</code>
+output pasted into the close-out commit body.</p>
+<h3 id="anti-bluff-smoke">8.4 Anti-bluff smoke</h3>
+<p><code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/tools/permissions/</code>
+must be empty. Run on every sub-commit.</p>
+<h3 id="mutation-test-const-039">8.5 Mutation test (CONST-039)</h3>
+<p>Deliberately remove the deny-rule check from the engine. The
+Challenge MUST fail. If it still passes, the Challenge is non-conformant
+and must be tightened.</p>
+<hr />
+<h2 id="sub-task-plan">9. Sub-task plan</h2>
+<p>Mirroring F01’s 11-task cadence (here 13 because of the additional
+CLI surface and slash-command wiring):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>Bootstrap evidence file <code>06_phase_1_evidence.md</code> §F02 +
+advance PROGRESS to F02-active</td>
+<td>docs only</td>
+</tr>
+<tr>
+<td>T02</td>
+<td>Add <code>Wildcard</code> field to
+<code>confirmation.Condition</code>; extend <code>Matches</code>
+(TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T03</td>
+<td>New package <code>internal/tools/permissions</code> skeleton (types
+only, doc.go)</td>
+<td>compile-only</td>
+</tr>
+<tr>
+<td>T04</td>
+<td><code>shell_splitter.go</code> + <code>mvdan.cc/sh/v3/syntax</code>
+dep + TDD</td>
+<td>go.mod bump committed</td>
+</tr>
+<tr>
+<td>T05</td>
+<td><code>rule_engine.go</code> (pattern parse, match, priority sort) —
+TDD</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T06</td>
+<td><code>mode_presets.go</code> — five presets + conservative command
+lists + tests</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T07</td>
+<td><code>rule_loader.go</code> (YAML → Rule, file precedence, fail-fast
+errors) — TDD</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T08</td>
+<td><code>permissions.go</code> facade: <code>NewEngine</code> builds
+<code>confirmation.Policy</code> and registers with
+<code>PolicyEngine</code></td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T09</td>
+<td>Wire <code>--permission-mode</code> flag in
+<code>cmd/cli/main.go</code>; integration test (no mocks, real
+files)</td>
+<td><code>-tags=integration</code> test passes</td>
+</tr>
+<tr>
+<td>T10</td>
+<td>Add <code>helixcode permissions {list,add,remove,check}</code>
+subcommands (Cobra)</td>
+<td>smoke test passes</td>
+</tr>
+<tr>
+<td>T11</td>
+<td>Register <code>/permissions</code> slash command in
+<code>internal/commands/</code></td>
+<td>unit + smoke test</td>
+</tr>
+<tr>
+<td>T12</td>
+<td>Challenge under <code>tests/e2e/challenges/permissions/</code> with
+three scenarios from §8.3; runtime evidence pasted</td>
+<td>Challenge PASS in commit body</td>
+</tr>
+<tr>
+<td>T13</td>
+<td>Feature 2 close-out: anti-bluff scan,
+<code>make verify-foundation</code>, push to all four remotes (no
+force)</td>
+<td>PROGRESS.md flipped to F03 active</td>
+</tr>
+</tbody>
+</table>
+<p>Estimated 13 sub-commits. F03 (Tool Result Persistence) is unblocked
+when T13 lands.</p>
+<hr />
+<h2 id="risks-and-mitigations">10. Risks and mitigations</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>mvdan.cc/sh/v3 transitively pulls a heavy dep</strong></td>
+<td>Verify before T04 commit: <code>go mod why mvdan.cc/sh/v3</code> and
+<code>go mod download</code> size. If it brings in something unwanted,
+fall back to a smaller subset (<code>mvdan.cc/sh/v3/syntax</code> only,
+which is the core parser without the executor).</td>
+</tr>
+<tr>
+<td><strong>Existing <code>autonomy.PermissionManager</code> callers
+expect old semantics</strong></td>
+<td>The autonomy package is <strong>not modified</strong> by F02 — both
+systems coexist; tool-level permission is added below the autonomy
+layer. Confirmed by greppable callsite audit at T03.</td>
+</tr>
+<tr>
+<td><strong>Challenge needs Anthropic API key for end-to-end
+run</strong></td>
+<td><code>tests/e2e/challenges/permissions/</code> uses a deterministic
+prompt + the existing test infrastructure (already validated for
+F01-T10). Same <code>.env.full-test</code> Anthropic key.</td>
+</tr>
+<tr>
+<td><strong>YAML schema drift</strong></td>
+<td>Schema is version-locked: top-level
+<code>apiVersion: helixcode.permissions/v1</code> becomes mandatory in
+T07; loader rejects unknown versions.</td>
+</tr>
+<tr>
+<td><strong>CLI flag conflicts with existing flags</strong></td>
+<td><code>--permission-mode</code> audit at T09:
+<code>grep -rn &#39;permission-mode\|PermissionMode&#39; cmd/</code> confirms no
+collision before adding.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="references">11. References</h2>
+<ul>
+<li>Synthesis spec:
+<code>docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>
+§4.1 (Phase 1 charter)</li>
+<li>Porting doc:
+<code>docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/porting_claude_code.md</code>
+§Feature 2</li>
+<li>Predecessor plan:
+<code>docs/superpowers/plans/2026-05-05-p1-f01-auto-compaction.md</code></li>
+<li>Evidence file (live):
+<code>docs/improvements/06_phase_1_evidence.md</code></li>
+<li>Existing infrastructure being extended:
+<ul>
+<li><code>helix_code/internal/tools/confirmation/policies.go</code> —
+<code>PolicyEngine</code>, <code>Policy</code>, <code>Rule</code>,
+<code>Condition</code></li>
+<li><code>helix_code/internal/tools/confirmation/audit.go</code> — audit
+log</li>
+<li><code>helix_code/internal/workflow/autonomy/permission.go</code> —
+autonomy-level <code>PermissionManager</code> (unchanged)</li>
+<li><code>helix_code/internal/commands/command.go</code> — slash-command
+interface</li>
+</ul></li>
+<li>Constitutional anchors:
+<ul>
+<li>Article XI §11.9 — Anti-Bluff Forensic Anchor (every PASS carries
+runtime evidence)</li>
+<li>CONST-035 — Zero-Bluff Mandate</li>
+<li>CONST-039 — Challenge System Integrity (mutation testing
+mandatory)</li>
+<li>CONST-042 — No-Secret-Leak (file mode 0600 for any persisted YAML
+containing secrets — N/A here, but the dir-creation pattern
+matches)</li>
+<li>CONST-043 — No-Force-Push (close-out commit T13 pushes without
+force)</li>
+</ul></li>
+</ul>
+<hr />
+<p><em>End of P1-F02 Permission Rule System design spec.</em></p>
+</body>
+</html>

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-19-const046-i18n-architecture-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-19-const046-i18n-architecture-design</h1>
+</header>
+<h1 id="round-90-const-046-i18n-architecture-design">Round 90 —
+CONST-046 i18n Architecture Design</h1>
+<p><strong>Date</strong>: 2026-05-19 <strong>Status</strong>: Design
+Proposal (pending operator decision points in §10)
+<strong>Programme</strong>: HelixCode §11.4 governance campaign, round
+90 — documentation-only <strong>Scope</strong>: Top-level i18n
+architecture for HelixCode and all owned submodules carrying deferred
+CONST-046 backlog <strong>Constitutional anchors</strong>: CONST-035
+(anti-bluff), CONST-044 (CONTINUATION discipline), CONST-046
+(no-hardcoded-content), CONST-047 (recursive submodule application),
+CONST-049 §11.4.17 (universal-vs-project classification), CONST-050(A)
+(no-fakes-beyond-unit-tests), CONST-051(B) (decoupling), CONST-051(C)
+(dependency layout), Article XI §11.9 (end-user usability guarantee)</p>
+<hr />
+<h2 id="background">1. Background</h2>
+<h3 id="the-const-046-mandate-verbatim-from-this-repos-claude.md-10.5">1.1
+The CONST-046 Mandate (verbatim, from this repo’s CLAUDE.md §10.5)</h3>
+<blockquote>
+<p>“NO user-facing text, question template, prompt text, error message,
+label, helper text, or explanatory content may be hardcoded as a static
+literal string in any source file. All text visible to users MUST be: 1.
+Generated dynamically by an LLM at runtime based on the user’s language,
+prompt context, and session state, OR 2. Loaded from an i18n resource
+file (<code>.yaml</code>, <code>.json</code>, <code>.toml</code>) with
+locale-aware overrides, OR 3. Composed programmatically from verifier
+metadata, provider responses, or configuration data.”</p>
+</blockquote>
+<p><strong>Why it matters</strong> (verbatim from §10.5): <em>“Hardcoded
+English strings silently break the product for non-English users. A
+clarification question hardcoded as ‘Which file has the bug?’ is asked
+identically to Serbian, Japanese, or Spanish users — producing an
+incoherent, unusable experience.”</em> This is a §11.9 / Article XI
+end-user-usability defect of the same severity class as a
+PASS-bluff.</p>
+<h3 id="operator-anti-bluff-anchor-2026-05-19">1.2 Operator anti-bluff
+anchor (2026-05-19)</h3>
+<blockquote>
+<p>“all existing tests and Challenges do work in anti-bluff manner -
+they MUST confirm that all tested codebase really works as expected! We
+had been in position that all tests do execute with success and all
+Challenges as well, but in reality the most of the features does not
+work and can’t be used! This MUST NOT be the case and execution of tests
+and Challenges MUST guarantee the quality, the completition and full
+usability by end users of the product!”</p>
+</blockquote>
+<p>The architecture below is constrained by this anchor: any i18n
+abstraction whose tests pass on a missing key without surfacing the gap
+is, itself, a §11.4 PASS-bluff regardless of how green its summary line
+is. §6 covers the loud-failure design that protects against this.</p>
+<h3 id="accumulated-const-046-backlog-round-by-round-deferrals">1.3
+Accumulated CONST-046 backlog (round-by-round deferrals)</h3>
+<p>Cross-referenced from <code>docs/CONTINUATION.md</code>
+close-outs:</p>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 18%" />
+<col style="width: 12%" />
+<col style="width: 32%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>File(s)</th>
+<th>Hits</th>
+<th>Deferral round</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixLLM</td>
+<td><code>internal/agents/tools/web.go</code>,
+<code>internal/gateway/openai.go</code></td>
+<td>2</td>
+<td>rounds 23-29 audit</td>
+<td>Hardcoded English in tool prompts + gateway error messages</td>
+</tr>
+<tr>
+<td>Planning (hiplan)</td>
+<td><code>mcts/TreeOfThoughts.go</code> and siblings</td>
+<td>3+</td>
+<td>rounds 23-29 audit</td>
+<td>Prompt templates for tree-of-thoughts reasoning</td>
+</tr>
+<tr>
+<td>SelfImprove</td>
+<td>reward + integration prompts</td>
+<td>8</td>
+<td>rounds 23-29 audit</td>
+<td>LLM reward-modelling prompts, all English</td>
+</tr>
+<tr>
+<td>VisionEngine</td>
+<td><code>StubAnalyzer</code> paths</td>
+<td>4</td>
+<td>rounds 23-29 audit</td>
+<td>Analyzer status strings</td>
+</tr>
+<tr>
+<td>panoptic</td>
+<td>multiple</td>
+<td>unspecified</td>
+<td>round 29</td>
+<td>Listed as “CONST-046 deferral”</td>
+</tr>
+<tr>
+<td>DocProcessor</td>
+<td><code>cmd/docprocessor/main.go</code> lines 35, 44, 46, 50, 53</td>
+<td>5</td>
+<td>round 29 / re-confirmed round 73 (close-out¹¹⁶)</td>
+<td>CLI status output</td>
+</tr>
+<tr>
+<td>harmony_os</td>
+<td>various</td>
+<td>unspecified</td>
+<td>round 31 (one admission removed; siblings remain)</td>
+<td>Platform-feature messages</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conservative estimate</strong>: ~22-30 string occurrences
+across 7 submodules. None are §11.4 PASS-bluffs in the strict sense (no
+fabricated runtime evidence); all are end-user-usability defects per
+§11.9.</p>
+<h3 id="why-this-is-round-90-and-not-round-91-implementation">1.4 Why
+this is round 90 and not round 91+ implementation</h3>
+<p>The backlog has been deferred 50+ rounds because every individual hit
+is small but the <strong>abstraction is project-wide</strong>: each
+submodule that adopts an ad-hoc i18n shim creates exactly the kind of
+coupling CONST-051(B) forbids. A single shared design — designed once,
+applied everywhere — is the only CONST-047-compliant resolution. Round
+90 produces that design. Rounds 91+ execute it.</p>
+<hr />
+<h2 id="constraints-and-goals">2. Constraints and goals</h2>
+<h3 id="hard-constraints">2.1 Hard constraints</h3>
+<ul>
+<li><strong>CONST-051(B) decoupling</strong>: no owned submodule may
+import a HelixCode-specific package. Every submodule consuming i18n MUST
+receive its <code>Translator</code> via dependency injection from the
+parent application’s composition root.</li>
+<li><strong>CONST-050(A) production purity</strong>: i18n implementation
+MAY use mocks only in unit tests. Integration tests load real bundle
+files from disk.</li>
+<li><strong>CONST-046 loud-failure invariant</strong>: a missing key
+MUST NOT silently render as empty string, “(missing)” placeholder, or
+fabricated text. Missing key → either return key literal as fallback
+(English source-key acts as graceful degradation) OR surface
+<code>ErrI18nKeyMissing</code> sentinel. Choice is per-call via
+API.</li>
+<li><strong>CONST-053 .gitignore</strong>: no generated/compiled bundle
+artefacts in version control. Source YAML files only; any
+pre-compilation step must regenerate from source.</li>
+<li><strong>Pure Go preferred</strong>: minimise external dep weight;
+avoid CGo.</li>
+<li><strong>OS-level locale detection</strong>: respect
+<code>LC_ALL</code>, <code>LANG</code> environment variables per POSIX;
+allow per-request override.</li>
+</ul>
+<h3 id="soft-goals">2.2 Soft goals</h3>
+<ul>
+<li>Bundle files human-editable (translators are not always
+programmers).</li>
+<li>Pluralisation support (English <code>1 file</code> vs
+<code>2 files</code>; Slavic forms more complex — Serbian has 3-form
+plural).</li>
+<li>Variable interpolation with type safety.</li>
+<li>Lazy loading (don’t read every locale’s full bundle on every process
+start).</li>
+<li>Translator API surface small enough to fit in one page of Go.</li>
+</ul>
+<hr />
+<h2 id="architecture-options">3. Architecture options</h2>
+<p>Four options surveyed. Each evaluated on: dep weight,
+locale-resolution semantics, fallback behaviour, pluralisation,
+decoupling fit, ease of editing, alignment with existing Go ecosystem
+usage in HelixCode tree.</p>
+<h3 id="option-a-yaml-resource-bundles-in-house-loader">3.1 Option A —
+YAML resource bundles (in-house loader)</h3>
+<p><strong>Description</strong>: One YAML file per locale (e.g.,
+<code>i18n/en.yaml</code>, <code>i18n/sr.yaml</code>). Custom Go loader
+using <code>gopkg.in/yaml.v3</code>. Simple
+<code>map[string]string</code> keyed by dot-namespaced ID (e.g.,
+<code>docprocessor.cli.loaded</code>).</p>
+<p><strong>Pros</strong>: - Zero new external deps beyond YAML lib
+(already transitively present). - Trivially auditable: bundle files are
+plain text, diffs reviewable in PRs. - Pure Go, no CGo. - Loader can be
+~150 LOC; trivial to mutation-test.</p>
+<p><strong>Cons</strong>: - Pluralisation requires custom
+CLDR-plural-rule logic (handwritten = error-prone for Slavic three-form
+plurals). - Interpolation is <code>text/template</code>-based; loses
+type safety vs typed-generator approaches. - No tooling for translator
+hand-off (no <code>xgettext</code>-style extractor; we’d write our
+own).</p>
+<p><strong>Locale resolution</strong>: parse
+<code>LC_ALL</code>/<code>LANG</code> → BCP-47 → strip region
+(<code>sr_RS.UTF-8</code> → <code>sr-RS</code> → <code>sr</code>).
+Per-request override accepted.</p>
+<p><strong>Fallback</strong>: requested → language-only
+(<code>sr-RS</code> → <code>sr</code>) → <code>en-US</code> (default) →
+key literal OR sentinel error (caller chooses).</p>
+<h3 id="option-b-go-struct-embedded-resources-embed.fs-texttemplate">3.2
+Option B — Go-struct embedded resources (<code>embed.FS</code> +
+<code>text/template</code>)</h3>
+<p><strong>Description</strong>: Bundle files committed under
+<code>i18n/</code>, embedded into the binary via
+<code>//go:embed i18n/*.yaml</code>. Same YAML format as Option A; the
+difference is distribution — bundles travel inside the binary, no
+runtime file I/O.</p>
+<p><strong>Pros</strong>: - Zero runtime filesystem dependency
+(single-binary deploys clean). - All Option A pros otherwise.</p>
+<p><strong>Cons</strong>: - Every locale ships in every binary even when
+unused (binary bloat — small per-locale, but multiplies). - Translation
+updates require recompile + redeploy (no live patch). - All Option A
+cons otherwise. - Conflicts with CONST-051(B) decoupling when used
+inside a submodule — the submodule’s binary embeds bundles the consumer
+might want to override.</p>
+<p><strong>Locale resolution / fallback</strong>: identical to Option
+A.</p>
+<h3 id="option-c-gettext-style-.po-files-with-golang.orgxtextmessage">3.3
+Option C — gettext-style <code>.po</code> files with
+<code>golang.org/x/text/message</code></h3>
+<p><strong>Description</strong>: Use Google’s official Go i18n package
+(<code>golang.org/x/text/message</code>, <code>language</code>,
+<code>catalog</code>). Bundles stored as <code>.po</code> or generated
+catalogs.</p>
+<p><strong>Pros</strong>: - Tier-1 maintained by the Go team;
+transitively present in HelixCode tree (<code>panoptic</code>,
+<code>helix_qa</code>, many <code>cli_agents/*</code>). - Strong
+CLDR-grounded pluralisation built in. - <code>gotext</code> tool
+extracts strings and generates skeleton catalogs.</p>
+<p><strong>Cons</strong>: - API designed for <strong>gettext</strong>
+workflow (catalogs compiled from <code>.po</code> → Go source). Compiled
+catalogs are generated code — conflicts with CONST-053 if checked in; if
+regenerated at build, adds a build step every submodule must wire up. -
+<code>.po</code> format is less ergonomic than YAML for non-translator
+editors. - Catalog struct-tag mechanism encourages compile-time binding
+(works against the dependency-injection pattern CONST-051(B)
+requires).</p>
+<p><strong>Locale resolution</strong>:
+<code>language.MatchStrings</code> with operator-supplied matcher.
+Excellent CLDR fidelity.</p>
+<p><strong>Fallback</strong>: explicit <code>Matcher</code> configured
+at construction; <code>Fallback()</code> chain user-defined.</p>
+<h3 id="option-d-nicksnydergo-i18nv2-jsonyaml-bundles">3.4 Option D —
+<code>nicksnyder/go-i18n/v2</code> (JSON/YAML bundles)</h3>
+<p><strong>Description</strong>: Popular third-party Go i18n library.
+Bundles as JSON, YAML, or TOML. Already transitively present in
+<code>cli_agents/crush/</code> and in the
+<code>kimi_agent_helix_cli_integration_blueprint</code> reference
+materials.</p>
+<p><strong>Pros</strong>: - Ergonomic API:
+<code>Localizer.Localize(&amp;i18n.LocalizeConfig{MessageID: &quot;...&quot;})</code>.
+- CLDR pluralisation built in (uses Google’s CLDR data tables). - YAML
+bundle support out of the box (translator-friendly). - Already
+battle-tested across the Go ecosystem. - One external dep with
+permissive MIT licence; transitively already pulled in by
+<code>cli_agents/crush/</code>.</p>
+<p><strong>Cons</strong>: - External dep — version-pinning + audit
+burden (small but real per CONST-042 supply-chain hygiene). - Library
+has its own opinions about pluralisation key suffixes
+(<code>.one</code>, <code>.other</code>, <code>.few</code>,
+<code>.many</code>) — translators must learn its conventions. - Default
+behaviour on missing key returns <code>MessageID</code> (the key itself)
+— matches our loud-failure preference but must be explicitly chosen via
+<code>LocalizeConfig.DefaultMessage</code>.</p>
+<p><strong>Locale resolution</strong>: <code>language.Tag</code> parsed
+from <code>Accept-Language</code> header or env var;
+<code>Bundle.MatchTags</code> does the fallback walk.</p>
+<p><strong>Fallback</strong>: requested → bundle’s MatchTags → default
+tag → message ID literal (our loud-failure path).</p>
+<hr />
+<h2 id="recommendation">4. Recommendation</h2>
+<p><strong>Option D — <code>nicksnyder/go-i18n/v2</code></strong> is
+recommended.</p>
+<p><strong>Rationale</strong>:</p>
+<ol type="1">
+<li><strong>Ecosystem alignment</strong> — already transitively in tree
+(<code>cli_agents/crush/go.mod:150</code>) and explicitly chosen by the
+<code>kimi_agent_helix_cli_integration_blueprint</code> reference
+research. Re-using what the Go ecosystem has converged on is cheaper
+than rolling our own (Option A) or fighting <code>gotext</code>’s
+codegen workflow (Option C).</li>
+<li><strong>YAML bundle support</strong> — keeps the human-editability
+advantage of Option A without writing our own loader.</li>
+<li><strong>CLDR pluralisation</strong> — Serbian three-form plurals
+(<code>1 fajl</code>, <code>2 fajla</code>, <code>5 fajlova</code>) work
+correctly without us hand-coding plural rules. Hand-coding plural rules
+is a §11.4.6 (no-guessing) risk magnet.</li>
+<li><strong>Loud-failure compatible</strong> — missing key returns the
+message ID literal by default; we tighten to sentinel via wrapper.</li>
+<li><strong>Decoupling fit</strong> — the library exposes
+<code>*i18n.Bundle</code> and <code>*i18n.Localizer</code> as pure types
+with no global state. Submodules consume our <code>Translator</code>
+interface (defined in §5.1); the concrete <code>go-i18n</code>-backed
+implementation lives only in the parent app’s composition root.
+Submodules never
+<code>import &quot;github.com/nicksnyder/go-i18n/v2/i18n&quot;</code> directly —
+they import our interface. CONST-051(B) satisfied.</li>
+</ol>
+<p><strong>What the recommendation does NOT pick</strong>: - <strong>Not
+Option B (embed.FS)</strong>: binary-bloat + recompile-to-update
+tradeoff dominates. - <strong>Not Option A (in-house)</strong>:
+hand-coding plural rules is a §11.4.6 risk; we’d be re-implementing CLDR
+plural tables badly. - <strong>Not Option C
+(<code>x/text/message</code>)</strong>: codegen workflow conflicts with
+our YAML-bundles-as-source-of-truth preference; catalog struct-tag
+binding fights DI.</p>
+<p><strong>Honest tradeoff acknowledgement</strong>: Option A’s “zero
+external deps” is genuinely attractive under CONST-042. The
+recommendation accepts one MIT-licensed dep with permissive audit
+history; rounds 91-93 MUST include the dep-audit step explicitly.</p>
+<hr />
+<h2 id="components">5. Components</h2>
+<h3 id="top-level-helix_codepkgi18n">5.1 Top-level:
+<code>helix_code/pkg/i18n/</code></h3>
+<p>New top-level package (exported, hence <code>pkg/</code> not
+<code>internal/</code>) defining the consumer-facing interface every
+submodule depends on:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> i18n</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;context&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Translator is the contract every submodule depends on for user-facing text.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Implementations are injected from the parent application&#39;s composition root.</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Translator <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// T resolves a key for the request&#39;s locale, interpolating named args.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Returns the resolved string. On missing key, returns key literal as fallback.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    T<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">,</span> args <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="dt">string</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// TStrict is identical to T but returns ErrI18nKeyMissing on missing key.</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    TStrict<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">,</span> args <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// TN handles pluralisation (CLDR rules). count drives plural form.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    TN<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">,</span> count <span class="dt">int</span><span class="op">,</span> args <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">)</span> <span class="dt">string</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// WithLocale returns a Translator bound to a specific BCP-47 tag,</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// bypassing context-based locale extraction.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    WithLocale<span class="op">(</span>tag <span class="dt">string</span><span class="op">)</span> Translator</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> ErrI18nKeyMissing <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;i18n: key not found in any locale bundle&quot;</span><span class="op">)</span></span></code></pre></div>
+<p>Concrete implementation <code>pkg/i18n/gobundle/</code> wraps
+<code>nicksnyder/go-i18n/v2</code>. Tests live alongside.</p>
+<h3 id="per-submodule-consumption-pattern">5.2 Per-submodule consumption
+pattern</h3>
+<p>Every owned submodule that needs user-facing text:</p>
+<ol type="1">
+<li>Declares a constructor parameter of type
+<code>i18n.Translator</code> (the interface above, vendored or accessed
+via Go module path — TBD in §10).</li>
+<li>Stores it on the receiver struct.</li>
+<li>Calls <code>r.t.T(ctx, &quot;submodule.feature.key&quot;, args)</code> instead
+of <code>fmt.Sprintf(&quot;English literal: %s&quot;, v)</code>.</li>
+</ol>
+<p>Example — DocProcessor CLI migration:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Before (CONST-046 violation):</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;Loaded %d documents</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>docs<span class="op">))</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">// After:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>fmt<span class="op">.</span>Println<span class="op">(</span>r<span class="op">.</span>t<span class="op">.</span>T<span class="op">(</span>ctx<span class="op">,</span> <span class="st">&quot;docprocessor.cli.loaded&quot;</span><span class="op">,</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">any</span><span class="op">{</span><span class="st">&quot;Count&quot;</span><span class="op">:</span> <span class="bu">len</span><span class="op">(</span>docs<span class="op">)}))</span></span></code></pre></div>
+<p>Bundle entry
+(<code>submodules/doc_processor/i18n/en.yaml</code>):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">docprocessor</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cli</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">loaded</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Loaded {{.Count}} documents&quot;</span></span></code></pre></div>
+<p>Serbian counterpart (<code>i18n/sr.yaml</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">docprocessor</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">cli</span><span class="kw">:</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">loaded</span><span class="kw">:</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">one</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Učitan {{.Count}} dokument&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">few</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Učitana {{.Count}} dokumenta&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">other</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Učitano {{.Count}} dokumenata&quot;</span></span></code></pre></div>
+<h3 id="bundle-storage-layout">5.3 Bundle storage layout</h3>
+<p>Per CONST-051(C) (dependency layout) and CONST-051(B) (decoupling),
+each submodule keeps its own bundles at its own repo root:</p>
+<pre><code>&lt;submodule&gt;/
+  i18n/
+    en.yaml     # required, source-of-truth locale
+    sr.yaml     # optional additional locales
+    ja.yaml
+    ...</code></pre>
+<p>The submodule MUST NOT ship a <code>Translator</code> implementation
+— only bundle files. The parent application (HelixCode) constructs the
+<code>Translator</code> from the union of all submodules’ bundles at
+startup. Construction is wired in
+<code>helix_code/cmd/server/main.go</code> (and equivalent CLI / desktop
+/ mobile entry points).</p>
+<h3 id="default-locale-and-fallback-chain">5.4 Default locale and
+fallback chain</h3>
+<ul>
+<li><strong>Default</strong>: <code>en-US</code> (chosen because it is
+the source-of-truth locale every key MUST appear in; matches existing
+English literals).</li>
+<li><strong>Fallback walk</strong>: requested tag → language-only
+stripped (<code>sr-RS</code> → <code>sr</code>) → <code>en-US</code> →
+loud failure (key literal or <code>ErrI18nKeyMissing</code>).</li>
+<li><strong>NEVER fabricate</strong>: no machine-translated synthetic
+text at runtime. If a translator wants to add a locale, they add the
+YAML file. Absence of locale-N for a key is a graceful en-US fallback,
+never a hallucination.</li>
+</ul>
+<h3 id="locale-source-priority-highest-wins">5.5 Locale source priority
+(highest wins)</h3>
+<ol type="1">
+<li>Per-call <code>WithLocale(tag)</code> override.</li>
+<li><code>context.Context</code> value
+(<code>ctx.Value(i18n.LocaleKey)</code>).</li>
+<li>Process env <code>LC_ALL</code>.</li>
+<li>Process env <code>LANG</code>.</li>
+<li>Hardcoded fallback <code>en-US</code>.</li>
+</ol>
+<hr />
+<h2 id="anti-bluff-guarantee">6. Anti-bluff guarantee</h2>
+<p>The §1.2 operator anchor forbids tests that pass without proving
+end-user functionality. Three concrete protections:</p>
+<ol type="1">
+<li><strong>Loud missing-key</strong>: as §5.4 — fallback is key literal
+(visible to the user as a degraded experience they can report) or
+sentinel error (caller’s choice). No silent empty string, no fabricated
+placeholder.</li>
+<li><strong>Paired mutation tests</strong> (CONST-050(A) / §11.4 paired
+mutation): every i18n migration ships with TWO tests:
+<ul>
+<li><strong>Coverage test</strong>: asserts the key resolves for
+<code>en-US</code> and at least one non-English locale.</li>
+<li><strong>Mutation test</strong>: deletes the key from
+<code>en-US</code> bundle, asserts the strict path returns
+<code>ErrI18nKeyMissing</code> AND the lenient path returns the key
+literal. Test FAILs if either condition silently produces a non-empty
+translation that wasn’t the literal — proving the loud-failure machinery
+actually fires.</li>
+</ul></li>
+<li><strong>CONST-046 audit gate</strong>: round 91 ships
+<code>scripts/audit-const046.sh</code> that greps for
+<code>fmt.Printf</code>/<code>fmt.Println</code>/<code>fmt.Errorf</code>/return-string-literal
+patterns inside production paths (<code>cmd/</code>,
+<code>internal/</code>, <code>applications/</code>, <code>pkg/</code>)
+of every owned submodule. Output: hit list with file:line. Round 91+
+migrations clear the list; the gate runs in
+<code>make ci-validate-all</code> warn-mode initially and tightens to
+fail-on-hit once Phase 3 completes.</li>
+</ol>
+<hr />
+<h2 id="phased-implementation-plan">7. Phased implementation plan</h2>
+<p>Each phase is intended to be 2-3 rounds of
+subagent-driven-development. Round counts are estimates; operator may
+compress or expand.</p>
+<h3 id="phase-1-foundation-rounds-91-93">Phase 1 — Foundation (rounds
+91-93)</h3>
+<ul>
+<li><strong>Round 91</strong>: Create <code>helix_code/pkg/i18n/</code>
+package with <code>Translator</code> interface + <code>gobundle/</code>
+concrete impl wrapping <code>nicksnyder/go-i18n/v2</code>. Unit tests +
+paired mutation tests. Wire into
+<code>helix_code/cmd/server/main.go</code> composition root. Ship
+<code>helix_code/i18n/en.yaml</code> skeleton.</li>
+<li><strong>Round 92</strong>: Ship
+<code>scripts/audit-const046.sh</code> in warn-mode. Run it; populate
+<code>docs/const046-audit-baseline.md</code> with full hit list (single
+source of truth for what Phase 2/3 has to clear).</li>
+<li><strong>Round 93</strong>: Add Translator-injection wiring to the 7
+backlog submodules (no string migration yet — only the injection
+surface). Each submodule’s CLAUDE.md gains an “i18n” sub-section
+documenting the <code>Translator</code> parameter and bundle-file
+location.</li>
+</ul>
+<h3 id="phase-2-top-impact-migrations-rounds-94-96">Phase 2 — Top-impact
+migrations (rounds 94-96)</h3>
+<p>Migrations are ordered by user-visibility × hit-count:</p>
+<ul>
+<li><strong>Round 94</strong>: SelfImprove × 8 prompts. Highest
+hit-count single submodule; LLM-facing prompts so locale-aware prompting
+may improve non-English reward quality.</li>
+<li><strong>Round 95</strong>: HelixLLM × 2 strings (<code>web.go</code>
+tool prompt + <code>openai.go</code> gateway error).
+Customer-facing.</li>
+<li><strong>Round 96</strong>: harmony_os string sweep. Platform-feature
+strings visible in user-facing error paths.</li>
+</ul>
+<p>Each round: migrate, ship paired mutation tests, ship <code>sr</code>
+and <code>ja</code> locales for the migrated keys (operator may choose
+alternate seed locales in §10).</p>
+<h3 id="phase-3-remainder-rounds-97-99">Phase 3 — Remainder (rounds
+97-99)</h3>
+<ul>
+<li><strong>Round 97</strong>: DocProcessor CLI
+(<code>cmd/docprocessor/main.go</code> 5 <code>fmt.Printf</code>
+lines).</li>
+<li><strong>Round 98</strong>: Planning hiplan / MCTS / TreeOfThoughts ×
+3+ prompt templates.</li>
+<li><strong>Round 99</strong>: VisionEngine × 4 StubAnalyzer strings,
+panoptic remainder. Tighten <code>scripts/audit-const046.sh</code> from
+warn-mode to fail-on-hit.</li>
+</ul>
+<h3 id="phase-exit-criteria">Phase exit criteria</h3>
+<p>A phase is closed when: - All migrations of the phase ship with
+paired mutation tests AND captured runtime evidence per §11.4.2
+(terminal output pasted in close-out). -
+<code>scripts/audit-const046.sh</code> hit count strictly decreases vs
+prior phase’s baseline. - CONTINUATION close-out documents the phase-end
+audit count + per-submodule status.</p>
+<hr />
+<h2 id="test-strategy">8. Test strategy</h2>
+<p>Per CONST-050(B), four-layer test floor for every migration:</p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 25%" />
+<col style="width: 62%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What it proves</th>
+<th>Example for DocProcessor <code>cli.loaded</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pre-build static</td>
+<td>Bundle YAML files parse + every key in <code>en.yaml</code> is
+present in declared-required locales</td>
+<td><code>go test ./pkg/i18n/audit/</code></td>
+</tr>
+<tr>
+<td>Post-build unit</td>
+<td><code>Translator.T</code> resolves the key for en-US and falls back
+correctly for missing locale</td>
+<td><code>TestTranslator_DocProcessorCLILoaded_EN</code></td>
+</tr>
+<tr>
+<td>Runtime integration</td>
+<td>Real CLI run with <code>LANG=sr_RS.UTF-8 ./docprocessor</code>
+prints Serbian text; same with <code>LANG=en_US.UTF-8</code> prints
+English</td>
+<td><code>tests/integration/i18n/docprocessor_test.go</code></td>
+</tr>
+<tr>
+<td>Paired mutation</td>
+<td>Delete the key from <code>en.yaml</code>; strict path returns
+<code>ErrI18nKeyMissing</code>, lenient returns key literal</td>
+<td><code>TestTranslator_DocProcessorCLILoaded_MissingKey</code></td>
+</tr>
+</tbody>
+</table>
+<p>Captured-evidence requirement: integration tests MUST capture actual
+stdout — diff against expected per CONST-035 / §11.4.2.</p>
+<hr />
+<h2 id="cross-references">9. Cross-references</h2>
+<ul>
+<li><strong>CONTINUATION close-out¹¹⁶</strong> (round 73): DocProcessor
+CLI 5 <code>fmt.Printf</code> lines — explicitly deferred and routed to
+this design.</li>
+<li><strong>CONTINUATION line 132</strong> (P3-T04): clarification
+engine LLM-driven per CONST-046 — option (1) of the CONST-046 mandate
+(LLM-generation). Demonstrates the LLM path that complements this
+YAML-bundle path; both options are needed for different use cases.</li>
+<li><strong>CONTINUATION line 140</strong>: CONST-046 mandate
+adoption.</li>
+<li><strong>Round 31</strong> (harmony_os): one “simulated results”
+admission removed; sibling strings flagged for this design.</li>
+<li><strong>Round 37 spec</strong>
+(<code>2026-05-18-round37-memory-persistence-real-backends-design.md</code>):
+demonstrates the injection-point pattern (nil-client sentinel →
+loud-failure) that §6’s loud-failure design reuses.</li>
+<li><strong>CONST-046 in <code>CLAUDE.md</code> §10.5</strong> of this
+repo: the mandate text + compliance examples.</li>
+<li><strong>Constitution submodule</strong>
+(<code>constitution/Constitution.md</code> §11.4.x): the universal
+severity classification.</li>
+</ul>
+<hr />
+<h2 id="operator-decision-points">10. Operator decision points</h2>
+<p>These resolve before round 91 implementation starts. Each has a
+recommended default; operator may override.</p>
+<ol type="1">
+<li><strong>Module path for the <code>Translator</code>
+interface</strong>: should <code>pkg/i18n/</code> live in HelixCode and
+be vendored into each submodule, OR be promoted to a dedicated own-org
+submodule (<code>vasic-digital/HelixI18n</code> or similar) per
+CONST-051(C) flat-layout discipline? <strong>Recommended</strong>:
+dedicated submodule — keeps decoupling clean and allows non-HelixCode
+consumers (e.g., panoptic standalone use) to depend on it without
+pulling HelixCode. Round 91 first task = create the submodule.</li>
+<li><strong>Seed non-English locales</strong>: which locale(s) ship
+alongside <code>en-US</code> for Phase 2? <strong>Recommended</strong>:
+<code>sr-RS</code> (operator’s locale per repo signals) +
+<code>ja-JP</code> (high-divergence script — good fallback-walk test).
+Operator may add/swap.</li>
+<li><strong>Audit gate tightening cadence</strong>: when does
+<code>scripts/audit-const046.sh</code> flip from warn-mode to
+fail-on-hit? <strong>Recommended</strong>: end of Phase 3 (round 99).
+Earlier flip risks blocking unrelated work; later flip risks
+regression-creep.</li>
+<li><strong>LLM-generation vs i18n-bundle split</strong>: the CONST-046
+mandate allows both. <strong>Recommended split</strong>: clarification
+questions + tool prompts + LLM-internal prompts → LLM-generation (option
+1, locale propagated to the LLM via system prompt); CLI status output +
+error messages + UI labels + helper text → i18n bundles (option 2, this
+design). The clarification engine in
+<code>internal/clarification/</code> is the reference for option 1.</li>
+<li><strong>Pluralisation locale subset</strong>: ship pluralised
+entries for <code>en</code> (one/other) and <code>sr</code>
+(one/few/other) from Phase 2 onward, OR defer pluralisation entirely to
+a later phase? <strong>Recommended</strong>: ship from Phase 2 —
+<code>go-i18n/v2</code> handles it for free, and retro-fitting plural
+forms after the fact is more painful than designing them in.</li>
+</ol>
+<hr />
+<h2 id="self-review-checklist-per-superpowersbrainstorming">11.
+Self-review checklist (per <code>superpowers:brainstorming</code>)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>No placeholders / TODOs
+in the spec body</label></li>
+<li><label><input type="checkbox" checked></input>Internal consistency: §3
+options ↔︎ §5 components ↔︎ §7 phases all reference the same Translator
+interface and YAML bundle layout</label></li>
+<li><label><input type="checkbox" checked></input>Scope check: 3 phases ×
+~3 rounds = round-sized work each</label></li>
+<li><label><input type="checkbox" checked></input>Ambiguity: every option’s
+pros/cons stated, recommendation explicitly chosen and justified, honest
+tradeoff acknowledgement included (§4 last paragraph)</label></li>
+<li><label><input type="checkbox" checked></input>Anti-bluff: §6
+loud-failure design + §8 paired mutation requirement enforced per
+migration</label></li>
+<li><label><input type="checkbox" checked></input>Constitutional alignment:
+CONST-046, CONST-051(B/C), CONST-050(A), CONST-047 all explicitly
+addressed</label></li>
+<li><label><input type="checkbox" checked></input>Operator decisions
+enumerated in §10 — none silently assumed</label></li>
+<li><label><input type="checkbox" checked></input>Word count target (~3000)
+and LOC budget (&lt;600 markdown lines) respected</label></li>
+</ul>
+</body>
+</html>

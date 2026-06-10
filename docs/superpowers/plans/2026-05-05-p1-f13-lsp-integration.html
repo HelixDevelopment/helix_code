@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f13-lsp-integration</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f13-lsp-integration</h1>
+</header>
+<h1 id="p1-f13-lsp-integration-implementation-plan">P1-F13 — LSP
+Integration Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Bring real Language-Server Protocol
+diagnostics into HelixCode for 5 curated servers (<code>gopls</code>,
+<code>rust-analyzer</code>, <code>pyright</code>,
+<code>typescript-language-server</code>, <code>clangd</code>).
+Lazy-spawn + 5-minute idle timeout per server. Auto-trigger after every
+successful <code>fs_edit</code> / <code>fs_write</code> /
+<code>multi_edit_commit</code> and inline the diagnostic summary into
+the tool result. Full user surface: <code>/lsp</code> slash +
+<code>helixcode lsp</code> cobra (<code>status</code> /
+<code>restart</code> / <code>list-servers</code> /
+<code>stop</code>).</p>
+<p><strong>Architecture:</strong> New
+<code>internal/tools/{lsp_types,lsp_client,lsp_manager,lsp_servers,lsp,lsp_fakeserver}.go</code>,
+plus <code>internal/commands/lsp_command.go</code> and
+<code>cmd/cli/lsp_cmd.go</code>. Modify
+<code>internal/tools/registry.go</code> to register the two LSP tools,
+accept an <code>LSPManager</code> via <code>SetLSPManager</code>, and
+post-Execute call <code>lspManager.NotifyChange</code> for edit-class
+tools (attaching <code>lsp_diagnostics</code> to the tool result).
+Modify <code>cmd/cli/main.go</code> to construct + wire + close the
+manager. Two new external deps: <code>go.lsp.dev/jsonrpc2</code> and
+<code>go.lsp.dev/protocol</code> (canonical Go LSP libraries).</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, spf13/cobra v1.8
+— all already present. <strong>Two NEW external deps</strong>: -
+<code>go.lsp.dev/jsonrpc2 v0.10.0</code> — JSON-RPC 2.0 framing over
+arbitrary <code>io.ReadWriter</code>. Justification: hand-rolling the
+framing layer is exactly the class of work where bluffs hide; this is
+the canonical library used by gopls itself. -
+<code>go.lsp.dev/protocol v0.12.0</code> — typed LSP protocol structs
+(<code>InitializeParams</code>, <code>DidOpenTextDocumentParams</code>,
+<code>PublishDiagnosticsParams</code>, etc.). Justification: avoids
+re-defining ~200 LSP types by hand; the upstream library is the source
+of truth and pulls cleanly into Go 1.26.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-05-p1-f13-lsp-integration-design.md</code>
+(commit <code>ed36237</code>)</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (FULL 4-term applied to F13
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/lsp.go internal/tools/lsp_client.go internal/tools/lsp_manager.go <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  internal/tools/lsp_servers.go internal/tools/lsp_types.go internal/tools/lsp_fakeserver <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  internal/commands/lsp_command.go cmd/cli/lsp_cmd.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — most LSP
+servers will NOT be installed on the test machine. The Challenge MUST
+present TWO clearly separated sections:
+<code>MANAGER PIPELINE (always runs, in-tree fake server)</code> and
+<code>REAL LANGUAGE SERVERS (gated)</code>. The fake server is a real OS
+subprocess speaking real LSP-framed JSON-RPC over stdio — NOT a Go
+in-process stub. Real-server tests skip with
+<code>SKIP-OK: P1-F13 &lt;binary&gt; not installed (install: &lt;hint&gt;)</code>
+per server. Bare skips break <code>make no-silent-skips</code>.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P1-F13-T01 — bootstrap
+evidence + advance PROGRESS to F13</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T02 — go.mod: add
+<code>go.lsp.dev/jsonrpc2 v0.10.0</code> +
+<code>go.lsp.dev/protocol v0.12.0</code> (TDD: failing import test →
+run; add deps; run again)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T03 —
+<code>internal/tools/lsp_types.go</code>: Diagnostic + DiagnosticSummary
++ DiagnosticSeverity + LSPServerSpec + ServerStatus (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T04 —
+<code>internal/tools/lsp_client.go</code>: jsonrpc2 client wrapper,
+initialize/shutdown handshake, didOpen/didChange/publishDiagnostics (TDD
+with paired in-memory pipes)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T05 —
+<code>internal/tools/lsp_manager.go</code>: lazy-spawn + idle-timeout +
+file-extension router + crash-recovery (TDD with in-tree fake server
+subprocess)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T06 —
+<code>internal/tools/lsp_servers.go</code>: curated allowlist +
+<code>Detect</code> via exec.LookPath (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T07 —
+<code>internal/tools/lsp.go</code>: LSPGetDiagnosticsTool +
+LSPAnalyzeDiagnosticTool (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T08 —
+<code>internal/tools/registry.go</code>: SetLSPManager + post-Execute
+auto-trigger for fs_edit/fs_write/multi_edit_commit (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T09 —
+<code>/lsp</code> slash command +
+<code>internal/commands/lsp_command.go</code> (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T10 —
+<code>helixcode lsp</code> cobra: <code>cmd/cli/lsp_cmd.go</code> +
+main.go wiring + integration test (gated, SKIP-OK on missing
+servers)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T11 — Challenge
+with runtime evidence (in-tree fake server harness + real-server gated
+phase)</label></li>
+<li><label><input type="checkbox" checked></input>P1-F13-T12 — Feature 13
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap">Task 1: Bootstrap</h2>
+<p>Append F13 evidence section header (spec <code>ed36237</code>),
+update PROGRESS current focus to F13, insert F13 task list (12 items)
+after F12’s. Commit
+<code>docs(P1-F13-T01): bootstrap Phase 1 / Feature 13 evidence + advance PROGRESS</code>.</p>
+<hr />
+<h2 id="task-2-go.mod-add-lsp-deps-tdd">Task 2: go.mod — add LSP deps
+(TDD)</h2>
+<p><strong>Files:</strong> <code>helix_code/go.mod</code>,
+<code>helix_code/go.sum</code>, new
+<code>helix_code/internal/tools/lsp_deps_smoke_test.go</code>.</p>
+<p>Failing test FIRST (proves the deps are needed and pinned):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> tools</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;testing&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.lsp.dev/jsonrpc2&quot;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;go.lsp.dev/protocol&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPDeps_Smoke<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> _ jsonrpc2<span class="op">.</span>Conn       <span class="co">// must compile against v0.10.0+</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> _ protocol<span class="op">.</span>InitializeParams</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> _ protocol<span class="op">.</span>PublishDiagnosticsParams</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> jsonrpc2<span class="op">.</span>ErrIdleTimeout <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Fatal<span class="op">(</span><span class="st">&quot;jsonrpc2 not wired&quot;</span><span class="op">)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Run <code>go test ./internal/tools/...</code> — fails with
+<code>cannot find module providing package</code>. Then
+<code>go get go.lsp.dev/jsonrpc2@v0.10.0 go.lsp.dev/protocol@v0.12.0 &amp;&amp; go mod tidy</code>.
+Re-run; passes. Verify both modules appear in <code>go.mod</code> with
+the pinned versions.</p>
+<p>Subject:
+<code>feat(P1-F13-T02): add go.lsp.dev/jsonrpc2 v0.10.0 + go.lsp.dev/protocol v0.12.0</code>.</p>
+<hr />
+<h2 id="task-3-lsp_types.go-tdd">Task 3: lsp_types.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/lsp_types.go</code>, new
+<code>helix_code/internal/tools/lsp_types_test.go</code>.</p>
+<p>Define <code>Diagnostic</code>, <code>DiagnosticSummary</code>,
+<code>DiagnosticSeverity</code>, <code>DiagnosticRange</code>,
+<code>Position</code>, <code>LSPServerSpec</code>,
+<code>ServerStatus</code>. Mirror spec §3.3 exactly. Add a
+<code>Diagnostic.ComputeID()</code> helper that hashes
+<code>(FilePath|Range|Source|Code|Message)</code> into a stable string
+for <code>LSPAnalyzeDiagnostic</code> lookup.</p>
+<p>Test:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDiagnosticSummary_CountingBySeverity<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    sum <span class="op">:=</span> DiagnosticSummary<span class="op">{</span>Diagnostics<span class="op">:</span> <span class="op">[]</span>Diagnostic<span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Severity<span class="op">:</span> SeverityError<span class="op">},</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Severity<span class="op">:</span> SeverityError<span class="op">},</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Severity<span class="op">:</span> SeverityWarning<span class="op">},</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Severity<span class="op">:</span> SeverityInformation<span class="op">},</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Severity<span class="op">:</span> SeverityHint<span class="op">},</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    sum<span class="op">.</span>Recount<span class="op">()</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">2</span><span class="op">,</span> sum<span class="op">.</span>TotalErrors<span class="op">)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> sum<span class="op">.</span>TotalWarnings<span class="op">)</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> sum<span class="op">.</span>TotalInformation<span class="op">)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> sum<span class="op">.</span>TotalHints<span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestDiagnostic_ComputeID_Stable<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    d <span class="op">:=</span> Diagnostic<span class="op">{</span>FilePath<span class="op">:</span> <span class="st">&quot;/a/b.go&quot;</span><span class="op">,</span> Source<span class="op">:</span> <span class="st">&quot;gopls&quot;</span><span class="op">,</span> Code<span class="op">:</span> <span class="st">&quot;E1&quot;</span><span class="op">,</span> Message<span class="op">:</span> <span class="st">&quot;oops&quot;</span><span class="op">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        Range<span class="op">:</span> DiagnosticRange<span class="op">{</span>Start<span class="op">:</span> Position<span class="op">{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">0</span><span class="op">},</span> End<span class="op">:</span> Position<span class="op">{</span><span class="dv">1</span><span class="op">,</span> <span class="dv">5</span><span class="op">}}}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> d<span class="op">.</span>ComputeID<span class="op">(),</span> d<span class="op">.</span>ComputeID<span class="op">())</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    other <span class="op">:=</span> d</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    other<span class="op">.</span>Message <span class="op">=</span> <span class="st">&quot;different&quot;</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEqual<span class="op">(</span>t<span class="op">,</span> d<span class="op">.</span>ComputeID<span class="op">(),</span> other<span class="op">.</span>ComputeID<span class="op">())</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F13-T03): LSP type definitions (Diagnostic, DiagnosticSummary, ServerStatus)</code>.</p>
+<hr />
+<h2 id="task-4-lsp_client.go-tdd-with-paired-in-memory-pipes">Task 4:
+lsp_client.go (TDD with paired in-memory pipes)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/lsp_client.go</code>, new
+<code>helix_code/internal/tools/lsp_client_test.go</code>.</p>
+<p><code>LSPClient</code> is a <code>jsonrpc2.Conn</code> wrapper.
+Constructor accepts an <code>io.ReadWriteCloser</code> (so unit tests
+can hand it <code>net.Pipe()</code>-paired conns; production wires it to
+<code>cmd.StdoutPipe()</code> + <code>cmd.StdinPipe()</code>).</p>
+<p>Methods (mirror spec §3.3):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLSPClient<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> spec LSPServerSpec<span class="op">,</span> root <span class="dt">string</span><span class="op">,</span> rw io<span class="op">.</span>ReadWriteCloser<span class="op">)</span> <span class="op">(*</span>LSPClient<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> DidOpen<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">,</span> content <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> DidChange<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">,</span> content <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> DidClose<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> GetDiagnostics<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">[]</span>Diagnostic</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> WaitForDiagnostics<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">,</span> timeout time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">[]</span>Diagnostic</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> Status<span class="op">()</span> ServerStatus</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> Close<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<p>The <code>initialize</code> request is sent on construction;
+<code>initialized</code> notification follows; the publishDiagnostics
+handler is registered via the <code>jsonrpc2</code> handler interface
+and writes into <code>c.diagnostics[uri]</code> under
+<code>c.mu</code>.</p>
+<p>Tests use <code>net.Pipe()</code> to wire the client to a goroutine
+that fakes the server side — the test reads outbound JSON, asserts on
+it, and writes back canned LSP responses.</p>
+<p>Test:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPClient_InitializeHandshake_SendsRootURI<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    cli<span class="op">,</span> srv <span class="op">:=</span> net<span class="op">.</span>Pipe<span class="op">()</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    serverDone <span class="op">:=</span> <span class="bu">make</span><span class="op">(</span><span class="kw">chan</span> <span class="kw">struct</span><span class="op">{})</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">go</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">defer</span> <span class="bu">close</span><span class="op">(</span>serverDone<span class="op">)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// read framed initialize, write framed result</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        req <span class="op">:=</span> readLSPMessage<span class="op">(</span>t<span class="op">,</span> srv<span class="op">)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> <span class="dt">string</span><span class="op">(</span>req<span class="op">),</span> <span class="st">`&quot;rootUri&quot;:&quot;file:///workspace&quot;`</span><span class="op">)</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        writeLSPMessage<span class="op">(</span>t<span class="op">,</span> srv<span class="op">,</span> <span class="st">`{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;result&quot;:{&quot;capabilities&quot;:{}}}`</span><span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// consume the `initialized` notification</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        _ <span class="op">=</span> readLSPMessage<span class="op">(</span>t<span class="op">,</span> srv<span class="op">)</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}()</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    c<span class="op">,</span> err <span class="op">:=</span> NewLSPClient<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        LSPServerSpec<span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;fake&quot;</span><span class="op">,</span> Binary<span class="op">:</span> <span class="st">&quot;fake&quot;</span><span class="op">},</span> <span class="st">&quot;/workspace&quot;</span><span class="op">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        rwc<span class="op">{</span>cli<span class="op">})</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> c<span class="op">.</span>Close<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;-</span>serverDone</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPClient_DidChange_VersionIncrement<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* version 1 then 2 */</span> <span class="op">}</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPClient_PublishDiagnostics_StoredByURI<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* server pushes diag, client surfaces */</span> <span class="op">}</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPClient_WaitForDiagnostics_Timeout<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* no diag arrives, returns empty */</span> <span class="op">}</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPClient_Shutdown_Graceful<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* shutdown + exit observed in order */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F13-T04): LSPClient jsonrpc2 wrapper with initialize/didOpen/didChange/publishDiagnostics</code>.</p>
+<hr />
+<h2 id="task-5-lsp_manager.go-tdd-with-in-tree-fake-server-subprocess">Task
+5: lsp_manager.go (TDD with in-tree fake server subprocess)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/lsp_manager.go</code>, new
+<code>helix_code/internal/tools/lsp_manager_test.go</code>, new
+<code>helix_code/internal/tools/lsp_fakeserver/main.go</code>.</p>
+<p>The fake server (<code>lsp_fakeserver/main.go</code>) is a tiny
+standalone Go program that: - reads LSP-framed JSON-RPC from stdin, -
+responds to <code>initialize</code> with a minimal capabilities result,
+- on <code>textDocument/didOpen</code> and
+<code>textDocument/didChange</code> publishes a deterministic diagnostic
+at line 0 col 0 (“p1f13-fake-diagnostic”), - on <code>shutdown</code>
+returns <code>null</code>, on <code>exit</code> calls
+<code>os.Exit(0)</code>.</p>
+<p>The manager test builds it once via
+<code>go build -o $TMPDIR/p1f13_fake ./internal/tools/lsp_fakeserver</code>
+in <code>TestMain</code>, then runs <code>LSPManager</code> against a
+synthetic spec
+<code>{Binary: $TMPDIR/p1f13_fake, Extensions: [&quot;.fake&quot;]}</code>. Real
+subprocess, real stdio, real JSON-RPC.</p>
+<p><code>LSPManager</code> API (spec §3.3):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLSPManager<span class="op">(</span>opts LSPManagerOptions<span class="op">)</span> <span class="op">*</span>LSPManager</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> NotifyChange<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> absPath <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>DiagnosticSummary<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> GetDiagnostics<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> absPath <span class="dt">string</span><span class="op">,</span> minSeverity DiagnosticSeverity<span class="op">)</span> <span class="op">(*</span>DiagnosticSummary<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> Status<span class="op">()</span> <span class="op">[]</span>ServerStatus</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> Restart<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> Stop<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> Close<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<p>Tests:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPManager_LazySpawn_OnFirstFakeFile<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    bin <span class="op">:=</span> buildFakeServer<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewLSPManager<span class="op">(</span>LSPManagerOptions<span class="op">{</span>Root<span class="op">:</span> t<span class="op">.</span>TempDir<span class="op">(),</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        Specs<span class="op">:</span> <span class="op">[]</span>LSPServerSpec<span class="op">{{</span>Name<span class="op">:</span> <span class="st">&quot;fake&quot;</span><span class="op">,</span> Binary<span class="op">:</span> bin<span class="op">,</span> Extensions<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;.fake&quot;</span><span class="op">}}},</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        IdleTimeout<span class="op">:</span> time<span class="op">.</span>Minute<span class="op">})</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> m<span class="op">.</span>Close<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Empty<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Status<span class="op">())</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> writeFile<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;.fake&quot;</span><span class="op">,</span> <span class="st">&quot;anything&quot;</span><span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    summary<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>NotifyChange<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> p<span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> summary<span class="op">)</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> summary<span class="op">.</span>TotalErrors<span class="op">+</span>summary<span class="op">.</span>TotalWarnings<span class="op">,</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Len<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>Status<span class="op">(),</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPManager_UnknownExtension_NoSpawn_NoError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* .xyz → empty summary */</span> <span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPManager_BinaryNotOnPath_NoError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* Detect returns err → empty summary */</span> <span class="op">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPManager_IdleTimeout_ReapsServer<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* IdleTimeout=200ms, sleep 500ms, Status empty */</span> <span class="op">}</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPManager_CrashRecovery_Restarts<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* SIGKILL the subprocess; next NotifyChange respawns */</span> <span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPManager_Close_AllSubprocessesReaped<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* PIDs gone */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F13-T05): LSPManager with lazy spawn, idle timeout, file-extension router, crash recovery + in-tree fake LSP server</code>.</p>
+<hr />
+<h2 id="task-6-lsp_servers.go-curated-allowlist-tdd">Task 6:
+lsp_servers.go — curated allowlist (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/lsp_servers.go</code>, new
+<code>helix_code/internal/tools/lsp_servers_test.go</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DefaultLSPServerSpecs<span class="op">()</span> <span class="op">[]</span>LSPServerSpec <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">[]</span>LSPServerSpec<span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;gopls&quot;</span><span class="op">,</span> Binary<span class="op">:</span> <span class="st">&quot;gopls&quot;</span><span class="op">,</span> Extensions<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;.go&quot;</span><span class="op">}},</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;rust-analyzer&quot;</span><span class="op">,</span> Binary<span class="op">:</span> <span class="st">&quot;rust-analyzer&quot;</span><span class="op">,</span> Extensions<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;.rs&quot;</span><span class="op">}},</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;pyright&quot;</span><span class="op">,</span> Binary<span class="op">:</span> <span class="st">&quot;pyright-langserver&quot;</span><span class="op">,</span> Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;--stdio&quot;</span><span class="op">},</span> Extensions<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;.py&quot;</span><span class="op">}},</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;typescript-language-server&quot;</span><span class="op">,</span> Binary<span class="op">:</span> <span class="st">&quot;typescript-language-server&quot;</span><span class="op">,</span> Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;--stdio&quot;</span><span class="op">},</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            Extensions<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;.ts&quot;</span><span class="op">,</span> <span class="st">&quot;.tsx&quot;</span><span class="op">,</span> <span class="st">&quot;.jsx&quot;</span><span class="op">,</span> <span class="st">&quot;.js&quot;</span><span class="op">}},</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span>Name<span class="op">:</span> <span class="st">&quot;clangd&quot;</span><span class="op">,</span> Binary<span class="op">:</span> <span class="st">&quot;clangd&quot;</span><span class="op">,</span> Extensions<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;.c&quot;</span><span class="op">,</span> <span class="st">&quot;.cpp&quot;</span><span class="op">,</span> <span class="st">&quot;.cc&quot;</span><span class="op">,</span> <span class="st">&quot;.h&quot;</span><span class="op">,</span> <span class="st">&quot;.hpp&quot;</span><span class="op">}},</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> DetectInstalled<span class="op">(</span>specs <span class="op">[]</span>LSPServerSpec<span class="op">,</span> lookPath <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">))</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span></span></code></pre></div>
+<p>Tests assert (a) all 5 servers appear, (b) extensions match the spec,
+(c) <code>DetectInstalled</code> returns a map with only those whose
+<code>lookPath</code> succeeded. Use an injected <code>lookPath</code>
+so the test never depends on the host having any of them installed.</p>
+<p>Subject:
+<code>feat(P1-F13-T06): curated 5-server allowlist + Detect via exec.LookPath</code>.</p>
+<hr />
+<h2 id="task-7-lsp.go-agent-tools-tdd">Task 7: lsp.go — agent tools
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/lsp.go</code>, new
+<code>helix_code/internal/tools/lsp_test.go</code>.</p>
+<p>Adapters that satisfy the existing <code>Tool</code> interface
+(<code>Name</code>/<code>Description</code>/<code>Schema</code>/<code>Category</code>/<code>Validate</code>/<code>Execute</code>).
+Both wrap an <code>*LSPManager</code> injected via constructor. Category
+constant <code>CategoryLSP ToolCategory = &quot;lsp&quot;</code> added in
+<code>registry.go</code>.</p>
+<p>Tests use the in-tree fake server via the manager:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPGetDiagnosticsTool_ReturnsSummaryFromManager<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> managerWithFakeServer<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>LSPGetDiagnosticsTool<span class="op">{</span>manager<span class="op">:</span> m<span class="op">}</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    p <span class="op">:=</span> writeFile<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;.fake&quot;</span><span class="op">,</span> <span class="st">&quot;x&quot;</span><span class="op">)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> m<span class="op">.</span>NotifyChange<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> p<span class="op">)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;file_path&quot;</span><span class="op">:</span> p<span class="op">})</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    sum <span class="op">:=</span> res<span class="op">.(*</span>DiagnosticSummary<span class="op">)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>GreaterOrEqual<span class="op">(</span>t<span class="op">,</span> <span class="bu">len</span><span class="op">(</span>sum<span class="op">.</span>Diagnostics<span class="op">),</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPGetDiagnosticsTool_FiltersBySeverity<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* severity=warning excludes hints */</span> <span class="op">}</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPAnalyzeDiagnosticTool_LookupByID<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* roundtrip: get summary, pick ID, analyze */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F13-T07): LSPGetDiagnostics + LSPAnalyzeDiagnostic agent tools</code>.</p>
+<hr />
+<h2 id="task-8-registry.go-setlspmanager-auto-trigger-tdd">Task 8:
+registry.go — SetLSPManager + auto-trigger (TDD)</h2>
+<p><strong>Files:</strong> modify
+<code>helix_code/internal/tools/registry.go</code>, new
+<code>helix_code/internal/tools/registry_lsp_test.go</code>.</p>
+<p>Add to <code>ToolRegistry</code>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>lspManager <span class="op">*</span>LSPManager <span class="co">// optional; nil disables LSP auto-trigger</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r <span class="op">*</span>ToolRegistry<span class="op">)</span> SetLSPManager<span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">();</span> <span class="cf">defer</span> r<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span>lspManager <span class="op">=</span> m</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In <code>Execute</code>, after a successful inner Execute and after
+<code>markPlanActionExecuted</code>, before returning:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> execErr <span class="op">==</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> r<span class="op">.</span>lspManager <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> isEditTool<span class="op">(</span>name<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> path <span class="op">:=</span> extractEditedPath<span class="op">(</span>name<span class="op">,</span> params<span class="op">);</span> path <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> summary<span class="op">,</span> _ <span class="op">:=</span> r<span class="op">.</span>lspManager<span class="op">.</span>NotifyChange<span class="op">(</span>ctx<span class="op">,</span> path<span class="op">);</span> summary <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> <span class="bu">len</span><span class="op">(</span>summary<span class="op">.</span>Diagnostics<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>            result <span class="op">=</span> wrapResultWithLSP<span class="op">(</span>result<span class="op">,</span> summary<span class="op">)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>isEditTool</code> returns true for <code>&quot;fs_edit&quot;</code>,
+<code>&quot;fs_write&quot;</code>, <code>&quot;multi_edit_commit&quot;</code>.
+<code>wrapResultWithLSP</code> ensures the result is a
+<code>map[string]interface{}</code> with key
+<code>&quot;lsp_diagnostics&quot;</code> set; if the inner result is not already a
+map, it wraps it as
+<code>{&quot;result&quot;: &lt;inner&gt;, &quot;lsp_diagnostics&quot;: &lt;summary&gt;}</code>.
+Also register <code>LSPGetDiagnosticsTool</code> and
+<code>LSPAnalyzeDiagnosticTool</code> in <code>registerAllTools()</code>
+(gated: only when <code>lspManager != nil</code>, registered lazily from
+<code>SetLSPManager</code>).</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_AutoTriggerAfterFSEdit_AttachesLSPDiagnostics<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fs_edit then assert result[&quot;lsp_diagnostics&quot;] populated */</span> <span class="op">}</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_AutoTriggerSkipsOnEditError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* fs_edit fails → no NotifyChange call */</span> <span class="op">}</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_AutoTriggerNeverBlocksOnLSPError<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* manager returns err → user edit still succeeds */</span> <span class="op">}</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_NoLSPManager_NoAutoTrigger<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* without SetLSPManager, edits succeed unchanged */</span> <span class="op">}</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestRegistry_LSPToolsRegistered<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* Get(&quot;LSPGetDiagnostics&quot;) succeeds after SetLSPManager */</span> <span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F13-T08): registry.SetLSPManager + post-Execute auto-trigger for fs_edit/fs_write/multi_edit_commit</code>.</p>
+<hr />
+<h2 id="task-9-lsp-slash-command-tdd">Task 9: /lsp slash command
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/lsp_command.go</code>, new
+<code>helix_code/internal/commands/lsp_command_test.go</code>.</p>
+<p>Mirrors F09 <code>commands_command.go</code> and F11
+<code>sessions_command.go</code> patterns. Subcommands: -
+<code>/lsp status</code> — calls <code>manager.Status()</code>, renders
+a <code>text/tabwriter</code> table. - <code>/lsp list-servers</code> —
+prints <code>DefaultLSPServerSpecs()</code> and
+<code>DetectInstalled()</code> results side-by-side. -
+<code>/lsp restart [name]</code> —
+<code>manager.Restart(ctx, name)</code> (or all when
+<code>name == &quot;&quot;</code>). - <code>/lsp stop [name]</code> —
+<code>manager.Stop(ctx, name)</code> (or all).</p>
+<p>Tests:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPCommand_StatusEmptyManager_RendersHeaderRow<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* no servers running → just headers */</span> <span class="op">}</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPCommand_StatusWithFakeServer_RendersOneRow<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* uses managerWithFakeServer helper */</span> <span class="op">}</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPCommand_ListServers_Shows5<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPCommand_RestartByName_DelegatesToManager<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{}</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSPCommand_Stop_DelegatesToManager<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F13-T09): /lsp slash command (status / restart / list-servers / stop)</code>.</p>
+<hr />
+<h2 id="task-10-helixcode-lsp-cobra-main.go-wiring-integration-test">Task
+10: helixcode lsp cobra + main.go wiring + integration test</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/cmd/cli/lsp_cmd.go</code>, new
+<code>helix_code/cmd/cli/lsp_cmd_test.go</code>, modify
+<code>helix_code/cmd/cli/main.go</code>, new
+<code>helix_code/tests/integration/lsp_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p>Cobra mirrors F11 <code>sessions_cmd.go</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> lspCmdDeps <span class="kw">struct</span><span class="op">{</span> Manager <span class="op">*</span>tools<span class="op">.</span>LSPManager <span class="op">}</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> newLSPCmd<span class="op">(</span>deps lspCmdDeps<span class="op">)</span> <span class="op">*</span>cobra<span class="op">.</span>Command <span class="op">{</span> <span class="co">/* root + 4 subcommands */</span> <span class="op">}</span></span></code></pre></div>
+<p><code>main.go</code> startup wiring:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>specs <span class="op">:=</span> tools<span class="op">.</span>DefaultLSPServerSpecs<span class="op">()</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>lspMgr <span class="op">:=</span> tools<span class="op">.</span>NewLSPManager<span class="op">(</span>tools<span class="op">.</span>LSPManagerOptions<span class="op">{</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    Root<span class="op">:</span> workspaceRoot<span class="op">,</span> Specs<span class="op">:</span> specs<span class="op">,</span> IdleTimeout<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Minute<span class="op">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> lspMgr<span class="op">.</span>Close<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>registry<span class="op">.</span>SetLSPManager<span class="op">(</span>lspMgr<span class="op">)</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>slashRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewLSPCommand<span class="op">(</span>lspMgr<span class="op">))</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>rootCmd<span class="op">.</span>AddCommand<span class="op">(</span>newLSPCmd<span class="op">(</span>lspCmdDeps<span class="op">{</span>Manager<span class="op">:</span> lspMgr<span class="op">}))</span></span></code></pre></div>
+<p>Integration test (gated, per spec §5.2):</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">// +build integration</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestLSP_GoplsRoundTrip<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> exec<span class="op">.</span>LookPath<span class="op">(</span><span class="st">&quot;gopls&quot;</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skip<span class="op">(</span><span class="st">&quot;SKIP-OK: P1-F13 gopls not installed (install: go install golang.org/x/tools/gopls@latest)&quot;</span><span class="op">)</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    dir <span class="op">:=</span> t<span class="op">.</span>TempDir<span class="op">()</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    src <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>dir<span class="op">,</span> <span class="st">&quot;broken.go&quot;</span><span class="op">)</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> os<span class="op">.</span>WriteFile<span class="op">(</span>src<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">(</span><span class="st">&quot;package mismatch</span><span class="ch">\n</span><span class="st">func {</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">),</span> <span class="bn">0644</span><span class="op">))</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> tools<span class="op">.</span>NewLSPManager<span class="op">(</span>tools<span class="op">.</span>LSPManagerOptions<span class="op">{</span>Root<span class="op">:</span> dir<span class="op">,</span> Specs<span class="op">:</span> tools<span class="op">.</span>DefaultLSPServerSpecs<span class="op">(),</span> IdleTimeout<span class="op">:</span> <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">})</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> m<span class="op">.</span>Close<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    sum<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>NotifyChange<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> src<span class="op">)</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> sum<span class="op">)</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> sum<span class="op">.</span>TotalErrors<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="st">&quot;expected gopls to surface a syntax error&quot;</span><span class="op">)</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co">// Plus TestLSP_RustAnalyzerRoundTrip, TestLSP_PyrightRoundTrip,</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">// TestLSP_TypescriptLanguageServerRoundTrip, TestLSP_ClangdRoundTrip</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="co">// each with their own SKIP-OK + install hint per spec §5.2.</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co">// Plus TestLSP_AutoTriggerThroughFSEdit_GoplsEndToEnd (gated on gopls).</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P1-F13-T10): wire LSPManager into main.go + helixcode lsp cobra + gated integration tests</code>.</p>
+<hr />
+<h2 id="task-11-challenge-with-runtime-evidence">Task 11: Challenge with
+runtime evidence</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p1f13_challenge/main.go</code>,
+new <code>challenges/p1-f13-lsp-integration/CHALLENGE.md</code>, new
+<code>challenges/p1-f13-lsp-integration/run.sh</code>.</p>
+<p>The harness builds the in-tree fake LSP server, then runs two phases.
+Output skeleton:</p>
+<pre><code>=== MANAGER PIPELINE (always runs, in-tree fake server) ===
+[PASS] manager: lazy spawn on first .fake file
+[PASS] manager: file-extension router routes .fake to fake-server only
+[PASS] manager: unknown extension returns empty summary, no error
+[PASS] manager: binary-not-on-PATH returns empty summary, no error
+[PASS] manager: idle timeout reaps subprocess after 200ms
+[PASS] manager: crash recovery respawns subprocess after SIGKILL
+[PASS] client: initialize handshake (rootURI verified)
+[PASS] client: didOpen + didChange version increment
+[PASS] client: publishDiagnostics stored by URI
+[PASS] auto-trigger: fs_edit attaches lsp_diagnostics to result
+[PASS] auto-trigger: never blocks user edit on LSP error
+
+=== REAL LANGUAGE SERVERS (gated) ===
+[PASS|skipped: gopls not on PATH (install: go install golang.org/x/tools/gopls@latest)]
+[PASS|skipped: rust-analyzer not on PATH (install: rustup component add rust-analyzer)]
+[PASS|skipped: pyright not on PATH (install: npm i -g pyright)]
+[PASS|skipped: typescript-language-server not on PATH (install: npm i -g typescript-language-server typescript)]
+[PASS|skipped: clangd not on PATH (install: apt install clangd OR brew install llvm)]
+
+SUMMARY: MANAGER=11/11 PASS; REAL_SERVERS=&lt;n&gt;/5 PASS (&lt;5-n&gt; skipped)</code></pre>
+<p>The Challenge MUST NOT print <code>[PASS]</code> for a server that
+wasn’t actually invoked. Anti-bluff smoke clean check appended to the
+harness output. Verbatim output captured into
+<code>06_phase_1_evidence.md</code>. Dual commit (Challenges submodule +
+meta-repo bump).</p>
+<p>Subject:
+<code>feat(P1-F13-T11): challenge with runtime evidence (in-tree fake server pipeline + gated real servers)</code>.</p>
+<hr />
+<h2 id="task-12-close-out-push">Task 12: Close-out + push</h2>
+<p>Tick all 12 items in PROGRESS, advance PROGRESS focus to F14
+candidate, run final verification (<code>make verify-compile</code>,
+anti-bluff smoke,
+<code>go test -count=1 ./internal/tools/... ./internal/commands/...</code>),
+commit
+<code>chore(P1-F13-T12): close out feature 13 — LSP integration</code>,
+push 4 remotes non-force (<code>origin</code>, <code>helixdev</code>,
+<code>vasic-digital</code>, <code>gitlab</code> per programme
+conventions).</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T03 types (§3.3), T04 client (§3.3, §4), T05 manager (§3.3, §4.2, §4.4,
+§4.5), T06 servers (§1, §3.3), T07 tools (§3.4), T08 registry
+auto-trigger (§4.3), T09 slash (§3.4), T10 cobra + integration (§3.4,
+§5.2, §6.2), T11 Challenge (§5.2, §6.3), T12 close-out (§9).</li>
+<li><strong>TDD:</strong> every code task starts with a failing test
+that exercises the real code path (paired in-memory pipes for client;
+real subprocess for manager; auto-trigger asserted via the registry’s
+actual Execute path).</li>
+<li><strong>Type consistency:</strong> <code>Diagnostic</code>,
+<code>DiagnosticSummary</code>, <code>DiagnosticSeverity</code>,
+<code>LSPServerSpec</code>, <code>ServerStatus</code>,
+<code>LSPManager</code>, <code>LSPClient</code>,
+<code>LSPGetDiagnosticsTool</code>,
+<code>LSPAnalyzeDiagnosticTool</code> — names match across spec §3.3 and
+plan T03–T08.</li>
+<li><strong>Two new external deps:</strong>
+<code>go.lsp.dev/jsonrpc2 v0.10.0</code> +
+<code>go.lsp.dev/protocol v0.12.0</code>. Both confirmed absent from
+<code>helix_code/go.mod</code> at spec time. Justification: these are
+the canonical Go LSP libraries (used by gopls itself); hand-rolling
+JSON-RPC framing + ~200 LSP types is exactly the bluff-prone work the
+Constitution asks us to avoid.</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has TWO sections; the
+always-runs section uses a real OS subprocess (the in-tree fake server)
+speaking real LSP-framed JSON-RPC over real stdio, NOT a Go in-process
+stub. The gated section explicitly skips with
+<code>SKIP-OK: P1-F13 &lt;binary&gt; not installed (install: &lt;hint&gt;)</code>
+per server.</li>
+<li><strong>Auto-trigger never blocks the user:</strong>
+<code>r.lspManager.NotifyChange</code> errors are logged WARN and
+dropped; the user’s edit always succeeds. This is asserted by
+<code>TestRegistry_AutoTriggerNeverBlocksOnLSPError</code>.</li>
+<li><strong>CONST-042:</strong> INFO logs in <code>LSPClient</code> log
+only <code>len(message)</code> and basenames; full diagnostic content is
+DEBUG-only behind <code>HELIX_LSP_DEBUG=1</code>. Challenge verifies
+INFO log lines do not contain test-diagnostic substrings.</li>
+<li><strong>Cross-platform:</strong> pure Go; <code>os/exec</code> stdio
+piping behaves identically on Linux/macOS/Windows (the upstream
+<code>go.lsp.dev/jsonrpc2</code> library is itself used by gopls on all
+three).</li>
+<li><strong>Branch + push:</strong> stays on <code>main</code>,
+non-force to all four remotes (per CONST-043); explicit user
+authorization is requested at T12 before pushing.</li>
+<li><strong>Reality check:</strong> the existing <code>Tool</code>
+interface in <code>internal/tools/registry.go</code>
+(<code>Name</code>/<code>Description</code>/<code>Schema</code>/<code>Execute</code>/<code>Category</code>/<code>Validate</code>
+— see registry.go:24) is fully compatible with the LSP tool adapters. No
+registry redesign required. The auto-trigger lives in the existing
+chokepoint (<code>ToolRegistry.Execute</code> at registry.go:334) — same
+place hooks fire — so we are extending an established pattern, not
+inventing one.</li>
+</ol>
+</body>
+</html>

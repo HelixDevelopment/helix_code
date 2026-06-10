@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f09-slash-command-system-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f09-slash-command-system-design</h1>
+</header>
+<h1 id="phase-1-feature-9-slash-command-system-user-defined-markdown-commands">Phase
+1 / Feature 9 — Slash Command System (user-defined Markdown
+commands)</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Add a parallel slash-command surface for <strong>user-defined
+Markdown commands</strong>, distinct from the built-in Go-defined
+commands shipped in F02–F08. Users author <code>.md</code> files with
+YAML frontmatter (title, description, variables) plus a Markdown body;
+commands are invoked with <code>/command-name</code>; variables like
+<code>{{ARG1}}</code>, <code>{{SELECTION}}</code>,
+<code>{{CURRENT_FILE}}</code>, <code>{{CWD}}</code>,
+<code>{{ENV.NAME}}</code>, <code>{{FILE:path}}</code> are substituted at
+runtime via single-pass regex; file changes are watched via fsnotify and
+the registry hot-reloads. Both <code>/commands</code> slash and
+<code>helixcode commands</code> cobra subcommand expose
+<code>list</code>/<code>show &lt;name&gt;</code>/<code>reload</code>/<code>run &lt;name&gt;</code>.</p>
+<h2 id="architecture">2. Architecture</h2>
+<p>Add <code>internal/commands/markdown_commands.go</code> (in the same
+package as built-ins so user-defined commands satisfy the existing
+<code>Command</code> interface and live in the same
+<code>Registry</code>). Loader scans project
+<code>.helix/commands/*.md</code> and user
+<code>~/.config/helixcode/commands/*.md</code> (project overrides user
+by name). Frontmatter parsed via existing <code>gopkg.in/yaml.v3</code>.
+fsnotify watcher (already a transitive dependency) re-runs the loader on
+file create/modify/delete events. New <code>MarkdownCommand</code> type
+implements <code>Command</code>, with <code>Execute()</code> performing
+variable substitution and returning the rendered text as
+<code>CommandResult.Output</code>. Single-pass regex
+<code>\{\{([A-Z_][A-Z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?(:[^}]+)?)\}\}</code>
+matches all token forms; resolver dispatches per-token-class.</p>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/commands/markdown_commands.go</code> —
+<code>MarkdownCommand</code>, <code>MarkdownLoader</code>,
+<code>tokenResolver</code>, frontmatter parser, regex substitution</li>
+<li><code>helix_code/internal/commands/markdown_commands_test.go</code>
+— unit tests</li>
+<li><code>helix_code/internal/commands/markdown_watcher.go</code> —
+fsnotify-driven reloader (separate file for cross-platform
+isolation)</li>
+<li><code>helix_code/internal/commands/markdown_watcher_test.go</code></li>
+<li><code>helix_code/internal/commands/commands_command.go</code> —
+<code>/commands</code> slash command (list/show/reload/run)</li>
+<li><code>helix_code/internal/commands/commands_command_test.go</code></li>
+<li><code>helix_code/cmd/cli/commands_cmd.go</code> —
+<code>helixcode commands</code> cobra subcommand</li>
+<li><code>helix_code/cmd/cli/commands_cmd_test.go</code></li>
+<li><code>helix_code/internal/commands/builtin/commands_register_test.go</code></li>
+<li><code>helix_code/tests/integration/markdown_commands_test.go</code></li>
+<li><code>challenges/p1-f09-slash-commands/CHALLENGE.md</code> +
+<code>run.sh</code></li>
+</ul>
+<h3 id="modified">3.2 Modified</h3>
+<ul>
+<li><code>helix_code/internal/commands/builtin/register.go</code> —
+<code>RegisterBuiltinCommandsWithMarkdown(registry, loader)</code>; add
+<code>&quot;commands&quot;</code> to <code>GetBuiltinCommandNames</code> +
+builtin_test.go skip set</li>
+<li><code>helix_code/cmd/cli/main.go</code> — construct
+<code>MarkdownLoader</code>, start watcher, register
+<code>/commands</code> slash + <code>helixcode commands</code> cobra
+dispatcher</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In internal/commands/markdown_commands.go</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MarkdownCommand <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    name        <span class="dt">string</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    title       <span class="dt">string</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    description <span class="dt">string</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    body        <span class="dt">string</span>         <span class="co">// Markdown body after frontmatter</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    variables   <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="co">// declared in frontmatter</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    sourcePath  <span class="dt">string</span>         <span class="co">// file path, for diagnostics</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> c<span class="op">.</span>name <span class="op">}</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Aliases<span class="op">()</span> <span class="op">[]</span><span class="dt">string</span>    <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="op">{</span> <span class="cf">return</span> c<span class="op">.</span>description <span class="op">}</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span>        <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/&quot;</span> <span class="op">+</span> c<span class="op">.</span>name <span class="op">+</span> <span class="st">&quot; [args]&quot;</span> <span class="op">}</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>MarkdownCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MarkdownLoader <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    projectDir <span class="dt">string</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    userDir    <span class="dt">string</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    registry   <span class="op">*</span>Registry</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    mu         sync<span class="op">.</span>RWMutex</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    loaded     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="dt">string</span> <span class="co">// command name → source path</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMarkdownLoader<span class="op">(</span>registry <span class="op">*</span>Registry<span class="op">,</span> projectDir<span class="op">,</span> userDir <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>MarkdownLoader</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MarkdownLoader<span class="op">)</span> Load<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MarkdownLoader<span class="op">)</span> Reload<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>MarkdownLoader<span class="op">)</span> Watch<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span>  <span class="co">// blocks; cancel ctx to stop</span></span></code></pre></div>
+<h3 id="frontmatter-format">3.4 Frontmatter format</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> Refactor file</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> Rename a function across the file and run tests</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">variables:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">  function_name: &quot;&quot;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>Please rename function <span class="in">`{{ARG1}}`</span> (or <span class="in">`{{ARG.function_name}}`</span>) in {{CURRENT_FILE}} to <span class="in">`{{ARG2}}`</span>.</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>After the rename, run <span class="in">`{{FILE:scripts/run-tests.sh}}`</span> and report the diff.</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>Working directory: {{CWD}}</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>User: {{ENV.USER}}</span></code></pre></div>
+<h3 id="token-classes-regex-a-z_a-z0-9_.a-za-z_a-za-z0-9_">3.5 Token
+classes (regex
+<code>\{\{([A-Z_][A-Z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?(:[^}]+)?)\}\}</code>)</h3>
+<ul>
+<li><code>{{ARG1}}…{{ARGN}}</code> — positional args (1-indexed)</li>
+<li><code>{{ARG.name}}</code> — named arg from frontmatter
+<code>variables:</code> map (defaults if user didn’t supply)</li>
+<li><code>{{SELECTION}}</code> — current selection (CommandContext
+should expose <code>Selection string</code>); empty string if
+absent</li>
+<li><code>{{CURRENT_FILE}}</code> — current file path
+(CommandContext.CurrentFile); empty if absent</li>
+<li><code>{{CWD}}</code> — current working directory
+(<code>os.Getwd()</code>)</li>
+<li><code>{{ENV.NAME}}</code> — env var lookup; empty string if unset
+(with warning logged once per Load)</li>
+<li><code>{{FILE:path}}</code> — read file contents at path, with size
+cap (1 MB) and error on missing/oversized</li>
+</ul>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup">4.1 Startup</h3>
+<pre><code>main.go
+  ├─ loader := NewMarkdownLoader(cmdRegistry, &quot;.helix/commands&quot;, &quot;~/.config/helixcode/commands&quot;)
+  ├─ loader.Load()   // scans both dirs, registers MarkdownCommand for each .md file
+  ├─ go loader.Watch(ctx)   // fsnotify on both dirs
+  └─ cmdRegistry.Register(commands.NewCommandsCommand(loader))   // /commands slash</code></pre>
+<h3 id="user-invokes-refactor-file.go-oldname-newname">4.2 User invokes
+<code>/refactor file.go oldName newName</code></h3>
+<pre><code>slash router resolves &quot;refactor&quot; via cmdRegistry.Get
+  └─ MarkdownCommand.Execute(ctx, &amp;CommandContext{Args: [&quot;file.go&quot;,&quot;oldName&quot;,&quot;newName&quot;]})
+       ├─ build tokenResolver from cc.Args + frontmatter variables + os.Getwd + os.LookupEnv
+       ├─ regex.ReplaceAllStringFunc(body, resolver.Resolve)
+       └─ return &amp;CommandResult{Success: true, Output: rendered}</code></pre>
+<h3 id="fsnotify-watch">4.3 fsnotify watch</h3>
+<pre><code>loader.Watch(ctx)
+  └─ on Create/Modify/Delete event in either dir:
+        ├─ debounce 200ms
+        └─ loader.Reload()
+              ├─ rescan both dirs
+              ├─ diff against l.loaded (added / changed / removed)
+              ├─ for added/changed: parseFrontmatter → registry.Register (replace if exists)
+              └─ for removed: registry.Unregister(name)   // new method on Registry needed</code></pre>
+<h3 id="helixcode-commands-list">4.4
+<code>helixcode commands list</code></h3>
+<pre><code>helixcode commands list
+  └─ scans both dirs (no Registry needed; pure fs operation)
+  └─ table: NAME | TITLE | SOURCE-PATH</code></pre>
+<p><code>helixcode commands show &lt;name&gt;</code> reads the file and
+prints the body.
+<code>helixcode commands run &lt;name&gt; &lt;args...&gt;</code> builds
+a context, calls <code>MarkdownCommand.Execute</code>, prints the
+rendered output (so users can pipe / redirect).</p>
+<h2 id="error-handling-edge-cases">5. Error handling, edge cases</h2>
+<ul>
+<li><strong>Frontmatter parse error</strong>: log a WARN with file path
++ error, skip that file (don’t fail the whole Load).</li>
+<li><strong>Duplicate command name</strong>: project file wins
+(deterministic precedence). User file is logged as overridden.</li>
+<li><strong><code>{{FILE:path}}</code> over 1 MB</strong>: substitution
+returns <code>[FILE TOO LARGE: &lt;path&gt;]</code> (visible in output,
+agent can retry with smaller scope).</li>
+<li><strong><code>{{FILE:path}}</code> missing</strong>: substitution
+returns <code>[FILE NOT FOUND: &lt;path&gt;]</code>.</li>
+<li><strong><code>{{ARGN}}</code> out of bounds</strong> (user supplied
+fewer args): substitution returns empty string (lenient — agent fills in
+from context).</li>
+<li><strong><code>{{ENV.NAME}}</code> unset</strong>: substitution
+returns empty string + WARN logged (once per Load).</li>
+<li><strong>fsnotify errors</strong> (e.g., dir doesn’t exist
+initially): logged at INFO; loader retries on next Reload trigger.</li>
+<li><strong>Watcher Goroutine leak on shutdown</strong>:
+<code>Watch(ctx)</code> returns when ctx cancels.</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9">Anti-bluff (CONST-035 / §11.9)</h3>
+<ul>
+<li>Challenge: write a <code>.helix/commands/echo-input.md</code> with
+body <code>Got: {{ARG1}}</code>, run
+<code>helixcode commands run echo-input hello</code>, capture stdout
+<code>Got: hello</code> (not “rendered template” or “would
+render”).</li>
+<li>Tests use real files via <code>t.TempDir()</code> + real fsnotify
+events — no mocks.</li>
+<li>Anti-bluff smoke must remain clean.</li>
+</ul>
+<h2 id="testing">6. Testing</h2>
+<p>Unit tests (markdown_commands_test.go): - TestParseFrontmatter (valid
++ missing + malformed) - TestSubstitute_PositionalArg -
+TestSubstitute_NamedArg - TestSubstitute_Selection_CurrentFile_CWD -
+TestSubstitute_EnvVar (set + unset) - TestSubstitute_FileToken (exists +
+missing + oversize) - TestMarkdownCommand_ImplementsInterface
+(compile-time)</p>
+<p>Loader tests: - TestLoader_LoadProjectAndUser (project overrides
+user) - TestLoader_LoadIgnoresNonMarkdown - TestLoader_ReloadDiffs
+(added/changed/removed) - TestLoader_FrontmatterErrorIsLogged (does not
+fail Load)</p>
+<p>Watcher tests (markdown_watcher_test.go): -
+TestWatcher_DebouncesRapidWrites - TestWatcher_StopsOnContextCancel -
+TestWatcher_HandlesMissingDirInitially</p>
+<p>Slash command tests (commands_command_test.go): -
+TestSlashCommands_List - TestSlashCommands_ShowReturnsBody -
+TestSlashCommands_ReloadRefreshesRegistry -
+TestSlashCommands_RunRendersOutput -
+TestSlashCommands_UnknownSubcommandErrors</p>
+<p>Cobra tests (commands_cmd_test.go): - TestCommandsCmd_List -
+TestCommandsCmd_Show - TestCommandsCmd_Run</p>
+<p>Integration test (real fs): -
+TestMarkdownCommands_ProjectOverridesUser (real tempdirs) -
+TestMarkdownCommands_WatcherReloadsOnFileWrite</p>
+<p>Challenge: real <code>.helix/commands/echo.md</code> +
+<code>helixcode commands run echo &quot;hello world&quot;</code> → captures
+<code>hello world</code> in real stdout.</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>fsnotify works on Linux/macOS/Windows. Cross-compile linux is the
+canonical check (Windows pre-existing CGO failures unrelated). User dir
+resolution uses <code>os.UserConfigDir()</code> (cross-platform).</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li>Argument validation against frontmatter <code>variables:</code>
+schema (currently lenient — empty string fallback).</li>
+<li>Git-tracked vs untracked command provenance.</li>
+<li>Sandboxed execution of commands that include shell directives
+(commands are pure templates; no execution semantics).</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li>CONST-035 / §11.9: Challenge captures real rendered output via real
+subprocess.</li>
+<li>CONST-042: command files may include <code>{{ENV.NAME}}</code> for
+sensitive vars; loader does NOT log resolved env values.</li>
+<li>CONST-043: non-force pushes to all four remotes per programme
+convention.</li>
+</ul>
+<h2 id="open-questions-resolved-during-brainstorming">10. Open questions
+resolved during brainstorming</h2>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: where does loader live</td>
+<td>(C) <code>internal/commands/markdown_commands.go</code> (same
+package as built-ins)</td>
+</tr>
+<tr>
+<td>Q2: variable substitution scope</td>
+<td>(A) Full parity
+(ARGN/named/SELECTION/CURRENT_FILE/CWD/ENV/FILE)</td>
+</tr>
+<tr>
+<td>Q3: discovery scope</td>
+<td>(C) Project + user + fsnotify watch</td>
+</tr>
+<tr>
+<td>Q4: user surface</td>
+<td>(C) Both <code>/commands</code> slash +
+<code>helixcode commands</code> cobra</td>
+</tr>
+<tr>
+<td>Q5: substitution implementation</td>
+<td>(B) Single-pass regex with token resolver</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

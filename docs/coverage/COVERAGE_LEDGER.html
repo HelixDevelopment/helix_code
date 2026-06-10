@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>COVERAGE_LEDGER</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">COVERAGE_LEDGER</h1>
+</header>
+<h1 id="helixcode-const-048-coverage-ledger-submodule-feature-platform-invariant">HelixCode
+CONST-048 Coverage Ledger — Submodule × Feature × Platform ×
+Invariant</h1>
+<p><strong>Schema:</strong> <code>SCHEMA_VERSION = 1.0.0</code> (see
+<code>SCHEMA.md</code>) <strong>Last regenerated:</strong> 2026-05-18
+(round 68 initial publication) <strong>Source roster:</strong>
+<code>docs/improvements/submodule_owned.txt</code> (68 owned submodules)
+<strong>Companion ledger:</strong> <code>docs/coverage/ledger.md</code>
+(feature × invariant rollup, round 41+) <strong>Generator:</strong>
+<code>scripts/generate-coverage-ledger.sh</code>
+<strong>Mandate:</strong> CONST-048 (Full-Automation-Coverage) /
+constitution §11.4.25; CONST-035 anti-bluff posture; Article XI
+§11.9</p>
+<h2 id="how-to-read-this-ledger">How to read this ledger</h2>
+<p>Each row = <code>(Submodule, Feature, Platform)</code>. Six invariant
+cells per row (I1..I6) hold one of: <code>PASS</code>,
+<code>PENDING_FORENSICS:</code>, <code>OPERATOR-BLOCKED:</code>,
+<code>UNCONFIRMED:</code>, <code>SKIP-OK: #&lt;ticket&gt;</code>,
+<code>PARTIAL</code>, <code>N/A</code>. Overall column is mechanical
+rollup. Notes column carries the evidence reference for any PASS
+marker.</p>
+<p>Round 68 deliverable = <strong>structure + honest conservative
+initial population</strong>. Default cell is <code>UNCONFIRMED:</code>.
+PASS markers only where CONTINUATION.md round narrative documents
+captured evidence. Subsequent rounds promote <code>UNCONFIRMED:</code> →
+<code>PASS</code> by adding the round reference in Notes.</p>
+<p>Auto-marking everything PASS would itself be a CONST-035 PASS-bluff
+at the governance layer — explicitly forbidden by the round 68
+brief.</p>
+<h2 id="const-048-invariants">CONST-048 invariants</h2>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 78%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Invariant</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I1</td>
+<td>Anti-bluff posture with captured runtime evidence (CONST-035 /
+Article XI §11.9)</td>
+</tr>
+<tr>
+<td>I2</td>
+<td>Proof of working capability end-to-end on target topology
+(CONST-050(A) — no mocks beyond unit tests)</td>
+</tr>
+<tr>
+<td>I3</td>
+<td>Implementation matches the documented promise (§11.4.12)</td>
+</tr>
+<tr>
+<td>I4</td>
+<td>No open issues/bugs surfaced (Issues.md cross-check + source-tree
+<code>TODO(round-N)</code> / <code>BUG #NN:</code> grep)</td>
+</tr>
+<tr>
+<td>I5</td>
+<td>Full documentation in sync (§11.4.12)</td>
+</tr>
+<tr>
+<td>I6</td>
+<td>Four-layer test floor (pre-build + post-build + runtime + paired
+mutation)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="coverage-rollup-round-68-baseline">Coverage rollup (round 68
+baseline)</h2>
+<table>
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Owned submodules (roster)</td>
+<td>68</td>
+</tr>
+<tr>
+<td>Rows in ledger</td>
+<td>68 (one per submodule, <code>whole-module</code> feature row
+each)</td>
+</tr>
+<tr>
+<td>PASS Overall</td>
+<td>0</td>
+</tr>
+<tr>
+<td>PARTIAL Overall</td>
+<td>8</td>
+</tr>
+<tr>
+<td>PENDING_FORENSICS Overall</td>
+<td>0</td>
+</tr>
+<tr>
+<td>OPERATOR-BLOCKED Overall</td>
+<td>0</td>
+</tr>
+<tr>
+<td>UNCONFIRMED Overall</td>
+<td>60</td>
+</tr>
+</tbody>
+</table>
+<p>Conservative posture per CONST-035: no full-row PASS until every
+invariant for every platform has captured evidence. PARTIAL rows hold
+the documented-PASS work from CONTINUATION rounds
+23/37/41/53/60/62/63/64/65 (the round-specific evidence appears in the
+cell + Notes).</p>
+<h2 id="ledger-rows">Ledger rows</h2>
+<h3 id="submodules-with-documented-pass-on-some-invariants-partial-overall">Submodules
+with documented PASS-on-some-invariants (PARTIAL Overall)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 7%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 9%" />
+<col style="width: 13%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Feature</th>
+<th>Platform</th>
+<th>I1 anti-bluff</th>
+<th>I2 e2e-working</th>
+<th>I3 doc-match</th>
+<th>I4 no-issues</th>
+<th>I5 doc-sync</th>
+<th>I6 4-layer-tests</th>
+<th>Overall</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>submodules/auto_temp</td>
+<td>grid-search temperature tuning</td>
+<td>linux,macos,windows</td>
+<td>PASS (round 23 fix 127be62)</td>
+<td>PASS (round 37 wired Real backends)</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>PARTIAL</td>
+<td>PARTIAL</td>
+<td>round 23 + round 37 per CONTINUATION; needs I4/I5/I6 audit</td>
+</tr>
+<tr>
+<td>submodules/storage</td>
+<td>recording S3 sync</td>
+<td>linux,macos</td>
+<td>PASS (round 37 acecf73)</td>
+<td>PARTIAL (round 37 env-gated SKIP-OK on real S3)</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>PARTIAL</td>
+<td>PARTIAL</td>
+<td>round 37 per CONTINUATION; real-S3 integration env-gated</td>
+</tr>
+<tr>
+<td>submodules/llm_orchestrator</td>
+<td>OpenCode CLI adapter</td>
+<td>linux,macos</td>
+<td>PASS (round 64 a9493fa)</td>
+<td>PASS (round 64 real opencode v1.14.41 invocation)</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>PARTIAL (16 tests + 1 SKIP-OK windows)</td>
+<td>PARTIAL</td>
+<td>round 64 per CONTINUATION: 106 PASS / 0 FAIL / 0 SKIP unit; real
+binary integration test passed; Windows job-object deferred to round
+65+</td>
+</tr>
+<tr>
+<td>submodules/llm_orchestrator</td>
+<td>SimpleAgentPool + 5 builder factories</td>
+<td>all-platforms</td>
+<td>PASS (round 50+ per CONTINUATION)</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>PARTIAL</td>
+<td>PARTIAL</td>
+<td>per CONTINUATION pool wiring; E2E topology evidence pending</td>
+</tr>
+<tr>
+<td>submodules/helix_specifier</td>
+<td>real DebateFunc</td>
+<td>all-platforms</td>
+<td>PASS (round 65 f2cb17a)</td>
+<td>PASS (round 65 LLMResponder interface + LLMBackedDebateFunc)</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>PARTIAL (paired-mutation gate landed)</td>
+<td>PARTIAL</td>
+<td>round 65 per CONTINUATION; closes ErrDebateFuncNotConfigured (round
+28); Option B chosen per CONST-051(B)</td>
+</tr>
+<tr>
+<td>submodules/llm_provider</td>
+<td>provider error sentinel coverage (17 providers)</td>
+<td>all-platforms</td>
+<td>PASS (round 63 5171edf)</td>
+<td>PASS (round 63 full llm pkg PASS 52.868s)</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>PARTIAL (17 new tests + 21 subtests)</td>
+<td>PARTIAL</td>
+<td>round 63 100% coverage milestone per CONTINUATION; closes round-46
+deferred providers</td>
+</tr>
+<tr>
+<td>submodules/llms_verifier</td>
+<td>provider/model verification (CONST-036)</td>
+<td>all-platforms</td>
+<td>PASS (CONST-036/037 wiring per ledger.md)</td>
+<td>PARTIAL (groq+openrouter+mistral+deepseek live-verified per
+ledger.md F12)</td>
+<td>PARTIAL</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>PARTIAL</td>
+<td>PARTIAL</td>
+<td>cross-ref ledger.md F12; 10 providers unprobed (no keys / Gemini
+invalid / Ollama+LlamaCPP local not running)</td>
+</tr>
+<tr>
+<td>submodules/models</td>
+<td>model metadata source</td>
+<td>all-platforms</td>
+<td>PASS (per CONST-036 ledger)</td>
+<td>PARTIAL (per LLMsVerifier integration above)</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>PARTIAL</td>
+<td>wired to LLMsVerifier per CONST-036; depth audit pending</td>
+</tr>
+</tbody>
+</table>
+<h3 id="all-other-owned-submodules-unconfirmed-baseline-round-68">All
+other owned submodules — UNCONFIRMED baseline (round 68)</h3>
+<p>Each of the rows below is a single <code>whole-module</code>
+placeholder. Future rounds split into per-feature rows when audit work
+captures evidence. Until then, the rows hold UNCONFIRMED across every
+invariant — which is the honest position per CONST-035 (“never claim
+PASS without captured evidence”).</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 6%" />
+<col style="width: 7%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 9%" />
+<col style="width: 13%" />
+<col style="width: 6%" />
+<col style="width: 5%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Feature</th>
+<th>Platform</th>
+<th>I1 anti-bluff</th>
+<th>I2 e2e-working</th>
+<th>I3 doc-match</th>
+<th>I4 no-issues</th>
+<th>I5 doc-sync</th>
+<th>I6 4-layer-tests</th>
+<th>Overall</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>challenges</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; needs per-Challenge-script row split</td>
+</tr>
+<tr>
+<td>containers</td>
+<td>whole-module</td>
+<td>linux,containers</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; CONST-045 host-enrolment lives here</td>
+</tr>
+<tr>
+<td>submodules/doc_processor</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/helix_llm</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/helix_memory</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/vision_engine</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/agentic</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/auth</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; JWT/bcrypt/argon2 stack</td>
+</tr>
+<tr>
+<td>submodules/background_tasks</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; cross-ref ledger.md F07</td>
+</tr>
+<tr>
+<td>submodules/benchmark</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/cache</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; Redis backend</td>
+</tr>
+<tr>
+<td>submodules/claritas</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/concurrency</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/config</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; Viper config stack</td>
+</tr>
+<tr>
+<td>submodules/conversation</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/database</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; PostgreSQL via pgx/v5</td>
+</tr>
+<tr>
+<td>submodules/doc_processor</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline (vasic-digital fork)</td>
+</tr>
+<tr>
+<td>submodules/document</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/embeddings</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/event_bus</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/filesystem</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/formatters</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/gandalf_solutions</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/hyper_tune</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/i18n</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; CONST-046 hardcoded-content sink</td>
+</tr>
+<tr>
+<td>submodules/i_llm</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/lazy</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/leak_hub</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/llm_ops</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/llm_orchestrator</td>
+<td>whole-module (vasic-digital fork)</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; HelixDevelopment fork has documented work
+above</td>
+</tr>
+<tr>
+<td>submodules/llm_provider</td>
+<td>whole-module (vasic-digital fork)</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; HelixDevelopment fork has documented work
+above</td>
+</tr>
+<tr>
+<td>submodules/mcp_module</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; cross-ref ledger.md F06</td>
+</tr>
+<tr>
+<td>submodules/memory</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; cross-ref ledger.md F24</td>
+</tr>
+<tr>
+<td>submodules/messaging</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/middleware</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/models</td>
+<td>whole-module (vasic-digital fork)</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; HelixDevelopment fork above has documented
+work</td>
+</tr>
+<tr>
+<td>submodules/normalize</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/observability</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; OpenTelemetry exporters</td>
+</tr>
+<tr>
+<td>submodules/optimization</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/ouroborous</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/planning</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; cross-ref ledger.md F08/F25</td>
+</tr>
+<tr>
+<td>submodules/plinius_common</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/plugins</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; CONST-040 capability flag</td>
+</tr>
+<tr>
+<td>submodules/rag</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; CONST-040 capability flag</td>
+</tr>
+<tr>
+<td>submodules/rate_limiter</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/recovery</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/red_team</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/self_improve</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/skill_registry</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; cross-ref ledger.md F10</td>
+</tr>
+<tr>
+<td>submodules/streaming</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/tool_schema</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/toon</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/vector_db</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/veritas</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/vision_engine</td>
+<td>whole-module (vasic-digital fork)</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>submodules/watcher</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; fsnotify wrapper</td>
+</tr>
+<tr>
+<td>github_pages_website</td>
+<td>whole-module</td>
+<td>headless</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; static marketing site</td>
+</tr>
+<tr>
+<td>helix_agent</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; CONST-050(B) test-bank harness</td>
+</tr>
+<tr>
+<td>panoptic</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline; cross-cutting Challenge bank</td>
+</tr>
+<tr>
+<td>security</td>
+<td>whole-module</td>
+<td>all-platforms</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>UNCONFIRMED:</td>
+<td>round 68 baseline</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cross-reference-points">Cross-reference points</h2>
+<ul>
+<li><strong>CONTINUATION.md</strong> — canonical source of
+round-by-round PASS justifications. Cite <code>round NN</code> in Notes
+for any PASS marker.</li>
+<li><strong>ledger.md</strong> — feature × invariant rollup (F01..F30
+catalogue). Cross-check that PASS rows here align with F-cell PASS in
+ledger.md.</li>
+<li><strong><code>docs/improvements/submodule_owned.txt</code></strong>
+— canonical owned-submodule roster; every entry MUST have ≥1 row
+here.</li>
+<li><strong><code>scripts/generate-coverage-ledger.sh --check</code></strong>
+— enforces submodule coverage + schema invariants; CI gate.</li>
+<li><strong>Issues.md</strong> (per-submodule, future) — feeds I4 once
+introduced per CONST-057 / §11.4.16.</li>
+</ul>
+<h2 id="how-pass-markers-get-promoted-round-n-workflow">How PASS markers
+get promoted (round N+ workflow)</h2>
+<ol type="1">
+<li>Round agent completes work on a submodule.</li>
+<li>Round agent captures evidence (test logs, integration runs,
+real-binary invocations).</li>
+<li>Round agent updates CONTINUATION.md with round narrative + commit
+SHA.</li>
+<li>Round agent (or operator) edits this ledger:
+<ul>
+<li>Find the row for <code>(submodule, feature, platform)</code> — or
+split a <code>whole-module</code> row into per-feature rows.</li>
+<li>Promote <code>UNCONFIRMED:</code> → <code>PASS</code> for the
+specific invariant the work addresses.</li>
+<li>Add to Notes:
+<code>round NN &lt;SHA&gt; + brief evidence pointer</code>.</li>
+</ul></li>
+<li>Commit ledger update in the same commit as the work (per CONST-044
+CONTINUATION-sync discipline).</li>
+<li><code>bash scripts/generate-coverage-ledger.sh --check</code> MUST
+pass.</li>
+</ol>
+<h2 id="anti-bluff-guarantees-round-68">Anti-bluff guarantees (round
+68)</h2>
+<ol type="1">
+<li>Default cell = <code>UNCONFIRMED:</code> — never <code>PASS</code>.
+(60 of 68 rows are UNCONFIRMED Overall at round 68 publication — honest
+baseline.)</li>
+<li>PASS marker requires either CONTINUATION round reference or
+pasted-evidence path in Notes (enforced by <code>--check</code> mode of
+generator).</li>
+<li>Every owned submodule has ≥1 row (enforced by
+<code>--check</code>).</li>
+<li>Status vocabulary is closed (enforced by <code>--check</code>).</li>
+<li>Schema version bump on column changes (enforced by
+<code>SCHEMA.md</code> discipline).</li>
+<li>PASS-by-default is forbidden — it would be a CONST-035 PASS-bluff at
+the governance layer, equivalent severity to a false-success test result
+per Article XI §11.9.</li>
+</ol>
+<h2 id="operator-mandate-verbatim-2026-05-19-preserved-per-const-049-11.4.17">Operator
+mandate (verbatim, 2026-05-19, preserved per CONST-049 §11.4.17)</h2>
+<blockquote>
+<p>“all existing tests and Challenges do work in anti-bluff manner -
+they MUST confirm that all tested codebase really works as expected! We
+had been in position that all tests do execute with success and all
+Challenges as well, but in reality the most of the features does not
+work and can’t be used! This MUST NOT be the case and execution of tests
+and Challenges MUST guarantee the quality, the completition and full
+usability by end users of the product!”</p>
+</blockquote>
+<p>This ledger is the structural artefact that makes the above mandate
+auditable per-submodule, per-feature, per-platform, per-invariant.</p>
+<h2 id="audit-trail">Audit trail</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 22%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr>
+<th>Date</th>
+<th>Author</th>
+<th>Round</th>
+<th>Schema</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-05-18</td>
+<td>Claude Opus 4.7</td>
+<td>round 68</td>
+<td>1.0.0</td>
+<td>Initial publication. 68 rows (one per owned submodule). 8 PARTIAL
+Overall (AutoTemp, Storage, LLMOrchestrator×2, HelixSpecifier,
+LLMProvider, LLMsVerifier, Models — all backed by CONTINUATION rounds
+23/37/50/63/64/65). 60 UNCONFIRMED Overall (honest baseline). Closes 50+
+round deferred governance debt for CONST-048 ledger structure.
+Conservative population per CONST-035 anti-bluff posture.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sources-verified-2026-05-29-internal-governance-doc-no-third-party-service-operator-instructions-to-cross-reference.-this-ledger-is-helixcodes-own-const-048-submodule-feature-platform-invariant-tracker-it-references-internal-constitutional-anchors-plus-a-few-third-party-identifiers-used-as-captured-evidence-records-not-as-instructions-opencode-v1.14.41-round-64-evidence-of-a-real-binary-invocation-a-historical-evidence-pin-deliberately-not-re-bumped-pgxv5-redis-opentelemetry-stack-description-notes.-per-const-036-the-llm-providermodel-identifiers-in-these-rows-are-llmsverifier-sourced-at-runtime-helixcode-llm-models-list-they-are-not-pinned-here-and-are-deliberately-left-unmodified.-version-authority-per-claude.md-3.1-confirmed-in-tree-inner-module-go-1.26-root-go-1.25.2-postgresql-15-redis-7-no-stale-builddocker-version-pins-in-this-doc-to-correct.-reviewed-against-the-live-tree-on-this-date-no-corrections-required.">Sources
+verified 2026-05-29: internal-governance doc — no third-party-service
+operator instructions to cross-reference. This ledger is HelixCode’s own
+CONST-048 submodule × feature × platform × invariant tracker; it
+references internal constitutional anchors plus a few third-party
+identifiers used as captured-evidence records, not as instructions:
+<code>opencode v1.14.41</code> (round-64 evidence of a real binary
+invocation — a historical evidence pin, deliberately not re-bumped),
+<code>pgx/v5</code> / <code>Redis</code> / <code>OpenTelemetry</code>
+(stack-description notes). Per CONST-036, the LLM provider/model
+identifiers in these rows are LLMsVerifier-sourced at runtime
+(<code>helixcode llm models list</code>) — they are NOT pinned here and
+are deliberately left unmodified. Version authority per CLAUDE.md §3.1
+(confirmed in-tree): inner module <code>go 1.26</code>, root
+<code>go 1.25.2</code>; PostgreSQL 15+; Redis 7+ — no stale build/Docker
+version pins in this doc to correct. Reviewed against the live tree on
+this date; no corrections required.</h2>
+</body>
+</html>

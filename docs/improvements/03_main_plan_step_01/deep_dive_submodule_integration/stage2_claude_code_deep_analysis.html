@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>stage2_claude_code_deep_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">stage2_claude_code_deep_analysis</h1>
+</header>
+<h1 id="deep-analysis-claude-code-claude-code-source">Deep Analysis:
+Claude Code (claude-code-source)</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p><strong>Claude Code is a CLOSED-SOURCE AI CLI agent</strong>
+distributed by Anthropic as a native binary. The GitHub repository
+(<code>anthropics/claude-code</code>) is a <strong>documentation and
+plugin repository</strong>, NOT the source code. The actual application
+is a JavaScript/TypeScript application compiled to native binaries using
+<strong>Bun’s <code>--compile</code> feature</strong>, distributed via
+npm as platform-specific packages
+(<code>@anthropic-ai/claude-code-darwin-arm64</code>, etc.).</p>
+<p>Despite being closed-source, this analysis extracts comprehensive
+architectural intelligence from: - <strong>SDK Type Definitions</strong>
+(<code>sdk-tools.d.ts</code>) - Complete tool API schemas -
+<strong>Binary String Analysis</strong> - Internal architecture, bundled
+dependencies, runtime - <strong>CHANGELOG</strong> (3412 lines, 120+
+releases) - Complete feature evolution - <strong>Plugin
+Examples</strong> - Plugin architecture, hooks system, skills format -
+<strong>Settings Examples</strong> - Configuration system, sandboxing,
+permissions - <strong>Installation Scripts</strong> - Distribution
+mechanism, platform detection</p>
+<hr />
+<h2 id="repository-structure">1. Repository Structure</h2>
+<h3 id="what-the-github-repository-actually-contains">What the GitHub
+Repository Actually Contains</h3>
+<pre><code>claude-code/
+├── .claude/                    # Example project-level commands
+│   └── commands/               # Custom slash command definitions
+│       ├── commit-push-pr.md
+│       ├── dedupe.md
+│       └── triage-issue.md
+├── .claude-plugin/             # Plugin metadata for this repo
+│   └── marketplace.json
+├── .devcontainer/              # Dev container configs
+├── .github/                    # GitHub workflows (issue triage, etc.)
+│   ├── ISSUE_TEMPLATE/
+│   └── workflows/              # 15+ automated workflows
+├── .vscode/                    # VS Code extension settings
+├── examples/                   # Configuration examples
+│   ├── hooks/                  # Hook validator examples
+│   ├── mdm/                    # Mobile device management configs
+│   └── settings/               # settings.json examples
+│       ├── settings-strict.json
+│       ├── settings-lax.json
+│       └── settings-bash-sandbox.json
+├── plugins/                    # OFFICIAL PLUGIN EXAMPLES (12 plugins)
+│   ├── agent-sdk-dev/
+│   ├── claude-opus-4-5-migration/
+│   ├── code-review/
+│   ├── commit-commands/
+│   ├── explanatory-output-style/
+│   ├── feature-dev/
+│   ├── frontend-design/
+│   ├── hookify/
+│   ├── learning-output-style/
+│   ├── plugin-dev/
+│   ├── pr-review-toolkit/
+│   ├── ralph-wiggum/
+│   └── security-guidance/
+├── scripts/                    # Automation scripts (TypeScript)
+└── CHANGELOG.md               # 3412 lines of release notes</code></pre>
+<h3 id="the-actual-binary-distribution">The Actual Binary
+Distribution</h3>
+<pre><code>@anthropic-ai/claude-code (npm wrapper)
+├── bin/claude.exe              # Placeholder stub
+├── cli-wrapper.cjs             # Fallback Node.js launcher
+├── install.cjs                 # Postinstall binary placement
+├── sdk-tools.d.ts              # Complete tool API schemas
+└── node_modules/
+    └── @anthropic-ai/claude-code-linux-x64/
+        └── claude              # 248MB native binary</code></pre>
+<p><strong>Platform Support:</strong> macOS (ARM64, x64), Linux (x64,
+ARM64, musl), Windows (x64, ARM64)</p>
+<hr />
+<h2 id="core-architecture">2. Core Architecture</h2>
+<h3 id="runtime-bun-compiled-native-binary">Runtime: Bun-Compiled Native
+Binary</h3>
+<p>The 248MB <code>claude</code> binary is a <strong>Bun-compiled single
+executable</strong> containing: - Complete V8/Node.js JavaScript runtime
+(evidenced by <code>napi_*</code>, <code>uv_*</code>, <code>v8::</code>
+symbols) - Bundled application code (obfuscated/minified JavaScript
+visible in strings) - Embedded static assets, help text, completion
+scripts - Native module dependencies (SQLite, crypto, networking)</p>
+<p><strong>Key Evidence from Binary Strings:</strong> -
+<code>bun getcompletes</code>, <code>Bun.serve</code>,
+<code>Bun.stripANSI</code> - Bun runtime APIs -
+<code>bun_install_boolean_flags</code>, <code>bun-grouped</code> - Bun’s
+internal shell completion - <code>--hot</code>, <code>--watch</code>,
+<code>--preload</code> - Bun CLI flags embedded -
+<code>internal:streams/destroy</code>,
+<code>builtin://node/stream/duplex</code> - Node.js compatibility
+layer</p>
+<h3 id="internal-message-architecture">Internal Message
+Architecture</h3>
+<p>From binary string analysis, Claude Code uses a normalized message
+format:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Message types extracted from binary</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>{<span class="dt">type</span><span class="op">:</span> <span class="st">&quot;assistant&quot;</span><span class="op">,</span> <span class="dt">message</span><span class="op">:</span> {<span class="dt">content</span><span class="op">:</span> [<span class="op">...</span>]<span class="op">,</span> <span class="dt">context_management</span><span class="op">:</span> {<span class="op">...</span>}}<span class="op">,</span> uuid<span class="op">,</span> timestamp<span class="op">,</span> <span class="op">...</span>}</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>{<span class="dt">type</span><span class="op">:</span> <span class="st">&quot;user&quot;</span><span class="op">,</span> <span class="dt">message</span><span class="op">:</span> {<span class="dt">content</span><span class="op">:</span> [<span class="op">...</span>]}<span class="op">,</span> toolUseResult<span class="op">,</span> mcpMeta<span class="op">,</span> <span class="op">...</span>}</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>{<span class="dt">type</span><span class="op">:</span> <span class="st">&quot;progress&quot;</span><span class="op">,</span> data<span class="op">,</span> toolUseID<span class="op">,</span> parentToolUseID<span class="op">,</span> uuid<span class="op">,</span> timestamp}</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>{<span class="dt">type</span><span class="op">:</span> <span class="st">&quot;attachment&quot;</span><span class="op">,</span> <span class="dt">attachment</span><span class="op">:</span> {<span class="dt">type</span><span class="op">:</span> <span class="st">&quot;hook_*&quot;</span><span class="op">,</span> hookEvent<span class="op">,</span> hookName<span class="op">,</span> toolUseID}}</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>{<span class="dt">type</span><span class="op">:</span> <span class="st">&quot;system&quot;</span><span class="op">,</span> <span class="dt">subtype</span><span class="op">:</span> <span class="st">&quot;api_error|local_command&quot;</span>}</span></code></pre></div>
+<p><strong>Context Management Field:</strong>
+<code>context_management</code> attached to assistant messages - this is
+the key to how Claude Code handles large contexts.</p>
+<h3 id="multi-model-architecture">Multi-Model Architecture</h3>
+<p>Claude Code supports multiple provider backends: - <strong>Anthropic
+API</strong> (primary) - <strong>Amazon Bedrock</strong> (with Mantle
+support, SigV4 auth) - <strong>Google Vertex AI</strong> (with
+interactive setup wizard) - <strong>Azure/OpenAI-compatible
+gateways</strong> (via <code>ANTHROPIC_BASE_URL</code>) -
+<strong>Claude.ai Console</strong> (OAuth-based)</p>
+<p><strong>Model Selection:</strong> <code>sonnet</code> |
+<code>opus</code> | <code>haiku</code> for subagents, with effort levels
+(<code>low</code>, <code>medium</code>, <code>high</code>,
+<code>max</code>)</p>
+<hr />
+<h2 id="tool-use-framework">3. Tool Use Framework</h2>
+<h3 id="complete-tool-inventory-from-sdk-tools.d.ts">Complete Tool
+Inventory (from sdk-tools.d.ts)</h3>
+<p>Claude Code exposes <strong>18 core tools</strong> to the LLM:</p>
+<h4 id="file-operations">File Operations</h4>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 39%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Read</strong> (<code>FileRead</code>)</td>
+<td>Read files with pagination</td>
+<td><code>offset</code>, <code>limit</code>, PDF page ranges, image
+display, notebook cells</td>
+</tr>
+<tr>
+<td><strong>Write</strong> (<code>FileWrite</code>)</td>
+<td>Create/overwrite files</td>
+<td>Absolute paths, git diff output, structured patch</td>
+</tr>
+<tr>
+<td><strong>Edit</strong> (<code>FileEdit</code>)</td>
+<td>Search-and-replace edits</td>
+<td><code>old_string</code>/<code>new_string</code>,
+<code>replace_all</code>, user modification tracking</td>
+</tr>
+<tr>
+<td><strong>NotebookEdit</strong></td>
+<td>Jupyter notebook editing</td>
+<td>Cell CRUD, code/markdown types</td>
+</tr>
+</tbody>
+</table>
+<h4 id="search-discovery">Search &amp; Discovery</h4>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 39%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Grep</strong> (<code>GrepInput</code>)</td>
+<td>ripgrep-based search</td>
+<td><code>output_mode</code>: content/files/count,
+<code>-A</code>/<code>-B</code>/<code>-C</code>,
+<code>head_limit</code>, <code>offset</code>,
+<code>multiline</code></td>
+</tr>
+<tr>
+<td><strong>Glob</strong> (<code>GlobInput</code>)</td>
+<td>File globbing</td>
+<td>Pattern matching, directory scoping, 100-file limit</td>
+</tr>
+</tbody>
+</table>
+<h4 id="shell-execution">Shell Execution</h4>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 39%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bash</strong> (<code>BashInput</code>)</td>
+<td>Shell command execution</td>
+<td><code>timeout</code> (max 600s), <code>run_in_background</code>,
+<code>dangerouslyDisableSandbox</code>, structured content output</td>
+</tr>
+<tr>
+<td><strong>TaskOutput</strong></td>
+<td>Read background task output</td>
+<td><code>block</code>, <code>timeout</code>, task_id</td>
+</tr>
+<tr>
+<td><strong>TaskStop</strong></td>
+<td>Stop background tasks</td>
+<td>task_id or shell_id</td>
+</tr>
+</tbody>
+</table>
+<h4 id="web-external">Web &amp; External</h4>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 39%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WebSearch</strong></td>
+<td>Search the web</td>
+<td><code>allowed_domains</code>, <code>blocked_domains</code></td>
+</tr>
+<tr>
+<td><strong>WebFetch</strong></td>
+<td>Fetch and process URLs</td>
+<td><code>url</code>, <code>prompt</code> for content processing</td>
+</tr>
+</tbody>
+</table>
+<h4 id="mcp-integration">MCP Integration</h4>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 39%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mcp</strong> (<code>McpInput</code>)</td>
+<td>Execute MCP tools</td>
+<td>Dynamic schema from servers</td>
+</tr>
+<tr>
+<td><strong>ListMcpResources</strong></td>
+<td>List available resources</td>
+<td>Server filtering</td>
+</tr>
+<tr>
+<td><strong>ReadMcpResource</strong></td>
+<td>Read MCP resources</td>
+<td>URI-based, blob support</td>
+</tr>
+</tbody>
+</table>
+<h4 id="agent-workflow">Agent &amp; Workflow</h4>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 39%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Agent</strong> (<code>AgentInput</code>)</td>
+<td>Spawn subagents</td>
+<td><code>run_in_background</code>, <code>isolation: &quot;worktree&quot;</code>,
+permission <code>mode</code>, named agents</td>
+</tr>
+<tr>
+<td><strong>TodoWrite</strong></td>
+<td>Task list management</td>
+<td><code>pending</code>/<code>in_progress</code>/<code>completed</code>
+states</td>
+</tr>
+<tr>
+<td><strong>AskUserQuestion</strong></td>
+<td>Interactive user questions</td>
+<td>1-4 questions, multi-select, preview content, annotations</td>
+</tr>
+<tr>
+<td><strong>ExitPlanMode</strong></td>
+<td>Plan mode exit</td>
+<td><code>allowedPrompts</code> for plan-based permissions</td>
+</tr>
+</tbody>
+</table>
+<h4 id="git-worktree">Git Worktree</h4>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 39%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>EnterWorktree</strong></td>
+<td>Create/switch git worktrees</td>
+<td>Named worktrees, path-based switching</td>
+</tr>
+<tr>
+<td><strong>ExitWorktree</strong></td>
+<td>Leave worktrees</td>
+<td><code>keep</code> or <code>remove</code> with change protection</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tool-result-persistence-layer">Tool Result Persistence
+Layer</h3>
+<p>A critical innovation: <strong>tool results too large for inline
+context are persisted to disk</strong>: -
+<code>persistedOutputPath</code> / <code>persistedOutputSize</code> -
+large outputs saved to <code>tool-results</code> dir -
+<code>rawOutputPath</code> - MCP tool raw outputs - MCP tool results can
+bypass token-based persist layer via
+<code>_meta[&quot;anthropic/maxResultSizeChars&quot;]</code> (up to 500K)</p>
+<h3 id="progress-system">Progress System</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Progress message format (from binary)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>{<span class="dt">type</span><span class="op">:</span> <span class="st">&quot;progress&quot;</span><span class="op">,</span> <span class="dt">data</span><span class="op">:</span> {<span class="op">...</span>}<span class="op">,</span> toolUseID<span class="op">,</span> parentToolUseID<span class="op">,</span> uuid<span class="op">,</span> timestamp}</span></code></pre></div>
+<p>Progress types include: - Hook progress (<code>hook_progress</code>)
+- Tool execution progress - Streaming deltas - Attachment progress</p>
+<hr />
+<h2 id="context-management-system">4. Context Management System</h2>
+<h3 id="auto-compaction-the-infinite-conversation-feature">Auto-Compaction
+(The “Infinite Conversation” Feature)</h3>
+<p>Claude Code implements <strong>automatic conversation
+compaction</strong> to handle arbitrarily long sessions:</p>
+<p><strong>How it works:</strong> 1. Monitors token usage against
+<code>CLAUDE_CODE_MAX_CONTEXT_TOKENS</code> 2. When approaching limits
+(80% threshold), automatically compacts history 3. Preserves essential
+context while summarizing older turns 4. Re-executes skills against the
+next user message if invoked before compaction</p>
+<p><strong>Technical details from CHANGELOG:</strong> -
+<code>DISABLE_COMPACT</code> env var to disable auto-compaction -
+Auto-compact threshold increased from 60% to 80% - Compaction detects
+thrashing loops (3 consecutive compactions with no progress = error) -
+Empty hook entries skipped to reduce transcript size - Pre-edit file
+copies capped to prevent bloat</p>
+<h3 id="context-management-metadata">Context Management Metadata</h3>
+<p>From the binary strings, each assistant message carries:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>context_management<span class="op">:</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Token usage tracking</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Cache hit/miss information</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Compaction markers</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 id="token-usage-caching">Token Usage &amp; Caching</h3>
+<p>Claude Code has sophisticated caching: - <strong>Prompt
+caching</strong> with Anthropic API (ephemeral 1h and 5m cache tiers) -
+Cache creation/read token tracking in tool outputs - Pro users see
+footer hints when prompt cache expires - <code>/context</code> command
+shows free space and message breakdowns</p>
+<h3 id="settings-hierarchy-for-context">Settings Hierarchy for
+Context</h3>
+<pre><code>managed-settings.json (enterprise policy)
+  → ~/.claude/settings.json (user)
+    → .claude/settings.json (project)
+      → CLI flags (highest priority)</code></pre>
+<hr />
+<h2 id="file-editing-capabilities">5. File Editing Capabilities</h2>
+<h3 id="edit-tool-fileeditinput">Edit Tool
+(<code>FileEditInput</code>)</h3>
+<p><strong>Format:</strong> <code>old_string</code> /
+<code>new_string</code> / <code>replace_all</code></p>
+<p><strong>Innovations:</strong> - Shorter <code>old_string</code>
+anchors to reduce output tokens (optimization in v2.1.91) - Works on
+files viewed via <code>Bash</code> with <code>sed -n</code> or
+<code>cat</code> without requiring separate <code>Read</code> - Tracks
+user modifications in permission dialog
+(<code>userModified: boolean</code>) - Structured patch output with
+<code>oldStart</code>, <code>oldLines</code>, <code>newStart</code>,
+<code>newLines</code></p>
+<h3 id="write-tool-filewriteinput">Write Tool
+(<code>FileWriteInput</code>)</h3>
+<p><strong>Format:</strong> <code>file_path</code> (absolute) +
+<code>content</code></p>
+<p><strong>Features:</strong> - Git diff output with
+additions/deletions/changes - <code>type: &quot;create&quot; | &quot;update&quot;</code> -
+Original file preservation for diff generation - User modification
+tracking</p>
+<h3 id="diff-display-system">Diff Display System</h3>
+<ul>
+<li><strong>Word-level diff</strong> display for improved
+readability</li>
+<li><strong>GitHub-style patch</strong> output in tool results</li>
+<li>Write tool diff computation optimized: 60% faster on files with
+tabs/<code>&amp;</code>/<code>$</code></li>
+<li>Diffs disappear from UI on <code>--resume</code> for files &gt;10KB
+(fixed in recent versions)</li>
+</ul>
+<h3 id="protected-paths">Protected Paths</h3>
+<p>Default protected directories (require explicit approval): -
+<code>.claude/</code>, <code>.git/</code>, <code>.vscode/</code>,
+<code>.husky/</code> - Shell config files -
+<code>.claude/skills/</code>, <code>.claude/agents/</code>,
+<code>.claude/commands/</code> (with
+<code>--dangerously-skip-permissions</code>)</p>
+<hr />
+<h2 id="shell-command-execution-bash-tool">6. Shell Command Execution
+(Bash Tool)</h2>
+<h3 id="architecture">Architecture</h3>
+<p>The Bash tool is the most security-critical component:</p>
+<p><strong>Input Schema:</strong></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  command<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>           <span class="co">// The command to execute</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  description<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>      <span class="co">// Human-readable description (5-10 words for simple, longer for complex)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  timeout<span class="op">?:</span> <span class="dt">number</span><span class="op">;</span>           <span class="co">// Max 600000ms (10 minutes)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  run_in_background<span class="op">?:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  dangerouslyDisableSandbox<span class="op">?:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>Output Schema:</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  stdout<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  stderr<span class="op">:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  interrupted<span class="op">:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  backgroundTaskId<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  backgroundedByUser<span class="op">?:</span> <span class="dt">boolean</span><span class="op">;</span>      <span class="co">// Ctrl+B backgrounding</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  assistantAutoBackgrounded<span class="op">?:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  dangerouslyDisableSandbox<span class="op">?:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  returnCodeInterpretation<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>  <span class="co">// Semantic meaning of exit codes</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  noOutputExpected<span class="op">?:</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  structuredContent<span class="op">?:</span> <span class="dt">unknown</span>[]<span class="op">;</span>      <span class="co">// Rich output blocks</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  persistedOutputPath<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>        <span class="co">// Large output disk path</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  persistedOutputSize<span class="op">?:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  staleReadFileStateHint<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>    <span class="co">// Warning when files changed during command</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  ghRateLimitHint<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>           <span class="co">// GitHub API rate limit helper</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 id="permission-modes-5-modes">Permission Modes (5 Modes)</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default</code></td>
+<td>Standard approval workflow</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>Auto-approves safe commands, prompts for dangerous ones</td>
+</tr>
+<tr>
+<td><code>acceptEdits</code></td>
+<td>Auto-approves file edits, asks for everything else</td>
+</tr>
+<tr>
+<td><code>dontAsk</code></td>
+<td>Auto-approves read-only commands</td>
+</tr>
+<tr>
+<td><code>bypassPermissions</code></td>
+<td>Auto-approves everything (dangerous)</td>
+</tr>
+<tr>
+<td><code>plan</code></td>
+<td>Plan mode - requires plan approval before execution</td>
+</tr>
+</tbody>
+</table>
+<h3 id="permission-rules-system">Permission Rules System</h3>
+<p>Sophisticated rule-based permissions in
+<code>settings.json</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;permissions&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ask&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Bash&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;deny&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;WebSearch&quot;</span><span class="ot">,</span> <span class="st">&quot;WebFetch&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;defaultMode&quot;</span><span class="fu">:</span> <span class="st">&quot;auto&quot;</span><span class="fu">,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;allow&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Bash(git status:*)&quot;</span><span class="ot">,</span> <span class="st">&quot;Bash(git add:*)&quot;</span><span class="ot">,</span> <span class="st">&quot;Bash(ls:*)&quot;</span><span class="ot">,</span> <span class="st">&quot;Read(*)&quot;</span><span class="ot">,</span> <span class="st">&quot;Edit(*)&quot;</span><span class="ot">,</span> <span class="st">&quot;Write(*)&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;deny&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Bash(rm -rf *)&quot;</span><span class="ot">,</span> <span class="st">&quot;Bash(curl -X POST *)&quot;</span><span class="ot">]</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Rule Features:</strong> - Wildcard patterns:
+<code>Bash(git commit:*)</code> - Tool-specific: <code>Read</code>,
+<code>Edit</code>, <code>Write</code>, <code>Bash</code> - Compound
+command handling (<code>ls &amp;&amp; git push</code>) - Env-var prefix
+handling (<code>FOO=bar git push</code>) - Read-only command
+auto-detection</p>
+<h3 id="sandboxing">Sandboxing</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;sandbox&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;autoAllowBashIfSandboxed&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;allowUnsandboxedCommands&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;excludedCommands&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;network&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;allowUnixSockets&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;allowAllUnixSockets&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;allowLocalBinding&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;allowedDomains&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;httpProxyPort&quot;</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;socksProxyPort&quot;</span><span class="fu">:</span> <span class="kw">null</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enableWeakerNestedSandbox&quot;</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Linux Sandboxing:</strong> - PID namespace isolation when
+<code>CLAUDE_CODE_SUBPROCESS_ENV_SCRUB</code> is set -
+<code>apply-seccomp</code> helper for syscall filtering - Unix socket
+blocking - Network domain restrictions -
+<code>CLAUDE_CODE_SCRIPT_CAPS</code> for per-session script invocation
+limits</p>
+<p><strong>Bash Tool Safety Checks:</strong> - Dangerous <code>rm</code>
+operation detection - Network redirect detection
+(<code>/dev/tcp/...</code>, <code>/dev/udp/...</code>) -
+Backslash-escaped flag detection - Piped command analysis - Archive
+extraction TOCTOU protection - PowerShell argument-splitting
+hardening</p>
+<h3 id="background-task-management">Background Task Management</h3>
+<ul>
+<li><code>run_in_background</code> flag for long-running commands</li>
+<li><code>Ctrl+B</code> to background running commands
+interactively</li>
+<li><code>TaskOutput</code> tool to read background task results</li>
+<li><code>TaskStop</code> tool to cancel background tasks</li>
+<li>Progress messages based on last 5 lines of output</li>
+<li>Assistant can auto-background long blocking commands</li>
+</ul>
+<hr />
+<h2 id="git-integration">7. Git Integration</h2>
+<h3 id="worktree-based-isolation">Worktree-Based Isolation</h3>
+<p>Claude Code has <strong>first-class git worktree
+support</strong>:</p>
+<p><strong>EnterWorktree Tool:</strong> - Create named worktrees with
+validation (<code>/[a-zA-Z0-9._-]+/</code>, max 64 chars) - Switch to
+existing worktrees from <code>git worktree list</code> - Isolated
+working copies for subagents</p>
+<p><strong>ExitWorktree Tool:</strong> - <code>keep</code>: Leaves
+worktree and branch on disk - <code>remove</code>: Deletes both, with
+change protection (requires <code>discard_changes: true</code> for
+uncommitted files)</p>
+<h3 id="git-workflow-features">Git Workflow Features</h3>
+<ul>
+<li><code>claude project purge [path]</code> - Delete all Claude Code
+state for a project</li>
+<li><code>--from-pr</code> accepts GitHub, GitLab, Bitbucket PR
+URLs</li>
+<li>Pasting PR URL into <code>/resume</code> finds the session that
+created that PR</li>
+<li>Git status in startup logo (unless
+<code>CLAUDE_CODE_HIDE_CWD</code>)</li>
+<li><code>workspace.git_worktree</code> in status line JSON</li>
+<li>Subagents with <code>isolation: &quot;worktree&quot;</code> work on isolated
+copies</li>
+</ul>
+<h3 id="github-integration">GitHub Integration</h3>
+<ul>
+<li><code>gh pr create</code> support via commit-commands plugin</li>
+<li>GitHub API rate limit detection with contextual hints</li>
+<li><code>owner/repo#N</code> shorthand links use git remote’s host</li>
+<li><code>prUrlTemplate</code> for custom code-review URLs</li>
+<li><code>AI_AGENT</code> env var set for subprocesses so
+<code>gh</code> can attribute traffic</li>
+</ul>
+<hr />
+<h2 id="mcp-model-context-protocol-support">8. MCP (Model Context
+Protocol) Support</h2>
+<h3 id="mcp-server-types-supported">MCP Server Types Supported</h3>
+<table>
+<thead>
+<tr>
+<th>Transport</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>stdio</strong></td>
+<td>Local process - stdin/stdout communication</td>
+</tr>
+<tr>
+<td><strong>SSE</strong></td>
+<td>Server-Sent Events - cloud services</td>
+</tr>
+<tr>
+<td><strong>HTTP</strong></td>
+<td>Streamable HTTP - newer spec</td>
+</tr>
+<tr>
+<td><strong>WebSocket</strong></td>
+<td>WebSocket transport</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mcp-configuration">MCP Configuration</h3>
+<p><strong><code>.mcp.json</code> format (project-level):</strong></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;server-name&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;npx&quot;</span><span class="fu">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;-y&quot;</span><span class="ot">,</span> <span class="st">&quot;@modelcontextprotocol/server-filesystem&quot;</span><span class="ot">,</span> <span class="st">&quot;/allowed/path&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;env&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;LOG_LEVEL&quot;</span><span class="fu">:</span> <span class="st">&quot;debug&quot;</span><span class="fu">}</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Plugin-level MCP (in <code>plugin.json</code>):</strong></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;plugin-api&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;${CLAUDE_PLUGIN_ROOT}/servers/api-server&quot;</span><span class="fu">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;--port&quot;</span><span class="ot">,</span> <span class="st">&quot;8080&quot;</span><span class="ot">]</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="mcp-features">MCP Features</h3>
+<ul>
+<li><strong>OAuth 2.0</strong> support with Authorization Server
+discovery</li>
+<li><strong>Auto-reconnection</strong> for SSE connections on
+disconnect</li>
+<li><strong><code>alwaysLoad</code></strong> option - tools skip
+deferred loading and are always available</li>
+<li><strong>Tool annotations</strong> and titles display in
+<code>/mcp</code> view</li>
+<li><strong>Resource mentions</strong> via <code>@</code> typeahead</li>
+<li><strong>Non-blocking connections</strong>
+(<code>MCP_CONNECTION_NONBLOCKING=true</code>) for <code>-p</code>
+mode</li>
+<li><strong>claude.ai connectors</strong> - built-in MCP servers from
+Claude.ai</li>
+<li><strong>Headers helper</strong> scripts for dynamic auth</li>
+<li>Server startup timeout: <code>MCP_TIMEOUT</code> env var</li>
+<li>Connection bounded at 5s for <code>--mcp-config</code></li>
+</ul>
+<h3 id="claude-code-as-mcp-server">Claude Code as MCP Server</h3>
+<p><code>claude mcp serve</code> - Claude Code can act as an MCP server
+itself, exposing its tools to other MCP clients.</p>
+<hr />
+<h2 id="plugin-system-architecture">9. Plugin System Architecture</h2>
+<h3 id="plugin-structure">Plugin Structure</h3>
+<pre><code>plugin-name/
+├── .claude-plugin/
+│   └── plugin.json          # Plugin metadata
+├── commands/                # Slash commands (.md files with YAML frontmatter)
+├── agents/                  # Specialized agents (.md files)
+├── skills/                  # Skills (SKILL.md files)
+├── hooks/                   # Event handlers (hooks.json + scripts)
+├── themes/                  # Custom themes (JSON files)
+├── .mcp.json                # MCP server configs
+└── bin/                     # Plugin executables</code></pre>
+<h3 id="plugin-metadata-plugin.json">Plugin Metadata
+(<code>plugin.json</code>)</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;hookify&quot;</span><span class="fu">,</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="st">&quot;0.1.0&quot;</span><span class="fu">,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Easily create hooks to prevent unwanted behaviors&quot;</span><span class="fu">,</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;author&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">,</span> <span class="dt">&quot;email&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">},</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">}</span>        <span class="er">//</span> <span class="er">Optional</span> <span class="er">inline</span> <span class="er">MCP</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="slash-commands">Slash Commands</h3>
+<p>Commands are <strong>Markdown files with YAML frontmatter</strong> in
+<code>.claude/commands/</code>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="an">allowed-tools:</span><span class="co"> Bash(git:*), Read(*)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> Commit, push, and open a PR</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">## Context</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Current git status: !<span class="in">`git status`</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Current branch: !<span class="in">`git branch --show-current`</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## Your task</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Create a new branch if on main</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Create a single commit...</span></code></pre></div>
+<p><strong>Features:</strong> - Inline shell execution with
+<code>!`command`</code> syntax - <code>@</code>-mention file
+autocomplete - Tool restriction via <code>allowed-tools</code>
+frontmatter - Namespacing:
+<code>.claude/commands/frontend/component.md</code> →
+<code>/frontend:component</code> - <code>keep-coding-instructions</code>
+frontmatter for output styles</p>
+<h3 id="skills">Skills</h3>
+<p>Skills are <strong>Markdown files with YAML frontmatter</strong> in
+<code>skills/&lt;name&gt;/SKILL.md</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="an">name:</span><span class="co"> frontend-design</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> Create distinctive, production-grade frontend interfaces</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="an">license:</span><span class="co"> Complete terms in LICENSE.txt</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu"># Skill content...</span></span></code></pre></div>
+<p><strong>Skill invocation triggers:</strong> - User-typed slash
+commands - Claude proactive invocation - Nested skill invocation</p>
+<p><strong>Skill features:</strong> - <code>${CLAUDE_EFFORT}</code>
+variable substitution - <code>context: fork</code> for isolated skill
+execution - Agent frontmatter for delegating to specialized agents -
+Auto-invoked based on conversation context</p>
+<h3 id="agents">Agents</h3>
+<p>Agents are specialized LLM configurations in
+<code>agents/&lt;name&gt;.md</code>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="an">name:</span><span class="co"> code-explorer</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> Deeply analyzes existing codebase features</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"> tools: Glob, Grep, LS, Read, NotebookRead, WebFetch, TodoWrite, WebSearch, KillShell, BashOutput</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="an">model:</span><span class="co"> sonnet</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="an">color:</span><span class="co"> yellow</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="an">permissionMode:</span><span class="co"> plan</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu"># Agent system prompt...</span></span></code></pre></div>
+<p><strong>Agent features:</strong> - Tool restriction per-agent - Model
+override (<code>sonnet</code>/<code>opus</code>/<code>haiku</code>) -
+Color theming - Permission mode inheritance - Worktree isolation - Named
+subagents addressable via <code>SendMessage({to: name})</code></p>
+<h3 id="hooks-system">Hooks System</h3>
+<p>Hooks are <strong>event-driven scripts</strong> that intercept tool
+execution and conversation flow:</p>
+<p><strong>Hook Events:</strong> | Event | When Fired | Blocking? |
+|——-|———–|———–| | <strong>PreToolUse</strong> | Before any tool executes
+| Yes - can deny/block | | <strong>PostToolUse</strong> | After tool
+succeeds | No - can add context | | <strong>PostToolUseFailure</strong>
+| After tool fails | No | | <strong>Stop</strong> | When user tries to
+exit | Yes - can prevent exit | | <strong>SubagentStop</strong> | When
+subagent tries to exit | Yes | | <strong>UserPromptSubmit</strong> |
+When user sends a message | Yes | | <strong>PreCompact</strong> | Before
+context compaction | No | | <strong>TaskCreated</strong> | When
+background task created | Yes | | <strong>PermissionDenied</strong> |
+After auto-mode denial | No - can request retry |</p>
+<p><strong>Hook Configuration (<code>hooks.json</code>):</strong></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;PreToolUse&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>          <span class="fu">{</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;command&quot;</span><span class="fu">,</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;python3 ${CLAUDE_PLUGIN_ROOT}/hooks/pretooluse.py&quot;</span><span class="fu">,</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;timeout&quot;</span><span class="fu">:</span> <span class="dv">10</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>          <span class="fu">}</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        <span class="ot">]</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Hook Input Format:</strong></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tool_name&quot;</span><span class="fu">:</span> <span class="st">&quot;Bash&quot;</span><span class="fu">,</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tool_input&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;rm -rf /tmp/test&quot;</span><span class="fu">},</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;hook_event_name&quot;</span><span class="fu">:</span> <span class="st">&quot;PreToolUse&quot;</span><span class="fu">,</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;transcript_path&quot;</span><span class="fu">:</span> <span class="st">&quot;/path/to/transcript.jsonl&quot;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Hook Output Format:</strong></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;decision&quot;</span><span class="fu">:</span> <span class="st">&quot;block&quot;</span><span class="fu">,</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;reason&quot;</span><span class="fu">:</span> <span class="st">&quot;Dangerous rm command!&quot;</span><span class="fu">,</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;systemMessage&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">,</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;hookSpecificOutput&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;hookEventName&quot;</span><span class="fu">:</span> <span class="st">&quot;PreToolUse&quot;</span><span class="fu">,</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;permissionDecision&quot;</span><span class="fu">:</span> <span class="st">&quot;deny&quot;</span><span class="fu">,</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;updatedToolOutput&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><strong>Advanced Hook Features:</strong> -
+<code>type: &quot;mcp_tool&quot;</code> - Hooks can invoke MCP tools directly -
+<code>duration_ms</code> in PostToolUse/PostToolUseFailure inputs - Hook
+output &gt;50K saved to disk with file path + preview - Async hooks
+supported - <code>if</code> condition filtering for commands with
+env-var prefixes - <code>&quot;defer&quot;</code> permission decision for headless
+sessions</p>
+<h3 id="themes">Themes</h3>
+<p>Custom themes stored in <code>~/.claude/themes/</code> or shipped via
+plugin <code>themes/</code> directory: - Named themes selectable via
+<code>/theme</code> - JSON format - Plugins can ship themes</p>
+<hr />
+<h2 id="tuiux-implementation">10. TUI/UX Implementation</h2>
+<h3 id="rendering-modes">Rendering Modes</h3>
+<p>Claude Code supports <strong>two rendering modes:</strong></p>
+<h4 id="fullscreen-mode-default">1. Fullscreen Mode (Default)</h4>
+<ul>
+<li>Uses terminal alt-screen (DEC 2026 support detection)</li>
+<li>Virtualized scrollback</li>
+<li>Mouse support (clicking, scrolling, URL opening)</li>
+<li>Dialogs, pickers, overlays</li>
+<li>Vim mode (<code>v</code>/<code>V</code> visual mode, j/k
+navigation)</li>
+</ul>
+<h4 id="no-flicker-mode-no_flicker1-or-claude_code_no_flicker1">2.
+No-Flicker Mode (<code>NO_FLICKER=1</code> or
+<code>CLAUDE_CODE_NO_FLICKER=1</code>)</h4>
+<ul>
+<li>Flicker-free alt-screen rendering</li>
+<li>Virtualized scrollback</li>
+<li>Focus view toggle (<code>Ctrl+O</code>) - shows prompt + one-line
+tool summary + final response</li>
+<li>Designed for terminals with poor alt-screen handling</li>
+</ul>
+<h3 id="interactive-components">Interactive Components</h3>
+<p><strong>Slash Command Picker:</strong> - Type-to-filter search -
+Contiguous substring highlighting - Long descriptions wrap to second
+line - Namespace support (<code>/frontend:component</code>)</p>
+<p><strong>Model Picker (<code>/model</code>):</strong> - Lists models
+from gateway’s <code>/v1/models</code> endpoint when using custom base
+URL - Effort level selection - Model description overrides via env
+vars</p>
+<p><strong>Skills Picker (<code>/skills</code>):</strong> -
+Type-to-filter search box - Plugin-provided skills auto-loaded</p>
+<p><strong>Agents View (<code>/agents</code>):</strong> - Tabbed layout:
+Running tab + Library tab - Run agent and View running instance actions
+- <code>● N running</code> indicator per agent type</p>
+<p><strong>Resume Picker (<code>/resume</code>):</strong> -
+Cross-project session resume - Filter with project/worktree/branch names
+- PR URL paste finds creating session - Parallel loading for
+all-projects view</p>
+<h3 id="progress-status-system">Progress &amp; Status System</h3>
+<p><strong>Spinner System:</strong> - Token count indication in spinner
+- Tool usage count display - Time-based spinner tips (customizable via
+<code>spinnerTipsOverride</code>) - Red spinner when permission check
+stalls</p>
+<p><strong>Status Line (<code>/status-line</code>):</strong> - Custom
+status line command support - <code>refreshInterval</code> for periodic
+re-run - JSON input includes <code>workspace.git_worktree</code>,
+<code>effort.level</code>, <code>thinking.enabled</code></p>
+<p><strong>Notifications:</strong> - Transient footer notifications
+(e.g., context-low warning) - <code>invalidates</code> property for
+clearing notifications - Task completion notifications for background
+agents</p>
+<h3 id="input-system">Input System</h3>
+<p><strong>Keybindings:</strong> - Custom keybindings in
+<code>~/.claude/keybindings.json</code> - Vim mode (NORMAL/INSERT, c,
+f/F, t/T, visual mode) - <code>Ctrl+n/p</code> or <code>j/k</code> for
+menu navigation - <code>Shift+Enter</code> for newline insertion -
+<code>Ctrl+L</code> forces screen redraw - <code>Ctrl+Z</code> suspends
+process</p>
+<p><strong>Paste Handling:</strong> - Bracketed paste support - Kitty
+keyboard protocol sequences - CRLF content normalization - Image paste
+with automatic downscaling to 2000px - Multi-line paste support</p>
+<h3 id="streaming-architecture">Streaming Architecture</h3>
+<p><strong>Streaming Display:</strong> - Real-time assistant message
+streaming - Tool use streaming with progress indicators - Image
+rendering during streaming - CJK/Unicode text handling - Combining-mark
+text support (Devanagari)</p>
+<p><strong>Stream Resilience:</strong> - Stalled streaming falls back to
+non-streaming mode - “Stream idle timeout” recovery (fixed for
+sleep/wake, background sessions) - Retry with exponential backoff for
+429s - API retry countdown display</p>
+<hr />
+<h2 id="configuration-system">11. Configuration System</h2>
+<h3 id="settings-precedence-hierarchy">Settings Precedence
+Hierarchy</h3>
+<pre><code>1. CLI flags (highest)
+2. Environment variables
+3. .claude/settings.json (project-level)
+4. ~/.claude/settings.json (user-level)
+5. managed-settings.json (enterprise policy, lowest)</code></pre>
+<h3 id="key-settings">Key Settings</h3>
+<div class="sourceCode" id="cb22"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;permissions&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;defaultMode&quot;</span><span class="fu">:</span> <span class="st">&quot;auto&quot;</span><span class="fu">,</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;ask&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Bash&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;deny&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;WebSearch&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;allow&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;Bash(git status:*)&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;disableBypassPermissionsMode&quot;</span><span class="fu">:</span> <span class="st">&quot;disable&quot;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;sandbox&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;network&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;allowedDomains&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;api.example.com&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;allowLocalBinding&quot;</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">},</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">},</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cleanupPeriodDays&quot;</span><span class="fu">:</span> <span class="dv">30</span><span class="fu">,</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;showThinkingSummaries&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;language&quot;</span><span class="fu">:</span> <span class="st">&quot;en&quot;</span><span class="fu">,</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;theme&quot;</span><span class="fu">:</span> <span class="st">&quot;default&quot;</span><span class="fu">,</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;editorMode&quot;</span><span class="fu">:</span> <span class="st">&quot;vim&quot;</span><span class="fu">,</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;verbose&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;prUrlTemplate&quot;</span><span class="fu">:</span> <span class="st">&quot;https://github.com/{owner}/{repo}/pull/{number}&quot;</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="managed-settings-enterprise">Managed Settings (Enterprise)</h3>
+<ul>
+<li><code>forceRemoteSettingsRefresh</code> - Blocks startup until
+remote settings fetched</li>
+<li><code>allowManagedPermissionRulesOnly</code> - Only managed rules
+apply</li>
+<li><code>allowManagedHooksOnly</code> - Only managed hooks allowed</li>
+<li><code>blockedMarketplaces</code> - Enforce marketplace
+restrictions</li>
+<li><code>wslInheritsWindowsSettings</code> - WSL inherits Windows-side
+managed settings</li>
+</ul>
+<hr />
+<h2 id="unique-innovations-power-features">12. Unique Innovations &amp;
+Power Features</h2>
+<h3 id="bun-compiled-native-binary-distribution">1. <strong>Bun-Compiled
+Native Binary Distribution</strong></h3>
+<p>Claude Code is a ~500MB JS app compiled to native binaries using Bun.
+This gives: - Single-file distribution (no Node.js dependency for users)
+- Fast startup (no npm install overhead) - Cross-platform native
+performance - Embedded V8 engine with full Node.js compatibility</p>
+<h3 id="auto-compaction-for-infinite-conversations">2.
+<strong>Auto-Compaction for Infinite Conversations</strong></h3>
+<p>Automatically manages context window by compacting old conversation
+turns. Detects thrashing loops and stops with actionable errors instead
+of burning API calls.</p>
+<h3 id="permission-mode-system-with-granular-rules">3.
+<strong>Permission Mode System with Granular Rules</strong></h3>
+<p>Five permission modes plus wildcard rule syntax
+(<code>Bash(git commit:*)</code>), compound command handling, and
+env-var prefix support. The most sophisticated permission system in any
+CLI agent.</p>
+<h3 id="git-worktree-based-agent-isolation">4. <strong>Git
+Worktree-Based Agent Isolation</strong></h3>
+<p>Subagents can work in isolated git worktrees with automatic cleanup.
+Enables parallel development workflows without branch conflicts.</p>
+<h3 id="hook-based-extensibility-architecture">5. <strong>Hook-Based
+Extensibility Architecture</strong></h3>
+<p>Event-driven plugin system with 9+ hook events. Hooks can block tool
+execution, modify outputs, prevent session exit, and even invoke MCP
+tools. Python/JS/shell script support.</p>
+<h3 id="multi-modelmulti-provider-backend">6.
+<strong>Multi-Model/Multi-Provider Backend</strong></h3>
+<p>Supports Anthropic API, Bedrock (with Mantle), Vertex AI, Azure, and
+custom gateways. Interactive setup wizards for complex auth flows.</p>
+<h3 id="tool-result-persistence-layer-1">7. <strong>Tool Result
+Persistence Layer</strong></h3>
+<p>Large tool outputs (&gt;50K chars) automatically saved to disk with
+file paths instead of cluttering context. MCP tools can bypass with
+<code>_meta</code> annotations (up to 500K).</p>
+<h3 id="background-task-system-with-ctrlb">8. <strong>Background Task
+System with Ctrl+B</strong></h3>
+<p>Commands can run in background with progress tracking. Interactive
+Ctrl+B backgrounding. Parent agents can check child progress via
+<code>TaskOutput</code>.</p>
+<h3 id="no-flicker-alt-screen-rendering-mode">9. <strong>No-Flicker
+Alt-Screen Rendering Mode</strong></h3>
+<p>Dedicated rendering mode for terminals with poor alt-screen support.
+Virtualized scrollback, focus view toggle, reduced redraw artifacts.</p>
+<h3 id="plan-mode-with-structured-approval">10. <strong>Plan Mode with
+Structured Approval</strong></h3>
+<p>Plan mode generates structured plans with <code>ExitPlanMode</code>
+tool. Plans saved to files, can be edited by user.
+<code>allowedPrompts</code> for semantic action categories.</p>
+<h3 id="mcp-deep-integration">11. <strong>MCP Deep
+Integration</strong></h3>
+<p>Full MCP lifecycle: stdio/SSE/HTTP/WebSocket transports, OAuth 2.0,
+auto-reconnection, non-blocking startup, resource mentions, claude.ai
+connectors. Can also serve as MCP server.</p>
+<h3 id="context-aware-skill-system">12. <strong>Context-Aware Skill
+System</strong></h3>
+<p>Skills auto-invoke based on conversation context. Support
+<code>context: fork</code> for isolated execution,
+<code>${CLAUDE_EFFORT}</code> variable substitution, agent delegation,
+and user/proactive/nested trigger attribution.</p>
+<h3 id="session-transcript-system">13. <strong>Session Transcript
+System</strong></h3>
+<p>Full conversation persistence in JSONL format. Supports
+<code>--resume</code>, <code>--continue</code>, cross-project resume, PR
+URL-based session finding. Corrupt lines skipped gracefully.</p>
+<h3 id="lsp-language-server-protocol-integration">14. <strong>LSP
+(Language Server Protocol) Integration</strong></h3>
+<p>Claude Code can connect to LSP servers for diagnostics. Identifies
+itself via <code>clientInfo</code> in initialize requests. Shows
+diagnostic summaries expandable on click.</p>
+<h3 id="opentelemetry-integration">15. <strong>OpenTelemetry
+Integration</strong></h3>
+<p>Full OTEL tracing with <code>claude_code.*</code> event names. W3C
+TRACEPARENT propagation to subprocesses. Resource attributes for OS,
+arch, WSL version.</p>
+<h3 id="voice-mode">16. <strong>Voice Mode</strong></h3>
+<p>Push-to-talk voice dictation with microphone permission handling.
+Respects VS Code <code>accessibility.voice.speechLanguage</code>
+setting.</p>
+<h3 id="remote-control">17. <strong>Remote Control</strong></h3>
+<p>Connect local terminal to claude.ai/code web sessions. Session names
+with hostname prefix. Real-time synchronization.</p>
+<h3 id="powershell-tool-on-windows">18. <strong>PowerShell Tool on
+Windows</strong></h3>
+<p>Full PowerShell support on Windows (5.1 and 7+). Version-appropriate
+syntax guidance. Argument-splitting hardening. Primary shell when
+PowerShell tool enabled.</p>
+<h3 id="subprocess-sandboxing-linux">19. <strong>Subprocess Sandboxing
+(Linux)</strong></h3>
+<p>PID namespace isolation, seccomp syscall filtering, network
+restrictions, unix socket blocking, per-session script capability
+limits.</p>
+<h3 id="smart-file-editing">20. <strong>Smart File Editing</strong></h3>
+<p>Edit tool works on files viewed via Bash without separate Read.
+Tracks user modifications. Word-level diff display. Git diff output. 60%
+faster diff computation via algorithmic optimization.</p>
+<hr />
+<h2 id="performance-optimizations">13. Performance Optimizations</h2>
+<h3 id="from-changelog-analysis">From CHANGELOG Analysis</h3>
+<ol type="1">
+<li><strong>Bun.stripANSI routing</strong> - Replaced custom stripAnsi
+with Bun’s native implementation</li>
+<li><strong>Eliminated per-turn JSON.stringify</strong> of MCP tool
+schemas on cache-key lookup</li>
+<li><strong>SSE transport</strong> - Large streamed frames handled in
+linear time (was quadratic)</li>
+<li><strong>SDK transcript writes</strong> - No longer slow down
+quadratically on long conversations</li>
+<li><strong>Image handling</strong> - Compressed to same token budget as
+Read tool, downscaled to 2000px</li>
+<li><strong>Memory leak fixes</strong> - Multiple fixes for unbounded
+growth (images, <code>/usage</code>, MCP buffers, hook handlers)</li>
+<li><strong>File descriptor management</strong> - Bounded usage during
+<code>find</code> in Bash tool on large trees</li>
+<li><strong>Parallel loading</strong> - Resume picker loads project
+sessions in parallel</li>
+<li><strong>Edit tool optimization</strong> - Shorter old_string
+anchors, 60% faster diff computation</li>
+<li><strong>StructuredOutput schema cache</strong> - Fixed ~50% failure
+rate with multiple schemas</li>
+</ol>
+<hr />
+<h2 id="error-recovery-edge-case-handling">14. Error Recovery &amp; Edge
+Case Handling</h2>
+<h3 id="streaming-resilience">Streaming Resilience</h3>
+<ul>
+<li>Stalled streaming → non-streaming fallback</li>
+<li>Sleep/wake stream idle timeout recovery</li>
+<li>Background session false aborts during thinking pauses fixed</li>
+<li>API retry with exponential backoff (minimum enforced)</li>
+</ul>
+<h3 id="session-recovery">Session Recovery</h3>
+<ul>
+<li>Corrupt transcript lines skipped on <code>--resume</code></li>
+<li><code>--resume</code> cache miss recovery</li>
+<li>Attachment messages persisted even when dialogs appear</li>
+<li>Messages typed during processing enqueued properly</li>
+</ul>
+<h3 id="tool-resilience">Tool Resilience</h3>
+<ul>
+<li>Grep tool falls back to system <code>rg</code> when embedded binary
+stale</li>
+<li>Bash tool warns when formatter modifies previously-read files</li>
+<li>Edit tool handles format-on-save hooks between consecutive
+edits</li>
+<li>MCP servers auto-retry transient errors up to 3 times</li>
+</ul>
+<h3 id="permission-edge-cases">Permission Edge Cases</h3>
+<ul>
+<li><code>toString</code> prototype property names in settings no longer
+break parsing</li>
+<li>JavaScript prototype property names in permission rules handled</li>
+<li>Wildcard rules match commands with extra spaces/tabs</li>
+<li>Piped commands with <code>cd</code> segments handled correctly</li>
+<li>Redirects to <code>/dev/tcp/...</code> properly blocked</li>
+</ul>
+<hr />
+<h2 id="sdk-api-integration">15. SDK &amp; API Integration</h2>
+<h3 id="typescript-sdk">TypeScript SDK</h3>
+<div class="sourceCode" id="cb23"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { claude } <span class="im">from</span> <span class="st">&#39;@anthropic-ai/claude-code&#39;</span><span class="op">;</span></span></code></pre></div>
+<h3 id="python-sdk">Python SDK</h3>
+<div class="sourceCode" id="cb24"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install claude-code-sdk</span></span></code></pre></div>
+<h3 id="sdk-features">SDK Features</h3>
+<ul>
+<li><code>mcp_authenticate</code> with <code>redirectUri</code>
+support</li>
+<li><code>read_file</code> with size cap enforcement</li>
+<li><code>--fork</code> subagent support
+(<code>CLAUDE_CODE_FORK_SUBAGENT=1</code>)</li>
+<li>Bridge sessions showing local git repo info on claude.ai session
+cards</li>
+<li><code>--print</code> mode with
+<code>--output-format=stream-json</code></li>
+<li><code>--exclude-dynamic-system-prompt-sections</code> for cross-user
+prompt caching</li>
+</ul>
+<hr />
+<h2 id="top-20-most-important-features-to-port-to-helixcode">16. Top 20
+Most Important Features to Port to HelixCode</h2>
+<h3 id="priority-1-core-architecture-must-have">Priority 1: Core
+Architecture (Must-Have)</h3>
+<ol type="1">
+<li><strong>Auto-Compaction System</strong>
+<ul>
+<li>What: Automatic context window management with summarization</li>
+<li>Why: Enables arbitrarily long sessions without manual
+<code>/compact</code></li>
+<li>Port: Implement token counting + summarization pipeline with
+thrashing detection</li>
+<li>Complexity: HIGH</li>
+</ul></li>
+<li><strong>Permission Rule System with 5 Modes</strong>
+<ul>
+<li>What: Granular tool approval with wildcard rules, compound command
+handling</li>
+<li>Why: Critical for security and UX - balances autonomy with
+safety</li>
+<li>Port: Rule engine with regex matching, env-var prefix handling,
+tool-specific patterns</li>
+<li>Complexity: HIGH</li>
+</ul></li>
+<li><strong>Tool Result Persistence Layer</strong>
+<ul>
+<li>What: Auto-save large outputs to disk, reference by path in
+context</li>
+<li>Why: Prevents context pollution, enables large file/directory
+listings</li>
+<li>Port: File-based result storage with path references in message
+format</li>
+<li>Complexity: MEDIUM</li>
+</ul></li>
+<li><strong>Git Worktree-Based Agent Isolation</strong>
+<ul>
+<li>What: Spawn subagents in isolated git worktrees with
+auto-cleanup</li>
+<li>Why: Enables parallel development without branch conflicts</li>
+<li>Port: Git worktree management + subagent process isolation</li>
+<li>Complexity: HIGH</li>
+</ul></li>
+<li><strong>Hook-Based Extensibility</strong>
+<ul>
+<li>What: Event-driven plugin hooks (PreToolUse, PostToolUse, Stop,
+etc.)</li>
+<li>Why: Most powerful customization mechanism - can block, modify,
+extend behavior</li>
+<li>Port: Event bus + external process invocation with JSON I/O</li>
+<li>Complexity: HIGH</li>
+</ul></li>
+</ol>
+<h3 id="priority-2-ux-productivity-high-impact">Priority 2: UX &amp;
+Productivity (High-Impact)</h3>
+<ol start="6" type="1">
+<li><strong>No-Flicker Rendering Mode</strong>
+<ul>
+<li>What: Alternative TUI renderer for terminals with poor alt-screen
+support</li>
+<li>Why: Critical compatibility feature for broad terminal support</li>
+<li>Port: Separate renderer implementation with virtualized
+scrollback</li>
+<li>Complexity: HIGH</li>
+</ul></li>
+<li><strong>Background Task System (Ctrl+B)</strong>
+<ul>
+<li>What: Run commands in background with progress tracking and
+retrieval</li>
+<li>Why: Essential for long-running builds, tests, deployments</li>
+<li>Port: Process management + task queue + progress streaming</li>
+<li>Complexity: MEDIUM</li>
+</ul></li>
+<li><strong>Smart File Editing (Edit without Read)</strong>
+<ul>
+<li>What: Edit files viewed via Bash without separate Read tool
+call</li>
+<li>Why: Reduces token usage and tool call count</li>
+<li>Port: Track file content from Bash outputs, make available to Edit
+tool</li>
+<li>Complexity: MEDIUM</li>
+</ul></li>
+<li><strong>Plan Mode with Structured Approval</strong>
+<ul>
+<li>What: Generate plans with semantic action categories, require
+approval</li>
+<li>Why: Enables high-trust workflows while maintaining oversight</li>
+<li>Port: Plan generation + approval workflow + allowedPrompts
+tracking</li>
+<li>Complexity: MEDIUM</li>
+</ul></li>
+<li><strong>Slash Command System with Frontmatter</strong>
+<ul>
+<li>What: Markdown files with YAML frontmatter become
+<code>/commands</code></li>
+<li>Why: Easy customization, version-controllable prompts, inline shell
+execution</li>
+<li>Port: Markdown parser + frontmatter extraction + command
+registry</li>
+<li>Complexity: LOW</li>
+</ul></li>
+</ol>
+<h3 id="priority-3-integration-ecosystem-differentiating">Priority 3:
+Integration &amp; Ecosystem (Differentiating)</h3>
+<ol start="11" type="1">
+<li><strong>MCP Full Lifecycle Support</strong>
+<ul>
+<li>What: stdio/SSE/HTTP/WebSocket transports, OAuth,
+auto-reconnection</li>
+<li>Why: Ecosystem integration - connects to databases, APIs, file
+systems</li>
+<li>Port: MCP client implementation per transport + OAuth flow + server
+management</li>
+<li>Complexity: VERY HIGH</li>
+</ul></li>
+<li><strong>Skill System with Auto-Invocation</strong>
+<ul>
+<li>What: Context-aware skill loading with variable substitution and
+fork isolation</li>
+<li>Why: Domain-specific expertise without manual activation</li>
+<li>Port: Skill registry + trigger detection + isolated execution
+context</li>
+<li>Complexity: HIGH</li>
+</ul></li>
+<li><strong>Session Transcript with Cross-Project Resume</strong>
+<ul>
+<li>What: JSONL persistence, <code>--resume</code>,
+<code>--continue</code>, PR URL-based finding</li>
+<li>Why: Conversation continuity is critical for complex tasks</li>
+<li>Port: Transcript serialization + session index + search/resume
+logic</li>
+<li>Complexity: MEDIUM</li>
+</ul></li>
+<li><strong>Multi-Provider Backend</strong>
+<ul>
+<li>What: Anthropic, Bedrock, Vertex, Azure, custom gateways with
+interactive setup</li>
+<li>Why: Deployment flexibility, enterprise requirements</li>
+<li>Port: Provider abstraction layer + auth adapters + setup
+wizards</li>
+<li>Complexity: HIGH</li>
+</ul></li>
+<li><strong>LSP Diagnostic Integration</strong>
+<ul>
+<li>What: Connect to language servers, show expandable diagnostics</li>
+<li>Why: Real-time code quality feedback</li>
+<li>Port: LSP client + diagnostic aggregation + display integration</li>
+<li>Complexity: MEDIUM</li>
+</ul></li>
+<li><strong>Sandboxed Shell Execution</strong>
+<ul>
+<li>What: PID namespace isolation, seccomp, network restrictions</li>
+<li>Why: Security for arbitrary code execution</li>
+<li>Port: Linux namespaces + seccomp BPF + network filtering</li>
+<li>Complexity: VERY HIGH</li>
+</ul></li>
+<li><strong>Theme System with Custom Themes</strong>
+<ul>
+<li>What: Named themes in JSON, plugin-shipped themes</li>
+<li>Why: Accessibility, personalization, branding</li>
+<li>Port: Theme registry + color system + terminal color mapping</li>
+<li>Complexity: LOW</li>
+</ul></li>
+<li><strong>AskUserQuestion with Previews</strong>
+<ul>
+<li>What: Interactive questions with option previews, multi-select,
+annotations</li>
+<li>Why: Rich user interaction for decisions</li>
+<li>Port: Dialog component + option rendering + preview content</li>
+<li>Complexity: MEDIUM</li>
+</ul></li>
+<li><strong>Subagent Team with Named Agents</strong>
+<ul>
+<li>What: Named, addressable subagents with SendMessage, team
+context</li>
+<li>Why: Multi-agent collaboration workflows</li>
+<li>Port: Agent registry + message routing + team context sharing</li>
+<li>Complexity: HIGH</li>
+</ul></li>
+<li><strong>OpenTelemetry Integration</strong>
+<ul>
+<li>What: Full tracing with W3C propagation, subprocess span
+inheritance</li>
+<li>Why: Observability for production deployments</li>
+<li>Port: OTEL SDK integration + span management + context
+propagation</li>
+<li>Complexity: MEDIUM</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="appendix-a-complete-tool-schemas-summary">Appendix A: Complete
+Tool Schemas Summary</h2>
+<h3 id="input-schemas">Input Schemas</h3>
+<ul>
+<li><code>AgentInput</code>: description, prompt, subagent_type, model,
+run_in_background, name, team_name, mode, isolation</li>
+<li><code>BashInput</code>: command, description, timeout,
+run_in_background, dangerouslyDisableSandbox</li>
+<li><code>FileEditInput</code>: file_path, old_string, new_string,
+replace_all</li>
+<li><code>FileReadInput</code>: file_path, offset, limit, pages</li>
+<li><code>FileWriteInput</code>: file_path, content</li>
+<li><code>GlobInput</code>: pattern, path</li>
+<li><code>GrepInput</code>: pattern, path, glob, output_mode, -A, -B,
+-C, context, -n, -i, type, head_limit, offset, multiline</li>
+<li><code>ListMcpResourcesInput</code>: server</li>
+<li><code>McpInput</code>: [dynamic schema per server]</li>
+<li><code>NotebookEditInput</code>: notebook_path, cell_id, new_source,
+cell_type, edit_mode</li>
+<li><code>ReadMcpResourceInput</code>: server, uri</li>
+<li><code>TodoWriteInput</code>: todos[]</li>
+<li><code>WebFetchInput</code>: url, prompt</li>
+<li><code>WebSearchInput</code>: query, allowed_domains,
+blocked_domains</li>
+<li><code>AskUserQuestionInput</code>: questions[]</li>
+<li><code>EnterWorktreeInput</code>: name, path</li>
+<li><code>ExitWorktreeInput</code>: action, discard_changes</li>
+</ul>
+<h3 id="output-schemas">Output Schemas</h3>
+<ul>
+<li><code>AgentOutput</code>: content, usage, toolStats, status, prompt
+(or async_launched)</li>
+<li><code>BashOutput</code>: stdout, stderr, interrupted,
+backgroundTaskId, structuredContent, persistedOutputPath</li>
+<li><code>FileEditOutput</code>: filePath, oldString, newString,
+structuredPatch, gitDiff</li>
+<li><code>FileReadOutput</code>:
+text/image/notebook/pdf/parts/file_unchanged variants</li>
+<li><code>FileWriteOutput</code>: type, filePath, content,
+structuredPatch, gitDiff</li>
+<li><code>GlobOutput</code>: durationMs, numFiles, filenames,
+truncated</li>
+<li><code>GrepOutput</code>: mode, numFiles, filenames, content,
+numLines, numMatches</li>
+<li><code>McpOutput</code>: string</li>
+<li><code>NotebookEditOutput</code>: new_source, cell_id, cell_type,
+language, edit_mode</li>
+<li><code>WebFetchOutput</code>: bytes, code, codeText, result,
+durationMs</li>
+<li><code>WebSearchOutput</code>: [search results]</li>
+</ul>
+<hr />
+<h2 id="appendix-b-environment-variables">Appendix B: Environment
+Variables</h2>
+<h3 id="api-configuration">API Configuration</h3>
+<ul>
+<li><code>ANTHROPIC_API_KEY</code> /
+<code>ANTHROPIC_AUTH_TOKEN</code></li>
+<li><code>ANTHROPIC_BASE_URL</code> /
+<code>ANTHROPIC_BEDROCK_BASE_URL</code></li>
+<li><code>ANTHROPIC_MODEL</code> /
+<code>ANTHROPIC_SMALL_FAST_MODEL</code></li>
+<li><code>ANTHROPIC_DEFAULT_*_MODEL_NAME</code> /
+<code>_DESCRIPTION</code></li>
+<li><code>ANTHROPIC_BEDROCK_SERVICE_TIER</code></li>
+<li><code>AWS_BEARER_TOKEN_BEDROCK</code></li>
+<li><code>AWS_REGION</code> / <code>AWS_DEFAULT_REGION</code></li>
+</ul>
+<h3 id="runtime-behavior">Runtime Behavior</h3>
+<ul>
+<li><code>CLAUDE_CODE_MAX_CONTEXT_TOKENS</code></li>
+<li><code>DISABLE_COMPACT</code></li>
+<li><code>CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS</code></li>
+<li><code>CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC</code></li>
+<li><code>DISABLE_TELEMETRY</code></li>
+<li><code>DISABLE_AUTOUPDATER</code> / <code>DISABLE_UPDATES</code></li>
+<li><code>CLAUDE_CODE_FORK_SUBAGENT</code></li>
+<li><code>CLAUDE_CODE_HIDE_CWD</code></li>
+<li><code>CLAUDE_CODE_NO_FLICKER</code></li>
+<li><code>CLAUDE_CODE_GIT_BASH_PATH</code></li>
+<li><code>CLAUDE_CODE_ORGANIZATION_UUID</code></li>
+<li><code>CLAUDE_CODE_PERFORCE_MODE</code></li>
+<li><code>CLAUDE_CODE_SUBPROCESS_ENV_SCRUB</code></li>
+<li><code>CLAUDE_CODE_SCRIPT_CAPS</code></li>
+</ul>
+<h3 id="sandbox-permissions">Sandbox &amp; Permissions</h3>
+<ul>
+<li><code>--dangerously-skip-permissions</code></li>
+<li><code>CLAUDE_CODE_USE_MANTLE</code></li>
+</ul>
+<h3 id="mcp">MCP</h3>
+<ul>
+<li><code>MCP_TIMEOUT</code> / <code>MCP_TOOL_TIMEOUT</code></li>
+<li><code>MCP_CONNECTION_NONBLOCKING</code></li>
+</ul>
+<h3 id="timing">Timing</h3>
+<ul>
+<li><code>API_TIMEOUT_MS</code></li>
+<li><code>BASH_DEFAULT_TIMEOUT_MS</code> /
+<code>BASH_MAX_TIMEOUT_MS</code></li>
+</ul>
+<hr />
+<h2 id="appendix-c-file-structure-runtime">Appendix C: File Structure
+(Runtime)</h2>
+<pre><code>~/.claude/
+├── settings.json              # User settings
+├── keybindings.json           # Custom keybindings
+├── themes/                    # Custom themes
+├── history.jsonl              # Prompt history
+├── CLAUDE.md                  # Global context
+└── [session storage]          # Transcripts, tasks, file history
+
+.claude/ (project-level)
+├── settings.json              # Project settings
+├── commands/                  # Custom slash commands
+├── skills/                    # Project skills
+├── agents/                    # Project agents
+├── hooks/                     # Project hooks
+└── CLAUDE.md                # Project context</code></pre>
+<hr />
+<p><em>Analysis completed from binary string analysis, SDK type
+definitions, CHANGELOG review (3412 lines, 120+ versions), plugin
+architecture examination, and installation script reverse
+engineering.</em></p>
+</body>
+</html>

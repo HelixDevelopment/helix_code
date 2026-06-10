@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-06-p1-f20-theme-system-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-06-p1-f20-theme-system-design</h1>
+</header>
+<h1 id="phase-1-feature-20-theme-system-final-phase-1-feature">Phase 1 /
+Feature 20 — Theme System (FINAL Phase 1 feature)</h1>
+<p><strong>Date:</strong> 2026-05-06 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<blockquote>
+<p><strong>Note (programme position):</strong> F20 is the
+<strong>last</strong> Phase 1 feature. T09 (close-out) records “Phase 1
+of CLI-Agent Fusion programme complete” in PROGRESS.md.</p>
+</blockquote>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, end-to-end <strong>5-role semantic theme system</strong>
+for the HelixCode CLI agent so that LLM token streams, tool result
+frames, and slash-command output can be colourised with a
+<em>consistent, role-based palette</em> that adapts to the active
+terminal’s color depth and to the user’s preference (built-in
+<code>dark</code> / <code>light</code> / <code>none</code>, or a user
+YAML override). When the F18 renderer is in plain mode (non-TTY
+destinations: pipes, CI logs, <code>&gt;file</code>, dumb terminals),
+zero color bytes MUST be emitted regardless of the active theme — the
+no-leak invariant is structurally enforced.</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong><code>theme</code> package</strong>
+(<code>helix_code/internal/theme/</code>) — five semantic roles
+(<code>Info</code> / <code>Warn</code> / <code>Error</code> /
+<code>Highlight</code> / <code>Dim</code>; Q1=A) backed by per-depth
+<code>Color</code> variants (<code>ANSI16</code> / <code>ANSI256</code>
+/ <code>Truecolor</code>). Three built-in themes (<code>dark</code> /
+<code>light</code> / <code>none</code>; Q2=C) that always ship with the
+binary and never require disk I/O. An optional user YAML override at
+<code>$XDG_CONFIG_HOME/helixcode/theme.yaml</code> (Q2=C) that can
+replace any subset of the built-in palette without forcing the user to
+re-spell every role. A <code>Styler</code> that wraps text with
+role-coded ANSI escape codes for fancy mode and acts as a no-op
+pass-through for plain mode.</li>
+<li><strong>Renderer integration</strong> (Q1=A consequence) — F18’s
+<code>Renderer</code> is extended through a thin
+<code>Stylize(role Role, text string) string</code> helper invoked at
+the call sites that already pass text into <code>WriteToken</code> /
+<code>RenderTextBlock</code> / <code>RenderLines</code>. The Styler is
+constructed once at process startup alongside the renderer (same factory
+pattern as F18 + F19) and threaded through the existing wire points (LLM
+streaming hook in <code>handleGenerate</code>, tool result frame
+helpers, slash-command output). Plain-mode renderers receive a Styler
+whose <code>Stylize</code> is the identity function — no ANSI escape
+codes leave the package.</li>
+<li><strong>Env var + <code>/theme</code> slash command</strong> (Q5=B)
+— <code>HELIXCODE_THEME=dark|light|none|&lt;custom-name&gt;</code> (Q3=C
+precedence: env &gt; <code>$COLORFGBG</code> parse &gt; default
+<code>dark</code>). Color depth auto-detected (Q4=D) from
+<code>$COLORTERM</code> (<code>truecolor</code>/<code>24bit</code> →
+Truecolor), then <code>$TERM</code> (<code>*-256color</code> → ANSI256,
+otherwise → ANSI16; <code>dumb</code>/unset → <code>Off</code>). A
+read-only <code>/theme</code> slash command with three subcommands:
+<code>/theme status</code> (active name + depth + source),
+<code>/theme list</code> (all available names: built-in + YAML),
+<code>/theme show &lt;name&gt;</code> (preview the 5 roles in a numbered
+table with sample text). NO cobra subcommand. Switching the active theme
+at runtime is OUT OF SCOPE for v1 (deferred to F20.5; see §8).</li>
+</ol>
+<p>The plain-mode-zero-color invariant (Q1=A + Q4=D consequence) is
+<strong>structurally enforced</strong>: the Styler’s
+<code>Stylize</code> method consults the active <code>ColorDepth</code>
+at call time; depth <code>Off</code> (returned for plain renderers, dumb
+terminals, and explicit <code>none</code> theme) makes
+<code>Stylize(role, text) == text</code> byte-for-byte. A unit test
+scans the captured plain-mode writer for any byte in <code>{0x1b}</code>
+(ESC) and FAILS on any hit. The Challenge harness includes a dedicated
+PLAIN-MODE-ZERO-COLOR phase that constructs a real
+<code>plainRenderer</code> + a real Styler with a colourful theme +
+writes 100 styled tokens through the production code path and asserts
+the captured bytes contain ZERO <code>0x1b</code> characters.</p>
+<p>The dark/light/none built-ins are concrete and load-bearing — see
+§3.4 for the exact ANSI codes per role × depth. <code>none</code> is the
+explicit “no color, even on a TTY” theme (distinct from the
+depth-<code>Off</code> plain-mode path) — its codes are empty strings on
+every depth, so <code>Stylize(role, text) == text</code> regardless of
+renderer mode.</p>
+<p>Out of scope for v1: bold / italic / underline / blink (defer to
+F20.5 — Constitutional anchors are unchanged but the theme YAML schema
+gains optional
+<code>bold</code>/<code>italic</code>/<code>underline</code> fields);
+background colors (defer to F20.5); per-tool-type custom colors
+(e.g. “all <code>lsp_diagnostic</code> results in red regardless of
+role”); gradient text; transparent / faded text; mid-process theme
+reload on YAML file change (the YAML is read once at startup); GUI theme
+synchronisation (the desktop Fyne UI under
+<code>applications/desktop/</code> reads
+<code>assets/colors/helix-theme.css</code> directly — that path is left
+intact and not coupled to the CLI theme); 256-color truecolor
+approximation algorithms beyond a literal lookup (an ANSI256 theme uses
+ANSI256 codes verbatim; a Truecolor theme uses Truecolor codes verbatim;
+cross-depth fallback within one theme is documented in §5.5).</p>
+<p>Anti-bluff hot zone (loud): a theme “applied” but no ANSI bytes ever
+observable in fancy-mode output (the package compiles, the slash command
+lists the theme, but the call sites still emit raw text); truecolor
+codes (<code>\x1b[38;2;&lt;r&gt;;&lt;g&gt;;&lt;b&gt;m</code>) emitted on
+a 16-color terminal where they render as visual garbage; plain-mode
+somehow leaking ANSI through the theme path (because the call site
+forgot to use the Styler and reached for <code>Stylize</code> directly
+on the package); the env var <code>HELIXCODE_THEME</code> honoured but
+<code>$COLORFGBG</code>/<code>$COLORTERM</code>/<code>$TERM</code>
+detection branches never exercised in tests so a regression silently
+downgrades every user. Each of these maps to a unit + integration +
+Challenge phase per §5.2.</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>Four layers, all under <code>helix_code/internal/theme/</code>, plus
+thin wiring at the F18 renderer boundary and one slash command:</p>
+<ul>
+<li><strong><code>Theme</code> struct</strong> (<code>types.go</code>) —
+the value type carrying the 5-role palette per <code>ColorDepth</code>.
+Concretely, a <code>Theme</code> holds three <code>[5]Color</code>
+arrays (one per depth tier) so a single <code>Theme</code> can be
+rendered at the depth the terminal actually supports, without a runtime
+cross-depth conversion (which would bias the palette).</li>
+<li><strong><code>ThemeRegistry</code></strong>
+(<code>builtin.go</code>) — exposes
+<code>BuiltIn() map[ThemeName]Theme</code> returning the three frozen
+built-ins (<code>ThemeDark</code>, <code>ThemeLight</code>,
+<code>ThemeNone</code>). Built-ins live in code (no disk read), so a
+binary with NO <code>theme.yaml</code> on disk still has all three
+available. The registry is read-only after <code>Build()</code> —
+concurrent reads are safe; writes happen only via the loader.</li>
+<li><strong><code>ThemeLoader</code></strong> (<code>loader.go</code>) —
+resolves the active <code>ThemeName</code> per the §3.6 precedence
+ladder, then merges any matching YAML override on top of the built-in.
+The loader is the <em>only</em> place env vars and disk I/O happen; the
+rest of the codebase only sees a constructed <code>Styler</code>.</li>
+<li><strong><code>Styler</code></strong> (<code>loader.go</code>) — the
+runtime façade. Owns one <code>Theme</code> + one
+<code>ColorDepth</code>.
+<code>Stylize(role Role, text string) string</code> looks up the theme’s
+<code>Color</code> for <code>role</code> at the current depth and wraps
+text with the open / reset escape sequences. When
+<code>ColorDepth == Off</code>, returns <code>text</code> unchanged
+(identity).</li>
+</ul>
+<pre><code>                          ┌── HELIXCODE_THEME env (Q3=C) ──┐
+                          │ COLORFGBG (fallback signal)    │
+                          │ default: &quot;dark&quot;                │
+                          └────────────┬───────────────────┘
+                                       │
+                                       ▼
+                          ┌── ColorDepth detector (Q4=D) ──┐
+                          │ COLORTERM=truecolor|24bit      │
+                          │ TERM=*-256color                 │
+                          │ TERM=dumb|&quot;&quot; → Off              │
+                          └────────────┬───────────────────┘
+                                       │
+                                       ▼
+                              ┌─ ThemeLoader.Load() ─┐
+                              │  resolve name        │
+                              │  detect depth        │
+                              │  merge YAML override │
+                              │  build Theme         │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                                ┌── Styler (theme + depth) ──┐
+                                │  Stylize(role, text)       │
+                                │  depth=Off → identity      │
+                                │  depth=ANSI16 → &quot;\x1b[31m&quot; │
+                                │  depth=ANSI256 → &quot;\x1b[38;5;160m&quot;
+                                │  depth=Truecolor → &quot;\x1b[38;2;255;0;0m&quot;
+                                │  always reset &quot;\x1b[0m&quot;    │
+                                └──────────┬─────────────────┘
+                                           │
+                                           ▼
+                       Renderer call sites (F18) — WriteToken / RenderLines / RenderTextBlock
+                                           │
+                                           ▼
+                                   render.Renderer (fancy or plain)
+                                   plain-mode Styler is depth=Off → no ANSI byte ever leaves the boundary</code></pre>
+<p><strong>Wire points</strong> (existing code; one new line each):</p>
+<ul>
+<li><p><strong>Renderer factory boundary</strong>:
+<code>cmd/cli/main.go</code> constructs the renderer at startup (F18
+wiring); F20 adds an adjacent
+<code>theme.NewStyler(theme.LoaderOptions{...})</code> call. The Styler
+is held on the <code>*CLI</code> struct (sibling field of
+<code>c.renderer</code>) and threaded into the spots that today pass
+plain text to F18’s helpers. Specifically:</p>
+<ul>
+<li><code>handleGenerate</code> non-stream path (the
+<code>RenderTextBlock(c.renderer, &quot;&quot;, text)</code> call added in
+F18-T08) becomes
+<code>RenderTextBlock(c.renderer, &quot;&quot;, c.styler.Stylize(theme.RoleInfo, text))</code>
+for the response body. Errors emitted on the same path are styled with
+<code>theme.RoleError</code>.</li>
+<li>Slash-command output paths (<code>/lsp</code>,
+<code>/sandbox</code>, <code>/edit</code>, <code>/sessions</code>,
+<code>/skills</code>, <code>/commands</code>, <code>/telemetry</code>,
+<code>/subagents</code>, <code>/tasks</code>, <code>/plan</code>,
+<code>/mcp</code>, <code>/permissions</code>, <code>/hooks</code>) — F20
+does NOT refactor every one. F20 wires the <code>Styler</code> into the
+<em>new</em> <code>/theme</code> command’s own output (so the demo of
+the styling system is itself styled) and wires it into the F18
+RenderTextBlock helpers in <code>cmd/cli/main.go::handleGenerate</code>.
+Other call sites are migration candidates for F20.5.</li>
+<li>Tool result frame rendering (F18 <code>RenderLines</code> glue) —
+F20 wires the Styler at the call site that classifies a frame as
+<code>error</code> vs <code>info</code> (e.g. an
+<code>lsp_diagnostic</code> with <code>severity=error</code> styles the
+heading line via <code>RoleError</code>). Concretely:
+<code>cmd/cli/main.go</code> formats the tool-result lines and calls
+<code>c.styler.Stylize(role, line)</code> per line BEFORE passing to
+<code>RenderLines</code>.</li>
+</ul></li>
+<li><p><strong>Slash-command registration</strong>
+(<code>cmd/cli/main.go</code>): one new line under the existing
+<code>commands.Registry.Register(...)</code> block —
+<code>c.commandRegistry.Register(commands.NewThemeCommand(c.styler, themeLoader))</code>.
+The command name is <code>theme</code>; subcommands <code>status</code>
+/ <code>list</code> / <code>show &lt;name&gt;</code>.</p></li>
+<li><p><strong>Renderer factory itself</strong>: F18’s
+<code>render.NewRenderer</code> is unchanged. The Styler does NOT live
+inside <code>internal/render/</code> — that package is plumbing-only
+(byte emission). Theme is a higher-level concern that decorates the
+<em>content</em> before it reaches the renderer. This separation keeps
+the F18 plain-renderer’s <code>bytes.IndexAny(out, &quot;\x1b&quot;)</code>
+invariant trivially provable: nothing inside
+<code>internal/render/</code> ever writes an escape; if an ANSI byte
+appears in plain-mode output it could only have come from upstream, and
+the <code>Stylize</code> identity-on-<code>Off</code> guarantee blocks
+that path.</p></li>
+</ul>
+<p>Why a <code>Styler.Stylize(role, text)</code> decorator (Q1=A
+consequence) and not a renderer-level
+<code>r.WriteStyled(role, text)</code> method: - Adding methods to F18’s
+<code>Renderer</code> interface forces every Renderer implementation
+(<code>ansiRenderer</code>, <code>plainRenderer</code>, future test
+fakes) to know about themes — couples plumbing to policy. - The
+decorator pattern lets plain mode statically prove “no ANSI” by giving
+the styler a depth=Off variant; the renderer never has to discriminate.
+- Tests pin byte sequences cleanly:
+<code>Stylize(theme.RoleError, &quot;boom&quot;) == &quot;\x1b[31mboom\x1b[0m&quot;</code>
+is a one-line assertion against the production path, no renderer needed.
+- Migration is incremental: a call site that hasn’t adopted the styler
+still emits unstyled text (no breakage); a call site that has adopted it
+gets coloured output in fancy mode and identical bytes in plain
+mode.</p>
+<p>Why slash + env (Q5=B) and not cobra: - Theme is a <em>runtime
+preview</em> surface (a user wants to see what <code>light</code> looks
+like) — slash-command output is the natural fit (output is rendered
+through the active renderer, so <code>/theme show light</code> shows
+real ANSI when the renderer is fancy and clean text when plain). - A
+cobra subcommand <code>helixcode theme</code> would be a debug-only
+convenience; the CLI’s <code>/theme</code> slash already covers the
+user-facing case. - Mid-process theme switching (re-running
+<code>theme.NewStyler</code> and re-threading it) is out of scope for
+v1; the slash command is read-only. F20.5 may add
+<code>/theme set &lt;name&gt;</code>.</p>
+<hr />
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/theme/types.go</code> —
+<code>Theme</code>, <code>Role</code> enum, <code>Color</code>,
+<code>ColorDepth</code>, <code>ThemeName</code>, sentinel errors
+(<code>ErrUnknownTheme</code>, <code>ErrInvalidYAML</code>,
+<code>ErrInvalidRole</code>), constants.</li>
+<li><code>helix_code/internal/theme/types_test.go</code>.</li>
+<li><code>helix_code/internal/theme/builtin.go</code> —
+<code>BuiltIn() map[ThemeName]Theme</code>; concrete
+<code>ThemeDark</code> / <code>ThemeLight</code> /
+<code>ThemeNone</code> literals with full per-depth palettes.</li>
+<li><code>helix_code/internal/theme/builtin_test.go</code>.</li>
+<li><code>helix_code/internal/theme/detect.go</code> —
+<code>DetectThemeName(env func(string) string) (ThemeName, string)</code>
+(returns the resolved name + the <em>source</em> string for
+<code>/theme status</code>);
+<code>DetectColorDepth(env func(string) string) ColorDepth</code>. Pure
+functions of the env lookup; no <code>os.Getenv</code> inside the
+function body.</li>
+<li><code>helix_code/internal/theme/detect_test.go</code> — table-driven
+over every (HELIXCODE_THEME, COLORFGBG, COLORTERM, TERM) combination
+called out in §3.6.</li>
+<li><code>helix_code/internal/theme/loader.go</code> —
+<code>LoaderOptions</code> (Env / ConfigDir / Filesystem seams),
+<code>Loader.Load() (*Styler, error)</code>,
+<code>Styler{Stylize}</code>.</li>
+<li><code>helix_code/internal/theme/loader_test.go</code> — real temp
+<code>theme.yaml</code> with custom palette; injected <code>Env</code>
+and <code>ConfigDir</code>; assert merged Theme matches expected
+per-depth bytes.</li>
+<li><code>helix_code/internal/commands/theme_command.go</code> —
+<code>ThemeCommand</code> (<code>Command</code> impl);
+<code>/theme status</code>, <code>/theme list</code>,
+<code>/theme show &lt;name&gt;</code>.</li>
+<li><code>helix_code/internal/commands/theme_command_test.go</code>.</li>
+<li><code>helix_code/tests/integration/theme_test.go</code> —
+<code>//go:build integration</code>; ALWAYS-runs; real env vars via
+<code>LoaderOptions.Env</code> injection + real temp YAML; asserts
+byte-exact ANSI emission via the production Styler.</li>
+<li><code>helix_code/tests/integration/cmd/p1f20_challenge/main.go</code>
+— runtime evidence harness.</li>
+<li><code>challenges/p1-f20-theme-system/CHALLENGE.md</code> +
+<code>run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/cmd/cli/main.go</code> — three small additions: (1)
+construct the <code>theme.Loader</code> + <code>theme.Styler</code> at
+startup adjacent to the renderer; (2) wire the styler into the
+<code>handleGenerate</code> non-stream <code>RenderTextBlock</code> call
+(style response with <code>RoleInfo</code>, errors with
+<code>RoleError</code>); (3) register <code>/theme</code> via
+<code>commands.NewThemeCommand(c.styler, themeLoader)</code>.</li>
+<li><code>helix_code/internal/commands/registry.go</code> — no schema
+change; one new registration via the existing
+<code>Register(cmd Command)</code> API.</li>
+<li><code>helix_code/go.mod</code> — <code>gopkg.in/yaml.v3</code> is
+<strong>already</strong> an indirect dep (verify with
+<code>grep &quot;yaml.v3&quot; helix_code/go.mod</code> before T05); F20 promotes
+it to a direct dep at the version already in <code>go.sum</code>. T05
+verifies <code>go mod tidy</code> produces only the indirect→direct line
+move; no new transitive entries.</li>
+</ul>
+<p><strong>One existing-tree direct dep promoted</strong> (yaml.v3); see
+§3.5.</p>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/theme/types.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Role is the semantic name of a styled span. Five values; a Role is an int</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">// so a Theme&#39;s per-depth palette can be a [5]Color array (zero allocations).</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Role <span class="dt">int</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    RoleInfo      Role <span class="op">=</span> <span class="ot">iota</span> <span class="co">// neutral informational output (LLM responses, status lines)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    RoleWarn                  <span class="co">// non-fatal anomalies (deprecation hints, retry notices)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    RoleError                 <span class="co">// failures the user must see (tool errors, validation)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    RoleHighlight             <span class="co">// emphasis / accent (chosen choice, current model name)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    RoleDim                   <span class="co">// de-emphasised supporting text (timestamps, hints)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    numRoles</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">// String returns the lowercase role name (&quot;info&quot;, &quot;warn&quot;, &quot;error&quot;, &quot;highlight&quot;,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;dim&quot;) for use in YAML keys, /theme show output, and error messages.</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>r Role<span class="op">)</span> String<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">// ParseRole maps a YAML key string back to a Role. Returns ErrInvalidRole</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">// for any unknown key.</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> ParseRole<span class="op">(</span>s <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>Role<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">// ColorDepth identifies how many distinct color codes the active terminal</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">// can address. The depth is chosen at startup by DetectColorDepth and never</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">// changes for the life of the process.</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ColorDepth <span class="dt">int</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    DepthOff       ColorDepth <span class="op">=</span> <span class="ot">iota</span> <span class="co">// no color (dumb terminal, plain mode, theme=none)</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    DepthANSI16                      <span class="co">// 16 colors via SGR 30-37 / 90-97</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    DepthANSI256                     <span class="co">// 256 colors via &quot;\x1b[38;5;&lt;n&gt;m&quot;</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    DepthTruecolor                   <span class="co">// 24-bit RGB via &quot;\x1b[38;2;&lt;r&gt;;&lt;g&gt;;&lt;b&gt;m&quot;</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co">// String returns &quot;off&quot;/&quot;ansi16&quot;/&quot;ansi256&quot;/&quot;truecolor&quot; for /theme status.</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>d ColorDepth<span class="op">)</span> String<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">// ThemeName is a stable theme identifier. Built-ins are &quot;dark&quot;, &quot;light&quot;,</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;none&quot;. User YAML may declare any name; the loader treats names as opaque</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">// strings (case-sensitive, byte-for-byte equality).</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ThemeName <span class="dt">string</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    ThemeDarkName  ThemeName <span class="op">=</span> <span class="st">&quot;dark&quot;</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    ThemeLightName ThemeName <span class="op">=</span> <span class="st">&quot;light&quot;</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    ThemeNoneName  ThemeName <span class="op">=</span> <span class="st">&quot;none&quot;</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">// Color is a single styled-span code. The depth-specific Open string is the</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co">// SGR sequence to emit BEFORE the styled text; Reset is shared across all</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">// depths and is the literal &quot;\x1b[0m&quot; sequence. An empty Open means &quot;no</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co">// styling at this depth&quot; — equivalent to DepthOff for that role.</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Color <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    Open <span class="dt">string</span> <span class="co">// e.g. &quot;\x1b[31m&quot; (ANSI16), &quot;\x1b[38;5;160m&quot; (ANSI256),</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>                <span class="co">//      &quot;\x1b[38;2;220;50;47m&quot; (Truecolor), or &quot;&quot; (none)</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="co">// Reset is the universal SGR reset sequence. Exported as a const so tests can</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">// assert byte equality without re-typing the escape.</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> Reset <span class="op">=</span> <span class="st">&quot;</span><span class="ch">\x1b</span><span class="st">[0m&quot;</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="co">// Theme is the per-depth palette for the 5 roles. The arrays are indexed by</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="co">// Role; ANSI16[RoleInfo] is the open code for Info at 16-color depth.</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Theme <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    Name      ThemeName</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    ANSI16    <span class="op">[</span>numRoles<span class="op">]</span>Color</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    ANSI256   <span class="op">[</span>numRoles<span class="op">]</span>Color</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    Truecolor <span class="op">[</span>numRoles<span class="op">]</span>Color</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="co">// Sentinel errors. Tests compare via errors.Is.</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    ErrUnknownTheme <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;theme: unknown theme name&quot;</span><span class="op">)</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    ErrInvalidYAML  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;theme: invalid YAML override&quot;</span><span class="op">)</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    ErrInvalidRole  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;theme: invalid role name&quot;</span><span class="op">)</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/theme/loader.go</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LoaderOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Env       <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="dt">string</span> <span class="co">// default os.Getenv</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ConfigDir <span class="dt">string</span>              <span class="co">// default $XDG_CONFIG_HOME/helixcode (or $HOME/.config/helixcode)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Filesystem fs<span class="op">.</span>FS              <span class="co">// default os.DirFS — injected for tests</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Loader <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* unexported state */</span> <span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLoader<span class="op">(</span>opts LoaderOptions<span class="op">)</span> <span class="op">*</span>Loader</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Load resolves the active theme name, depth, and any YAML override, then</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">// returns a constructed Styler. Returns wrapped ErrUnknownTheme if the</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">// resolved name does not match a built-in or YAML entry; wrapped</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">// ErrInvalidYAML if the YAML file exists but cannot be parsed.</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>l <span class="op">*</span>Loader<span class="op">)</span> Load<span class="op">()</span> <span class="op">(*</span>Styler<span class="op">,</span> ResolvedSource<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">// ResolvedSource records WHERE the active theme name came from. Used by</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">// /theme status output. One of &quot;env&quot; (HELIXCODE_THEME was set),</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">// &quot;colorfgbg&quot; (parsed from $COLORFGBG luminance), or &quot;default&quot; (fell</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">// through to &quot;dark&quot;).</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ResolvedSource <span class="dt">string</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    SourceEnv       ResolvedSource <span class="op">=</span> <span class="st">&quot;env&quot;</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    SourceColorFGBG ResolvedSource <span class="op">=</span> <span class="st">&quot;colorfgbg&quot;</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    SourceDefault   ResolvedSource <span class="op">=</span> <span class="st">&quot;default&quot;</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Styler <span class="kw">struct</span> <span class="op">{</span> <span class="co">/* unexported: theme + depth + name + source */</span> <span class="op">}</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">// Stylize wraps text with the role&#39;s open + reset SGR sequences.</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">//   - depth == Off                 → returns text unchanged (identity)</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">//   - depth has empty Open at role → returns text unchanged</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">//   - otherwise                    → returns Open + text + Reset</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">// The function is allocation-free for the depth=Off path (returns the input</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">// string directly) so the plain-mode hot path does not pay a copy cost.</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> Stylize<span class="op">(</span>role Role<span class="op">,</span> text <span class="dt">string</span><span class="op">)</span> <span class="dt">string</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">// Theme returns the active Theme value (read-only; do not mutate).</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> Theme<span class="op">()</span> Theme</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">// Depth returns the active ColorDepth.</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> Depth<span class="op">()</span> ColorDepth</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">// Source returns the ResolvedSource for /theme status.</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>Styler<span class="op">)</span> Source<span class="op">()</span> ResolvedSource</span></code></pre></div>
+<h3 id="built-in-palettes-concrete-load-bearing">3.4 Built-in palettes
+(concrete, load-bearing)</h3>
+<p>The exact open codes per role × depth for the three built-ins. Tests
+in T03 assert these byte-for-byte. Reset is <code>&quot;\x1b[0m&quot;</code> for
+every role.</p>
+<p><strong><code>dark</code> theme</strong> — biased toward bright tones
+that read on dark terminals.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Role</th>
+<th>ANSI16 (Open)</th>
+<th>ANSI256 (Open)</th>
+<th>Truecolor (Open)</th>
+<th>RGB / SGR rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Info</td>
+<td><code>\x1b[37m</code></td>
+<td><code>\x1b[38;5;250m</code></td>
+<td><code>\x1b[38;2;220;220;220m</code></td>
+<td>bright grey / off-white (250) — neutral body text</td>
+</tr>
+<tr>
+<td>Warn</td>
+<td><code>\x1b[33m</code></td>
+<td><code>\x1b[38;5;214m</code></td>
+<td><code>\x1b[38;2;255;176;0m</code></td>
+<td>amber (214) — pre-attentive but not alarming</td>
+</tr>
+<tr>
+<td>Error</td>
+<td><code>\x1b[31m</code></td>
+<td><code>\x1b[38;5;196m</code></td>
+<td><code>\x1b[38;2;255;64;64m</code></td>
+<td>red (196) — high-saturation alarm</td>
+</tr>
+<tr>
+<td>Highlight</td>
+<td><code>\x1b[36m</code></td>
+<td><code>\x1b[38;5;51m</code></td>
+<td><code>\x1b[38;2;0;200;220m</code></td>
+<td>cyan (51) — accent on dark background</td>
+</tr>
+<tr>
+<td>Dim</td>
+<td><code>\x1b[90m</code></td>
+<td><code>\x1b[38;5;243m</code></td>
+<td><code>\x1b[38;2;128;128;128m</code></td>
+<td>bright-black / mid-grey (243) — supporting text</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>light</code> theme</strong> — biased toward darker
+tones that read on light terminals.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Role</th>
+<th>ANSI16 (Open)</th>
+<th>ANSI256 (Open)</th>
+<th>Truecolor (Open)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Info</td>
+<td><code>\x1b[30m</code></td>
+<td><code>\x1b[38;5;235m</code></td>
+<td><code>\x1b[38;2;40;40;40m</code></td>
+</tr>
+<tr>
+<td>Warn</td>
+<td><code>\x1b[33m</code></td>
+<td><code>\x1b[38;5;130m</code></td>
+<td><code>\x1b[38;2;175;95;0m</code></td>
+</tr>
+<tr>
+<td>Error</td>
+<td><code>\x1b[31m</code></td>
+<td><code>\x1b[38;5;124m</code></td>
+<td><code>\x1b[38;2;175;0;0m</code></td>
+</tr>
+<tr>
+<td>Highlight</td>
+<td><code>\x1b[34m</code></td>
+<td><code>\x1b[38;5;25m</code></td>
+<td><code>\x1b[38;2;0;95;175m</code></td>
+</tr>
+<tr>
+<td>Dim</td>
+<td><code>\x1b[37m</code></td>
+<td><code>\x1b[38;5;245m</code></td>
+<td><code>\x1b[38;2;138;138;138m</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>none</code> theme</strong> — empty <code>Open</code>
+for every role × depth. <code>Stylize</code> returns the input verbatim
+regardless of <code>ColorDepth</code>. Useful for users who want “TTY
+but no color” (e.g. piping through <code>less -R</code> is fine, but the
+user prefers monochrome).</p>
+<h3 id="new-external-dependencies">3.5 New external dependencies</h3>
+<p><strong>One indirect→direct promotion:</strong>
+<code>gopkg.in/yaml.v3</code> (already pulled in transitively by viper /
+cobra; verified before T05). No new entries in <code>go.sum</code>.
+T08’s verification step asserts <code>go mod tidy</code> produces no
+transitive additions.</p>
+<p>Stdlib usage: <code>errors</code>, <code>fmt</code>, <code>io</code>,
+<code>io/fs</code>, <code>os</code>, <code>path/filepath</code>,
+<code>strings</code>, <code>strconv</code>. No CGO. Pure Go.</p>
+<p><code>golang.org/x/term</code> is unused in F20 — TTY detection is
+delegated to F18’s renderer factory (which is the source of truth for
+“is this writer a terminal”). The Styler’s <code>DepthOff</code> path is
+the structural enforcement of plain-mode-zero-color; the Styler does not
+need its own TTY probe.</p>
+<h3 id="theme-name-and-depth-resolution">3.6 Theme-name and depth
+resolution</h3>
+<p><strong>Theme name (Q3=C) precedence ladder:</strong></p>
+<ol type="1">
+<li><code>HELIXCODE_THEME</code> env var. If set and non-empty:
+<ul>
+<li>If matches a built-in (<code>dark</code> / <code>light</code> /
+<code>none</code>) or a name in YAML → use it.
+<code>Source = SourceEnv</code>.</li>
+<li>If matches NOTHING → log a warning, fall through to step 2.</li>
+</ul></li>
+<li><code>$COLORFGBG</code> — terminal-emulator-supplied “<fg>;<bg>”
+indices (xterm convention; e.g. xterm sets <code>15;0</code> for
+white-on-black, gnome-terminal sets <code>7;0</code> for grey-on-black).
+Parse the <em>bg</em> index; if 0 (black) or in {0,1,2,3,4,5,6,8} the
+background is dark → choose <code>dark</code>; if in
+{7,9,10,11,12,13,14,15} → choose <code>light</code>.
+<code>Source = SourceColorFGBG</code>. Unparseable values → fall through
+to step 3.</li>
+<li>Default: <code>dark</code>.
+<code>Source = SourceDefault</code>.</li>
+</ol>
+<p><strong>Color depth (Q4=D) detection:</strong></p>
+<ol type="1">
+<li><code>$COLORTERM</code> value <code>truecolor</code> or
+<code>24bit</code> → <code>DepthTruecolor</code>.</li>
+<li>Else <code>$TERM</code> matches glob <code>*-256color</code>
+(case-sensitive suffix check) → <code>DepthANSI256</code>.</li>
+<li>Else <code>$TERM</code> is set, non-empty, not <code>dumb</code> →
+<code>DepthANSI16</code>.</li>
+<li>Else (<code>$TERM</code> is <code>dumb</code> or unset/empty) →
+<code>DepthOff</code>.</li>
+</ol>
+<p>When the renderer is in plain mode (F18 chose
+<code>plainRenderer</code>), the Styler is <em>additionally</em> forced
+to <code>DepthOff</code> regardless of what
+<code>DetectColorDepth</code> returned. This double-belts the no-leak
+invariant: even if a future regression causes the loader to emit
+Truecolor codes, plain mode short-circuits them at <code>Stylize</code>
+time.</p>
+<h3 id="yaml-override-schema">3.7 YAML override schema</h3>
+<p><code>$XDG_CONFIG_HOME/helixcode/theme.yaml</code> (Q2=C). File mode
+0644 is acceptable (no secrets — CONST-042 does not apply; see §9).
+Schema:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">themes</span><span class="kw">:</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">custom-solarized</span><span class="kw">:</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ansi16</span><span class="kw">:</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">info</span><span class="kw">:</span><span class="at">      </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[37m&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">warn</span><span class="kw">:</span><span class="at">      </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[33m&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">error</span><span class="kw">:</span><span class="at">     </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[31m&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">highlight</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[36m&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dim</span><span class="kw">:</span><span class="at">       </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[90m&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ansi256</span><span class="kw">:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">info</span><span class="kw">:</span><span class="at">      </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;5;230m&quot;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">warn</span><span class="kw">:</span><span class="at">      </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;5;136m&quot;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">error</span><span class="kw">:</span><span class="at">     </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;5;160m&quot;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">highlight</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;5;33m&quot;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dim</span><span class="kw">:</span><span class="at">       </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;5;240m&quot;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">truecolor</span><span class="kw">:</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">info</span><span class="kw">:</span><span class="at">      </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;2;253;246;227m&quot;</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">warn</span><span class="kw">:</span><span class="at">      </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;2;181;137;0m&quot;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">error</span><span class="kw">:</span><span class="at">     </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;2;220;50;47m&quot;</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">highlight</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;2;38;139;210m&quot;</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dim</span><span class="kw">:</span><span class="at">       </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[38;2;101;123;131m&quot;</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">partial-override</span><span class="kw">:</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ansi16</span><span class="kw">:</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">error</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;</span><span class="sc">\x1b</span><span class="st">[91m&quot;</span><span class="co">   # only override Error; other roles inherit from &quot;dark&quot;</span></span></code></pre></div>
+<p>Merge semantics: the loader resolves
+<code>HELIXCODE_THEME=&lt;name&gt;</code>. If <code>&lt;name&gt;</code>
+exists in YAML, the loader starts from the matching built-in (default
+<code>dark</code>; if the YAML entry sets a <code>base: light</code>
+field — F20.5 candidate — start from that built-in instead) and overlays
+any role × depth slot the YAML defines. Slots not mentioned in YAML keep
+the built-in code. <strong>v1 merge is into the <code>dark</code>
+built-in</strong> for all custom names; the optional <code>base:</code>
+field is deferred to F20.5.</p>
+<p>Validation: - Unknown role keys (e.g. <code>infoo: ...</code>) →
+<code>ErrInvalidYAML</code> with the offending key. - Unknown depth keys
+(e.g. <code>ansi128: ...</code>) → <code>ErrInvalidYAML</code>. - Open
+string MUST start with <code>\x1b[</code> and end with <code>m</code>
+(the SGR delimiters). If it doesn’t, <code>ErrInvalidYAML</code>. - File
+missing → no error; loader uses built-ins only. - File present but empty
+(zero bytes) → no error; built-ins only. - File present with parse error
+→ wrap with <code>ErrInvalidYAML</code> and (per §5) WARN to stderr +
+fall back to built-ins (does NOT abort startup).</p>
+<h3 id="existing-code-constraints">3.8 Existing-code constraints</h3>
+<ul>
+<li>F18’s <code>internal/render/</code> package is
+<strong>unchanged</strong>. Theme decorates content; the renderer emits
+bytes.</li>
+<li>F19’s <code>internal/tools/askuser/</code> is
+<strong>unchanged</strong> for v1. <code>ask_user</code> prompts could
+be styled in F20.5 (e.g. RoleHighlight on the chosen choice’s index in
+<code>/theme show</code>-style preview); v1 leaves them plain.</li>
+<li>The desktop GUI’s <code>assets/colors/helix-theme.css</code> and
+<code>assets/colors/color-scheme.json</code> are
+<strong>unchanged</strong>. F20 targets the CLI exclusively; GUI theme
+synchronisation is OUT OF SCOPE (§8).</li>
+</ul>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup">4.1 Startup</h3>
+<pre><code>cmd/cli/main.go::run():
+  ├─ renderer, _ := render.NewRenderer(render.FactoryOptions{})
+  ├─ defer renderer.Close()
+  ├─ themeLoader := theme.NewLoader(theme.LoaderOptions{})
+  ├─ styler, source, err := themeLoader.Load()
+  │     ├─ if err != nil:
+  │     │     log warning + use built-in dark + DepthOff if YAML err, otherwise DepthOff fallback
+  ├─ // If renderer is plain mode, force the styler to DepthOff so no ANSI ever leaves.
+  ├─ if renderer.Mode() == render.ModePlain: styler = styler.WithDepth(theme.DepthOff)
+  ├─ c.renderer = renderer
+  ├─ c.styler   = styler
+  └─ // wire /theme slash command
+     c.commandRegistry.Register(commands.NewThemeCommand(c.styler, themeLoader))</code></pre>
+<h3 id="per-call-styling">4.2 Per-call styling</h3>
+<pre><code>caller (e.g. handleGenerate non-stream branch):
+  ├─ resp := provider.Generate(ctx, req)
+  ├─ styled := c.styler.Stylize(theme.RoleInfo, resp.Text)
+  └─ render.RenderTextBlock(c.renderer, &quot;&quot;, styled)
+        // styled in fancy mode = &quot;\x1b[38;5;250m&lt;resp.Text&gt;\x1b[0m&quot;
+        // styled in plain mode = resp.Text (Stylize is identity due to DepthOff)</code></pre>
+<h3 id="theme-slash-command">4.3 <code>/theme</code> slash command</h3>
+<pre><code>/theme               → alias of /theme status
+/theme status        → prints: &quot;active=&lt;name&gt; depth=&lt;depth&gt; source=&lt;source&gt;&quot;
+                       three lines, each styled (heading via RoleHighlight,
+                       value via RoleInfo, footer via RoleDim).
+/theme list          → prints all available theme names: built-ins + YAML.
+                       One per line; the active one prefixed with &quot;* &quot; (RoleHighlight).
+/theme show &lt;name&gt;   → looks up the named theme; prints a 5-row table:
+                       Role   Sample (styled at active depth)
+                       info   &quot;the quick brown fox&quot;
+                       warn   &quot;...&quot;
+                       ...
+                       Each sample is wrapped via Stylize using &lt;name&gt;&#39;s palette
+                       (NOT the active styler) — so /theme show light on a dark
+                       terminal previews the light palette codes.</code></pre>
+<p>The slash command’s output is itself rendered through the active
+renderer (F18) — so its bytes are subject to plain-mode-zero-color at
+the renderer boundary too. (Belt-and-suspenders: the previewed sample is
+wrapped in ANSI because the user explicitly asked to see what
+<code>light</code> looks like, and on a non-TTY destination the user
+would see those escapes as literal text — which is the <em>correct</em>
+behaviour for <code>show &lt;name&gt;</code> on a non-TTY: the user is
+asking “what bytes would this theme emit?”)</p>
+<h3 id="resolution-truth-table">4.4 Resolution truth table</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th><code>HELIXCODE_THEME</code></th>
+<th><code>$COLORFGBG</code></th>
+<th>resolved name</th>
+<th><code>$COLORTERM</code></th>
+<th><code>$TERM</code></th>
+<th>resolved depth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dark</code></td>
+<td>*</td>
+<td><code>dark</code></td>
+<td><code>truecolor</code></td>
+<td><code>xterm-256color</code></td>
+<td><code>DepthTruecolor</code></td>
+</tr>
+<tr>
+<td><code>light</code></td>
+<td>*</td>
+<td><code>light</code></td>
+<td><code>24bit</code></td>
+<td><code>xterm-256color</code></td>
+<td><code>DepthTruecolor</code></td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>*</td>
+<td><code>none</code></td>
+<td>*</td>
+<td>*</td>
+<td>(any depth; Open codes are empty so output is plain)</td>
+</tr>
+<tr>
+<td><code>nope</code></td>
+<td><code>15;0</code></td>
+<td><code>dark</code> (fallback) + warn</td>
+<td><code>truecolor</code></td>
+<td><code>xterm-256color</code></td>
+<td><code>DepthTruecolor</code></td>
+</tr>
+<tr>
+<td>(unset)</td>
+<td><code>15;0</code></td>
+<td><code>dark</code> (bg=0 → dark)</td>
+<td>(unset)</td>
+<td><code>xterm-256color</code></td>
+<td><code>DepthANSI256</code></td>
+</tr>
+<tr>
+<td>(unset)</td>
+<td><code>0;15</code></td>
+<td><code>light</code> (bg=15 → light)</td>
+<td>(unset)</td>
+<td><code>xterm</code></td>
+<td><code>DepthANSI16</code></td>
+</tr>
+<tr>
+<td>(unset)</td>
+<td>(unset)</td>
+<td><code>dark</code> (default)</td>
+<td>(unset)</td>
+<td><code>dumb</code></td>
+<td><code>DepthOff</code></td>
+</tr>
+<tr>
+<td>(unset)</td>
+<td>(unset)</td>
+<td><code>dark</code> (default)</td>
+<td>(unset)</td>
+<td>(unset)</td>
+<td><code>DepthOff</code></td>
+</tr>
+<tr>
+<td><code>custom-solarized</code> (in YAML)</td>
+<td>*</td>
+<td><code>custom-solarized</code></td>
+<td><code>truecolor</code></td>
+<td><code>xterm-256color</code></td>
+<td><code>DepthTruecolor</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="plain-mode-short-circuit">4.5 Plain-mode short-circuit</h3>
+<p>When <code>renderer.Mode() == render.ModePlain</code>, the startup
+code overrides the Styler’s depth to <code>DepthOff</code> via a
+<code>WithDepth(DepthOff)</code> constructor (returns a new Styler —
+original is immutable):</p>
+<pre><code>if renderer.Mode() == render.ModePlain {
+    styler = styler.WithDepth(theme.DepthOff)
+}</code></pre>
+<p><code>Stylize</code> at <code>DepthOff</code> returns the input text
+unchanged. A unit test asserts <code>Stylize(role, &quot;x&quot;) == &quot;x&quot;</code>
+for every role × <code>DepthOff</code> combination, byte-for-byte. The
+Challenge harness’s PLAIN-MODE-ZERO-COLOR phase additionally constructs
+a real <code>plainRenderer</code> + a real Styler with <code>dark</code>
+theme + <code>DepthTruecolor</code> (then overridden to
+<code>Off</code>), writes 100 styled tokens through
+<code>RenderTextBlock</code>, and asserts the captured bytes contain
+ZERO <code>0x1b</code> characters.</p>
+<h2 id="error-handling-edge-cases-and-anti-bluff">5. Error handling,
+edge cases, and anti-bluff</h2>
+<h3 id="error-paths">5.1 Error paths</h3>
+<ul>
+<li><strong>Unknown theme name in env</strong> — WARN to stderr
+(<code>theme: HELIXCODE_THEME=&lt;x&gt; not found; falling back to dark</code>);
+proceed with default <code>dark</code> + <code>SourceDefault</code>.
+NEVER abort startup.</li>
+<li><strong>YAML parse error</strong> — wrap as
+<code>fmt.Errorf(&quot;theme: %w: %s&quot;, ErrInvalidYAML, parseErr)</code>; WARN
+to stderr; proceed with built-ins only. NEVER abort startup.</li>
+<li><strong>YAML schema violation</strong> (unknown role / depth /
+malformed Open code) — wrap as <code>ErrInvalidYAML</code> with the
+offending key; WARN to stderr; proceed with built-ins. The loader does
+NOT partially apply a malformed override (all-or-nothing per theme
+name).</li>
+<li><strong>Unknown role string in <code>ParseRole</code></strong> —
+return <code>ErrInvalidRole</code> with the unknown key. Used only by
+the YAML loader.</li>
+<li><strong>Unparseable <code>$COLORFGBG</code></strong> — fall through
+to default; do NOT log (this signal is opportunistic, not
+configured).</li>
+<li><strong><code>$COLORTERM</code> unset + <code>$TERM</code>
+unset</strong> — <code>DepthOff</code>. Styler <code>Stylize</code>
+returns input unchanged. Equivalent to “no styling”.</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9-loud">5.2 Anti-bluff (CONST-035 /
+§11.9) — LOUD</h3>
+<p><strong>Common bluff variants and their structural
+defences:</strong></p>
+<ol type="1">
+<li><strong>(a) Theme “applied” but no ANSI bytes ever emitted</strong>
+— the package compiles, <code>/theme list</code> shows three themes, but
+the call sites still pass raw <code>text</code> to the renderer (the
+migration in <code>cmd/cli/main.go::handleGenerate</code> was
+forgotten). <strong>Defence</strong>: the integration test wires a real
+<code>*os.File</code>-backed <code>bytes.Buffer</code> (via
+<code>FactoryOptions.IsTTY=true</code> injection) through the production
+<code>RenderTextBlock(c.renderer, &quot;&quot;, c.styler.Stylize(theme.RoleInfo, body))</code>
+call site and asserts the captured bytes contain <em>both</em>
+<code>\x1b[</code> (an ANSI byte sequence — proves styling happened) AND
+the literal <code>body</code> text (proves the styling didn’t replace
+the text). A Challenge phase BUILT-IN-DARK additionally counts
+<code>bytes.Count(captured, []byte(&quot;\x1b[&quot;))</code> and asserts it is
+exactly <code>2 * num-styled-tokens</code> (one open + one reset per
+token); a count of zero is a hard failure (bluff (a)).</li>
+<li><strong>(b) Truecolor codes emitted on a 16-color terminal</strong>
+— the depth detector or the loader picks <code>Truecolor</code>
+regardless of <code>$COLORTERM</code> value. <strong>Defence</strong>: a
+unit test sets <code>Env=fakeEnv({&quot;TERM&quot;: &quot;xterm&quot;})</code> (no
+<code>COLORTERM</code>) and asserts
+<code>DetectColorDepth(env) == DepthANSI16</code>; another sets
+<code>Env=fakeEnv({&quot;TERM&quot;: &quot;xterm-256color&quot;})</code> and asserts
+<code>DepthANSI256</code>; another sets <code>COLORTERM=truecolor</code>
++ <code>TERM=xterm-256color</code> and asserts
+<code>DepthTruecolor</code>. A Challenge phase DEPTH-AUTO-DETECT runs
+all four branches with synthesised env vars and asserts the resolved
+depth byte-for-byte against an expected sequence (<code>Off</code> for
+<code>TERM=dumb</code>, etc.).</li>
+<li><strong>(c) Plain mode leaks ANSI through the theme path</strong> —
+a regression in the Styler emits ANSI even when <code>DepthOff</code>,
+OR a call site bypasses the Styler and calls the package-level
+<code>BuiltIn()[&quot;dark&quot;].Truecolor[RoleInfo]</code> directly.
+<strong>Defence</strong>: a unit test constructs a
+<code>Styler{depth: DepthOff, theme: ThemeDark}</code> and asserts
+<code>Stylize(RoleInfo, &quot;x&quot;) == &quot;x&quot;</code> byte-for-byte. The
+Challenge’s PLAIN-MODE-ZERO-COLOR phase wires a real
+<code>plainRenderer</code> + real Styler with <code>dark</code> theme
+through <code>RenderTextBlock</code> and asserts
+<code>bytes.IndexByte(captured, 0x1b) == -1</code>. A second source-scan
+unit test greps <code>cmd/cli/</code> and
+<code>internal/commands/theme_command.go</code> for any direct reference
+to
+<code>theme.ThemeDark.Truecolor[</code>/<code>theme.ThemeDark.ANSI256[</code>/<code>theme.ThemeDark.ANSI16[</code>
+(i.e. bypassing the Styler) — must return zero matches.</li>
+<li><strong>(d) Theme env var honoured but COLORFGBG/COLORTERM detection
+branches never triggered in tests</strong> — a regression in the env
+detector silently downgrades every user (e.g. always returns
+<code>DepthOff</code>). <strong>Defence</strong>: the table-driven
+detect tests in T04 enumerate every branch of the §3.6 ladder with a
+synthetic <code>Env</code> closure (no <code>os.Setenv</code> — pure
+functions). The Challenge’s DEPTH-AUTO-DETECT phase uses synthesised env
+vars (a <code>func(string) string</code> closure passed via
+<code>LoaderOptions.Env</code>) and asserts the resolved name AND depth
+for each of 6 representative env combinations.</li>
+</ol>
+<p><strong>Required real-execution criteria</strong> (define what “theme
+system works”):</p>
+<ol type="1">
+<li><strong>Unit tests</strong> assert exact ANSI byte sequences for
+each (role × depth) combination of each built-in theme. T03’s tests pin
+§3.4’s table byte-for-byte
+(e.g. <code>dark.Truecolor[RoleError].Open == &quot;\x1b[38;2;255;64;64m&quot;</code>).</li>
+<li><strong>Plain-mode invariant</strong> —
+<code>Stylize(role, text) == text</code> byte-identical when
+<code>Depth == Off</code>, for every role and every theme. Captured
+plain-renderer output contains zero <code>0x1b</code> bytes regardless
+of theme. Source-scan ensures no direct package-level palette access
+bypasses the Styler.</li>
+<li><strong>Color-depth auto-detect</strong> is tested with an injected
+<code>Env func(string) string</code> closure; covers all four branches
+(<code>Truecolor</code>, <code>ANSI256</code>, <code>ANSI16</code>,
+<code>Off</code>) in §3.6 + the <code>dumb</code> and unset-TERM
+cases.</li>
+<li><strong>Challenge harness</strong> — five always-run phases
+(BUILT-IN-DARK + BUILT-IN-LIGHT + PLAIN-MODE-ZERO-COLOR +
+DEPTH-AUTO-DETECT + YAML-OVERRIDE), each with positive byte
+evidence.</li>
+</ol>
+<p><strong>Concrete forbidden-phrases anti-bluff smoke</strong>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  internal/theme internal/commands/theme_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<h3 id="concurrency">5.3 Concurrency</h3>
+<p><code>Styler</code> is read-only after construction.
+<code>Stylize</code> is a pure function of (theme, depth, role, text);
+concurrent reads are safe. The loader is called once at startup; no
+runtime mutation. Future runtime theme switching (F20.5
+<code>/theme set</code>) would require an <code>atomic.Value</code> swap
+or a copy-on-write Styler — out of scope for v1.</p>
+<h3 id="no-color-terminals-no_color1">5.4 No-color terminals
+(<code>NO_COLOR=1</code>)</h3>
+<p>Out of scope for v1. The convention
+<code>https://no-color.org/</code> (treat <code>NO_COLOR</code> as
+“disable color regardless”) is a F20.5 candidate. v1 documents this gap
+explicitly: a user with <code>NO_COLOR=1</code> set will still see ANSI
+in fancy mode unless they additionally set
+<code>HELIXCODE_THEME=none</code>. F20.5 will add a fourth precedence
+rung that maps <code>NO_COLOR</code> non-empty →
+<code>theme=none</code>.</p>
+<h3 id="cross-depth-fallback-within-one-theme">5.5 Cross-depth fallback
+within one theme</h3>
+<p>A theme with empty <code>Open</code> at depth <code>Truecolor</code>
+(e.g. user-supplied YAML that only defined ANSI16 codes) does NOT fall
+back to ANSI16 at runtime. The Styler returns <code>text</code>
+unchanged for that role × depth combination. Rationale: silently
+substituting a different depth’s code can warp the palette (a custom
+theme designed only for 16-color may use <code>\x1b[31m</code> for both
+Error and Warn at ANSI16; falling back to ANSI16 codes when the terminal
+supports Truecolor would <em>correctly</em> render those colors, but
+loses the designer’s chance to differentiate at Truecolor depth). v1
+keeps the rule simple: empty Open → no styling for that slot. F20.5 may
+add an opt-in <code>inherit: true</code> field per slot.</p>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-real-bytes.buffer-capture-injected-env-closure-no-mocks-of-stdlib">6.1
+Unit (real <code>bytes.Buffer</code> capture; injected env closure; no
+mocks of stdlib)</h3>
+<p><strong>Types</strong> (<code>types_test.go</code>): -
+<code>TestRole_String_LowercaseNames</code>. -
+<code>TestRole_ParseRole_OK_ForAll5</code>. -
+<code>TestRole_ParseRole_Unknown_Err</code>. -
+<code>TestColorDepth_String_AllFourValues</code>. -
+<code>TestThemeName_StableConstants</code>. -
+<code>TestColor_OpenZeroValueIsEmpty</code>. -
+<code>TestReset_LiteralByteSequence</code>. -
+<code>TestErrorSentinels_DistinctErrorsIs</code>.</p>
+<p><strong>Built-ins</strong> (<code>builtin_test.go</code>): -
+<code>TestBuiltIn_DarkAllRolesAllDepths_BytesPinned</code> — assert each
+row of §3.4’s <code>dark</code> table byte-for-byte. -
+<code>TestBuiltIn_LightAllRolesAllDepths_BytesPinned</code>. -
+<code>TestBuiltIn_NoneAllOpenAreEmpty_AllDepthsAllRoles</code>. -
+<code>TestBuiltIn_RegistryReturnsThreeThemes</code>. -
+<code>TestBuiltIn_NamesMatchConstants</code>.</p>
+<p><strong>Detection</strong> (<code>detect_test.go</code>): -
+<code>TestDetectThemeName_EnvSet_ReturnsEnv</code> —
+<code>Env={&quot;HELIXCODE_THEME&quot;: &quot;light&quot;}</code> →
+<code>(&quot;light&quot;, &quot;env&quot;)</code>. -
+<code>TestDetectThemeName_EnvUnknown_FallsThroughToColorFGBG</code> —
+<code>Env={&quot;HELIXCODE_THEME&quot;: &quot;nope&quot;, &quot;COLORFGBG&quot;: &quot;15;0&quot;}</code> →
+<code>(&quot;dark&quot;, &quot;colorfgbg&quot;)</code>. -
+<code>TestDetectThemeName_NoEnv_ColorFGBGDark_ReturnsDark</code> —
+<code>Env={&quot;COLORFGBG&quot;: &quot;15;0&quot;}</code> →
+<code>(&quot;dark&quot;, &quot;colorfgbg&quot;)</code>. -
+<code>TestDetectThemeName_NoEnv_ColorFGBGLight_ReturnsLight</code> —
+<code>Env={&quot;COLORFGBG&quot;: &quot;0;15&quot;}</code> →
+<code>(&quot;light&quot;, &quot;colorfgbg&quot;)</code>. -
+<code>TestDetectThemeName_NoEnv_NoColorFGBG_ReturnsDarkDefault</code> —
+<code>Env={}</code> → <code>(&quot;dark&quot;, &quot;default&quot;)</code>. -
+<code>TestDetectColorDepth_ColorTermTruecolor_Truecolor</code>. -
+<code>TestDetectColorDepth_ColorTerm24bit_Truecolor</code>. -
+<code>TestDetectColorDepth_TermXterm256_ANSI256</code>. -
+<code>TestDetectColorDepth_TermXterm_ANSI16</code>. -
+<code>TestDetectColorDepth_TermDumb_Off</code>. -
+<code>TestDetectColorDepth_TermUnset_Off</code>.</p>
+<p><strong>Loader + Styler</strong> (<code>loader_test.go</code>): -
+<code>TestLoader_NoYAMLFile_BuiltInsOnly</code>. -
+<code>TestLoader_YAMLFileMissing_NoError</code>. -
+<code>TestLoader_YAMLEmpty_NoError</code>. -
+<code>TestLoader_YAMLParseErr_WrappedErrInvalidYAML</code>. -
+<code>TestLoader_YAMLSchema_UnknownRole_ErrInvalidYAML</code>. -
+<code>TestLoader_YAMLSchema_UnknownDepth_ErrInvalidYAML</code>. -
+<code>TestLoader_YAMLSchema_OpenMissingPrefix_ErrInvalidYAML</code>. -
+<code>TestLoader_YAMLOverridesBuiltInDark_PerSlot</code>. -
+<code>TestLoader_YAMLOverridesBuiltIn_UnmentionedSlotsKeepBuiltIn</code>.
+- <code>TestStyler_Stylize_DepthOff_IdentityForAllRoles</code>. -
+<code>TestStyler_Stylize_DepthANSI16_DarkInfo_BytesPinned</code>. -
+<code>TestStyler_Stylize_DepthANSI256_DarkError_BytesPinned</code>. -
+<code>TestStyler_Stylize_DepthTruecolor_DarkHighlight_BytesPinned</code>.
+- <code>TestStyler_Stylize_NoneAllDepths_AllRolesIdentity</code>. -
+<code>TestStyler_Stylize_EmptyOpen_NoStyling</code> — covers cross-depth
+gap per §5.5. -
+<code>TestStyler_WithDepth_ReturnsNewStylerCorrectDepth</code> —
+original immutable. -
+<code>TestStyler_Source_Theme_Depth_Accessors</code>. -
+<code>TestNoDirectPaletteAccess_BypassesStyler_SourceScan</code> — greps
+<code>cmd/cli/</code>/<code>internal/commands/theme_command.go</code>
+for <code>theme.Theme*\.(Truecolor|ANSI256|ANSI16)\[</code>; FAILs on
+any hit (anti-bluff (c)).</p>
+<p><strong>Theme command</strong> (<code>theme_command_test.go</code>):
+- <code>TestThemeCommand_Name_IsTheme</code>. -
+<code>TestThemeCommand_Status_PrintsActiveNameAndDepthAndSource</code>.
+- <code>TestThemeCommand_List_IncludesAllBuiltIns</code>. -
+<code>TestThemeCommand_List_IncludesYAMLOverrides</code>. -
+<code>TestThemeCommand_Show_KnownName_RendersFiveRoles</code>. -
+<code>TestThemeCommand_Show_UnknownName_ErrUnknownTheme</code>. -
+<code>TestThemeCommand_Show_UsesNamedThemePalette_NotActive</code> —
+<code>/theme show light</code> on a <code>dark</code> styler shows
+light’s codes.</p>
+<h3 id="integration-gobuild-integration">6.2 Integration
+(<code>//go:build integration</code>)</h3>
+<p><code>tests/integration/theme_test.go</code> (ALWAYS-runs; no
+infrastructure dep):</p>
+<ul>
+<li><code>TestTheme_Integration_FancyRenderer_DarkInfoEmitsANSI</code> —
+wires real <code>ansiRenderer</code> (via
+<code>FactoryOptions{IsTTY: ()=&gt;true}</code>) + real Styler
+(<code>dark</code> + <code>DepthTruecolor</code>) through
+<code>render.RenderTextBlock</code>; assert captured bytes contain
+<code>\x1b[38;2;220;220;220m</code> AND the literal text AND
+<code>\x1b[0m</code>.</li>
+<li><code>TestTheme_Integration_PlainRenderer_DarkInfoEmitsZeroAnsi</code>
+— wires real <code>plainRenderer</code> (via
+<code>FactoryOptions{IsTTY: ()=&gt;false}</code>) + real Styler
+force-overridden to <code>DepthOff</code>; assert
+<code>bytes.IndexByte(captured, 0x1b) == -1</code> AND captured contains
+the literal text.</li>
+<li><code>TestTheme_Integration_DepthAutoDetect_AllFourBranches</code> —
+runs through <code>Loader.Load()</code> four times with synthesised
+<code>Env</code> covering the four depth branches; asserts each
+<code>Styler.Depth()</code> matches expected.</li>
+<li><code>TestTheme_Integration_YAMLOverride_CustomNameLoads</code> —
+writes <code>theme.yaml</code> to a tempdir; sets
+<code>LoaderOptions.ConfigDir</code> +
+<code>Env={&quot;HELIXCODE_THEME&quot;:&quot;custom-solarized&quot;}</code>; loads; asserts
+<code>Stylize(RoleError, &quot;x&quot;)</code> returns the YAML-supplied open code
++ reset.</li>
+</ul>
+<h3 id="challenge-challengesp1-f20-theme-system">6.3 Challenge
+(<code>challenges/p1-f20-theme-system/</code>)</h3>
+<p>Five-phase output skeleton (all always-run):</p>
+<pre><code>=== THEME-PHASE-A: BUILT-IN-DARK (always runs) ===
+[PASS] constructed real ansiRenderer + Styler(dark, Truecolor)
+[PASS] RenderTextBlock(renderer, &quot;&quot;, styler.Stylize(RoleInfo, &quot;hello world&quot;)) wrote N bytes
+[PASS] captured bytes contain &quot;\x1b[38;2;220;220;220m&quot; (dark Info Truecolor open)
+[PASS] captured bytes contain literal &quot;hello world&quot;
+[PASS] captured bytes contain &quot;\x1b[0m&quot; (reset)
+[PASS] bytes.Count(captured, &quot;\x1b[&quot;) == 2 (exactly one open + one reset)
+
+=== THEME-PHASE-B: BUILT-IN-LIGHT (always runs) ===
+[PASS] constructed real ansiRenderer + Styler(light, Truecolor)
+[PASS] Stylize(RoleError, &quot;boom&quot;) wrapped with &quot;\x1b[38;2;175;0;0m&quot; + &quot;\x1b[0m&quot;
+[PASS] captured bytes contain expected open + literal + reset in correct order
+[PASS] byte offset of open &lt; byte offset of literal &lt; byte offset of reset
+
+=== THEME-PHASE-C: PLAIN-MODE-ZERO-COLOR (always runs) ===
+[PASS] constructed real plainRenderer + Styler(dark, depth-overridden to Off)
+[PASS] wrote 100 styled tokens through RenderTextBlock
+[PASS] bytes.IndexByte(captured, 0x1b) == -1 (zero ANSI bytes)
+[PASS] captured bytes contain all 100 token literals
+
+=== THEME-PHASE-D: DEPTH-AUTO-DETECT (always runs) ===
+[PASS] env={COLORTERM:truecolor, TERM:xterm-256color} → DepthTruecolor
+[PASS] env={TERM:xterm-256color} → DepthANSI256
+[PASS] env={TERM:xterm} → DepthANSI16
+[PASS] env={TERM:dumb} → DepthOff
+[PASS] env={} (no TERM, no COLORTERM) → DepthOff
+[PASS] env={HELIXCODE_THEME:nope, COLORFGBG:15;0} → name=&quot;dark&quot; source=&quot;colorfgbg&quot;
+
+=== THEME-PHASE-E: YAML-OVERRIDE (always runs) ===
+[PASS] wrote theme.yaml to tempdir with custom-solarized palette
+[PASS] LoaderOptions.ConfigDir=&lt;tempdir&gt;; Env={HELIXCODE_THEME:custom-solarized,...}
+[PASS] Loader.Load() returned no error; Styler.Theme().Name == &quot;custom-solarized&quot;
+[PASS] Stylize(RoleError, &quot;x&quot;) at DepthTruecolor wraps with &quot;\x1b[38;2;220;50;47m&quot; + &quot;\x1b[0m&quot;
+[PASS] Slot not in YAML (RoleHighlight at ANSI16) inherits from dark &quot;\x1b[36m&quot;
+
+SUMMARY: PHASE-A=6/6 PASS; PHASE-B=4/4 PASS; PHASE-C=4/4 PASS; PHASE-D=6/6 PASS; PHASE-E=5/5 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch.
+Absence-of-error is NEVER acceptable. Byte-count assertions (Phase A:
+exactly 2 ANSI sequences per token) and zero-byte invariants (Phase C:
+zero <code>0x1b</code> bytes in plain mode) are positive evidence of
+real ANSI emission and real plain-mode purity.</p>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>ANSI escape codes are emitted on Linux, macOS, and Windows. Windows
+10+ has VT-mode auto-enabled by Go’s runtime in F18
+(<code>runtime · syscall_windows.go</code>); cmd / PowerShell consoles
+render <code>\x1b[31m</code> correctly. Pre-Windows 10 is OUT OF SCOPE
+(matches F18’s stance).</p>
+<p><code>$COLORTERM</code> and <code>$TERM</code> env vars are set by
+terminal emulators on all three platforms (xterm, gnome-terminal,
+iTerm2, Windows Terminal, ConEmu). The detection algorithm in §3.6 is
+identical across platforms (no platform branches in
+<code>detect.go</code>).</p>
+<p>The cross-compile <code>make prod</code> target (linux/macos/windows)
+is exercised in T08. No platform-specific code in F20.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li><strong>Bold / italic / underline / strikethrough / blink /
+reverse-video</strong> — F20.5. The YAML schema gains optional sibling
+fields (<code>bold: true</code>, <code>italic: true</code>, …) per role
+× depth slot.</li>
+<li><strong>Background colors</strong> — F20.5. The YAML schema adds an
+optional <code>bg</code> field whose Open uses SGR <code>48;...</code>
+codes.</li>
+<li><strong>Per-tool-type custom colors</strong> (e.g. all
+<code>lsp_diagnostic</code> results in red regardless of role) — F20.5;
+would need a tool-id → role-override map.</li>
+<li><strong>Gradient text</strong> (per-character interpolated colors) —
+out of scope indefinitely (high complexity, low ROI).</li>
+<li><strong><code>NO_COLOR</code> env var</strong> support per
+https://no-color.org/ — F20.5; new precedence rung (highest priority)
+mapping <code>NO_COLOR</code> non-empty → <code>theme=none</code>.</li>
+<li><strong>GUI theme synchronisation</strong> with the desktop Fyne UI
+— out of scope. The CSS / JSON theme assets are a separate pathway.</li>
+<li><strong>Mid-process theme reload</strong> on YAML file change —
+F20.5; would need fsnotify watcher + atomic swap.</li>
+<li><strong><code>/theme set &lt;name&gt;</code></strong> runtime
+switching — F20.5; would need atomic-value Styler swap.</li>
+<li><strong>Cross-depth fallback within one theme</strong>
+(e.g. ANSI16-only theme rendering on Truecolor terminal) — F20.5; would
+need an opt-in <code>inherit: true</code> slot field.</li>
+<li><strong>Cobra subcommand</strong> <code>helixcode theme</code> —
+debug-only convenience; F20.5 candidate.</li>
+<li><strong>256-color truecolor approximation</strong> — out of scope. A
+Truecolor-only theme on an ANSI256 terminal degrades to no-styling for
+those slots (per §5.5).</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>§11.9 / CONST-035</strong> — Challenge has FIVE always-run
+phases. Every phase records positive runtime evidence: byte counts
+(Phase A: exactly 2 ANSI sequences per token), byte content (Phase B:
+open/literal/reset present in order), zero-byte invariants (Phase C:
+zero <code>0x1b</code> in plain-mode capture), depth-resolution
+byte-equality (Phase D: synthesised env → expected depth), YAML-merge
+byte-equality (Phase E: custom slot wraps with custom code; un-mentioned
+slot wraps with built-in code). Every byte-evidence mismatch is a hard
+failure.</li>
+<li><strong>CONST-039</strong> — Challenge at
+<code>challenges/p1-f20-theme-system/</code> + evidence harness at
+<code>tests/integration/cmd/p1f20_challenge/main.go</code>. Every phase
+asserts positive byte evidence.</li>
+<li><strong>CONST-042 (No-Secret-Leak)</strong> — theme YAML carries NO
+secrets (color codes are non-sensitive). File mode <strong>0644</strong>
+is acceptable (no secrets means no <code>.env</code> analogue; the file
+lives in <code>$XDG_CONFIG_HOME/helixcode/theme.yaml</code> which is the
+user’s own config dir). The loader does NOT log file contents; only the
+resolved theme name is logged at INFO level. A unit test scans
+<code>internal/theme/*.go</code> for any
+<code>logger.Info(.*\(palette\|color\|open\|reset\))</code> match and
+FAILs on any hit (defensive — there are no actual secrets, but log
+discipline is consistent with F19’s anti-bluff posture).</li>
+<li><strong>CONST-043 (No-Force-Push)</strong> — close-out task pushes
+to all four remotes non-force; explicit user authorization is requested
+at T09 before pushing.</li>
+<li><strong>No-Mocks-In-Production (Universal Rule 2)</strong> — the
+loader’s only test seams are constructor-injected
+(<code>Env func(string) string</code>, <code>ConfigDir string</code>,
+<code>Filesystem fs.FS</code>); no filesystem abstraction in production
+paths. The Styler has zero mockable surface — it’s a pure value type.
+Unit tests use real <code>bytes.Buffer</code> for I/O capture and real
+<code>os.MkdirTemp</code> + <code>os.WriteFile</code> for YAML files.
+Mock renderers do NOT appear; the integration test wires the real
+<code>ansiRenderer</code> and the real <code>plainRenderer</code> from
+F18.</li>
+<li><strong>CONST-033 (No host power management)</strong> — F20 emits
+ANSI escape codes only; never <code>\x1b[5n</code> device-status-report
+or any escape with side effects on the host. The emitted SGR sequences
+(<code>\x1b[31m</code>, <code>\x1b[38;5;&lt;n&gt;m</code>,
+<code>\x1b[38;2;&lt;r&gt;;&lt;g&gt;;&lt;b&gt;m</code>,
+<code>\x1b[0m</code>) modify only terminal display state.</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: role palette</td>
+<td>(A) 5 semantic roles: info / warn / error / highlight / dim</td>
+<td>Consistent role-based palette applied across LLM output, tool
+results, slash output</td>
+</tr>
+<tr>
+<td>Q2: defaults + override</td>
+<td>(C) Built-in dark/light/none + optional user YAML override</td>
+<td>Built-ins ship with binary; YAML at
+<code>$XDG_CONFIG_HOME/helixcode/theme.yaml</code> overlays per role ×
+depth slot</td>
+</tr>
+<tr>
+<td>Q3: name precedence</td>
+<td>(C) <code>HELIXCODE_THEME</code> &gt; <code>$COLORFGBG</code> parse
+&gt; default <code>dark</code></td>
+<td>Three-rung ladder; unparseable signals fall through to default</td>
+</tr>
+<tr>
+<td>Q4: depth detection</td>
+<td>(D) <code>$COLORTERM</code> truecolor/24bit → Truecolor;
+<code>$TERM</code> <code>*-256color</code> → ANSI256; set-but-not-256 →
+ANSI16; <code>dumb</code>/unset → Off</td>
+<td>Source-of-truth for color depth at startup; renderer plain-mode
+further forces depth=Off</td>
+</tr>
+<tr>
+<td>Q5: surface</td>
+<td>(B) Env var (<code>HELIXCODE_THEME</code>) + <code>/theme</code>
+slash (status / list / show <name>); NO cobra</td>
+<td>Read-only slash; runtime switching is F20.5</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="non-obvious-decisions-recorded-for-plan-time-review">11.
+Non-obvious decisions (recorded for plan-time review)</h2>
+<ol type="1">
+<li><strong>Decorator pattern (Stylize wraps text) vs renderer extension
+(<code>r.WriteStyled(role, text)</code>)</strong> — picked decorator.
+Keeps F18’s <code>Renderer</code> interface unchanged; plain mode
+statically proves no-leak via depth=Off; tests pin byte sequences
+without instantiating a renderer; migration is incremental (un-migrated
+call sites still emit unstyled text correctly). Recorded in §2
+trailer.</li>
+<li><strong>Five roles, not three or seven</strong> — <code>Info</code>
+/ <code>Warn</code> / <code>Error</code> / <code>Highlight</code> /
+<code>Dim</code> covers the 80% case (status output, warnings, errors,
+accents, supporting text). Three is too few (no accent); seven adds
+noise (<code>Success</code> overlaps <code>Info</code>,
+<code>Critical</code> overlaps <code>Error</code>). Recorded in §1.</li>
+<li><strong>Depth as a per-Theme array (<code>[5]Color</code> × 3 depth
+tiers) NOT a runtime cross-depth conversion</strong> — a theme designer
+hand-picks codes per depth, so a <code>Truecolor</code> palette is not
+auto-derived from ANSI16 (which would lose information) or
+auto-quantised from RGB (which would warp warm/cool tones). The cost is
+more YAML lines for a custom theme; the benefit is faithful palette
+rendering at every depth. Recorded in §3.3.</li>
+<li><strong><code>$COLORFGBG</code> parsing is opportunistic, NOT
+configured</strong> — a malformed value falls through silently (no
+warn). Rationale: terminal emulators set this inconsistently (xterm sets
+<code>15;0</code>, gnome-terminal sets <code>7;0</code>, alacritty does
+not set it at all); warning on unparseable values would WARN-spam every
+alacritty user. Recorded in §5.1.</li>
+<li><strong>Plain mode forces depth=Off via
+<code>WithDepth(DepthOff)</code> at startup</strong> —
+belt-and-suspenders against future regressions. Even if
+<code>DetectColorDepth</code> returns Truecolor, plain-mode
+<code>Stylize</code> is identity. The test that pins this is
+<code>TestStyler_Stylize_DepthOff_IdentityForAllRoles</code>. Recorded
+in §4.5.</li>
+<li><strong>YAML merge always starts from <code>dark</code> in
+v1</strong> — no <code>base:</code> field. Rationale: merge semantics
+are simple (overlay slot-by-slot); the optional base-selection is F20.5.
+v1 docs the limitation in §3.7.</li>
+<li><strong><code>none</code> theme is distinct from depth=Off</strong>
+— <code>none</code> means “I’m on a TTY but I want no color”
+(e.g. piping through <code>less -R</code> is fine but the user prefers
+monochrome); depth=Off means “the terminal can’t render ANSI”. Both
+produce identical bytes (<code>Stylize(role, x) == x</code>); the
+distinction matters for <code>/theme status</code> (source / depth
+reporting) and for the test that pins each path independently.</li>
+<li><strong>The Styler does NOT probe TTY itself</strong> — F18’s
+renderer factory is the source of truth. F20’s startup code reads
+<code>renderer.Mode()</code> and conditionally overrides the Styler.
+Rationale: two probes would risk drift; the renderer is the authority on
+output destination.</li>
+<li><strong><code>/theme show &lt;name&gt;</code> previews the named
+theme’s palette, NOT the active styler’s</strong> — so
+<code>/theme show light</code> on a dark-themed session shows light’s
+codes (not light’s codes mapped through dark’s depth). Rationale: the
+user is asking “what does light look like”; the answer must use light’s
+data. Recorded in §4.3.</li>
+<li><strong><code>bytes.Count(captured, []byte(&quot;\x1b[&quot;)) == 2 * num-tokens</code></strong>
+as the Phase A invariant — exactly one open + one reset per styled
+token. A count of zero proves bluff (a) (no styling); a count off by N
+proves bluff (c) (extra ANSI leaks). Recorded in §5.2.</li>
+<li><strong>The <code>theme.yaml</code> file is read once at
+startup</strong> — no fsnotify watcher in v1. F20.5 may add hot-reload;
+v1 documents this in §8 and §11. Rationale: the theme is a
+startup-property like the renderer mode (F18 is also startup-only); both
+are configured before the agent loop opens.</li>
+<li><strong><code>yaml.v3</code> indirect→direct promotion is the only
+<code>go.mod</code> change</strong> — verified before T05 by
+<code>grep &quot;yaml.v3&quot; helix_code/go.mod</code>. T08 verifies
+<code>go mod tidy</code> produces only the <code>require</code> block
+move; no new <code>go.sum</code> entries.</li>
+<li><strong>CSS / JSON assets in <code>assets/colors/</code> are
+unchanged</strong> — those drive the Fyne desktop GUI; coupling them to
+the CLI theme would require a runtime CSS parser in Go (out of scope).
+Recorded in §3.8 + §8.</li>
+<li><strong>Phase 1 close-out</strong> — F20 is the final Phase 1
+feature. T09 records the programme milestone in PROGRESS.md alongside
+the F20 close-out summary.</li>
+</ol>
+</body>
+</html>

@@ -6,170 +6,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>05-coverage-ledger</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
 </head>
 <body>
 <header id="title-block-header">
@@ -186,8 +57,7 @@ Scope:     Governance close-out only. NO production code changed by this file �
            records the captured before/after evidence and the CONST-048 six-invariant
            status for every speed-programme task O1-O21 / P0-T01..P5-T04.
 -->
-<h1
-id="r5-helixcode-speed-programme-coverage-ledger-release-gate-sweep">R5
+<h1 id="r5-helixcode-speed-programme-coverage-ledger-release-gate-sweep">R5
 — HelixCode Speed Programme: Coverage Ledger &amp; Release-Gate
 Sweep</h1>
 <table>
@@ -249,8 +119,7 @@ findings filed to docs/Issues.md</a></li>
 <h2 id="purpose-scope">1. Purpose &amp; scope</h2>
 <p>This is the CONST-048 coverage ledger for the HelixCode speed
 programme — the governance close-out artefact mandated by task
-<strong>P5-T04</strong> of <a
-href="./04-phased-implementation-plan.md"><code>04-phased-implementation-plan.md</code></a>.
+<strong>P5-T04</strong> of <a href="./04-phased-implementation-plan.md"><code>04-phased-implementation-plan.md</code></a>.
 It records, for every one of the <strong>31 tasks</strong> (one per
 phase-task, mapped to opportunities O1–O21), the captured before→after
 measurement and the six CONST-048 invariants.</p>
@@ -841,14 +710,14 @@ speed work added no user-facing strings.</td>
 <td><strong>RAN — 2 failures (exit 1)</strong></td>
 <td>Both failures are the <strong>pre-existing HXC-008</strong> gaps,
 NOT speed-programme regressions: (a) verifier references non-existent
-<code>dependencies/HelixDevelopment/Models</code> (actual dir is
-lowercase <code>models</code> post-CONST-052); (b)
+<code>submodules/models</code> (actual dir is lowercase
+<code>models</code> post-CONST-052); (b)
 <code>helix_qa/CONSTITUTION.md</code> missing
 <code>CONST-047..057</code>. Already filed as HXC-008.</td>
 </tr>
 <tr>
 <td>Anti-bluff smoke</td>
-<td><code>grep -rn "simulated\|for now\|TODO implement\|placeholder" helix_code/internal helix_code/cmd</code>
+<td><code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; helix_code/internal helix_code/cmd</code>
 (prod, non-<code>_test.go</code>)</td>
 <td><strong>RAN — clean</strong></td>
 <td>Only hits are doc-comment uses of the word “placeholders” in

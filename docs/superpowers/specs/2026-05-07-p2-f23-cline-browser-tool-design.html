@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f23-cline-browser-tool-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f23-cline-browser-tool-design</h1>
+</header>
+<h1 id="phase-2-feature-23-cline-browser-tool">Phase 2 / Feature 23 —
+Cline Browser Tool</h1>
+<p><strong>Date:</strong> 2026-05-07 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 2 port (codex / aider / <strong>cline</strong>
+/ cursor patterns)</p>
+<blockquote>
+<p><strong>Programme position:</strong> F23 is the
+<strong>third</strong> Phase 2 feature (F21 Codex Approval Modes + F22
+Aider Git Auto-Commit shipped before it). T01 (bootstrap) appends an F23
+evidence section to
+<code>docs/improvements/07_phase_2_evidence.md</code> (created in
+F21-T01, extended by F22-T01); T10 (close-out) records F23’s runtime
+evidence beneath F22’s.</p>
+</blockquote>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Ship a real, end-to-end <strong>6-tool browser-automation
+suite</strong> for the HelixCode CLI agent, modelled verbatim on
+<strong>cline</strong>’s Puppeteer-based browser tool surface
+(<code>cli_agents/cline/</code>), so that an LLM driver — and a human
+via the <code>/browser</code> slash command — can drive a real headless
+Chromium subprocess against a real URL, observe the real DOM, click real
+elements, type into real inputs, capture real PNG screenshots to disk,
+and tear the subprocess down cleanly. The feature lands six new tools
+registered through the F21-extended <code>Tool</code> interface (each
+with the correct <code>RequiresApproval()</code> level), plus a
+<code>/browser</code> slash command for status / one-shot navigation /
+explicit close, plus a <code>BrowserManager</code> that owns the single
+chromium session per Helixcode session via an atomic-pointer with lazy
+lifecycle (Q1=A — chromedp; Q2=A — six tools; Q3=A — headless default
+with <code>HELIXCODE_BROWSER_HEADED=true</code> opt-in; Q4=A —
+screenshots written to tempdir, tool result returns the file path; Q5=A
+— <code>/browser</code> slash + 6 tools as primary surface, NO cobra
+subcommand).</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong><code>internal/tools/browser/</code> package
+additions</strong> — F23 EXTENDS the existing
+<code>internal/tools/browser/</code> package (which already carries
+chromedp infrastructure: <code>Controller</code>,
+<code>ActionExecutor</code>, <code>ScreenshotCapture</code>,
+<code>ConsoleMonitor</code>, <code>ChromeDiscovery</code>,
+<code>ScreenshotAnnotator</code>, <code>ElementSelector</code> — ~3K
+lines from earlier work). F23 ADDS a thinner cline-style session façade:
+<code>BrowserSession</code> (encapsulates a chromedp
+<code>context.Context</code> + cancel func + a per-session tempdir for
+screenshots + a screenshot counter + the discovered chromium binary
+path), <code>BrowserManager</code> (atomic pointer to the current
+<code>*BrowserSession</code> with
+<code>EnsureSession(ctx) (*BrowserSession, error)</code> lazy-create on
+first navigate, <code>RequireSession() (*BrowserSession, error)</code>
+for tools that need an active session, <code>CloseSession() error</code>
+invoked by <code>browser_close</code> and process-exit),
+<code>BrowserOptions</code> (read at session-create time: headless flag
+from env + viewport defaults), <code>Snapshot</code> (returned from
+<code>browser_snapshot</code> — page URL, page title, content-mode
+marker, content body capped at 64 KB), <code>ScreenshotResult</code>
+(returned from <code>browser_screenshot</code> — absolute file path,
+file size in bytes, PNG width/height read from the chromedp result).
+Sentinel errors (<code>ErrNoActiveSession</code>,
+<code>ErrChromiumNotFound</code>, <code>ErrNavigationTimeout</code>,
+<code>ErrSelectorNotFound</code>, <code>ErrScreenshotTooLarge</code>).
+Env-var constants (<code>EnvVarHeadedMode</code>).</li>
+<li><strong>Six new Tool-interface implementations</strong> —
+<code>browser_navigate</code>, <code>browser_snapshot</code>,
+<code>browser_click</code>, <code>browser_type</code>,
+<code>browser_screenshot</code>, <code>browser_close</code>. Each in its
+own file under <code>internal/tools/browser/</code>
+(<code>navigate_tool.go</code>, <code>snapshot_tool.go</code>,
+<code>click_type_tools.go</code>, <code>screenshot_tool.go</code>,
+<code>close_tool.go</code>); each implements the F21-extended
+<code>tools.Tool</code> interface
+(<code>Name() / Description() / Schema() / Validate() / Execute() / Category() / RequiresApproval()</code>).
+The 6 tools take NO <code>browser_id</code> parameter — the
+<code>BrowserManager</code> is the single source of truth for “which
+session is current” (cline pattern). They register themselves with the
+<code>tools.ToolRegistry</code> via a single
+<code>RegisterAll(reg, mgr)</code> helper. Per-tool
+<code>RequiresApproval()</code> (Q2=A consequence) is mapped per §3.6 of
+this spec: <code>browser_navigate</code> → <code>LevelEdit</code>
+(mutates session state, may visit untrusted URLs),
+<code>browser_snapshot</code> → <code>LevelReadOnly</code> (pure read of
+page DOM), <code>browser_click</code> → <code>LevelEdit</code> (mutates
+page state, may trigger destructive forms), <code>browser_type</code> →
+<code>LevelEdit</code> (mutates page state, may submit credentials),
+<code>browser_screenshot</code> → <code>LevelReadOnly</code> (pure
+capture of pixels), <code>browser_close</code> → <code>LevelEdit</code>
+(mutates session state — terminates a subprocess that may have unsaved
+page state). NO tool is <code>LevelRun</code> (the chromium subprocess
+is owned by chromedp, not exposed as a shell tool); NO tool is
+<code>LevelAll</code> (no recursion).</li>
+<li><strong><code>/browser</code> slash command</strong> (Q5=A) —
+<code>internal/commands/browser_command.go</code>. Three subcommands:
+<code>/browser status</code> (active-session yes/no + chromium path +
+screenshot tempdir + headed/headless mode),
+<code>/browser navigate &lt;url&gt;</code> (one-shot convenience:
+ensures a session, navigates, returns the resulting URL + title;
+equivalent to invoking the <code>browser_navigate</code> tool but
+bypasses LLM tool-selection), <code>/browser close</code> (calls
+<code>manager.CloseSession()</code> which cancels the chromedp context
+and tears down the chromium subprocess + cleans the tempdir). NO cobra
+subcommand. The slash is the human-ergonomic surface; the 6 tools are
+the LLM-ergonomic surface; both go through the same
+<code>BrowserManager</code>.</li>
+</ol>
+<p><strong>The single largest bluff vector for F23</strong> is “browser
+navigated but never actually loaded the URL” — a tool returns success
+because <code>chromedp.Run</code> did not error, but the page is still
+on <code>about:blank</code>, and a snapshot would (silently) return
+empty HTML. §5.2 enumerates five such patterns and pins each with
+positive runtime evidence: navigate-then-snapshot MUST return HTML
+containing a fixture string from a real local
+<code>httptest.Server</code>; click-then-snapshot MUST show DOM
+mutation; screenshot files MUST exist AND be &gt; 1 KB AND begin with
+the PNG magic bytes (<code>89 50 4E 47 0D 0A 1A 0A</code>);
+<code>browser_close</code> MUST cause a subsequent
+<code>browser_snapshot</code> to fail with
+<code>ErrNoActiveSession</code> (positive evidence the session was
+actually torn down, not just marked-closed); and headed-mode
+<code>HELIXCODE_BROWSER_HEADED=true</code> MUST be readable from the
+running session’s <code>BrowserOptions</code>. CONST-042 (no secret
+leak): full page contents are NEVER logged at INFO level — only the URL,
+the snapshot byte length, and the screenshot file path. CONST-043: F23
+emits zero <code>git push</code> commands; T10’s mirror push to four
+remotes is ATTEMPTED only with explicit user authorisation per push.</p>
+<p><strong>Anti-bluff hot zone (loud)</strong>: a tool returns a success
+result but chromium isn’t actually running (the chromedp context was
+created but the <code>chromedp.Run(navigate)</code> call timed out and
+the error was swallowed by a <code>defer recover()</code>); a snapshot
+returns empty HTML and a “successful” result because the implementation
+reads <code>chromedp.OuterHTML</code> against <code>body</code> BEFORE
+<code>chromedp.WaitReady(&quot;body&quot;)</code> resolved; a click “succeeded”
+because chromedp’s selector match returned <code>nil</code> error even
+though the selector matched zero elements (chromedp v0.15 changed
+selector-not-found semantics — must use
+<code>chromedp.NodeVisible</code> + a post-click sleep + a
+snapshot-comparison to assert real change); a screenshot file exists at
+the returned path but is 0 bytes (chromedp’s <code>FullScreenshot</code>
+returned <code>nil, nil</code> and the implementation
+<code>os.WriteFile</code>-d the nil byte slice);
+<code>browser_close</code> returned success but
+<code>pgrep chrome</code> still shows the subprocess running because the
+chromedp cancel func wasn’t called or was called on the wrong context.
+Each of these maps to a unit + integration + Challenge phase per
+§5.2.</p>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<p>The package layout under
+<code>helix_code/internal/tools/browser/</code> keeps the existing
+chromedp infrastructure (Controller, ActionExecutor, etc.) intact and
+ADDS a thin cline-style session façade on top:</p>
+<ul>
+<li><strong><code>BrowserSession</code></strong>
+(<code>session.go</code>, NEW) — encapsulates one chromium subprocess.
+Fields: <code>ctx context.Context</code> (the chromedp Context returned
+by <code>chromedp.NewContext</code> +
+<code>chromedp.NewExecAllocator</code> chain),
+<code>cancel context.CancelFunc</code> (cancels <code>ctx</code> AND
+tears down the chromium subprocess), <code>screenshotDir string</code>
+(per-session tempdir under
+<code>$XDG_DATA_HOME/helixcode/browser/screenshots/&lt;session-id&gt;/</code>;
+created at session-create), <code>screenshotCount atomic.Uint64</code>
+(next screenshot number; written as <code>&lt;n&gt;.png</code> in the
+session dir), <code>chromiumPath string</code> (the discovered chromium
+binary path; recorded for <code>/browser status</code>),
+<code>headed bool</code> (recorded for <code>/browser status</code>;
+<code>true</code> when <code>HELIXCODE_BROWSER_HEADED=true</code> was
+set at session-create), <code>createdAt time.Time</code> (wall-clock
+when the session started), <code>log *zap.Logger</code>. Methods:
+<code>Run(ctx context.Context, actions ...chromedp.Action) error</code>
+(the single chromedp entry point — wraps
+<code>chromedp.Run(s.ctx, actions...)</code>; rejects with
+<code>ErrNoActiveSession</code> if <code>s.ctx == nil</code>),
+<code>NextScreenshotPath() string</code> (atomic-increment + format
+<code>&lt;dir&gt;/&lt;n&gt;.png</code>), <code>Close() error</code>
+(calls <code>s.cancel()</code> once via <code>sync.Once</code>, removes
+<code>screenshotDir</code>, returns).</li>
+<li><strong><code>BrowserManager</code></strong>
+(<code>manager.go</code>, NEW) — atomic pointer to the single current
+<code>*BrowserSession</code>. Fields:
+<code>current atomic.Pointer[BrowserSession]</code>,
+<code>screenshotRoot string</code> (parent of all per-session dirs;
+usually <code>$XDG_DATA_HOME/helixcode/browser/screenshots</code>),
+<code>discovery ChromeDiscovery</code> (the existing
+<code>internal/tools/browser/discovery.go</code> interface),
+<code>log *zap.Logger</code>, <code>mu sync.Mutex</code> (guards
+EnsureSession / CloseSession against races; the atomic pointer makes the
+read path lock-free). Methods:
+<code>EnsureSession(ctx context.Context) (*BrowserSession, error)</code>
+(loads <code>current</code>; if non-nil, returns it; otherwise acquires
+<code>mu</code>, double-checks, discovers chromium via
+<code>discovery.Discover</code>, creates the chromedp Allocator +
+Context, registers cancel + sub-cancel, creates the tempdir, stores in
+<code>current</code>, returns),
+<code>RequireSession() (*BrowserSession, error)</code> (loads
+<code>current</code>; if nil → <code>ErrNoActiveSession</code>;
+otherwise returns), <code>CloseSession() error</code> (acquires
+<code>mu</code>, swaps <code>current</code> to nil, calls
+<code>s.Close()</code> on the previous session, returns),
+<code>Status() ManagerStatus</code> (active yes/no + chromium path +
+tempdir + headed mode + createdAt). The atomic-pointer pattern ensures
+concurrent tool calls share one session without the lock-on-read tax;
+the mutex serialises lifecycle transitions only.</li>
+<li><strong><code>BrowserOptions</code></strong>
+(<code>options.go</code>, NEW) — read at <code>EnsureSession</code>
+time. Fields: <code>Headless bool</code> (default true; overridden by
+<code>HELIXCODE_BROWSER_HEADED=true</code>),
+<code>ViewportWidth int</code> (default 1280),
+<code>ViewportHeight int</code> (default 720),
+<code>NavigateTimeout time.Duration</code> (default 30 s — covers
+slow-loading SPAs), <code>ClickWaitDuration time.Duration</code>
+(default 500 ms — short post-click settle for nav/JS to fire),
+<code>ScreenshotMaxBytes int64</code> (default 5 MB — hard cap on
+full-page screenshots; larger pages get viewport-only fallback). Read
+once via <code>OptionsFromEnv()</code> at session-create; never re-read
+mid-session.</li>
+<li><strong><code>Snapshot</code> +
+<code>ScreenshotResult</code></strong> (<code>types.go</code>, NEW; sit
+alongside the existing <code>*.go</code> files) — value types returned
+by <code>browser_snapshot</code> / <code>browser_screenshot</code>.
+<code>Snapshot{URL string; Title string; Mode string; Content string; Truncated bool}</code>
+(Mode ∈ {<code>html</code>, <code>text</code>} — the user picks via the
+tool’s <code>mode</code> arg; <code>Content</code> is capped at
+<code>len(Content) ≤ 64 KB</code> and <code>Truncated</code> is set when
+capping happened — positive evidence that capping was deliberate).
+<code>ScreenshotResult{Path string; Bytes int64; Width int; Height int}</code>
+— Path is absolute; <code>Bytes &gt; 1024</code> and PNG-magic invariant
+are validated by the tool itself before return.</li>
+<li><strong>Six Tool implementations</strong> — each is a small struct
+holding <code>mgr *BrowserManager</code> +
+<code>opts *BrowserOptions</code>. <code>Execute</code> is the only
+non-trivial method per tool; the rest are thin (Schema, Description,
+Validate, Name, Category=<code>CategoryBrowser</code>, RequiresApproval
+per §3.6).</li>
+</ul>
+<pre><code>                    HELIXCODE_BROWSER_HEADED=true (opt-in headed)
+                                  │
+                                  ▼
+                          OptionsFromEnv()
+                                  │
+                                  ▼
+                  ┌── BrowserManager ──┐  ← atomic.Pointer[BrowserSession]
+                  │  EnsureSession()   │
+                  │  RequireSession()  │
+                  │  CloseSession()    │
+                  │  Status()          │
+                  └────────┬───────────┘
+                           │
+                           ▼
+              ┌── BrowserSession ──┐    ← chromedp Context + cancel
+              │  Run(actions...)   │       per-session tempdir
+              │  NextScreenshotPath│       atomic counter
+              │  Close()           │
+              └────────┬───────────┘
+                       │
+        ┌──────────────┼───────────────┐
+        ▼              ▼               ▼
+   Tool: navigate  Tool: snapshot  Tool: click/type/screenshot/close
+   (LevelEdit)    (LevelReadOnly) (LevelEdit/RO/RO/Edit per §3.6)
+        │              │               │
+        └─── ToolRegistry (F21 approval gate, F13 LSP hook, F22 autocommit) ───┘
+                       │
+                       ▼
+            /browser slash command
+            (status / navigate-once / close)</code></pre>
+<p><strong>Why a session-singleton (atomic-pointer) and NOT a
+session-per-tool-call:</strong> chromium spawn cost is ~500 ms; a
+session-per-call would impose that on every snapshot. The cline pattern
+is “one session per task, reused across tools”; we follow that.
+Multi-tab is explicitly out of scope (§8) — the single-tab model matches
+how an LLM drives a browser (read URL → snapshot → click → snapshot →
+screenshot → close).</p>
+<p><strong>Why a per-session screenshot tempdir (not a single global
+dir):</strong> prevents cross-session filename collisions, and
+<code>Close()</code> can <code>os.RemoveAll(screenshotDir)</code>
+cleanly without racing with another session.</p>
+<p><strong>Why screenshot file path return (Q4=A) and NOT base64
+inline:</strong> a 1 MB PNG base64-encoded blows the tool-result JSON to
+~1.4 MB; LLM context windows can’t sustain that pattern. The path-return
+pattern lets downstream tools read the file directly (e.g. the LLM
+client can attach the file as a multimodal image in the next turn).
+Tests assert the file exists AND has PNG magic bytes — base64 vs path is
+a design choice; bytes-on-disk is the runtime evidence.</p>
+<p><strong>Why headless-default + env opt-in (Q3=A):</strong> headless
+is the only sensible default for a coding-agent CLI (no display in CI /
+SSH / containers). <code>HELIXCODE_BROWSER_HEADED=true</code> is the
+documented escape hatch for human-debugging sessions where the developer
+wants to watch the browser; we don’t expose a per-tool
+<code>headed:bool</code> because per-tool toggling would mean tearing
+down and respawning chromium each time, which is the opposite of the
+session-singleton design.</p>
+<p><strong>Why slash + 6 tools (Q5=A) and NOT cobra:</strong> cobra
+would force a process restart to attach to a new chromium session; the
+slash + tool surface is purely runtime. The slash gives humans a
+one-keystroke debug interface (<code>/browser status</code>,
+<code>/browser close</code>) without invoking the LLM; the 6 tools give
+the LLM a granular grip without invoking the human.</p>
+<p><strong>Why we do NOT replicate the existing
+<code>BrowserTools</code>/<code>BrowserLaunchTool</code>-style
+API:</strong> the existing API takes a <code>browser_id</code> per call
+(multi-browser model) and exposes <code>browser_launch</code> separately
+from <code>browser_navigate</code>. The cline pattern is: navigate
+creates the session implicitly. F23 lands the cline pattern as a NEW
+surface; the existing
+<code>BrowserLaunchTool</code>/<code>BrowserNavigateTool</code>/<code>BrowserScreenshotTool</code>/<code>BrowserCloseTool</code>
+in <code>internal/tools/browser_tools.go</code> are NOT removed (would
+be a backwards-incompatible change for any caller currently using them)
+— they coexist and are documented as the lower-level multi-browser API;
+F23’s six tools are the recommended primary surface. Spec §3 documents
+both surfaces; tests exercise only F23’s surface.</p>
+<hr />
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/tools/browser/types.go</code> —
+<code>Snapshot</code>, <code>ScreenshotResult</code>,
+<code>ManagerStatus</code> value types; sentinel errors;
+<code>EnvVarHeadedMode</code> constant.</li>
+<li><code>helix_code/internal/tools/browser/types_test.go</code>.</li>
+<li><code>helix_code/internal/tools/browser/options.go</code> —
+<code>BrowserOptions</code> + <code>OptionsFromEnv()</code>.</li>
+<li><code>helix_code/internal/tools/browser/options_test.go</code>.</li>
+<li><code>helix_code/internal/tools/browser/session.go</code> —
+<code>BrowserSession</code> struct + <code>Run</code> +
+<code>NextScreenshotPath</code> + <code>Close</code>
+(sync.Once-guarded).</li>
+<li><code>helix_code/internal/tools/browser/session_test.go</code> —
+exercises <code>Run</code> + <code>NextScreenshotPath</code> against a
+stub session built via <code>chromedp.NewContext</code> over an
+in-process headless instance (skip-OK if chromium binary not on
+PATH).</li>
+<li><code>helix_code/internal/tools/browser/manager.go</code> —
+<code>BrowserManager</code> struct + <code>EnsureSession</code> /
+<code>RequireSession</code> / <code>CloseSession</code> /
+<code>Status</code>.</li>
+<li><code>helix_code/internal/tools/browser/manager_test.go</code> —
+atomic-pointer concurrency, double-create idempotency,
+close-then-require returns <code>ErrNoActiveSession</code>.</li>
+<li><code>helix_code/internal/tools/browser/navigate_tool.go</code> —
+<code>BrowserNavigateToolV2</code> (V2 to disambiguate from existing
+<code>BrowserNavigateTool</code> in
+<code>internal/tools/browser_tools.go</code>); registers as Name
+<code>browser_navigate</code> if the existing one is replaced at
+registration time, OR as a new name <code>browser_navigate_v2</code> if
+coexistence is needed (T09 picks the resolution).</li>
+<li><code>helix_code/internal/tools/browser/navigate_tool_test.go</code>.</li>
+<li><code>helix_code/internal/tools/browser/snapshot_tool.go</code> —
+<code>BrowserSnapshotTool</code>.</li>
+<li><code>helix_code/internal/tools/browser/snapshot_tool_test.go</code>.</li>
+<li><code>helix_code/internal/tools/browser/click_type_tools.go</code> —
+<code>BrowserClickTool</code> + <code>BrowserTypeTool</code> together
+(small, related).</li>
+<li><code>helix_code/internal/tools/browser/click_type_tools_test.go</code>.</li>
+<li><code>helix_code/internal/tools/browser/screenshot_tool.go</code> —
+<code>BrowserScreenshotToolV2</code> (PNG-magic + size verification
+baked into Execute).</li>
+<li><code>helix_code/internal/tools/browser/screenshot_tool_test.go</code>.</li>
+<li><code>helix_code/internal/tools/browser/close_tool.go</code> —
+<code>BrowserCloseToolV2</code>.</li>
+<li><code>helix_code/internal/tools/browser/close_tool_test.go</code>.</li>
+<li><code>helix_code/internal/tools/browser/register.go</code> —
+<code>RegisterAll(reg *tools.ToolRegistry, mgr *BrowserManager) error</code>
+— single entry point that constructs all six tools and calls
+<code>reg.RegisterTool</code> for each.</li>
+<li><code>helix_code/internal/commands/browser_command.go</code> —
+<code>BrowserCommand</code> slash struct; subcommands
+<code>status</code> / <code>navigate &lt;url&gt;</code> /
+<code>close</code>.</li>
+<li><code>helix_code/internal/commands/browser_command_test.go</code>.</li>
+<li><code>helix_code/tests/integration/browser_test.go</code> —
+<code>//go:build integration</code>; gated on chromium availability via
+<code>chromedp</code> discovery; spawns a real
+<code>httptest.Server</code> serving fixture HTML; exercises navigate →
+snapshot → click → snapshot (assert mutation) → type → screenshot
+(PNG-magic) → close (assert subsequent require fails).</li>
+<li><code>helix_code/tests/integration/cmd/p2f23_challenge/main.go</code>
+— Challenge harness.</li>
+<li><code>challenges/p2-f23-cline-browser-tool/CHALLENGE.md</code> +
+<code>challenges/p2-f23-cline-browser-tool/run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/cmd/cli/main.go</code> — three additions adjacent
+to F22 wiring: (1) construct
+<code>mgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), c.logger)</code>;
+(2) call <code>browser.RegisterAll(c.toolRegistry, mgr)</code>; (3)
+register <code>commands.NewBrowserCommand(mgr)</code> slash. NO removal
+of existing <code>BrowserLaunchTool</code>/etc.</li>
+<li><code>helix_code/internal/commands/registry.go</code> — no schema
+change; one new <code>Register(...)</code> call site for
+<code>/browser</code>.</li>
+<li><code>helix_code/go.mod</code> — <strong>zero new external
+deps</strong> (chromedp v0.15.1 + cdproto
+v0.0.0-20260405000525-47a8ff65b46a are already direct deps from earlier
+browser work). T10’s verification step asserts
+<code>git diff go.mod</code> and <code>git diff go.sum</code> are
+no-op.</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/browser/types.go (NEW; sits alongside existing types in browser/*.go)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Snapshot is the result of a browser_snapshot tool call.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Snapshot <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    URL       <span class="dt">string</span> <span class="st">`json:&quot;url&quot;`</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Title     <span class="dt">string</span> <span class="st">`json:&quot;title&quot;`</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    Mode      <span class="dt">string</span> <span class="st">`json:&quot;mode&quot;`</span>       <span class="co">// &quot;html&quot; | &quot;text&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    Content   <span class="dt">string</span> <span class="st">`json:&quot;content&quot;`</span>     <span class="co">// capped at MaxSnapshotBytes</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    Truncated <span class="dt">bool</span>   <span class="st">`json:&quot;truncated&quot;`</span>   <span class="co">// true when Content was capped</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">// ScreenshotResult is the result of a browser_screenshot tool call.</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ScreenshotResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    Path   <span class="dt">string</span> <span class="st">`json:&quot;path&quot;`</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    Bytes  <span class="dt">int64</span>  <span class="st">`json:&quot;bytes&quot;`</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    Width  <span class="dt">int</span>    <span class="st">`json:&quot;width&quot;`</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    Height <span class="dt">int</span>    <span class="st">`json:&quot;height&quot;`</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">// ManagerStatus is the result of /browser status / BrowserManager.Status().</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ManagerStatus <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    Active         <span class="dt">bool</span>      <span class="st">`json:&quot;active&quot;`</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    ChromiumPath   <span class="dt">string</span>    <span class="st">`json:&quot;chromium_path,omitempty&quot;`</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    ScreenshotDir  <span class="dt">string</span>    <span class="st">`json:&quot;screenshot_dir,omitempty&quot;`</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    Headed         <span class="dt">bool</span>      <span class="st">`json:&quot;headed&quot;`</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    CreatedAt      time<span class="op">.</span>Time <span class="st">`json:&quot;created_at,omitempty&quot;`</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// MaxSnapshotBytes caps Snapshot.Content so a 50 MB SPA HTML doesn&#39;t</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">// blow the tool-result JSON. Truncation sets Snapshot.Truncated = true.</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    MaxSnapshotBytes <span class="op">=</span> <span class="dv">64</span> <span class="op">*</span> <span class="dv">1024</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// MaxScreenshotBytes is the hard cap before BrowserScreenshotTool falls</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// back to viewport-only capture instead of full-page.</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    MaxScreenshotBytes <span class="dt">int64</span> <span class="op">=</span> <span class="dv">5</span> <span class="op">*</span> <span class="dv">1024</span> <span class="op">*</span> <span class="dv">1024</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">// EnvVarHeadedMode is the canonical env var checked by OptionsFromEnv at</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="co">// EnsureSession time. The literal string &quot;true&quot; (case-insensitive) enables</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">// headed mode; everything else (including unset) means headless. Tests pin</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">// this byte-for-byte.</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> EnvVarHeadedMode <span class="op">=</span> <span class="st">&quot;HELIXCODE_BROWSER_HEADED&quot;</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> <span class="op">(</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    ErrNoActiveSession    <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;browser: no active session (call browser_navigate first)&quot;</span><span class="op">)</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    ErrChromiumNotFound   <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;browser: chromium binary not found in PATH&quot;</span><span class="op">)</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    ErrNavigationTimeout  <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;browser: navigation timed out&quot;</span><span class="op">)</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    ErrSelectorNotFound   <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;browser: selector matched zero elements&quot;</span><span class="op">)</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    ErrScreenshotTooLarge <span class="op">=</span> errors<span class="op">.</span>New<span class="op">(</span><span class="st">&quot;browser: screenshot exceeds MaxScreenshotBytes&quot;</span><span class="op">)</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/browser/options.go (NEW)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    Headless          <span class="dt">bool</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    ViewportWidth     <span class="dt">int</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ViewportHeight    <span class="dt">int</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    NavigateTimeout   time<span class="op">.</span>Duration</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ClickWaitDuration time<span class="op">.</span>Duration</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    ScreenshotMaxBytes <span class="dt">int64</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> OptionsFromEnv<span class="op">()</span> BrowserOptions <span class="op">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    headed <span class="op">:=</span> strings<span class="op">.</span>EqualFold<span class="op">(</span>os<span class="op">.</span>Getenv<span class="op">(</span>EnvVarHeadedMode<span class="op">),</span> <span class="st">&quot;true&quot;</span><span class="op">)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> BrowserOptions<span class="op">{</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        Headless<span class="op">:</span>           <span class="op">!</span>headed<span class="op">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        ViewportWidth<span class="op">:</span>      <span class="dv">1280</span><span class="op">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        ViewportHeight<span class="op">:</span>     <span class="dv">720</span><span class="op">,</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        NavigateTimeout<span class="op">:</span>    <span class="dv">30</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        ClickWaitDuration<span class="op">:</span>  <span class="dv">500</span> <span class="op">*</span> time<span class="op">.</span>Millisecond<span class="op">,</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        ScreenshotMaxBytes<span class="op">:</span> MaxScreenshotBytes<span class="op">,</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/browser/session.go (NEW)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserSession <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    ctx             context<span class="op">.</span>Context</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    cancel          context<span class="op">.</span>CancelFunc</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    screenshotDir   <span class="dt">string</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    screenshotCount atomic<span class="op">.</span>Uint64</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    chromiumPath    <span class="dt">string</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    headed          <span class="dt">bool</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    createdAt       time<span class="op">.</span>Time</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    closeOnce       sync<span class="op">.</span>Once</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    log             <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>BrowserSession<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> actions <span class="op">...</span>chromedp<span class="op">.</span>Action<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>BrowserSession<span class="op">)</span> NextScreenshotPath<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>BrowserSession<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/browser/manager.go (NEW)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    current        atomic<span class="op">.</span>Pointer<span class="op">[</span>BrowserSession<span class="op">]</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    screenshotRoot <span class="dt">string</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    discovery      ChromeDiscovery <span class="co">// existing interface in internal/tools/browser/discovery.go</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    log            <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    mu             sync<span class="op">.</span>Mutex</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewBrowserManager<span class="op">(</span>d ChromeDiscovery<span class="op">,</span> log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>BrowserManager</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>BrowserManager<span class="op">)</span> EnsureSession<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>BrowserSession<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>BrowserManager<span class="op">)</span> RequireSession<span class="op">()</span> <span class="op">(*</span>BrowserSession<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>BrowserManager<span class="op">)</span> CloseSession<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>BrowserManager<span class="op">)</span> Status<span class="op">()</span> ManagerStatus</span></code></pre></div>
+<h3 id="tool-surface-six-tools">3.4 Tool surface (six tools)</h3>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 11%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool name</th>
+<th>RequiresApproval()</th>
+<th>Args</th>
+<th>Result type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>browser_navigate</code></td>
+<td><code>LevelEdit</code></td>
+<td><code>url string</code> (required)</td>
+<td><code>{url, title}</code> map</td>
+<td>Lazy-creates a session; navigates; waits for <code>body</code>
+ready; returns the resolved URL + page title.</td>
+</tr>
+<tr>
+<td><code>browser_snapshot</code></td>
+<td><code>LevelReadOnly</code></td>
+<td><code>mode string</code> (default <code>&quot;html&quot;</code>; allowed
+<code>&quot;html&quot;</code>/<code>&quot;text&quot;</code>)</td>
+<td><code>Snapshot</code></td>
+<td>RequireSession → <code>chromedp.OuterHTML(&quot;html&quot;, &amp;out)</code>
+(mode=html) or <code>chromedp.Text(&quot;body&quot;, &amp;out)</code> (mode=text);
+cap at 64 KB; set <code>Truncated</code>.</td>
+</tr>
+<tr>
+<td><code>browser_click</code></td>
+<td><code>LevelEdit</code></td>
+<td><code>selector string</code> (required)</td>
+<td><code>{clicked: true, url, title}</code> map</td>
+<td>RequireSession →
+<code>chromedp.Click(sel, chromedp.NodeVisible)</code> → sleep
+<code>ClickWaitDuration</code> → fetch URL/title. Selector-not-found
+returns <code>ErrSelectorNotFound</code>.</td>
+</tr>
+<tr>
+<td><code>browser_type</code></td>
+<td><code>LevelEdit</code></td>
+<td><code>selector string</code>, <code>text string</code> (both
+required)</td>
+<td><code>{typed: true}</code> map</td>
+<td>RequireSession →
+<code>chromedp.SendKeys(sel, text, chromedp.NodeVisible)</code>.</td>
+</tr>
+<tr>
+<td><code>browser_screenshot</code></td>
+<td><code>LevelReadOnly</code></td>
+<td><code>full_page bool</code> (default <code>false</code>)</td>
+<td><code>ScreenshotResult</code></td>
+<td>RequireSession → <code>chromedp.FullScreenshot(&amp;buf, 90)</code>
+(full_page=true) or <code>chromedp.CaptureScreenshot(&amp;buf)</code>
+(false) → write to <code>s.NextScreenshotPath()</code> → verify size
+&gt; 1024 + PNG-magic → return path.</td>
+</tr>
+<tr>
+<td><code>browser_close</code></td>
+<td><code>LevelEdit</code></td>
+<td>(none)</td>
+<td><code>{closed: true}</code> map</td>
+<td><code>manager.CloseSession()</code>. Idempotent: closing a closed
+session is a no-op (returns success).</td>
+</tr>
+</tbody>
+</table>
+<p>(Note: per F21, <code>LevelReadOnly</code> bypasses the approval gate
+entirely; <code>LevelEdit</code> is gated behind
+<code>ModeAutoEdit</code> or higher. This means <code>snapshot</code>
+and <code>screenshot</code> are always allowed;
+<code>navigate</code>/<code>click</code>/<code>type</code>/<code>close</code>
+require the user to be in a non-<code>ModeSuggest</code> mode OR to
+confirm at the prompt. This is intentional: pure observation never asks;
+mutating-the-page or terminating-the-process always asks unless the user
+has opted into auto-edit.)</p>
+<h3 id="browser-slash-command">3.5 <code>/browser</code> slash
+command</h3>
+<p><code>browser_command.go</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserCommand <span class="kw">struct</span> <span class="op">{</span> mgr <span class="op">*</span>BrowserManager <span class="op">}</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewBrowserCommand<span class="op">(</span>mgr <span class="op">*</span>BrowserManager<span class="op">)</span> <span class="op">*</span>BrowserCommand</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>BrowserCommand<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span>         <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;browser&quot;</span> <span class="op">}</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>BrowserCommand<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span>  <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Show browser status, one-shot navigate, or close the session.&quot;</span> <span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>BrowserCommand<span class="op">)</span> Usage<span class="op">()</span> <span class="dt">string</span>        <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;/browser [status|navigate &lt;url&gt;|close]&quot;</span> <span class="op">}</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>BrowserCommand<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> cc <span class="op">*</span>CommandContext<span class="op">)</span> <span class="op">(*</span>CommandResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    sub <span class="op">:=</span> <span class="st">&quot;status&quot;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>cc<span class="op">.</span>Args<span class="op">)</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span> sub <span class="op">=</span> cc<span class="op">.</span>Args<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">}</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> sub <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;status&quot;</span><span class="op">:</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        st <span class="op">:=</span> c<span class="op">.</span>mgr<span class="op">.</span>Status<span class="op">()</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Output<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;browser: active=%v</span><span class="ch">\n</span><span class="st">chromium: %s</span><span class="ch">\n</span><span class="st">screenshot_dir: %s</span><span class="ch">\n</span><span class="st">headed: %v</span><span class="ch">\n</span><span class="st">created_at: %s&quot;</span><span class="op">,</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            st<span class="op">.</span>Active<span class="op">,</span> st<span class="op">.</span>ChromiumPath<span class="op">,</span> st<span class="op">.</span>ScreenshotDir<span class="op">,</span> st<span class="op">.</span>Headed<span class="op">,</span> st<span class="op">.</span>CreatedAt<span class="op">.</span>Format<span class="op">(</span>time<span class="op">.</span>RFC3339<span class="op">))},</span> <span class="ot">nil</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;navigate&quot;</span><span class="op">:</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>cc<span class="op">.</span>Args<span class="op">)</span> <span class="op">&lt;</span> <span class="dv">2</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;/browser navigate: url required&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        url <span class="op">:=</span> cc<span class="op">.</span>Args<span class="op">[</span><span class="dv">1</span><span class="op">]</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        s<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>mgr<span class="op">.</span>EnsureSession<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> title <span class="dt">string</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> s<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">,</span> chromedp<span class="op">.</span>Navigate<span class="op">(</span>url<span class="op">),</span> chromedp<span class="op">.</span>WaitReady<span class="op">(</span><span class="st">&quot;body&quot;</span><span class="op">,</span> chromedp<span class="op">.</span>ByQuery<span class="op">),</span> chromedp<span class="op">.</span>Title<span class="op">(&amp;</span>title<span class="op">));</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Output<span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;navigated: %s</span><span class="ch">\n</span><span class="st">title: %s&quot;</span><span class="op">,</span> url<span class="op">,</span> title<span class="op">)},</span> <span class="ot">nil</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;close&quot;</span><span class="op">:</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> c<span class="op">.</span>mgr<span class="op">.</span>CloseSession<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>CommandResult<span class="op">{</span>Output<span class="op">:</span> <span class="st">&quot;browser: closed&quot;</span><span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;/browser: unknown subcommand %q (want status|navigate|close)&quot;</span><span class="op">,</span> sub<span class="op">)</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="per-tool-requiresapproval-rationale">3.6 Per-tool
+RequiresApproval rationale</h3>
+<ul>
+<li><strong><code>browser_navigate</code> →
+<code>LevelEdit</code></strong> — visiting a URL can fetch malicious JS
+that exploits chromium; this is a real attack vector. Gating behind
+<code>ModeAutoEdit</code>+ matches the security posture of
+<code>fs_write</code> (which the user knows mutates state). NOT
+<code>LevelRun</code> because no shell command is exposed.</li>
+<li><strong><code>browser_snapshot</code> →
+<code>LevelReadOnly</code></strong> — pure read; serialises the current
+DOM. No external side effects. Bypasses approval (F21 §3.6 explicit
+allowlist).</li>
+<li><strong><code>browser_click</code> → <code>LevelEdit</code></strong>
+— clicking a button can trigger destructive forms (delete, transfer,
+submit) or navigate to a new URL with new JS. Gated.</li>
+<li><strong><code>browser_type</code> → <code>LevelEdit</code></strong>
+— typing into a field can submit credentials, exfiltrate keystrokes via
+JS handlers, or fill destructive forms. Gated.</li>
+<li><strong><code>browser_screenshot</code> →
+<code>LevelReadOnly</code></strong> — pure pixel capture; writes to
+local tempdir but no network/DOM side effects. Bypasses approval.</li>
+<li><strong><code>browser_close</code> → <code>LevelEdit</code></strong>
+— terminates the session, dropping any unsaved page state
+(e.g. half-typed text in a form). Gated so the user can refuse if
+they’re mid-task. Idempotent on re-call.</li>
+</ul>
+<h3 id="new-external-dependencies">3.7 New external dependencies</h3>
+<p><strong>Zero new dependencies.</strong> chromedp v0.15.1 + cdproto
+v0.0.0-20260405000525-47a8ff65b46a are already direct deps in
+<code>helix_code/go.mod</code> (introduced for the existing
+<code>internal/tools/browser/</code> package). <code>os/exec</code> is
+not used (chromedp manages the subprocess). <code>os</code>,
+<code>sync</code>, <code>sync/atomic</code>, <code>time</code>,
+<code>errors</code>, <code>fmt</code>, <code>strings</code>,
+<code>path/filepath</code>, <code>context</code> are stdlib.
+<code>zap</code> is already direct. T10’s verification step asserts
+<code>git diff --exit-code go.mod go.sum</code> is no-op.</p>
+<hr />
+<h2 id="data-flow">4. Data flow</h2>
+<ol type="1">
+<li><strong>Startup</strong> (<code>cmd/cli/main.go</code>):
+<ul>
+<li><code>mgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), c.logger)</code>.</li>
+<li><code>if err := browser.RegisterAll(c.toolRegistry, mgr); err != nil { log.Fatalf(...) }</code>.</li>
+<li><code>c.commandRegistry.Register(commands.NewBrowserCommand(mgr))</code>.</li>
+</ul></li>
+<li><strong>First <code>browser_navigate(url)</code></strong>:
+<ul>
+<li>F21 approval gate consults
+<code>tool.RequiresApproval() == LevelEdit</code>; in
+<code>ModeSuggest</code> returns <code>ErrApprovalRequired</code>; in
+<code>ModeAutoEdit</code>+ allows.</li>
+<li><code>BrowserNavigateToolV2.Execute(ctx, params)</code> extracts
+<code>url</code>.</li>
+<li><code>mgr.EnsureSession(ctx)</code> — atomic load is nil → acquire
+<code>mu</code> → discover chromium via
+<code>discovery.Discover()</code> →
+<code>chromedp.NewExecAllocator(parent, chromedp.NoFirstRun, chromedp.Headless if !opts.Headless==false_implies_headed_else_headless, chromedp.WindowSize(opts.ViewportWidth, opts.ViewportHeight))</code>
+→ <code>chromedp.NewContext(allocCtx, chromedp.WithLogf(zapInfo))</code>
+→ mkdir per-session tempdir → store in <code>current</code> →
+return.</li>
+<li><code>session.Run(ctx, chromedp.Navigate(url), chromedp.WaitReady(&quot;body&quot;, chromedp.ByQuery), chromedp.Title(&amp;title), chromedp.Location(&amp;resolvedURL))</code>.</li>
+<li>Return <code>{url: resolvedURL, title: title}</code>.</li>
+</ul></li>
+<li><strong><code>browser_snapshot(mode)</code></strong>:
+<ul>
+<li><code>mgr.RequireSession()</code> — atomic load; nil →
+<code>ErrNoActiveSession</code>.</li>
+<li><code>var content string; var pageURL, pageTitle string</code>.</li>
+<li><code>mode == &quot;html&quot;</code>:
+<code>session.Run(ctx, chromedp.OuterHTML(&quot;html&quot;, &amp;content, chromedp.ByQuery), chromedp.Location(&amp;pageURL), chromedp.Title(&amp;pageTitle))</code>.</li>
+<li><code>mode == &quot;text&quot;</code>:
+<code>session.Run(ctx, chromedp.Text(&quot;body&quot;, &amp;content, chromedp.NodeVisible, chromedp.ByQuery), chromedp.Location(&amp;pageURL), chromedp.Title(&amp;pageTitle))</code>.</li>
+<li><code>truncated := false; if len(content) &gt; MaxSnapshotBytes { content = content[:MaxSnapshotBytes]; truncated = true }</code>.</li>
+<li>Return
+<code>Snapshot{URL: pageURL, Title: pageTitle, Mode: mode, Content: content, Truncated: truncated}</code>.</li>
+</ul></li>
+<li><strong><code>browser_click(selector)</code></strong>:
+<ul>
+<li><code>mgr.RequireSession()</code>.</li>
+<li><code>session.Run(ctx, chromedp.Click(sel, chromedp.NodeVisible, chromedp.ByQuery), chromedp.Sleep(opts.ClickWaitDuration))</code>.</li>
+<li>On selector miss (chromedp returns wrapped
+<code>context.DeadlineExceeded</code> because <code>NodeVisible</code>
+timed out): map to <code>ErrSelectorNotFound</code>.</li>
+</ul></li>
+<li><strong><code>browser_type(selector, text)</code></strong>:
+<ul>
+<li><code>mgr.RequireSession()</code>.</li>
+<li><code>session.Run(ctx, chromedp.SendKeys(sel, text, chromedp.NodeVisible, chromedp.ByQuery))</code>.</li>
+</ul></li>
+<li><strong><code>browser_screenshot(full_page)</code></strong>:
+<ul>
+<li><code>mgr.RequireSession()</code>.</li>
+<li><code>var buf []byte</code>.</li>
+<li><code>full_page == true</code>:
+<code>session.Run(ctx, chromedp.FullScreenshot(&amp;buf, 90))</code>.</li>
+<li><code>full_page == false</code>:
+<code>session.Run(ctx, chromedp.CaptureScreenshot(&amp;buf))</code>.</li>
+<li>Verify <code>len(buf) &gt; 0</code>; verify PNG magic
+<code>0x89 0x50 0x4E 0x47</code> at offset 0; if absent → fail with
+descriptive error (real chromium output is PNG; bad bytes mean chromedp
+returned junk).</li>
+<li><code>path := session.NextScreenshotPath()</code>;
+<code>os.WriteFile(path, buf, 0600)</code>.</li>
+<li>Stat the file; assert <code>Bytes &gt; 1024</code> (defensive — a
+0-byte or 1-byte file is a bug); read width/height by decoding the PNG
+header (lightweight: <code>image/png.DecodeConfig</code> on the first 64
+bytes).</li>
+<li>Return
+<code>ScreenshotResult{Path, Bytes, Width, Height}</code>.</li>
+</ul></li>
+<li><strong><code>browser_close()</code></strong>:
+<ul>
+<li><code>mgr.CloseSession()</code>. If <code>current</code> is nil →
+no-op success. Otherwise swap nil + call <code>prev.Close()</code> which
+<code>s.cancel()</code>s the chromedp context (terminating chromium) and
+<code>os.RemoveAll(screenshotDir)</code>.</li>
+</ul></li>
+<li><strong><code>/browser status</code></strong>:
+<ul>
+<li>Calls <code>mgr.Status()</code> which atomically loads
+<code>current</code> and returns the immutable status snapshot.</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="error-handling-anti-bluff-hot-zone-edge-cases">5. Error
+handling, anti-bluff hot zone, edge cases</h2>
+<h3 id="error-handling">5.1 Error handling</h3>
+<ul>
+<li><strong>Chromium not found</strong> —
+<code>discovery.Discover()</code> returns
+<code>ErrChromiumNotFound</code>; <code>EnsureSession</code> propagates;
+<code>browser_navigate</code> fails with a clear error. The CLI does NOT
+crash; subsequent invocations of any browser tool fail the same way
+until chromium is installed.</li>
+<li><strong>Navigation timeout</strong> — <code>chromedp.Navigate</code>
+blocks until <code>WaitReady(&quot;body&quot;)</code> resolves; bounded by
+<code>opts.NavigateTimeout = 30 s</code>. On timeout,
+<code>chromedp.Run</code> returns <code>context.DeadlineExceeded</code>;
+tool wraps as <code>ErrNavigationTimeout</code>.</li>
+<li><strong>Selector not found</strong> —
+<code>chromedp.NodeVisible</code> waits for the selector to become
+visible; on timeout (default 0 in chromedp = inherits parent ctx; we
+wrap a <code>context.WithTimeout(parent, 5s)</code> for click/type)
+returns wrapped deadline error → mapped to
+<code>ErrSelectorNotFound</code>.</li>
+<li><strong>Screenshot empty / non-PNG</strong> — defensive PNG-magic
+check after <code>FullScreenshot</code>. If chromedp returns a non-PNG
+byte buffer (this would be a chromedp bug, but defensive), tool returns
+an explicit error rather than writing junk to disk.</li>
+<li><strong>Close on nil session</strong> — <code>CloseSession()</code>
+is idempotent: if <code>current.Load()</code> is nil, returns nil.
+<code>browser_close</code> tool propagates success. (No “you must
+navigate first” error — the agent should be free to call close
+defensively.)</li>
+<li><strong>Concurrent tool calls</strong> — atomic-pointer reads in
+<code>RequireSession</code> are lock-free; chromedp itself serialises
+actions per-context, so concurrent click + snapshot will queue (not
+race). Tests assert this.</li>
+</ul>
+<h3 id="anti-bluff-hot-zone-five-critical-patterns">5.2 Anti-bluff hot
+zone — five critical patterns</h3>
+<p><strong>Bluff #1: “Navigate succeeded but page didn’t load.”</strong>
+- Pattern: <code>chromedp.Run(ctx, chromedp.Navigate(url))</code>
+returns nil even though the load failed silently (e.g. chromium hit a
+TLS error and is on <code>chrome-error://</code>). The tool reports
+success; a subsequent snapshot would return empty/error HTML. - Test:
+integration <code>TestBrowser_NavigateThenSnapshot_Real</code> spins up
+a real <code>httptest.Server</code> serving fixture HTML containing a
+sentinel string
+<code>&lt;p id=&quot;fixture&quot;&gt;FIXTURE_LOADED_42&lt;/p&gt;</code>; calls
+<code>browser_navigate(server.URL)</code> then
+<code>browser_snapshot(mode=html)</code>; asserts
+<code>Snapshot.Content</code> contains <code>FIXTURE_LOADED_42</code>. -
+Challenge: PHASE-A asserts the same against a Challenge-owned
+httptest.Server.</p>
+<p><strong>Bluff #2: “Click succeeded but DOM unchanged.”</strong> -
+Pattern: <code>chromedp.Click(sel, chromedp.NodeVisible)</code> matches
+a no-op element (e.g. a disabled button), or the click handler is async
+and DOM hasn’t mutated by the time snapshot reads. The tool reports
+success; the LLM proceeds as if the click did something. - Test:
+integration <code>TestBrowser_ClickMutatesDOM_Real</code> serves a
+fixture with
+<code>&lt;button id=&quot;b&quot; onclick=&quot;document.getElementById(&#39;out&#39;).innerText=&#39;CLICKED_42&#39;&quot;&gt;go&lt;/button&gt;&lt;span id=&quot;out&quot;&gt;UNCLICKED&lt;/span&gt;</code>;
+navigate → snapshot (assert <code>UNCLICKED</code> present) → click
+<code>#b</code> → snapshot (assert <code>CLICKED_42</code> present AND
+<code>UNCLICKED</code> absent — positive byte differential, not just “no
+error”). - Challenge: PHASE-C identical pattern.</p>
+<p><strong>Bluff #3: “Snapshot returned empty HTML.”</strong> - Pattern:
+<code>chromedp.OuterHTML(&quot;html&quot;, &amp;content)</code> runs before
+<code>WaitReady(&quot;body&quot;)</code> resolves, returning the empty
+<code>&lt;html&gt;&lt;/html&gt;</code> shell. Tool reports success with
+empty content. - Test: <code>TestBrowser_Snapshot_NotEmpty</code>
+asserts <code>len(Snapshot.Content) &gt; 100</code> after navigating to
+fixture (positive evidence — empty would be &lt; 50 bytes for
+<code>&lt;html&gt;&lt;/html&gt;</code> shell). - Challenge: PHASE-B
+asserts <code>len &gt; 100</code> AND fixture sentinel present.</p>
+<p><strong>Bluff #4: “Screenshot file exists but is 0 bytes / not a
+PNG.”</strong> - Pattern:
+<code>chromedp.FullScreenshot(&amp;buf, 90)</code> returned
+<code>nil, nil</code> on a closed session;
+<code>os.WriteFile(path, buf, 0600)</code> writes a 0-byte file; tool
+reports success with the (nonexistent) byte count. - Test:
+<code>TestBrowser_Screenshot_PNGMagic_RealFile</code> reads the first 8
+bytes of the returned file and asserts they equal
+<code>[]byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}</code> (the
+PNG signature). Asserts <code>Bytes &gt; 1024</code> (a real screenshot
+of even a blank page is multiple KB). - Challenge: PHASE-E identical
+PNG-magic + size assertions.</p>
+<p><strong>Bluff #5: “browser_close didn’t actually terminate
+chromium.”</strong> - Pattern: the tool sets
+<code>manager.current = nil</code> via the swap but never calls
+<code>cancel()</code>, leaving the chromium subprocess running forever
+(memory leak; persistent listener on a TCP port). Tool reports success;
+a <code>pgrep chromium</code> would still find the PID. - Test:
+<code>TestBrowser_Close_KillsChromium_Real</code> records the chromium
+PID via <code>chromedp.Targets(ctx)</code> before close; closes; reads
+the PID’s <code>/proc/&lt;pid&gt;/status</code> (Linux); asserts the
+process is gone (or in zombie state) within 2 s. (Cross-platform
+fallback: <code>RequireSession</code> returns
+<code>ErrNoActiveSession</code> after close — positive functional
+evidence.) - Challenge: PHASE-F asserts post-close
+<code>browser_snapshot</code> fails with <code>ErrNoActiveSession</code>
+(positive: the manager actually torn down) AND chromedp’s
+<code>chromedp.FromContext(prevCtx).Browser</code> returns an error
+indicating the connection is closed.</p>
+<h3 id="edge-cases">5.3 Edge cases</h3>
+<ul>
+<li><strong>Slow page (&gt; 30 s)</strong> —
+<code>NavigateTimeout</code> fires; tool returns
+<code>ErrNavigationTimeout</code>. User can re-call with their own
+longer ctx.</li>
+<li><strong>Cross-origin iframe in snapshot</strong> —
+<code>chromedp.OuterHTML(&quot;html&quot;, &amp;c)</code> returns the top-frame
+HTML; cross-origin iframes are opaque (chromium policy). Acceptable —
+out of scope per §8.</li>
+<li><strong>Headed mode with no display server</strong> — chromedp’s
+exec allocator passes <code>--display</code>-less flags; on Linux
+without X/Wayland, headed mode silently falls back to headless or fails
+to spawn. Documented; tests run only headless.</li>
+<li><strong>Two concurrent <code>browser_navigate</code> calls</strong>
+— second call hits the post-Lock double-check, reuses the existing
+session, navigates within it (both calls observe the second URL after
+they both return). Not a bug; matches single-tab semantics.</li>
+<li><strong>Path traversal in screenshot dir</strong> — paths are
+constructed via
+<code>filepath.Join(screenshotDir, fmt.Sprintf(&quot;%d.png&quot;, n))</code> with
+monotonic <code>n</code>; user input never reaches the path.
+Defensive.</li>
+<li><strong>Chromium consumed &gt; 5 MB on a screenshot</strong> —
+<code>BrowserScreenshotTool</code> checks
+<code>int64(len(buf)) &gt; opts.ScreenshotMaxBytes</code> and falls back
+to viewport-only capture (a re-run with
+<code>chromedp.CaptureScreenshot</code>). If still over, returns
+<code>ErrScreenshotTooLarge</code>.</li>
+<li><strong>Process exit while session active</strong> —
+<code>cmd/cli/main.go</code> SHOULD
+<code>defer mgr.CloseSession()</code> in its main loop; tested by
+sending SIGINT during integration test (assert chromium PID is gone
+after CLI exit).</li>
+</ul>
+<hr />
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-tests-mocks-allowed">6.1 Unit tests (mocks ALLOWED)</h3>
+<ul>
+<li><code>types_test.go</code> — pin <code>EnvVarHeadedMode</code>,
+<code>MaxSnapshotBytes</code>, <code>MaxScreenshotBytes</code>
+byte-for-byte; assert sentinel errors are distinct +
+<code>errors.Is</code>-comparable.</li>
+<li><code>options_test.go</code> — <code>OptionsFromEnv</code> with env
+unset (Headless=true), with <code>HELIXCODE_BROWSER_HEADED=true</code>
+(Headless=false), with <code>=TRUE</code> (case-insensitive;
+Headless=false), with <code>=anything-else</code> (Headless=true).</li>
+<li><code>manager_test.go</code> — table-driven against a stub
+<code>ChromeDiscovery</code> that returns a fake binary path AND a stub
+session-factory. Cases: nil → EnsureSession populates; double
+EnsureSession returns same pointer; CloseSession swaps to nil + invokes
+Close; RequireSession after Close returns
+<code>ErrNoActiveSession</code>; concurrent EnsureSession from N=10
+goroutines yields the same pointer.</li>
+<li><code>session_test.go</code> — primarily tests
+<code>NextScreenshotPath</code> monotonicity + <code>Close</code>
+idempotency under sync.Once; full chromedp.Run path is tested under
+integration (skip-OK if chromium absent).</li>
+<li><code>navigate_tool_test.go</code> /
+<code>snapshot_tool_test.go</code> /
+<code>click_type_tools_test.go</code> /
+<code>screenshot_tool_test.go</code> / <code>close_tool_test.go</code> —
+Schema/Validate/Name/RequiresApproval assertions; Execute tests use a
+stub manager that returns a stub session whose <code>Run</code> records
+the actions for assertion.</li>
+<li><code>browser_command_test.go</code> — status/navigate/close
+subcommands with a stub manager.</li>
+</ul>
+<h3 id="integration-tests-no-mocks-gobuild-integration-gated-on-chromium-availability">6.2
+Integration tests (NO mocks; <code>//go:build integration</code>; gated
+on chromium availability)</h3>
+<p><code>tests/integration/browser_test.go</code> runs ALL tests against
+a real chromium subprocess managed by chromedp + a real
+<code>net/http/httptest.Server</code> serving fixture HTML. Each test
+starts with:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> setupBrowserSession<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">(*</span>browser<span class="op">.</span>BrowserManager<span class="op">,</span> <span class="op">*</span>httptest<span class="op">.</span>Server<span class="op">,</span> <span class="kw">func</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Skip if chromium not on PATH.</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> _<span class="op">,</span> err <span class="op">:=</span> browser<span class="op">.</span>NewDefaultChromeDiscovery<span class="op">().</span>Discover<span class="op">(</span>context<span class="op">.</span>Background<span class="op">());</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Skipf<span class="op">(</span><span class="st">&quot;SKIP-OK: #P2-F23 chromium not available: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    fixture <span class="op">:=</span> <span class="st">`&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;title&gt;F23-FIXTURE&lt;/title&gt;&lt;/head&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="st">        &lt;body&gt;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="st">            &lt;p id=&quot;fixture&quot;&gt;FIXTURE_LOADED_42&lt;/p&gt;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="st">            &lt;button id=&quot;b&quot; onclick=&quot;document.getElementById(&#39;out&#39;).innerText=&#39;CLICKED_42&#39;&quot;&gt;go&lt;/button&gt;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="st">            &lt;span id=&quot;out&quot;&gt;UNCLICKED&lt;/span&gt;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="st">            &lt;input id=&quot;in&quot; type=&quot;text&quot;&gt;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="st">        &lt;/body&gt;&lt;/html&gt;`</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    srv <span class="op">:=</span> httptest<span class="op">.</span>NewServer<span class="op">(</span>http<span class="op">.</span>HandlerFunc<span class="op">(</span><span class="kw">func</span><span class="op">(</span>w http<span class="op">.</span>ResponseWriter<span class="op">,</span> _ <span class="op">*</span>http<span class="op">.</span>Request<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        w<span class="op">.</span>Header<span class="op">().</span>Set<span class="op">(</span><span class="st">&quot;Content-Type&quot;</span><span class="op">,</span> <span class="st">&quot;text/html; charset=utf-8&quot;</span><span class="op">)</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        _<span class="op">,</span> _ <span class="op">=</span> w<span class="op">.</span>Write<span class="op">([]</span><span class="dt">byte</span><span class="op">(</span>fixture<span class="op">))</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}))</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> browser<span class="op">.</span>NewBrowserManager<span class="op">(</span>browser<span class="op">.</span>NewDefaultChromeDiscovery<span class="op">(),</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mgr<span class="op">,</span> srv<span class="op">,</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span> _ <span class="op">=</span> mgr<span class="op">.</span>CloseSession<span class="op">();</span> srv<span class="op">.</span>Close<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Tests: -
+<code>TestBrowser_NavigateThenSnapshot_Real_AssertFixtureSentinel</code>
+— assert <code>Snapshot.Content</code> contains
+<code>FIXTURE_LOADED_42</code> AND <code>len &gt; 100</code>. -
+<code>TestBrowser_ClickMutatesDOM_Real</code> — pre-click snapshot has
+<code>UNCLICKED</code>; click <code>#b</code>; post-click snapshot has
+<code>CLICKED_42</code> (and NOT <code>UNCLICKED</code>). -
+<code>TestBrowser_TypeIntoInput_Real</code> — type “hello” into
+<code>#in</code>; snapshot HTML contains <code>value=&quot;hello&quot;</code> OR
+(more reliable) JS-eval reads back the input value. -
+<code>TestBrowser_Screenshot_FileExistsAndPNG_Real</code> — assert
+returned path exists, <code>Bytes &gt; 1024</code>, first 8 bytes are
+PNG magic, decoded width/height match the requested viewport. -
+<code>TestBrowser_Close_RequireFailsAfter_Real</code> — close → call
+<code>mgr.RequireSession()</code> → assert
+<code>errors.Is(err, ErrNoActiveSession)</code>. -
+<code>TestBrowser_ConcurrentEnsureSession_SamePointer_Real</code> — fire
+10 goroutines into <code>EnsureSession</code>; assert the returned
+<code>*BrowserSession</code> pointer equality (only one chromium
+subprocess). - <code>TestBrowser_HeadedMode_OptIn</code> — set env,
+construct, assert <code>Status().Headed == true</code>. (No display
+assertion — runs headed flag in <code>BrowserOptions</code> only.)</p>
+<h3 id="challenge-harness-seven-phases">6.3 Challenge harness — seven
+phases</h3>
+<p><code>challenges/p2-f23-cline-browser-tool/run.sh</code> invokes
+<code>tests/integration/cmd/p2f23_challenge/main.go</code>:</p>
+<ol type="1">
+<li><strong>PHASE-A: NAVIGATE-AND-SNAPSHOT (always runs; gated on
+chromium)</strong> — local <code>httptest.Server</code> with sentinel
+<code>FIXTURE_LOADED_42</code>; <code>browser_navigate(srv.URL)</code>
+then <code>browser_snapshot(mode=html)</code>; assert (i) content
+contains sentinel, (ii) <code>len(content) &gt; 100</code>, (iii)
+Snapshot.URL ends with <code>/</code>, (iv) Title equals
+<code>F23-FIXTURE</code>.</li>
+<li><strong>PHASE-B: SNAPSHOT-MODE-TEXT (always runs)</strong> — same
+fixture; <code>browser_snapshot(mode=text)</code>; assert content is a
+string (not HTML tags) AND contains <code>FIXTURE_LOADED_42</code>.</li>
+<li><strong>PHASE-C: CLICK-MUTATES-DOM (always runs)</strong> —
+pre-click snapshot has <code>UNCLICKED</code>;
+<code>browser_click(&quot;#b&quot;)</code>; post-click snapshot has
+<code>CLICKED_42</code> (positive byte differential).</li>
+<li><strong>PHASE-D: TYPE-INTO-INPUT (always runs)</strong> —
+<code>browser_type(&quot;#in&quot;, &quot;HELIX_42&quot;)</code>; assert post-snapshot HTML
+contains either <code>value=&quot;HELIX_42&quot;</code> or (via JS-eval helper if
+available) the input value reads back as <code>HELIX_42</code>.</li>
+<li><strong>PHASE-E: SCREENSHOT-PNG-MAGIC (always runs)</strong> —
+<code>browser_screenshot(full_page=false)</code>; assert (i) returned
+path exists, (ii) <code>os.Stat().Size() &gt; 1024</code>, (iii) first 8
+bytes are exactly <code>89 50 4E 47 0D 0A 1A 0A</code>, (iv)
+<code>image/png.DecodeConfig</code> succeeds (positive: it’s a real PNG,
+not just magic-bytes-then-junk).</li>
+<li><strong>PHASE-F: CLOSE-TEARS-DOWN (always runs)</strong> —
+<code>browser_close()</code>; subsequent <code>browser_snapshot()</code>
+returns error <code>errors.Is(err, ErrNoActiveSession)</code>. (Positive
+evidence the manager actually torn down, not just status-flipped.)</li>
+<li><strong>PHASE-G: CONCURRENT-SESSION-SHARING (always runs)</strong> —
+5 goroutines call <code>EnsureSession</code> simultaneously; assert all
+5 receive the same <code>*BrowserSession</code> pointer (proves no
+per-call chromium spawn).</li>
+</ol>
+<p>Output skeleton ends with:</p>
+<pre><code>SUMMARY: PHASE-A=4/4 PASS; PHASE-B=2/2 PASS; PHASE-C=3/3 PASS; PHASE-D=2/2 PASS;
+         PHASE-E=4/4 PASS; PHASE-F=2/2 PASS; PHASE-G=2/2 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch. Skip
+is permitted ONLY when chromium is absent; skip MUST emit
+<code>SKIP-OK: #P2-F23 chromium not available</code> with the discovery
+error in the message. Absence-of-error is NEVER acceptable as PASS.</p>
+<hr />
+<h2 id="cross-platform">7. Cross-platform</h2>
+<ul>
+<li><strong>Linux</strong> — chromedp’s <code>NewExecAllocator</code>
+finds <code>chromium</code>/<code>google-chrome</code> via the existing
+<code>ChromeDiscovery</code> interface
+(<code>internal/tools/browser/discovery.go</code> already implements the
+search across snap/Flatpak/system installs).
+<code>httptest.Server</code> uses <code>127.0.0.1</code> ephemeral port;
+chromedp connects locally.</li>
+<li><strong>macOS</strong> — <code>ChromeDiscovery</code> already
+searches <code>/Applications/Google Chrome.app/.../Chromium</code>,
+Brave, Edge. Same code path; same test surface.</li>
+<li><strong>Windows</strong> — <code>ChromeDiscovery</code> already
+searches <code>Program Files</code>/<code>Program Files (x86)</code>.
+Same code path.</li>
+<li><strong>No chromium</strong> — <code>discovery.Discover</code>
+returns <code>ErrChromiumNotFound</code>; integration tests SKIP with
+<code>SKIP-OK: #P2-F23 chromium not available</code> (per Rule 5 + the
+no-silent-skips Make target). The Challenge harness similarly skips with
+explicit log line; CI without chromium reports <code>SKIP-OK</code> and
+overall exit 0 (skip is not a pass and not a fail).</li>
+</ul>
+<hr />
+<h2 id="out-of-scope">8. Out of scope</h2>
+<ul>
+<li><strong>Multi-tab support</strong> — single-session, single-tab.
+Multi-tab requires a tab-id parameter on every tool, which doesn’t match
+the cline pattern. v2.</li>
+<li><strong>Persistent cookies / sessions across CLI runs</strong> —
+each Helixcode session starts a fresh chromium subprocess. v2 may add a
+<code>BrowserUserDataDir</code> option for
+<code>--user-data-dir=&lt;path&gt;</code>.</li>
+<li><strong>Download support</strong> —
+<code>chromedp.SendDownloadHeaders</code> etc. is a separate surface;
+out of scope.</li>
+<li><strong>PDF rendering</strong> — <code>chromedp.PrintToPDF</code> is
+a separate tool surface; v2.</li>
+<li><strong>Mobile viewport emulation</strong> —
+<code>chromedp.EmulateViewport(375, 812, chromedp.EmulateScale(2))</code>
+etc. is out of scope; users can set
+<code>HELIXCODE_BROWSER_VIEWPORT</code> in v2.</li>
+<li><strong>Browser extension management</strong> — out of scope.</li>
+<li><strong>Selenium / Playwright fallback when chromedp fails</strong>
+— chromedp + chromium is the only supported runtime; alternative engines
+are v2.</li>
+<li><strong>Network interception / request mocking</strong> — out of
+scope; chromedp supports it via <code>cdproto/network</code> but that’s
+a separate tool surface.</li>
+<li><strong>Authenticated browsing (login flows persisted)</strong> —
+handled implicitly by typing credentials, but no separate “login
+session” abstraction; v2.</li>
+<li><strong>Concurrency beyond single-session sharing</strong> — no
+parallel multi-session; the manager rejects a second session creation
+while <code>current != nil</code>.</li>
+</ul>
+<hr />
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>CONST-035</strong> (anti-bluff): every PASS in F23 carries
+positive runtime evidence — real chromium subprocess + real
+<code>httptest.Server</code> + real DOM-mutation byte differential +
+real PNG-magic verification + real close-then-fail-on-require evidence.
+The Challenge harness MUST exit non-zero on byte mismatch. Tests use
+real chromium discovery + real chromedp Run (mocks of chromedp are
+forbidden in integration tests per Rule 5).</li>
+<li><strong>CONST-039</strong> (Challenge required): F23 ships with
+<code>challenges/p2-f23-cline-browser-tool/</code> (Challenge harness
+with 7 phases A-G).</li>
+<li><strong>CONST-042</strong> (no secret leak): full page contents are
+NEVER logged at INFO level. The browser tools’ loggers log only the URL
+(which is a CALLER input — the agent or user already knows it), the
+snapshot byte length, and the screenshot file path. A unit test scans
+<code>internal/tools/browser/*.go</code> for
+<code>logger\.Info\(.*\b(content|html|page|body|snapshot|outerHTML|innerText)\b</code>
+matches and FAILs on any hit (excluding test files). Per-tool
+descriptions and telemetry NEVER include the user-typed text from
+<code>browser_type</code>. Screenshot files live under
+user-only-readable <code>0600</code> mode in
+<code>$XDG_DATA_HOME/helixcode/browser/screenshots/</code>.</li>
+<li><strong>CONST-043</strong> (no force push, no auto-push): F23 emits
+zero <code>git push</code> commands. T10’s close-out push to four
+remotes (origin / helixdev / vasic-digital / gitlab) is performed by the
+human operator with explicit per-push approval per CONST-043; the docs
+work itself doesn’t push.</li>
+<li><strong>CONST-033</strong> (host power management): F23 emits no
+shell commands beyond chromedp’s chromium-subprocess management (which
+is a runtime user-space process, not a power-state transition). No
+suspend/reboot/halt commands.</li>
+</ul>
+<hr />
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<ul>
+<li><strong>Q1 = A</strong> — Browser engine: <code>chromedp</code>
+(already in <code>helix_code/go.mod</code> as a direct dep at v0.15.1,
+with cdproto v0.0.0-20260405000525-47a8ff65b46a). Chromium subprocess
+managed by chromedp via <code>NewExecAllocator</code> +
+<code>NewContext</code>. No new external deps.</li>
+<li><strong>Q2 = A</strong> — Tool surface: six tools
+(<code>browser_navigate</code>, <code>browser_snapshot</code>,
+<code>browser_click</code>, <code>browser_type</code>,
+<code>browser_screenshot</code>, <code>browser_close</code>); each
+registered through the F21-extended Tool interface; per-tool
+RequiresApproval mapped per §3.6
+(<code>navigate</code>/<code>click</code>/<code>type</code>/<code>close</code>
+→ <code>LevelEdit</code>; <code>snapshot</code>/<code>screenshot</code>
+→ <code>LevelReadOnly</code>).</li>
+<li><strong>Q3 = A</strong> — Headless default;
+<code>HELIXCODE_BROWSER_HEADED=true</code> env var (case-insensitive
+equal to literal <code>true</code>) enables headed mode for human
+debugging. Read once at session-create via
+<code>OptionsFromEnv()</code>; not re-read mid-session.</li>
+<li><strong>Q4 = A</strong> — Screenshots written to
+<code>$XDG_DATA_HOME/helixcode/browser/screenshots/&lt;session-id&gt;/&lt;n&gt;.png</code>;
+tool result returns the absolute file path (NOT base64); files are mode
+<code>0600</code>; per-session tempdir is removed on
+<code>CloseSession()</code>. <code>n</code> is monotonic per session via
+<code>atomic.Uint64</code>.</li>
+<li><strong>Q5 = A</strong> — <code>/browser</code> slash command
+(<code>status</code> / <code>navigate &lt;url&gt;</code> /
+<code>close</code>) PLUS the six tools as the LLM-facing surface. NO
+cobra subcommand. Slash + tools share the single
+<code>BrowserManager</code>.</li>
+</ul>
+<hr />
+<h2 id="non-obvious-calls">11. Non-obvious calls</h2>
+<ol type="1">
+<li><strong>Coexistence with the existing
+<code>BrowserLaunchTool</code>/<code>BrowserNavigateTool</code>/<code>BrowserScreenshotTool</code>/<code>BrowserCloseTool</code>
+in <code>internal/tools/browser_tools.go</code>.</strong> The existing
+API takes a <code>browser_id</code> per call (multi-browser model from
+earlier work). F23 lands the cline single-session pattern as a DIFFERENT
+surface; the existing API stays. T09’s registration step picks ONE
+strategy: (a) register F23 tools under names
+<code>browser_navigate</code>/etc., overshadowing the existing ones
+(requires removing/renaming existing ones — riskier for any caller
+currently depending on them), OR (b) register F23 tools under a
+<code>_v2</code> suffix, leaving both APIs available. Spec defaults to
+(a) with the existing ones renamed <code>_legacy</code> if any test
+references them. Tests + Challenge use the F23 names.</li>
+<li><strong>Atomic-pointer over RWMutex for
+<code>current</code>.</strong> <code>RequireSession</code> is called on
+every tool invocation; lock-free read avoids contention under concurrent
+agent calls. The mutex serialises only the EnsureSession/CloseSession
+transitions (rare events).</li>
+<li><strong>chromedp <code>WaitReady(&quot;body&quot;)</code> is mandatory after
+<code>Navigate</code>.</strong> Without it, <code>OuterHTML</code> reads
+the empty pre-load <code>&lt;html&gt;&lt;/html&gt;</code>. Spec §4 step
+2 + §5.2 Bluff #1 + #3 pin this.</li>
+<li><strong><code>chromedp.NodeVisible</code> on
+<code>Click</code>/<code>SendKeys</code>.</strong> Without it, clicks
+may fire on hidden/zero-pixel elements, producing fake-success. Spec §4
+steps 4-5 + §5.2 Bluff #2 pin this.</li>
+<li><strong>PNG-magic verification on screenshot bytes BEFORE writing to
+disk.</strong> Catches the chromedp-returned-empty-buf case at the
+source rather than discovering it later when a downstream tool tries to
+decode the file. Spec §5.2 Bluff #4 pin.</li>
+<li><strong><code>sync.Once</code> on
+<code>BrowserSession.Close()</code>.</strong> <code>browser_close</code>
+followed by process-exit’s <code>defer CloseSession()</code> would
+otherwise call <code>cancel()</code> twice; chromedp tolerates it but
+the subsequent <code>os.RemoveAll(screenshotDir)</code> would race.
+sync.Once makes Close idempotent.</li>
+<li><strong>Per-session tempdir under <code>$XDG_DATA_HOME</code> (NOT
+<code>os.TempDir()</code>).</strong> XDG persists across logins (so the
+user can find the screenshots after the session);
+<code>os.TempDir()</code> is <code>/tmp</code> which gets cleaned on
+reboot. Per-session subdir prevents cross-session collision; close-time
+<code>RemoveAll</code> keeps disk usage bounded.</li>
+<li><strong>Headed mode via env var (NOT a CLI flag).</strong> A flag
+would force the user to remember it across re-launches; an env var
+sticks in their shell profile naturally. Read once at session-create —
+re-reading mid-session would let <code>/browser status</code> lie about
+the current chromium’s actual state.</li>
+<li><strong><code>HELIXCODE_BROWSER_HEADED</code> is case-INsensitive
+<code>true</code>.</strong> Typos (<code>True</code>, <code>TRUE</code>,
+<code>yes</code>, <code>1</code>) are treated as headless (the safe
+default), NOT as headed. Only the literal lowercase-or-uppercase
+<code>true</code> enables headed. Tests pin this.</li>
+<li><strong>Per-tool <code>RequiresApproval()</code> differs across the
+six tools.</strong> Reads (<code>snapshot</code>,
+<code>screenshot</code>) bypass approval; writes (<code>navigate</code>,
+<code>click</code>, <code>type</code>, <code>close</code>) gate. This is
+finer-grained than treating “all browser tools” as one approval class —
+the user benefits from being able to read the page without prompts but
+being prompted before any mutation.</li>
+<li><strong><code>browser_navigate</code> is <code>LevelEdit</code>, NOT
+<code>LevelRun</code>.</strong> Even though it spawns a chromium
+subprocess on first call, the subprocess is owned by chromedp
+(long-lived; not invoked per-tool). Treating it as <code>LevelRun</code>
+would force <code>ModeFullAuto</code> to drop it through the F14
+sandbox, which doesn’t make sense (the chromium binary is itself the
+sandboxed surface; double-sandboxing breaks chromedp’s subprocess
+management).</li>
+<li><strong><code>browser_close</code> is <code>LevelEdit</code>, NOT
+<code>LevelReadOnly</code>.</strong> Closing a session drops in-flight
+page state (half-typed text, mid-load downloads). Gating prevents the
+agent from “helpfully cleaning up” while the user is mid-task.</li>
+<li><strong>F22 auto-commit interaction.</strong>
+<code>RequiresApproval == LevelEdit</code> for
+<code>navigate</code>/<code>click</code>/<code>type</code>/<code>close</code>
+means F22’s <code>fireAutoCommit</code> hook will fire after each
+successful call. That’s wrong semantically — these tools don’t mutate
+the working tree. Spec §3.5 of F22 derives <code>MutatedPaths</code>
+from per-tool param keys; <code>browser_*</code> tools have no
+<code>path</code> param, so the fallthrough returns <code>nil</code>,
+and F22’s committer’s <code>git status --porcelain</code> check returns
+“no changes” → <code>Skipped</code>. Net effect: no spurious commits.
+Verified by integration test in T09.</li>
+<li><strong>F21 <code>--approval</code> flag interaction.</strong> In
+<code>ModeSuggest</code>, <code>browser_navigate</code> returns
+<code>ErrApprovalRequired</code> immediately without spawning chromium.
+In <code>ModeAutoEdit</code>, <code>browser_navigate</code> proceeds.
+Tests cover both directions.</li>
+<li><strong>F13 LSP auto-trigger interaction.</strong> F13 fires
+post-Execute for tools with edited file paths. <code>browser_*</code>
+tools have no file paths, so F13’s path-derivation returns empty and the
+LSP trigger is a no-op. No interference.</li>
+<li><strong>F04 worktree integration.</strong> Since browser tools don’t
+operate on the filesystem (other than the screenshot tempdir), worktree
+isolation is irrelevant. Each subagent gets its own
+<code>BrowserManager</code> if F04 dispatches with isolated registries;
+otherwise they share. Spec doesn’t pin a choice — main.go’s wiring
+decides. T09 default: shared per-CLI-instance, like F22’s
+autocommitter.</li>
+<li><strong>Disk usage discipline.</strong> Screenshots accumulate under
+<code>$XDG_DATA_HOME</code> until <code>CloseSession()</code> is called.
+A long-lived agent that takes 100 screenshots without closing
+accumulates 100 PNGs. Spec §5.3 notes process-exit’s
+<code>defer CloseSession()</code> is the safety net. v2 may add
+per-session quota.</li>
+<li><strong><code>browser_screenshot</code>’s decoded width/height comes
+from <code>image/png.DecodeConfig</code> reading the first 64 bytes (the
+IHDR chunk).</strong> This is a stdlib call, not a chromedp call, and
+it’s lightweight (no full-image decode). Provides positive evidence that
+the bytes are a valid PNG, beyond just the magic check.</li>
+<li><strong>Context propagation.</strong> Each tool’s
+<code>Execute(ctx, ...)</code> parent ctx wraps the chromedp ctx via
+<code>chromedp.Run</code>’s internal context handling — chromedp
+respects ctx cancellation. If the LLM driver cancels the request
+mid-call (e.g. user hits Ctrl-C), chromium aborts the action
+cleanly.</li>
+<li><strong>Single-source-of-truth for “is a session active”:</strong>
+<code>manager.current.Load() != nil</code>. Both
+<code>/browser status</code> and <code>RequireSession</code> use the
+same atomic load — no two-source-truth drift.</li>
+</ol>
+</body>
+</html>

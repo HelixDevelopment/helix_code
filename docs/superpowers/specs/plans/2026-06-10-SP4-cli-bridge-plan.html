@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-SP4-cli-bridge-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-SP4-cli-bridge-plan</h1>
+</header>
+<h1 id="sp4-cli-agent-bridge-providers-implementation-plan">SP4 —
+CLI-agent bridge providers — Implementation Plan</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Maintainer</td>
+<td>CLI-Agent Fusion programme</td>
+</tr>
+<tr>
+<td>Phase</td>
+<td>PLANNING (read-only; no code modified to produce this plan)</td>
+</tr>
+<tr>
+<td>Parent roadmap</td>
+<td><code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>
+§SP4 (lines 154-167)</td>
+</tr>
+<tr>
+<td>Source analysis</td>
+<td><code>docs/superpowers/specs/analysis/2026-06-10-D-cli-bridge.md</code></td>
+</tr>
+<tr>
+<td>Status summary</td>
+<td>Decomposition complete; 34 tasks across P4.0–P4.6; tier-1 = 8
+installed agents</td>
+</tr>
+<tr>
+<td>Issues</td>
+<td>docs/Issues.md (ATM-NNN assigned at execution kickoff)</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>none yet</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-goal--scope">1. Goal &amp; scope</a></li>
+<li><a href="#2-verified-anchors-read-only-this-session">2. Verified
+anchors (read-only this session)</a></li>
+<li><a href="#3-architecture-decision-replace--thin-adapter-const-051--114-74">3.
+Architecture decision: replace + thin adapter (CONST-051 /
+§11.4.74)</a></li>
+<li><a href="#4-anti-bluff--tdd-discipline-binding-this-plan">4.
+Anti-bluff &amp; TDD discipline binding this plan</a></li>
+<li><a href="#5-phased-tasks">5. Phased tasks</a></li>
+<li><a href="#6-files-to-create--modify">6. Files to create /
+modify</a></li>
+<li><a href="#7-ordered-task-list-34-tasks">7. Ordered task list (34
+tasks)</a></li>
+<li><a href="#8-per-agent-1499-research-items">8. Per-agent §11.4.99
+research items</a></li>
+<li><a href="#9-operator-decisions-required">9. Operator decisions
+required</a></li>
+<li><a href="#10-rollback-plan">10. Rollback plan</a></li>
+<li><a href="#11-12-line-summary">11. 12-line summary</a></li>
+</ul>
+<hr />
+<h2 id="goal-scope">1. Goal &amp; scope</h2>
+<p>Make each working CLI coding agent its <strong>own HelixCode model
+provider</strong> that: 1. proxies prompts via the agent’s CLI (real
+<code>exec</code>, never simulated), 2. surfaces power-features (Vision
+/ Generative / RAG / Memory / MCP / LSP / ACP), 3. selects PRIMARY
+(system-installed binary via <code>exec.LookPath</code>) with FALLBACK
+(submodule-built binary), 4. lists models DYNAMICALLY per agent
+(CONST-036, no hardcoded lists), 5. re-exports +
+<strong>installs</strong> + <strong>live-validates</strong> each agent’s
+config.</p>
+<p><strong>Tier-1 (do first — 8 agents system-installed NOW, versions
+captured in analysis-D §2):</strong> <code>claude</code> 2.1.170 →
+<code>qwen</code> 0.5.0 → <code>opencode</code> 1.16.2 →
+<code>gemini</code> 0.1.9 → <code>crush</code> v0.22.2 →
+<code>codex</code> → <code>goose</code> 1.8.0 → <code>copilot</code>
+1.0.46.</p>
+<p>Audio-priority ordering (§11.4.72) is N/A here (no audio surface);
+tier-1 ordering follows install-readiness + most-visible-first (§11.4.42
+/ §11.4.103).</p>
+<p><strong>Tier-2 (fallback path required — system-absent
+today):</strong> <code>aider</code>, <code>plandex</code>,
+<code>forge</code> (analysis-D §2). Then expand toward the ~43
+coding-CLI candidates in <code>cli_agents/</code> (analysis-D §1).</p>
+<hr />
+<h2 id="verified-anchors-read-only-this-session">2. Verified anchors
+(read-only this session)</h2>
+<p>Every line below was opened and confirmed this session (not copied
+from analysis).</p>
+<h3 id="the-llm.provider-contract-helixcode-providers-must-satisfy">2.1
+The <code>llm.Provider</code> contract HelixCode providers must
+satisfy</h3>
+<p><code>helix_code/internal/llm/missing_types.go:356-378</code> —
+interface <code>Provider</code> with methods:
+<code>GetType() ProviderType</code>, <code>GetName() string</code>,
+<code>GetModels() []ModelInfo</code>,
+<code>GetCapabilities() []ModelCapability</code>,
+<code>Generate(ctx, *LLMRequest) (*LLMResponse, error)</code>,
+<code>GenerateStream(ctx, *LLMRequest, chan&lt;- LLMResponse) error</code>,
+<code>IsAvailable(ctx) bool</code>,
+<code>GetHealth(ctx) (*ProviderHealth, error)</code>,
+<code>Close() error</code>, <code>GetContextWindow() int</code>,
+<code>CountTokens(text) (int, error)</code>. <code>ProviderType</code>
+const block at <code>missing_types.go:38+</code> already has
+<code>ProviderTypeQwen</code>, <code>ProviderTypeCopilot</code> etc. —
+new per-CLI provider types must be ADDED here.</p>
+<h3 id="copilot_provider.go-is-not-a-cli-bridge">2.2
+<code>copilot_provider.go</code> is NOT a CLI bridge</h3>
+<p><code>grep &quot;exec.Command|LookPath&quot; helix_code/internal/llm/copilot_provider.go</code>
+→ <strong>empty</strong>. It is HTTP/token-based (confirmed). There is
+<strong>no CLI-exec provider in <code>helix_code/internal/llm</code>
+today</strong>.</p>
+<h3 id="d-7-wiring-gap-confirmed">2.3 D-7 wiring gap CONFIRMED</h3>
+<p><code>helix_code/go.mod</code> replace block (lines 194-212) wires
+<code>containers/helixqa/docprocessor/llmorchestrator/visionengine/challenges/security/debate/helixspecifier/lazy</code>
+— <strong>NO <code>replace dev.helix.agent</code></strong>. HelixCode
+cannot import the <code>clis</code> substrate today.</p>
+<h3 id="the-real-exec-primitive-honest">2.4 The real exec primitive —
+honest</h3>
+<p><code>submodules/helix_agent/internal/clis/agents/base/base.go:120-124</code>
+<code>IsAvailable()</code> does real
+<code>exec.LookPath(string(b.info.Type))</code>; <code>:127-138</code>
+<code>ExecuteCommand</code> runs <code>exec.CommandContext</code> with
+workdir + env. This is the genuine detect+exec base to reuse.
+<code>agents/claude_code/claude_code.go</code> is partially real:
+<code>:160</code> <code>exec.LookPath(&quot;node&quot;)</code>, <code>:276</code>
+<code>exec.CommandContext(ctx,&quot;bash&quot;,...)</code>, <code>:310</code> git
+exec, <code>:453</code> LookPath.</p>
+<h3 id="d-6-stub-bluff-confirmed-and-it-is-wider-than-the-roadmap-recorded">2.5
+D-6 stub bluff CONFIRMED — and it is WIDER than the roadmap
+recorded</h3>
+<ul>
+<li><code>agents/qwencode/qwencode.go:101-112</code>
+<code>generate()</code> returns
+<code>fmt.Sprintf(&quot;// Generated by Qwen\n// %s&quot;, prompt)</code>;
+<code>:115-126</code> <code>chat()</code> returns
+<code>fmt.Sprintf(&quot;Qwen: %s&quot;, message)</code>; <code>:137-139</code>
+<code>IsAvailable()</code> returns <code>q.config.APIKey != &quot;&quot;</code> —
+<strong>never execs <code>qwen</code></strong>. (Matches D-6
+exactly.)</li>
+<li><strong>NEW FINDING (not in roadmap D-6):</strong> the pooled
+dispatch methods in
+<code>submodules/helix_agent/internal/clis/instance_manager.go</code>
+are ALSO stubs — <code>executeAider:906-913</code>,
+<code>executeClaudeCode:915-922</code>,
+<code>executeCodex:924-931</code>, <code>executeCline:933-940</code>,
+<code>executeOpenHands:942+</code> each
+<code>return map[string]string{&quot;status&quot;:&quot;executed&quot;,&quot;message&quot;:&quot;&lt;Agent&gt; execution completed&quot;, ...}</code>
+with <strong>NO exec at all</strong>. So even the “real CLI-exec layer”
+the analysis credits has a stubbed dispatch tier. This materially
+expands P4.0 de-bluff scope and MUST be RED-reproduced.
+(<code>SendRequest:290</code>, <code>CreateInstance:83</code>,
+<code>AcquireInstance:167</code> are the lifecycle entry points routing
+into these stubs.)</li>
+<li>The richer contract: <code>clis/types.go:537</code>
+<code>CLIAgent</code> interface (<code>ExecuteTask:548</code>),
+<code>Capabilities</code> struct <code>:555-566</code>
+(<code>SupportsRepoMap/GitOps/DiffEditing/ToolUse/Browser/Sandbox/Interpreter/SupportedTools</code>),
+<code>DefaultCapabilities:567+</code> hardcodes per-agent caps
+(CONST-040 says these SHOULD come from LLMsVerifier, not hardcode).</li>
+</ul>
+<h3 id="re-export-static-validate-exists-filesystem-install-live-validate-absent">2.6
+Re-export + static-validate EXISTS; filesystem-install + live-validate
+ABSENT</h3>
+<ul>
+<li><code>submodules/helix_agent/cmd/helixagent/main.go:107</code> flag
+<code>--generate-all-agents</code>, <code>:108</code>
+<code>--all-agents-output-dir</code>, dispatch <code>:1371</code> →
+handler <code>handleGenerateAllAgents:4522</code> (requires output dir
+<code>:4529</code>).</li>
+<li><code>submodules/helix_agent/challenges/codebase/go_files/unified_cli_generator/unified_cli_generator.go</code>:
+<code>GenerateAll():76</code>, <code>saveConfig():212</code>,
+<strong><code>Validate(agentType, config):263</code> →
+<code>*ValidationResult{Valid,Warnings,Errors}</code></strong> (static
+validation only).</li>
+<li><code>cli_agents_configs/</code> = <strong>109 files</strong>
+(<code>&lt;agent&gt;.json</code>/<code>&lt;agent&gt;.yaml</code> pairs +
+README). Their direction is REVERSED (CLI-agent → HelixAgent
+OpenAI-compat backend, analysis-D §4). SP4 adds the FORWARD direction
+(HelixCode → CLI-agent) and the ABSENT install+live-validate legs.</li>
+</ul>
+<hr />
+<h2 id="architecture-decision-replace-thin-adapter-const-051-11.4.74">3.
+Architecture decision: replace + thin adapter (CONST-051 /
+§11.4.74)</h2>
+<p><strong>Decision (recommended, pending operator confirmation — see §9
+D-A):</strong> add
+<code>replace dev.helix.agent =&gt; ../submodules/helix_agent</code> to
+<code>helix_code/go.mod</code> and write ONE thin adapter
+<code>helix_code/internal/llm/cli_agent_provider.go</code> that wraps
+the <code>clis</code> layer behind <code>llm.Provider</code>. Do
+<strong>not</strong> re-implement exec in HelixCode (§11.4.74
+extend-don’t-reimplement; CONST-051(B) decoupling — the generic bridge
+stays project-agnostic in the submodule, HelixCode owns only the thin
+adapter + registry).</p>
+<p><strong>Parametrized, not one-file-per-agent.</strong> A single
+<code>CLIAgentProvider</code> struct carries an <code>AgentSpec</code>
+(binary name, non-interactive arg template, model-list subcommand,
+capability probe set, fallback build path). Adding an agent = a registry
+row, not a new Go file. <code>GetType()</code> returns a per-agent
+<code>ProviderType</code> added to <code>missing_types.go</code>.</p>
+<p><strong>CONST-051(C) layout check:</strong>
+<code>dev.helix.agent</code> already lives at the root-accessible
+<code>submodules/helix_agent/</code> (flat layout). No nested own-org
+chain is introduced — the replace points at the existing root path.
+✅</p>
+<p><strong>Module-boundary risk (flag to executor):</strong>
+<code>dev.helix.agent</code> is a large module
+(<code>internal/{agentic,ensemble,llm,mcp,memory,…}</code> — 40+
+packages). Importing it transitively pulls its <code>go.mod</code> graph
+into <code>helix_code</code>. P4.0.2 MUST verify
+<code>go build ./...</code> still resolves after the replace and that no
+version conflicts arise; if the graph is too heavy, the fallback is a
+<strong>narrow extraction</strong> (a small <code>clis</code>-only
+interface shim) — decided at P4.0.2 with captured
+<code>go mod graph</code> evidence, not guessed (§11.4.6).</p>
+<hr />
+<h2 id="anti-bluff-tdd-discipline-binding-this-plan">4. Anti-bluff &amp;
+TDD discipline binding this plan</h2>
+<ul>
+<li><strong>§11.4.115 RED-first, polarity switch.</strong> Every fix
+ships a RED test authored to FAIL on the CURRENT artifact
+(<code>RED_MODE=1</code> reproduces the stub bluff), flipping to GREEN
+guard (<code>RED_MODE=0</code>) post-fix. The canonical RED here: a test
+asserting <code>qwencode</code> (and each instance_manager dispatch
+method) <em>actually execs the binary</em> — it MUST fail on the current
+stub returning <code>&quot;Qwen: %s&quot;</code> /
+<code>&quot;…execution completed&quot;</code>.</li>
+<li><strong>§11.4.98 fully-automated.</strong> Every governed test is
+self-driving end-to-end, no human action after startup, PASS at
+<code>-count=3</code>. Proxied-prompt tests drive a real installed CLI
+with a deterministic prompt (e.g. arithmetic) and assert a real answer
+in stdout — NOT a simulated string.</li>
+<li><strong>§11.4.108 four-layer.</strong> SOURCE (provider code) →
+ARTIFACT (<code>go build</code> binary contains it) → RUNTIME-ON-CLEAN
+(provider registered + <code>IsAvailable</code> true on a clean
+checkout) → USER-VISIBLE (real proxied prompt → real result). Each agent
+declares ONE runtime signature (e.g. “<code>helixcode</code> CLI lists
+≥1 model for <code>claude</code> via <code>GetModels</code> AND a
+<code>2+2</code> prompt returns <code>4</code>”).</li>
+<li><strong>§11.4.135 regression guard</strong> registered per closed
+defect in the same commit.</li>
+<li><strong>§11.4.85 stress + chaos</strong> on the exec path
+(concurrent proxied prompts; binary-missing / timeout /
+killed-subprocess injection — must error cleanly, never crash).</li>
+<li><strong>§11.4.125 / §11.4.134 code-review gate</strong> before
+pre-build + main build, iterate-until-GO.</li>
+<li><strong>§11.4.70 subagent-driven</strong> execution default; one
+subagent per agent-bridge keeps context isolated.</li>
+<li><strong>CONST-036</strong> dynamic <code>GetModels</code>;
+<strong>CONST-040</strong> capabilities from LLMsVerifier
+<code>VerificationResult</code> (not <code>DefaultCapabilities</code>
+hardcode) — wire to the verifier surface SP1/SP2 own; where the verifier
+has no entry for a CLI agent yet, probe the agent at runtime and mark
+provenance honestly.</li>
+</ul>
+<hr />
+<h2 id="phased-tasks">5. Phased tasks</h2>
+<h3 id="p4.0-pre-req-remediation-anti-bluff-blocks-everything">P4.0 —
+Pre-req remediation (anti-bluff, BLOCKS everything)</h3>
+<ul>
+<li><strong>T4.0.1</strong> RED-reproduce the <code>qwencode</code> stub
+bluff: test in <code>agents/qwencode/qwencode_test.go</code> asserting
+<code>generate</code>/<code>chat</code> run the real <code>qwen</code>
+binary and return non-templated output; assert <code>IsAvailable</code>
+uses <code>exec.LookPath</code>, not <code>APIKey != &quot;&quot;</code>. MUST
+FAIL on current code (§11.4.115).</li>
+<li><strong>T4.0.2</strong> RED-reproduce the <strong>instance_manager
+dispatch stubs</strong> (NEW): test asserting
+<code>SendRequest</code>→<code>executeClaudeCode</code>/<code>executeCodex</code>/<code>executeAider</code>/…
+actually exec the binary; MUST FAIL on the current
+<code>&quot;…execution completed&quot;</code> map. (This is the wider bluff
+surface found §2.5.)</li>
+<li><strong>T4.0.3</strong> GREEN: rewrite <code>qwencode</code>
+(<code>generate</code>/<code>chat</code>/<code>complete</code>/<code>IsAvailable</code>/<code>status</code>)
+over <code>base.ExecuteCommand</code> with the real <code>qwen</code>
+non-interactive invocation (research item §8). Keep package
+project-agnostic (CONST-051).</li>
+<li><strong>T4.0.4</strong> GREEN: replace each stubbed
+<code>instance_manager.execute&lt;Agent&gt;</code> with a real dispatch
+into the agent integration’s <code>Execute(...)</code> (which itself
+execs via <code>base</code>). Audit ALL ~70 agent packages for the same
+stub pattern; file a tracked sub-item per stubbed agent (do NOT silently
+leave others stubbed — §11.4.124 investigate-before-anything).</li>
+<li><strong>T4.0.5</strong> Add
+<code>replace dev.helix.agent =&gt; ../submodules/helix_agent</code> to
+<code>helix_code/go.mod</code>; capture <code>go mod graph</code> +
+<code>go build ./...</code> evidence; decide full-import vs narrow-shim
+(§3 risk).</li>
+<li><strong>T4.0.6</strong> §1.1 paired mutations for T4.0.1/T4.0.2 RED
+tests (re-insert a stub string → test FAILs).</li>
+</ul>
+<h3 id="p4.1-per-agent-provider-contract">P4.1 — Per-agent provider
+contract</h3>
+<ul>
+<li><strong>T4.1.1</strong> Add per-agent <code>ProviderType</code>
+consts to <code>missing_types.go</code>
+(e.g. <code>ProviderTypeClaudeCodeCLI</code>, <code>…QwenCodeCLI</code>,
+<code>…OpenCodeCLI</code>, <code>…GeminiCLI</code>,
+<code>…CrushCLI</code>, <code>…CodexCLI</code>, <code>…GooseCLI</code>,
+<code>…CopilotCLI</code>).</li>
+<li><strong>T4.1.2</strong>
+<code>helix_code/internal/llm/cli_agent_provider.go</code> —
+<code>CLIAgentProvider</code> + <code>AgentSpec</code>, implementing all
+11 <code>Provider</code> methods by delegating to <code>clis</code>
+(adapter). <code>IsAvailable</code> → real <code>exec.LookPath</code>
+mirror of <code>base.go:120</code>, never the qwencode APIKey
+bluff.</li>
+<li><strong>T4.1.3</strong> <code>cli_agent_registry.go</code> —
+registry of <code>AgentSpec</code> rows (data, not code-per-agent);
+registration into the existing provider manager so
+<code>handleListModels</code> (root CLAUDE.md BLUFF-002 pattern)
+surfaces them.</li>
+<li><strong>T4.1.4</strong> Unit + RED proxied-prompt test for the
+adapter against ONE installed agent (claude) before generalizing.</li>
+</ul>
+<h3 id="p4.2-primary-vs-fallback-selection">P4.2 — Primary-vs-fallback
+selection</h3>
+<ul>
+<li><strong>T4.2.1</strong> <code>resolveBinary(spec)</code> — PRIMARY
+<code>exec.LookPath(spec.Binary)</code>; FALLBACK resolve
+submodule-built artifact under <code>cli_agents/&lt;agent&gt;/</code>
+(built bin/dist/target or documented build target). Record chosen path
+in <code>GetHealth</code> details (anti-bluff evidence, analysis-D
+§5.3).</li>
+<li><strong>T4.2.2</strong> Fallback build recipe wiring for
+aider/plandex/forge (tier-2). §11.4.77 regen-mechanism doc for each
+built binary.</li>
+<li><strong>T4.2.3</strong> Tests: PRIMARY-present,
+PRIMARY-absent→FALLBACK-build, both-absent→honest
+<code>IsAvailable=false</code> + SKIP-with-reason
+(<code>hardware_not_present</code>-class → here
+<code>binary_unavailable</code>).</li>
+</ul>
+<h3 id="p4.3-power-feature-passthrough-dynamic-models-capabilities">P4.3
+— Power-feature passthrough + dynamic models + capabilities</h3>
+<ul>
+<li><strong>T4.3.1</strong> <code>GetModels()</code> per agent — exec
+the agent’s model-list subcommand, parse, return
+<code>[]ModelInfo</code> (CONST-036). Research flags §8.</li>
+<li><strong>T4.3.2</strong> <code>GetCapabilities()</code> — map
+<code>clis.Capabilities</code> → power-feature flags
+(Vision/Generative/RAG/Memory/MCP/LSP/ACP); source from LLMsVerifier
+<code>VerificationResult</code> where present (CONST-040), runtime-probe
++ honest-provenance otherwise.</li>
+<li><strong>T4.3.3</strong> Power-feature passthrough plumbing
+(MCP/LSP/ACP/RAG/Memory) — pass HelixCode’s MCP/LSP context into the
+agent invocation where the agent supports it; per-agent capability
+probe.</li>
+<li><strong>T4.3.4</strong> <code>GenerateStream</code> line-buffered
+stdout → channel; <code>CountTokens</code>/<code>GetContextWindow</code>
+char-fallback (mirror copilot_provider char-estimate).</li>
+</ul>
+<h3 id="p4.4-config-re-export-install-live-validate-the-absent-legs">P4.4 —
+Config re-export + INSTALL + LIVE-validate (the ABSENT legs)</h3>
+<ul>
+<li><strong>T4.4.1</strong> Re-export: reuse
+<code>helixagent --generate-all-agents</code> +
+<code>unified_cli_generator.GenerateAll/saveConfig</code> (exists). Add
+forward-direction config (HelixCode → CLI-agent) generation.</li>
+<li><strong>T4.4.2</strong> <strong>INSTALL (NEW):</strong> copy
+generated config into each agent’s real config dir
+(<code>~/.claude.json</code>, <code>~/.qwen/</code>,
+<code>~/.config/opencode/</code>, <code>~/.config/crush/</code>, etc.),
+back up existing first (§9.2 reversible-first). Per-agent install-path
+is a research item §8.</li>
+<li><strong>T4.4.3</strong> <strong>LIVE-validate (NEW):</strong> after
+install, run the installed agent end-to-end (real proxied prompt → real
+result, captured) to prove the install works (§11.4.5 / §11.4.69 runtime
+evidence). Static <code>Validate()</code> is the pre-check, live exec is
+the proof.</li>
+<li><strong>T4.4.4</strong> <code>docs/qa/&lt;run-id&gt;/</code>
+transcript per agent (§11.4.83) — full bidirectional prompt→result.</li>
+</ul>
+<h3 id="p4.5-tier-1-rollout-8-installed-then-expand">P4.5 — Tier-1
+rollout (8 installed) then expand</h3>
+<ul>
+<li><strong>T4.5.1–T4.5.8</strong> One subagent per tier-1 agent
+(claude, qwen, opencode, gemini, crush, codex, goose, copilot): wire
+<code>AgentSpec</code>, dynamic models, install+live-validate, capture
+evidence, register regression guard. Order = §1 tier-1 order.</li>
+<li><strong>T4.5.9</strong> Expand-plan stub-item for tier-2
+(aider/plandex/forge fallback build) + the ~43-agent backlog.</li>
+</ul>
+<h3 id="p4.6-full-test-coverage">P4.6 — Full test coverage</h3>
+<ul>
+<li><strong>T4.6.1</strong> Per-agent real proxied-prompt e2e (§11.4.98
+self-driving, <code>-count=3</code>).</li>
+<li><strong>T4.6.2</strong> Stress + chaos on exec path (§11.4.85).</li>
+<li><strong>T4.6.3</strong> HelixQA Challenge bank entry per tier-1
+agent (CONST-050(B)).</li>
+<li><strong>T4.6.4</strong> Pre-build gate
+<code>CM-CLI-AGENT-PROVIDER-NO-STUB</code> (greps provider + agent
+packages for templated-return bluff patterns) + §1.1 paired
+mutation.</li>
+</ul>
+<hr />
+<h2 id="files-to-create-modify">6. Files to create / modify</h2>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 34%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th>Action</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submodules/helix_agent/internal/clis/agents/qwencode/qwencode.go</code></td>
+<td>MODIFY</td>
+<td>Replace stub <code>generate/chat/complete/IsAvailable/status</code>
+with real <code>exec</code> (T4.0.3)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/clis/agents/qwencode/qwencode_test.go</code></td>
+<td>MODIFY</td>
+<td>RED-on-stub → GREEN guard, <code>RED_MODE</code> switch
+(T4.0.1)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/clis/instance_manager.go</code></td>
+<td>MODIFY</td>
+<td>Replace stub <code>execute&lt;Agent&gt;:906+</code> dispatch with
+real integration dispatch (T4.0.4)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/clis/instance_manager_test.go</code></td>
+<td>CREATE/MODIFY</td>
+<td>RED reproducing dispatch-stub bluff (T4.0.2)</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/clis/agents/*/</code> (audit
+~70)</td>
+<td>MODIFY (as found)</td>
+<td>De-bluff each stubbed agent package; tracked sub-item each
+(T4.0.4)</td>
+</tr>
+<tr>
+<td><code>helix_code/go.mod</code></td>
+<td>MODIFY</td>
+<td>Add
+<code>replace dev.helix.agent =&gt; ../submodules/helix_agent</code>
+(T4.0.5 / D-7)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/missing_types.go</code></td>
+<td>MODIFY</td>
+<td>Add per-agent <code>ProviderType</code> consts (T4.1.1)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/cli_agent_provider.go</code></td>
+<td>CREATE</td>
+<td><code>CLIAgentProvider</code> adapter implementing
+<code>llm.Provider</code> (T4.1.2)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/cli_agent_registry.go</code></td>
+<td>CREATE</td>
+<td><code>AgentSpec</code> registry + provider-manager registration
+(T4.1.3)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/cli_agent_provider_test.go</code></td>
+<td>CREATE</td>
+<td>Adapter unit + RED proxied-prompt tests (T4.1.4)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/cli_agent_fallback.go</code></td>
+<td>CREATE</td>
+<td><code>resolveBinary</code> primary→submodule fallback (T4.2.1)</td>
+</tr>
+<tr>
+<td><code>helix_code/internal/llm/cli_agent_install.go</code></td>
+<td>CREATE</td>
+<td>Filesystem install + live post-install validation loop
+(T4.4.2/T4.4.3)</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/integration/cli_agent_bridge_test.go</code></td>
+<td>CREATE</td>
+<td>Per-agent real proxied-prompt e2e, <code>-tags=integration</code>
+(T4.6.1)</td>
+</tr>
+<tr>
+<td><code>helix_code/tests/integration/cli_agent_stress_chaos_test.go</code></td>
+<td>CREATE</td>
+<td>Stress + chaos on exec path (T4.6.2)</td>
+</tr>
+<tr>
+<td><code>helix_code/scripts/gates/cm-cli-agent-provider-no-stub.sh</code></td>
+<td>CREATE</td>
+<td>Anti-stub pre-build gate + paired mutation (T4.6.4)</td>
+</tr>
+<tr>
+<td><code>cli_agents_configs/forward/&lt;agent&gt;.{json,yaml}</code></td>
+<td>CREATE</td>
+<td>Forward-direction (HelixCode→agent) configs (T4.4.1)</td>
+</tr>
+<tr>
+<td><code>docs/qa/&lt;run-id&gt;/</code></td>
+<td>CREATE</td>
+<td>Per-agent install + proxied-prompt transcripts (T4.4.4)</td>
+</tr>
+<tr>
+<td><code>docs/Issues.md</code>, <code>docs/CONTINUATION.md</code></td>
+<td>MODIFY</td>
+<td>ATM-NNN tracking + state sync (CONST-044)</td>
+</tr>
+</tbody>
+</table>
+<p>(Inner-module paths are under the repo-root <code>helix_code/</code>
+tracked subdirectory; <code>cli_agents_configs/</code>,
+<code>submodules/</code>, <code>docs/</code> are repo-root.)</p>
+<hr />
+<h2 id="ordered-task-list-34-tasks">7. Ordered task list (34 tasks)</h2>
+<ol type="1">
+<li>T4.0.1 RED qwencode stub</li>
+<li>T4.0.2 RED instance_manager dispatch stubs (NEW surface)</li>
+<li>T4.0.3 GREEN qwencode real exec</li>
+<li>T4.0.4 GREEN instance_manager dispatch + audit ~70 packages</li>
+<li>T4.0.5 <code>replace dev.helix.agent</code> + <code>go build</code>
+graph evidence</li>
+<li>T4.0.6 §1.1 paired mutations for P4.0</li>
+<li>T4.1.1 per-agent ProviderType consts</li>
+<li>T4.1.2 <code>CLIAgentProvider</code> adapter</li>
+<li>T4.1.3 <code>AgentSpec</code> registry + manager registration</li>
+<li>T4.1.4 adapter unit + RED proxied-prompt (claude)</li>
+<li>T4.2.1 <code>resolveBinary</code> primary→fallback + health
+provenance</li>
+<li>T4.2.2 fallback build recipe (aider/plandex/forge) + §11.4.77 regen
+doc</li>
+<li>T4.2.3 selection tests (present/fallback/both-absent
+SKIP-with-reason)</li>
+<li>T4.3.1 dynamic <code>GetModels</code> per agent (CONST-036)</li>
+<li>T4.3.2 <code>GetCapabilities</code> from LLMsVerifier (CONST-040) +
+honest probe</li>
+<li>T4.3.3 power-feature passthrough
+(MCP/LSP/ACP/RAG/Memory/Vision)</li>
+<li>T4.3.4 <code>GenerateStream</code> + token-count fallback</li>
+<li>T4.4.1 forward-direction re-export</li>
+<li>T4.4.2 filesystem INSTALL with backup (ABSENT leg)</li>
+<li>T4.4.3 LIVE post-install validate (ABSENT leg)</li>
+<li>T4.4.4 <code>docs/qa/&lt;run-id&gt;/</code> transcripts</li>
+<li>T4.5.1 tier-1: claude</li>
+<li>T4.5.2 tier-1: qwen</li>
+<li>T4.5.3 tier-1: opencode</li>
+<li>T4.5.4 tier-1: gemini</li>
+<li>T4.5.5 tier-1: crush</li>
+<li>T4.5.6 tier-1: codex</li>
+<li>T4.5.7 tier-1: goose</li>
+<li>T4.5.8 tier-1: copilot</li>
+<li>T4.5.9 expand-plan: tier-2 fallback + ~43-agent backlog</li>
+<li>T4.6.1 per-agent real proxied-prompt e2e (§11.4.98, count=3)</li>
+<li>T4.6.2 stress + chaos on exec path</li>
+<li>T4.6.3 HelixQA Challenge bank per tier-1 agent</li>
+<li>T4.6.4 <code>CM-CLI-AGENT-PROVIDER-NO-STUB</code> gate + paired
+mutation + code-review-until-GO</li>
+</ol>
+<p>Dependency rule: P4.0 blocks all; P4.1 before P4.2/P4.3/P4.5; P4.4
+needs P4.1+P4.2; P4.5 needs P4.1–P4.4; P4.6 cross-cuts P4.5. Within
+P4.5, tier-1 subagents run in parallel (§11.4.103) but each binary is a
+single-owner resource during its live-validate (§11.4.119).</p>
+<hr />
+<h2 id="per-agent-11.4.99-research-items">8. Per-agent §11.4.99 research
+items</h2>
+<p>Verify against LATEST official docs (never memory); cite URLs + date
+in a <code>## Sources verified</code> footer per agent before its
+config/guide commits. Each item = (a) non-interactive invocation, (b)
+model-list subcommand, (c) JSON/structured output mode, (d) real
+config-file path for INSTALL.</p>
+<ul>
+<li><strong>Claude Code 2.1.170</strong> — <code>claude -p</code> /
+<code>--print</code> / <code>--output-format json</code> print mode;
+model selection flag; session reuse; MCP wiring; config path
+<code>~/.claude.json</code> (confirm).</li>
+<li><strong>Qwen Code 0.5.0</strong> — real non-interactive invocation +
+model list (current <code>qwencode.go</code> is a stub, must be rebuilt
+against the installed binary); config dir <code>~/.qwen/</code>
+(confirm).</li>
+<li><strong>OpenCode 1.16.2</strong> — <code>opencode run</code>?
+non-interactive flags; how “Zen” provider models are
+enumerated/selected; model-list command; config
+<code>~/.config/opencode/</code> (confirm).</li>
+<li><strong>Gemini CLI 0.1.9</strong> — non-interactive flag, model-list
+subcommand, output mode.</li>
+<li><strong>Crush v0.22.2</strong> — non-interactive flag, model list,
+<code>~/.config/crush/</code> (confirm).</li>
+<li><strong>codex</strong> (no <code>--version</code> output) — confirm
+invocation + model list + approval-mode flags.</li>
+<li><strong>goose 1.8.0</strong> — non-interactive flag, session/model
+selection, model list.</li>
+<li><strong>copilot (GitHub Copilot CLI) 1.0.46</strong> —
+non-interactive flag, model list, auth handoff (distinct from the HTTP
+<code>copilot_provider.go</code>).</li>
+<li><strong>Power-features per agent</strong> — which of
+Vision/RAG/Memory/MCP/LSP/ACP each exposes and how to probe at runtime
+(CONST-040).</li>
+<li><strong>Tier-2</strong> — aider / plandex / forge
+build-from-submodule recipe + non-interactive invocation.</li>
+</ul>
+<hr />
+<h2 id="operator-decisions-required">9. Operator decisions required</h2>
+<ul>
+<li><strong>D-A (architecture):</strong> confirm
+<code>replace dev.helix.agent</code> + thin adapter (recommended) vs
+porting a <code>clis</code>-only shim into HelixCode. Surfaces at P4.0.5
+with <code>go mod graph</code> evidence (§11.4.66 interactive
+options).</li>
+<li><strong>D-B (config install target):</strong> INSTALL writes into
+the operator’s real per-agent config dirs (<code>~/.claude.json</code>,
+<code>~/.qwen/</code>, …), overwriting/backing-up live config. This
+mutates operator state — confirm before T4.4.2 (reversible-first backup
+is mandatory regardless).</li>
+<li><strong>D-C (scope of de-bluff):</strong> the ~70-agent stub audit
+(T4.0.4) may surface many stubbed packages beyond qwencode +
+instance_manager. Confirm: fix-all-now vs fix-tier-1-now + track-rest
+(§11.4.124 forbids silent deletion; all must be tracked).</li>
+<li><strong>D-D (no removal):</strong> several
+<code>cli_agents_configs/</code> files point agents AT HelixAgent
+(reverse direction). SP4 ADDS forward configs — it MUST NOT remove the
+reverse ones without operator yes (§11.4.122).</li>
+</ul>
+<hr />
+<h2 id="rollback-plan">10. Rollback plan</h2>
+<ul>
+<li>Each task is its own commit; the <code>replace</code> line + adapter
+are independently revertible.</li>
+<li>P4.0 submodule de-bluff lands in <code>dev.helix.agent</code> with
+its own RED→GREEN evidence; if the import graph proves too heavy
+(T4.0.5), revert the <code>helix_code/go.mod</code> replace and fall
+back to the narrow-shim path — the de-bluff itself stays (it fixes a
+live CONST-035 bluff regardless of wiring choice).</li>
+<li>INSTALL (T4.4.2) backs up every overwritten config before writing;
+rollback = restore the backup.</li>
+<li>No force-push (§11.4.113); all integration via
+merge-onto-latest-main.</li>
+<li>Gates reconcile-not-fake-pass (§11.4.120) if a P4.0 fix breaks an
+existing stub-tolerant test.</li>
+</ul>
+<hr />
+<h2 id="line-summary">11. 12-line summary</h2>
+<ol type="1">
+<li>SP4 makes each working CLI agent its own HelixCode
+<code>llm.Provider</code> (contract <code>missing_types.go:356</code>),
+proxying prompts via real <code>exec</code> + surfacing
+Vision/RAG/Memory/MCP/LSP/ACP.</li>
+<li>Confirmed D-7: <code>helix_code/go.mod</code> (194-212) has NO
+<code>replace dev.helix.agent</code> — wiring gap blocks importing the
+<code>clis</code> substrate.</li>
+<li>Confirmed D-6 stub bluff: <code>qwencode.go:101/115/137</code>
+returns templated strings + gates on <code>APIKey!=&quot;&quot;</code>, never
+execs <code>qwen</code>.</li>
+<li>NEW finding beyond the roadmap:
+<code>instance_manager.go:906+</code> dispatch methods
+(<code>executeClaudeCode/executeCodex/executeAider/executeCline/executeOpenHands</code>)
+are ALSO stubs returning <code>&quot;…execution completed&quot;</code> — the “real
+exec layer” has a stubbed dispatch tier; P4.0 scope widened.</li>
+<li>The honest exec primitive is <code>base.go:120</code>
+(<code>exec.LookPath</code>) + <code>:127</code>
+(<code>exec.CommandContext</code>); reuse it, don’t reimplement
+(§11.4.74).</li>
+<li>Architecture: <code>replace dev.helix.agent</code> + ONE
+parametrized <code>CLIAgentProvider</code> adapter (CONST-051
+decoupling) — adding an agent = a registry row, pending operator
+D-A.</li>
+<li>Re-export + static <code>Validate():263</code> exist
+(<code>unified_cli_generator.go</code>, <code>main.go:4522</code>); the
+ABSENT legs are filesystem INSTALL + LIVE post-install validation —
+SP4’s net-new work.</li>
+<li><code>cli_agents_configs/</code> (109 files) point agents AT
+HelixAgent (reverse); SP4 adds the forward direction without removing
+reverse (§11.4.122).</li>
+<li>TDD: every fix RED-first on the broken artifact with
+<code>RED_MODE</code> polarity switch (§11.4.115), fully-automated
+<code>-count=3</code> (§11.4.98), four-layer + runtime signature
+(§11.4.108).</li>
+<li>Per-agent §11.4.99 research: OpenCode/Zen run+model-list, Claude
+Code <code>-p</code>/<code>--output-format json</code>, Qwen real
+invocation, plus gemini/crush/codex/goose/copilot non-interactive flags
++ config paths.</li>
+<li>34 tasks across P4.0 (de-bluff+wire) → P4.1 (contract) → P4.2
+(fallback) → P4.3 (models+caps+power-features) → P4.4
+(install+live-validate) → P4.5 (tier-1 rollout) → P4.6 (full coverage +
+gate).</li>
+<li><strong>Task count: 34.</strong> <strong>Tier-1 order: claude → qwen
+→ opencode → gemini → crush → codex → goose → copilot.</strong></li>
+</ol>
+<h2 id="sources-verified">Sources verified</h2>
+<p>2026-06-10 (read-only this session):
+<code>missing_types.go:356</code>, <code>copilot_provider.go</code> (no
+exec), <code>helix_code/go.mod:194-212</code>,
+<code>base/base.go:120-138</code>,
+<code>qwencode/qwencode.go:101-139</code>,
+<code>instance_manager.go:82-181,290,906-942</code>,
+<code>types.go:537-567</code>,
+<code>unified_cli_generator.go:76,212,263</code>,
+<code>cmd/helixagent/main.go:107-108,1371,4522</code>,
+<code>claude_code/claude_code.go:160,276,310,453</code>,
+<code>cli_agents_configs/</code> (109 files). Per-agent CLI flag/version
+docs are §8 research items — NOT yet verified against vendor docs (must
+be before their config/guide commits, §11.4.99).</p>
+</body>
+</html>

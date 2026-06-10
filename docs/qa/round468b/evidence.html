@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>evidence</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">evidence</h1>
+</header>
+<h1 id="retroactive-qa-evidence-commit-3ce30285-run-id-round468b">Retroactive
+QA evidence — commit <code>3ce30285</code> (run-id
+<code>round468b</code>)</h1>
+<blockquote>
+<p><strong>RECONSTRUCTED, AFTER-THE-FACT DOCUMENTATION (HXC-039,
+§11.4.83).</strong> This file is NOT a captured-at-the-time end-user
+transcript. It is honest retroactive documentation created during the
+HXC-039 §11.4.83 back-fill, operator-authorised, to give a pre-existing
+commit its required <code>docs/qa/&lt;run-id&gt;/</code> evidence
+directory WITHOUT rewriting git history. No runtime output below is
+fabricated (§11.4.6 / §11.4.123).</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Commit SHA</td>
+<td><code>3ce30285c4055c4b0272d4efbc49763d8da4321d</code></td>
+</tr>
+<tr>
+<td>Short SHA</td>
+<td><code>3ce30285</code></td>
+</tr>
+<tr>
+<td>Authored</td>
+<td>2026-06-04T12:15:48+05:00</td>
+</tr>
+<tr>
+<td>Subject</td>
+<td><code>chore(meta): Wave3 broken-build fixes + W4C config + 6 submodule pointer bumps (round468b)</code></td>
+</tr>
+<tr>
+<td>run-id basename</td>
+<td><code>round468b</code> (a verbatim substring of the commit
+subject)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-the-commit-changed-from-git-show---stat">What the commit
+changed (from <code>git show --stat</code>)</h2>
+<pre><code>docs/...CONSOLIDATED_REPORT_ADDENDUM.wave2.2026-06-04.md | 105 +++++++++++++
+docs/CONTINUATION.md                               |  14 +++
+github_pages_website                               |   2 +-
+helix_code/internal/config/config.go               |  16 ++++
+helix_code/internal/config/fresh_install_save_test.go | 64 +++++++++++
+submodules/challenges                              |   2 +-
+submodules/doc_processor                           |   2 +-
+submodules/helix_qa                                |   2 +-
+submodules/llm_orchestrator                        |   2 +-
+submodules/llms_verifier                           |   2 +-
+10 files changed, 205 insertions(+), 6 deletions(-)</code></pre>
+<p>A <code>chore(meta)</code> “Wave3” commit: broken-build fixes + “W4C”
+config work in <code>internal/config/config.go</code>, docs, and 6
+submodule pointer bumps. The production-code touch tripping the feature
+heuristic is the <code>config.go</code> change.</p>
+<h2 id="verification-that-exists-for-this-commit">Verification that
+exists for this commit</h2>
+<ul>
+<li><strong>Paired unit test extended in the SAME commit:</strong>
+<code>internal/config/fresh_install_save_test.go</code> (64 new lines)
+covers the config changes
+(<code>go test ./internal/config/...</code>).</li>
+<li>This is a <code>chore(meta)</code> commit (build fixes + config +
+pointer bumps), not a user-facing feature; it arguably warranted a
+<code>[no-qa-evidence]</code> opt-out. This directory records that
+determination retroactively.</li>
+<li><strong>No captured runtime transcript was recorded at commit
+time</strong> under <code>docs/qa/</code>. This directory is retroactive
+documentation.</li>
+</ul>
+<h2 id="honesty-statement">Honesty statement</h2>
+<p>Reconstructed documentation. NO faked PASS logs, NO fabricated
+runtime output. Asserted verification = the in-commit config unit-test
+delta visible in <code>git show 3ce30285</code>.</p>
+</body>
+</html>

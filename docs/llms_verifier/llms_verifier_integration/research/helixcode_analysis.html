@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixcode_analysis</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">helixcode_analysis</h1>
+</header>
+<h1 id="helixcode-repository---exhaustive-analysis">HelixCode Repository
+- Exhaustive Analysis</h1>
+<blockquote>
+<p><strong>Analysis Date</strong>: 2025-07-01<br />
+<strong>Repository</strong>:
+https://github.com/HelixDevelopment/HelixCode<br />
+<strong>Branch</strong>: main<br />
+<strong>Purpose</strong>: Deep analysis for LLMsVerifier integration as
+single source of truth for models</p>
+</blockquote>
+<hr />
+<h2 id="repository-structure-overview">1. Repository Structure
+Overview</h2>
+<h3 id="top-level-directories">1.1 Top-Level Directories</h3>
+<table>
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.github/workflows</code></td>
+<td>GitHub Actions workflows (auto-commit style)</td>
+</tr>
+<tr>
+<td><code>Assets</code></td>
+<td>Project logos, wide_black.png, themes</td>
+</tr>
+<tr>
+<td><code>Dependencies</code></td>
+<td>Dependency tracking and governance</td>
+</tr>
+<tr>
+<td><code>Documentation</code></td>
+<td>Technical documentation</td>
+</tr>
+<tr>
+<td><code>Example_Projects</code></td>
+<td>Example projects submodule</td>
+</tr>
+<tr>
+<td><code>Example_Resources</code></td>
+<td>Example resources submodule</td>
+</tr>
+<tr>
+<td><code>Github-Pages-Website</code></td>
+<td>Marketing website submodule (@ 49f7e16)</td>
+</tr>
+<tr>
+<td><code>HelixCode</code></td>
+<td><strong>Main Go implementation</strong></td>
+</tr>
+<tr>
+<td><code>Implementation_Guide</code></td>
+<td>Implementation plans and guides</td>
+</tr>
+<tr>
+<td><code>Specification</code></td>
+<td>Technical specifications and requirements</td>
+</tr>
+<tr>
+<td><code>Upstreams</code></td>
+<td>Upstream sync scripts (GitLab)</td>
+</tr>
+<tr>
+<td><code>Website</code></td>
+<td>Marketing website</td>
+</tr>
+<tr>
+<td><code>awesome-ai-memory</code></td>
+<td>awesome-ai-memory submodule (@ 7f281fd)</td>
+</tr>
+<tr>
+<td><code>challenges/scripts</code></td>
+<td>Challenge scripts (host power management, no-suspend)</td>
+</tr>
+<tr>
+<td><code>cmd/security_test</code></td>
+<td>Security testing tools</td>
+</tr>
+<tr>
+<td><code>docker</code></td>
+<td>Docker configurations</td>
+</tr>
+<tr>
+<td><code>docs</code></td>
+<td>Additional documentation</td>
+</tr>
+<tr>
+<td><code>internal</code></td>
+<td>Go internal packages (see below)</td>
+</tr>
+<tr>
+<td><code>isolated_files</code></td>
+<td>Isolated/misc files</td>
+</tr>
+<tr>
+<td><code>scripts</code></td>
+<td>Build and utility scripts</td>
+</tr>
+<tr>
+<td><code>security</code></td>
+<td>Security-related files</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>Test configurations</td>
+</tr>
+<tr>
+<td><code>tests/e2e</code></td>
+<td>E2E test suites</td>
+</tr>
+</tbody>
+</table>
+<h3 id="helix_code-subdirectory-structure-main-code">1.2 helix_code/
+Subdirectory Structure (Main Code)</h3>
+<pre><code>helix_code/
+├── cmd/
+│   ├── cli/              # CLI client entry point
+│   ├── server/           # HTTP server entry point
+│   └── security-test/    # Security testing tools
+├── internal/
+│   ├── agent/            # Agent subsystem
+│   ├── auth/             # JWT authentication (VERIFIED REAL)
+│   ├── cognee/           # Cognee integration
+│   ├── commands/         # Command implementations
+│   ├── config/           # Configuration management (Viper-based)
+│   ├── context/          # Context management
+│   ├── database/         # PostgreSQL layer
+│   ├── deployment/       # Deployment tools
+│   ├── discovery/        # Discovery services
+│   ├── editor/           # Code editing tools
+│   ├── event/            # Event system
+│   ├── fix/              # Fix utilities
+│   ├── focus/            # Focus management
+│   ├── hardware/         # Hardware detection
+│   ├── hooks/            # Hook system
+│   ├── llm/              # LLM providers and reasoning (BLUFF AREA)
+│   ├── logging/          # Logging
+│   ├── logo/             # Logo processing
+│   ├── mcp/              # MCP protocol implementation
+│   ├── memory/           # Memory integration
+│   ├── mocks/            # Test mocks
+│   ├── monitoring/        # Monitoring
+│   ├── notification/     # Multi-channel notifications
+│   ├── performance/      # Performance utilities
+│   ├── persistence/      # Persistence layer
+│   ├── project/          # Project management
+│   ├── provider/         # Provider utilities
+│   ├── providers/        # Provider implementations
+│   ├── redis/            # Redis client
+│   ├── server/           # HTTP server &amp; API (Gin)
+│   ├── session/          # Session management
+│   ├── task/             # Task management
+│   ├── tools/            # Tool ecosystem
+│   ├── user/             # User management
+│   ├── util/             # Utilities
+│   ├── worker/           # SSH-based worker pool
+│   └── workflow/         # Workflow engine
+├── api/                  # API definitions
+├── applications/         # Platform-specific apps (desktop, mobile, Aurora OS, Harmony OS)
+├── assets/               # Generated assets
+├── benchmarks/           # Benchmark suites
+├── bin/                  # Build output
+├── config/               # Configuration files
+├── docker/               # Docker files
+├── examples/             # Examples
+├── scripts/              # Build scripts
+└── tests/                # Test suites</code></pre>
+<p><strong>Key Finding</strong>: The project is primarily <strong>Go
+(95.4%)</strong>, with some Shell (4.3%), Makefile (0.1%), Swift (0.1%),
+Kotlin (0.1%), and Dockerfile (0.0%).</p>
+<hr />
+<h2 id="readme-documentation-analysis">2. README &amp; Documentation
+Analysis</h2>
+<h3 id="readme.md-2">2.1 README.md <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/README.md%20-%20README"><sup>2</sup></a></h3>
+<p><strong>Project Identity</strong>: HelixCode - Distributed AI
+Development Platform<br />
+<strong>Package</strong>: <code>dev.helix.code</code><br />
+<strong>License</strong>: MIT<br />
+<strong>Version</strong>: 1.0.0</p>
+<p><strong>Documented Features (5 Phases)</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 27%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Status</th>
+<th>Key Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 1: Foundation</td>
+<td>Completed</td>
+<td>PostgreSQL schema (11 tables), JWT auth, worker management, task
+management, REST API (Gin), config system</td>
+</tr>
+<tr>
+<td>Phase 2: Core Services</td>
+<td>Completed</td>
+<td>Task division, LLM multi-provider, distributed computing, MCP
+protocol, reasoning, notifications</td>
+</tr>
+<tr>
+<td>Phase 3: Workflows</td>
+<td>Completed</td>
+<td>Project management, dev workflows (plan/build/test/refactor),
+session management</td>
+</tr>
+<tr>
+<td>Phase 4: LLM Integration</td>
+<td>Completed</td>
+<td>Hardware detection, model management, provider architecture, CLI
+interface</td>
+</tr>
+<tr>
+<td>Phase 5: Advanced Features</td>
+<td>Completed</td>
+<td>SSH worker pool, LLM tooling, multi-client (REST/CLI/TUI/WebSocket),
+cross-platform, mobile ready</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Documented CLI Usage</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Interactive mode</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./cli</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># List workers</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./cli</span> <span class="at">--list-workers</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a worker</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./cli</span> <span class="at">--worker</span> worker-host <span class="at">--user</span> helix <span class="at">--key</span> ~/.ssh/id_rsa</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate with LLM</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./cli</span> <span class="at">--prompt</span> <span class="st">&quot;Hello world&quot;</span> <span class="at">--model</span> llama-3-8b</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Health check</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ex">./cli</span> <span class="at">--health</span></span></code></pre></div>
+<p><strong>Documented API Endpoints</strong>: -
+<code>POST /api/v1/auth/register</code>,
+<code>POST /api/v1/auth/login</code>,
+<code>POST /api/v1/auth/refresh</code> -
+<code>GET /api/v1/workers</code>, <code>POST /api/v1/workers</code>,
+<code>GET /api/v1/workers/:id</code> - <code>GET /api/v1/tasks</code>,
+<code>POST /api/v1/tasks</code>, <code>GET /api/v1/tasks/:id</code>,
+<code>POST /api/v1/tasks/:id/start</code> -
+<code>GET /api/v1/projects</code>, <code>POST /api/v1/projects</code>,
+<code>GET /api/v1/projects/:id</code></p>
+<p><strong>Build Commands</strong>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> build          <span class="co"># Build application</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test           <span class="co"># Run all tests</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> clean          <span class="co"># Clean build artifacts</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> lint           <span class="co"># Lint code</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> fmt            <span class="co"># Format code</span></span></code></pre></div>
+<hr />
+<h2 id="agents.md-analysis">3. AGENTS.md Analysis</h2>
+<h3 id="agents.md-5-authoritative-agent-guide">3.1 AGENTS.md <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/AGENTS.md%20-%20Agent%20guidelines"><sup>5</sup></a>
+— Authoritative Agent Guide</h3>
+<p><strong>Version</strong>: 2.0.0 (CONST-035 Anti-Bluff Mandate)<br />
+<strong>Date</strong>: 2026-04-30</p>
+<p><strong>Critical Bluff Areas Identified</strong>:</p>
+<h4 id="bluff-001-llm-generation-is-simulated-critical">BLUFF-001: LLM
+Generation is Simulated (CRITICAL)</h4>
+<ul>
+<li><strong>File</strong>: <code>cmd/cli/main.go</code> lines
+190-214</li>
+<li><strong>Evidence</strong>: Simulated response with
+<code>fmt.Sprintf(&quot;Generated response for: %s...&quot;)</code></li>
+<li><strong>Fix Priority</strong>: P0 - Immediate</li>
+</ul>
+<h4 id="bluff-002-model-listing-is-hardcoded-critical">BLUFF-002: Model
+Listing is Hardcoded (CRITICAL)</h4>
+<ul>
+<li><strong>File</strong>: <code>cmd/cli/main.go</code> lines
+101-128</li>
+<li><strong>Evidence</strong>: Only 3 hardcoded models (llama-3-8b,
+mistral-7b, phi-3-mini)</li>
+<li><strong>Fix Priority</strong>: P0 - Immediate</li>
+</ul>
+<h4 id="bluff-003-command-execution-is-simulated-high">BLUFF-003:
+Command Execution is Simulated (HIGH)</h4>
+<ul>
+<li><strong>File</strong>: <code>cmd/cli/main.go</code> lines
+237-250</li>
+<li><strong>Evidence</strong>: <code>time.Sleep(1 * time.Second)</code>
+simulating command execution</li>
+<li><strong>Fix Priority</strong>: P0 - Immediate</li>
+</ul>
+<p><strong>Free AI Providers Listed</strong>: - XAI (Grok):
+grok-3-fast-beta, grok-3-mini-fast-beta - OpenRouter: Free models -
+GitHub Copilot: gpt-4o, claude-3.5-sonnet (with subscription) - Qwen:
+2,000 requests/day free tier</p>
+<p><strong>Technology Stack (from AGENTS.md)</strong>: - Go 1.24.0 with
+toolchain go1.24.9 - Gin v1.11.0 (HTTP) - JWT v4.5.2 - Viper v1.21.0
+(Config) - Cobra v1.8.0 (CLI) - Testify v1.11.1 (Testing) - Fyne v2.7.0
+(Desktop UI) - tview v0.42.0 (Terminal UI) - chromedp v0.14.2 (Browser)
+- goquery v1.10.3 (Web scraping) - go-tree-sitter (Parsing)</p>
+<hr />
+<h2 id="constitution.md-analysis">4. CONSTITUTION.md Analysis</h2>
+<h3 id="key-constitutional-constraints-34">4.1 Key Constitutional
+Constraints <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/CONSTITUTION.md%20-%20Project%20constitution"><sup>34</sup></a></h3>
+<table>
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONST-001</td>
+<td><strong>NO CI/CD pipelines</strong> - permanent, non-negotiable</td>
+</tr>
+<tr>
+<td>CONST-002</td>
+<td><strong>NO mocks in production</strong> - only in unit tests
+(<code>*_test.go</code> with <code>-short</code>)</td>
+</tr>
+<tr>
+<td>CONST-003</td>
+<td><strong>NO HTTPS for Git</strong> - SSH only</td>
+</tr>
+<tr>
+<td>CONST-004</td>
+<td><strong>NO manual container commands</strong> -
+orchestrator-owned</td>
+</tr>
+<tr>
+<td>CONST-005</td>
+<td><strong>100% real data for non-unit tests</strong></td>
+</tr>
+<tr>
+<td>CONST-006</td>
+<td><strong>Challenge coverage</strong> - every component must have
+challenge scripts</td>
+</tr>
+<tr>
+<td>CONST-017</td>
+<td><strong>Zero-Bluff Testing (CONST-035)</strong></td>
+</tr>
+<tr>
+<td>CONST-018</td>
+<td><strong>Host Power Management Hard Ban</strong> - no
+suspend/hibernate/reboot</td>
+</tr>
+<tr>
+<td>CONST-020</td>
+<td><strong>Provider Fallback Chain Reality</strong> - fallback chains
+tested with actual failures</td>
+</tr>
+<tr>
+<td>CONST-021</td>
+<td><strong>No Mocks Above Unit</strong> - Makefile must include
+<code>no-mocks-above-unit</code> target</td>
+</tr>
+<tr>
+<td>CONST-025</td>
+<td><strong>Secret Management</strong> - NO secrets in code, ever</td>
+</tr>
+<tr>
+<td>CONST-035</td>
+<td><strong>End-User Usability Mandate</strong> - every PASS must
+guarantee quality, completion, usability</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="configuration-system">5. Configuration System</h2>
+<h3 id="main-config-file-helix_codeinternalconfigconfig.go-15">5.1 Main
+Config File: <code>helix_code/internal/config/config.go</code> <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/config/config.go%20-%20Configuration%20system"><sup>15</sup></a></h3>
+<p><strong>Configuration Loading Order</strong> (Viper-based): 1. Set
+defaults (<code>setDefaults()</code>) 2. Find config file
+(<code>findConfigFile()</code>) 3. Read environment variables (prefix
+<code>HELIX</code>) 4. Explicitly bind critical env vars: -
+<code>HELIX_AUTH_JWT_SECRET</code> -
+<code>HELIX_DATABASE_PASSWORD</code> - <code>HELIX_DATABASE_HOST</code>
+- <code>HELIX_REDIS_PASSWORD</code> - <code>HELIX_REDIS_HOST</code> -
+<code>HELIX_REDIS_PORT</code> 5. Unmarshal into <code>Config</code>
+struct 6. Validate (<code>validateConfig()</code>)</p>
+<p><strong>Config Struct (key fields)</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Version     <span class="dt">string</span>            <span class="st">`mapstructure:&quot;version&quot;`</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    UpdatedBy   <span class="dt">string</span>            <span class="st">`mapstructure:&quot;updated_by&quot;`</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    Application ApplicationConfig <span class="st">`mapstructure:&quot;application&quot;`</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    Server      ServerConfig      <span class="st">`mapstructure:&quot;server&quot;`</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    Database    database<span class="op">.</span>Config   <span class="st">`mapstructure:&quot;database&quot;`</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Redis       RedisConfig       <span class="st">`mapstructure:&quot;redis&quot;`</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    Auth        AuthConfig        <span class="st">`mapstructure:&quot;auth&quot;`</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    Workers     WorkersConfig     <span class="st">`mapstructure:&quot;workers&quot;`</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    Tasks       TasksConfig       <span class="st">`mapstructure:&quot;tasks&quot;`</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    LLM         LLMConfig         <span class="st">`mapstructure:&quot;llm&quot;`</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    Providers   ProvidersConfig   <span class="st">`mapstructure:&quot;providers&quot;`</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    Logging     LoggingConfig     <span class="st">`mapstructure:&quot;logging&quot;`</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    Cognee      <span class="op">*</span>CogneeConfig     <span class="st">`mapstructure:&quot;cognee&quot;`</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>LLM Configuration</strong>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LLMConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    DefaultProvider <span class="dt">string</span>  <span class="st">`mapstructure:&quot;default_provider&quot;`</span>  <span class="co">// default: &quot;local&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    DefaultModel    <span class="dt">string</span>  <span class="st">`mapstructure:&quot;default_model&quot;`</span>       <span class="co">// default: &quot;llama-3.2-3b&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    MaxTokens       <span class="dt">int</span>     <span class="st">`mapstructure:&quot;max_tokens&quot;`</span>          <span class="co">// default: 4096</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    Temperature     <span class="dt">float64</span> <span class="st">`mapstructure:&quot;temperature&quot;`</span>         <span class="co">// default: 0.7</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Valid LLM Providers</strong> (from validator):
+<code>local</code>, <code>openai</code>, <code>anthropic</code>,
+<code>gemini</code>, <code>xai</code>, <code>openrouter</code>,
+<code>copilot</code></p>
+<p><strong>Default Config Locations</strong>: -
+<code>./config.yaml</code> - <code>./config/config.yaml</code> -
+<code>$HOME/.config/helixcode/config.yaml</code> -
+<code>/etc/helixcode/config.yaml</code></p>
+<h3 id="environment-variables-.env.example-4">5.2 Environment Variables
+(.env.example) <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/.env.example%20-%20Environment%20template"><sup>4</sup></a></h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Required</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_DATABASE_PASSWORD</span><span class="op">=</span>helixpass</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_AUTH_JWT_SECRET</span><span class="op">=</span>your-super-secret-jwt-key</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_REDIS_PASSWORD</span><span class="op">=</span>redispass</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Ports</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_API_PORT</span><span class="op">=</span>8080</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_SSH_PORT</span><span class="op">=</span>2222</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="va">HELIX_WEB_PORT</span><span class="op">=</span>3000</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM Provider Keys (optional)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># HELIX_OPENAI_API_KEY=...</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># HELIX_OLLAMA_HOST=http://ollama:11434</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># HELIX_LLAMA_CPP_HOST=http://llamacpp:8080</span></span></code></pre></div>
+<h3 id="configmanager">5.3 ConfigManager</h3>
+<p>File: <code>helix_code/internal/config/config.go</code> lines
+360+<br />
+Provides <code>ConfigManager</code> with: -
+<code>NewHelixConfigManager(configPath)</code> - loads or creates
+default config - <code>GetConfig()</code>, <code>UpdateConfig()</code>,
+<code>UpdateConfigFromMap()</code> - <code>ExportConfig()</code>,
+<code>ImportConfig()</code>, <code>BackupConfig()</code>,
+<code>ResetToDefaults()</code> - Configuration templates (basic,
+development, production, testing) - Configuration migrator (1.0.0 -&gt;
+1.1.0 -&gt; 1.2.0) - Configuration validator with custom rules</p>
+<hr />
+<h2 id="core-architecture">6. Core Architecture</h2>
+<h3 id="entry-points">6.1 Entry Points</h3>
+<table>
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 21%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>Entry Point</th>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server</td>
+<td><code>cmd/server/main.go</code> <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/cmd/server/main.go%20-%20Server%20entry%20point"><sup>37</sup></a></td>
+<td>HTTP server (Gin) with DB, Redis</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>cmd/cli/main.go</code> <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/cmd/cli/main.go%20-%20CLI%20entry%20point"><sup>10</sup></a></td>
+<td>Command-line interface</td>
+</tr>
+<tr>
+<td>CLI (old)</td>
+<td><code>cmd/cli/main.go.old</code> <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/cmd/cli/main.go.old%20-%20Old%20CLI%20entry%20point"><sup>11</sup></a></td>
+<td>Older CLI with more commands</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Server Startup Flow</strong>
+(<code>cmd/server/main.go</code>): 1. Load config
+(<code>config.Load()</code>) 2. Initialize database (optional - empty
+host disables) 3. Initialize schema (<code>db.InitializeSchema()</code>)
+4. Initialize Redis 5. Create HTTP server
+(<code>server.New(cfg, db, rds)</code>) 6. Start HTTP server 7. Graceful
+shutdown on SIGINT/SIGTERM</p>
+<p><strong>CLI Startup Flow</strong> (<code>cmd/cli/main.go</code>): 1.
+<code>NewCLI()</code>: - Initialize LLM provider (Ollama, default
+<code>llama3.2</code>, <code>http://localhost:11434</code>) - Initialize
+worker pool (<code>worker.NewSSHWorkerPool(true)</code>) - Initialize
+notification engine 2. <code>cli.Run()</code> parses flags and
+dispatches to handlers</p>
+<h3 id="cli-flag-architecture">6.2 CLI Flag Architecture</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>command        <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;command&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Command to execute&quot;</span><span class="op">)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>workerHost     <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;worker&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Worker host to add&quot;</span><span class="op">)</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>workerUser     <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;user&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Worker SSH username&quot;</span><span class="op">)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>workerKey      <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;key&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Worker SSH key path&quot;</span><span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>model          <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;model&quot;</span><span class="op">,</span> <span class="st">&quot;llama-3-8b&quot;</span><span class="op">,</span> <span class="st">&quot;LLM model to use&quot;</span><span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>prompt         <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;prompt&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Prompt for LLM generation&quot;</span><span class="op">)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>maxTokens      <span class="op">=</span> flag<span class="op">.</span>Int<span class="op">(</span><span class="st">&quot;max-tokens&quot;</span><span class="op">,</span> <span class="dv">1000</span><span class="op">,</span> <span class="st">&quot;Maximum tokens&quot;</span><span class="op">)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>temperature    <span class="op">=</span> flag<span class="op">.</span>Float64<span class="op">(</span><span class="st">&quot;temperature&quot;</span><span class="op">,</span> <span class="fl">0.7</span><span class="op">,</span> <span class="st">&quot;Generation temperature&quot;</span><span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>stream         <span class="op">=</span> flag<span class="op">.</span>Bool<span class="op">(</span><span class="st">&quot;stream&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;Stream the response&quot;</span><span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>listWorkers    <span class="op">=</span> flag<span class="op">.</span>Bool<span class="op">(</span><span class="st">&quot;list-workers&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;List all workers&quot;</span><span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>listModels     <span class="op">=</span> flag<span class="op">.</span>Bool<span class="op">(</span><span class="st">&quot;list-models&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;List available models&quot;</span><span class="op">)</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>healthCheck    <span class="op">=</span> flag<span class="op">.</span>Bool<span class="op">(</span><span class="st">&quot;health&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;Perform health check&quot;</span><span class="op">)</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>notify         <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;notify&quot;</span><span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">,</span> <span class="st">&quot;Send notification&quot;</span><span class="op">)</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>notifyType     <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;notify-type&quot;</span><span class="op">,</span> <span class="st">&quot;info&quot;</span><span class="op">,</span> <span class="st">&quot;Notification type&quot;</span><span class="op">)</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>notifyPriority <span class="op">=</span> flag<span class="op">.</span>String<span class="op">(</span><span class="st">&quot;notify-priority&quot;</span><span class="op">,</span> <span class="st">&quot;medium&quot;</span><span class="op">,</span> <span class="st">&quot;Notification priority&quot;</span><span class="op">)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>nonInteractive <span class="op">=</span> flag<span class="op">.</span>Bool<span class="op">(</span><span class="st">&quot;non-interactive&quot;</span><span class="op">,</span> <span class="ot">false</span><span class="op">,</span> <span class="st">&quot;Run in non-interactive mode&quot;</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Interactive Commands</strong>: - <code>workers</code> →
+<code>handleListWorkers</code> - <code>models</code> →
+<code>handleListModels</code> - <code>health</code> →
+<code>handleHealthCheck</code> - <code>help</code> / <code>exit</code> /
+<code>quit</code></p>
+<hr />
+<h2 id="modelprovider-management-system">7. Model/Provider Management
+System</h2>
+<h3 id="provider-interface-38">7.1 Provider Interface <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/missing_types.go%20-%20Provider%20types%20and%20interface"><sup>38</sup></a></h3>
+<p>File: <code>helix_code/internal/llm/missing_types.go</code></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Provider <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    GetType<span class="op">()</span> ProviderType</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    GetName<span class="op">()</span> <span class="dt">string</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    GetModels<span class="op">()</span> <span class="op">[]</span>ModelInfo</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    GetCapabilities<span class="op">()</span> <span class="op">[]</span>ModelCapability</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    Generate<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    GenerateStream<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> request <span class="op">*</span>LLMRequest<span class="op">,</span> ch <span class="kw">chan</span><span class="op">&lt;-</span> LLMResponse<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    IsAvailable<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">bool</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    GetHealth<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>ProviderHealth<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    Close<span class="op">()</span> <span class="dt">error</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="provider-type-registry-38">7.2 Provider Type Registry <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/missing_types.go%20-%20Provider%20types%20and%20interface"><sup>38</sup></a></h3>
+<p><strong>35+ Provider Types Defined</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Providers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cloud APIs</td>
+<td><code>openai</code>, <code>anthropic</code>, <code>gemini</code>,
+<code>vertexai</code>, <code>azure</code>, <code>bedrock</code>,
+<code>groq</code>, <code>qwen</code>, <code>copilot</code>,
+<code>openrouter</code>, <code>xai</code>, <code>cohere</code>,
+<code>mistral</code>, <code>huggingface</code></td>
+</tr>
+<tr>
+<td>Local Inference</td>
+<td><code>ollama</code>, <code>llamacpp</code>, <code>vllm</code>,
+<code>localai</code>, <code>fastchat</code>, <code>textgen</code>,
+<code>lmstudio</code>, <code>jan</code>, <code>koboldai</code>,
+<code>gpt4all</code>, <code>tabbyapi</code>, <code>mlx</code>,
+<code>mistralrs</code></td>
+</tr>
+<tr>
+<td>Memory/Agent</td>
+<td><code>memgpt</code>, <code>crewai</code>, <code>characterai</code>,
+<code>replika</code>, <code>anima</code>, <code>llamaindex</code></td>
+</tr>
+<tr>
+<td>Database/Vector</td>
+<td><code>clickhouse</code>, <code>supabase</code>,
+<code>deeplake</code>, <code>chroma</code></td>
+</tr>
+<tr>
+<td>Generic</td>
+<td><code>local</code>, <code>agnostic</code>, <code>gemma</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="provider-factory-21">7.3 Provider Factory <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/factory.go%20-%20Provider%20factory"><sup>21</sup></a></h3>
+<p>File: <code>helix_code/internal/llm/factory.go</code></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewProvider<span class="op">(</span>config ProviderConfigEntry<span class="op">)</span> <span class="op">(</span>Provider<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> config<span class="op">.</span>Type <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeOpenAI<span class="op">:</span>      <span class="cf">return</span> NewOpenAIProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeAnthropic<span class="op">:</span>   <span class="cf">return</span> NewAnthropicProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeGemini<span class="op">:</span>      <span class="cf">return</span> NewGeminiProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeOllama<span class="op">:</span>      <span class="cf">return</span> NewOllamaProvider<span class="op">(</span>ollamaConfig<span class="op">)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeLlamaCpp<span class="op">:</span>    <span class="cf">return</span> NewLlamaCPPProvider<span class="op">(</span>llamaConfig<span class="op">)</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeQwen<span class="op">:</span>        <span class="cf">return</span> NewQwenProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeXAI<span class="op">:</span>         <span class="cf">return</span> NewXAIProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeOpenRouter<span class="op">:</span>   <span class="cf">return</span> NewOpenRouterProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeCopilot<span class="op">:</span>     <span class="cf">return</span> NewCopilotProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeAzure<span class="op">:</span>       <span class="cf">return</span> NewAzureProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeBedrock<span class="op">:</span>     <span class="cf">return</span> NewBedrockProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeVertexAI<span class="op">:</span>    <span class="cf">return</span> NewVertexAIProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeGroq<span class="op">:</span>        <span class="cf">return</span> NewGroqProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeVLLM<span class="op">:</span>        <span class="cf">return</span> NewVLLMProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> ProviderTypeLocalAI<span class="op">:</span>     <span class="cf">return</span> NewLocalAIProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... 20+ more cases</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;unsupported provider type: %s&quot;</span><span class="op">,</span> config<span class="op">.</span>Type<span class="op">)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Model Manager Initialization</strong>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> InitializeModelManager<span class="op">(</span>configs <span class="op">[]</span>ProviderConfigEntry<span class="op">)</span> <span class="op">(*</span>ModelManager<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    manager <span class="op">:=</span> NewModelManager<span class="op">()</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> config <span class="op">:=</span> <span class="kw">range</span> configs <span class="op">{</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">!</span>config<span class="op">.</span>Enabled <span class="op">{</span> <span class="cf">continue</span> <span class="op">}</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        provider<span class="op">,</span> err <span class="op">:=</span> NewProvider<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> manager<span class="op">.</span>RegisterProvider<span class="op">(</span>provider<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> manager<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="model-manager-33">7.4 Model Manager <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/model_manager.go%20-%20Model%20manager"><sup>33</sup></a></h3>
+<p>File: <code>helix_code/internal/llm/model_manager.go</code></p>
+<p><strong>Core Responsibilities</strong>: -
+<code>RegisterProvider(provider Provider) error</code> - registers
+provider and its models -
+<code>SelectOptimalModel(criteria ModelSelectionCriteria) (*ModelInfo, error)</code>
+- selects best model - <code>GetAvailableModels() []*ModelInfo</code> -
+returns all registered models -
+<code>GetModelsByCapability(capabilities []ModelCapability) []*ModelInfo</code>
+- capability filtering -
+<code>GetProviderForModel(modelName, providerType) (Provider, error)</code>
+- provider lookup -
+<code>HealthCheck(ctx) map[ProviderType]*ProviderHealth</code> - health
+checks all providers</p>
+<p><strong>Model Scoring Criteria</strong>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ModelSelectionCriteria <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    TaskType             <span class="dt">string</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    RequiredCapabilities <span class="op">[]</span>ModelCapability</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    MaxTokens            <span class="dt">int</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    Budget               <span class="dt">float64</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    LatencyRequirement   time<span class="op">.</span>Duration</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    QualityPreference    <span class="dt">string</span> <span class="co">// &quot;fast&quot;, &quot;balanced&quot;, &quot;quality&quot;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Scoring Algorithm</strong>: 1. Capability matching (must have
+all required) 2. Context size adequacy 3. Task type suitability (bonus
+multipliers for code_generation, debugging, etc.) 4. Hardware
+compatibility (<code>hardware.Detector.CanRunModel()</code>) 5. Quality
+preference (70B = 1.3x, 3B = 0.9x)</p>
+<h3 id="model-discovery-engine-29">7.5 Model Discovery Engine <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/model_discovery.go%20-%20Model%20discovery"><sup>29</sup></a></h3>
+<p>File: <code>helix_code/internal/llm/model_discovery.go</code></p>
+<p><strong>Key Features</strong>: -
+<code>GetRecommendations(ctx, RecommendationRequest) (*RecommendationResponse, error)</code>
+- Hardware-aware model recommendations - Task compatibility scoring
+(code_generation, planning, debugging, testing, refactoring,
+documentation, analysis) - Performance estimation (tokens/second,
+memory, latency, cost) - Privacy scoring (local/hybrid/cloud) - Fallback
+alternatives based on model category</p>
+<p><strong>Hardcoded External Models</strong> (in
+<code>fetchExternalModels</code>):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">[]*</span>ModelInfo<span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;llama-3-8b-instruct&quot;</span><span class="op">,</span> Name<span class="op">:</span> <span class="st">&quot;Llama 3 8B Instruct&quot;</span><span class="op">,</span> Format<span class="op">:</span> FormatGGUF<span class="op">,</span> Size<span class="op">:</span> <span class="fl">4.7</span><span class="er">GB</span><span class="op">,</span> ContextSize<span class="op">:</span> <span class="dv">8192</span><span class="op">},</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;mistral-7b-instruct&quot;</span><span class="op">,</span> Name<span class="op">:</span> <span class="st">&quot;Mistral 7B Instruct&quot;</span><span class="op">,</span> Format<span class="op">:</span> FormatGGUF<span class="op">,</span> Size<span class="op">:</span> <span class="fl">4.1</span><span class="er">GB</span><span class="op">,</span> ContextSize<span class="op">:</span> <span class="dv">32768</span><span class="op">},</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span>ID<span class="op">:</span> <span class="st">&quot;codellama-7b-instruct&quot;</span><span class="op">,</span> Name<span class="op">:</span> <span class="st">&quot;CodeLlama 7B Instruct&quot;</span><span class="op">,</span> Format<span class="op">:</span> FormatGGUF<span class="op">,</span> Size<span class="op">:</span> <span class="fl">3.8</span><span class="er">GB</span><span class="op">,</span> ContextSize<span class="op">:</span> <span class="dv">16384</span><span class="op">},</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="cross-provider-registry-14">7.6 Cross-Provider Registry <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/cross_provider_registry.go%20-%20Cross-provider%20registry"><sup>14</sup></a></h3>
+<p>File:
+<code>helix_code/internal/llm/cross_provider_registry.go</code></p>
+<p><strong>Default Providers Registered</strong>: | Provider | Type |
+Endpoint | Default Port | Supported Formats |
+|———-|——|———-|————–|——————-| | vllm | openai-compatible |
+http://localhost:8000 | 8000 | GGUF, GPTQ, AWQ, HF, FP16, BF16 | |
+llamacpp | custom | http://localhost:8080 | 8080 | GGUF | | ollama |
+openai-compatible | http://localhost:11434 | 11434 | GGUF |</p>
+<p><strong>Registry persisted to</strong>
+<code>~/.helixcode/local-llm/registry.json</code></p>
+<h3 id="alias-management-20">7.7 Alias Management <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/aliases.go%20-%20Alias%20management"><sup>20</sup></a></h3>
+<p>File: <code>helix_code/internal/llm/aliases.go</code></p>
+<ul>
+<li><code>AliasManager</code> with fuzzy matching (Levenshtein
+distance)</li>
+<li>Default threshold: 0.7 (70%)</li>
+<li>Provider-specific alias resolution</li>
+<li>Autocomplete support</li>
+</ul>
+<h3 id="auto-llm-manager-23">7.8 Auto LLM Manager <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/auto_llm_manager.go%20-%20Auto%20LLM%20manager"><sup>23</sup></a></h3>
+<p>File: <code>helix_code/internal/llm/auto_llm_manager.go</code></p>
+<p><strong>Zero-Touch Mode</strong>: - Auto-discover, auto-install,
+auto-configure, auto-start, auto-monitor, auto-update - Background
+tasks: health monitor, performance optimizer, update checker -
+Auto-recovery with retry limits - Git-based provider installation
+(clone, build, configure) - Directory structure under
+<code>~/.helixcode/local-llm/</code></p>
+<h3 id="ollama-provider-implementation-31">7.9 Ollama Provider
+Implementation <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/internal/llm/ollama_provider.go%20-%20Ollama%20provider"><sup>31</sup></a></h3>
+<p>File: <code>helix_code/internal/llm/ollama_provider.go</code></p>
+<p><strong>Real Implementation</strong> (anti-bluff verified): -
+<code>discoverModels()</code> - calls <code>GET /api/tags</code> to
+fetch actual models - <code>Generate()</code> - calls
+<code>POST /api/chat</code> with real HTTP request -
+<code>GenerateStream()</code> - calls streaming endpoint, sends real
+response chunks - <code>IsAvailable()</code> - tests API endpoint -
+<code>GetHealth()</code> - tests API endpoint with latency
+measurement</p>
+<p><strong>Configuration</strong>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> OllamaConfig <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    BaseURL       <span class="dt">string</span>        <span class="co">// default: http://localhost:11434</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    DefaultModel  <span class="dt">string</span>        <span class="co">// e.g., &quot;llama2&quot;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    Timeout       time<span class="op">.</span>Duration <span class="co">// default: 120s</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    KeepAlive     time<span class="op">.</span>Duration</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    StreamEnabled <span class="dt">bool</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="current-model-listing-critical-bluff">7.10 Current Model Listing
+(CRITICAL BLUFF)</h3>
+<p>File: <code>helix_code/cmd/cli/main.go</code> lines 101-128</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>CLI<span class="op">)</span> handleListModels<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    models <span class="op">:=</span> <span class="op">[]</span><span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        ID          <span class="dt">string</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        Name        <span class="dt">string</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        Provider    <span class="dt">string</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        ContextSize <span class="dt">int</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        Status      <span class="dt">string</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}{</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;llama-3-8b&quot;</span><span class="op">,</span> <span class="st">&quot;Llama 3 8B&quot;</span><span class="op">,</span> <span class="st">&quot;llama.cpp&quot;</span><span class="op">,</span> <span class="dv">8192</span><span class="op">,</span> <span class="st">&quot;available&quot;</span><span class="op">},</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;mistral-7b&quot;</span><span class="op">,</span> <span class="st">&quot;Mistral 7B&quot;</span><span class="op">,</span> <span class="st">&quot;ollama&quot;</span><span class="op">,</span> <span class="dv">4096</span><span class="op">,</span> <span class="st">&quot;available&quot;</span><span class="op">},</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span><span class="st">&quot;phi-3-mini&quot;</span><span class="op">,</span> <span class="st">&quot;Phi-3 Mini&quot;</span><span class="op">,</span> <span class="st">&quot;openai&quot;</span><span class="op">,</span> <span class="dv">128000</span><span class="op">,</span> <span class="st">&quot;available&quot;</span><span class="op">},</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... prints hardcoded list</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>This is HARDCODED - NOT dynamic discovery</strong>. The
+AGENTS.md explicitly flags this as BLUFF-002 (P0 critical).</p>
+<hr />
+<h2 id="cli-ux-analysis">8. CLI UX Analysis</h2>
+<h3 id="current-cli-cmdclimain.go-10">8.1 Current CLI
+(<code>cmd/cli/main.go</code>) <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/cmd/cli/main.go%20-%20CLI%20entry%20point"><sup>10</sup></a></h3>
+<p><strong>UI Framework</strong>: Standard Go <code>flag</code> package
+(NOT Cobra - despite AGENTS.md claiming Cobra)</p>
+<p><strong>Commands</strong>: | Flag | Handler | |——|———| |
+<code>--list-workers</code> | <code>handleListWorkers</code> | |
+<code>--list-models</code> | <code>handleListModels</code> (HARDCODED) |
+| <code>--health</code> | <code>handleHealthCheck</code> | |
+<code>--worker HOST</code> | <code>handleAddWorker</code> | |
+<code>--prompt TEXT</code> | <code>handleGenerate</code> (REAL - calls
+provider.Generate) | | <code>--model NAME</code> | Used with
+<code>--prompt</code> | | <code>--stream</code> | Used with
+<code>--prompt</code> | | <code>--notify MESSAGE</code> |
+<code>handleNotification</code> | | <code>--command CMD</code> |
+<code>handleCommand</code> (SIMULATED) | | (no flags) |
+<code>handleInteractive</code> |</p>
+<p><strong>Interactive Mode</strong>: - Prompt: <code>helix&gt;</code> -
+Commands: <code>workers</code>, <code>models</code>,
+<code>health</code>, <code>help</code>,
+<code>exit</code>/<code>quit</code> - Uses <code>fmt.Scanln()</code> for
+input - Signal handling for graceful shutdown (SIGINT/SIGTERM)</p>
+<h3 id="older-cli-cmdclimain.go.old-11">8.2 Older CLI
+(<code>cmd/cli/main.go.old</code>) <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/cmd/cli/main.go.old%20-%20Old%20CLI%20entry%20point"><sup>11</sup></a></h3>
+<p><strong>UI Framework</strong>: Argument-based (not flags)</p>
+<p><strong>Commands</strong>: - <code>help</code>, <code>version</code>,
+<code>models</code>, <code>hardware</code>, <code>health</code> -
+<code>chat &lt;prompt&gt;</code>,
+<code>generate &lt;description&gt;</code>,
+<code>plan &lt;project&gt;</code>, <code>test &lt;code&gt;</code>,
+<code>debug &lt;issue&gt;</code>, <code>refactor &lt;code&gt;</code></p>
+<p><strong>Status</strong>: All AI commands are TODO placeholders:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>CLI<span class="op">)</span> startChat<span class="op">(</span>args <span class="op">[]</span><span class="dt">string</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// </span><span class="al">TODO</span><span class="co">: Implement actual chat functionality</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    fmt<span class="op">.</span>Println<span class="op">(</span><span class="st">&quot;Chat functionality coming soon...&quot;</span><span class="op">)</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="platform-support">9. Platform Support</h2>
+<p><strong>Documented Platforms</strong>: - Linux (primary) - macOS
+(Intel + ARM64) - Windows - Aurora OS - SymphonyOS / Harmony OS -
+Android (mobile framework) - iOS (mobile framework)</p>
+<p><strong>Build Targets</strong> (from Makefile):</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> prod              <span class="co"># Linux, macOS, Windows binaries</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> desktop-linux     <span class="co"># Desktop GUI + CLI for Linux</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> desktop-macos     <span class="co"># Intel + ARM</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> desktop-windows   <span class="co"># .exe</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> mobile-ios        <span class="co"># HelixCore.xcframework</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> mobile-android    <span class="co"># mobile.aar</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> aurora-os         <span class="co"># Aurora OS client</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> harmony-os        <span class="co"># Harmony OS client</span></span></code></pre></div>
+<hr />
+<h2 id="test-framework">10. Test Framework</h2>
+<h3 id="testing-infrastructure">10.1 Testing Infrastructure</h3>
+<p><strong>Framework</strong>: Go built-in testing + Testify v1.11.1</p>
+<p><strong>Test Categories</strong> (from AGENTS.md): 1. Unit tests -
+Mocks OK, <code>*_test.go</code>, <code>-short</code> flag 2. Contract
+tests - Real API schemas, no mocks 3. Component tests - Real subsystems
+wired together 4. Integration tests - Full app with real dependencies 5.
+E2E challenges - Complete user workflows 6. Security tests - OWASP
+compliance 7. Performance tests - Benchmarks</p>
+<p><strong>Makefile Test Targets</strong> <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/Makefile%20-%20Build%20system"><sup>24</sup></a>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test              <span class="co"># Basic go test -v ./...</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-all          <span class="co"># test + coverage + benchmark + docs</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-coverage     <span class="co"># go test -v -race -coverprofile=coverage.out</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-benchmark    <span class="co"># go test -bench=. -benchmem ./...</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-docs         <span class="co"># Documentation validation</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-full         <span class="co"># ALL tests with infrastructure (ZERO skips)</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-unit-full    <span class="co"># Unit tests with full infra</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-integration-full  <span class="co"># Integration tests</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-e2e-full     <span class="co"># E2E challenge tests</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-security-full <span class="co"># Security tests</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-load-full    <span class="co"># Load tests</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-complete     <span class="co"># All test types in sequence</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> coverage-full     <span class="co"># Comprehensive coverage report</span></span></code></pre></div>
+<p><strong>Test Infrastructure</strong>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-up     <span class="co"># docker compose -f docker-compose.full-test.yml up -d</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-down   <span class="co"># Stop infrastructure</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test-infra-status <span class="co"># Check status</span></span></code></pre></div>
+<h3 id="llm-package-test-files">10.2 LLM Package Test Files</h3>
+<p>File: <code>helix_code/internal/llm/</code> contains extensive test
+files: - <code>aliases_test.go</code> -
+<code>anthropic_provider_test.go</code> -
+<code>auto_llm_manager_test.go</code> -
+<code>azure_provider_test.go</code> -
+<code>bedrock_provider_test.go</code> -
+<code>cache_control_test.go</code> -
+<code>cloud_providers_integration_test.go</code> -
+<code>copilot_provider_test.go</code> -
+<code>cross_provider_registry_test.go</code> -
+<code>cross_provider_test.go</code> - <code>factory_test.go</code> -
+<code>local_providers_integration_test.go</code> -
+<code>local_providers_test.go</code> -
+<code>model_converter_test.go</code> -
+<code>model_discovery_test.go</code> -
+<code>model_download_manager_test.go</code> -
+<code>model_manager_test.go</code> -
+<code>ollama_provider_test.go</code> -
+<code>openai_compatible_provider_test.go</code> -
+<code>openai_provider_test.go</code> -
+<code>openrouter_provider_test.go</code> -
+<code>provider_features_test.go</code> -
+<code>provider_registry_test.go</code> - <code>qwen_oauth_test.go</code>
+- <code>qwen_provider_test.go</code> - <code>reasoning_test.go</code> -
+<code>token_budget_test.go</code> - <code>tool_provider_test.go</code> -
+<code>usage_analytics_test.go</code> -
+<code>vertexai_provider_test.go</code> -
+<code>xai_provider_test.go</code></p>
+<h3 id="challenge-system">10.3 Challenge System</h3>
+<p><strong>Location</strong>: <code>challenges/scripts/</code> <a href="https://github.com/HelixDevelopment/helix_code/tree/main/challenges%20-%20Challenges%20directory"><sup>22</sup></a></p>
+<p>Files: - <code>host_no_auto_suspend_challenge.sh</code> - CONST-033
+host power management guard - <code>no_suspend_calls_challenge.sh</code>
+- No suspend calls challenge</p>
+<p><strong>E2E Tests</strong>: <code>tests/e2e/challenges/</code> with
+<code>run_all_challenges.sh</code></p>
+<p><strong>Test Runner</strong>:
+<code>cd tests/e2e/challenges &amp;&amp; go run cmd/runner/main.go -all</code></p>
+<hr />
+<h2 id="dependencies-analysis">11. Dependencies Analysis</h2>
+<h3 id="go.mod-3">11.1 go.mod <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/go.mod%20-%20Go%20module%20definition"><sup>3</sup></a></h3>
+<p><strong>Module</strong>: <code>dev.helix.code</code><br />
+<strong>Go Version</strong>: 1.24.0 (toolchain go1.24.9)</p>
+<p><strong>Key Dependencies</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 30%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>github.com/gin-gonic/gin</code></td>
+<td>v1.11.0</td>
+<td>HTTP web framework</td>
+</tr>
+<tr>
+<td><code>github.com/spf13/cobra</code></td>
+<td>v1.8.0</td>
+<td>CLI framework (claimed but NOT used in current CLI)</td>
+</tr>
+<tr>
+<td><code>github.com/spf13/viper</code></td>
+<td>v1.21.0</td>
+<td>Configuration management</td>
+</tr>
+<tr>
+<td><code>github.com/golang-jwt/jwt/v4</code></td>
+<td>v4.5.2</td>
+<td>JWT authentication</td>
+</tr>
+<tr>
+<td><code>github.com/jackc/pgx/v5</code></td>
+<td>v5.7.6</td>
+<td>PostgreSQL driver</td>
+</tr>
+<tr>
+<td><code>github.com/redis/go-redis/v9</code></td>
+<td>v9.17.2</td>
+<td>Redis client</td>
+</tr>
+<tr>
+<td><code>github.com/stretchr/testify</code></td>
+<td>v1.11.1</td>
+<td>Testing framework</td>
+</tr>
+<tr>
+<td><code>fyne.io/fyne/v2</code></td>
+<td>v2.7.0</td>
+<td>Desktop GUI</td>
+</tr>
+<tr>
+<td><code>github.com/rivo/tview</code></td>
+<td>v0.42.0</td>
+<td>Terminal UI</td>
+</tr>
+<tr>
+<td><code>github.com/chromedp/chromedp</code></td>
+<td>v0.14.2</td>
+<td>Browser automation</td>
+</tr>
+<tr>
+<td><code>github.com/PuerkitoBio/goquery</code></td>
+<td>v1.10.3</td>
+<td>Web scraping</td>
+</tr>
+<tr>
+<td><code>github.com/smacker/go-tree-sitter</code></td>
+<td>-</td>
+<td>Parsing</td>
+</tr>
+<tr>
+<td><code>github.com/gorilla/websocket</code></td>
+<td>v1.5.3</td>
+<td>WebSocket</td>
+</tr>
+<tr>
+<td><code>github.com/google/uuid</code></td>
+<td>v1.6.0</td>
+<td>UUID generation</td>
+</tr>
+<tr>
+<td><code>github.com/fatih/color</code></td>
+<td>v1.18.0</td>
+<td>Terminal colors</td>
+</tr>
+<tr>
+<td><code>golang.org/x/crypto</code></td>
+<td>v0.46.0</td>
+<td>Cryptography</td>
+</tr>
+<tr>
+<td><code>github.com/hashicorp/golang-lru/v2</code></td>
+<td>v2.0.7</td>
+<td>LRU cache</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cloud Provider SDKs</strong>: | Dependency | Version |
+Purpose | |————|———|———| |
+<code>github.com/Azure/azure-sdk-for-go/sdk/azcore</code> | v1.16.0 |
+Azure core | |
+<code>github.com/Azure/azure-sdk-for-go/sdk/azidentity</code> | v1.8.0 |
+Azure identity | | <code>github.com/aws/aws-sdk-go-v2</code> | v1.32.7 |
+AWS SDK | |
+<code>github.com/aws/aws-sdk-go-v2/service/bedrockruntime</code> |
+v1.23.1 | AWS Bedrock | | <code>google.golang.org/grpc</code> | v1.76.0
+| gRPC | | <code>golang.org/x/oauth2</code> | v0.32.0 | OAuth2 |</p>
+<p><strong>Memory Integrations</strong>: | Dependency | Version |
+Purpose | |————|———|———| | <code>github.com/getzep/zep-go/v3</code> |
+v3.10.0 | Zep memory |</p>
+<hr />
+<h2 id="integration-points">12. Integration Points</h2>
+<h3 id="llm-provider-integration">12.1 LLM Provider Integration</h3>
+<p><strong>Current Integration Model</strong>: - Provider interface at
+<code>helix_code/internal/llm/missing_types.go</code> - Factory pattern
+at <code>helix_code/internal/llm/factory.go</code> - Each provider is a
+separate Go file implementing the <code>Provider</code> interface - 35+
+provider types supported</p>
+<p><strong>Provider Registration Flow</strong>: 1. Config specifies
+<code>ProviderConfigEntry</code> (type, endpoint, API key, models,
+enabled, parameters) 2. <code>InitializeModelManager(configs)</code>
+iterates enabled configs 3. <code>NewProvider(config)</code> dispatches
+to provider constructor 4.
+<code>manager.RegisterProvider(provider)</code> adds to registry</p>
+<h3 id="database-integration">12.2 Database Integration</h3>
+<ul>
+<li>PostgreSQL 15+ (optional - empty host disables)</li>
+<li>11 tables for distributed computing</li>
+<li>Schema initialization in <code>internal/database</code></li>
+<li>Redis 7+ for caching (optional)</li>
+</ul>
+<h3 id="worker-pool-integration">12.3 Worker Pool Integration</h3>
+<ul>
+<li>SSH-based worker pool</li>
+<li>Health monitoring</li>
+<li>Auto-installation capability</li>
+<li>Cross-platform workers</li>
+</ul>
+<h3 id="mcp-protocol">12.4 MCP Protocol</h3>
+<ul>
+<li>Model Context Protocol implementation</li>
+<li>Multi-transport support</li>
+</ul>
+<h3 id="notification-system">12.5 Notification System</h3>
+<ul>
+<li>Multi-channel: Slack, Discord, Email, Telegram</li>
+<li>Notification engine with priority levels</li>
+</ul>
+<hr />
+<h2 id="docker-architecture">13. Docker Architecture</h2>
+<h3 id="docker-compose.yml-36">13.1 docker-compose.yml <a href="https://raw.githubusercontent.com/HelixDevelopment/helix_code/main/helix_code/docker-compose.yml%20-%20Docker%20composition"><sup>36</sup></a></h3>
+<p><strong>Services</strong>: | Service | Image | Ports | Purpose |
+|———|——-|——-|———| | helixcode-server | Build from Dockerfile | 8080,
+2222 | Main application | | postgres | postgres:15 | 5432 | Database | |
+redis | redis:7-alpine | 6379 | Cache | | nginx | nginx:alpine | 80, 443
+| Reverse proxy | | prometheus | prom/prometheus:latest | 9090 |
+Monitoring | | grafana | grafana/grafana:latest | 3000 | Dashboards
+|</p>
+<p><strong>Health Checks</strong>: - Server:
+<code>curl -f http://localhost:8080/health</code> - PostgreSQL:
+<code>pg_isready -U helix</code> - Redis:
+<code>redis-cli --raw incr ping</code></p>
+<hr />
+<h2 id="gaps-todos-and-incomplete-features">14. Gaps, TODOs, and
+Incomplete Features</h2>
+<h3 id="critical-gaps-p0">14.1 Critical Gaps (P0)</h3>
+<ol type="1">
+<li><strong>BLUFF-001: LLM Generation Simulated</strong> (file:
+<code>cmd/cli/main.go.old</code>)
+<ul>
+<li>Current <code>cmd/cli/main.go</code> has REAL implementation calling
+<code>provider.Generate()</code></li>
+<li>Status: <strong>PARTIALLY FIXED</strong> in current main.go, but old
+file still exists with simulated code</li>
+</ul></li>
+<li><strong>BLUFF-002: Model Listing Hardcoded</strong>
+<ul>
+<li><code>cmd/cli/main.go</code> lines 101-128: Only 3 hardcoded
+models</li>
+<li>Does NOT use <code>modelManager.GetAvailableModels()</code> or
+<code>provider.GetModels()</code></li>
+<li>Status: <strong>NOT FIXED</strong> - P0 critical</li>
+</ul></li>
+<li><strong>BLUFF-003: Command Execution Simulated</strong>
+<ul>
+<li><code>cmd/cli/main.go</code> lines 237-250:
+<code>time.Sleep(1 * time.Second)</code> simulating execution</li>
+<li>Status: <strong>NOT FIXED</strong> - P0 critical</li>
+</ul></li>
+<li><strong>CLI Uses <code>flag</code> NOT Cobra</strong>
+<ul>
+<li>AGENTS.md claims Cobra v1.8.0 is the CLI framework</li>
+<li>Actual <code>cmd/cli/main.go</code> uses Go standard
+<code>flag</code> package</li>
+<li><code>cmd/cli/main.go.old</code> also does NOT use Cobra</li>
+<li>Status: <strong>DISCREPANCY</strong> - either docs are wrong or
+Cobra integration is missing</li>
+</ul></li>
+<li><strong>Model Discovery Not Connected to CLI</strong>
+<ul>
+<li><code>ModelDiscoveryEngine</code> exists with sophisticated
+scoring</li>
+<li>CLI <code>handleListModels</code> does NOT use it</li>
+<li><code>handleGenerate</code> does NOT use
+<code>SelectOptimalModel()</code></li>
+<li>Status: <strong>NOT INTEGRATED</strong></li>
+</ul></li>
+<li><strong>No Dynamic Model Source</strong>
+<ul>
+<li>Models are hardcoded in <code>model_discovery.go</code>
+(<code>fetchExternalModels</code>)</li>
+<li>No external API integration for fetching current model lists</li>
+<li>No integration with model registries (HuggingFace, Ollama library,
+etc.)</li>
+<li>Status: <strong>HARDCODED MODELS ONLY</strong></li>
+</ul></li>
+</ol>
+<h3 id="medium-gaps">14.2 Medium Gaps</h3>
+<ol start="7" type="1">
+<li><strong>Old CLI File Still Present</strong>
+<ul>
+<li><code>cmd/cli/main.go.old</code> contains simulated code and
+TODOs</li>
+<li>Should be removed or archived</li>
+</ul></li>
+<li><strong>Missing Provider Implementations</strong>
+<ul>
+<li>35+ provider types defined in <code>missing_types.go</code></li>
+<li>Only ~15 have actual implementation files visible</li>
+<li>Some may be stubs</li>
+</ul></li>
+<li><strong>Hardware Detection Integration</strong>
+<ul>
+<li><code>hardware.Detector</code> exists</li>
+<li><code>ModelManager.calculateHardwareCompatibility()</code> calls
+it</li>
+<li>But CLI does NOT use hardware-aware model selection</li>
+</ul></li>
+<li><strong>No LLMsVerifier Integration</strong>
+<ul>
+<li>No references to “LLMsVerifier”, “verifier”, or external model
+verification service</li>
+<li>No API client for fetching verified model lists</li>
+<li>Status: <strong>NOT PRESENT</strong></li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="current-model-management-approach-summary">15. Current Model
+Management Approach Summary</h2>
+<h3 id="how-models-are-currently-managed">15.1 How Models Are Currently
+Managed</h3>
+<ol type="1">
+<li><strong>ProviderConfigEntry</strong> structs define which providers
+are enabled and which models they serve</li>
+<li><strong>Factory</strong> creates provider instances based on
+type</li>
+<li><strong>ModelManager</strong> registers providers and maintains a
+<code>modelRegistry</code> map keyed by
+<code>providerType::modelName</code></li>
+<li><strong>ModelDiscoveryEngine</strong> provides recommendations but
+with hardcoded external models</li>
+<li><strong>CrossProviderRegistry</strong> tracks downloaded models and
+provider compatibility</li>
+<li><strong>AliasManager</strong> handles fuzzy model name
+resolution</li>
+</ol>
+<h3 id="model-sources">15.2 Model Sources</h3>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 30%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Source</th>
+<th>Status</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provider discovery (Ollama <code>/api/tags</code>)</td>
+<td>REAL</td>
+<td><code>ollama_provider.go:discoverModels()</code></td>
+</tr>
+<tr>
+<td>CrossProviderRegistry downloaded models</td>
+<td>PERSISTED</td>
+<td><code>~/.helixcode/local-llm/registry.json</code></td>
+</tr>
+<tr>
+<td>Hardcoded external models</td>
+<td>HARDCODED</td>
+<td><code>model_discovery.go:fetchExternalModels()</code></td>
+</tr>
+<tr>
+<td>CLI list models</td>
+<td>HARDCODED</td>
+<td><code>cmd/cli/main.go:handleListModels()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="api-keys-credentials">15.3 API Keys / Credentials</h3>
+<ul>
+<li>Stored in environment variables (prefix <code>HELIX_</code>)</li>
+<li>Configured via <code>ProviderConfigEntry.APIKey</code></li>
+<li>No secret management beyond env vars (no Vault integration
+visible)</li>
+</ul>
+<hr />
+<h2 id="recommendations-for-llmsverifier-integration">16.
+Recommendations for LLMsVerifier Integration</h2>
+<h3 id="integration-points-1">16.1 Integration Points</h3>
+<p>To integrate LLMsVerifier as the single source of truth for models,
+the following integration points should be targeted:</p>
+<ol type="1">
+<li><strong><code>internal/llm/model_discovery.go:fetchExternalModels()</code></strong>
+<ul>
+<li>Replace hardcoded model list with LLMsVerifier API call</li>
+<li>Add LLMsVerifier client to fetch verified models</li>
+</ul></li>
+<li><strong><code>internal/llm/model_manager.go:SelectOptimalModel()</code></strong>
+<ul>
+<li>Augment with LLMsVerifier verification status</li>
+<li>Filter out unverified models or warn about them</li>
+</ul></li>
+<li><strong><code>cmd/cli/main.go:handleListModels()</code></strong>
+<ul>
+<li>Replace hardcoded list with dynamic fetch from LLMsVerifier</li>
+<li>Show verification status for each model</li>
+</ul></li>
+<li><strong><code>internal/llm/factory.go:NewProvider()</code></strong>
+<ul>
+<li>Add LLMsVerifier-aware provider initialization</li>
+<li>Validate provider endpoints against LLMsVerifier registry</li>
+</ul></li>
+<li><strong>New Package: <code>internal/llm/verifier/</code></strong>
+<ul>
+<li>Create dedicated LLMsVerifier client package</li>
+<li>Handle API authentication, caching, error handling</li>
+</ul></li>
+</ol>
+<h3 id="files-to-modify">16.2 Files to Modify</h3>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 33%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cmd/cli/main.go</code></td>
+<td>101-128</td>
+<td>Replace hardcoded models with LLMsVerifier fetch</td>
+</tr>
+<tr>
+<td><code>internal/llm/model_discovery.go</code></td>
+<td>~900+</td>
+<td>Replace <code>fetchExternalModels()</code> hardcoded list</td>
+</tr>
+<tr>
+<td><code>internal/llm/model_manager.go</code></td>
+<td>~280</td>
+<td>Add LLMsVerifier status to model scoring</td>
+</tr>
+<tr>
+<td><code>internal/config/config.go</code></td>
+<td>~100</td>
+<td>Add LLMsVerifier configuration section</td>
+</tr>
+<tr>
+<td><code>helix_code/go.mod</code></td>
+<td>-</td>
+<td>Add LLMsVerifier client dependency</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="citations">17. Citations</h2>
+<hr />
+<p><em>Analysis compiled from exhaustive repository exploration. All
+file paths are relative to repository root unless otherwise
+specified.</em></p>
+</body>
+</html>

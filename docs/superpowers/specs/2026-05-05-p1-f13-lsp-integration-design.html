@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f13-lsp-integration-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f13-lsp-integration-design</h1>
+</header>
+<h1 id="phase-1-feature-13-lsp-integration">Phase 1 / Feature 13 — LSP
+Integration</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Status:</strong> Approved
+(auto-approved per programme cadence) <strong>Programme:</strong>
+CLI-Agent Fusion — Phase 1 port from claude-code</p>
+<hr />
+<h2 id="goal">1. Goal</h2>
+<p>Bring real Language-Server Protocol diagnostics into HelixCode so the
+agent (and the user) get IDE-grade error/warning feedback without
+running a full build. Five language servers ship in the curated
+allowlist:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Binary</th>
+<th>Extensions</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gopls</code></td>
+<td><code>.go</code></td>
+<td><code>go install golang.org/x/tools/gopls@latest</code> (or
+distro)</td>
+</tr>
+<tr>
+<td><code>rust-analyzer</code></td>
+<td><code>.rs</code></td>
+<td><code>rustup component add rust-analyzer</code></td>
+</tr>
+<tr>
+<td><code>pyright</code></td>
+<td><code>.py</code></td>
+<td><code>npm i -g pyright</code></td>
+</tr>
+<tr>
+<td><code>typescript-language-server</code></td>
+<td><code>.ts</code>, <code>.tsx</code>, <code>.jsx</code>,
+<code>.js</code></td>
+<td><code>npm i -g typescript-language-server typescript</code></td>
+</tr>
+<tr>
+<td><code>clangd</code></td>
+<td><code>.c</code>, <code>.cpp</code>, <code>.cc</code>,
+<code>.h</code>, <code>.hpp</code></td>
+<td><code>apt install clangd</code> /
+<code>brew install llvm</code></td>
+</tr>
+</tbody>
+</table>
+<p>Servers are NOT bundled with HelixCode — F13 detects them at runtime
+via <code>exec.LookPath</code> and lazy-spawns on first relevant file
+open. Unknown extensions are a no-op (no LSP, no error). Idle timeout is
+5 minutes per server, then SIGTERM + reaper.</p>
+<p>Three concrete user surfaces ship together:</p>
+<ol type="1">
+<li><strong>Agent tools</strong> — <code>LSPGetDiagnostics</code> and
+<code>LSPAnalyzeDiagnostic</code> registered with
+<code>internal/tools/registry.go::ToolRegistry</code>. The agent can ask
+for diagnostics whenever it wants.</li>
+<li><strong>Auto-trigger after Edit/Write</strong> — every successful
+<code>fs_edit</code>, <code>fs_write</code>, and
+<code>multi_edit_commit</code> tool call triggers a diagnostic refresh
+for the touched file; the resulting <code>DiagnosticSummary</code> is
+<strong>inlined into the tool result</strong> so the agent sees
+diagnostics on the next turn without an extra round-trip.</li>
+<li><strong>CLI surface</strong> — <code>/lsp</code> slash command
+(<code>status</code> / <code>restart [name]</code> /
+<code>list-servers</code> / <code>stop [name]</code>) and
+<code>helixcode lsp</code> cobra subcommand with the same verbs.</li>
+</ol>
+<p>JSON-RPC transport and LSP protocol types are NOT hand-rolled. F13
+adopts two new external dependencies — <code>go.lsp.dev/jsonrpc2</code>
+and <code>go.lsp.dev/protocol</code> — which are the canonical Go LSP
+libraries (used by <code>gopls</code> itself for its tests).
+Hand-rolling a JSON-RPC 2.0 framing layer + LSP type registry is exactly
+the class of work where bluffs hide; using the upstream library is the
+conservative call.</p>
+<p>The scope of F13 is <strong>diagnostics only</strong>. Code
+completion, go-to-definition, hover, find-references, rename, workspace
+symbols, inlay hints, and semantic tokens are explicitly deferred
+(§8).</p>
+<h2 id="architecture">2. Architecture</h2>
+<p>Three layers, each with a single responsibility, all under
+<code>internal/tools/</code>:</p>
+<ul>
+<li><strong><code>LSPManager</code></strong> — owns server lifetimes.
+Lazy-spawns a server on first relevant file, registers a 5-minute idle
+timer per server, routes file-extension lookups to the right
+<code>LSPClient</code>, restarts on crash with exponential backoff, and
+shuts down all servers on <code>Close()</code>.</li>
+<li><strong><code>LSPClient</code></strong> — one per running language
+server. Wraps a <code>*jsonrpc2.Conn</code> over the server’s
+stdin/stdout, performs the <code>initialize</code> /
+<code>initialized</code> / <code>shutdown</code> / <code>exit</code>
+handshake, tracks open documents, dispatches
+<code>textDocument/didOpen</code> / <code>didChange</code> /
+<code>didClose</code>, and consumes
+<code>textDocument/publishDiagnostics</code> notifications into an
+in-memory map keyed by <code>DocumentURI</code>.</li>
+<li><strong>Agent tools</strong> — <code>LSPGetDiagnosticsTool</code>
+and <code>LSPAnalyzeDiagnosticTool</code> query the
+<code>LSPManager</code> and return <code>DiagnosticSummary</code> shaped
+for the agent.</li>
+</ul>
+<p>The auto-trigger lives in <code>ToolRegistry.Execute</code> (the
+existing chokepoint where every tool call funnels through; see
+registry.go:334). After a successful <code>fs_edit</code> /
+<code>fs_write</code> / <code>multi_edit_commit</code>, the registry
+calls <code>LSPManager.NotifyChange(ctx, absPath)</code> which:</p>
+<ol type="1">
+<li>Dispatches <code>textDocument/didChange</code> on the matching
+client (or <code>didOpen</code> if first time).</li>
+<li>Waits up to 800ms for fresh diagnostics (cancellable via ctx).</li>
+<li>Returns a <code>DiagnosticSummary</code> that the registry attaches
+to the tool result map under key <code>lsp_diagnostics</code> (only when
+non-empty — empty diagnostics stay silent, no noise).</li>
+</ol>
+<pre><code>┌──────────────────┐  fs_edit/fs_write/multi_edit_commit
+│  agent.go (LLM)  │ ─────────────────────────────────► ToolRegistry.Execute
+└──────────────────┘                                         │
+                                                              ├─ inner tool runs (writes file)
+                                                              ├─ LSPManager.NotifyChange(absPath)
+                                                              │     ├─ Router(ext) → LSPClient(go|rust|py|ts|c)
+                                                              │     ├─ DidChange + WaitForDiagnostics(800ms)
+                                                              │     └─ DiagnosticSummary
+                                                              └─ result[&quot;lsp_diagnostics&quot;] = summary</code></pre>
+<p><code>LSPManager</code> also implements the <code>/lsp</code> and
+<code>helixcode lsp</code> surface verbs as plain Go method calls (no
+separate IPC).</p>
+<h2 id="components">3. Components</h2>
+<h3 id="new-files">3.1 New files</h3>
+<ul>
+<li><code>helix_code/internal/tools/lsp_types.go</code> —
+<code>Diagnostic</code>, <code>DiagnosticSummary</code>,
+<code>DiagnosticSeverity</code>, <code>LSPServerSpec</code>,
+<code>ServerStatus</code>. No deps.</li>
+<li><code>helix_code/internal/tools/lsp_client.go</code> —
+<code>LSPClient</code> (jsonrpc2 wrapper, handshake, didOpen/didChange,
+publishDiagnostics handler).</li>
+<li><code>helix_code/internal/tools/lsp_client_test.go</code> — unit
+tests against an in-process fake server (in-memory
+<code>io.ReadWriter</code> pair).</li>
+<li><code>helix_code/internal/tools/lsp_manager.go</code> —
+<code>LSPManager</code> (lazy spawn, idle timeout, file-extension
+router, crash recovery).</li>
+<li><code>helix_code/internal/tools/lsp_manager_test.go</code> — unit
+tests with the in-tree fake LSP subprocess (built once via
+<code>go test -c</code>).</li>
+<li><code>helix_code/internal/tools/lsp_servers.go</code> — curated
+allowlist (<code>gopls</code>, <code>rust-analyzer</code>,
+<code>pyright</code>, <code>typescript-language-server</code>,
+<code>clangd</code>), <code>Detect()</code> via
+<code>exec.LookPath</code>.</li>
+<li><code>helix_code/internal/tools/lsp_servers_test.go</code>.</li>
+<li><code>helix_code/internal/tools/lsp.go</code> —
+<code>LSPGetDiagnosticsTool</code>,
+<code>LSPAnalyzeDiagnosticTool</code> (Tool interface adapters).</li>
+<li><code>helix_code/internal/tools/lsp_test.go</code>.</li>
+<li><code>helix_code/internal/tools/lsp_fakeserver/main.go</code> —
+small in-tree LSP server that implements <code>initialize</code>,
+<code>textDocument/didOpen</code>, <code>textDocument/didChange</code>,
+and emits a deterministic <code>publishDiagnostics</code> (used by
+manager tests + Challenge harness).</li>
+<li><code>helix_code/internal/commands/lsp_command.go</code> —
+<code>/lsp</code> slash command with <code>status</code> /
+<code>restart</code> / <code>list-servers</code> / <code>stop</code>
+subcommands.</li>
+<li><code>helix_code/internal/commands/lsp_command_test.go</code>.</li>
+<li><code>helix_code/cmd/cli/lsp_cmd.go</code> —
+<code>helixcode lsp</code> cobra root + 4 subcommands.</li>
+<li><code>helix_code/cmd/cli/lsp_cmd_test.go</code>.</li>
+<li><code>helix_code/tests/integration/lsp_test.go</code> —
+<code>//go:build integration</code>, gated per §5.</li>
+<li><code>helix_code/tests/integration/cmd/p1f13_challenge/main.go</code>
+— runtime evidence harness.</li>
+<li><code>challenges/p1-f13-lsp-integration/CHALLENGE.md</code> +
+<code>run.sh</code>.</li>
+</ul>
+<h3 id="modified-files">3.2 Modified files</h3>
+<ul>
+<li><code>helix_code/internal/tools/registry.go</code> — register
+<code>LSPGetDiagnosticsTool</code> +
+<code>LSPAnalyzeDiagnosticTool</code> in
+<code>registerAllTools()</code>; add
+<code>SetLSPManager(*LSPManager)</code> and a post-Execute hook that
+calls <code>lspManager.NotifyChange(ctx, path)</code> when the tool name
+is <code>fs_edit</code> / <code>fs_write</code> /
+<code>multi_edit_commit</code> and the inner Execute returned no error.
+Augment the tool result map with <code>&quot;lsp_diagnostics&quot;</code> when the
+summary is non-empty. Add a
+<code>CategoryLSP ToolCategory = &quot;lsp&quot;</code> constant.</li>
+<li><code>helix_code/cmd/cli/main.go</code> — construct an
+<code>LSPManager</code> during CLI startup, wire it into the registry
+via <code>SetLSPManager</code>, register <code>/lsp</code> slash command
+and <code>helixcode lsp</code> cobra subcommand, defer
+<code>lspMgr.Close()</code>.</li>
+<li><code>helix_code/go.mod</code> / <code>helix_code/go.sum</code> —
+add <code>go.lsp.dev/jsonrpc2 v0.10.0</code> and
+<code>go.lsp.dev/protocol v0.12.0</code>. (Both confirmed absent from
+go.mod at spec time; only
+<code>aws-sdk-go-v2/.../protocol/eventstream</code> is present, which is
+unrelated.)</li>
+</ul>
+<h3 id="types">3.3 Types</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/lsp_types.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DiagnosticSeverity <span class="dt">int</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    SeverityError       DiagnosticSeverity <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    SeverityWarning     DiagnosticSeverity <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    SeverityInformation DiagnosticSeverity <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    SeverityHint        DiagnosticSeverity <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Diagnostic <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    ID       <span class="dt">string</span>             <span class="st">`json:&quot;id&quot;`</span>        <span class="co">// stable hash for LSPAnalyzeDiagnostic lookup</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    FilePath <span class="dt">string</span>             <span class="st">`json:&quot;file_path&quot;`</span> <span class="co">// absolute path on host</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    Range    DiagnosticRange    <span class="st">`json:&quot;range&quot;`</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    Severity DiagnosticSeverity <span class="st">`json:&quot;severity&quot;`</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    Code     <span class="dt">string</span>             <span class="st">`json:&quot;code,omitempty&quot;`</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    Source   <span class="dt">string</span>             <span class="st">`json:&quot;source&quot;`</span>    <span class="co">// &quot;gopls&quot;, &quot;rust-analyzer&quot;, etc.</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    Message  <span class="dt">string</span>             <span class="st">`json:&quot;message&quot;`</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DiagnosticRange <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    Start Position <span class="st">`json:&quot;start&quot;`</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    End   Position <span class="st">`json:&quot;end&quot;`</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Position <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    Line      <span class="dt">int</span> <span class="st">`json:&quot;line&quot;`</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    Character <span class="dt">int</span> <span class="st">`json:&quot;character&quot;`</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> DiagnosticSummary <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    TotalErrors      <span class="dt">int</span>           <span class="st">`json:&quot;total_errors&quot;`</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    TotalWarnings    <span class="dt">int</span>           <span class="st">`json:&quot;total_warnings&quot;`</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    TotalInformation <span class="dt">int</span>           <span class="st">`json:&quot;total_information&quot;`</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    TotalHints       <span class="dt">int</span>           <span class="st">`json:&quot;total_hints&quot;`</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    Diagnostics      <span class="op">[]</span>Diagnostic  <span class="st">`json:&quot;diagnostics&quot;`</span>     <span class="co">// truncated to 5 when Expandable</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    Expandable       <span class="dt">bool</span>          <span class="st">`json:&quot;expandable&quot;`</span>      <span class="co">// true if more than 5</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    Source           <span class="dt">string</span>        <span class="st">`json:&quot;source,omitempty&quot;`</span><span class="co">// e.g. &quot;auto-trigger:fs_edit&quot;</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LSPServerSpec <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    Name       <span class="dt">string</span>   <span class="co">// &quot;gopls&quot;</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    Binary     <span class="dt">string</span>   <span class="co">// &quot;gopls&quot;</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    Extensions <span class="op">[]</span><span class="dt">string</span> <span class="co">// [&quot;.go&quot;]</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    Args       <span class="op">[]</span><span class="dt">string</span> <span class="co">// []</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ServerStatus <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    Name       <span class="dt">string</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    Spec       LSPServerSpec</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    Running    <span class="dt">bool</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    PID        <span class="dt">int</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    StartedAt  time<span class="op">.</span>Time</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    LastActive time<span class="op">.</span>Time</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    OpenDocs   <span class="dt">int</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/lsp_client.go</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LSPClient <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>    spec        LSPServerSpec</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    cmd         <span class="op">*</span>exec<span class="op">.</span>Cmd</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    conn        <span class="op">*</span>jsonrpc2<span class="op">.</span>Conn       <span class="co">// go.lsp.dev/jsonrpc2</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>    rootURI     protocol<span class="op">.</span>DocumentURI <span class="co">// go.lsp.dev/protocol</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    diagnostics <span class="kw">map</span><span class="op">[</span>protocol<span class="op">.</span>DocumentURI<span class="op">][]</span>Diagnostic</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>    openDocs    <span class="kw">map</span><span class="op">[</span>protocol<span class="op">.</span>DocumentURI<span class="op">]</span><span class="dt">int32</span> <span class="co">// version counter</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    mu          sync<span class="op">.</span>Mutex</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLSPClient<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> spec LSPServerSpec<span class="op">,</span> root <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>LSPClient<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> DidOpen<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">,</span> content <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> DidChange<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">,</span> content <span class="op">[]</span><span class="dt">byte</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> DidClose<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> GetDiagnostics<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">[]</span>Diagnostic</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> WaitForDiagnostics<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> path <span class="dt">string</span><span class="op">,</span> timeout time<span class="op">.</span>Duration<span class="op">)</span> <span class="op">[]</span>Diagnostic</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> Status<span class="op">()</span> ServerStatus</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>LSPClient<span class="op">)</span> Close<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/lsp_manager.go</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LSPManagerOptions <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>    Root        <span class="dt">string</span>                       <span class="co">// workspace root (project dir)</span></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    IdleTimeout time<span class="op">.</span>Duration                <span class="co">// default 5*time.Minute</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>    Specs       <span class="op">[]</span>LSPServerSpec              <span class="co">// curated allowlist</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    Detect      <span class="kw">func</span><span class="op">(</span><span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="co">// default exec.LookPath; injectable for tests</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    Logger      <span class="op">*</span>log<span class="op">.</span>Logger                  <span class="co">// optional</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> LSPManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>    opts    LSPManagerOptions</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    clients <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>LSPClient <span class="co">// by spec.Name</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>    timers  <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>time<span class="op">.</span>Timer</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>    mu      sync<span class="op">.</span>Mutex</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>    closed  <span class="dt">bool</span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewLSPManager<span class="op">(</span>opts LSPManagerOptions<span class="op">)</span> <span class="op">*</span>LSPManager</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> NotifyChange<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> absPath <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>DiagnosticSummary<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> GetDiagnostics<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> absPath <span class="dt">string</span><span class="op">,</span> minSeverity DiagnosticSeverity<span class="op">)</span> <span class="op">(*</span>DiagnosticSummary<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> Status<span class="op">()</span> <span class="op">[]</span>ServerStatus</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> Restart<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> Stop<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> name <span class="dt">string</span><span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>LSPManager<span class="op">)</span> Close<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
+<p><code>Diagnostic</code> is HelixCode’s own type, NOT the
+<code>protocol.Diagnostic</code> from go.lsp.dev. We deliberately wrap
+because (a) we add the stable <code>ID</code> field (needed for
+<code>LSPAnalyzeDiagnostic</code> lookup), (b) we add
+<code>FilePath</code> on every record (the protocol type only has it on
+the publish notification), and (c) we want a stable schema for the JSON
+sent to the LLM that doesn’t churn if the upstream library bumps. The
+wrap layer is ~30 LoC of straight field copies in
+<code>lsp_client.go</code>.</p>
+<h3 id="user-surfaces">3.4 User surfaces</h3>
+<p><strong>Agent tool calls</strong> (registered with
+<code>ToolRegistry</code>):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool name</th>
+<th>Schema</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LSPGetDiagnostics</code></td>
+<td><code>{file_path?: string, severity?: &quot;error\|warning\|information\|hint&quot;}</code></td>
+<td><code>DiagnosticSummary</code></td>
+</tr>
+<tr>
+<td><code>LSPAnalyzeDiagnostic</code></td>
+<td><code>{diagnostic_id: string}</code> (required)</td>
+<td><code>{diagnostic: Diagnostic, file_context: string, suggestion?: string}</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Slash command <code>/lsp</code></strong>: -
+<code>/lsp status</code> — table of all servers (name, running, PID,
+open docs, last active). - <code>/lsp list-servers</code> — show curated
+allowlist + which ones were detected on PATH. -
+<code>/lsp restart [name]</code> — restart one server
+(<code>gopls</code>) or all if no arg. - <code>/lsp stop [name]</code> —
+graceful shutdown of one server or all.</p>
+<p><strong>Cobra <code>helixcode lsp</code></strong> — same four
+verbs:</p>
+<pre><code>helixcode lsp status
+helixcode lsp list-servers
+helixcode lsp restart [name]
+helixcode lsp stop [name]</code></pre>
+<h2 id="data-flow">4. Data flow</h2>
+<h3 id="startup-wiring-cmdclimain.go">4.1 Startup wiring
+(<code>cmd/cli/main.go</code>)</h3>
+<pre><code>NewCLI()
+  ├─ root := determineWorkspaceRoot()      // git toplevel or cwd (reuse F11 helper)
+  ├─ specs := tools.DefaultLSPServerSpecs()
+  ├─ lspMgr := tools.NewLSPManager(LSPManagerOptions{
+  │      Root: root, Specs: specs, IdleTimeout: 5*time.Minute,
+  │  })
+  ├─ registry.SetLSPManager(lspMgr)
+  ├─ register `/lsp` slash + `helixcode lsp` cobra
+  └─ defer lspMgr.Close(ctx)</code></pre>
+<h3 id="lazy-spawn-flow">4.2 Lazy spawn flow</h3>
+<pre><code>LSPManager.NotifyChange(ctx, absPath)
+  ├─ ext := filepath.Ext(absPath)
+  ├─ spec := specByExt(ext)          // nil → no-op, return empty summary
+  ├─ client := m.clients[spec.Name]
+  ├─ if client == nil:
+  │     bin, err := m.opts.Detect(spec.Binary)
+  │     if err != nil:                // server not installed
+  │         m.logOnce(&quot;LSP %s not on PATH — skipping diagnostics&quot;, spec.Name)
+  │         return empty, nil         // NOT an error
+  │     client = NewLSPClient(ctx, spec, m.opts.Root)
+  │     m.clients[spec.Name] = client
+  ├─ resetIdleTimer(spec.Name)
+  ├─ content := os.ReadFile(absPath)
+  ├─ if client.IsOpen(absPath): client.DidChange(...) else: client.DidOpen(...)
+  ├─ diags := client.WaitForDiagnostics(ctx, absPath, 800*time.Millisecond)
+  └─ return summarize(diags, source=&quot;auto-trigger:&lt;toolName&gt;&quot;), nil</code></pre>
+<h3 id="auto-trigger-flow-in-registry.goexecute">4.3 Auto-trigger flow
+(in <code>registry.go::Execute</code>)</h3>
+<pre><code>result, execErr := tool.Execute(ctx, params)
+if execErr == nil &amp;&amp; r.lspManager != nil &amp;&amp; isEditTool(name):
+    path := extractEditedPath(name, params)
+    if path != &quot;&quot;:
+        summary, _ := r.lspManager.NotifyChange(ctx, path)  // never blocks &gt; 800ms
+        if summary != nil &amp;&amp; len(summary.Diagnostics) &gt; 0:
+            wrapResultWithLSP(result, summary)              // adds &quot;lsp_diagnostics&quot;</code></pre>
+<p><code>isEditTool</code> returns true for <code>fs_edit</code>,
+<code>fs_write</code>, <code>multi_edit_commit</code>.
+<code>extractEditedPath</code> reads <code>params[&quot;file_path&quot;]</code>
+(Edit/Write) or, for multi-edit-commit, falls back to the first path in
+the staged batch. Errors in <code>NotifyChange</code> are logged at
+WARN; they NEVER fail the user’s edit (CONST-035 requires a clear
+separation: the edit happened either way).</p>
+<h3 id="idle-timeout">4.4 Idle timeout</h3>
+<p>On every successful <code>LSPClient</code> request,
+<code>LSPManager</code> resets a <code>time.AfterFunc</code> with
+<code>IdleTimeout</code> (default 5 min). On fire, the manager calls
+<code>client.Close(ctx)</code> (graceful: send <code>shutdown</code>
+request, then <code>exit</code> notification, then wait up to 2s, then
+SIGTERM, then SIGKILL after another 2s) and removes it from the map.
+Next <code>NotifyChange</code> for that language re-spawns.</p>
+<h3 id="crash-recovery">4.5 Crash recovery</h3>
+<p><code>LSPClient</code> watches <code>cmd.Wait()</code> in a
+goroutine. On unexpected exit, it marks itself dead. The manager
+attempts up to 3 restarts with exponential backoff (1s, 2s, 4s) before
+giving up. After permanent failure, the spec is marked
+<code>Disabled</code> until <code>/lsp restart &lt;name&gt;</code> is
+called manually.</p>
+<h3 id="lsp-status-flow">4.6 <code>/lsp status</code> flow</h3>
+<p>Slash handler calls <code>LSPManager.Status() []ServerStatus</code>,
+renders a <code>text/tabwriter</code> table, returns it as a
+slash-command response.</p>
+<h2 id="error-handling-edge-cases-and-anti-bluff">5. Error handling,
+edge cases, and anti-bluff</h2>
+<h3 id="error-paths">5.1 Error paths</h3>
+<ul>
+<li><strong>Server binary not on PATH</strong> — log once at INFO (“LSP
+gopls not on PATH; install via
+<code>go install golang.org/x/tools/gopls@latest</code>”),
+<code>NotifyChange</code> returns empty summary + nil err. The user’s
+edit is never blocked.</li>
+<li><strong>Server fails to start</strong> — log at WARN with the exit
+code + first 200 chars of stderr, mark spec <code>Disabled</code>,
+return empty summary + nil err.</li>
+<li><strong>Server crashes mid-session</strong> — auto-restart with
+backoff (§4.5).</li>
+<li><strong><code>initialize</code> handshake hangs</strong> — 10s ctx
+timeout on <code>NewLSPClient</code>; on timeout, kill subprocess,
+return error to manager which falls back to “no diagnostics”.</li>
+<li><strong>Unknown file extension</strong> — <code>specByExt</code>
+returns nil, <code>NotifyChange</code> returns empty summary + nil err.
+Not an error.</li>
+<li><strong><code>textDocument/publishDiagnostics</code> arrives for an
+unknown URI</strong> — store under that URI key anyway;
+<code>WaitForDiagnostics</code> only consults the requested URI.</li>
+<li><strong>Concurrent <code>NotifyChange</code> for the same
+client</strong> — guarded by <code>LSPClient.mu</code>; serialized to
+avoid out-of-order <code>didChange</code> versions.</li>
+<li><strong>Manager <code>Close</code> while a <code>NotifyChange</code>
+is in flight</strong> — the call observes <code>closed=true</code> after
+acquiring the lock and returns empty summary.</li>
+</ul>
+<h3 id="anti-bluff-const-035-11.9-loud">5.2 Anti-bluff (CONST-035 /
+§11.9) — LOUD</h3>
+<p><strong>The single largest bluff vector for F13 is “LSP test passed”
+with no real LSP server running.</strong> Most CI/dev machines do NOT
+have all five servers installed. Therefore the gating policy below is
+non-negotiable:</p>
+<ol type="1">
+<li><p><strong>Unit tests</strong> (mocks OK ONLY at the jsonrpc2
+transport boundary). <code>LSPClient</code> accepts a generic
+<code>io.ReadWriter</code> so unit tests can pair two
+<code>bytes.Buffer</code>-backed in-memory pipes and validate request
+shaping (<code>initialize</code> with the right <code>RootURI</code>,
+<code>didChange</code> with monotonically increasing version) and
+response parsing. NO mocks of the manager, NO mocks of
+<code>os/exec</code>.</p></li>
+<li><p><strong>Integration tests</strong>
+(<code>-tags=integration</code>) — gated on real binary presence:</p>
+<ul>
+<li><code>TestLSP_GoplsRoundTrip</code> — when
+<code>exec.LookPath(&quot;gopls&quot;) == nil</code>, runs a real
+<code>gopls</code> subprocess against a Go file with a deliberate
+<code>package</code> mismatch, asserts diagnostic comes back with
+<code>severity=error</code>. When <code>gopls</code> is absent:
+<code>t.Skip(&quot;SKIP-OK: P1-F13 gopls not installed (install: go install golang.org/x/tools/gopls@latest)&quot;)</code>.</li>
+<li><code>TestLSP_RustAnalyzerRoundTrip</code> —
+<code>rust-analyzer</code> absent →
+<code>t.Skip(&quot;SKIP-OK: P1-F13 rust-analyzer not installed (install: rustup component add rust-analyzer)&quot;)</code>.</li>
+<li><code>TestLSP_PyrightRoundTrip</code> — <code>pyright</code> absent
+→
+<code>t.Skip(&quot;SKIP-OK: P1-F13 pyright not installed (install: npm i -g pyright)&quot;)</code>.</li>
+<li><code>TestLSP_TypescriptLanguageServerRoundTrip</code> — absent →
+<code>t.Skip(&quot;SKIP-OK: P1-F13 typescript-language-server not installed (install: npm i -g typescript-language-server typescript)&quot;)</code>.</li>
+<li><code>TestLSP_ClangdRoundTrip</code> — absent →
+<code>t.Skip(&quot;SKIP-OK: P1-F13 clangd not installed (install: apt install clangd OR brew install llvm)&quot;)</code>.</li>
+<li><code>SKIP-OK:</code> is the canonical marker required by
+<code>make no-silent-skips</code>. Bare <code>t.Skip()</code> is
+forbidden.</li>
+</ul></li>
+<li><p><strong>Challenge harness</strong> — exercises the
+<strong>manager pipeline</strong> (lazy spawn, idle timeout,
+file-extension routing, crash recovery, auto-trigger) via the
+<strong>in-tree fake LSP server</strong> at
+<code>internal/tools/lsp_fakeserver/main.go</code>. The harness builds
+the fake server once with
+<code>go build -o /tmp/p1f13_fake ./internal/tools/lsp_fakeserver</code>,
+registers a synthetic
+<code>LSPServerSpec{Binary: &quot;/tmp/p1f13_fake&quot;, Extensions: [&quot;.fake&quot;]}</code>
+on the manager, writes a <code>.fake</code> file, observes the
+diagnostic round-trip, then waits past the idle timeout and asserts the
+subprocess is reaped. This proves the entire manager + client +
+auto-trigger pipeline works end-to-end with a real subprocess speaking
+real JSON-RPC over real stdio — it does NOT depend on any external
+language server.</p></li>
+<li><p><strong>Anti-bluff rule in the Challenge:</strong> the harness
+output MUST present TWO sections —
+<code>=== MANAGER PIPELINE (always runs, in-tree fake server) ===</code>
+and <code>=== REAL LANGUAGE SERVERS (gated) ===</code>. The second
+section enumerates the 5 servers and prints <code>[PASS]</code> or
+<code>[skipped: &lt;binary&gt; not on PATH]</code> for each. The
+Challenge MUST NOT print <code>[PASS]</code> for a server that wasn’t
+actually invoked. A reader of the Challenge output can never confuse
+“manager works” with “every language server works”.</p></li>
+<li><p><strong>Concrete forbidden phrases</strong> (anti-bluff smoke
+clean check, applied to every new file):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/lsp.go internal/tools/lsp_client.go internal/tools/lsp_manager.go <span class="dt">\</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  internal/tools/lsp_servers.go internal/tools/lsp_types.go internal/tools/lsp_fakeserver <span class="dt">\</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  internal/commands/lsp_command.go cmd/cli/lsp_cmd.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p></li>
+<li><p><strong>The fake server is NOT a mock of a language
+server.</strong> It is a real OS subprocess that speaks real LSP-framed
+JSON-RPC 2.0 over stdin/stdout. It validates the same code paths a real
+<code>gopls</code> would exercise (initialize handshake, didOpen,
+publishDiagnostics, shutdown, exit, idle reap). It does not pretend to
+do semantic analysis — it emits a deterministic diagnostic for any
+opened document, which is enough to prove the pipeline.</p></li>
+</ol>
+<h2 id="testing">6. Testing</h2>
+<h3 id="unit-mocks-ok-transport-boundary-only">6.1 Unit (mocks OK,
+transport boundary only)</h3>
+<ul>
+<li><code>TestLSPClient_InitializeHandshake_SendsRootURI</code> — paired
+in-memory pipes; assert outbound JSON contains expected
+<code>rootUri</code>.</li>
+<li><code>TestLSPClient_DidOpen_FollowedBy_DidChange_VersionIncrement</code>.</li>
+<li><code>TestLSPClient_PublishDiagnostics_StoredByURI</code>.</li>
+<li><code>TestLSPClient_Shutdown_GracefulExit</code>.</li>
+<li><code>TestLSPManager_LazySpawn_OnFirstRelevantFile</code>.</li>
+<li><code>TestLSPManager_RouterByFileExtension</code>.</li>
+<li><code>TestLSPManager_UnknownExtension_ReturnsEmptySummary_NoError</code>.</li>
+<li><code>TestLSPManager_BinaryNotOnPath_ReturnsEmptySummary_NoError</code>.</li>
+<li><code>TestLSPManager_IdleTimeout_ReapsServer</code> (uses fake-clock
+injection).</li>
+<li><code>TestLSPManager_CrashRecovery_RestartsWithBackoff</code> (kills
+the fake subprocess mid-test).</li>
+<li><code>TestLSPManager_Status_ReportsAllRunningServers</code>.</li>
+<li><code>TestLSPManager_Close_ShutdownAllClients</code>.</li>
+<li><code>TestLSPGetDiagnosticsTool_FiltersBySeverity</code>.</li>
+<li><code>TestLSPAnalyzeDiagnosticTool_LookupByID</code>.</li>
+<li><code>TestRegistry_AutoTriggerAfterFSEdit_AttachesLSPDiagnostics</code>.</li>
+<li><code>TestRegistry_AutoTriggerSkipsOnEditError</code>.</li>
+<li><code>TestRegistry_AutoTriggerNeverBlocksUserEdit_OnLSPError</code>.</li>
+<li><code>TestLSPCommand_StatusRendersTable</code>.</li>
+<li><code>TestLSPCommand_RestartByName</code>.</li>
+<li><code>TestLSPCobra_StatusInvokesManager</code>.</li>
+</ul>
+<h3 id="integration--tagsintegration-gated-per-5.2">6.2 Integration
+(<code>-tags=integration</code>, gated per §5.2)</h3>
+<ul>
+<li><code>TestLSP_GoplsRoundTrip</code> — real <code>gopls</code>;
+<code>SKIP-OK: P1-F13 gopls not installed (install: go install golang.org/x/tools/gopls@latest)</code>.</li>
+<li><code>TestLSP_RustAnalyzerRoundTrip</code> —
+<code>SKIP-OK: P1-F13 rust-analyzer not installed (install: rustup component add rust-analyzer)</code>.</li>
+<li><code>TestLSP_PyrightRoundTrip</code> —
+<code>SKIP-OK: P1-F13 pyright not installed (install: npm i -g pyright)</code>.</li>
+<li><code>TestLSP_TypescriptLanguageServerRoundTrip</code> —
+<code>SKIP-OK: P1-F13 typescript-language-server not installed (install: npm i -g typescript-language-server typescript)</code>.</li>
+<li><code>TestLSP_ClangdRoundTrip</code> —
+<code>SKIP-OK: P1-F13 clangd not installed (install: apt install clangd OR brew install llvm)</code>.</li>
+<li><code>TestLSP_AutoTriggerThroughFSEdit_GoplsEndToEnd</code> (gated
+on <code>gopls</code> present) — exercises the full registry → manager →
+real gopls path.</li>
+</ul>
+<h3 id="challenge">6.3 Challenge</h3>
+<ul>
+<li><strong>Phase 1 — manager pipeline (always runs)</strong> — fake LSP
+server spawned, <code>.fake</code> file written, diagnostic round-trip
+observed, idle timeout reaps subprocess, crash + restart verified. ~10
+[PASS] lines.</li>
+<li><strong>Phase 2 — real servers (gated)</strong> — for each of the 5
+servers: detect, attempt round-trip, print <code>[PASS]</code> or
+<code>[skipped: &lt;reason&gt;]</code>. Skipped lines name the missing
+binary AND the install command.</li>
+<li>Final summary line:
+<code>MANAGER=10/10 PASS; REAL_SERVERS=&lt;n&gt;/5 PASS (&lt;5-n&gt; skipped)</code>.</li>
+</ul>
+<h2 id="cross-platform">7. Cross-platform</h2>
+<p>Pure Go + stdio subprocess. The implementation depends on: -
+<code>os/exec.CommandContext</code> — same semantics on Linux, macOS,
+Windows. <code>cmd.StdinPipe()</code> / <code>cmd.StdoutPipe()</code>
+work identically across all three. (This is documented Go behaviour;
+tested extensively by <code>gopls</code> itself.) -
+<code>go.lsp.dev/jsonrpc2</code> and <code>go.lsp.dev/protocol</code> —
+pure Go, no cgo, no platform-specific code. - Process termination —
+graceful <code>shutdown</code>/<code>exit</code> LSP messages first;
+fall back to <code>cmd.Process.Signal(syscall.SIGTERM)</code> (which is
+mapped to <code>TerminateProcess</code> on Windows by the Go runtime);
+final fallback <code>cmd.Process.Kill()</code>. - Path handling —
+diagnostics carry absolute host paths; we use <code>filepath.Abs</code>
+and <code>filepath.ToSlash</code> for the LSP URI conversion (LSP
+requires forward slashes in <code>file://</code> URIs even on
+Windows).</p>
+<p>No new platform-specific code required.</p>
+<h2 id="out-of-scope-deferred">8. Out of scope (deferred)</h2>
+<ul>
+<li><strong>Code completion</strong>
+(<code>textDocument/completion</code>) — F13 is diagnostics-only.</li>
+<li><strong>Go-to-definition / find-references / rename / hover</strong>
+— deferred to a future F13.5.</li>
+<li><strong>Workspace symbols</strong> (<code>workspace/symbol</code>) —
+deferred.</li>
+<li><strong>Inlay hints / semantic tokens</strong> — deferred.</li>
+<li><strong>Code actions / quick fixes</strong> —
+<code>LSPAnalyzeDiagnostic</code> returns suggestion text only, NOT
+auto-applied edits.</li>
+<li><strong>Multi-root workspaces</strong> — single workspace root per
+<code>LSPManager</code> instance in v1.</li>
+<li><strong>Custom server allowlist via config</strong> — five-server
+allowlist is hardcoded in <code>lsp_servers.go</code>. User-defined
+extra servers are deferred.</li>
+<li><strong>Server-installed-on-demand</strong> — F13 NEVER
+auto-installs language servers; install instructions are surfaced in
+skip messages instead.</li>
+</ul>
+<h2 id="constitutional-compliance">9. Constitutional compliance</h2>
+<ul>
+<li><strong>§11.9 / CONST-035</strong> — Challenge has TWO sections
+(manager pipeline vs real servers), the first always runs against a real
+subprocess speaking real JSON-RPC, the second is explicitly gated and
+never claims PASS without a runtime call. <code>[skipped: …]</code>
+lines name the missing binary so a reader can audit.</li>
+<li><strong>CONST-039</strong> — F13 ships with a Challenge in
+<code>challenges/p1-f13-lsp-integration/</code> and an evidence harness
+at <code>tests/integration/cmd/p1f13_challenge/main.go</code>.</li>
+<li><strong>CONST-042 (No-Secret-Leak)</strong> — LSP traffic over stdio
+frequently contains absolute paths to user files;
+<code>Diagnostic.Message</code> may contain user code snippets. Default
+INFO logging in <code>LSPClient</code> MUST NOT print full diagnostic
+messages or absolute paths; instead it logs <code>len(message)</code>
+and the basename only. DEBUG-level logging may include full content but
+is opt-in via <code>HELIX_LSP_DEBUG=1</code>. The Challenge verifies
+<code>INFO</code> log lines do not contain substrings of test diagnostic
+messages.</li>
+<li><strong>CONST-043 (No-Force-Push)</strong> — close-out task pushes
+to all four remotes non-force.</li>
+<li><strong>No-Mocks-In-Production (Universal Rule 2)</strong> —
+<code>LSPManager</code>, <code>LSPClient</code>, and the agent tools are
+real, talking to real subprocesses over real stdio. Mocks live only in
+<code>_test.go</code> files at the transport boundary and in the in-tree
+fake server (which is itself NOT a mock — it is a real subprocess used
+by both unit tests and the Challenge harness).</li>
+</ul>
+<h2 id="open-questions-resolved">10. Open questions resolved</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Q</th>
+<th>Answer</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1: language server scope</td>
+<td>(B) curated allowlist</td>
+<td>gopls / rust-analyzer / pyright / typescript-language-server /
+clangd; routed by file extension</td>
+</tr>
+<tr>
+<td>Q2: JSON-RPC + LSP types implementation</td>
+<td>(B) external libraries</td>
+<td><code>go.lsp.dev/jsonrpc2 v0.10.0</code> +
+<code>go.lsp.dev/protocol v0.12.0</code> (both new deps)</td>
+</tr>
+<tr>
+<td>Q3: server lifecycle</td>
+<td>(B) lazy + idle timeout</td>
+<td>spawn on first relevant file open, 5-minute idle timeout per server,
+managed by <code>LSPManager</code></td>
+</tr>
+<tr>
+<td>Q4: auto-trigger</td>
+<td>(A) auto after Edit/Write</td>
+<td><code>ToolRegistry.Execute</code> post-hook for
+<code>fs_edit</code>/<code>fs_write</code>/<code>multi_edit_commit</code>;
+summary inlined into tool result under <code>lsp_diagnostics</code></td>
+</tr>
+<tr>
+<td>Q5: user surface</td>
+<td>(A) full surface</td>
+<td><code>/lsp</code> slash + <code>helixcode lsp</code> cobra, both
+with <code>status</code> / <code>restart [name]</code> /
+<code>list-servers</code> / <code>stop [name]</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

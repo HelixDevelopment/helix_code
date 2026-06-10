@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-05-p1-f03-tool-result-persistence-design</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-05-p1-f03-tool-result-persistence-design</h1>
+</header>
+<h1 id="p1-f03-tool-result-persistence-design-spec">P1-F03 — Tool Result
+Persistence — Design Spec</h1>
+<p><strong>Date:</strong> 2026-05-05 <strong>Author:</strong> Claude
+Opus 4.7 (1M context) + user (milos85vasic.2nd@gmail.com) <strong>Phase
+/ Feature:</strong> Phase 1, Feature 3 of
+<code>docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>
+<strong>Status:</strong> APPROVED in brainstorming, awaiting user review
+of written spec <strong>Successor:</strong> to be handed to
+<code>superpowers:writing-plans</code> for executable plan
+<strong>Predecessor:</strong> Feature 2 (Permission Rule System) —
+closed 2026-05-05 (commits
+<code>f9e97ff</code>…<code>3fdcb39</code>)</p>
+<hr />
+<h2 id="goals-non-goals-success-criteria">1. Goals, non-goals, success
+criteria</h2>
+<h3 id="what-were-building">1.1 What we’re building</h3>
+<p>A claude-code-style tool-result persistence layer for HelixCode: when
+a tool produces output exceeding 50,000 characters, the runtime saves
+the raw content to <code>&lt;cwd&gt;/.helix/tool-results/</code> and
+substitutes a path-reference into the message that goes to the LLM. The
+LLM gets <code>persistedOutputPath</code> +
+<code>persistedOutputSize</code> fields plus a system-prompt note
+instructing it to use the existing <code>Read</code> tool when full
+content is needed. A 7-day age-based sweep runs lazily at startup.</p>
+<p>This feature exists because LLM context windows are finite and tool
+outputs (build logs, test reports, large file listings, find/grep
+results) routinely blow past 50K characters. Without persistence, a
+single chatty tool call can poison a session’s remaining token
+budget.</p>
+<h3 id="goals-priority-order">1.2 Goals (priority order)</h3>
+<ul>
+<li><strong>G1 — No bluff.</strong> A passing test/Challenge guarantees
+end-user usability per Constitution Article XI §11.9. Specifically: a
+tool that produces a &gt;50K-char output must produce a real file on
+disk that the user (or LLM via Read) can subsequently fetch — verified
+by <code>os.Stat</code> and content comparison, not just by inspecting a
+returned struct.</li>
+<li><strong>G2 — Extend, don’t parallelise.</strong> Same lesson as
+F01/F02. The new sub-package <code>internal/tools/persistence/</code>
+lives next to <code>internal/tools/permissions/</code> and
+<code>internal/tools/confirmation/</code> — same logical layer,
+different concern. Existing <code>internal/persistence/</code> (which
+manages full-state snapshots of session/memory/focus/template managers)
+is left untouched: blob storage and state snapshots are different
+shapes.</li>
+<li><strong>G3 — Boundary at the LLM provider, not the tool
+registry.</strong> The threshold check fires when a tool result is about
+to be serialised into a message that consumes LLM tokens.
+<code>internal/tools/registry.Execute</code> is unchanged. Non-LLM
+callers (test harnesses, future programmatic users) get raw outputs
+without unnecessary disk I/O.</li>
+<li><strong>G4 — Read-back via existing Read tool.</strong> No new tool
+added to the registry. The LLM follows the path in
+<code>persistedOutputPath</code> using its existing Read capability. A
+system-prompt note tells the LLM the convention.</li>
+<li><strong>G5 — Project-scoped + lazy 7-day cleanup.</strong> Blobs
+land under <code>&lt;cwd&gt;/.helix/tool-results/</code> and persist
+across sessions, matching claude-code semantics.
+<code>CleanupOld(7*24h)</code> runs once per CLI startup in a goroutine
+— never blocks the user, never adds a long-running background goroutine
+that needs lifecycle management.</li>
+</ul>
+<h3 id="non-goals-explicit-out-of-scope-for-f03">1.3 Non-goals (explicit
+out-of-scope for F03)</h3>
+<ul>
+<li><strong>N1.</strong> Compression on disk (gzip). Adds CPU cost;
+defer until observed disk pressure.</li>
+<li><strong>N2.</strong> Distributed / S3 / network-backed persistence.
+Not relevant to local CLI use.</li>
+<li><strong>N3.</strong> Tool-side opt-in/opt-out. Every result over the
+threshold persists; tools whose outputs are reliably small are no-ops at
+the threshold check.</li>
+<li><strong>N4.</strong> Per-tool threshold overrides. Single global
+<code>PersistThreshold = 50_000</code>. Per-tool customisation defers
+until requested.</li>
+<li><strong>N5.</strong> Cleanup beyond age-based. No quota-based
+eviction (LRU, etc.). 7-day window keeps disk use bounded for typical
+workflows.</li>
+<li><strong>N6.</strong> Re-using
+<code>internal/persistence/Store</code>. That package’s
+<code>Store</code> is a state-snapshot framework with
+<code>session.Manager</code>/<code>memory.Manager</code>/etc. wired in —
+wrong shape for blob storage. Building atop it would force F03 to
+participate in the snapshot lifecycle, which is gratuitous
+coupling.</li>
+<li><strong>N7.</strong> Fixing the F02 dead struct field
+(<code>c.permissionsEngine</code>). Tracked separately in PROGRESS.md
+parking lot.</li>
+</ul>
+<h3 id="success-criteria">1.4 Success criteria</h3>
+<ul>
+<li><strong>S1.</strong> <code>make verify-compile</code> exits 0 with
+the new package and provider wiring.</li>
+<li><strong>S2.</strong> Unit tests for
+<code>internal/tools/persistence/</code> pass with
+<code>-race</code>.</li>
+<li><strong>S3.</strong> Integration test
+(<code>-tags=integration</code>, no mocks) demonstrates: a tool
+returning &gt;50K chars triggers persistence, the resulting tool_result
+message contains <code>persistedOutputPath</code> (NOT the full
+content), the file at that path matches the original byte-for-byte, and
+a subsequent <code>Read</code> of that path returns the full
+content.</li>
+<li><strong>S4.</strong> Challenge under
+<code>tests/e2e/challenges/persistence/</code> runs an end-to-end
+scenario with runtime evidence pasted into the close-out commit body.
+The Challenge proves: file exists, content matches, message-payload
+omits inline content over the threshold.</li>
+<li><strong>S5.</strong> Anti-bluff smoke
+(<code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/tools/persistence/</code>)
+returns zero hits.</li>
+<li><strong>S6.</strong> <code>CleanupOld(7*24h)</code> removes only
+files with <code>mtime</code> older than the cutoff. Files inside the
+directory but with <code>.gitkeep</code> or unrelated names are left
+alone (the cleanup matches its own filename pattern).</li>
+<li><strong>S7.</strong> Path-traversal guard in
+<code>LoadPersisted</code> rejects any input outside the configured base
+directory, including <code>../</code>-traversal attempts and absolute
+paths to <code>/etc/passwd</code>-style targets.</li>
+</ul>
+<hr />
+<h2 id="architecture">2. Architecture</h2>
+<h3 id="topology">2.1 Topology</h3>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│  Tool runs (registry.Execute — UNCHANGED)               │
+└──────────────────────────────┬──────────────────────────┘
+                               │ result: interface{}
+                ┌──────────────▼──────────────────────────┐
+                │ internal/llm/tool_provider.go           │
+                │   (the provider-agnostic orchestration) │
+                │   calls persistence.Manager.MaybePersist│
+                └──────────────┬──────────────────────────┘
+                               │ *PersistedResult
+                ┌──────────────▼──────────────────────────┐
+                │ internal/llm/&lt;provider&gt;.go              │
+                │   serialises wire-specific tool_result  │
+                │   (inline output OR path-reference)     │
+                └──────────────┬──────────────────────────┘
+                               │
+                ┌──────────────▼──────────────────────────┐
+                │ internal/tools/persistence/             │  ← NEW
+                │   - manager.go (Manager, MaybePersist,  │
+                │                 LoadPersisted, Cleanup) │
+                │   - types.go (PersistedResult, consts)  │
+                │   - doc.go                              │
+                │   - &lt;cwd&gt;/.helix/tool-results/*.txt     │
+                └─────────────────────────────────────────┘</code></pre>
+<h3 id="why-this-shape">2.2 Why this shape</h3>
+<ul>
+<li><strong>One new sub-package</strong>, mirroring F02. No coupling
+with the heavyweight <code>internal/persistence/Store</code>.</li>
+<li><strong>Boundary at <code>tool_provider.go</code></strong> means the
+threshold check happens once, regardless of which LLM provider is in
+use. Provider-specific wire serialisation reads
+<code>*PersistedResult</code> and renders it into the provider’s
+tool_result schema.</li>
+<li><strong>Auditable wiring path.</strong> T07 audits every provider
+that handles <code>tool_result</code> to confirm it goes through
+<code>tool_provider.go</code>. Any non-conforming provider gets a direct
+<code>MaybePersist</code> call — the audit produces a list, not a
+guess.</li>
+<li><strong>Read-back via existing tool.</strong> The <code>Read</code>
+tool already validates paths and reads files. The system-prompt note
+teaches the LLM the convention; no new tool surface.</li>
+</ul>
+<h3 id="component-responsibilities">2.3 Component responsibilities</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>types.go</code></td>
+<td><code>PersistedResult</code> struct, constants
+(<code>PersistThreshold = 50_000</code>,
+<code>PersistDir = &quot;.helix/tool-results&quot;</code>,
+<code>DefaultMaxAge = 7 * 24 * time.Hour</code>)</td>
+</tr>
+<tr>
+<td><code>manager.go</code></td>
+<td><code>Manager</code> struct (project-rooted),
+<code>NewManager(projectRoot)</code>,
+<code>MaybePersist(toolName, callID, output) → *PersistedResult</code>,
+<code>LoadPersisted(path) → string</code> (path-traversal guard),
+<code>CleanupOld(maxAge) error</code></td>
+</tr>
+<tr>
+<td><code>internal/llm/tool_provider.go</code> (extended)</td>
+<td>Receives <code>*Manager</code> via constructor injection; wraps
+every tool result through <code>MaybePersist</code> before populating
+the next request payload</td>
+</tr>
+<tr>
+<td><code>internal/llm/anthropic_provider.go</code> (audited)</td>
+<td>Reads <code>PersistedResult.Output</code> (inline) or
+<code>PersistedResult.PersistedOutputPath</code> (reference) and renders
+into Anthropic tool_result content blocks</td>
+</tr>
+<tr>
+<td>Other providers (<code>openai_*</code>, <code>azure_*</code>,
+<code>ollama_*</code>, <code>bedrock_*</code>)</td>
+<td>Same audit. Each gets MaybePersist either through
+<code>tool_provider.go</code> or directly.</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code> (extended)</td>
+<td>Construct <code>persistence.Manager</code> once at startup with
+<code>os.Getwd()</code>. Trigger lazy
+<code>go manager.CleanupOld(DefaultMaxAge)</code> in a goroutine. Pass
+<code>*Manager</code> to provider constructors.</td>
+</tr>
+<tr>
+<td>System prompt template</td>
+<td>Add a one-paragraph note: “Tool outputs over 50,000 characters are
+saved to disk. When you receive a <code>persistedOutputPath</code>, use
+the Read tool with that path to fetch the full content.”</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-shapes">3. Data shapes</h2>
+<h3 id="constants">3.1 Constants</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// internal/tools/persistence/types.go</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> persistence</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="st">&quot;time&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    PersistThreshold <span class="op">=</span> <span class="dv">50_000</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    PersistDir       <span class="op">=</span> <span class="st">&quot;.helix/tool-results&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    DefaultMaxAge    <span class="op">=</span> <span class="dv">7</span> <span class="op">*</span> <span class="dv">24</span> <span class="op">*</span> time<span class="op">.</span>Hour</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<h3 id="persistedresult">3.2 <code>PersistedResult</code></h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PersistedResult <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Output              <span class="dt">string</span> <span class="st">`json:&quot;output,omitempty&quot;`</span>              <span class="co">// empty if persisted</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    PersistedOutputPath <span class="dt">string</span> <span class="st">`json:&quot;persistedOutputPath,omitempty&quot;`</span> <span class="co">// absolute path on disk</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    PersistedOutputSize <span class="dt">int</span>    <span class="st">`json:&quot;persistedOutputSize,omitempty&quot;`</span> <span class="co">// chars (= len([]byte(content)))</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    WasPersisted        <span class="dt">bool</span>   <span class="st">`json:&quot;wasPersisted&quot;`</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ToolName            <span class="dt">string</span> <span class="st">`json:&quot;toolName&quot;`</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    ToolCallID          <span class="dt">string</span> <span class="st">`json:&quot;toolCallID,omitempty&quot;`</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>Output</code> and <code>PersistedOutputPath</code> are mutually
+exclusive. <code>PersistedOutputSize</code> is the byte count of the
+original content (also equal to <code>len([]byte(output))</code>).
+<code>WasPersisted</code> is the canonical boolean — providers that
+serialise this struct to a wire format check <code>WasPersisted</code>
+to decide which branch to render.</p>
+<h3 id="manager">3.3 <code>Manager</code></h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Manager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    baseDir <span class="dt">string</span>       <span class="co">// &lt;projectRoot&gt;/&lt;PersistDir&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    mu      sync<span class="op">.</span>RWMutex <span class="co">// guards file creation; LoadPersisted is read-only and uses RLock</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewManager<span class="op">(</span>projectRoot <span class="dt">string</span><span class="op">)</span> <span class="op">*</span>Manager</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> MaybePersist<span class="op">(</span>toolName<span class="op">,</span> toolCallID <span class="dt">string</span><span class="op">,</span> output <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>PersistedResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> LoadPersisted<span class="op">(</span>path <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="dt">string</span><span class="op">,</span> <span class="dt">error</span><span class="op">)</span>     <span class="co">// path-traversal guarded</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>Manager<span class="op">)</span> CleanupOld<span class="op">(</span>maxAge time<span class="op">.</span>Duration<span class="op">)</span> <span class="dt">error</span>          <span class="co">// log + continue on per-file errors</span></span></code></pre></div>
+<h3 id="filename-pattern">3.4 Filename pattern</h3>
+<p><code>&lt;sanitized-tool&gt;_&lt;sha256[:16]&gt;_&lt;UTC-yyyymmdd_hhmmss&gt;.txt</code></p>
+<ul>
+<li><code>sanitized-tool</code> strips <code>/</code>, <code>\</code>,
+spaces, <code>..</code>, control characters, and clamps to 32
+chars.</li>
+<li>Hash is the first 16 hex chars of <code>sha256(output)</code> —
+makes identical content idempotent across retries (same filename, no
+duplicate).</li>
+<li>Timestamp is UTC to keep filenames sortable across timezone
+changes.</li>
+</ul>
+<hr />
+<h2 id="threshold-semantics">4. Threshold semantics</h2>
+<p><code>PersistThreshold = 50_000</code> characters, applied as
+<code>len([]byte(output)) &gt; 50_000</code>. Inputs:</p>
+<ul>
+<li>Strings: direct.</li>
+<li>Non-string <code>interface{}</code> results: converted via
+<code>fmt.Sprintf(&quot;%v&quot;, result)</code> <em>before</em> the size check.
+The conversion is the responsibility of <code>tool_provider.go</code>
+(where it already happens for serialisation); <code>MaybePersist</code>
+receives a string.</li>
+<li><code>nil</code>: returns
+<code>&amp;PersistedResult{Output: &quot;&quot;, WasPersisted: false, ToolName: t}</code>.</li>
+<li><code>&quot;&quot;</code>: same as nil — empty inline result.</li>
+</ul>
+<p>Boundary cases: - <code>len([]byte(output)) == 50_000</code> → inline
+(boundary is strictly greater than). -
+<code>len([]byte(output)) == 50_001</code> → persisted.</p>
+<p>The size check uses bytes, not runes. A 50K-rune CJK output is ~150K
+bytes and gets persisted. This is correct: token budget tracks bytes
+downstream, not runes.</p>
+<hr />
+<h2 id="read-back-path">5. Read-back path</h2>
+<p>The LLM receives a tool_result message containing the structured
+fields. The provider wire-format renders it (Anthropic example):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;tool_result&quot;</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tool_use_id&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;callID&gt;&quot;</span><span class="fu">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;[Tool output persisted to &lt;path&gt; — 142533 chars. Use Read to fetch full content.]&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The <code>content</code> field is human-readable (not JSON) so the
+LLM treats it as a regular string rather than parsing structure. The
+system-prompt note (added in T08) primes the LLM to recognise the
+convention and call <code>Read</code> when needed.</p>
+<p>The existing <code>Read</code> tool already validates paths against
+the workspace root and applies its own size handling (line ranges,
+etc.), so reading a persisted blob is no more dangerous than reading any
+other file the LLM has access to.</p>
+<hr />
+<h2 id="cleanup-semantics">6. Cleanup semantics</h2>
+<p><code>CleanupOld(maxAge time.Duration)</code> walks
+<code>&lt;projectRoot&gt;/.helix/tool-results/</code>, stats each entry,
+and removes any FILE (not directory) whose <code>ModTime()</code> is
+older than <code>time.Now().Add(-maxAge)</code>.</p>
+<p>Rules: - Only files matching the persistence filename pattern
+(<code>&lt;tool&gt;_&lt;hash16&gt;_&lt;timestamp&gt;.txt</code>) are
+eligible. A user-placed <code>.gitkeep</code> or <code>README.md</code>
+is left alone. - Directories are not removed. - Per-file errors are
+logged and skipped (don’t fail the whole sweep on one permission
+denied). - The function returns the first error encountered (for
+testing) but always finishes the walk.</p>
+<p>Lazy startup invocation: <code>cmd/cli/main.go</code> spawns
+<code>go func() { _ = manager.CleanupOld(persistence.DefaultMaxAge) }()</code>
+so the CLI never blocks on cleanup.</p>
+<hr />
+<h2 id="error-handling">7. Error handling</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Case</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Disk full / permission denied during <code>MaybePersist</code></td>
+<td>log warning at WARN; return inline
+(<code>WasPersisted: false</code>, <code>Output: original</code>). The
+tool call succeeds; only persistence fails.</td>
+</tr>
+<tr>
+<td><code>MkdirAll</code> fails for
+<code>.helix/tool-results/</code></td>
+<td>same fall-back as above</td>
+</tr>
+<tr>
+<td><code>LoadPersisted</code> with path outside
+<code>baseDir</code></td>
+<td>return error wrapping <code>ErrPathTraversal</code> (NEW sentinel:
+<code>var ErrPathTraversal = errors.New(&quot;path outside persistence directory&quot;)</code>)</td>
+</tr>
+<tr>
+<td><code>LoadPersisted</code> for missing file</td>
+<td>error wrapping <code>os.ErrNotExist</code></td>
+</tr>
+<tr>
+<td><code>CleanupOld</code> per-file errors</td>
+<td>log + continue; return the first error from the walk</td>
+</tr>
+<tr>
+<td><code>tool_provider.go</code> receives nil
+<code>*Manager</code></td>
+<td>treat as “persistence disabled”; pass through inline</td>
+</tr>
+</tbody>
+</table>
+<p>The fall-back-to-inline policy preserves the user-visible behaviour
+(the tool call works) at the cost of a fatter LLM payload. This is the
+right trade — disk failures shouldn’t break tool execution.</p>
+<hr />
+<h2 id="testing-strategy-const-035-article-xi-11.9">8. Testing strategy
+(CONST-035 / Article XI §11.9)</h2>
+<p>Three layers, mirroring F02:</p>
+<h3 id="unit-internaltoolspersistence_test.go">8.1 Unit
+(<code>internal/tools/persistence/*_test.go</code>)</h3>
+<ul>
+<li><code>MaybePersist</code> threshold: 49_999 inline; 50_000 inline
+(boundary); 50_001 persisted.</li>
+<li>Filename sanitisation: <code>/</code>, <code>\</code>,
+<code>..</code>, spaces, unicode, names &gt;32 chars.</li>
+<li>Hash idempotence: same content produces same filename.</li>
+<li><code>LoadPersisted</code> happy path; rejects
+<code>../etc/passwd</code>; rejects absolute paths outside
+<code>baseDir</code>.</li>
+<li><code>CleanupOld</code>: removes old files; leaves recent files;
+leaves non-pattern files (<code>.gitkeep</code>); leaves
+directories.</li>
+<li>Disk-full simulation: <code>t.TempDir()</code> +
+<code>os.Chmod(dir, 0o500)</code> → returns inline with logged
+warning.</li>
+<li><code>nil</code> and empty inputs handled correctly.</li>
+</ul>
+<p>Mocks ALLOWED at this layer per CLAUDE.md.</p>
+<h3 id="integration-testsintegrationpersistencepersistence_integration_test.go--tagsintegration">8.2
+Integration
+(<code>tests/integration/persistence/persistence_integration_test.go</code>,
+<code>-tags=integration</code>)</h3>
+<ul>
+<li>Uses real <code>tool_provider.go</code> orchestration loop with a
+fixture <code>Tool</code> that emits
+<code>strings.Repeat(&quot;X&quot;, 60_000)</code>.</li>
+<li>Asserts: <code>tool_result</code> payload coming out the other side
+has <code>WasPersisted: true</code>,
+<code>PersistedOutputSize == 60_000</code>,
+<code>Output: &quot;&quot;</code>.</li>
+<li>Asserts: file exists at <code>PersistedOutputPath</code>;
+<code>os.ReadFile</code> returns 60_000 X’s.</li>
+<li>Asserts: a subsequent invocation of the existing <code>Read</code>
+tool against <code>PersistedOutputPath</code> returns the full
+content.</li>
+<li><strong>No mocks.</strong> Uses real filesystem, real tool
+orchestration. (The fixture Tool is a real Tool struct, not a
+mock.)</li>
+</ul>
+<h3 id="challenge-testse2echallengespersistence">8.3 Challenge
+(<code>tests/e2e/challenges/persistence/</code>)</h3>
+<p>End-to-end scenario: - A <code>Bash</code> tool call invoked via
+<code>helixcode permissions check</code> (or a similar dry-run path that
+goes through <code>tool_provider.go</code>) emits &gt;50K chars of
+output. - Challenge driver intercepts the resulting message payload (via
+a debug fixture that captures the tool_provider’s outbound message) and
+asserts <code>WasPersisted: true</code>. - File exists at the path;
+<code>cmp</code> matches the original output.</p>
+<p>Three scenarios in <code>expected.json</code>: - <strong>S1</strong>
+— output of 49,999 chars → inline (<code>WasPersisted: false</code>). -
+<strong>S2</strong> — output of 50,001 chars → persisted; file content
+matches. - <strong>S3</strong> — same content emitted twice → same
+filename (hash idempotence verified).</p>
+<p>Runtime evidence: stdout transcript +
+<code>ls -la .helix/tool-results/</code> + <code>wc -c</code> of the
+persisted file pasted into commit body.</p>
+<h3 id="anti-bluff-smoke">8.4 Anti-bluff smoke</h3>
+<p><code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; internal/tools/persistence/</code>
+must be empty. Run on every sub-commit.</p>
+<h3 id="mutation-test-const-039">8.5 Mutation test (CONST-039)</h3>
+<p>Temporarily set <code>PersistThreshold = 0</code> so every output
+persists. Re-run the Challenge — S1 should now fail (WasPersisted: true
+expected to be false). Revert and confirm S1 passes again.</p>
+<hr />
+<h2 id="sub-task-plan">9. Sub-task plan</h2>
+<p>11 tasks (smaller than F02 because no CLI subcommand group + no slash
+command):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Task</th>
+<th>Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>Bootstrap <code>06_phase_1_evidence.md</code> §F03 + advance
+PROGRESS to F03-active</td>
+<td>docs only</td>
+</tr>
+<tr>
+<td>T02</td>
+<td><code>internal/tools/persistence/types.go</code> +
+<code>doc.go</code> skeleton (constants, PersistedResult struct)</td>
+<td>compile-only</td>
+</tr>
+<tr>
+<td>T03</td>
+<td><code>manager.go</code>: <code>Manager</code>,
+<code>NewManager</code>, <code>MaybePersist</code> with hash idempotence
++ filename sanitisation (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T04</td>
+<td><code>LoadPersisted</code> with path-traversal guard +
+<code>ErrPathTraversal</code> sentinel (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T05</td>
+<td><code>CleanupOld</code> with filename-pattern matching + non-fatal
+per-file errors (TDD)</td>
+<td>unit tests pass</td>
+</tr>
+<tr>
+<td>T06</td>
+<td>Wire into <code>internal/llm/tool_provider.go</code> orchestration
+loop with constructor injection of <code>*Manager</code></td>
+<td>compile + smoke test</td>
+</tr>
+<tr>
+<td>T07</td>
+<td>Audit and wire each LLM provider (<code>anthropic_*</code>,
+<code>openai_*</code>, <code>azure_*</code>, <code>ollama_*</code>,
+<code>bedrock_*</code>) that handles tool_result content. Direct
+MaybePersist call where the provider bypasses
+<code>tool_provider.go</code>.</td>
+<td>compile + per-provider smoke test</td>
+</tr>
+<tr>
+<td>T08</td>
+<td>Update system prompt template with persisted-output note; unit test
+for the rendered prompt</td>
+<td>unit test passes</td>
+</tr>
+<tr>
+<td>T09</td>
+<td><code>cmd/cli/main.go</code> constructs <code>Manager</code> at
+startup + lazy <code>go CleanupOld</code>; integration test
+(<code>-tags=integration</code>, no mocks)</td>
+<td>integration test passes</td>
+</tr>
+<tr>
+<td>T10</td>
+<td>Challenge under <code>tests/e2e/challenges/persistence/</code> with
+three scenarios from §8.3; runtime evidence pasted in commit body</td>
+<td>Challenge PASS in commit</td>
+</tr>
+<tr>
+<td>T11</td>
+<td>Feature 3 close-out: anti-bluff scan,
+<code>make verify-foundation</code>, push to all four remotes (no
+force)</td>
+<td>PROGRESS flipped to F04</td>
+</tr>
+</tbody>
+</table>
+<p>11 sub-commits expected. F04 (Git Worktree Agent Isolation) unblocked
+when T11 lands.</p>
+<hr />
+<h2 id="risks-and-mitigations">10. Risks and mitigations</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Some LLM providers bypass <code>tool_provider.go</code> and assemble
+tool_result directly</td>
+<td>T07 explicitly audits each provider and adds
+<code>MaybePersist</code> where needed. The audit’s output (list of
+providers + their wiring path) goes into the T07 commit message.</td>
+</tr>
+<tr>
+<td>Race between active session reading a blob and
+<code>CleanupOld</code> deleting it</td>
+<td>The 7-day window is far longer than any session’s lifetime; active
+sessions read blobs within minutes of writing them. The race is
+mathematically possible but practically zero. If observed: switch to a
+lock-file or pid-marker scheme in a follow-up.</td>
+</tr>
+<tr>
+<td>Path-traversal vulnerability in <code>LoadPersisted</code></td>
+<td>T04 has explicit tests for <code>../etc/passwd</code>,
+<code>/etc/passwd</code>, symlink-via-base-dir attacks. The guard uses
+<code>filepath.Abs</code> + prefix check; symlinks under the base dir
+are accepted (matches <code>Read</code> tool’s existing behaviour).</td>
+</tr>
+<tr>
+<td><code>interface{}</code> tool result with unprintable types
+(functions, channels)</td>
+<td><code>fmt.Sprintf(&quot;%v&quot;, result)</code> produces
+<code>&quot;&lt;func ...&gt;&quot;</code>-style strings. These are below 50K and
+pass through inline; no persistence triggered. Document in T03 unit
+tests.</td>
+</tr>
+<tr>
+<td>Filename collision under high concurrency</td>
+<td>The hash makes identical content idempotent (same filename).
+Different content with same hash prefix would collide; sha256[:16] makes
+that effectively impossible. The sanitised tool name is deterministic
+from the input, so two simultaneous calls with the same content+tool
+produce the same filename — and <code>os.WriteFile</code> overwrites,
+which is fine.</td>
+</tr>
+<tr>
+<td><code>cmd/cli/main.go</code> is large and tangled (per F02 review
+notes)</td>
+<td>T09 only adds a <code>*Manager</code> field + initialiser +
+goroutine spawn. No restructuring.</td>
+</tr>
+<tr>
+<td>F02 follow-up (permissions engine not threaded into
+ConfirmationCoordinator) intersects with F03</td>
+<td>Independent. F03 wires <code>*Manager</code> into the LLM provider
+construction path; F02’s wiring gap is in the tool execution dispatch
+path. They share <code>cmd/cli/main.go</code> as a touchpoint but don’t
+conflict.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="references">11. References</h2>
+<ul>
+<li>Synthesis spec:
+<code>docs/superpowers/specs/2026-05-04-cli-agent-fusion-synthesis-design.md</code>
+§4.1 (Phase 1 charter)</li>
+<li>Porting doc:
+<code>docs/improvements/04_main_plan_step_02/kimi_agent_helix_cli_integration_blueprint/porting_claude_code.md</code>
+§Feature 3</li>
+<li>Predecessor plan:
+<code>docs/superpowers/plans/2026-05-05-p1-f02-permission-rules.md</code></li>
+<li>Predecessor spec:
+<code>docs/superpowers/specs/2026-05-05-p1-f02-permission-rules-design.md</code></li>
+<li>Evidence file (live):
+<code>docs/improvements/06_phase_1_evidence.md</code></li>
+<li>Existing infrastructure being audited (NOT modified except for
+wiring):
+<ul>
+<li><code>helix_code/internal/tools/registry.go</code> —
+<code>Execute</code> returns <code>(interface{}, error)</code>;
+unchanged</li>
+<li><code>helix_code/internal/llm/tool_provider.go</code> —
+orchestration loop where <code>MaybePersist</code> is called</li>
+<li><code>helix_code/internal/llm/anthropic_provider.go</code> —
+tool_result content serialisation</li>
+<li><code>helix_code/internal/persistence/Store</code> — heavyweight
+state-snapshot; NOT used as substrate (per N6)</li>
+</ul></li>
+<li>Constitutional anchors:
+<ul>
+<li>Article XI §11.9 — Anti-Bluff Forensic Anchor (every PASS carries
+runtime evidence)</li>
+<li>CONST-035 — Zero-Bluff Mandate</li>
+<li>CONST-039 — Challenge System Integrity (mutation testing
+mandatory)</li>
+<li>CONST-042 — No-Secret-Leak (N/A; persisted outputs may contain user
+data but not credentials by convention)</li>
+<li>CONST-043 — No-Force-Push (close-out commit T11 pushes without
+force)</li>
+</ul></li>
+</ul>
+<hr />
+<p><em>End of P1-F03 Tool Result Persistence design spec.</em></p>
+</body>
+</html>

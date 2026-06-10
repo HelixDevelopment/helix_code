@@ -4,176 +4,47 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>CodeGraph Status</title>
+  <title>Status</title>
   <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">CodeGraph Status</h1>
+<h1 class="title">Status</h1>
 </header>
 <h1 id="codegraph-status">CodeGraph — Status</h1>
 <p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
@@ -308,8 +179,7 @@ code-extensions only (no <code>.env</code> / <code>.key</code> /
 can ever be indexed.</p>
 <h2 id="event-ledger">Event ledger</h2>
 <p>(events appended below by the automation; newest at the bottom)</p>
-<h2
-id="t120315z-hxc-017-config-fix-include-own-org-submodules-exclude-only-third-party-11.4.79">2026-05-28T12:03:15Z
+<h2 id="t120315z-hxc-017-config-fix-include-own-org-submodules-exclude-only-third-party-11.4.79">2026-05-28T12:03:15Z
 — HXC-017 config fix: include own-org submodules, exclude only
 third-party (§11.4.79)</h2>
 <ul>
@@ -328,7 +198,7 @@ excludes (<code>**/.env</code>, <code>**/.env.*</code>,
 <code>**/*.key</code>, <code>**/*.pem</code>,
 <code>**/secrets/**</code>) per §11.4.10.</li>
 <li><strong>Config JSON validity</strong>: confirmed via
-<code>python3 -c "import json;json.load(open('.codegraph/config.json'))"</code>
+<code>python3 -c &quot;import json;json.load(open(&#39;.codegraph/config.json&#39;))&quot;</code>
 → VALID.</li>
 <li><strong>Index status BEFORE re-index</strong>: Files 39,024 / Nodes
 624,103 / Edges 1,643,200 / DB 1609.00 MB.</li>
@@ -341,12 +211,12 @@ newly-included own-org submodule trees.</li>
 resolves)</strong>:
 <ul>
 <li><code>codegraph query EventBus</code> →
-<code>dependencies/vasic-digital/event_bus/pkg/bus/bus.go:85</code> ✅
-(would NOT have resolved under the old blanket
-<code>dependencies/**</code> exclude).</li>
+<code>submodules/event_bus/pkg/bus/bus.go:85</code> ✅ (would NOT have
+resolved under the old blanket <code>dependencies/**</code>
+exclude).</li>
 <li><code>codegraph query helix_memory</code> →
-<code>dependencies/HelixDevelopment/helix_memory/pkg/config/config.go</code>
-(+more) ✅.</li>
+<code>submodules/helix_memory/pkg/config/config.go</code> (+more)
+✅.</li>
 <li><code>codegraph query llama</code> filtered to
 <code>dependencies/LLama_CPP</code> → <strong>empty</strong> ✅
 (third-party correctly excluded).</li>
@@ -354,8 +224,7 @@ resolves)</strong>:
 <li><strong>HXC-017 status</strong>: fully done — config fixed, re-index
 complete, own-org inclusion proven, third-party exclusion proven.</li>
 </ul>
-<h2
-id="t063700z-codegraph_sync.sh-runmediamilosvasicdata4tbprojectshelixcode">2026-05-29T06:37:00Z
+<h2 id="t063700z-codegraph_sync.sh-runmediamilosvasicdata4tbprojectshelixcode">2026-05-29T06:37:00Z
 — codegraph_sync.sh @
 /run/media/milosvasic/DATA4TB/Projects/HelixCode</h2>
 <p><strong>FAIL</strong> — codegraph sync exited non-zero. Tail of
@@ -364,8 +233,7 @@ removed — was 25387 chars of ANSI noise from codegraph_sync.sh; see
 qa-results/ logs)</em> <em>(raw progress-spinner log line removed — was
 3007584 chars of ANSI noise from codegraph_sync.sh; see qa-results/
 logs)</em></p>
-<h2
-id="codegraph-0.9.7-update-indexsync-fail-11.4.79-own-org-regression-hxc-033">2026-05-29
+<h2 id="codegraph-0.9.7-update-indexsync-fail-11.4.79-own-org-regression-hxc-033">2026-05-29
 — codegraph 0.9.7 update: index/sync FAIL + §11.4.79 own-org regression
 (HXC-033)</h2>
 <p><strong>Event</strong>: operator installed codegraph
@@ -388,10 +256,10 @@ OOM.</p>
 <p><strong>§11.4.79 anti-bluff probe — FAILS:</strong>
 <code>codegraph_search BundleTranslator</code> (MCP) returns ONLY
 <code>helix_code/internal/tools/askuser/...</code> — the own-org
-<code>dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go</code>
-symbol does NOT resolve. Own-org submodules are NOT reachable in the
-0.9.7 index. <strong>This is a §11.4.79 regression introduced by the
-0.9.7 update.</strong></p>
+<code>submodules/llm_orchestrator/pkg/i18n/bundle.go</code> symbol does
+NOT resolve. Own-org submodules are NOT reachable in the 0.9.7 index.
+<strong>This is a §11.4.79 regression introduced by the 0.9.7
+update.</strong></p>
 <p><strong>Not a config regression:</strong> tracked
 <code>.codegraph/config.json</code> is intact (git-clean) — own-org
 includes + §11.4.10 credential excludes (<code>**/.env</code>,
@@ -405,8 +273,7 @@ needs operator decision (downgrade to prior working version / upstream
 bug report / accept degraded index). Evidence:
 <code>qa-results/codegraph_index_*.log</code>,
 <code>codegraph_recover_*.log</code>.</p>
-<h2
-id="codegraph-0.9.7-resolved-wipe-init-re-index-restored-own-org-index-hxc-033-fixed">2026-05-29
+<h2 id="codegraph-0.9.7-resolved-wipe-init-re-index-restored-own-org-index-hxc-033-fixed">2026-05-29
 — codegraph 0.9.7 RESOLVED: wipe + init + re-index restored own-org
 index (HXC-033 → Fixed)</h2>
 <p><strong>Resolution (operator-directed: “clear all indexed data fully
@@ -440,12 +307,12 @@ edge-enrichment phase runs async after node indexing).</p>
 <p><strong>§11.4.79 anti-bluff probe — PASS
 (<code>codegraph query</code>, fresh DB):</strong> -
 <code>NewBundleTranslator</code> →
-<code>dependencies/HelixDevelopment/llm_orchestrator/pkg/i18n/bundle.go:34</code>
-(+ <code>dependencies/vasic-digital/...</code>,
-<code>doc_processor</code>) — 10 own-org hits. ✅ HelixDevelopment +
-vasic-digital both reachable. - <code>EventBus</code> → resolves. ✅ -
-<code>llama_model_load</code> under <code>dependencies/LLama_CPP</code>
-→ empty. ✅ third-party correctly excluded.</p>
+<code>submodules/llm_orchestrator/pkg/i18n/bundle.go:34</code> (+
+<code>dependencies/vasic-digital/...</code>, <code>doc_processor</code>)
+— 10 own-org hits. ✅ HelixDevelopment + vasic-digital both reachable. -
+<code>EventBus</code> → resolves. ✅ - <code>llama_model_load</code>
+under <code>dependencies/LLama_CPP</code> → empty. ✅ third-party
+correctly excluded.</p>
 <p><strong>Status.md hygiene fix:</strong> this ledger had bloated to
 3.66 MB — a single 3,007,584-char line of raw ANSI progress-spinner
 output that <code>constitution/scripts/codegraph_sync.sh</code> dumped

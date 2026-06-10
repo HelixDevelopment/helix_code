@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>transcript</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">transcript</h1>
+</header>
+<h1 id="qa-transcript-hxc-016">QA Transcript — HXC-016</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-05-28T00:00:00Z</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Run-id</td>
+<td>HXC-016</td>
+</tr>
+<tr>
+<td>Feature</td>
+<td>§11.4.69–97 governance cascade into all owned submodules +
+mechanical propagation gate (CONST-047 / §3, §11.4.32)</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>Task</td>
+</tr>
+<tr>
+<td>Tracker</td>
+<td><code>docs/Fixed.md</code> (HXC-016 row —
+<code>Completed (→ Fixed.md)</code>)</td>
+</tr>
+<tr>
+<td>Authority</td>
+<td>constitution submodule <code>Constitution.md</code> §11.4.83
+(docs/qa/ end-user evidence mandate)</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>PASS — verified end-to-end</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p><strong>Seed worked example.</strong> This transcript is a real,
+already-completed feature’s end-user evidence, recorded here as the
+canonical format for the <code>docs/qa/</code> tree (see
+<code>docs/qa/README.md</code>). It transcribes the verification
+commands and outputs captured during the HXC-016 session (the same
+evidence summarised in the <code>docs/Fixed.md</code> HXC-016 row). No
+output is fabricated — every result below is the real captured result
+from that session.</p>
+</blockquote>
+<h2 id="feature-exercised">Feature exercised</h2>
+<p>The end-user-visible “feature” of HXC-016 is the
+<strong>governance-cascade guarantee</strong>: every owned-org submodule
+carries the new constitution anchors (§11.4.69 + §11.4.75–97), and the
+<code>verify-governance-cascade.sh</code> release-gate tool — the
+interface a maintainer or release engineer runs to confirm that
+guarantee — reports zero failures. The “user” here is the maintainer
+running the gate before a release.</p>
+<h2 id="bidirectional-thread">Bidirectional thread</h2>
+<h3 id="exchange-1-run-the-cascade-verifier-the-user-visible-gate">Exchange
+1 — run the cascade verifier (the user-visible gate)</h3>
+<p><strong>Sent (command the maintainer runs):</strong></p>
+<pre><code>scripts/verify-governance-cascade.sh</code></pre>
+<p><strong>Received (captured result, summarised from the HXC-016
+session):</strong></p>
+<pre><code>=== Result: 0 failures === PASS</code></pre>
+<p>204 owned-submodule PASS lines were emitted, each carrying the
+<code>+ §11.4 covenant-114</code> marker confirming the new anchors are
+present in that submodule’s CONSTITUTION / CLAUDE / AGENTS / QWEN
+files.</p>
+<h3 id="exchange-2-paired-1.1-mutation-proves-the-gate-is-not-a-bluff">Exchange
+2 — paired §1.1 mutation (proves the gate is not a bluff)</h3>
+<p><strong>Sent (mutation — strip the §11.4.95 H2 heading from one
+submodule’s CLAUDE.md, then re-run the gate):</strong></p>
+<pre><code># remove the &quot;## §11.4.95 —&quot; heading line from a cache/CLAUDE.md fixture
+scripts/verify-governance-cascade.sh</code></pre>
+<p><strong>Received:</strong></p>
+<pre><code>=== Result: 1 failures ===</code></pre>
+<p>The gate correctly FAILed when the anchor heading was removed —
+demonstrating it detects real absence, not just running green
+unconditionally.</p>
+<h3 id="exchange-3-restore-confirm-returns-to-the-verified-baseline">Exchange
+3 — restore + confirm (returns to the verified baseline)</h3>
+<p><strong>Sent:</strong></p>
+<pre><code>git checkout -- &lt;the mutated CLAUDE.md&gt;
+scripts/verify-governance-cascade.sh</code></pre>
+<p><strong>Received:</strong></p>
+<pre><code>=== Result: 0 failures === PASS</code></pre>
+<h2 id="anti-bluff-hardening-recorded-during-the-run">Anti-bluff
+hardening recorded during the run</h2>
+<p>A loose <code>grep -qF &quot;§11.4.95 —&quot;</code> originally matched the
+§11.4.95 cross-reference <em>inside</em> the §11.4.93 block body,
+silently skipping the §11.4.95 <em>heading</em> in several submodules.
+The gate was tightened to match the H2 marker <code>## §11.4.NN —</code>
+(commit <code>d2165bf7</code>), which then exposed 201 missing-heading
+files; fix-ups <code>79478ed5</code> / <code>903b9225</code> /
+<code>a9a1a6a1</code> restored them. A second defect — a
+<code>reset --hard origin/main</code> that regressed 4 HelixDevelopment
+submodules off their canonical <code>master</code> lineage — was
+repaired by repointing to master with the complete anchor set
+(<code>b4b790ea</code>).</p>
+<h2 id="captured-evidence-references">Captured-evidence references</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Evidence</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Final gate result <code>0 failures === PASS</code> (204 submodule
+PASS lines)</td>
+<td>HXC-016 session log; summarised in <code>docs/Fixed.md</code>
+HXC-016 row</td>
+</tr>
+<tr>
+<td>Paired §1.1 mutation FAIL→restore→PASS</td>
+<td>Exchanges 2–3 above</td>
+</tr>
+<tr>
+<td>Gate-tightening + fix-up commits</td>
+<td><code>d2165bf7</code>, <code>9031368d</code>, <code>79478ed5</code>,
+<code>903b9225</code>, <code>a9a1a6a1</code>, <code>b4b790ea</code></td>
+</tr>
+<tr>
+<td>Root cascade commit + submodule batches</td>
+<td><code>27929ae1</code>; <code>ef4b3986</code> / <code>a864039d</code>
+/ <code>e4046668</code> / <code>3adb2e63</code> / <code>464b2401</code>
+/ <code>b4ad4f50</code> / <code>053fd731</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="verdict">Verdict</h2>
+<p>PASS — the cascade guarantee is verifiable end-to-end through the
+same gate a release engineer runs, the gate is proven non-bluff via a
+paired mutation, and the baseline is restored. This is the evidence
+shape every future <code>docs/qa/&lt;run-id&gt;/transcript.md</code>
+should follow.</p>
+</body>
+</html>

@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-19-const052-rename-programme-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-19-const052-rename-programme-plan</h1>
+</header>
+<h1 id="const-052-rename-programme-phased-plan-issue-005">CONST-052
+Rename Programme — Phased Plan (ISSUE-005)</h1>
+<p><strong>Spec date:</strong> 2026-05-19 <strong>Constitutional
+anchor:</strong> CONST-052 (constitution §11.4.29)
+<strong>Tracker:</strong> ISSUE-005 (<code>docs/Issues.md</code>)
+<strong>Scope:</strong> PLAN ONLY. No renames executed in this round.
+Operator review + approval gates each phase before execution.
+<strong>Author intent:</strong> Translate CONST-052’s <em>“phased
+execution per the operator’s explicit instruction: comprehensive
+brainstorming → phase-divided plan → fine-grained tasks/subtasks → every
+change covered by every applicable test type”</em> into a concrete,
+evidence-backed migration map for HelixCode’s meta-repo.</p>
+<hr />
+<h2 id="status-snapshot">1. Status Snapshot</h2>
+<h3 id="meta-root-naming-already-compliant">1.1 Meta-root naming
+(already compliant)</h3>
+<p>A
+<code>find . -maxdepth 1 -type d -not -path &quot;./.git&quot; -not -path &quot;.&quot; -printf &quot;%f\n&quot; | sort | grep -E &#39;[A-Z]&#39;</code>
+against HEAD <code>2a5586e</code> returns <strong>empty</strong>. The 32
+top-level meta-repo directories (<code>assets/</code>,
+<code>awesome-ai-memory/</code>, <code>challenges/</code>,
+<code>cli_agents/</code>, <code>cli_agents_configs/</code>,
+<code>cli_agents_resources/</code>, <code>cmd/</code>,
+<code>configs/</code>, <code>constitution/</code>,
+<code>containers/</code>, <code>dependencies/</code>,
+<code>docker/</code>, <code>docs/</code>,
+<code>github_pages_website/</code>, <code>helix_agent/</code>,
+<code>helix_code/</code>, <code>helix_qa/</code>,
+<code>implementation_guide/</code>, <code>internal/</code>,
+<code>mcp_servers/</code>, <code>packaging/</code>,
+<code>panoptic/</code>, <code>reports/</code>, <code>scripts/</code>,
+<code>security/</code>, <code>specification/</code>, <code>test/</code>,
+<code>tests/</code>, <code>upstreams/</code>, <code>website/</code>,
+plus hidden <code>.claude/</code>, <code>.github/</code>) are ALL
+snake_case (verified <code>2026-05-18</code>).</p>
+<p><strong>ISSUE-005 phrasing — “meta-repo directories like
+<code>helix_code/</code>, <code>challenges/</code>,
+<code>helix_qa/</code>, <code>helix_agent/</code> still
+PascalCase”</strong> — was authored before the round-88 meta-root
+partial sweep; the meta-root is now compliant. <strong>The remaining
+non-compliance is two layers deeper:</strong> under
+<code>dependencies/</code> and inside every submodule’s
+<code>Upstreams/</code> directory.</p>
+<h3 id="where-pascalcase-still-lives-the-actual-work">1.2 Where
+PascalCase still lives (the actual work)</h3>
+<p>Three deficiency clusters remain:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Cluster</th>
+<th>Where</th>
+<th>Count</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(A) Owned-org submodule <strong>directories</strong></td>
+<td><code>dependencies/HelixDevelopment/*</code> +
+<code>dependencies/vasic-digital/*</code></td>
+<td>10 + 48 = 58 dirs</td>
+<td>HIGH (CONST-052 §11.4.29 applies — owned by us)</td>
+</tr>
+<tr>
+<td>(B) Third-party submodule directories</td>
+<td><code>dependencies/{LLama_CPP,Ollama,HuggingFace_Hub}</code>,
+<code>cli_agents_resources/*</code></td>
+<td>3 + 7 = 10 dirs</td>
+<td>EXEMPT (CONST-052 vendor exception)</td>
+</tr>
+<tr>
+<td>(C) <code>Upstreams/</code> (PascalCase) → <code>upstreams/</code>
+(snake) per CONST-052 transition</td>
+<td>49 submodule subtrees (incl. own + vendor)</td>
+<td>49 dirs</td>
+<td>MEDIUM (transition explicitly supported by
+<code>constitution/install_upstreams.sh</code> for both)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verification commands (all run 2026-05-18 against HEAD
+<code>2a5586e</code>):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (A) Owned-org PascalCase submodule dirs:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> dependencies/HelixDevelopment <span class="at">-maxdepth</span> 1 <span class="at">-type</span> d <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;dependencies/HelixDevelopment&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 10</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> dependencies/vasic-digital   <span class="at">-maxdepth</span> 1 <span class="at">-type</span> d <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;dependencies/vasic-digital&quot;</span>   <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 48</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># (B) Third-party submodule dirs:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> dependencies <span class="at">-maxdepth</span> 1 <span class="at">-type</span> d <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&#39;/[A-Z]&#39;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>  <span class="co"># → 3 (LLama_CPP, Ollama, HuggingFace_Hub)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> cli_agents_resources <span class="at">-maxdepth</span> 2 <span class="at">-type</span> d <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&#39;/[A-Z]&#39;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>  <span class="co"># → 7 (Awesome-*, Cheshire-Cat-Ai, GitHub-Awesome-Copilot, OpenAI-Cookbook, Taches-CC-Resources)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># (C) PascalCase Upstreams dirs:</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-maxdepth</span> 4 <span class="at">-type</span> d <span class="at">-name</span> <span class="st">&quot;Upstreams&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>  <span class="co"># → 49</span></span></code></pre></div>
+<h3 id="common-sense-exceptions-per-const-052-11.4.29">1.3 Common-sense
+exceptions per CONST-052 §11.4.29</h3>
+<p>The rule has four explicit carve-outs. Applied here:</p>
+<ol type="1">
+<li><strong>Language-mandated case</strong>
+(Java/Kotlin/Android/Apple/C#/Swift inside language roots). Affects:
+paths inside <code>cli_agents/junie</code>,
+<code>cli_agents/swe-agent</code>,
+<code>helix_code/applications/{ios,android,aurora-os,harmony-os}</code>.
+<strong>Exempt</strong> — language convention wins inside the language
+root.</li>
+<li><strong>Vendor / upstream third-party submodules.</strong> Affects
+cluster (B): <code>LLama_CPP</code>, <code>Ollama</code>,
+<code>HuggingFace_Hub</code>, <code>cli_agents_resources/*</code>,
+<code>cli_agents/*</code> (third-party agent forks).
+<strong>Exempt</strong> — renaming would break upstream merge
+alignment.</li>
+<li><strong>Build artefacts</strong> (<code>node_modules</code>,
+<code>__pycache__</code>, <code>.git</code>, <code>target</code>,
+<code>build</code>, <code>bin</code>). Already ignored, irrelevant.</li>
+<li><strong>Common-sense test</strong> (“does renaming break the
+technology?”). Special case for
+<code>submodules/llms_verifier/Assets/</code> and <code>Website/</code>
+— these are language-neutral but ship as fixed-name asset roots wired
+into deployment manifests; the <strong>decision is
+operator-side</strong> (deferred to §8 decision-points).</li>
+</ol>
+<h3 id="why-this-was-deferred">1.4 Why this was deferred</h3>
+<p>Three coupled cascades historically blocked execution:</p>
+<ol type="1">
+<li><strong>Documentation-path encoding.</strong> A literal string
+<code>submodules/helix_llm/...</code> appears in 244 .md files (verified
+count); each is a working anchor that breaks if the directory
+moves.</li>
+<li><strong>Go module replace directives.</strong> 8 <code>go.mod</code>
+files (verified
+<code>grep -l &quot;HelixDevelopment\|vasic-digital&quot; --include=&quot;go.mod&quot; -r .</code>)
+carry <code>replace</code> lines that map a module-id to a relative
+directory; rename without paired <code>replace</code> update silently
+breaks <code>go build</code>.</li>
+<li><strong>Submodule registration.</strong> <code>.gitmodules</code>
+carries 70 PascalCase <code>path = ...</code> entries; renaming requires
+<code>git mv</code> + <code>.gitmodules</code> rewrite +
+<code>git submodule sync</code> + re-init across all clones.</li>
+</ol>
+<p>Round 106 (the <strong>HelixMemory</strong> rename pilot)
+demonstrated all three at once: one wrong path knocked out 6
+packages.</p>
+<hr />
+<h2 id="reference-cascade-audit">2. Reference-Cascade Audit</h2>
+<h3 id="owned-org-per-submodule-fan-out-the-cost-of-rename-matrix">2.1
+Owned-org per-submodule fan-out (the cost-of-rename matrix)</h3>
+<p>All numbers from
+<code>grep -rn &quot;$path&quot; --include=&quot;&lt;ext&gt;&quot; . | grep -v &quot;\.git/&quot; | wc -l</code>,
+run 2026-05-18.</p>
+<h4 id="dependencieshelixdevelopment-10-submodules">2.1.1
+<code>dependencies/HelixDevelopment/*</code> (10 submodules)</h4>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th style="text-align: right;">.md refs</th>
+<th style="text-align: right;">.sh refs</th>
+<th style="text-align: right;">.go refs</th>
+<th style="text-align: right;">Aggregate</th>
+<th>Risk band</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HelixLLM</code></td>
+<td style="text-align: right;">244</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;"><strong>269</strong></td>
+<td style="text-align: right;"><strong>522</strong></td>
+<td><strong>PHASE-3 critical (Go-replace blast radius)</strong></td>
+</tr>
+<tr>
+<td><code>LLMsVerifier</code></td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">95</td>
+<td>PHASE-3</td>
+</tr>
+<tr>
+<td><code>DocProcessor</code></td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">67</td>
+<td>PHASE-2</td>
+</tr>
+<tr>
+<td><code>LLMOrchestrator</code></td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">63</td>
+<td>PHASE-2</td>
+</tr>
+<tr>
+<td><code>VisionEngine</code></td>
+<td style="text-align: right;">56</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">61</td>
+<td>PHASE-2</td>
+</tr>
+<tr>
+<td><code>LLMProvider</code></td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">42</td>
+<td>PHASE-2</td>
+</tr>
+<tr>
+<td><code>HelixMemory</code></td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">48</td>
+<td>PHASE-2 (pilot already done — confirms cost band)</td>
+</tr>
+<tr>
+<td><code>HelixSpecifier</code></td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">48</td>
+<td>PHASE-2</td>
+</tr>
+<tr>
+<td><code>Models</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>DebateOrchestrator</code></td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td>PHASE-1</td>
+</tr>
+</tbody>
+</table>
+<p>Aggregate cluster total:
+<strong><code>dependencies/HelixDevelopment</code> string appears 260
+times</strong> across .md/.sh/.go/.yaml/.yml/.toml (verified).</p>
+<h4 id="dependenciesvasic-digital-48-submodules-top-10-only-audited-remainder-estimated">2.1.2
+<code>dependencies/vasic-digital/*</code> (48 submodules — top 10 only
+audited; remainder estimated)</h4>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th style="text-align: right;">.md refs</th>
+<th style="text-align: right;">.sh refs</th>
+<th style="text-align: right;">.go refs</th>
+<th style="text-align: right;">Aggregate</th>
+<th>Risk band</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Models</code></td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">16</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>Memory</code></td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>Storage</code></td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>VectorDB</code></td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>Auth</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>Cache</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>Database</code></td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>RAG</code></td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>Plugins</code></td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td><code>MCP_Module</code></td>
+<td style="text-align: right;">[estimated 5-10, not exhaustively
+counted]</td>
+<td style="text-align: right;">[estimated 2-3, not exhaustively
+counted]</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">~10</td>
+<td>PHASE-1</td>
+</tr>
+<tr>
+<td>Other 38 vasic-digital submodules</td>
+<td style="text-align: right;">[estimated 0-10 each, not exhaustively
+counted]</td>
+<td style="text-align: right;">[estimated 0-3 each, not exhaustively
+counted]</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">individually small</td>
+<td>PHASE-1</td>
+</tr>
+</tbody>
+</table>
+<p>Aggregate cluster total:
+<strong><code>dependencies/vasic-digital</code> string appears 138
+times</strong> (verified).</p>
+<h3 id="third-party-exempt-but-tabulated-for-completeness">2.2
+Third-party (EXEMPT but tabulated for completeness)</h3>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 40%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Path</th>
+<th style="text-align: right;">.md/.sh/.go refs</th>
+<th>Disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dependencies/LLama_CPP</code></td>
+<td style="text-align: right;">4</td>
+<td>EXEMPT (vendor; upstream merge alignment)</td>
+</tr>
+<tr>
+<td><code>dependencies/Ollama</code></td>
+<td style="text-align: right;">4</td>
+<td>EXEMPT (vendor)</td>
+</tr>
+<tr>
+<td><code>dependencies/HuggingFace_Hub</code></td>
+<td style="text-align: right;">20</td>
+<td>EXEMPT (vendor)</td>
+</tr>
+<tr>
+<td><code>cli_agents_resources/GitHub-Awesome-Copilot</code></td>
+<td style="text-align: right;">0</td>
+<td>EXEMPT (vendor)</td>
+</tr>
+<tr>
+<td><code>cli_agents_resources/Awesome-AI-GPTs</code></td>
+<td style="text-align: right;">0</td>
+<td>EXEMPT (vendor)</td>
+</tr>
+<tr>
+<td><code>cli_agents_resources/{Awesome-AI-Agents, Cheshire-Cat-Ai, OpenAI-Cookbook, Taches-CC-Resources}</code></td>
+<td style="text-align: right;">[estimated 0-5 each, not exhaustively
+counted]</td>
+<td>EXEMPT (vendor)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="upstreams-pascalcase-upstreams-snake-cluster-c">2.3
+<code>Upstreams/</code> (PascalCase) → <code>upstreams/</code> (snake) —
+cluster (C)</h3>
+<p>Reference count:
+<code>grep -rn &quot;/Upstreams/\|/Upstreams\b&quot; --include=&quot;*.md&quot; --include=&quot;*.sh&quot; . | grep -v &quot;\.git/&quot; | wc -l</code>
+→ <strong>40 references</strong> across all .md and .sh files.</p>
+<p>Important coupling: <code>constitution/install_upstreams.sh</code>
+(commit <code>45d3678</code> of the constitution submodule)
+<strong>already supports BOTH directory names</strong> (verified:
+<code>grep -n &quot;upstreams\|Upstreams&quot; constitution/install_upstreams.sh</code>
+returns dual-name handling at lines 6 + lookup loop). This means cluster
+(C) renames are <strong>non-breaking by construction</strong> — the
+upstream installer continues to work whichever name the submodule uses.
+<strong>Convention drift, not functional drift.</strong></p>
+<h3 id="submodule-directories-owned-by-us-but-unaffected-already-snake_case-at-root">2.4
+Submodule directories owned by us but unaffected (already snake_case at
+root)</h3>
+<ul>
+<li><code>challenges/</code>, <code>containers/</code>,
+<code>helix_agent/</code>, <code>helix_code/</code>,
+<code>helix_qa/</code>, <code>security/</code>, <code>assets/</code>,
+<code>github_pages_website/</code>, <code>panoptic/</code>,
+<code>awesome-ai-memory/</code>.</li>
+</ul>
+<p>These dirs are compliant at the meta-root path. The <strong>remote
+GitHub repo URLs</strong> (<code>HelixDevelopment/HelixCode.git</code>,
+<code>HelixDevelopment/HelixAgent.git</code>,
+<code>vasic-digital/Challenges.git</code>, etc.) are PascalCase but
+<strong>CONST-052 §11.4.29 governs filesystem paths, not org-side
+repository identifiers</strong> — renaming a GitHub repo is a separate
+operational concern outside CONST-052’s scope (would require
+breaking-change coordination across every clone everywhere).
+Out-of-scope here.</p>
+<hr />
+<h2 id="renames-to-perform-full-list">3. Renames To Perform (Full
+List)</h2>
+<h3 id="cluster-a-owned-org-dependencieshelixdevelopment-10-renames">3.1
+Cluster A — owned-org <code>dependencies/HelixDevelopment/*</code> (10
+renames)</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>OLD</th>
+<th>NEW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submodules/debate_orchestrator/</code></td>
+<td><code>dependencies/helix_development/debate_orchestrator/</code></td>
+</tr>
+<tr>
+<td><code>submodules/doc_processor/</code></td>
+<td><code>dependencies/helix_development/doc_processor/</code></td>
+</tr>
+<tr>
+<td><code>submodules/helix_llm/</code></td>
+<td><code>dependencies/helix_development/helix_llm/</code></td>
+</tr>
+<tr>
+<td><code>submodules/helix_memory/</code></td>
+<td><code>dependencies/helix_development/helix_memory/</code></td>
+</tr>
+<tr>
+<td><code>submodules/helix_specifier/</code></td>
+<td><code>dependencies/helix_development/helix_specifier/</code></td>
+</tr>
+<tr>
+<td><code>submodules/llm_orchestrator/</code></td>
+<td><code>dependencies/helix_development/llm_orchestrator/</code></td>
+</tr>
+<tr>
+<td><code>submodules/llm_provider/</code></td>
+<td><code>dependencies/helix_development/llm_provider/</code></td>
+</tr>
+<tr>
+<td><code>submodules/llms_verifier/</code></td>
+<td><code>dependencies/helix_development/llms_verifier/</code></td>
+</tr>
+<tr>
+<td><code>submodules/models/</code></td>
+<td><code>dependencies/helix_development/models/</code></td>
+</tr>
+<tr>
+<td><code>submodules/vision_engine/</code></td>
+<td><code>dependencies/helix_development/vision_engine/</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Parent dir <code>HelixDevelopment/</code> →
+<code>helix_development/</code></strong> is part of cluster A (renamed
+once before/after the leaf renames per operator preference).</p>
+<h3 id="cluster-a-owned-org-dependenciesvasic-digital-48-renames">3.2
+Cluster A — owned-org <code>dependencies/vasic-digital/*</code> (48
+renames)</h3>
+<p><code>vasic-digital/</code> itself <strong>already contains a
+hyphen</strong> (<code>-</code> separator). CONST-052 §11.4.29 says
+“snake_case” with <code>_</code> as the separator. <strong>Org-name
+renaming decision deferred to §8</strong> (would require GitHub org
+rename, which is out-of-scope). For the IN-SCOPE filesystem path,
+treatment:</p>
+<ul>
+<li><strong>Option 1:</strong> leave the org subdir as
+<code>vasic-digital/</code> (it is operator’s GitHub-org handle; treat
+as proper noun exempt — though CONST-052 mentions only language
+exceptions, not proper nouns). Plan default.</li>
+<li><strong>Option 2:</strong> rename to <code>vasic_digital/</code>
+(strictly compliant; introduces drift between filesystem path and GitHub
+org handle).</li>
+</ul>
+<p>Plan adopts Option 1 (defer org-dir rename pending operator decision,
+§8). The <strong>leaf submodule renames proceed</strong> regardless:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>OLD (sample — full list applied to all 48)</th>
+<th>NEW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submodules/agentic/</code></td>
+<td><code>submodules/agentic/</code></td>
+</tr>
+<tr>
+<td><code>submodules/auth/</code></td>
+<td><code>submodules/auth/</code></td>
+</tr>
+<tr>
+<td><code>submodules/auto_temp/</code></td>
+<td><code>submodules/auto_temp/</code></td>
+</tr>
+<tr>
+<td><code>submodules/background_tasks/</code></td>
+<td><code>submodules/background_tasks/</code></td>
+</tr>
+<tr>
+<td><code>submodules/benchmark/</code></td>
+<td><code>submodules/benchmark/</code></td>
+</tr>
+<tr>
+<td><code>submodules/cache/</code></td>
+<td><code>submodules/cache/</code></td>
+</tr>
+<tr>
+<td><code>submodules/claritas/</code></td>
+<td><code>submodules/claritas/</code></td>
+</tr>
+<tr>
+<td><code>submodules/concurrency/</code></td>
+<td><code>submodules/concurrency/</code></td>
+</tr>
+<tr>
+<td><code>submodules/config/</code></td>
+<td><code>submodules/config/</code></td>
+</tr>
+<tr>
+<td><code>submodules/conversation/</code></td>
+<td><code>submodules/conversation/</code> (NO-OP — already
+compliant)</td>
+</tr>
+<tr>
+<td><code>submodules/database/</code></td>
+<td><code>submodules/database/</code></td>
+</tr>
+<tr>
+<td><code>submodules/doc_processor/</code></td>
+<td><code>submodules/doc_processor/</code></td>
+</tr>
+<tr>
+<td><code>submodules/document/</code></td>
+<td><code>submodules/document/</code></td>
+</tr>
+<tr>
+<td><code>submodules/embeddings/</code></td>
+<td><code>submodules/embeddings/</code></td>
+</tr>
+<tr>
+<td><code>submodules/event_bus/</code></td>
+<td><code>submodules/event_bus/</code></td>
+</tr>
+<tr>
+<td><code>submodules/filesystem/</code></td>
+<td><code>submodules/filesystem/</code></td>
+</tr>
+<tr>
+<td><code>submodules/formatters/</code></td>
+<td><code>submodules/formatters/</code></td>
+</tr>
+<tr>
+<td><code>submodules/gandalf_solutions/</code></td>
+<td><code>submodules/gandalf_solutions/</code></td>
+</tr>
+<tr>
+<td><code>submodules/hyper_tune/</code></td>
+<td><code>submodules/hyper_tune/</code></td>
+</tr>
+<tr>
+<td><code>submodules/i_llm/</code></td>
+<td><code>submodules/i_llm/</code></td>
+</tr>
+<tr>
+<td><code>submodules/i18n/</code></td>
+<td><code>submodules/i18n/</code></td>
+</tr>
+<tr>
+<td><code>submodules/lazy/</code></td>
+<td><code>submodules/lazy/</code></td>
+</tr>
+<tr>
+<td><code>submodules/leak_hub/</code></td>
+<td><code>submodules/leak_hub/</code></td>
+</tr>
+<tr>
+<td><code>submodules/llm_ops/</code></td>
+<td><code>submodules/llm_ops/</code></td>
+</tr>
+<tr>
+<td><code>submodules/llm_orchestrator/</code></td>
+<td><code>submodules/llm_orchestrator/</code></td>
+</tr>
+<tr>
+<td><code>submodules/llm_provider/</code></td>
+<td><code>submodules/llm_provider/</code></td>
+</tr>
+<tr>
+<td><code>submodules/mcp_module/</code></td>
+<td><code>submodules/mcp_module/</code></td>
+</tr>
+<tr>
+<td><code>submodules/memory/</code></td>
+<td><code>submodules/memory/</code></td>
+</tr>
+<tr>
+<td><code>submodules/messaging/</code></td>
+<td><code>submodules/messaging/</code></td>
+</tr>
+<tr>
+<td><code>submodules/middleware/</code></td>
+<td><code>submodules/middleware/</code></td>
+</tr>
+<tr>
+<td><code>submodules/models/</code></td>
+<td><code>submodules/models/</code></td>
+</tr>
+<tr>
+<td><code>submodules/normalize/</code></td>
+<td><code>submodules/normalize/</code></td>
+</tr>
+<tr>
+<td><code>submodules/observability/</code></td>
+<td><code>submodules/observability/</code></td>
+</tr>
+<tr>
+<td><code>submodules/optimization/</code></td>
+<td><code>submodules/optimization/</code></td>
+</tr>
+<tr>
+<td><code>submodules/ouroborous/</code></td>
+<td><code>submodules/ouroborous/</code></td>
+</tr>
+<tr>
+<td><code>submodules/planning/</code></td>
+<td><code>submodules/planning/</code></td>
+</tr>
+<tr>
+<td><code>submodules/plinius_common/</code></td>
+<td><code>submodules/plinius_common/</code></td>
+</tr>
+<tr>
+<td><code>submodules/plugins/</code></td>
+<td><code>submodules/plugins/</code></td>
+</tr>
+<tr>
+<td><code>submodules/rag/</code></td>
+<td><code>submodules/rag/</code></td>
+</tr>
+<tr>
+<td><code>submodules/rate_limiter/</code></td>
+<td><code>submodules/rate_limiter/</code></td>
+</tr>
+<tr>
+<td><code>submodules/recovery/</code></td>
+<td><code>submodules/recovery/</code></td>
+</tr>
+<tr>
+<td><code>submodules/red_team/</code></td>
+<td><code>submodules/red_team/</code></td>
+</tr>
+<tr>
+<td><code>submodules/self_improve/</code></td>
+<td><code>submodules/self_improve/</code></td>
+</tr>
+<tr>
+<td><code>submodules/skill_registry/</code></td>
+<td><code>submodules/skill_registry/</code></td>
+</tr>
+<tr>
+<td><code>submodules/storage/</code></td>
+<td><code>submodules/storage/</code></td>
+</tr>
+<tr>
+<td><code>submodules/streaming/</code></td>
+<td><code>submodules/streaming/</code></td>
+</tr>
+<tr>
+<td><code>submodules/tool_schema/</code></td>
+<td><code>submodules/tool_schema/</code></td>
+</tr>
+<tr>
+<td><code>submodules/toon/</code></td>
+<td><code>submodules/toon/</code></td>
+</tr>
+<tr>
+<td><code>submodules/vector_db/</code></td>
+<td><code>submodules/vector_db/</code></td>
+</tr>
+<tr>
+<td><code>submodules/veritas/</code></td>
+<td><code>submodules/veritas/</code></td>
+</tr>
+<tr>
+<td><code>submodules/vision_engine/</code></td>
+<td><code>submodules/vision_engine/</code></td>
+</tr>
+<tr>
+<td><code>submodules/watcher/</code></td>
+<td><code>submodules/watcher/</code></td>
+</tr>
+</tbody>
+</table>
+<p>Total cluster A: <strong>10 + 48 = 58 leaf renames</strong> (+1
+parent rename = 59 if <code>HelixDevelopment</code> →
+<code>helix_development</code> executes).</p>
+<h3 id="cluster-b-third-party-no-renames-exempt-per-const-052-11.4.29-vendor-carve-out">3.3
+Cluster B — third-party (NO RENAMES — exempt per CONST-052 §11.4.29
+vendor carve-out)</h3>
+<p><code>dependencies/LLama_CPP</code>,
+<code>dependencies/Ollama</code>,
+<code>dependencies/HuggingFace_Hub</code>,
+<code>cli_agents_resources/*</code> (7 dirs), <code>cli_agents/*</code>
+(third-party agent forks) — <strong>0 renames.</strong> Rationale
+documented per dir in a follow-on exemption ledger (created in Phase-1
+setup, §4.1).</p>
+<h3 id="cluster-c-upstreams-upstreams-49-renames">3.4 Cluster C —
+<code>Upstreams/</code> → <code>upstreams/</code> (49 renames)</h3>
+<p>All 49 submodule <code>Upstreams/</code> subdirs:</p>
+<pre><code>./constitution/Upstreams                       → ./constitution/upstreams
+./panoptic/Upstreams                           → ./panoptic/upstreams
+./github_pages_website/Upstreams               → ./github_pages_website/upstreams
+./containers/Upstreams                         → ./containers/upstreams
+./helix_qa/Upstreams                           → ./helix_qa/upstreams
+./challenges/Upstreams                         → ./challenges/upstreams
+./cli_agents/claude-code-source/Upstreams      → ./cli_agents/claude-code-source/upstreams
+./security/Upstreams                           → ./security/upstreams
+./helix_agent/Upstreams                        → ./helix_agent/upstreams
+./helix_agent/templates/Upstreams              → ./helix_agent/templates/upstreams
+./dependencies/HelixDevelopment/*/Upstreams    → ./dependencies/helix_development/*/upstreams   (×7 leaves with Upstreams dirs)
+./dependencies/vasic-digital/*/Upstreams       → ./dependencies/vasic-digital/*/upstreams       (×32 leaves with Upstreams dirs)</code></pre>
+<p><strong>Important:</strong> each <code>Upstreams/</code> lives INSIDE
+a submodule’s own git tree. Renaming requires committing in that
+submodule’s repo first, then bumping the parent’s
+<code>.gitmodules</code> pointer. Cluster (C) is therefore <strong>49
+inner-submodule commits + 1 parent bump per leaf</strong> — high commit
+count, low risk per commit.</p>
+<h3 id="out-of-scope-operator-decisions-in-8">3.5 Out-of-scope (operator
+decisions in §8)</h3>
+<ul>
+<li><code>HelixDevelopment/</code> parent dir →
+<code>helix_development/</code> (renames 260 references, must
+paired-execute with cluster A).</li>
+<li><code>vasic-digital/</code> parent dir → <code>vasic_digital/</code>
+(renames 138 references; drift vs GitHub org handle).</li>
+<li><code>LLMsVerifier/Assets/</code> → <code>assets/</code> and
+<code>LLMsVerifier/Website/</code> → <code>website/</code> (inside
+submodule, possibly deployment-wired).</li>
+</ul>
+<hr />
+<h2 id="phased-execution-plan">4. Phased Execution Plan</h2>
+<p>Five phases ordered by <strong>cost × blast radius</strong>, low to
+high. Each phase ends with a green-bar checkpoint before next phase
+begins. <strong>Operator approves each phase before
+execution.</strong></p>
+<h3 id="phase-0-pre-flight-tooling-exemption-ledger">4.1 Phase 0 —
+Pre-flight (tooling + exemption ledger)</h3>
+<p><strong>Goal:</strong> make subsequent phases auditable and
+reversible.</p>
+<p><strong>Tasks:</strong> 1. <strong>T-0.1</strong> Author
+<code>scripts/rename-dir.sh &lt;OLD&gt; &lt;NEW&gt;</code> — wraps
+<code>git mv</code>, then runs the four reference-class sweeps (.md,
+.sh, .go, .gitmodules) with <code>sed -i</code> replacement, then
+<code>git submodule sync --recursive</code>. Idempotent: re-run is no-op
+once new path exists. 2. <strong>T-0.2</strong> Author
+<code>scripts/verify-no-stale-refs.sh &lt;OLD&gt;</code> — exits
+non-zero if
+<code>grep -rn &quot;$OLD&quot; --include=&#39;*.{md,sh,go,yaml,yml,toml}&#39; . | grep -v &quot;\.git/&quot;</code>
+returns any hit. Used as gate post-rename. 3. <strong>T-0.3</strong>
+Author <code>scripts/dry-run-rename.sh &lt;OLD&gt; &lt;NEW&gt;</code> —
+produces a diff preview of every file change without writing (uses
+<code>git mv -n</code> semantics emulated by
+<code>git diff --no-index</code> against a temp
+<code>sed</code>-rewritten tree). 4. <strong>T-0.4</strong> Create
+<code>docs/governance/CONST-052-exemption-ledger.md</code> enumerating
+every directory exempted per §1.3 / §3.3 with citation. Becomes the
+audit answer to “why is <code>LLama_CPP</code> still PascalCase?” 5.
+<strong>T-0.5</strong> Add a pre-commit hook entry to
+<code>.git/hooks/pre-commit</code> (template form, opt-in) that runs
+<code>verify-no-stale-refs.sh</code> for any PascalCase path mentioned
+in <code>git diff --staged --name-only</code>.</p>
+<p><strong>Test coverage (per CONST-050(B) + CONST-052
+§11.4.29):</strong> - Unit: feed each script a synthetic 3-file fixture;
+assert correct rename behaviour. - Integration: throwaway-clone test
+that runs <code>rename-dir.sh</code> against a real (cluster-A pilot)
+directory, verifies build still passes. - Anti-bluff wire evidence:
+pre-rename SHA + post-rename SHA + <code>git submodule status</code>
+snapshot.</p>
+<p><strong>Estimated effort:</strong> 1 commit (scripts), ~250 LOC bash,
+0 pushes.</p>
+<h3 id="phase-1-low-risk-leaves-vasic-digital-small-helixdevelopment-cluster-c-inner">4.2
+Phase 1 — Low-risk leaves (vasic-digital + small HelixDevelopment +
+cluster C inner)</h3>
+<p><strong>Scope:</strong> 48 cluster-A vasic-digital renames + 2 small
+cluster-A HelixDevelopment renames (<code>Models</code>,
+<code>DebateOrchestrator</code>) + all 49 cluster-C
+<code>Upstreams/</code> → <code>upstreams/</code> renames.</p>
+<p><strong>Why first:</strong> lowest reference cascades (≤16 refs each
+for vasic-digital, ≤5 for the two HD leaves, ≤40 total for
+Upstreams).</p>
+<p><strong>Tasks (per-rename templated; representative sample
+shown):</strong></p>
+<pre><code>For each leaf L in {vasic-digital/*} ∪ {HelixDevelopment/Models, HelixDevelopment/DebateOrchestrator}:
+  T-1.L.1 ./scripts/dry-run-rename.sh dependencies/&lt;L&gt; dependencies/&lt;new_L&gt;
+  T-1.L.2 Operator review of diff preview (one approval covers a batch of 5 leaves).
+  T-1.L.3 ./scripts/rename-dir.sh dependencies/&lt;L&gt; dependencies/&lt;new_L&gt;
+  T-1.L.4 git -C dependencies/&lt;new_L&gt; submodule sync
+  T-1.L.5 cd helix_code &amp;&amp; go build ./... (verifies no Go-import drift)
+  T-1.L.6 ./scripts/verify-no-stale-refs.sh dependencies/&lt;L&gt;
+  T-1.L.7 Run helix_code/Makefile unit + integration tests (real infra per CONST-050(A))
+  T-1.L.8 Commit: &quot;rename(P1): &lt;L&gt; → &lt;new_L&gt; (CONST-052)&quot;
+  T-1.L.9 Push to all 4 remotes.
+
+For each Upstreams dir U:
+  T-1.U.1 cd &lt;U&gt;&#39;s parent submodule
+  T-1.U.2 git mv Upstreams upstreams
+  T-1.U.3 sed -i &#39;s|/Upstreams/|/upstreams/|g&#39; (per the submodule&#39;s tree only)
+  T-1.U.4 ./scripts/verify-no-stale-refs.sh Upstreams (inside that submodule)
+  T-1.U.5 Submodule commit + push (4 remotes).
+  T-1.U.6 In parent: git add &lt;submodule&gt; &amp;&amp; commit &quot;bump: &lt;submodule&gt; upstreams rename&quot;.</code></pre>
+<p><strong>Batching:</strong> group 5 leaves per commit for
+vasic-digital (10 commits total) + 1 commit for cluster-C bumps in
+parent + per-submodule cluster-C inner commits (~49 inner commits across
+49 submodules).</p>
+<p><strong>Test coverage per batch:</strong> 1. <strong>Regression
+test:</strong> <code>verify-no-stale-refs.sh</code> for every renamed
+path. 2. <strong>Unit:</strong>
+<code>cd helix_code &amp;&amp; make test</code> (real units). 3.
+<strong>Integration:</strong>
+<code>cd helix_code &amp;&amp; make test-integration-full</code> against
+the docker-compose stack from <code>make test-infra-up</code>. 4.
+<strong>E2E:</strong>
+<code>cd helix_code/tests/e2e/challenges &amp;&amp; go run cmd/runner/main.go -all</code>.
+5. <strong>Challenges:</strong>
+<code>cd challenges &amp;&amp; make demo-all</code>. 6. <strong>Wire
+evidence:</strong> terminal output of every test run captured, attached
+to the close-out.</p>
+<p><strong>Estimated effort:</strong> ~10 batch commits cluster A + ~49
+inner commits cluster C + 49 parent bumps + 1 close-out commit. ~110
+commits, ~440 pushes (4 remotes). LOC delta primarily renames (low);
+reference-update sed sweeps ~150 LOC delta net.</p>
+<h3 id="phase-2-medium-cascade-helixdevelopment-leaves">4.3 Phase 2 —
+Medium-cascade HelixDevelopment leaves</h3>
+<p><strong>Scope:</strong> <code>DocProcessor</code> (67),
+<code>LLMOrchestrator</code> (63), <code>VisionEngine</code> (61),
+<code>LLMProvider</code> (42), <code>HelixMemory</code> (48 — partially
+done in round 88-pilot, re-verify), <code>HelixSpecifier</code>
+(48).</p>
+<p><strong>Why second:</strong> medium reference cascades (40-70 each).
+The HelixMemory pilot taught us the failure modes (round 106 — 6
+packages broke from one wrong path); apply the lesson at scale here.</p>
+<p><strong>Tasks (per-rename, same template as Phase 1 but with three
+additions):</strong></p>
+<pre><code>For each leaf L in {DocProcessor, LLMOrchestrator, VisionEngine, LLMProvider, HelixMemory, HelixSpecifier}:
+  T-2.L.0 (NEW) Audit every helix_code/go.mod replace directive that mentions L; map each to its new path.
+  T-2.L.1-9 same as Phase 1.
+  T-2.L.10 (NEW) Run helix_code&#39;s helixqa integration suite specifically (these 6 modules touch helix_qa bindings).
+  T-2.L.11 (NEW) Update docs/ARCHITECTURE.md path references in same commit batch.</code></pre>
+<p><strong>Test coverage per leaf:</strong> Phase 1 floor +
+module-specific suites (e.g., LLMProvider rename also runs
+<code>helix_code/internal/providers/...</code> test set).</p>
+<p><strong>Estimated effort:</strong> 6 leaves × 1 commit = 6 commits,
+24 pushes, ~200 LOC sed delta across docs.</p>
+<h3 id="phase-3-high-cascade-leaves-helixllm-llmsverifier">4.4 Phase 3 —
+High-cascade leaves (HelixLLM + LLMsVerifier)</h3>
+<p><strong>Scope:</strong> <code>HelixLLM</code> (244 .md + 9 .sh +
+<strong>269 .go refs</strong> — 522 aggregate) and
+<code>LLMsVerifier</code> (95 aggregate, plus CONST-036/037
+constitutional dependence).</p>
+<p><strong>Why last:</strong> highest blast radius.
+<code>HelixLLM</code>’s 269 Go references mean the rename is effectively
+a refactor of every consumer’s import path — same magnitude as a
+major-version-bump library migration. <code>LLMsVerifier</code> is the
+constitutional single-source-of-truth (CONST-036) so its rename touches
+every provider-integration test.</p>
+<p><strong>Tasks:</strong></p>
+<pre><code>T-3.HLLM.0  Snapshot ALL helix_code/go.mod replace lines mentioning HelixLLM.
+T-3.HLLM.1  Snapshot every Go file with `import &quot;dev.helix.code/.../HelixLLM/...&quot;` (or equivalent path-based import).
+T-3.HLLM.2  dry-run-rename.sh
+T-3.HLLM.3  Operator approval (REQUIRED — large-blast-radius gate).
+T-3.HLLM.4  rename-dir.sh
+T-3.HLLM.5  Update every go.mod replace + every Go import line.
+T-3.HLLM.6  go build ./... in helix_code/.
+T-3.HLLM.7  Full test floor: unit + integration + e2e + challenges + helixqa-autonomous-session.
+T-3.HLLM.8  Commit + push.
+T-3.HLLM.9  Repeat for LLMsVerifier with extra CONST-036/037 verifier-cascade check (run scripts/verify-llmsverifier-pin-parity.sh).</code></pre>
+<p><strong>Test coverage:</strong> full CONST-050(B) matrix — unit,
+integration, e2e, full-automation, security, DDoS, scaling, chaos,
+stress, performance, benchmarking, UI, UX, Challenges, helix_qa
+autonomous session. Each leaf gets its own wire-evidence dossier.</p>
+<p><strong>Estimated effort:</strong> 2 leaves × 2-3 commits each
+(rename commit + Go-path-sweep commit + post-test fix commit if any) =
+~6 commits, ~24 pushes, ~400 LOC delta (mostly Go import lines + go.mod
+replaces).</p>
+<h3 id="phase-4-parent-dir-go-module-replace-bumps">4.5 Phase 4 —
+Parent-dir + Go-module-replace bumps</h3>
+<p><strong>Scope:</strong> if operator approves §8 decisions, rename
+<code>dependencies/HelixDevelopment/</code> →
+<code>dependencies/helix_development/</code> and optionally
+<code>dependencies/vasic-digital/</code> →
+<code>dependencies/vasic_digital/</code>. <strong>And</strong> bump
+every <code>replace</code> directive in every <code>go.mod</code> to the
+new paths.</p>
+<p><strong>Tasks:</strong> 1. <strong>T-4.1</strong> Inventory: list all
+8 <code>go.mod</code> files (already verified) plus their
+<code>replace</code> directives. 2. <strong>T-4.2</strong> Author a
+single bash script <code>scripts/bump-go-replaces.sh</code> that walks
+all 8, applies
+<code>sed -i &#39;s|HelixDevelopment|helix_development|g; s|vasic-digital|vasic_digital|g&#39;</code>
+(where in-scope), and runs <code>go mod tidy</code>. 3.
+<strong>T-4.3</strong> Bulk rename parent dirs (cluster A parent). 4.
+<strong>T-4.4</strong> Bulk rename <code>.gitmodules</code> paths. 5.
+<strong>T-4.5</strong> <code>git submodule sync --recursive</code>
+everywhere. 6. <strong>T-4.6</strong>
+<code>helix_code &amp;&amp; go build ./... &amp;&amp; go test ./...</code>
+validates Go cascade. 7. <strong>T-4.7</strong> Full test floor. 8.
+<strong>T-4.8</strong> Commit + push (single atomic commit per cluster A
+parent + cluster B parent if in scope).</p>
+<p><strong>Test coverage:</strong> full CONST-050(B) matrix + paired
+mutation (purposely plant a stale <code>HelixDevelopment/...</code> ref
+and assert <code>verify-no-stale-refs.sh</code> catches it).</p>
+<p><strong>Estimated effort:</strong> 2 atomic commits (one per parent
+rename), 8 pushes, ~50 LOC delta (path-rewrite only).</p>
+<hr />
+<h2 id="test-coverage-per-rename-batch-const-050b-const-052-11.4.29-conformance">5.
+Test Coverage per Rename Batch (CONST-050(B) + CONST-052 §11.4.29
+conformance)</h2>
+<p>Every rename batch (Phase 1 leaves, Phase 2-3 individual, Phase 4
+atomic) MUST ship the four invariants:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test type</th>
+<th>Command</th>
+<th>Evidence captured</th>
+<th>Gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Reference-resolution regression</td>
+<td><code>./scripts/verify-no-stale-refs.sh &lt;old_path&gt;</code></td>
+<td>exit code + stdout</td>
+<td>exit=0 required</td>
+</tr>
+<tr>
+<td>2. Unit (mocks allowed only here per CONST-050(A))</td>
+<td><code>cd helix_code &amp;&amp; make test</code></td>
+<td>terminal output</td>
+<td>0 failures</td>
+</tr>
+<tr>
+<td>3. Integration (real infra)</td>
+<td><code>cd helix_code &amp;&amp; make test-integration-full</code></td>
+<td>terminal output + docker-compose status</td>
+<td>0 failures</td>
+</tr>
+<tr>
+<td>4. E2E challenges (full user flow)</td>
+<td><code>cd helix_code/tests/e2e/challenges &amp;&amp; go run cmd/runner/main.go -all</code></td>
+<td>runner output + per-challenge wire evidence</td>
+<td>0 failures</td>
+</tr>
+<tr>
+<td>5. Challenges submodule (vasic-digital/Challenges)</td>
+<td><code>cd challenges &amp;&amp; make demo-all</code></td>
+<td>per-Challenge captured output</td>
+<td>0 failures</td>
+</tr>
+<tr>
+<td>6. helix_qa autonomous session</td>
+<td><code>cd helix_qa &amp;&amp; ./run-autonomous-session.sh</code></td>
+<td>session report + wire-evidence dossier</td>
+<td>0 failures</td>
+</tr>
+<tr>
+<td>7. Anti-bluff smoke</td>
+<td><code>grep -rn &quot;simulated\|for now\|TODO implement\|placeholder&quot; helix_code/internal helix_code/cmd</code></td>
+<td>empty grep output</td>
+<td>empty required</td>
+</tr>
+<tr>
+<td>8. Governance cascade</td>
+<td><code>./scripts/verify-governance-cascade.sh</code></td>
+<td>pass/fail report</td>
+<td>pass required</td>
+</tr>
+<tr>
+<td>9. Constitution rules sweep</td>
+<td><code>./scripts/verify-all-constitution-rules.sh</code></td>
+<td>per-rule status</td>
+<td>every implementable rule PASS</td>
+</tr>
+</tbody>
+</table>
+<p>For Phase 3 (high-cascade) + Phase 4 (Go-replace): add (10)
+<code>cd helix_code &amp;&amp; go build ./... &amp;&amp; go test -race ./...</code>
+and (11) paired mutation per §1.1 — plant stale ref, verify gate catches
+it, then revert.</p>
+<hr />
+<h2 id="tooling-requirements">6. Tooling Requirements</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Script</th>
+<th>Purpose</th>
+<th>Phase used</th>
+<th>LOC est.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/rename-dir.sh &lt;OLD&gt; &lt;NEW&gt;</code></td>
+<td>git mv + 4-class reference sweep + submodule sync</td>
+<td>All</td>
+<td>~80</td>
+</tr>
+<tr>
+<td><code>scripts/verify-no-stale-refs.sh &lt;OLD&gt;</code></td>
+<td>post-rename gate; greps all reference classes</td>
+<td>All</td>
+<td>~30</td>
+</tr>
+<tr>
+<td><code>scripts/dry-run-rename.sh &lt;OLD&gt; &lt;NEW&gt;</code></td>
+<td>preview diff without writing</td>
+<td>All</td>
+<td>~70</td>
+</tr>
+<tr>
+<td><code>scripts/bump-go-replaces.sh</code></td>
+<td>bulk update go.mod replace lines</td>
+<td>Phase 4</td>
+<td>~50</td>
+</tr>
+<tr>
+<td><code>scripts/CONST-052-progress-report.sh</code></td>
+<td>print “X of 58 cluster-A leaves done”</td>
+<td>Reporting</td>
+<td>~40</td>
+</tr>
+<tr>
+<td><code>docs/governance/CONST-052-exemption-ledger.md</code></td>
+<td>per-dir exemption rationale (cluster B)</td>
+<td>Phase 0 docs</td>
+<td>~80 doc lines</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Manual edits</strong> (no script — operator approval gate per
+edit):</p>
+<ol type="1">
+<li><code>.gitmodules</code> — paths updated atomically with
+<code>git mv</code> commits.</li>
+<li>Root governance docs (<code>CLAUDE.md</code>,
+<code>AGENTS.md</code>, <code>CONSTITUTION.md</code>) — only if they
+cite a renamed path. <strong>Caution:</strong> most governance is inside
+the <code>constitution/</code> submodule; CONST-049 §11.4.26 7-step
+workflow applies if those need edits.</li>
+<li><code>docs/ARCHITECTURE.md</code> — likely needs sweep at end of
+each phase.</li>
+<li><code>docs/CONTINUATION.md</code> — CONST-044 mandates same-commit
+update for state advancement.</li>
+</ol>
+<hr />
+<h2 id="risk-mitigation">7. Risk Mitigation</h2>
+<h3 id="per-phase-rollback-procedure">7.1 Per-phase rollback
+procedure</h3>
+<p>Each phase ends with a tagged commit. Rollback =
+<code>git revert &lt;tag&gt;</code> (NOT <code>git reset --hard</code>;
+CONST-043 forbids force operations). Submodule pointer reversions
+handled by re-checking-out the prior <code>.gitmodules</code> content
+and <code>git submodule update --init --recursive</code>.</p>
+<h3 id="per-rename-dry-run">7.2 Per-rename dry-run</h3>
+<p><code>scripts/dry-run-rename.sh</code> produces a unified diff
+preview of every file the script would write. Operator reviews diff
+before approving the wet run. Same pattern as <code>git mv -n</code> for
+the move itself, extended for reference-class sweeps.</p>
+<h3 id="bisect-strategy">7.3 Bisect strategy</h3>
+<p>If post-phase test floor FAILs: 1. Identify the failing test. 2.
+<code>git bisect start HEAD &lt;phase-start-tag&gt;</code>. 3. Run
+<code>verify-no-stale-refs.sh</code> + the failing test at each bisect
+step. 4. Once the offending commit is identified: revert that one
+commit, fix the missed reference, re-commit.</p>
+<h3 id="submodule-out-of-sync-risk">7.4 Submodule out-of-sync risk</h3>
+<p>Cluster (C) modifies submodule trees. If a submodule push fails
+(e.g., a remote rejects), the parent’s <code>.gitmodules</code> bump
+must NOT be pushed until all 4 remotes accept the submodule push. Gate:
+<code>scripts/verify-submodule-push-symmetric.sh</code> (NEW — author in
+Phase 0 if not present).</p>
+<h3 id="documentation-drift-after-submodule-pointer-bump">7.5
+Documentation drift after submodule pointer bump</h3>
+<p>When a submodule renames its <code>Upstreams/</code> →
+<code>upstreams/</code>, the parent’s <code>.gitmodules</code> pointer
+bumps to a new SHA, but the parent’s own .md files may still cite
+<code>&lt;submodule&gt;/Upstreams/...</code>. Gate:
+<code>verify-no-stale-refs.sh &quot;Upstreams&quot;</code> runs across the
+<strong>parent’s</strong> tree after each cluster-C bump.</p>
+<hr />
+<h2 id="operator-decision-points">8. Operator Decision Points</h2>
+<p>The following decisions must be made by the operator BEFORE execution
+of Phase 1 (or in some cases, before later phases):</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Default suggestion</th>
+<th>Affects phase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D-1</strong></td>
+<td>Execute phases sequentially (1 → 4) or interleave cluster C with
+cluster A?</td>
+<td>Sequential (lowest risk). Cluster C is independent and could run in
+parallel — but adds cognitive load.</td>
+<td>All</td>
+</tr>
+<tr>
+<td><strong>D-2</strong></td>
+<td>Rename <code>dependencies/HelixDevelopment/</code> →
+<code>dependencies/helix_development/</code>? Touches 260 references;
+mandatory for strict CONST-052 compliance but breaks every external
+bookmark to the org-dir.</td>
+<td>YES (strict compliance). Schedule for Phase 4.</td>
+<td>Phase 4</td>
+</tr>
+<tr>
+<td><strong>D-3</strong></td>
+<td>Rename <code>dependencies/vasic-digital/</code> →
+<code>dependencies/vasic_digital/</code>? Touches 138 references;
+introduces drift vs GitHub-org handle.</td>
+<td>DEFER (proper-noun-via-GitHub-handle exception; treat as
+carve-out).</td>
+<td>Phase 4</td>
+</tr>
+<tr>
+<td><strong>D-4</strong></td>
+<td>Rename <code>helix_code/</code> itself (if any PascalCase ever
+creeps back)? Would change every inner-Go module path (~15 go.mod
+replaces).</td>
+<td>NO action needed — already snake_case.</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><strong>D-5</strong></td>
+<td>Rename <code>LLMsVerifier/Assets/</code> → <code>assets/</code> and
+<code>LLMsVerifier/Website/</code> → <code>website/</code>? Inside
+submodule; possibly deployment-wired.</td>
+<td>DEFER pending deployment-wire audit.</td>
+<td>Phase 3</td>
+</tr>
+<tr>
+<td><strong>D-6</strong></td>
+<td>Should <code>MCP_Module</code> become <code>mcp_module</code>
+(already mixed case with underscore) or <code>mcp/module</code>? Strict
+snake_case = <code>mcp_module</code>.</td>
+<td><code>mcp_module</code> (strict snake_case, single token).</td>
+<td>Phase 1</td>
+</tr>
+<tr>
+<td><strong>D-7</strong></td>
+<td>Should <code>I-LLM</code> become <code>i_llm</code> or
+<code>illm</code>? Hyphen present in source.</td>
+<td><code>i_llm</code> (preserve token boundary).</td>
+<td>Phase 1</td>
+</tr>
+<tr>
+<td><strong>D-8</strong></td>
+<td>Should <code>TOON</code> become <code>toon</code> or stay UPPER
+(acronym exception)? CONST-052 doesn’t carve out acronyms.</td>
+<td><code>toon</code> (strict).</td>
+<td>Phase 1</td>
+</tr>
+<tr>
+<td><strong>D-9</strong></td>
+<td>Should <code>RAG</code> become <code>rag</code> (acronym)? Same as
+D-8.</td>
+<td><code>rag</code> (strict).</td>
+<td>Phase 1</td>
+</tr>
+<tr>
+<td><strong>D-10</strong></td>
+<td>Defer cluster C (<code>Upstreams</code> → <code>upstreams</code>)
+entirely? It’s convention-only since <code>install_upstreams.sh</code>
+accepts both.</td>
+<td>NO — strict compliance preferred per CONST-052 spirit.</td>
+<td>Phase 1</td>
+</tr>
+<tr>
+<td><strong>D-11</strong></td>
+<td>Should rename commits be co-authored “Co-Authored-By: Claude” per
+HelixCode commit convention?</td>
+<td>YES (consistent with existing close-out cadence).</td>
+<td>All</td>
+</tr>
+<tr>
+<td><strong>D-12</strong></td>
+<td>Per-phase approval cadence: one approval per phase, or one per batch
+(5-leaf group)?</td>
+<td>One per phase (less interruption). Per-batch escalation only if a
+phase reveals failures.</td>
+<td>All</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="estimated-effort">9. Estimated Effort</h2>
+<p>Aggregate estimates for the full programme, anchored to the verified
+data above.</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th style="text-align: right;">Commits</th>
+<th style="text-align: right;">Pushes (× 4 remotes)</th>
+<th style="text-align: right;">LOC delta</th>
+<th>Wall-time guess (operator-paced)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 0 (tooling)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">~250 LOC scripts + 80 LOC docs</td>
+<td>half-day</td>
+</tr>
+<tr>
+<td>Phase 1 (low-risk leaves + cluster C)</td>
+<td style="text-align: right;">~110</td>
+<td style="text-align: right;">~440</td>
+<td style="text-align: right;">~200 LOC net (mostly sed sweeps)</td>
+<td>2-3 days</td>
+</tr>
+<tr>
+<td>Phase 2 (medium HelixDevelopment)</td>
+<td style="text-align: right;">~6</td>
+<td style="text-align: right;">~24</td>
+<td style="text-align: right;">~200 LOC</td>
+<td>half-day</td>
+</tr>
+<tr>
+<td>Phase 3 (HelixLLM + LLMsVerifier)</td>
+<td style="text-align: right;">~6</td>
+<td style="text-align: right;">~24</td>
+<td style="text-align: right;">~400 LOC (Go imports + replaces)</td>
+<td>1 day</td>
+</tr>
+<tr>
+<td>Phase 4 (parent dirs + Go-replace bumps)</td>
+<td style="text-align: right;">~2</td>
+<td style="text-align: right;">~8</td>
+<td style="text-align: right;">~50 LOC</td>
+<td>quarter-day</td>
+</tr>
+<tr>
+<td><strong>Total programme</strong></td>
+<td style="text-align: right;"><strong>~125 commits</strong></td>
+<td style="text-align: right;"><strong>~500 pushes</strong></td>
+<td style="text-align: right;"><strong>~1100 LOC delta</strong></td>
+<td><strong>~5 days operator-paced</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Test runs: each batch triggers ~9 test types per §5; for 110 Phase-1
+batches that is ~990 test runs (some batched together — actual unique
+runs probably 60-80 if batched 5-leaf-per-batch). Phase 3 alone may take
+30-60 min per leaf due to full helix_qa autonomous session.</p>
+<p><strong>Conservativeness:</strong> the LOC + commit counts above are
+<strong>lower bounds</strong>. Real execution will surface unanticipated
+reference classes (e.g., <code>.yaml</code> deployment manifests,
+<code>.toml</code> package configs) requiring extra sed sweeps. Mark
+every estimate as
+<code>[estimated, will refine after Phase 0 dry-run output]</code>.</p>
+<hr />
+<h2 id="appendix-a-verification-commands-run-for-this-plan-all-2026-05-18-head-2a5586e">Appendix
+A — Verification commands run for this plan (all 2026-05-18, HEAD
+<code>2a5586e</code>)</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># §1.1 meta-root compliance:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-maxdepth</span> 1 <span class="at">-type</span> d <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;./.git&quot;</span> <span class="at">-not</span> <span class="at">-path</span> <span class="st">&quot;.&quot;</span> <span class="at">-printf</span> <span class="st">&quot;%f\n&quot;</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&#39;[A-Z]&#39;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 0</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># §1.2 cluster A counts:</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> dependencies/HelixDevelopment <span class="at">-maxdepth</span> 1 <span class="at">-type</span> d <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 11 (includes parent)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> dependencies/vasic-digital   <span class="at">-maxdepth</span> 1 <span class="at">-type</span> d <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 49 (includes parent)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># §1.2 cluster C count:</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> . <span class="at">-maxdepth</span> 4 <span class="at">-type</span> d <span class="at">-name</span> <span class="st">&quot;Upstreams&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 49</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># §1.4 go.mod count:</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-l</span> <span class="st">&quot;HelixDevelopment\|vasic-digital&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;go.mod&quot;</span> <span class="at">-r</span> . <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;\.git/&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 8</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># §2.1 per-submodule HelixDevelopment refs (sample):</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;HelixDevelopment/HelixLLM&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> . <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;\.git/&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 269</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;HelixDevelopment/HelixLLM&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.md&quot;</span> . <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;\.git/&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 244</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co"># §2.3 cluster C refs:</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;/Upstreams/\|/Upstreams\b&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.md&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.sh&quot;</span> . <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;\.git/&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 40</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co"># §1.4 .gitmodules PascalCase paths:</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-E</span> <span class="st">&#39;path = .*[A-Z]&#39;</span> .gitmodules <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 70</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co"># §2.4 aggregate HelixDevelopment / vasic-digital fan-out:</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;dependencies/HelixDevelopment&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.md&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.sh&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.yaml&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.yml&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.toml&quot;</span> . <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;\.git/&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 260</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;dependencies/vasic-digital&quot;</span>   <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.md&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.sh&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.go&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.yaml&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.yml&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="st">&quot;*.toml&quot;</span> . <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;\.git/&quot;</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span>   <span class="co"># → 138</span></span></code></pre></div>
+<p>All commands re-runnable; no claim in this plan rests on memory or
+estimation unless explicitly annotated
+<code>[estimated, not exhaustively counted]</code>.</p>
+<hr />
+<h2 id="appendix-b-anti-bluff-pledge">Appendix B — Anti-bluff
+pledge</h2>
+<p>Every claim in §1-§4 above is backed by a verifiable command in
+Appendix A. The two <code>[estimated, not exhaustively counted]</code>
+ranges (MCP_Module refs, “other 38 vasic-digital” refs) are explicitly
+marked; Phase 0 will replace them with full counts before Phase 1
+executes. No PASS claim, no completion claim, no false-success summary
+is permitted in this programme without paired terminal evidence per
+CONST-035 / Article XI §11.9.</p>
+</body>
+</html>

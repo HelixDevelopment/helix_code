@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-E-fork-mechanism</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-E-fork-mechanism</h1>
+</header>
+<h1 id="workstream-e-fork-all-now-mechanism-auto-merge-from-upstream">Workstream
+E — Fork-ALL-now mechanism + auto-merge-from-upstream</h1>
+<p><strong>Status:</strong> Analysis / Design (PLANNING phase —
+READ-ONLY; nothing forked, swapped, committed, or pushed)
+<strong>Date:</strong> 2026-06-10 <strong>Author role:</strong>
+read-only analysis/design subagent <strong>Evidence base:</strong> root
+<code>/Volumes/T7/Projects/HelixCode/.gitmodules</code> (381 lines),
+live working-tree probes of <code>cli_agents/*</code>,
+<code>constitution/scripts/</code> inventory. Every URL/path below is
+copied verbatim from <code>.gitmodules</code> (parsed via
+<code>git config -f .gitmodules --get-regexp</code>).</p>
+<hr />
+<h2 id="scope-decisions-given">0. Scope &amp; decisions (given)</h2>
+<ul>
+<li>Fork EVERY <code>cli_agents/*</code> third-party submodule under the
+<strong><code>vasic-digital</code></strong> org with prefix
+<strong><code>caf-</code></strong> (cli-agent-fork) →
+<code>git@github.com:vasic-digital/caf-&lt;name&gt;.git</code>.</li>
+<li>Swap each submodule’s <code>url</code> in <code>.gitmodules</code>
+to our fork, then <code>git submodule sync</code>.</li>
+<li>Recursively: any <strong>nested 3rd-party</strong> submodule gets
+the same treatment; nested <strong>own-org</strong> deps must resolve to
+our root-level versions (CONST-051 forbids nested own-org chains — pull
+to root).</li>
+<li>Regularly fetch + merge upstream
+<code>main</code>/<code>master</code> into each fork.</li>
+<li>Scripts are reusable / decoupled / generic / parameterized; live in
+<code>constitution/scripts/</code>.</li>
+<li>Constraints: §11.4.113 absolute no-force-push
+(merge-onto-latest-main only); §11.4.30 gitignore hygiene — only minimal
+files (<code>.gitignore</code>, governance siblings) may be committed to
+forks; we do <strong>not</strong> modify upstream application code.</li>
+</ul>
+<hr />
+<h2 id="fork-mapping-table-the-3rd-party-set">1. Fork mapping table (the
+3rd-party set)</h2>
+<p><code>.gitmodules</code> declares <strong>50</strong>
+<code>cli_agents/*</code> submodule entries. Of these: -
+<strong>49</strong> are third-party GitHub upstreams →
+<strong>fork</strong> to <code>vasic-digital/caf-&lt;name&gt;</code>. -
+<strong>1</strong> (<code>claude-code-source</code>) is already an
+own/private GitLab mirror → <strong>DO NOT fork</strong> (flagged
+below). - <strong>1 nested</strong> third-party submodule discovered
+inside <code>cli_agents/cline/</code> → also forked → <strong>50 forks
+total</strong>.</p>
+<h3 id="top-level-cli_agents-fork-49">1.1 Top-level
+<code>cli_agents/*</code> → fork (49)</h3>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 27%" />
+<col style="width: 42%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>submodule path</th>
+<th>upstream url (verbatim)</th>
+<th>proposed fork</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>cli_agents/agent-deck</td>
+<td>git@github.com:asheshgoplani/agent-deck.git</td>
+<td>git@github.com:vasic-digital/caf-agent-deck.git</td>
+</tr>
+<tr>
+<td>2</td>
+<td>cli_agents/aiagent</td>
+<td>git@github.com:Xiaoccer/AIAgent.git</td>
+<td>git@github.com:vasic-digital/caf-aiagent.git</td>
+</tr>
+<tr>
+<td>3</td>
+<td>cli_agents/aichat</td>
+<td>git@github.com:sigoden/aichat.git</td>
+<td>git@github.com:vasic-digital/caf-aichat.git</td>
+</tr>
+<tr>
+<td>4</td>
+<td>cli_agents/aichat-llm-functions</td>
+<td>git@github.com:sigoden/llm-functions.git</td>
+<td>git@github.com:vasic-digital/caf-aichat-llm-functions.git</td>
+</tr>
+<tr>
+<td>5</td>
+<td>cli_agents/aider</td>
+<td>git@github.com:Aider-AI/aider.git</td>
+<td>git@github.com:vasic-digital/caf-aider.git</td>
+</tr>
+<tr>
+<td>6</td>
+<td>cli_agents/amazon-q</td>
+<td>git@github.com:aws/amazon-q-developer-cli.git</td>
+<td>git@github.com:vasic-digital/caf-amazon-q.git</td>
+</tr>
+<tr>
+<td>7</td>
+<td>cli_agents/bridle</td>
+<td>git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git</td>
+<td>git@github.com:vasic-digital/caf-bridle.git</td>
+</tr>
+<tr>
+<td>8</td>
+<td>cli_agents/claude-code</td>
+<td>git@github.com:anthropics/claude-code.git</td>
+<td>git@github.com:vasic-digital/caf-claude-code.git</td>
+</tr>
+<tr>
+<td>9</td>
+<td>cli_agents/claude-squad</td>
+<td>git@github.com:smtg-ai/claude-squad.git</td>
+<td>git@github.com:vasic-digital/caf-claude-squad.git</td>
+</tr>
+<tr>
+<td>10</td>
+<td>cli_agents/cli-agent</td>
+<td>git@github.com:NathanGr33n/CLI_Tool.git</td>
+<td>git@github.com:vasic-digital/caf-cli-agent.git</td>
+</tr>
+<tr>
+<td>11</td>
+<td>cli_agents/cline</td>
+<td>git@github.com:cline/cline.git</td>
+<td>git@github.com:vasic-digital/caf-cline.git</td>
+</tr>
+<tr>
+<td>12</td>
+<td>cli_agents/codai</td>
+<td>git@github.com:meysamhadeli/codai.git</td>
+<td>git@github.com:vasic-digital/caf-codai.git</td>
+</tr>
+<tr>
+<td>13</td>
+<td>cli_agents/codename-goose</td>
+<td>git@github.com:jgenerali/codename-goose.git</td>
+<td>git@github.com:vasic-digital/caf-codename-goose.git</td>
+</tr>
+<tr>
+<td>14</td>
+<td>cli_agents/codex</td>
+<td>git@github.com:openai/codex.git</td>
+<td>git@github.com:vasic-digital/caf-codex.git</td>
+</tr>
+<tr>
+<td>15</td>
+<td>cli_agents/codex-skills</td>
+<td>git@github.com:openai/skills.git</td>
+<td>git@github.com:vasic-digital/caf-codex-skills.git</td>
+</tr>
+<tr>
+<td>16</td>
+<td>cli_agents/conduit</td>
+<td>git@github.com:lostintangent/conduit-release.git</td>
+<td>git@github.com:vasic-digital/caf-conduit.git</td>
+</tr>
+<tr>
+<td>17</td>
+<td>cli_agents/copilot-cli</td>
+<td>git@github.com:github/copilot-cli.git</td>
+<td>git@github.com:vasic-digital/caf-copilot-cli.git</td>
+</tr>
+<tr>
+<td>18</td>
+<td>cli_agents/crush</td>
+<td>git@github.com:charmbracelet/crush.git</td>
+<td>git@github.com:vasic-digital/caf-crush.git</td>
+</tr>
+<tr>
+<td>19</td>
+<td>cli_agents/deepseek-cli</td>
+<td>git@github.com:holasoymalva/deepseek-cli.git</td>
+<td>git@github.com:vasic-digital/caf-deepseek-cli.git</td>
+</tr>
+<tr>
+<td>20</td>
+<td>cli_agents/deepseek-cli-youkpan</td>
+<td>git@github.com:youkpan/deepseek-cli.git</td>
+<td>git@github.com:vasic-digital/caf-deepseek-cli-youkpan.git</td>
+</tr>
+<tr>
+<td>21</td>
+<td>cli_agents/fauxpilot</td>
+<td>git@github.com:fauxpilot/fauxpilot.git</td>
+<td>git@github.com:vasic-digital/caf-fauxpilot.git</td>
+</tr>
+<tr>
+<td>22</td>
+<td>cli_agents/forge</td>
+<td>git@github.com:antinomyhq/forge.git</td>
+<td>git@github.com:vasic-digital/caf-forge.git</td>
+</tr>
+<tr>
+<td>23</td>
+<td>cli_agents/gemini-cli</td>
+<td>git@github.com:google-gemini/gemini-cli.git</td>
+<td>git@github.com:vasic-digital/caf-gemini-cli.git</td>
+</tr>
+<tr>
+<td>24</td>
+<td>cli_agents/get-shit-done</td>
+<td>git@github.com:glittercowboy/get-shit-done.git</td>
+<td>git@github.com:vasic-digital/caf-get-shit-done.git</td>
+</tr>
+<tr>
+<td>25</td>
+<td>cli_agents/git-mcp</td>
+<td>git@github.com:idosal/git-mcp.git</td>
+<td>git@github.com:vasic-digital/caf-git-mcp.git</td>
+</tr>
+<tr>
+<td>26</td>
+<td>cli_agents/gpt-engineer</td>
+<td>git@github.com:AntonOsika/gpt-engineer.git</td>
+<td>git@github.com:vasic-digital/caf-gpt-engineer.git</td>
+</tr>
+<tr>
+<td>27</td>
+<td>cli_agents/gptme</td>
+<td>git@github.com:ErikBjare/gptme.git</td>
+<td>git@github.com:vasic-digital/caf-gptme.git</td>
+</tr>
+<tr>
+<td>28</td>
+<td>cli_agents/junie</td>
+<td>git@github.com:JetBrains/junie.git</td>
+<td>git@github.com:vasic-digital/caf-junie.git</td>
+</tr>
+<tr>
+<td>29</td>
+<td>cli_agents/mistral-code</td>
+<td>git@github.com:Wylgrif/Mistral-code.git</td>
+<td>git@github.com:vasic-digital/caf-mistral-code.git</td>
+</tr>
+<tr>
+<td>30</td>
+<td>cli_agents/multiagent-coding</td>
+<td>git@github.com:Danau5tin/multi-agent-coding-system.git</td>
+<td>git@github.com:vasic-digital/caf-multiagent-coding.git</td>
+</tr>
+<tr>
+<td>31</td>
+<td>cli_agents/nanocoder</td>
+<td>git@github.com:Nano-Collective/nanocoder.git</td>
+<td>git@github.com:vasic-digital/caf-nanocoder.git</td>
+</tr>
+<tr>
+<td>32</td>
+<td>cli_agents/noi</td>
+<td>git@github.com:lencx/Noi.git</td>
+<td>git@github.com:vasic-digital/caf-noi.git</td>
+</tr>
+<tr>
+<td>33</td>
+<td>cli_agents/octogen</td>
+<td>git@github.com:dbpunk-labs/octogen.git</td>
+<td>git@github.com:vasic-digital/caf-octogen.git</td>
+</tr>
+<tr>
+<td>34</td>
+<td>cli_agents/open-interpreter</td>
+<td>git@github.com:KillianLucas/open-interpreter.git</td>
+<td>git@github.com:vasic-digital/caf-open-interpreter.git</td>
+</tr>
+<tr>
+<td>35</td>
+<td>cli_agents/plandex</td>
+<td>git@github.com:plandex-ai/plandex.git</td>
+<td>git@github.com:vasic-digital/caf-plandex.git</td>
+</tr>
+<tr>
+<td>36</td>
+<td>cli_agents/postgres-mcp</td>
+<td>git@github.com:timescale/pg-aiguide.git</td>
+<td>git@github.com:vasic-digital/caf-postgres-mcp.git</td>
+</tr>
+<tr>
+<td>37</td>
+<td>cli_agents/qwen-code</td>
+<td>git@github.com:QwenLM/qwen-code.git</td>
+<td>git@github.com:vasic-digital/caf-qwen-code.git</td>
+</tr>
+<tr>
+<td>38</td>
+<td>cli_agents/shai</td>
+<td>git@github.com:ovh/shai.git</td>
+<td>git@github.com:vasic-digital/caf-shai.git</td>
+</tr>
+<tr>
+<td>39</td>
+<td>cli_agents/snow-cli</td>
+<td>git@github.com:MayDay-wpf/snow-cli.git</td>
+<td>git@github.com:vasic-digital/caf-snow-cli.git</td>
+</tr>
+<tr>
+<td>40</td>
+<td>cli_agents/spec-kit</td>
+<td>git@github.com:github/spec-kit.git</td>
+<td>git@github.com:vasic-digital/caf-spec-kit.git</td>
+</tr>
+<tr>
+<td>41</td>
+<td>cli_agents/superset</td>
+<td>git@github.com:superset-sh/superset.git</td>
+<td>git@github.com:vasic-digital/caf-superset.git</td>
+</tr>
+<tr>
+<td>42</td>
+<td>cli_agents/swe-agent</td>
+<td>git@github.com:princeton-nlp/SWE-agent.git</td>
+<td>git@github.com:vasic-digital/caf-swe-agent.git</td>
+</tr>
+<tr>
+<td>43</td>
+<td>cli_agents/taskweaver</td>
+<td>git@github.com:microsoft/TaskWeaver.git</td>
+<td>git@github.com:vasic-digital/caf-taskweaver.git</td>
+</tr>
+<tr>
+<td>44</td>
+<td>cli_agents/ui-ux-pro-max</td>
+<td>git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git</td>
+<td>git@github.com:vasic-digital/caf-ui-ux-pro-max.git</td>
+</tr>
+<tr>
+<td>45</td>
+<td>cli_agents/vtcode</td>
+<td>git@github.com:vinhnx/vtcode.git</td>
+<td>git@github.com:vasic-digital/caf-vtcode.git</td>
+</tr>
+<tr>
+<td>46</td>
+<td>cli_agents/warp</td>
+<td>git@github.com:warpdotdev/Warp.git</td>
+<td>git@github.com:vasic-digital/caf-warp.git</td>
+</tr>
+<tr>
+<td>47</td>
+<td>cli_agents/x-cmd</td>
+<td>git@github.com:x-cmd/x-cmd.git</td>
+<td>git@github.com:vasic-digital/caf-x-cmd.git</td>
+</tr>
+<tr>
+<td>48</td>
+<td>cli_agents/xela-cli</td>
+<td>git@github.com:xelauvas/codeclau.git</td>
+<td>git@github.com:vasic-digital/caf-xela-cli.git</td>
+</tr>
+<tr>
+<td>49</td>
+<td>cli_agents/zeroshot</td>
+<td>git@github.com:covibes/zeroshot.git</td>
+<td>git@github.com:vasic-digital/caf-zeroshot.git</td>
+</tr>
+</tbody>
+</table>
+<h3 id="nested-3rd-party-submodule-fork-1">1.2 Nested 3rd-party
+submodule → fork (1)</h3>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 20%" />
+<col style="width: 40%" />
+<col style="width: 24%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>nested path</th>
+<th>upstream url (verbatim)</th>
+<th>proposed fork</th>
+<th>note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>50</td>
+<td>cli_agents/cline → evals/cline-bench</td>
+<td>https://github.com/cline/cline-bench.git</td>
+<td>git@github.com:vasic-digital/caf-cline-bench.git</td>
+<td><strong>HTTPS</strong> upstream (Rule 3 — must be SSH in our fork).
+After <code>caf-cline</code> exists, edit <code>caf-cline</code>’s
+<code>.gitmodules</code> to point <code>evals/cline-bench</code> →
+<code>caf-cline-bench</code> (recursive swap, committed to the fork — a
+permitted minimal change).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fork count total: 50</strong> (49 top-level + 1 nested).</p>
+<h3 id="flagged-anomalies-do-not-fork-special-case">1.3 Flagged
+anomalies (do NOT fork / special-case)</h3>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 20%" />
+<col style="width: 24%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>path</th>
+<th>url</th>
+<th>flag</th>
+<th>action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cli_agents/claude-code-source</td>
+<td>git@gitlab.com:milos85vasic/ccode-private.git</td>
+<td><strong>Already an own/private GitLab mirror</strong> (operator
+<code>milos85vasic</code>), not a public 3rd-party upstream.</td>
+<td><strong>Skip fork.</strong> It is already controlled. The fork
+scripts must allowlist-skip any url whose host is
+<code>gitlab.com</code> under our own namespace, or whose path already
+resolves to our org. Optionally re-home under <code>vasic-digital</code>
+later, but out of scope for the fork-all pass.</td>
+</tr>
+<tr>
+<td>cli_agents_resources/OpenAI-Cookbook</td>
+<td>org-14957082@github.com:openai/openai-cookbook.git</td>
+<td><strong>Org-prefixed SSH alias</strong> (<code>org-14957082@</code>)
+— a per-machine <code>~/.ssh/config</code> GitHub-org SSH identity, NOT
+a path. Lives in <code>cli_agents_resources/</code>, <strong>out of
+scope</strong> (resources, not agents).</td>
+<td>Not forked in this workstream. Listed only so the parser does not
+mistake <code>org-NNNN@github.com</code> for a different host. The fork
+scripts must normalize <code>org-NNNN@github.com:</code> →
+<code>github.com:</code> before deriving <code>owner/repo</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Nesting depth finding:</strong> of the 6 representative
+agents inspected (claude-code, qwen-code, aider, plandex, crush,
+gemini-cli) <strong>none</strong> has a nested <code>.gitmodules</code>.
+A full sweep
+(<code>find cli_agents -maxdepth 2 -name .gitmodules</code>) found
+exactly one nested manifest — <code>cli_agents/cline/.gitmodules</code>
+(depth 1, the single <code>cline-bench</code> entry above). Max
+recursion depth observed across the fleet = <strong>1</strong>. No
+nested <strong>own-org</strong> chains exist under
+<code>cli_agents/*</code> (all own-org deps already live flat at
+<code>submodules/&lt;name&gt;/</code> per the existing layout), so
+CONST-051’s pull-to-root rule has <strong>no</strong>
+<code>cli_agents</code> violations to remediate — but the scripts must
+still enforce it generically for future nesting.</p>
+<hr />
+<h2 id="reusable-script-designs-constitutionscripts">2. Reusable script
+designs (<code>constitution/scripts/</code>)</h2>
+<p>All three follow the existing house style observed in
+<code>constitution/scripts/codegraph_update.sh</code>:
+<code>#!/usr/bin/env bash</code>, <code>set -uo pipefail</code>,
+<code>SCRIPT_DIR</code>/<code>CONST_ROOT</code> resolution, anti-bluff
+PASS that observes real post-state (not just CLI exit code), documented
+exit codes, append-only Status ledger. <strong>Nothing is
+hardcoded</strong> — org, prefix, source dir, providers, remotes are all
+flags/env with defaults.</p>
+<p>Common parameter surface (shared lib <code>caf_lib.sh</code>, sourced
+by all three):</p>
+<pre><code>--org &lt;name&gt;            default: vasic-digital            (env CAF_ORG)
+--prefix &lt;str&gt;          default: caf-                     (env CAF_PREFIX)
+--src-dir &lt;path&gt;        default: cli_agents               (env CAF_SRC_DIR; submodule scan root)
+--gitmodules &lt;path&gt;     default: &lt;repo-root&gt;/.gitmodules  (env CAF_GITMODULES)
+--providers &lt;csv&gt;       default: github,gitlab            (env CAF_PROVIDERS; dual-remote fan-out)
+--gitlab-group &lt;name&gt;   default: vasic-digital            (env CAF_GITLAB_GROUP)
+--branch &lt;name&gt;         default: &quot;&quot; → auto-detect remote HEAD (main|master)
+--dry-run               print planned actions, mutate nothing (default for CI/PLANNING)
+--only &lt;name[,name]&gt;    restrict to a subset (testing / retry)
+--exclude &lt;name[,name]&gt; skip-list (defaults include claude-code-source)
+--recursive             follow nested 3rd-party submodules (depth-limited, default depth 3)</code></pre>
+<p><code>caf_lib.sh</code> helpers: <code>caf_normalize_url()</code>
+(strip <code>org-NNNN@</code>, host-normalize, derive
+<code>owner/repo</code>), <code>caf_is_own_org()</code> (true if url
+already in vasic-digital/HelixDevelopment/… → skip-or-pull-to-root),
+<code>caf_fork_name()</code>
+(<code>&lt;prefix&gt;&lt;submodule-dir-name&gt;</code>),
+<code>caf_log()</code> (append to <code>docs/caf/Status.md</code> +
+stdout), <code>caf_detect_default_branch()</code>
+(<code>git ls-remote --symref &lt;url&gt; HEAD</code>).</p>
+<h3 id="caf_fork_all.sh-fork-or-create-remote-wiring">2.1
+<code>caf_fork_all.sh</code> — fork-or-create + remote wiring</h3>
+<p><strong>Purpose:</strong> For every submodule under
+<code>--src-dir</code>, create
+<code>&lt;org&gt;/&lt;prefix&gt;&lt;name&gt;</code> on each provider,
+seed it from upstream, and wire remotes (<code>origin</code>=our fork,
+<code>upstream</code>=original). Idempotent: re-running detects an
+existing fork and skips creation.</p>
+<p><strong>Inputs:</strong> the common surface above. Reads
+<code>--gitmodules</code> for <code>path</code>+<code>url</code> pairs
+filtered to <code>--src-dir</code>.</p>
+<p><strong>Per-submodule sequence (GitHub primary):</strong></p>
+<pre><code>url=&lt;verbatim from .gitmodules&gt;
+norm=$(caf_normalize_url &quot;$url&quot;)            # org-NNNN@ stripped, → owner/repo
+caf_is_own_org &quot;$norm&quot; &amp;&amp; { caf_log SKIP own-org &quot;$name&quot;; continue; }
+in_exclude &quot;$name&quot; &amp;&amp; { caf_log SKIP excluded &quot;$name&quot;; continue; }
+fork=$(caf_fork_name &quot;$name&quot;)               # caf-&lt;name&gt;
+
+# (a) fork-or-create on GitHub
+if gh repo view &quot;$ORG/$fork&quot; &gt;/dev/null 2&gt;&amp;1; then
+    caf_log EXISTS &quot;$ORG/$fork&quot;
+else
+    # gh fork keeps the upstream link; fall back to create+mirror-push for
+    # non-forkable sources (HTTPS-only, archived, or self-hosted upstream).
+    if ! gh repo fork &quot;$norm&quot; --org &quot;$ORG&quot; --fork-name &quot;$fork&quot; --clone=false; then
+        gh repo create &quot;$ORG/$fork&quot; --private --disable-wiki
+        tmp=$(mktemp -d); git clone --mirror &quot;$url&quot; &quot;$tmp/.git&quot;
+        git -C &quot;$tmp/.git&quot; push --mirror &quot;git@github.com:$ORG/$fork.git&quot;   # initial seed only; NOT a force of an existing ref (§11.4.113-safe: empty target)
+        rm -rf &quot;$tmp&quot;
+    fi
+fi
+
+# (b) GitLab mirror of the same fork (dual-remote)
+if provider_enabled gitlab; then
+    glab repo view &quot;$GITLAB_GROUP/$fork&quot; &gt;/dev/null 2&gt;&amp;1 \
+        || glab repo create &quot;$GITLAB_GROUP/$fork&quot; --private
+fi
+
+# (c) record mapping for the swap + merge steps
+echo &quot;$name|$url|git@github.com:$ORG/$fork.git|git@gitlab.com:$GITLAB_GROUP/$fork.git&quot; &gt;&gt; &quot;$MAP_FILE&quot;</code></pre>
+<p><strong>Error handling:</strong> every
+<code>gh</code>/<code>glab</code> call wrapped; non-zero →
+<code>caf_log FAIL &quot;$name&quot; &quot;$rc&quot;</code> and <code>continue</code> (one
+bad repo never aborts the batch). Rate-limit aware: on <code>gh</code>
+HTTP 403/429 the loop sleeps with exponential backoff
+(<code>gh api rate_limit</code> polled), resumable via
+<code>--only</code> from the partial <code>MAP_FILE</code>. Mirror-push
+initial seed targets an <strong>empty</strong> fork (no existing refs to
+overwrite) so it does not violate §11.4.113 (which forbids overwriting
+<em>existing</em> remote history).</p>
+<p><strong>Anti-bluff Challenge
+(<code>caf_fork_all.challenge.sh</code>):</strong> bootstrap a throwaway
+temp dir with a tiny fixture <code>.gitmodules</code> pointing at one
+small public repo (e.g. <code>octocat/Hello-World</code>) under
+<code>--src-dir=fixtures</code>; run with a disposable test org/group
+(or <code>--dry-run</code> asserting the exact
+<code>gh</code>/<code>glab</code> command lines emitted); on a live run
+assert <code>gh repo view &lt;org&gt;/caf-hello-world</code> exits 0 AND
+<code>git ls-remote git@github.com:&lt;org&gt;/caf-hello-world.git</code>
+returns refs AND the <code>upstream</code> remote resolves to the
+original. Captures stdout under <code>docs/qa/&lt;run-id&gt;/</code>.
+Teardown deletes the test fork. A PASS observes the <strong>real
+remote</strong>, never just the CLI exit code (§107/§11.4.5).</p>
+<h3 id="caf_update_merge.sh-fetch-merge-onto-latest-upstream">2.2
+<code>caf_update_merge.sh</code> — fetch + merge-onto-latest
+upstream</h3>
+<p><strong>Purpose:</strong> Keep every fork current by merging upstream
+<code>main</code>/<code>master</code> into the fork,
+fast-forward-preferred, <strong>never force</strong> (§11.4.113). Runs
+on cadence (weekly floor per §11.4.45 / §11.4.80 pattern).</p>
+<p><strong>Inputs:</strong> common surface +
+<code>--workdir &lt;path&gt;</code> (scratch clones dir, default
+<code>$(mktemp -d)</code>), <code>--strategy ff-only|merge</code>
+(default <code>merge</code>, union-preserving),
+<code>--push/--no-push</code> (default <code>--push</code>).</p>
+<p><strong>Per-fork loop (over <code>MAP_FILE</code> from §2.1, or
+re-derived from <code>.gitmodules</code>):</strong></p>
+<pre><code>git clone &quot;$fork_origin&quot; &quot;$wd/$fork&quot;        # our fork
+cd &quot;$wd/$fork&quot;
+git remote add upstream &quot;$upstream_url&quot; 2&gt;/dev/null || git remote set-url upstream &quot;$upstream_url&quot;
+git fetch --all --prune --tags
+base=$(caf_detect_default_branch upstream)  # main|master
+git checkout &quot;$base&quot;
+# §11.4.113 merge-onto-latest-main: base = latest fork main; merge upstream on top.
+if git merge --ff-only &quot;upstream/$base&quot; 2&gt;/dev/null; then
+    caf_log FF &quot;$fork&quot; &quot;$base&quot;
+else
+    git merge --no-edit &quot;upstream/$base&quot; || { caf_log CONFLICT &quot;$fork&quot;; record_conflict; continue; }
+    caf_log MERGE &quot;$fork&quot; &quot;$base&quot;
+fi
+# fan-out push to ALL configured provider remotes (fast-forward only)
+for remote in $(provider_remotes &quot;$fork&quot;); do
+    git push &quot;$remote&quot; &quot;$base&quot; || caf_log PUSHFAIL &quot;$fork&quot; &quot;$remote&quot;
+done</code></pre>
+<p><strong>Error handling / conflict policy:</strong> merge conflicts
+are <strong>never</strong> auto-resolved with
+<code>-s ours</code>/<code>-X theirs</code> (§11.4.113 step 4, §11.4.6
+no-guessing). A conflicted fork is logged to
+<code>docs/caf/conflicts/&lt;fork&gt;_&lt;ts&gt;.md</code> with the
+conflicting paths and parked for operator review; the loop continues
+with the next fork (zero-idle, §11.4.94). Because the fork’s
+<code>origin/&lt;base&gt;</code> is always the merge base and the merge
+commit descends from it, every push is a <strong>fast-forward</strong> →
+no force ever needed. If an upstream rewrote its history (rare), the
+script logs <code>UPSTREAM-REWRITE</code> and parks — it does
+<strong>not</strong> force.</p>
+<p><strong>Anti-bluff Challenge
+(<code>caf_update_merge.challenge.sh</code>):</strong> create a
+throwaway “upstream” repo + a “fork” clone in temp; add a commit to
+upstream; run
+<code>caf_update_merge.sh --only fixture --workdir &lt;tmp&gt;</code>;
+assert the fork’s <code>main</code> now contains the upstream commit SHA
+(<code>git log</code> grep), assert <code>git rev-parse fork/main</code>
+is a fast-forward descendant of the pre-merge tip, and assert
+<strong>no</strong> <code>--force</code> appears in the captured git
+trace (<code>GIT_TRACE</code> log scanned). Then plant a conflicting
+edit on both sides and assert the script logs <code>CONFLICT</code> +
+parks (does not silently resolve). Evidence under
+<code>docs/qa/&lt;run-id&gt;/</code>.</p>
+<h3 id="caf_resolve_nested_submodules.sh-recursive-nested-dep-handler">2.3
+<code>caf_resolve_nested_submodules.sh</code> — recursive nested-dep
+handler</h3>
+<p><strong>Purpose:</strong> Enforce the recursive rule: inside each
+fork (or each checked-out submodule), find nested submodules;
+<strong>3rd-party</strong> nested deps get forked (delegated to
+<code>caf_fork_all.sh</code> with <code>--src-dir</code> set to the
+nested manifest’s dir) and the fork’s nested <code>.gitmodules</code>
+rewritten to our fork URL; <strong>own-org</strong> nested deps are
+flagged as CONST-051 violations and reported for pull-to-root (the
+script does <strong>not</strong> silently rewrite own-org chains — it
+emits the remediation plan).</p>
+<p><strong>Inputs:</strong> common surface +
+<code>--depth &lt;n&gt;</code> (default 3) +
+<code>--repo &lt;path-or-fork&gt;</code>.</p>
+<p><strong>Sequence:</strong></p>
+<pre><code>scan_for_nested() {
+    local dir=&quot;$1&quot; depth=&quot;$2&quot;
+    [ &quot;$depth&quot; -le 0 ] &amp;&amp; return
+    [ -f &quot;$dir/.gitmodules&quot; ] || return
+    git config -f &quot;$dir/.gitmodules&quot; --get-regexp &#39;\.url$&#39; | while read -r key url; do
+        norm=$(caf_normalize_url &quot;$url&quot;)
+        if caf_is_own_org &quot;$norm&quot;; then
+            caf_log CONST051 &quot;$dir&quot; &quot;$url&quot;      # nested own-org chain → must pull to root
+            echo &quot;$dir|$url|PULL_TO_ROOT&quot; &gt;&gt; &quot;$NESTED_REPORT&quot;
+        else
+            fork=$(caf_fork_name &quot;$(basename &quot;$key&quot; .url | sed &#39;s/^submodule\.//&#39;)&quot;)
+            echo &quot;$dir|$url|FORK:$ORG/$fork&quot; &gt;&gt; &quot;$NESTED_REPORT&quot;
+            # delegate the actual fork to caf_fork_all (idempotent)
+        fi
+    done
+    # recurse one level deeper
+}</code></pre>
+<p>For <code>cline</code>: scan finds <code>evals/cline-bench</code> →
+HTTPS 3rd-party → emits <code>FORK: vasic-digital/caf-cline-bench</code>
+and (after <code>caf-cline-bench</code> exists) rewrites
+<code>caf-cline</code>’s <code>evals/cline-bench</code> url to
+<code>git@github.com:vasic-digital/caf-cline-bench.git</code> (SSH per
+Rule 3), committed to the <code>caf-cline</code> fork as a minimal
+<code>.gitmodules</code>-only change (§11.4.30-clean).</p>
+<p><strong>Error handling:</strong> depth-bounded; cycle guard via
+visited-set on normalized url; any own-org nested chain is a
+<strong>hard report item</strong> (release-blocker per CONST-051), never
+auto-rewritten without operator sign-off.</p>
+<p><strong>Anti-bluff Challenge
+(<code>caf_resolve_nested.challenge.sh</code>):</strong> build a temp
+parent with a nested <code>.gitmodules</code> containing one 3rd-party +
+one fake own-org url; run the script <code>--dry-run</code>; assert the
+3rd-party row is classified <code>FORK:</code> and the own-org row
+<code>PULL_TO_ROOT</code>/<code>CONST051</code>; flip the fixture (move
+the own-org dep to root) and assert no <code>CONST051</code> emitted.
+Evidence under <code>docs/qa/&lt;run-id&gt;/</code>.</p>
+<hr />
+<h2 id="submodule-swap-procedure-config-re-exportinstallvalidate-tie-in">3.
+Submodule-swap procedure + config re-export/install/validate tie-in</h2>
+<p>After forks exist and are seeded (§2.1) and <code>MAP_FILE</code> is
+populated:</p>
+<ol type="1">
+<li><p><strong>Rewrite <code>.gitmodules</code> urls</strong>
+(idempotent, per-line, NOT a blanket <code>git add -A</code> per
+§11.4.30):</p>
+<pre><code>while IFS=&#39;|&#39; read -r name upstream fork_gh fork_gl; do
+    git config -f .gitmodules &quot;submodule.cli_agents/$name.url&quot; &quot;$fork_gh&quot;
+done &lt; &quot;$MAP_FILE&quot;</code></pre>
+<p>(Skip <code>claude-code-source</code>; it stays on its GitLab
+mirror.)</p></li>
+<li><p><strong><code>git submodule sync --recursive</code></strong> —
+propagates the new urls into <code>.git/config</code> and each
+submodule’s <code>.git/config</code>.</p></li>
+<li><p><strong><code>git submodule set-url</code></strong> is an
+alternative for individual entries; <code>sync</code> is the bulk
+path.</p></li>
+<li><p><strong>Nested swap:</strong> for <code>cline</code>, the nested
+<code>evals/cline-bench</code> url is rewritten <strong>inside the
+<code>caf-cline</code> fork’s</strong> <code>.gitmodules</code> (not the
+parent meta-repo), then that fork commits the change.</p></li>
+<li><p><strong>Re-export + install + validate tie-in:</strong> the
+existing config/governance pipeline is re-run so the new remotes
+propagate:</p>
+<ul>
+<li><code>./scripts/init-submodules.sh</code> (re-init against swapped
+urls),</li>
+<li><code>./scripts/propagate-governance.sh</code> (cascade
+Constitution/CLAUDE/AGENTS into the new forks — each fork gets the
+§CONST-047/051 governance siblings, a permitted minimal commit),</li>
+<li><code>./scripts/verify-governance-cascade.sh</code> (confirm anchors
+present in every fork),</li>
+<li><code>install_upstreams</code> from each fork root
+<strong>if</strong> it has an <code>upstreams/</code> recipe dir
+(CONST-056),</li>
+<li>a <code>caf_validate.sh</code> post-step asserting every
+<code>cli_agents/*</code> url in <code>.gitmodules</code> now resolves
+to <code>vasic-digital/caf-*</code> (except the flagged skip) AND
+<code>git ls-remote</code> succeeds for each — captured-evidence gate,
+not a grep-only pass.</li>
+</ul></li>
+<li><p><strong>Commit discipline:</strong> the <code>.gitmodules</code>
+rewrite + submodule pointer updates land in ONE meta-repo commit;
+CONTINUATION updated in the same commit (CONST-044). Forks receive only
+<code>.gitignore</code>/governance/<code>.gitmodules</code>-nested
+minimal commits — never upstream code edits.</p></li>
+</ol>
+<hr />
+<h2 id="risks">4. Risks</h2>
+<ol type="1">
+<li><strong>API rate limits.</strong> ~50 forks × 2 providers = up to
+~100 create/fork calls plus per-fork clone/fetch. GitHub REST fork
+endpoint is rate-limited and <strong>async</strong> (fork readiness is
+eventually-consistent — <code>gh repo view</code> may 404 briefly after
+<code>gh repo fork</code>). Mitigation: exponential backoff on 403/429,
+<code>gh api rate_limit</code> polling, poll-until-ready before wiring
+remotes, resumable <code>--only</code> retry from partial
+<code>MAP_FILE</code>.</li>
+<li><strong>Scale (~50 repos) + disk/time.</strong> Mirror-clone
+fallback for non-forkable upstreams (HTTPS-only like
+<code>cline-bench</code>, or archived repos) is bandwidth/disk heavy
+(<code>warp</code>, <code>superset</code>, <code>amazon-q</code> are
+large). Mitigation: <code>--workdir</code> on a roomy volume,
+<code>--only</code> batching, background execution per §11.4.89, cleanup
+<code>trap</code>.</li>
+<li><strong>GitHub + GitLab dual-remote divergence.</strong> Two mirrors
+of each fork can drift if a push lands on one and fails the other.
+Mitigation: <code>caf_update_merge.sh</code> fans out to
+<strong>all</strong> provider remotes every run and logs
+<code>PUSHFAIL</code> per-remote; a <code>caf_validate.sh</code> parity
+check compares <code>git ls-remote</code> tips across providers.
+Fast-forward-only pushes keep both linear (§11.4.113).</li>
+<li><strong>Recursive depth / hidden nested deps.</strong> Only
+<code>cline</code> nests today (depth 1), but upstream repos can add
+submodules at any time, and some use HTTPS (Rule 3 violation if copied
+verbatim). Mitigation: <code>--recursive --depth 3</code> scan in
+<code>caf_resolve_nested_submodules.sh</code>, url normalization to SSH,
+cycle guard, and a CONST-051 hard-report for any nested own-org
+chain.</li>
+<li><strong>Keeping forks’ OWN upstream code unchanged.</strong> We do
+not control upstream source and must not diverge it (merges would
+conflict forever, and we’d lose the “track upstream” property).
+Mitigation: forks receive ONLY <code>.gitignore</code> + governance
+siblings + nested-<code>.gitmodules</code> rewrites — all non-source,
+§11.4.30-clean; <code>caf_update_merge.sh</code> merges upstream
+<strong>into</strong> the fork (never the reverse), conflicts park for
+review rather than auto-resolve, and the merge-onto-latest-main
+discipline (§11.4.113) guarantees pushes stay fast-forward so no
+upstream history is ever rewritten.</li>
+<li><strong><code>claude-code-source</code> mis-fork risk.</strong> It
+is already an own private GitLab mirror; a naive “fork everything” would
+create a pointless <code>caf-claude-code-source</code>. Mitigation:
+<code>caf_is_own_org</code> + default
+<code>--exclude claude-code-source</code> skip-guard, asserted by the
+§2.1 Challenge’s negative case.</li>
+<li><strong>Naming collisions / CONST-052 case.</strong> Fork names
+preserve the existing kebab submodule dir names
+(<code>caf-gpt-engineer</code>) for upstream traceability; this is
+intentional and consistent with the kebab paths already in
+<code>.gitmodules</code>. No two <code>cli_agents/*</code> names collide
+under the <code>caf-</code> prefix (verified against the 50-entry
+list).</li>
+</ol>
+<hr />
+<h2 id="executive-summary-12-lines">Executive summary (12 lines)</h2>
+<ol type="1">
+<li><code>.gitmodules</code> declares <strong>50</strong>
+<code>cli_agents/*</code> third-party submodule entries (parsed verbatim
+from the root manifest).</li>
+<li><strong>Fork mapping count = 50 forks:</strong> 49 top-level
+<code>cli_agents/*</code> → <code>vasic-digital/caf-&lt;name&gt;</code>,
+plus <strong>1 nested</strong> 3rd-party
+(<code>cline-bench</code>).</li>
+<li><strong>1 entry skipped:</strong>
+<code>cli_agents/claude-code-source</code> is already an own/private
+GitLab mirror (<code>gitlab.com:milos85vasic/ccode-private</code>) — not
+forked.</li>
+<li><strong>1 nested dep found</strong> by full sweep:
+<code>cli_agents/cline/.gitmodules → evals/cline-bench</code>
+(<code>https://github.com/cline/cline-bench.git</code>, HTTPS → must
+become SSH in the fork).</li>
+<li>Representative agents (claude-code, qwen-code, aider, plandex,
+crush, gemini-cli) have <strong>no</strong> nested submodules; max fleet
+nesting depth = <strong>1</strong>; <strong>no</strong> nested own-org
+chains under <code>cli_agents/*</code> (CONST-051 clean).</li>
+<li>One org-prefixed SSH alias noted
+(<code>org-14957082@github.com</code> on OpenAI-Cookbook) is in
+<code>cli_agents_resources/</code> — out of scope; parser must normalize
+<code>org-NNNN@github.com:</code> → <code>github.com:</code>.</li>
+<li><strong>Three reusable scripts</strong> (in
+<code>constitution/scripts/</code>, sharing <code>caf_lib.sh</code>,
+fully parameterized — org/prefix/src-dir/providers/branch all flags,
+nothing hardcoded):</li>
+<li><strong><code>caf_fork_all.sh</code></strong> — fork-or-create on
+GitHub+GitLab, wire
+<code>origin</code>(fork)+<code>upstream</code>(original), record
+<code>MAP_FILE</code>; idempotent, rate-limit backoff, mirror-push
+fallback for non-forkable/HTTPS upstreams (empty-target seed,
+§11.4.113-safe).</li>
+<li><strong><code>caf_update_merge.sh</code></strong> — fetch + merge
+upstream <code>main</code>/<code>master</code> into each fork,
+fast-forward-preferred, <strong>never force</strong>, conflicts parked
+for review, fan-out push to all providers.</li>
+<li><strong><code>caf_resolve_nested_submodules.sh</code></strong> —
+recursive (<code>--depth 3</code>) nested-dep classifier: 3rd-party →
+fork + SSH-rewrite; own-org → hard CONST-051 pull-to-root report (never
+auto-rewritten).</li>
+<li>Each script ships an <strong>anti-bluff Challenge</strong>
+(throwaway dir, tiny fixture repo, assert real remotes / fast-forward /
+no-<code>--force</code> in git trace, evidence under
+<code>docs/qa/&lt;run-id&gt;/</code>); swap = <code>.gitmodules</code>
+per-line url rewrite + <code>git submodule sync --recursive</code> +
+governance re-cascade + <code>caf_validate.sh</code> resolve check.</li>
+<li>Top risks: GitHub/GitLab rate limits + async fork readiness,
+~50-repo scale/disk, dual-remote drift, recursive/HTTPS nested deps, and
+keeping forks’ upstream <strong>code</strong> untouched (only
+<code>.gitignore</code>/governance/nested-<code>.gitmodules</code>
+commits; merge-into-fork only, §11.4.30 + §11.4.113).</li>
+</ol>
+</body>
+</html>

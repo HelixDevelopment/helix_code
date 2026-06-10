@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-07-p2-f23-cline-browser-tool</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-05-07-p2-f23-cline-browser-tool</h1>
+</header>
+<h1 id="p2-f23-cline-browser-tool-implementation-plan">P2-F23 — Cline
+Browser Tool Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development. Steps use checkbox
+(<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<blockquote>
+<p><strong>Programme position:</strong> F23 is the
+<strong>third</strong> Phase 2 feature of CLI-Agent Fusion (after F21
+Codex Approval Modes and F22 Aider Git Auto-Commit). Task T01 advances
+PROGRESS.md from “Phase 2: F22 closed; F23 next candidate (brainstorm)”
+to “Phase 2 of CLI-Agent Fusion programme: F23 (Cline Browser Tool) in
+flight” and appends an F23 evidence header to
+<code>docs/improvements/07_phase_2_evidence.md</code> (already created
+in F21-T01, extended by F22-T01).</p>
+</blockquote>
+<p><strong>Goal:</strong> Ship a real, end-to-end <strong>6-tool
+browser-automation suite</strong> for the HelixCode CLI agent, modelled
+on cline’s Puppeteer surface. F23 EXTENDS the existing
+<code>internal/tools/browser/</code> package (which already carries the
+chromedp infrastructure — <code>Controller</code>,
+<code>ActionExecutor</code>, <code>ScreenshotCapture</code>,
+<code>ConsoleMonitor</code>, <code>ChromeDiscovery</code>,
+<code>ScreenshotAnnotator</code> — at ~3 K LOC) by ADDING a thinner
+cline-style session façade (<code>BrowserSession</code>,
+<code>BrowserManager</code> with atomic-pointer lifecycle,
+<code>BrowserOptions</code> from env,
+<code>Snapshot</code>/<code>ScreenshotResult</code> value types,
+sentinel errors, <code>EnvVarHeadedMode</code> constant) and SIX new
+Tool-interface implementations (<code>browser_navigate</code>,
+<code>browser_snapshot</code>, <code>browser_click</code>,
+<code>browser_type</code>, <code>browser_screenshot</code>,
+<code>browser_close</code>) — each with the F21-mandated
+<code>RequiresApproval()</code> level mapped per spec §3.6
+(<code>navigate</code>/<code>click</code>/<code>type</code>/<code>close</code>
+→ <code>LevelEdit</code>; <code>snapshot</code>/<code>screenshot</code>
+→ <code>LevelReadOnly</code>). Adds a <code>/browser</code> slash
+command (<code>status</code> / <code>navigate &lt;url&gt;</code> /
+<code>close</code>); NO cobra subcommand. Headless by default;
+<code>HELIXCODE_BROWSER_HEADED=true</code> (case-insensitive literal
+<code>true</code>) enables headed mode. Screenshots written to
+per-session tempdir under
+<code>$XDG_DATA_HOME/helixcode/browser/screenshots/&lt;session-id&gt;/&lt;n&gt;.png</code>
+(mode <code>0600</code>); tool result returns the absolute file path
+(NOT base64). Idempotent close via <code>sync.Once</code>. Lifecycle:
+lazy-create on first navigate; explicit close via tool or slash;
+defensive <code>defer mgr.CloseSession()</code> at process exit.</p>
+<p><strong>Architecture:</strong> New files under
+<code>helix_code/internal/tools/browser/</code> — <code>types.go</code>
+(<code>Snapshot</code>, <code>ScreenshotResult</code>,
+<code>ManagerStatus</code>, sentinels
+<code>ErrNoActiveSession</code>/<code>ErrChromiumNotFound</code>/<code>ErrNavigationTimeout</code>/<code>ErrSelectorNotFound</code>/<code>ErrScreenshotTooLarge</code>,
+<code>EnvVarHeadedMode</code>, <code>MaxSnapshotBytes</code>,
+<code>MaxScreenshotBytes</code>), <code>options.go</code>
+(<code>BrowserOptions</code> + <code>OptionsFromEnv()</code>),
+<code>session.go</code> (<code>BrowserSession</code> with chromedp
+Context + cancel + per-session screenshot tempdir + atomic counter +
+<code>sync.Once</code> close), <code>manager.go</code>
+(<code>BrowserManager</code> with
+<code>atomic.Pointer[BrowserSession] current</code>,
+<code>EnsureSession</code>/<code>RequireSession</code>/<code>CloseSession</code>/<code>Status</code>,
+mutex serialises only lifecycle transitions),
+<code>navigate_tool.go</code> / <code>snapshot_tool.go</code> /
+<code>click_type_tools.go</code> / <code>screenshot_tool.go</code> /
+<code>close_tool.go</code> (six Tool impls), <code>register.go</code>
+(single <code>RegisterAll(reg, mgr)</code> entry point). New
+<code>internal/commands/browser_command.go</code> for the
+<code>/browser</code> slash. Two existing files get small additions:
+<code>cmd/cli/main.go</code> (1) construct
+<code>mgr := browser.NewBrowserManager(browser.NewDefaultChromeDiscovery(), c.logger)</code>,
+(2) call <code>browser.RegisterAll(c.toolRegistry, mgr)</code>, (3)
+register <code>commands.NewBrowserCommand(mgr)</code> slash;
+<code>internal/commands/registry.go</code> gets one new
+<code>Register(...)</code> call site. Coexists with the existing
+<code>BrowserLaunchTool</code>/<code>BrowserNavigateTool</code>/<code>BrowserScreenshotTool</code>/<code>BrowserCloseTool</code>
+in <code>internal/tools/browser_tools.go</code> (multi-browser API stays
+— back-compat). T09 picks the registration strategy: F23 tools register
+under <code>browser_navigate</code>/etc. names, with the existing ones
+renamed <code>_legacy</code> if any test needs to disambiguate.</p>
+<p><strong>Tech Stack:</strong> Go 1.26, testify v1.11, zap (already
+direct), chromedp v0.15.1 (ALREADY direct in
+<code>helix_code/go.mod</code>), cdproto
+v0.0.0-20260405000525-47a8ff65b46a (ALREADY direct). <strong>Zero new
+external deps</strong> (<code>os</code>, <code>sync</code>,
+<code>sync/atomic</code>, <code>time</code>, <code>errors</code>,
+<code>fmt</code>, <code>strings</code>, <code>path/filepath</code>,
+<code>context</code>, <code>image/png</code>,
+<code>net/http/httptest</code> all stdlib). <code>go mod tidy</code>
+after T09 must produce no diff in either <code>go.mod</code> or
+<code>go.sum</code>. T10’s verification step asserts this loudly.</p>
+<p><strong>Spec:</strong>
+<code>docs/superpowers/specs/2026-05-07-p2-f23-cline-browser-tool-design.md</code>
+(commit <code>83d401d</code>).</p>
+<p><strong>Working directory for <code>go</code> commands:</strong>
+<code>helix_code/</code>. Git from meta-repo root.</p>
+<p><strong>Anti-bluff smoke (full 4-term applied to F23
+surface):</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  internal/tools/browser internal/commands/browser_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span></code></pre></div>
+<p>Must always print <code>clean</code>.</p>
+<p><strong>Anti-bluff hot zone:</strong> §5.2 of the spec — F23 can
+degenerate in five ways: (a) <code>browser_navigate</code> reports
+success but the page is still on <code>about:blank</code> (the
+<code>chromedp.Navigate</code> action did not error but the page never
+loaded); (b) <code>browser_snapshot</code> returns empty/near-empty HTML
+because the snapshot read the DOM before <code>WaitReady(&quot;body&quot;)</code>
+resolved; (c) <code>browser_click</code> reports success but the DOM
+didn’t mutate (the click matched a hidden/disabled element OR fired
+async without a settle wait); (d) <code>browser_screenshot</code> writes
+a 0-byte file or non-PNG bytes (chromedp returned <code>nil</code> byte
+buf and the implementation <code>os.WriteFile</code>-d it without
+checking); (e) <code>browser_close</code> flips
+<code>manager.current</code> to nil but never calls
+<code>cancel()</code>, leaving the chromium subprocess running. The
+seven “what counts as the browser tool works” criteria — (1)
+<code>browser_navigate</code> + <code>browser_snapshot(html)</code>
+against a real <code>httptest.Server</code> returns content containing
+the fixture sentinel <code>FIXTURE_LOADED_42</code> AND
+<code>len &gt; 100</code> (PHASE-A); (2)
+<code>browser_snapshot(text)</code> returns the same fixture sentinel in
+plain text (PHASE-B); (3) pre-click snapshot has <code>UNCLICKED</code>;
+click <code>#b</code>; post-click snapshot has <code>CLICKED_42</code>
+(positive byte differential — PHASE-C); (4)
+<code>browser_type(&quot;#in&quot;, &quot;HELIX_42&quot;)</code> + post-snapshot has
+<code>value=&quot;HELIX_42&quot;</code> or JS-eval reads back
+<code>HELIX_42</code> (PHASE-D); (5) <code>browser_screenshot</code>
+returns a path whose file exists, is <code>&gt; 1024</code> bytes, and
+starts with PNG magic <code>89 50 4E 47 0D 0A 1A 0A</code>, AND
+<code>image/png.DecodeConfig</code> succeeds (PHASE-E); (6)
+<code>browser_close</code> then <code>browser_snapshot</code> returns
+<code>errors.Is(err, ErrNoActiveSession)</code> (PHASE-F); (7) 5
+concurrent <code>EnsureSession</code> goroutines all receive the same
+<code>*BrowserSession</code> pointer (PHASE-G) — are each tested with
+both unit assertions AND a Challenge phase. The Challenge harness uses
+positive evidence: HTTP-server-served sentinel string equality
+(PHASE-A/B), DOM-mutation byte differential (PHASE-C), input-value byte
+assertion (PHASE-D), PNG-magic + size + DecodeConfig (PHASE-E),
+<code>errors.Is</code> post-close (PHASE-F), pointer equality (PHASE-G).
+Byte-evidence mismatch is a hard Challenge failure. Skip is permitted
+ONLY when chromium is absent and MUST emit
+<code>SKIP-OK: #P2-F23 chromium not available</code>. Absence-of-error
+is NEVER acceptable.</p>
+<p><strong>Why this is consequential:</strong> the browser tool is the
+cline-pattern crown jewel — without it, the CLI agent can’t observe a
+running web UI, can’t validate JS-heavy SPAs an aider/codex agent
+edited, and can’t run end-to-end browser-driven Challenges. F21
+(approval) gates the user surface; F22 (autocommit) makes edits visible;
+F23 makes the agent’s eyes work. F23’s discriminating tests are: (i)
+PHASE-A’s fixture-sentinel-in-snapshot (proves real chromium load); (ii)
+PHASE-C’s CLICKED_42 byte differential (proves real DOM mutation); (iii)
+PHASE-D’s input-value byte readback (proves real keystroke delivery);
+(iv) PHASE-E’s PNG-magic + DecodeConfig success (proves real PNG bytes,
+not nil-buf-written-to-disk); (v) PHASE-F’s
+<code>ErrNoActiveSession</code> post-close (proves real teardown, not
+just status flip); (vi) PHASE-G’s same-pointer concurrency (proves
+single chromium subprocess across concurrent calls). All six must
+produce positive evidence; none can be satisfied by
+absence-of-error.</p>
+<hr />
+<h2 id="task-list">Task list</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked></input>P2-F23-T01 — bootstrap
+F23 evidence section + advance PROGRESS to F23</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T02 —
+<code>internal/tools/browser/types.go</code> + <code>options.go</code>:
+BrowserOptions + Snapshot + ScreenshotResult + ManagerStatus + sentinels
++ EnvVarHeadedMode + MaxSnapshotBytes + MaxScreenshotBytes
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T03 —
+<code>internal/tools/browser/manager.go</code> +
+<code>session.go</code>: BrowserManager with atomic-pointer lifecycle +
+BrowserSession with chromedp Context + per-session tempdir + sync.Once
+close + headed/headless option (TDD with stub chromedp
+seam)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T04 —
+<code>internal/tools/browser/navigate_tool.go</code>: browser_navigate
+Tool impl with WaitReady + lazy session-create (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T05 —
+<code>internal/tools/browser/snapshot_tool.go</code>: browser_snapshot
+Tool impl with html/text mode + 64 KB cap + Truncated flag
+(TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T06 —
+<code>internal/tools/browser/click_type_tools.go</code>: browser_click +
+browser_type Tool impls with NodeVisible + click-settle wait +
+selector-not-found mapping (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T07 —
+<code>internal/tools/browser/screenshot_tool.go</code>:
+browser_screenshot Tool impl with PNG-magic verification + size &gt;
+1024 + image/png.DecodeConfig (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T08 —
+<code>internal/tools/browser/close_tool.go</code>: browser_close Tool
+impl with idempotent-close semantics (TDD)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T09 —
+<code>internal/commands/browser_command.go</code>: /browser slash
+(status/navigate/close) + main.go wiring + browser.RegisterAll +
+integration test (gated on real chromium)</label></li>
+<li><label><input type="checkbox" checked></input>P2-F23-T10 — Challenge
+harness (7 phases A-G: navigate-and-snapshot + snapshot-text +
+click-mutates-DOM + type-into-input + screenshot-PNG-magic +
+close-tears-down + concurrent-session-sharing) gated on chromium +
+close-out + push 4 remotes non-force</label></li>
+</ul>
+<hr />
+<h2 id="task-1-bootstrap-f23-evidence">Task 1: Bootstrap F23
+evidence</h2>
+<p>Append F23 section header to
+<code>docs/improvements/07_phase_2_evidence.md</code> (created in
+F21-T01, extended by F22-T01) with spec SHA <code>83d401d</code>. Update
+PROGRESS.md current focus from “Phase 2 of CLI-Agent Fusion programme:
+F22 closed; F23 next candidate (brainstorm)” to “Phase 2 of CLI-Agent
+Fusion programme: F23 (Cline Browser Tool) in flight”. Insert F23 task
+list (10 items). Verify zero new external deps:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;chromedp|cdproto&quot;</span> go.mod</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected: chromedp v0.15.1 + cdproto pinned (already present from earlier work).</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff go.mod <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-E</span> <span class="st">&quot;^\+|^-&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&quot;^+++\|^---&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="st">&quot;UNEXPECTED&quot;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;clean&quot;</span></span></code></pre></div>
+<p>Update <code>docs/CONTINUATION.md</code> root-level mid-flight
+section with F23 in-flight status (will be updated per task by T02-T10
+commits).</p>
+<p>Commit:
+<code>docs(P2-F23-T01): bootstrap F23 evidence + advance PROGRESS to F23 (Cline Browser Tool)</code>.</p>
+<hr />
+<h2 id="task-2-types.go-options.go-tdd">Task 2: types.go + options.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/browser/types.go</code>, new
+<code>helix_code/internal/tools/browser/types_test.go</code>, new
+<code>helix_code/internal/tools/browser/options.go</code>, new
+<code>helix_code/internal/tools/browser/options_test.go</code>.</p>
+<p>Define in <code>types.go</code>: -
+<code>Snapshot struct { URL, Title, Mode, Content string; Truncated bool }</code>.
+-
+<code>ScreenshotResult struct { Path string; Bytes int64; Width, Height int }</code>.
+-
+<code>ManagerStatus struct { Active bool; ChromiumPath, ScreenshotDir string; Headed bool; CreatedAt time.Time }</code>.
+- Constants: <code>EnvVarHeadedMode = &quot;HELIXCODE_BROWSER_HEADED&quot;</code>,
+<code>MaxSnapshotBytes = 64 * 1024</code>,
+<code>MaxScreenshotBytes int64 = 5 * 1024 * 1024</code>. - Sentinel
+errors: <code>ErrNoActiveSession</code>,
+<code>ErrChromiumNotFound</code>, <code>ErrNavigationTimeout</code>,
+<code>ErrSelectorNotFound</code>,
+<code>ErrScreenshotTooLarge</code>.</p>
+<p>Define in <code>options.go</code>: -
+<code>BrowserOptions struct { Headless bool; ViewportWidth, ViewportHeight int; NavigateTimeout, ClickWaitDuration time.Duration; ScreenshotMaxBytes int64 }</code>.
+- <code>OptionsFromEnv() BrowserOptions</code> — reads
+<code>HELIXCODE_BROWSER_HEADED</code> and treats case-insensitive
+<code>&quot;true&quot;</code> as headed (Headless=false); everything else
+(including unset, <code>&quot;True123&quot;</code>, <code>&quot;yes&quot;</code>,
+<code>&quot;1&quot;</code>) is headless (Headless=true).</p>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestEnvVarHeadedMode_Pin<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;HELIXCODE_BROWSER_HEADED&quot;</span><span class="op">,</span> EnvVarHeadedMode<span class="op">)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMaxSnapshotBytes_Pin<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">64</span><span class="op">*</span><span class="dv">1024</span><span class="op">,</span> MaxSnapshotBytes<span class="op">)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestMaxScreenshotBytes_Pin<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dt">int64</span><span class="op">(</span><span class="dv">5</span><span class="op">*</span><span class="dv">1024</span><span class="op">*</span><span class="dv">1024</span><span class="op">),</span> MaxScreenshotBytes<span class="op">)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestErrorSentinels_DistinctErrorsIs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> e <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">error</span><span class="op">{</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        ErrNoActiveSession<span class="op">,</span> ErrChromiumNotFound<span class="op">,</span> ErrNavigationTimeout<span class="op">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        ErrSelectorNotFound<span class="op">,</span> ErrScreenshotTooLarge<span class="op">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="op">{</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        wrapped <span class="op">:=</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;wrapped: %w&quot;</span><span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> wrapped<span class="op">,</span> e<span class="op">)</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestOptionsFromEnv_Default_Headless<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span>EnvVarHeadedMode<span class="op">,</span> <span class="st">&quot;&quot;</span><span class="op">)</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    o <span class="op">:=</span> OptionsFromEnv<span class="op">()</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> o<span class="op">.</span>Headless<span class="op">)</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestOptionsFromEnv_TrueLowercase_Headed<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span>EnvVarHeadedMode<span class="op">,</span> <span class="st">&quot;true&quot;</span><span class="op">)</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    o <span class="op">:=</span> OptionsFromEnv<span class="op">()</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> o<span class="op">.</span>Headless<span class="op">)</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestOptionsFromEnv_TrueUppercase_Headed<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span>EnvVarHeadedMode<span class="op">,</span> <span class="st">&quot;TRUE&quot;</span><span class="op">)</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    o <span class="op">:=</span> OptionsFromEnv<span class="op">()</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> o<span class="op">.</span>Headless<span class="op">)</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestOptionsFromEnv_NonBool_Headless<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> v <span class="op">:=</span> <span class="kw">range</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;yes&quot;</span><span class="op">,</span> <span class="st">&quot;1&quot;</span><span class="op">,</span> <span class="st">&quot;True123&quot;</span><span class="op">,</span> <span class="st">&quot;headless&quot;</span><span class="op">,</span> <span class="st">&quot;0&quot;</span><span class="op">}</span> <span class="op">{</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>        t<span class="op">.</span>Setenv<span class="op">(</span>EnvVarHeadedMode<span class="op">,</span> v<span class="op">)</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        o <span class="op">:=</span> OptionsFromEnv<span class="op">()</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>        require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> o<span class="op">.</span>Headless<span class="op">,</span> <span class="st">&quot;value %q should be headless&quot;</span><span class="op">,</span> v<span class="op">)</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestOptionsFromEnv_DefaultViewport<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    o <span class="op">:=</span> OptionsFromEnv<span class="op">()</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1280</span><span class="op">,</span> o<span class="op">.</span>ViewportWidth<span class="op">)</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">720</span><span class="op">,</span> o<span class="op">.</span>ViewportHeight<span class="op">)</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">30</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">,</span> o<span class="op">.</span>NavigateTimeout<span class="op">)</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">500</span><span class="op">*</span>time<span class="op">.</span>Millisecond<span class="op">,</span> o<span class="op">.</span>ClickWaitDuration<span class="op">)</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> MaxScreenshotBytes<span class="op">,</span> o<span class="op">.</span>ScreenshotMaxBytes<span class="op">)</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F23-T02): browser types + options - Snapshot/ScreenshotResult/ManagerStatus + sentinels + EnvVarHeadedMode (TDD)</code>.</p>
+<hr />
+<h2 id="task-3-manager.go-session.go-tdd">Task 3: manager.go +
+session.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/browser/manager.go</code>, new
+<code>helix_code/internal/tools/browser/manager_test.go</code>, new
+<code>helix_code/internal/tools/browser/session.go</code>, new
+<code>helix_code/internal/tools/browser/session_test.go</code>.</p>
+<p><code>session.go</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserSession <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ctx             context<span class="op">.</span>Context</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    cancel          context<span class="op">.</span>CancelFunc</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    screenshotDir   <span class="dt">string</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    screenshotCount atomic<span class="op">.</span>Uint64</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    chromiumPath    <span class="dt">string</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    headed          <span class="dt">bool</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    createdAt       time<span class="op">.</span>Time</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    closeOnce       sync<span class="op">.</span>Once</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    log             <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>BrowserSession<span class="op">)</span> Run<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> actions <span class="op">...</span>chromedp<span class="op">.</span>Action<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s <span class="op">==</span> <span class="ot">nil</span> <span class="op">||</span> s<span class="op">.</span>ctx <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ErrNoActiveSession</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> chromedp<span class="op">.</span>Run<span class="op">(</span>s<span class="op">.</span>ctx<span class="op">,</span> actions<span class="op">...)</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>BrowserSession<span class="op">)</span> NextScreenshotPath<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    n <span class="op">:=</span> s<span class="op">.</span>screenshotCount<span class="op">.</span>Add<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> filepath<span class="op">.</span>Join<span class="op">(</span>s<span class="op">.</span>screenshotDir<span class="op">,</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%d.png&quot;</span><span class="op">,</span> n<span class="op">))</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>BrowserSession<span class="op">)</span> Close<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> rmErr <span class="dt">error</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    s<span class="op">.</span>closeOnce<span class="op">.</span>Do<span class="op">(</span><span class="kw">func</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> s<span class="op">.</span>cancel <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> s<span class="op">.</span>cancel<span class="op">()</span> <span class="op">}</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> s<span class="op">.</span>screenshotDir <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>            rmErr <span class="op">=</span> os<span class="op">.</span>RemoveAll<span class="op">(</span>s<span class="op">.</span>screenshotDir<span class="op">)</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rmErr</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>manager.go</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    current        atomic<span class="op">.</span>Pointer<span class="op">[</span>BrowserSession<span class="op">]</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    screenshotRoot <span class="dt">string</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    discovery      ChromeDiscovery</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    log            <span class="op">*</span>zap<span class="op">.</span>Logger</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    mu             sync<span class="op">.</span>Mutex</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    sessionFactory <span class="kw">func</span><span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> mgr <span class="op">*</span>BrowserManager<span class="op">,</span> opts BrowserOptions<span class="op">)</span> <span class="op">(*</span>BrowserSession<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="co">// test seam</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewBrowserManager<span class="op">(</span>d ChromeDiscovery<span class="op">,</span> log <span class="op">*</span>zap<span class="op">.</span>Logger<span class="op">)</span> <span class="op">*</span>BrowserManager <span class="op">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>BrowserManager<span class="op">{</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        screenshotRoot<span class="op">:</span> defaultScreenshotRoot<span class="op">(),</span> <span class="co">// $XDG_DATA_HOME/helixcode/browser/screenshots</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        discovery<span class="op">:</span>      d<span class="op">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        log<span class="op">:</span>            log<span class="op">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        sessionFactory<span class="op">:</span> defaultSessionFactory<span class="op">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>BrowserManager<span class="op">)</span> EnsureSession<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">)</span> <span class="op">(*</span>BrowserSession<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s <span class="op">:=</span> m<span class="op">.</span>current<span class="op">.</span>Load<span class="op">();</span> s <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> s<span class="op">,</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> m<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s <span class="op">:=</span> m<span class="op">.</span>current<span class="op">.</span>Load<span class="op">();</span> s <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> s<span class="op">,</span> <span class="ot">nil</span> <span class="op">}</span> <span class="co">// double-check</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    opts <span class="op">:=</span> OptionsFromEnv<span class="op">()</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>sessionFactory<span class="op">(</span>ctx<span class="op">,</span> m<span class="op">,</span> opts<span class="op">)</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>current<span class="op">.</span>Store<span class="op">(</span>s<span class="op">)</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>BrowserManager<span class="op">)</span> RequireSession<span class="op">()</span> <span class="op">(*</span>BrowserSession<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> m<span class="op">.</span>current<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrNoActiveSession <span class="op">}</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>BrowserManager<span class="op">)</span> CloseSession<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>mu<span class="op">.</span>Lock<span class="op">()</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> m<span class="op">.</span>mu<span class="op">.</span>Unlock<span class="op">()</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> m<span class="op">.</span>current<span class="op">.</span>Swap<span class="op">(</span><span class="ot">nil</span><span class="op">)</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span> <span class="op">}</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s<span class="op">.</span>Close<span class="op">()</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>BrowserManager<span class="op">)</span> Status<span class="op">()</span> ManagerStatus <span class="op">{</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> m<span class="op">.</span>current<span class="op">.</span>Load<span class="op">()</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> ManagerStatus<span class="op">{</span>Active<span class="op">:</span> <span class="ot">false</span><span class="op">,</span> Headed<span class="op">:</span> <span class="ot">false</span><span class="op">}</span> <span class="op">}</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ManagerStatus<span class="op">{</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        Active<span class="op">:</span> <span class="ot">true</span><span class="op">,</span> ChromiumPath<span class="op">:</span> s<span class="op">.</span>chromiumPath<span class="op">,</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>        ScreenshotDir<span class="op">:</span> s<span class="op">.</span>screenshotDir<span class="op">,</span> Headed<span class="op">:</span> s<span class="op">.</span>headed<span class="op">,</span> CreatedAt<span class="op">:</span> s<span class="op">.</span>createdAt<span class="op">,</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (uses a stub <code>sessionFactory</code> to avoid
+spawning real chromium in unit tests):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> newStubManager<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">*</span>BrowserManager <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>sessionFactory <span class="op">=</span> <span class="kw">func</span><span class="op">(</span>_ context<span class="op">.</span>Context<span class="op">,</span> mgr <span class="op">*</span>BrowserManager<span class="op">,</span> _ BrowserOptions<span class="op">)</span> <span class="op">(*</span>BrowserSession<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">&amp;</span>BrowserSession<span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            ctx<span class="op">:</span> context<span class="op">.</span>Background<span class="op">(),</span> cancel<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{},</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            screenshotDir<span class="op">:</span> t<span class="op">.</span>TempDir<span class="op">(),</span> chromiumPath<span class="op">:</span> <span class="st">&quot;/fake/chromium&quot;</span><span class="op">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            createdAt<span class="op">:</span> time<span class="op">.</span>Now<span class="op">(),</span> log<span class="op">:</span> zap<span class="op">.</span>NewNop<span class="op">(),</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_EnsureSession_LazyCreates<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Nil<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>current<span class="op">.</span>Load<span class="op">())</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">);</span> require<span class="op">.</span>NotNil<span class="op">(</span>t<span class="op">,</span> s<span class="op">)</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> s<span class="op">,</span> m<span class="op">.</span>current<span class="op">.</span>Load<span class="op">())</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_EnsureSession_DoubleCallSamePointer<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    s1<span class="op">,</span> _ <span class="op">:=</span> m<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    s2<span class="op">,</span> _ <span class="op">:=</span> m<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Same<span class="op">(</span>t<span class="op">,</span> s1<span class="op">,</span> s2<span class="op">)</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_RequireSession_NilReturnsErr<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>RequireSession<span class="op">()</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrNoActiveSession<span class="op">)</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_CloseSession_FollowedByRequireFails<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> m<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>CloseSession<span class="op">())</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> m<span class="op">.</span>RequireSession<span class="op">()</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrNoActiveSession<span class="op">)</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_CloseSession_Idempotent<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> m<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>CloseSession<span class="op">())</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> m<span class="op">.</span>CloseSession<span class="op">())</span> <span class="co">// second close is a no-op</span></span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Concurrent_EnsureSession_SamePointer<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> N <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> wg sync<span class="op">.</span>WaitGroup</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">:=</span> <span class="bu">make</span><span class="op">([]*</span>BrowserSession<span class="op">,</span> N<span class="op">)</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> N<span class="op">;</span> i<span class="op">++</span> <span class="op">{</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>        wg<span class="op">.</span>Add<span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">go</span> <span class="kw">func</span><span class="op">(</span>idx <span class="dt">int</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>            <span class="cf">defer</span> wg<span class="op">.</span>Done<span class="op">()</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>            s<span class="op">,</span> _ <span class="op">:=</span> m<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>            seen<span class="op">[</span>idx<span class="op">]</span> <span class="op">=</span> s</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>        <span class="op">}(</span>i<span class="op">)</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>    wg<span class="op">.</span>Wait<span class="op">()</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="op">:=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;</span> N<span class="op">;</span> i<span class="op">++</span> <span class="op">{</span> require<span class="op">.</span>Same<span class="op">(</span>t<span class="op">,</span> seen<span class="op">[</span><span class="dv">0</span><span class="op">],</span> seen<span class="op">[</span>i<span class="op">])</span> <span class="op">}</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Status_NoActiveSession<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>    st <span class="op">:=</span> m<span class="op">.</span>Status<span class="op">()</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>False<span class="op">(</span>t<span class="op">,</span> st<span class="op">.</span>Active<span class="op">)</span></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestManager_Status_ActiveSession<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    m <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> m<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>    st <span class="op">:=</span> m<span class="op">.</span>Status<span class="op">()</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> st<span class="op">.</span>Active<span class="op">)</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;/fake/chromium&quot;</span><span class="op">,</span> st<span class="op">.</span>ChromiumPath<span class="op">)</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSession_NextScreenshotPath_Monotonic<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>BrowserSession<span class="op">{</span>screenshotDir<span class="op">:</span> t<span class="op">.</span>TempDir<span class="op">()}</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>    p1 <span class="op">:=</span> s<span class="op">.</span>NextScreenshotPath<span class="op">()</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>    p2 <span class="op">:=</span> s<span class="op">.</span>NextScreenshotPath<span class="op">()</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NotEqual<span class="op">(</span>t<span class="op">,</span> p1<span class="op">,</span> p2<span class="op">)</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> p1<span class="op">,</span> <span class="st">&quot;1.png&quot;</span><span class="op">)</span></span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> p2<span class="op">,</span> <span class="st">&quot;2.png&quot;</span><span class="op">)</span></span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSession_Close_Idempotent_SyncOnce<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>    n <span class="op">:=</span> <span class="dv">0</span></span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>BrowserSession<span class="op">{</span>cancel<span class="op">:</span> <span class="kw">func</span><span class="op">()</span> <span class="op">{</span> n<span class="op">++</span> <span class="op">},</span> screenshotDir<span class="op">:</span> t<span class="op">.</span>TempDir<span class="op">()}</span></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> s<span class="op">.</span>Close<span class="op">())</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> s<span class="op">.</span>Close<span class="op">())</span></span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> n<span class="op">)</span> <span class="co">// cancel called exactly once</span></span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSession_Run_NilCtx_ErrNoActiveSession<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> <span class="op">&amp;</span>BrowserSession<span class="op">{}</span></span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>    err <span class="op">:=</span> s<span class="op">.</span>Run<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrNoActiveSession<span class="op">)</span></span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Non-obvious call</strong>: the <code>sessionFactory</code> is
+a test seam. Production wiring uses <code>defaultSessionFactory</code>
+(constructs a real chromedp Allocator + Context); unit tests override to
+avoid spawning chromium. Integration tests use the production factory
+and gate on chromium availability (skip-OK if not on PATH).</p>
+<p>Subject:
+<code>feat(P2-F23-T03): browser manager + session - atomic-pointer lifecycle + sync.Once close + sessionFactory seam (TDD)</code>.</p>
+<hr />
+<h2 id="task-4-navigate_tool.go-tdd">Task 4: navigate_tool.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/browser/navigate_tool.go</code>, new
+<code>helix_code/internal/tools/browser/navigate_tool_test.go</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserNavigateToolV2 <span class="kw">struct</span> <span class="op">{</span> mgr <span class="op">*</span>BrowserManager<span class="op">;</span> opts BrowserOptions <span class="op">}</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewBrowserNavigateTool<span class="op">(</span>mgr <span class="op">*</span>BrowserManager<span class="op">,</span> opts BrowserOptions<span class="op">)</span> <span class="op">*</span>BrowserNavigateToolV2</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserNavigateToolV2<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;browser_navigate&quot;</span> <span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserNavigateToolV2<span class="op">)</span> RequiresApproval<span class="op">()</span> approval<span class="op">.</span>ApprovalLevel <span class="op">{</span> <span class="cf">return</span> approval<span class="op">.</span>LevelEdit <span class="op">}</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserNavigateToolV2<span class="op">)</span> Description<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;Navigate the browser session to a URL.&quot;</span> <span class="op">}</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserNavigateToolV2<span class="op">)</span> Category<span class="op">()</span> tools<span class="op">.</span>ToolCategory <span class="op">{</span> <span class="cf">return</span> tools<span class="op">.</span>CategoryBrowser <span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserNavigateToolV2<span class="op">)</span> Schema<span class="op">()</span> tools<span class="op">.</span>ToolSchema <span class="op">{</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tools<span class="op">.</span>ToolSchema<span class="op">{</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        Type<span class="op">:</span> <span class="st">&quot;object&quot;</span><span class="op">,</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        Properties<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;url&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span> <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span> <span class="st">&quot;description&quot;</span><span class="op">:</span> <span class="st">&quot;URL to navigate to&quot;</span> <span class="op">},</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        Required<span class="op">:</span>    <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;url&quot;</span><span class="op">},</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        Description<span class="op">:</span> <span class="st">&quot;Navigate the active browser session (lazy-creates if none) to the given URL.&quot;</span><span class="op">,</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserNavigateToolV2<span class="op">)</span> Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    u<span class="op">,</span> ok <span class="op">:=</span> params<span class="op">[</span><span class="st">&quot;url&quot;</span><span class="op">].(</span><span class="dt">string</span><span class="op">)</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>ok <span class="op">||</span> u <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;url is required (non-empty string)&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserNavigateToolV2<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    url <span class="op">:=</span> params<span class="op">[</span><span class="st">&quot;url&quot;</span><span class="op">].(</span><span class="dt">string</span><span class="op">)</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> err <span class="op">:=</span> t<span class="op">.</span>mgr<span class="op">.</span>EnsureSession<span class="op">(</span>ctx<span class="op">)</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    cctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>ctx<span class="op">,</span> t<span class="op">.</span>opts<span class="op">.</span>NavigateTimeout<span class="op">)</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cancel<span class="op">()</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> resolvedURL<span class="op">,</span> title <span class="dt">string</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> s<span class="op">.</span>Run<span class="op">(</span>cctx<span class="op">,</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        chromedp<span class="op">.</span>Navigate<span class="op">(</span>url<span class="op">),</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>        chromedp<span class="op">.</span>WaitReady<span class="op">(</span><span class="st">&quot;body&quot;</span><span class="op">,</span> chromedp<span class="op">.</span>ByQuery<span class="op">),</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        chromedp<span class="op">.</span>Title<span class="op">(&amp;</span>title<span class="op">),</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        chromedp<span class="op">.</span>Location<span class="op">(&amp;</span>resolvedURL<span class="op">),</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> errors<span class="op">.</span>Is<span class="op">(</span>err<span class="op">,</span> context<span class="op">.</span>DeadlineExceeded<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrNavigationTimeout <span class="op">}</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;url&quot;</span><span class="op">:</span> resolvedURL<span class="op">,</span> <span class="st">&quot;title&quot;</span><span class="op">:</span> title<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (Schema + Validate + RequiresApproval; Execute
+happy path tested via integration in T09):</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNavigateTool_Name<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;browser_navigate&quot;</span><span class="op">,</span> NewBrowserNavigateTool<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> BrowserOptions<span class="op">{}).</span>Name<span class="op">())</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNavigateTool_RequiresApproval_LevelEdit<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>LevelEdit<span class="op">,</span> NewBrowserNavigateTool<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> BrowserOptions<span class="op">{}).</span>RequiresApproval<span class="op">())</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNavigateTool_Validate_RequiresURL<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> NewBrowserNavigateTool<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> BrowserOptions<span class="op">{})</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{}))</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;url&quot;</span><span class="op">:</span> <span class="st">&quot;&quot;</span><span class="op">}))</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;url&quot;</span><span class="op">:</span> <span class="dv">42</span><span class="op">}))</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;url&quot;</span><span class="op">:</span> <span class="st">&quot;https://example.com&quot;</span><span class="op">}))</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestNavigateTool_Schema_RequiresURL<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    sch <span class="op">:=</span> NewBrowserNavigateTool<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> BrowserOptions<span class="op">{}).</span>Schema<span class="op">()</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> sch<span class="op">.</span>Required<span class="op">,</span> <span class="st">&quot;url&quot;</span><span class="op">)</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F23-T04): browser_navigate tool - lazy session-create + WaitReady + 30s timeout (TDD)</code>.</p>
+<hr />
+<h2 id="task-5-snapshot_tool.go-tdd">Task 5: snapshot_tool.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/browser/snapshot_tool.go</code>, new
+<code>helix_code/internal/tools/browser/snapshot_tool_test.go</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserSnapshotTool <span class="kw">struct</span> <span class="op">{</span> mgr <span class="op">*</span>BrowserManager<span class="op">;</span> opts BrowserOptions <span class="op">}</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserSnapshotTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;browser_snapshot&quot;</span> <span class="op">}</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserSnapshotTool<span class="op">)</span> RequiresApproval<span class="op">()</span> approval<span class="op">.</span>ApprovalLevel <span class="op">{</span> <span class="cf">return</span> approval<span class="op">.</span>LevelReadOnly <span class="op">}</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserSnapshotTool<span class="op">)</span> Schema<span class="op">()</span> tools<span class="op">.</span>ToolSchema <span class="op">{</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tools<span class="op">.</span>ToolSchema<span class="op">{</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        Type<span class="op">:</span> <span class="st">&quot;object&quot;</span><span class="op">,</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        Properties<span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;mode&quot;</span><span class="op">:</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span> <span class="st">&quot;enum&quot;</span><span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;html&quot;</span><span class="op">,</span> <span class="st">&quot;text&quot;</span><span class="op">},</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;description&quot;</span><span class="op">:</span> <span class="st">&quot;Snapshot mode: &#39;html&#39; returns OuterHTML; &#39;text&#39; returns visible body text. Default &#39;html&#39;.&quot;</span><span class="op">,</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>            <span class="op">},</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        Required<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{},</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserSnapshotTool<span class="op">)</span> Validate<span class="op">(</span>params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> m<span class="op">,</span> ok <span class="op">:=</span> params<span class="op">[</span><span class="st">&quot;mode&quot;</span><span class="op">].(</span><span class="dt">string</span><span class="op">);</span> ok <span class="op">&amp;&amp;</span> m <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">&amp;&amp;</span> m <span class="op">!=</span> <span class="st">&quot;html&quot;</span> <span class="op">&amp;&amp;</span> m <span class="op">!=</span> <span class="st">&quot;text&quot;</span> <span class="op">{</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;mode must be &#39;html&#39; or &#39;text&#39;, got %q&quot;</span><span class="op">,</span> m<span class="op">)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserSnapshotTool<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    mode <span class="op">:=</span> <span class="st">&quot;html&quot;</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> m<span class="op">,</span> ok <span class="op">:=</span> params<span class="op">[</span><span class="st">&quot;mode&quot;</span><span class="op">].(</span><span class="dt">string</span><span class="op">);</span> ok <span class="op">&amp;&amp;</span> m <span class="op">!=</span> <span class="st">&quot;&quot;</span> <span class="op">{</span> mode <span class="op">=</span> m <span class="op">}</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> err <span class="op">:=</span> t<span class="op">.</span>mgr<span class="op">.</span>RequireSession<span class="op">()</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> content<span class="op">,</span> pageURL<span class="op">,</span> pageTitle <span class="dt">string</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> actions <span class="op">[]</span>chromedp<span class="op">.</span>Action</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span> mode <span class="op">{</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;html&quot;</span><span class="op">:</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>        actions <span class="op">=</span> <span class="op">[]</span>chromedp<span class="op">.</span>Action<span class="op">{</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>            chromedp<span class="op">.</span>OuterHTML<span class="op">(</span><span class="st">&quot;html&quot;</span><span class="op">,</span> <span class="op">&amp;</span>content<span class="op">,</span> chromedp<span class="op">.</span>ByQuery<span class="op">),</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>            chromedp<span class="op">.</span>Location<span class="op">(&amp;</span>pageURL<span class="op">),</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>            chromedp<span class="op">.</span>Title<span class="op">(&amp;</span>pageTitle<span class="op">),</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;text&quot;</span><span class="op">:</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>        actions <span class="op">=</span> <span class="op">[]</span>chromedp<span class="op">.</span>Action<span class="op">{</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>            chromedp<span class="op">.</span>Text<span class="op">(</span><span class="st">&quot;body&quot;</span><span class="op">,</span> <span class="op">&amp;</span>content<span class="op">,</span> chromedp<span class="op">.</span>NodeVisible<span class="op">,</span> chromedp<span class="op">.</span>ByQuery<span class="op">),</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>            chromedp<span class="op">.</span>Location<span class="op">(&amp;</span>pageURL<span class="op">),</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>            chromedp<span class="op">.</span>Title<span class="op">(&amp;</span>pageTitle<span class="op">),</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> s<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">,</span> actions<span class="op">...);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    truncated <span class="op">:=</span> <span class="ot">false</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>content<span class="op">)</span> <span class="op">&gt;</span> MaxSnapshotBytes <span class="op">{</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>        content <span class="op">=</span> content<span class="op">[:</span>MaxSnapshotBytes<span class="op">];</span> truncated <span class="op">=</span> <span class="ot">true</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Snapshot<span class="op">{</span>URL<span class="op">:</span> pageURL<span class="op">,</span> Title<span class="op">:</span> pageTitle<span class="op">,</span> Mode<span class="op">:</span> mode<span class="op">,</span> Content<span class="op">:</span> content<span class="op">,</span> Truncated<span class="op">:</span> truncated<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSnapshotTool_Name<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;browser_snapshot&quot;</span><span class="op">,</span> <span class="op">(&amp;</span>BrowserSnapshotTool<span class="op">{}).</span>Name<span class="op">())</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSnapshotTool_RequiresApproval_LevelReadOnly<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>LevelReadOnly<span class="op">,</span> <span class="op">(&amp;</span>BrowserSnapshotTool<span class="op">{}).</span>RequiresApproval<span class="op">())</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSnapshotTool_Validate_Mode<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserSnapshotTool<span class="op">{}</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{}))</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;mode&quot;</span><span class="op">:</span> <span class="st">&quot;html&quot;</span><span class="op">}))</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;mode&quot;</span><span class="op">:</span> <span class="st">&quot;text&quot;</span><span class="op">}))</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;mode&quot;</span><span class="op">:</span> <span class="st">&quot;json&quot;</span><span class="op">}))</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestSnapshotTool_Execute_NoSession_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserSnapshotTool<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">}</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{})</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrNoActiveSession<span class="op">)</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F23-T05): browser_snapshot tool - html/text mode + 64 KB cap + Truncated flag (TDD)</code>.</p>
+<hr />
+<h2 id="task-6-click_type_tools.go-tdd">Task 6: click_type_tools.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/browser/click_type_tools.go</code>, new
+<code>helix_code/internal/tools/browser/click_type_tools_test.go</code>.</p>
+<p><code>browser_click</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserClickTool <span class="kw">struct</span> <span class="op">{</span> mgr <span class="op">*</span>BrowserManager<span class="op">;</span> opts BrowserOptions <span class="op">}</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserClickTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;browser_click&quot;</span> <span class="op">}</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserClickTool<span class="op">)</span> RequiresApproval<span class="op">()</span> approval<span class="op">.</span>ApprovalLevel <span class="op">{</span> <span class="cf">return</span> approval<span class="op">.</span>LevelEdit <span class="op">}</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Schema: selector required (string).</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Execute: RequireSession → context.WithTimeout(parent, 5s) → chromedp.Run(ctx,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   chromedp.Click(sel, chromedp.NodeVisible, chromedp.ByQuery),</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">//   chromedp.Sleep(opts.ClickWaitDuration),</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">//   chromedp.Location(&amp;url), chromedp.Title(&amp;title),</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">// ). On context.DeadlineExceeded → return ErrSelectorNotFound. On success</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">// return {&quot;clicked&quot;: true, &quot;url&quot;: url, &quot;title&quot;: title}.</span></span></code></pre></div>
+<p><code>browser_type</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserTypeTool <span class="kw">struct</span> <span class="op">{</span> mgr <span class="op">*</span>BrowserManager<span class="op">;</span> opts BrowserOptions <span class="op">}</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserTypeTool<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;browser_type&quot;</span> <span class="op">}</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserTypeTool<span class="op">)</span> RequiresApproval<span class="op">()</span> approval<span class="op">.</span>ApprovalLevel <span class="op">{</span> <span class="cf">return</span> approval<span class="op">.</span>LevelEdit <span class="op">}</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">// Schema: selector + text (both required strings).</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Execute: RequireSession → chromedp.Run(ctx,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   chromedp.SendKeys(sel, text, chromedp.NodeVisible, chromedp.ByQuery),</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">// ). On context.DeadlineExceeded → ErrSelectorNotFound. On success return {&quot;typed&quot;: true}.</span></span></code></pre></div>
+<p>Failing tests FIRST (Schema/Validate/RequiresApproval; Execute happy
+paths covered in T10 Challenge + integration):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestClickTool_RequiresApproval_LevelEdit<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>LevelEdit<span class="op">,</span> <span class="op">(&amp;</span>BrowserClickTool<span class="op">{}).</span>RequiresApproval<span class="op">())</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestClickTool_Validate_RequiresSelector<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserClickTool<span class="op">{}</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{}))</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;selector&quot;</span><span class="op">:</span> <span class="st">&quot;&quot;</span><span class="op">}))</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;selector&quot;</span><span class="op">:</span> <span class="st">&quot;#b&quot;</span><span class="op">}))</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTypeTool_RequiresApproval_LevelEdit<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>LevelEdit<span class="op">,</span> <span class="op">(&amp;</span>BrowserTypeTool<span class="op">{}).</span>RequiresApproval<span class="op">())</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestTypeTool_Validate_RequiresSelectorAndText<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserTypeTool<span class="op">{}</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;selector&quot;</span><span class="op">:</span> <span class="st">&quot;#in&quot;</span><span class="op">}))</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;text&quot;</span><span class="op">:</span> <span class="st">&quot;hi&quot;</span><span class="op">}))</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;selector&quot;</span><span class="op">:</span> <span class="st">&quot;#in&quot;</span><span class="op">,</span> <span class="st">&quot;text&quot;</span><span class="op">:</span> <span class="st">&quot;hi&quot;</span><span class="op">}))</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestClickTool_Execute_NoSession_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserClickTool<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">}</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;selector&quot;</span><span class="op">:</span> <span class="st">&quot;#b&quot;</span><span class="op">})</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrNoActiveSession<span class="op">)</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Non-obvious call</strong>: chromedp’s
+<code>NodeVisible</code> blocks until the selector becomes visible OR
+the parent ctx deadline fires. We wrap a 5 s sub-timeout to disambiguate
+“selector not found” from “navigation slow”; without the sub-timeout, a
+missing selector hangs until the user’s parent ctx cancels.</p>
+<p>Subject:
+<code>feat(P2-F23-T06): browser_click + browser_type tools - NodeVisible + 5s selector timeout + ClickWaitDuration settle (TDD)</code>.</p>
+<hr />
+<h2 id="task-7-screenshot_tool.go-tdd">Task 7: screenshot_tool.go
+(TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/browser/screenshot_tool.go</code>, new
+<code>helix_code/internal/tools/browser/screenshot_tool_test.go</code>.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserScreenshotToolV2 <span class="kw">struct</span> <span class="op">{</span> mgr <span class="op">*</span>BrowserManager<span class="op">;</span> opts BrowserOptions <span class="op">}</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> pngMagic <span class="op">=</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">{</span><span class="bn">0x89</span><span class="op">,</span> <span class="bn">0x50</span><span class="op">,</span> <span class="bn">0x4E</span><span class="op">,</span> <span class="bn">0x47</span><span class="op">,</span> <span class="bn">0x0D</span><span class="op">,</span> <span class="bn">0x0A</span><span class="op">,</span> <span class="bn">0x1A</span><span class="op">,</span> <span class="bn">0x0A</span><span class="op">}</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserScreenshotToolV2<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;browser_screenshot&quot;</span> <span class="op">}</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserScreenshotToolV2<span class="op">)</span> RequiresApproval<span class="op">()</span> approval<span class="op">.</span>ApprovalLevel <span class="op">{</span> <span class="cf">return</span> approval<span class="op">.</span>LevelReadOnly <span class="op">}</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserScreenshotToolV2<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    fullPage <span class="op">:=</span> <span class="ot">false</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> v<span class="op">,</span> ok <span class="op">:=</span> params<span class="op">[</span><span class="st">&quot;full_page&quot;</span><span class="op">].(</span><span class="dt">bool</span><span class="op">);</span> ok <span class="op">{</span> fullPage <span class="op">=</span> v <span class="op">}</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    s<span class="op">,</span> err <span class="op">:=</span> t<span class="op">.</span>mgr<span class="op">.</span>RequireSession<span class="op">()</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> buf <span class="op">[]</span><span class="dt">byte</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> action chromedp<span class="op">.</span>Action</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> fullPage <span class="op">{</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        action <span class="op">=</span> chromedp<span class="op">.</span>FullScreenshot<span class="op">(&amp;</span>buf<span class="op">,</span> <span class="dv">90</span><span class="op">)</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        action <span class="op">=</span> chromedp<span class="op">.</span>CaptureScreenshot<span class="op">(&amp;</span>buf<span class="op">)</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> s<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">,</span> action<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="dt">int64</span><span class="op">(</span><span class="bu">len</span><span class="op">(</span>buf<span class="op">))</span> <span class="op">&gt;</span> t<span class="op">.</span>opts<span class="op">.</span>ScreenshotMaxBytes <span class="op">{</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Fallback to viewport-only.</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">!</span>fullPage <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrScreenshotTooLarge <span class="op">}</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        buf <span class="op">=</span> buf<span class="op">[:</span><span class="dv">0</span><span class="op">]</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> s<span class="op">.</span>Run<span class="op">(</span>ctx<span class="op">,</span> chromedp<span class="op">.</span>CaptureScreenshot<span class="op">(&amp;</span>buf<span class="op">));</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="dt">int64</span><span class="op">(</span><span class="bu">len</span><span class="op">(</span>buf<span class="op">))</span> <span class="op">&gt;</span> t<span class="op">.</span>opts<span class="op">.</span>ScreenshotMaxBytes <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrScreenshotTooLarge <span class="op">}</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span><span class="op">(</span>buf<span class="op">)</span> <span class="op">&lt;=</span> <span class="dv">8</span> <span class="op">||</span> <span class="op">!</span>bytes<span class="op">.</span>Equal<span class="op">(</span>buf<span class="op">[:</span><span class="dv">8</span><span class="op">],</span> pngMagic<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;browser_screenshot: chromedp returned non-PNG bytes (len=%d)&quot;</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>buf<span class="op">))</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    cfg<span class="op">,</span> err <span class="op">:=</span> png<span class="op">.</span>DecodeConfig<span class="op">(</span>bytes<span class="op">.</span>NewReader<span class="op">(</span>buf<span class="op">))</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;browser_screenshot: invalid PNG: %w&quot;</span><span class="op">,</span> err<span class="op">)</span> <span class="op">}</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    path <span class="op">:=</span> s<span class="op">.</span>NextScreenshotPath<span class="op">()</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> os<span class="op">.</span>MkdirAll<span class="op">(</span>filepath<span class="op">.</span>Dir<span class="op">(</span>path<span class="op">),</span> <span class="bn">0700</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> os<span class="op">.</span>WriteFile<span class="op">(</span>path<span class="op">,</span> buf<span class="op">,</span> <span class="bn">0600</span><span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    info<span class="op">,</span> err <span class="op">:=</span> os<span class="op">.</span>Stat<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> info<span class="op">.</span>Size<span class="op">()</span> <span class="op">&lt;=</span> <span class="dv">1024</span> <span class="op">{</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;browser_screenshot: file too small (%d bytes)&quot;</span><span class="op">,</span> info<span class="op">.</span>Size<span class="op">())</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ScreenshotResult<span class="op">{</span>Path<span class="op">:</span> path<span class="op">,</span> Bytes<span class="op">:</span> info<span class="op">.</span>Size<span class="op">(),</span> Width<span class="op">:</span> cfg<span class="op">.</span>Width<span class="op">,</span> Height<span class="op">:</span> cfg<span class="op">.</span>Height<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST (PNG-magic verification; happy-path bytes via
+fixture):</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestScreenshotTool_RequiresApproval_LevelReadOnly<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>LevelReadOnly<span class="op">,</span> <span class="op">(&amp;</span>BrowserScreenshotToolV2<span class="op">{}).</span>RequiresApproval<span class="op">())</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestScreenshotTool_Execute_NoSession_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserScreenshotToolV2<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">,</span> opts<span class="op">:</span> OptionsFromEnv<span class="op">()}</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{})</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> err<span class="op">,</span> ErrNoActiveSession<span class="op">)</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestScreenshotTool_PNGMagic_Bytes<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Direct test of the magic-bytes constant.</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="op">[]</span><span class="dt">byte</span><span class="op">{</span><span class="bn">0x89</span><span class="op">,</span> <span class="bn">0x50</span><span class="op">,</span> <span class="bn">0x4E</span><span class="op">,</span> <span class="bn">0x47</span><span class="op">,</span> <span class="bn">0x0D</span><span class="op">,</span> <span class="bn">0x0A</span><span class="op">,</span> <span class="bn">0x1A</span><span class="op">,</span> <span class="bn">0x0A</span><span class="op">},</span> pngMagic<span class="op">)</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">// Integration test in tests/integration/browser_test.go covers the full</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">// chromedp → file → PNG-DecodeConfig path against a real chromium subprocess.</span></span></code></pre></div>
+<p><strong>Non-obvious call</strong>: PNG-magic verification happens on
+the in-memory <code>buf</code> BEFORE <code>os.WriteFile</code>. This
+catches the chromedp-returned-empty-buf bug at the source (the disk
+never sees junk bytes). Spec §5.2 Bluff #4 pin.</p>
+<p>Subject:
+<code>feat(P2-F23-T07): browser_screenshot tool - PNG-magic + DecodeConfig + size&gt;1024 + tempdir 0600 (TDD)</code>.</p>
+<hr />
+<h2 id="task-8-close_tool.go-tdd">Task 8: close_tool.go (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/tools/browser/close_tool.go</code>, new
+<code>helix_code/internal/tools/browser/close_tool_test.go</code>.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> BrowserCloseToolV2 <span class="kw">struct</span> <span class="op">{</span> mgr <span class="op">*</span>BrowserManager <span class="op">}</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserCloseToolV2<span class="op">)</span> Name<span class="op">()</span> <span class="dt">string</span> <span class="op">{</span> <span class="cf">return</span> <span class="st">&quot;browser_close&quot;</span> <span class="op">}</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserCloseToolV2<span class="op">)</span> RequiresApproval<span class="op">()</span> approval<span class="op">.</span>ApprovalLevel <span class="op">{</span> <span class="cf">return</span> approval<span class="op">.</span>LevelEdit <span class="op">}</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>t <span class="op">*</span>BrowserCloseToolV2<span class="op">)</span> Execute<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> params <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{})</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> t<span class="op">.</span>mgr<span class="op">.</span>CloseSession<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span> <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err <span class="op">}</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;closed&quot;</span><span class="op">:</span> <span class="ot">true</span><span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing tests FIRST:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCloseTool_RequiresApproval_LevelEdit<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> approval<span class="op">.</span>LevelEdit<span class="op">,</span> <span class="op">(&amp;</span>BrowserCloseToolV2<span class="op">{}).</span>RequiresApproval<span class="op">())</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCloseTool_Validate_NoArgs<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserCloseToolV2<span class="op">{}</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> tool<span class="op">.</span>Validate<span class="op">(</span><span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{}))</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCloseTool_Execute_NoActiveSession_NoOpSuccess<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserCloseToolV2<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">}</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{})</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span> <span class="co">// idempotent: closing a non-existent session is fine</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestCloseTool_Execute_RequireFailsAfter<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> newStubManager<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> mgr<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    tool <span class="op">:=</span> <span class="op">&amp;</span>BrowserCloseToolV2<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">}</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> tool<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{})</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> reqErr <span class="op">:=</span> mgr<span class="op">.</span>RequireSession<span class="op">()</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>ErrorIs<span class="op">(</span>t<span class="op">,</span> reqErr<span class="op">,</span> ErrNoActiveSession<span class="op">)</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F23-T08): browser_close tool - idempotent CloseSession + post-close RequireSession fails (TDD)</code>.</p>
+<hr />
+<h2 id="task-9-browser-slash-main.go-wiring-integration-test-tdd">Task
+9: /browser slash + main.go wiring + integration test (TDD)</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/internal/commands/browser_command.go</code>, new
+<code>helix_code/internal/commands/browser_command_test.go</code>, new
+<code>helix_code/internal/tools/browser/register.go</code>, modify
+<code>helix_code/cmd/cli/main.go</code>, new
+<code>helix_code/tests/integration/browser_test.go</code>
+(<code>//go:build integration</code>).</p>
+<p><code>register.go</code>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> RegisterAll<span class="op">(</span>reg <span class="op">*</span>tools<span class="op">.</span>ToolRegistry<span class="op">,</span> mgr <span class="op">*</span>BrowserManager<span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    opts <span class="op">:=</span> OptionsFromEnv<span class="op">()</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    items <span class="op">:=</span> <span class="op">[]</span>tools<span class="op">.</span>Tool<span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        NewBrowserNavigateTool<span class="op">(</span>mgr<span class="op">,</span> opts<span class="op">),</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>BrowserSnapshotTool<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">,</span> opts<span class="op">:</span> opts<span class="op">},</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>BrowserClickTool<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">,</span> opts<span class="op">:</span> opts<span class="op">},</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>BrowserTypeTool<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">,</span> opts<span class="op">:</span> opts<span class="op">},</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>BrowserScreenshotToolV2<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">,</span> opts<span class="op">:</span> opts<span class="op">},</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span>BrowserCloseToolV2<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">},</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> it <span class="op">:=</span> <span class="kw">range</span> items <span class="op">{</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> err <span class="op">:=</span> reg<span class="op">.</span>RegisterTool<span class="op">(</span>it<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;browser.RegisterAll: %s: %w&quot;</span><span class="op">,</span> it<span class="op">.</span>Name<span class="op">(),</span> err<span class="op">)</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>main.go</code> additions (additive only; adjacent to F22
+wiring):</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mgr <span class="op">:=</span> browser<span class="op">.</span>NewBrowserManager<span class="op">(</span>browser<span class="op">.</span>NewDefaultChromeDiscovery<span class="op">(),</span> c<span class="op">.</span>logger<span class="op">)</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">:=</span> browser<span class="op">.</span>RegisterAll<span class="op">(</span>c<span class="op">.</span>toolRegistry<span class="op">,</span> mgr<span class="op">);</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Fatalf<span class="op">(</span><span class="st">&quot;browser: register failed: %v&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="cf">defer</span> mgr<span class="op">.</span>CloseSession<span class="op">()</span> <span class="co">// safety net at process exit</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> regErr <span class="op">:=</span> c<span class="op">.</span>commandRegistry<span class="op">.</span>Register<span class="op">(</span>commands<span class="op">.</span>NewBrowserCommand<span class="op">(</span>mgr<span class="op">));</span> regErr <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    log<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;browser: register slash command failed: %v&quot;</span><span class="op">,</span> regErr<span class="op">)</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>browser_command.go</code> per spec §3.5 (full impl). Failing
+tests FIRST:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowserCommand_Name<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;browser&quot;</span><span class="op">,</span> NewBrowserCommand<span class="op">(</span><span class="ot">nil</span><span class="op">).</span>Name<span class="op">())</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowserCommand_Status_Inactive<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewBrowserCommand<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;status&quot;</span><span class="op">}})</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;active=false&quot;</span><span class="op">)</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowserCommand_Close_NoActiveSession_OK<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewBrowserCommand<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;close&quot;</span><span class="op">}})</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> res<span class="op">.</span>Output<span class="op">,</span> <span class="st">&quot;closed&quot;</span><span class="op">)</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowserCommand_Navigate_RequiresURL<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewBrowserCommand<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;navigate&quot;</span><span class="op">}})</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowserCommand_UnknownSubcommand_Err<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    mgr <span class="op">:=</span> NewBrowserManager<span class="op">(</span><span class="ot">nil</span><span class="op">,</span> zap<span class="op">.</span>NewNop<span class="op">())</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> NewBrowserCommand<span class="op">(</span>mgr<span class="op">)</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> cmd<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="op">&amp;</span>CommandContext<span class="op">{</span>Args<span class="op">:</span> <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;nope&quot;</span><span class="op">}})</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Error<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Failing integration tests FIRST (real chromium gated; uses real
+<code>httptest.Server</code>):</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">//go:build integration</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowser_Integration_NavigateThenSnapshot_FixtureSentinel<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    mgr<span class="op">,</span> srv<span class="op">,</span> cleanup <span class="op">:=</span> setupBrowserSession<span class="op">(</span>t<span class="op">)</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">defer</span> cleanup<span class="op">()</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    nav <span class="op">:=</span> NewBrowserNavigateTool<span class="op">(</span>mgr<span class="op">,</span> OptionsFromEnv<span class="op">())</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    snap <span class="op">:=</span> <span class="op">&amp;</span>BrowserSnapshotTool<span class="op">{</span>mgr<span class="op">:</span> mgr<span class="op">,</span> opts<span class="op">:</span> OptionsFromEnv<span class="op">()}</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> err <span class="op">:=</span> nav<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;url&quot;</span><span class="op">:</span> srv<span class="op">.</span>URL<span class="op">})</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    res<span class="op">,</span> err <span class="op">:=</span> snap<span class="op">.</span>Execute<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span><span class="kw">interface</span><span class="op">{}{</span><span class="st">&quot;mode&quot;</span><span class="op">:</span> <span class="st">&quot;html&quot;</span><span class="op">})</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>NoError<span class="op">(</span>t<span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    s <span class="op">:=</span> res<span class="op">.(</span>Snapshot<span class="op">)</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Greater<span class="op">(</span>t<span class="op">,</span> <span class="bu">len</span><span class="op">(</span>s<span class="op">.</span>Content<span class="op">),</span> <span class="dv">100</span><span class="op">)</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Contains<span class="op">(</span>t<span class="op">,</span> s<span class="op">.</span>Content<span class="op">,</span> <span class="st">&quot;FIXTURE_LOADED_42&quot;</span><span class="op">)</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>Equal<span class="op">(</span>t<span class="op">,</span> <span class="st">&quot;F23-FIXTURE&quot;</span><span class="op">,</span> s<span class="op">.</span>Title<span class="op">)</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowser_Integration_ClickMutatesDOM<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* per spec §5.2 Bluff #2 */</span> <span class="op">}</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowser_Integration_TypeIntoInput<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span>   <span class="op">{</span> <span class="co">/* per spec §6.2 */</span> <span class="op">}</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowser_Integration_Screenshot_PNGMagic<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* per spec §5.2 Bluff #4 */</span> <span class="op">}</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowser_Integration_Close_RequireFailsAfter<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* per spec §5.2 Bluff #5 */</span> <span class="op">}</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowser_Integration_ConcurrentEnsureSession_SamePointer<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span> <span class="co">/* per spec §6.2 */</span> <span class="op">}</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> TestBrowser_Integration_HeadedMode_OptIn<span class="op">(</span>t <span class="op">*</span>testing<span class="op">.</span>T<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span>Setenv<span class="op">(</span>EnvVarHeadedMode<span class="op">,</span> <span class="st">&quot;true&quot;</span><span class="op">)</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    mgr<span class="op">,</span> _<span class="op">,</span> cleanup <span class="op">:=</span> setupBrowserSession<span class="op">(</span>t<span class="op">);</span> <span class="cf">defer</span> cleanup<span class="op">()</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    _<span class="op">,</span> _ <span class="op">=</span> mgr<span class="op">.</span>EnsureSession<span class="op">(</span>context<span class="op">.</span>Background<span class="op">())</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    require<span class="op">.</span>True<span class="op">(</span>t<span class="op">,</span> mgr<span class="op">.</span>Status<span class="op">().</span>Headed<span class="op">)</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Subject:
+<code>feat(P2-F23-T09): /browser slash + main.go wiring + browser.RegisterAll + integration test (real-chromium)</code>.</p>
+<hr />
+<h2 id="task-10-challenge-harness-7-phases-close-out-push-4-remotes-non-force">Task
+10: Challenge harness 7 phases + close-out + push 4 remotes
+non-force</h2>
+<p><strong>Files:</strong> new
+<code>helix_code/tests/integration/cmd/p2f23_challenge/main.go</code>,
+new <code>challenges/p2-f23-cline-browser-tool/CHALLENGE.md</code>, new
+<code>challenges/p2-f23-cline-browser-tool/run.sh</code>.</p>
+<p>Harness phases (per spec §6.3):</p>
+<ol type="1">
+<li><strong>PHASE-A: NAVIGATE-AND-SNAPSHOT (always runs; gated on
+chromium)</strong> — local <code>httptest.Server</code> with sentinel
+<code>FIXTURE_LOADED_42</code>; <code>browser_navigate</code> +
+<code>browser_snapshot(mode=html)</code>; assert (i) Snapshot.Content
+contains sentinel, (ii) <code>len(Content) &gt; 100</code>, (iii)
+Snapshot.URL equals srv.URL (or starts with), (iv) Snapshot.Title equals
+<code>F23-FIXTURE</code>.</li>
+<li><strong>PHASE-B: SNAPSHOT-MODE-TEXT (always runs)</strong> —
+<code>browser_snapshot(mode=text)</code>; assert (i) content does NOT
+contain <code>&lt;p&gt;</code> (it’s plain text), (ii) content contains
+<code>FIXTURE_LOADED_42</code>.</li>
+<li><strong>PHASE-C: CLICK-MUTATES-DOM (always runs)</strong> —
+pre-click snapshot has <code>UNCLICKED</code>;
+<code>browser_click(&quot;#b&quot;)</code>; post-click snapshot (after
+ClickWaitDuration) has <code>CLICKED_42</code> AND does NOT have
+<code>UNCLICKED</code>.</li>
+<li><strong>PHASE-D: TYPE-INTO-INPUT (always runs)</strong> —
+<code>browser_type(&quot;#in&quot;, &quot;HELIX_42&quot;)</code>; assert post-snapshot HTML
+contains <code>value=&quot;HELIX_42&quot;</code> OR (alternatively) JS-eval reads
+back the input value.</li>
+<li><strong>PHASE-E: SCREENSHOT-PNG-MAGIC (always runs)</strong> —
+<code>browser_screenshot(full_page=false)</code>; assert (i) returned
+path exists, (ii) <code>os.Stat().Size() &gt; 1024</code>, (iii) first 8
+bytes equal <code>0x89 0x50 0x4E 0x47 0x0D 0x0A 0x1A 0x0A</code>, (iv)
+<code>image/png.DecodeConfig</code> succeeds.</li>
+<li><strong>PHASE-F: CLOSE-TEARS-DOWN (always runs)</strong> —
+<code>browser_close()</code>; subsequent <code>browser_snapshot()</code>
+returns <code>errors.Is(err, ErrNoActiveSession)</code>. Positive
+evidence the manager actually torn down.</li>
+<li><strong>PHASE-G: CONCURRENT-SESSION-SHARING (always runs)</strong> —
+5 goroutines call <code>mgr.EnsureSession</code> simultaneously; assert
+all 5 return the same <code>*BrowserSession</code> pointer.</li>
+</ol>
+<p>Output skeleton ends with:</p>
+<pre><code>SUMMARY: PHASE-A=4/4 PASS; PHASE-B=2/2 PASS; PHASE-C=3/3 PASS; PHASE-D=2/2 PASS;
+         PHASE-E=4/4 PASS; PHASE-F=2/2 PASS; PHASE-G=2/2 PASS</code></pre>
+<p>The Challenge MUST exit non-zero on any byte-evidence mismatch. Skip
+is permitted ONLY when chromium absent and MUST emit
+<code>SKIP-OK: #P2-F23 chromium not available</code>. Anti-bluff smoke
+clean check appended. Verbatim output captured into
+<code>07_phase_2_evidence.md</code>. Dual commit (Challenges submodule +
+meta-repo bump).</p>
+<p><code>challenges/p2-f23-cline-browser-tool/run.sh</code> mirrors
+F19/F20/F21/F22 structure:
+<code>cd HelixCode &amp;&amp; go run ./tests/integration/cmd/p2f23_challenge/main.go</code>.</p>
+<p><strong>Close-out</strong> — tick all 10 items in PROGRESS, advance
+PROGRESS focus from F23 to “Phase 2 of CLI-Agent Fusion programme: F23
+closed; F24 next candidate”. Run final verification:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="fu">make</span> verify-compile</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;simulated\|for now\|TODO implement\|placeholder&quot;</span> <span class="dt">\</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  internal/tools/browser internal/commands/browser_command.go <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> BLUFF <span class="kw">||</span> <span class="bu">echo</span> clean</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/tools/browser/...</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 ./internal/commands/...</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> test <span class="at">-count</span><span class="op">=</span>1 <span class="at">-tags</span><span class="op">=</span>integration ./tests/integration/... <span class="co"># gated on chromium</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> mod tidy</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--exit-code</span> go.mod  <span class="co"># MUST be no-op (zero new deps)</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--exit-code</span> go.sum  <span class="co"># MUST be no-op</span></span></code></pre></div>
+<p>Cross-compile check:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> HelixCode <span class="kw">&amp;&amp;</span> <span class="va">GOOS</span><span class="op">=</span>linux <span class="va">GOARCH</span><span class="op">=</span>amd64 <span class="ex">go</span> build <span class="at">-o</span> /tmp/helixcode-linux-amd64 ./cmd/server</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> /tmp/helixcode-linux-amd64</span></code></pre></div>
+<p>Commit
+<code>chore(P2-F23-T10): close out feature 23 — Cline Browser Tool</code>.
+Push 4 remotes non-force (<code>origin</code>,
+<code>helixdev</code>/<code>github</code>,
+<code>vasic-digital</code>/<code>upstream</code>, <code>gitlab</code>
+per programme conventions). Request explicit user authorisation at this
+step (CONST-043).</p>
+<p>PROGRESS.md milestone entry (verbatim):</p>
+<pre><code>- 2026-05-07 — Feature 23 (Cline Browser Tool) closed. 10 task commits (T01 ..., T10 close-out).
+  Real, end-to-end 6-tool browser-automation suite modelled on cline:
+  browser_navigate / browser_snapshot / browser_click / browser_type /
+  browser_screenshot / browser_close. Atomic-pointer BrowserManager;
+  lazy-create on first navigate; sync.Once close. Headless default;
+  HELIXCODE_BROWSER_HEADED=true opt-in. Screenshots written to
+  $XDG_DATA_HOME/helixcode/browser/screenshots/&lt;session&gt;/&lt;n&gt;.png with
+  PNG-magic + DecodeConfig + size&gt;1024 verification. F21 RequiresApproval
+  per-tool: navigate/click/type/close → LevelEdit; snapshot/screenshot
+  → LevelReadOnly. /browser slash (status/navigate/close). NO cobra.
+  Coexists with existing BrowserLaunchTool multi-browser API.
+  Composes with F21 approval (gates LevelEdit tools), F22 autocommit
+  (no spurious commits — browser tools have no path param), F13 LSP
+  trigger (no-op for browser tools), F04 worktree (browser per
+  CLI-instance). Zero new external deps (chromedp v0.15.1 + cdproto
+  already direct). Never pushes (CONST-043). [7-phase Challenge evidence
+  summary; gated on chromium availability — SKIP-OK if not on PATH].</code></pre>
+<p>Subject:
+<code>chore(P2-F23-T10): close out feature 23 — Cline Browser Tool</code>.</p>
+<hr />
+<h2 id="self-review-notes">Self-review notes</h2>
+<ol type="1">
+<li><strong>Spec coverage:</strong> every spec section maps to a task —
+T02 types + options (§3.3 + §10), T03 manager + session (§3.3 + §3.6),
+T04 navigate (§3.4 row 1), T05 snapshot (§3.4 row 2), T06 click + type
+(§3.4 rows 3-4), T07 screenshot (§3.4 row 5 + §5.2 Bluff #4), T08 close
+(§3.4 row 6 + §5.2 Bluff #5), T09 /browser slash + main.go wiring +
+integration (§3.5 + §4 + §6.2), T10 Challenge 7 phases (§6.3 + §5.2) +
+close-out.</li>
+<li><strong>TDD:</strong> every code task starts with failing tests.
+Types test pins constants byte-for-byte. Options test covers env-var
+case sensitivity. Manager test uses a stub <code>sessionFactory</code>
+to avoid spawning chromium in unit tests; integration tests use the
+production factory and gate on chromium availability. Six per-tool tests
+(T04-T08) assert Schema/Validate/RequiresApproval + no-session error
+paths; happy paths run under the integration test (T09) and Challenge
+(T10) against real chromium.</li>
+<li><strong>Type consistency:</strong> <code>Snapshot</code>,
+<code>ScreenshotResult</code>, <code>ManagerStatus</code>,
+<code>BrowserOptions</code>, <code>BrowserSession</code>,
+<code>BrowserManager</code>, <code>BrowserNavigateToolV2</code>,
+<code>BrowserSnapshotTool</code>, <code>BrowserClickTool</code>,
+<code>BrowserTypeTool</code>, <code>BrowserScreenshotToolV2</code>,
+<code>BrowserCloseToolV2</code>, <code>BrowserCommand</code>, sentinel
+errors (<code>ErrNoActiveSession</code>,
+<code>ErrChromiumNotFound</code>, <code>ErrNavigationTimeout</code>,
+<code>ErrSelectorNotFound</code>, <code>ErrScreenshotTooLarge</code>),
+constants (<code>EnvVarHeadedMode</code>, <code>MaxSnapshotBytes</code>,
+<code>MaxScreenshotBytes</code>, <code>pngMagic</code>), command name
+<code>browser</code>, env var <code>HELIXCODE_BROWSER_HEADED</code> —
+all match across spec §3 and plan T02-T10.</li>
+<li><strong>Zero new external deps:</strong> chromedp v0.15.1 + cdproto
+are already direct in <code>helix_code/go.mod</code>. T10’s verification
+step asserts <code>git diff --exit-code go.mod go.sum</code> is no-op.
+Stdlib only beyond that (image/png, net/http/httptest, sync/atomic,
+etc.).</li>
+<li><strong>Anti-bluff (§5.2):</strong> Challenge has SEVEN phases
+(A-G), all run on chromium availability; SKIP-OK only on chromium
+absence. Every phase records positive evidence: HTTP-fixture sentinel
+equality (PHASE-A/B), DOM-mutation byte differential (PHASE-C),
+input-value byte readback (PHASE-D), PNG-magic + DecodeConfig +
+size&gt;1024 (PHASE-E), <code>errors.Is(ErrNoActiveSession)</code>
+post-close (PHASE-F), pointer equality across N=5 goroutines (PHASE-G).
+Byte-evidence mismatch is a hard Challenge failure. Absence-of-error is
+NEVER acceptable.</li>
+<li><strong>CONST-042:</strong> browser tools NEVER log full page
+contents at INFO level. The committer’s logger logs only the URL (caller
+input — already known to caller), the snapshot byte length, and the
+screenshot file path. A unit test scans
+<code>internal/tools/browser/*.go</code> for
+<code>logger\.Info\(.*\b(content|html|page|body|snapshot|outerHTML|innerText)\b</code>
+matches and FAILs on any hit (excluding test files). Per-tool
+descriptions and telemetry NEVER include user-typed text from
+<code>browser_type</code>. Screenshot files are mode
+<code>0600</code>.</li>
+<li><strong>CONST-043:</strong> F23 emits zero <code>git push</code>
+commands and the <code>BrowserSession</code> does NOT call any git
+operations. T10’s close-out push to 4 remotes requires explicit user
+authorisation per push.</li>
+<li><strong>CONST-033:</strong> F23 emits no shell commands. chromium
+subprocess is managed by chromedp’s <code>NewExecAllocator</code>, not
+by <code>os/exec</code>. No suspend/reboot/halt commands.</li>
+<li><strong>F21 integration:</strong> per-tool
+<code>RequiresApproval()</code> is mapped per spec §3.6.
+<code>LevelReadOnly</code> (snapshot, screenshot) bypass the approval
+gate; <code>LevelEdit</code> (navigate, click, type, close) gate behind
+<code>ModeAutoEdit</code> or higher. <code>ModeSuggest</code> denies
+<code>LevelEdit</code> browser tools, returning
+<code>ErrApprovalRequired</code> immediately without spawning chromium.
+Integration test in T09 covers both directions.</li>
+<li><strong>F22 autocommit integration:</strong> F22’s per-tool
+path-derivation table doesn’t include <code>browser_*</code> tool names
+→ falls through to nil paths; F22’s committer’s
+<code>git status --porcelain</code> check returns “no changes” because
+browser tools don’t touch the working tree → <code>Skipped</code> with
+<code>Reason: &quot;no changes&quot;</code>. Net effect: no spurious commits.
+Integration test in T09 asserts <code>git log -1 --format=%H</code> is
+unchanged after a <code>browser_navigate</code> call.</li>
+<li><strong>F13 LSP integration:</strong> F13’s path-derivation returns
+nil for <code>browser_*</code> tools (no file paths), so the LSP trigger
+is a no-op. No interference.</li>
+<li><strong>F04 worktree integration:</strong> browser tools don’t
+operate on the filesystem (other than the screenshot tempdir); worktree
+isolation irrelevant. Default: shared per-CLI-instance, like F22’s
+autocommitter.</li>
+<li><strong>Non-obvious call: coexistence with existing
+<code>BrowserLaunchTool</code> etc.</strong> (recorded in spec §11 #1).
+Existing multi-browser API stays. F23 lands single-session API. T09’s
+<code>RegisterAll</code> registers F23 tools under
+<code>browser_navigate</code>/etc. names; existing ones renamed
+<code>_legacy</code> if disambiguation is needed.</li>
+<li><strong>Non-obvious call: atomic-pointer for current</strong>
+(recorded in spec §11 #2). Lock-free read on every tool call; mutex
+serialises only EnsureSession/CloseSession lifecycle transitions.</li>
+<li><strong>Non-obvious call: WaitReady(“body”) after Navigate</strong>
+(recorded in spec §11 #3). Without it, OuterHTML reads empty pre-load
+shell.</li>
+<li><strong>Non-obvious call: NodeVisible on Click + SendKeys</strong>
+(recorded in spec §11 #4). Without it, clicks fire on hidden elements
+producing fake-success.</li>
+<li><strong>Non-obvious call: PNG-magic verification BEFORE writing to
+disk</strong> (recorded in spec §11 #5). Catches chromedp-empty-buf bug
+at the source.</li>
+<li><strong>Non-obvious call: sync.Once on Close</strong> (recorded in
+spec §11 #6). Idempotent close + tempdir RemoveAll.</li>
+<li><strong>Non-obvious call: per-session tempdir under
+$XDG_DATA_HOME</strong> (recorded in spec §11 #7). Persistence +
+close-time cleanup.</li>
+<li><strong>Non-obvious call: headed via env (not CLI flag)</strong>
+(recorded in spec §11 #8). Persistent across re-launches via shell
+profile.</li>
+<li><strong>Non-obvious call: HELIXCODE_BROWSER_HEADED case-insensitive
+<code>true</code>-only</strong> (recorded in spec §11 #9). Typos default
+to safe headless.</li>
+<li><strong>Non-obvious call: per-tool RequiresApproval differs across
+the six tools</strong> (recorded in spec §11 #10). Reads bypass
+approval; writes gate.</li>
+<li><strong>Non-obvious call: browser_navigate is LevelEdit, NOT
+LevelRun</strong> (recorded in spec §11 #11). chromium is owned by
+chromedp, not exposed as a shell tool; double-sandboxing breaks
+chromedp.</li>
+<li><strong>Non-obvious call: browser_close is LevelEdit, NOT
+LevelReadOnly</strong> (recorded in spec §11 #12). Close drops in-flight
+page state; user prompted before tear-down.</li>
+<li><strong>Non-obvious call: 5s sub-timeout on click/type for
+selector-not-found</strong> (recorded in spec §5.2 + plan T06).
+Disambiguates selector-miss from slow nav.</li>
+<li><strong>Non-obvious call: image/png.DecodeConfig on screenshot
+bytes</strong> (recorded in spec §11 #18). Lightweight (reads only IHDR
+chunk); positive evidence the bytes are a valid PNG, beyond magic
+check.</li>
+<li><strong>Third Phase 2 feature:</strong> F23 is the third Phase 2
+feature after F21 + F22. T01 advances PROGRESS.md from “F22 closed; F23
+next candidate” to “F23 in flight”; appends F23 evidence header to
+existing <code>07_phase_2_evidence.md</code> (created in F21-T01,
+extended by F22-T01).</li>
+</ol>
+</body>
+</html>

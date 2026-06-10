@@ -1,0 +1,2525 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HELIX_MASTER_DOCUMENTATION</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">HELIX_MASTER_DOCUMENTATION</h1>
+</header>
+<h1 id="helix-ecosystem-complete-deep-analysis-integration-master-document">Helix
+Ecosystem: Complete Deep Analysis &amp; Integration Master Document</h1>
+<p><strong>Version</strong>: 1.0<br />
+<strong>Date</strong>: 2026-05-04<br />
+<strong>Classification</strong>: Internal Engineering — Strategic
+Integration Plan<br />
+<strong>Scope</strong>: Full ecosystem analysis, gap closure planning,
+and CLI agent feature porting for HelixCode</p>
+<hr />
+<h2 id="table-of-contents">TABLE OF CONTENTS</h2>
+<ol type="1">
+<li><a href="#1-executive-summary">Executive Summary</a></li>
+<li><a href="#2-repository-ecosystem-map">Repository Ecosystem
+Map</a></li>
+<li><a href="#3-submodule-integration-status">Submodule Integration
+Status</a></li>
+<li><a href="#4-deep-analysis-results">Deep Analysis Results</a></li>
+<li><a href="#5-gap-analysis">Gap Analysis</a></li>
+<li><a href="#6-master-integration-plan">Master Integration
+Plan</a></li>
+<li><a href="#7-technical-documentation">Technical
+Documentation</a></li>
+<li><a href="#8-testing-strategy">Testing Strategy</a></li>
+<li><a href="#9-immediate-action-items">Immediate Action Items</a></li>
+<li><a href="#10-appendices">Appendices</a></li>
+</ol>
+<hr />
+<h2 id="executive-summary">1. EXECUTIVE SUMMARY</h2>
+<h3 id="mission-statement">1.1 Mission Statement</h3>
+<p>This document presents the complete analysis of the Helix development
+ecosystem — 9 major repositories, 87+ submodules, and 60+ CLI agent
+implementations — with a comprehensive integration plan to incorporate
+all power features, innovations, APIs, optimizations, and game-changing
+capabilities from the world’s leading AI CLI agents into HelixCode.</p>
+<h3 id="key-findings">1.2 Key Findings</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repositories Analyzed</td>
+<td>9 (HelixCode + 8 submodules)</td>
+</tr>
+<tr>
+<td>CLI Agents Cataloged</td>
+<td>60+</td>
+</tr>
+<tr>
+<td>Features Evaluated</td>
+<td>137</td>
+</tr>
+<tr>
+<td>Gaps Identified</td>
+<td>54 (39% missing)</td>
+</tr>
+<tr>
+<td>P0 Critical Gaps</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Integration Phases</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Total Tasks</td>
+<td>60</td>
+</tr>
+<tr>
+<td>Estimated Duration</td>
+<td>63 working days (~3 months)</td>
+</tr>
+<tr>
+<td>Tests Required</td>
+<td>5,245+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="strategic-priority">1.3 Strategic Priority</h3>
+<p><strong>CRITICAL DISCOVERY</strong>: HelixCode is currently ranked
+7th of 11 evaluated CLI agent platforms. After completing this
+integration plan, HelixCode will achieve top-3 competitive positioning
+by incorporating:</p>
+<ul>
+<li>Claude Code’s permission system, auto-compaction, and MCP
+lifecycle</li>
+<li>Aider’s dual-model architecture and fuzzy matching</li>
+<li>Cline’s Plan/Act dual-mode and shadow Git checkpoints</li>
+<li>Codex’s OS-native sandboxing and ZDR compliance</li>
+<li>Plandex’s cumulative diff review and massive context handling</li>
+<li>Forge’s 6 orchestration patterns and quality scoring</li>
+<li>Kilo Code’s subagent delegation system</li>
+<li>OpenCode’s 75+ provider support and plugin system</li>
+<li>Gemini CLI’s 1M token context and bidirectional planning</li>
+<li>Amazon Q’s terminal intellisense and diagram sync</li>
+</ul>
+<h3 id="critical-blocking-issue">1.4 Critical Blocking Issue</h3>
+<p><strong>4 submodules are MISSING from HelixCode</strong> despite
+being core dependencies: - <code>HelixAgent</code> — Ancestor project
+containing 60+ CLI agent analyses - <code>HelixLLM</code> — LLM gateway
+with 43 submodules and 6 operating modes - <code>HelixMemory</code> —
+Memory fusion system (Mem0, Cognee, Letta, Graphiti) -
+<code>HelixSpecifier</code> — Specification engine with 27 packages</p>
+<p>Additionally, <strong>4 submodules are PRESENT but EMPTY</strong>
+(not initialized): - <code>LLMsVerifier</code> — 12 provider adapters,
+ACP protocol - <code>HelixQA</code> — 235 tests, 4-phase QA, 47-agent
+test bank - <code>Challenges</code> — 209 tests, 16 evaluators, plugin
+system - <code>Containers</code> — 6 runtime implementations, container
+orchestration</p>
+<hr />
+<h2 id="repository-ecosystem-map">2. REPOSITORY ECOSYSTEM MAP</h2>
+<h3 id="complete-submodule-inventory-87-total">2.1 Complete Submodule
+Inventory (87 Total)</h3>
+<p>HelixCode contains <strong>87 declared submodules</strong>, all using
+SSH (<code>git@github.com</code> format):</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 25%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Example Projects (AI CLI Tools)</td>
+<td>~35</td>
+<td>Claude_Code, Aider, Cline, Codex, Plandex, GPT_Engineer, Gemini_CLI,
+Amazon-Q, etc.</td>
+</tr>
+<tr>
+<td>Example Resources</td>
+<td>~5</td>
+<td>Awesome-AI-Agents, Awesome-AI-GPTs, OpenAI-Cookbook</td>
+</tr>
+<tr>
+<td>Core Dependencies</td>
+<td>8</td>
+<td>LLama_CPP, Ollama, HuggingFace_Hub, DocProcessor, LLMOrchestrator,
+LLMProvider, LLMsVerifier, VisionEngine</td>
+</tr>
+<tr>
+<td>Quality Assurance</td>
+<td>3</td>
+<td>HelixQA, Challenges, containers</td>
+</tr>
+<tr>
+<td>Website</td>
+<td>1</td>
+<td>github_pages_website</td>
+</tr>
+</tbody>
+</table>
+<h3 id="missing-required-submodules">2.2 Missing Required
+Submodules</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 17%" />
+<col style="width: 45%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>Status</th>
+<th>Recommended SSH URL</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixAgent</td>
+<td><strong>MISSING</strong></td>
+<td><code>git@github.com:HelixDevelopment/HelixAgent.git</code></td>
+<td><code>submodules/helix_agent</code></td>
+</tr>
+<tr>
+<td>HelixLLM</td>
+<td><strong>MISSING</strong></td>
+<td><code>git@github.com:HelixDevelopment/HelixLLM.git</code></td>
+<td><code>submodules/helix_llm</code></td>
+</tr>
+<tr>
+<td>HelixMemory</td>
+<td><strong>MISSING</strong></td>
+<td><code>git@github.com:HelixDevelopment/HelixMemory.git</code></td>
+<td><code>submodules/helix_memory</code></td>
+</tr>
+<tr>
+<td>HelixSpecifier</td>
+<td><strong>MISSING</strong></td>
+<td><code>git@github.com:HelixDevelopment/HelixSpecifier.git</code></td>
+<td><code>submodules/helix_specifier</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture-overview">2.3 Architecture Overview</h3>
+<pre><code>HelixCode (root)
+├── Go Module: dev.helix.code (Go 1.26)
+│   └── 29+ LLM providers via unified Provider interface
+│
+├── Actor Model Agent System
+│   ├── 8 Agent Types: Planning, Coding, Testing, Debugging, Review, Refactoring, Documentation, Coordinator
+│   ├── BaseAgent with task queues, circuit breakers, collaboration logic
+│   └── Coordinator with registry, workflow execution, health monitoring
+│
+├── Tool Framework
+│   ├── 20+ registered tools across 8 categories
+│   ├── MultiFileEditor with atomic transaction support
+│   └── Tree-sitter based code mapping
+│
+├── 6-Platform UI
+│   ├── Terminal (tview)
+│   ├── Desktop (Fyne)
+│   ├── Android, iOS
+│   ├── Aurora OS, Harmony OS
+│   └── REST API (Gin + OpenAPI 3.0)
+│
+├── Docker Infrastructure
+│   ├── PostgreSQL 15, Redis
+│   └── 3GB memory main container
+│
+├── Quality Assurance
+│   ├── helix_qa (submodule — EMPTY)
+│   ├── Challenges (submodule — EMPTY)
+│   ├── LLMsVerifier (submodule — EMPTY)
+│   └── containers (submodule — EMPTY)
+│
+└── Missing Core Components
+    ├── HelixAgent (ancestor, 60+ cli_agents)
+    ├── HelixLLM (gateway, 43 submodules)
+    ├── HelixMemory (memory fusion)
+    └── HelixSpecifier (spec engine)</code></pre>
+<hr />
+<h2 id="submodule-integration-status">3. SUBMODULE INTEGRATION
+STATUS</h2>
+<h3 id="present-but-uninitialized-submodules">3.1 Present but
+Uninitialized Submodules</h3>
+<p>All 4 quality assurance submodules are <strong>declared in
+<code>.gitmodules</code> but their directories are completely
+empty</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Current state (EMPTY — requires initialization)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">helix_qa/</span>        <span class="co"># 235 tests, 4-phase QA, 47-agent test bank</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">challenges/</span>     <span class="co"># 209 tests, 16 evaluators, 21 adapters</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">containers/</span>     <span class="co"># 6 runtime implementations, Docker/Podman/K8s</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">submodules/llms_verifier/</span>  <span class="co"># 12 provider adapters, ACP protocol</span></span></code></pre></div>
+<h3 id="missing-submodules-must-be-added">3.2 Missing Submodules (Must
+Be Added)</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># These MUST be added via SSH</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">submodules/helix_agent</span>      <span class="co"># Ancestor project</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">submodules/helix_llm</span>        <span class="co"># LLM gateway</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ex">submodules/helix_memory</span>     <span class="co"># Memory system</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">submodules/helix_specifier</span>    <span class="co"># Spec engine</span></span></code></pre></div>
+<h3 id="ssh-integration-commands">3.3 SSH Integration Commands</h3>
+<p>Run from HelixCode repository root:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># === STEP 1: Configure SSH (if not already done) ===</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="fu">ssh-agent</span> <span class="at">-s</span><span class="va">)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-add</span> ~/.ssh/id_ed25519   <span class="co"># or id_rsa</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-T</span> git@github.com       <span class="co"># verify access</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># === STEP 2: Add Missing Submodules via SSH ===</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">--force</span> git@github.com:HelixDevelopment/HelixAgent.git submodules/helix_agent</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">--force</span> git@github.com:HelixDevelopment/HelixLLM.git submodules/helix_llm</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">--force</span> git@github.com:HelixDevelopment/HelixMemory.git submodules/helix_memory</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule add <span class="at">--force</span> git@github.com:HelixDevelopment/HelixSpecifier.git submodules/helix_specifier</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># === STEP 3: Initialize ALL Submodules Recursively ===</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> submodule update <span class="at">--init</span> <span class="at">--recursive</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co"># === STEP 4: Verify SSH Only (No HTTPS) ===</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&quot;https://github.com&quot;</span> .gitmodules  <span class="co"># Should return nothing</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># === STEP 5: Create Go Workspace ===</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> go.work <span class="op">&lt;&lt; &#39;EOF&#39;</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="st">go 1.26</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="st">use (</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="st">    .</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="st">    ./HelixCode</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="st">    ./submodules/llms_verifier</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="st">    ./submodules/helix_agent</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="st">    ./submodules/helix_llm</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="st">    ./submodules/helix_memory</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="st">    ./submodules/helix_specifier</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="st">    ./HelixQA</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="st">    ./Challenges</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="st">    ./Containers</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> work sync</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co"># === STEP 6: Build Verification ===</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build ./...</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="co"># === STEP 7: Commit ===</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .gitmodules go.work</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;feat: Add missing submodules via SSH (HelixAgent, HelixLLM, HelixMemory, HelixSpecifier)&quot;</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin main</span></code></pre></div>
+<hr />
+<h2 id="deep-analysis-results">4. DEEP ANALYSIS RESULTS</h2>
+<h3 id="claude-code-claude-code-source-primary-agent">4.1 Claude Code
+(claude-code-source) — PRIMARY AGENT</h3>
+<p><strong>Status</strong>: Closed-source (Bun-compiled 248MB native
+binary)<br />
+<strong>Repository</strong>: <code>anthropics/claude-code</code>
+(documentation/plugins only)<br />
+<strong>Analysis Method</strong>: SDK types, CHANGELOG mining, binary
+string analysis, plugin reverse-engineering</p>
+<h4 id="top-20-features-to-port">Top 20 Features to Port</h4>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Feature</th>
+<th>Complexity</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Auto-Compaction System</td>
+<td>High</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Permission Rule System (5 modes)</td>
+<td>High</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Tool Result Persistence</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Git Worktree Agent Isolation</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Hook-Based Extensibility</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>6</td>
+<td>No-Flicker Rendering</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Background Task System (Ctrl+B)</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Smart File Editing</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Plan Mode</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Slash Command System</td>
+<td>Low</td>
+<td>High</td>
+</tr>
+<tr>
+<td>11</td>
+<td>MCP Full Lifecycle (4 transports)</td>
+<td>Very High</td>
+<td>Very High</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Skill System</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Session Transcript Resume</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Multi-Provider Backend</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>15</td>
+<td>LSP Integration</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Sandboxed Shell Execution</td>
+<td>Very High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Theme System</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>18</td>
+<td>AskUserQuestion with Previews</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>19</td>
+<td>Subagent Team</td>
+<td>High</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>20</td>
+<td>OpenTelemetry Integration</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h4 id="tool-inventory-18-core-tools">Tool Inventory (18 Core
+Tools)</h4>
+<table>
+<colgroup>
+<col style="width: 58%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File Operations</td>
+<td>Read, Write, Edit, NotebookEdit</td>
+</tr>
+<tr>
+<td>Search</td>
+<td>Grep, Glob</td>
+</tr>
+<tr>
+<td>Shell</td>
+<td>Bash, TaskOutput, TaskStop</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>WebSearch, WebFetch</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>Mcp, ListMcpResources, ReadMcpResource</td>
+</tr>
+<tr>
+<td>Agent</td>
+<td>Agent (subagent spawn), TodoWrite, AskUserQuestion,
+ExitPlanMode</td>
+</tr>
+<tr>
+<td>Git</td>
+<td>EnterWorktree, ExitWorktree</td>
+</tr>
+</tbody>
+</table>
+<h3 id="other-cli-agents-game-changing-features">4.2 Other CLI Agents —
+Game-Changing Features</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 39%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Top Feature</th>
+<th>Why Port It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Aider</strong></td>
+<td>Architect/Editor Dual-Model</td>
+<td>Separates reasoning from editing; 85% pass rate</td>
+</tr>
+<tr>
+<td><strong>Aider</strong></td>
+<td>4-Layer Fuzzy Matching</td>
+<td>Exact→Whitespace→Indentation→difflib; robust edits</td>
+</tr>
+<tr>
+<td><strong>Cline</strong></td>
+<td>Plan/Act with Different Models</td>
+<td>Cheap models for execution, expensive for planning</td>
+</tr>
+<tr>
+<td><strong>Cline</strong></td>
+<td>Shadow Git Checkpoints</td>
+<td>Independent snapshots; granular rollback</td>
+</tr>
+<tr>
+<td><strong>Cline</strong></td>
+<td>Computer Use / Browser Automation</td>
+<td>Real Chrome verification</td>
+</tr>
+<tr>
+<td><strong>Codex</strong></td>
+<td>OS-Native Sandboxed Execution</td>
+<td>Seatbelt/Docker/iptables; trustworthy autonomy</td>
+</tr>
+<tr>
+<td><strong>Codex</strong></td>
+<td>Automatic Context Compaction</td>
+<td>Encrypted latent understanding preservation</td>
+</tr>
+<tr>
+<td><strong>Plandex</strong></td>
+<td>Cumulative Diff Review Sandbox</td>
+<td>Review ALL before applying ANY</td>
+</tr>
+<tr>
+<td><strong>Plandex</strong></td>
+<td>2M Token Context + 20M Indexing</td>
+<td>Massive context via Tree-sitter</td>
+</tr>
+<tr>
+<td><strong>Forge</strong></td>
+<td>6 Orchestration Patterns</td>
+<td>Sequential→Parallel→Leader-Worker→Kanban</td>
+</tr>
+<tr>
+<td><strong>Kilo Code</strong></td>
+<td>5 Specialized Modes + Subagents</td>
+<td>Recursive agent hierarchy</td>
+</tr>
+<tr>
+<td><strong>OpenCode</strong></td>
+<td>75+ Provider Mid-Session Switching</td>
+<td>Zero vendor lock-in</td>
+</tr>
+<tr>
+<td><strong>Gemini CLI</strong></td>
+<td>1M Token Context Window</td>
+<td>Eliminates complex indexing</td>
+</tr>
+<tr>
+<td><strong>Amazon Q</strong></td>
+<td>Fig-Style Terminal Intellisense</td>
+<td>Context-aware autocomplete</td>
+</tr>
+</tbody>
+</table>
+<h3 id="helixcode-strengths">4.3 HelixCode Strengths</h3>
+<table>
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 25%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Status</th>
+<th>Advantage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AutoLLMManager</td>
+<td>✅</td>
+<td>Zero-touch local LLM lifecycle (unique)</td>
+</tr>
+<tr>
+<td>Score-Augmented Model Selection</td>
+<td>✅</td>
+<td>Multi-criteria scoring with verifier bridge</td>
+</tr>
+<tr>
+<td>29+ LLM Providers</td>
+<td>✅</td>
+<td>Cloud + local via unified interface</td>
+</tr>
+<tr>
+<td>Actor Model Concurrency</td>
+<td>✅</td>
+<td>8 agent types with built-in collaboration</td>
+</tr>
+<tr>
+<td>Tree-sitter Code Mapping</td>
+<td>✅</td>
+<td>Accurate AST-based analysis</td>
+</tr>
+<tr>
+<td>6-Platform UI</td>
+<td>✅</td>
+<td>Terminal, Desktop, Mobile, OS-specific</td>
+</tr>
+<tr>
+<td>Atomic Multi-File Editor</td>
+<td>✅</td>
+<td>Transaction support with rollback</td>
+</tr>
+<tr>
+<td>OpenAPI 3.0 REST API</td>
+<td>✅</td>
+<td>60+ endpoints, JWT, WebSocket MCP</td>
+</tr>
+</tbody>
+</table>
+<h3 id="helixcode-critical-weaknesses">4.4 HelixCode Critical
+Weaknesses</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 34%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr>
+<th>Weakness</th>
+<th>Impact</th>
+<th>Gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI is basic (no streaming TUI)</td>
+<td><strong>HIGH</strong></td>
+<td>No interactive REPL, inline editing, file watch</td>
+</tr>
+<tr>
+<td>No sandboxed execution</td>
+<td><strong>CRITICAL</strong></td>
+<td>Security risk for autonomous operations</td>
+</tr>
+<tr>
+<td>No permission system</td>
+<td><strong>CRITICAL</strong></td>
+<td>Cannot safely auto-approve operations</td>
+</tr>
+<tr>
+<td>No context compaction</td>
+<td><strong>HIGH</strong></td>
+<td>Cannot handle long sessions</td>
+</tr>
+<tr>
+<td>No Plan/Act dual-mode</td>
+<td><strong>HIGH</strong></td>
+<td>No separation of planning from execution</td>
+</tr>
+<tr>
+<td>No MCP OAuth</td>
+<td><strong>HIGH</strong></td>
+<td>Missing enterprise MCP integration</td>
+</tr>
+<tr>
+<td>No fuzzy matching</td>
+<td><strong>MEDIUM</strong></td>
+<td>Edit application fragile</td>
+</tr>
+<tr>
+<td>No shadow Git checkpoints</td>
+<td><strong>MEDIUM</strong></td>
+<td>No safe experimentation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="gap-analysis">5. GAP ANALYSIS</h2>
+<h3 id="feature-matrix-summary">5.1 Feature Matrix Summary</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 26%" />
+<col style="width: 35%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>HelixCode</th>
+<th>Competitor Avg</th>
+<th>Gaps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool Use</td>
+<td>20 tools</td>
+<td>25 tools</td>
+<td>Missing: LSP, NotebookEdit, WebFetch</td>
+</tr>
+<tr>
+<td>Context Management</td>
+<td>Partial</td>
+<td>Advanced</td>
+<td>Missing: Auto-compaction, 1M+ token handling</td>
+</tr>
+<tr>
+<td>Edit Format</td>
+<td>Basic</td>
+<td>Robust</td>
+<td>Missing: Fuzzy matching, cumulative diff</td>
+</tr>
+<tr>
+<td>UI/UX</td>
+<td>Basic</td>
+<td>Rich</td>
+<td>Missing: Streaming TUI, themes, intellisense</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>Minimal</td>
+<td>Strong</td>
+<td>Missing: Sandbox, permissions, ZDR</td>
+</tr>
+<tr>
+<td>Git Integration</td>
+<td>Basic</td>
+<td>Advanced</td>
+<td>Missing: Worktree isolation, checkpoints</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>Basic</td>
+<td>Full</td>
+<td>Missing: OAuth, 4 transports, auto-reconnect</td>
+</tr>
+<tr>
+<td>Multi-Agent</td>
+<td>Actor Model</td>
+<td>Advanced</td>
+<td>Missing: Subagent delegation, orchestration patterns</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Good</td>
+<td>Good</td>
+<td>Missing: OpenTelemetry, A/B testing</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>Framework exists</td>
+<td>Integrated</td>
+<td>Needs: 100% coverage, challenge sessions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="top-20-gaps-to-close-priority-order">5.2 Top 20 Gaps to Close
+(Priority Order)</h3>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Gap</th>
+<th>Category</th>
+<th>Priority</th>
+<th>Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>OS-Native Sandboxed Execution</td>
+<td>Security</td>
+<td><strong>P0</strong></td>
+<td>Very High</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Auto-Compaction System</td>
+<td>Context</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Permission Rule System</td>
+<td>Security</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>4</td>
+<td>LSP Integration</td>
+<td>Tool Use</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>5</td>
+<td>4-Layer Fuzzy Matching</td>
+<td>Edit Format</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Cumulative Diff Review Sandbox</td>
+<td>Edit Format</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Subagent Delegation System</td>
+<td>Multi-Agent</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>8</td>
+<td>MCP Full Lifecycle</td>
+<td>MCP</td>
+<td><strong>P0</strong></td>
+<td>Very High</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Tool Result Persistence</td>
+<td>Context</td>
+<td><strong>P0</strong></td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Git Worktree Isolation</td>
+<td>Git</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Shadow Git Checkpoints</td>
+<td>Security</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Hook-Based Extensibility</td>
+<td>Tool Use</td>
+<td><strong>P0</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Background Task System</td>
+<td>UI/UX</td>
+<td><strong>P1</strong></td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Smart File Editing</td>
+<td>Edit Format</td>
+<td><strong>P1</strong></td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Session Transcript Resume</td>
+<td>Context</td>
+<td><strong>P1</strong></td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>16</td>
+<td>6 Orchestration Patterns</td>
+<td>Multi-Agent</td>
+<td><strong>P1</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Architect/Editor Dual-Model</td>
+<td>Multi-Agent</td>
+<td><strong>P1</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>18</td>
+<td>Interactive Clarification Loop</td>
+<td>Multi-Agent</td>
+<td><strong>P1</strong></td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>19</td>
+<td>No-Flicker Rendering</td>
+<td>UI/UX</td>
+<td><strong>P1</strong></td>
+<td>High</td>
+</tr>
+<tr>
+<td>20</td>
+<td>OpenTelemetry Integration</td>
+<td>Performance</td>
+<td><strong>P1</strong></td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h3 id="competitive-positioning">5.3 Competitive Positioning</h3>
+<table>
+<thead>
+<tr>
+<th>Position</th>
+<th>Platform</th>
+<th>Key Differentiator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Claude Code</td>
+<td>Best overall UX, permissions, MCP</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Aider</td>
+<td>Best git-native workflow, dual-model</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Cline</td>
+<td>Best IDE integration, checkpoints</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Codex</td>
+<td>Best sandboxing, ZDR compliance</td>
+</tr>
+<tr>
+<td>5</td>
+<td>OpenCode</td>
+<td>Best provider flexibility</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Plandex</td>
+<td>Best large-scale refactoring</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td><strong>HelixCode (current)</strong></td>
+<td><strong>Best enterprise architecture</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Forge</td>
+<td>Best orchestration patterns</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Gemini CLI</td>
+<td>Best context window</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Kilo Code</td>
+<td>Best subagent delegation</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Amazon Q</td>
+<td>Best AWS integration</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Target after integration</strong>: Position 3 (behind Claude
+Code and Aider only)</p>
+<hr />
+<h2 id="master-integration-plan">6. MASTER INTEGRATION PLAN</h2>
+<h3 id="phases-overview">6.1 Phases Overview</h3>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 14%" />
+<col style="width: 24%" />
+<col style="width: 29%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Name</th>
+<th>Duration</th>
+<th>Risk Level</th>
+<th>Goal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Foundation</td>
+<td>5-7 days</td>
+<td><strong>HIGH</strong></td>
+<td>Submodule integration + build system</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Core Infrastructure</td>
+<td>14-18 days</td>
+<td><strong>HIGH</strong></td>
+<td>LLM gateway, memory, spec engine</td>
+</tr>
+<tr>
+<td>2</td>
+<td>CLI Agent Foundation</td>
+<td>18-22 days</td>
+<td>MEDIUM-HIGH</td>
+<td>Tool framework, context, edit system</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Power Features</td>
+<td>21-28 days</td>
+<td><strong>HIGH</strong></td>
+<td>Plan mode, sandboxing, MCP, permissions</td>
+</tr>
+<tr>
+<td>4</td>
+<td>UI/UX &amp; TUI</td>
+<td>14-18 days</td>
+<td>MEDIUM</td>
+<td>Streaming TUI, themes, intellisense</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Testing &amp; QA</td>
+<td>14-18 days</td>
+<td>MEDIUM</td>
+<td>100% coverage, challenges, helix_qa</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Critical Path Total</strong>: ~63 working days (~76-95
+calendar days)</p>
+<h3 id="phase-0-foundation-submodule-integration-build-system-fix">6.2
+Phase 0: Foundation — Submodule Integration &amp; Build System Fix</h3>
+<h4 id="tasks">Tasks</h4>
+<table>
+<thead>
+<tr>
+<th>Task ID</th>
+<th>Name</th>
+<th>Effort</th>
+<th>Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0-T1</td>
+<td>Complete Submodule Audit</td>
+<td>1d</td>
+<td>None</td>
+</tr>
+<tr>
+<td>P0-T2</td>
+<td>Add 4 Missing Submodules</td>
+<td>1d</td>
+<td>P0-T1</td>
+</tr>
+<tr>
+<td>P0-T3</td>
+<td>Initialize Dormant Submodules</td>
+<td>1d</td>
+<td>P0-T2</td>
+</tr>
+<tr>
+<td>P0-T4</td>
+<td>Create Go Workspace</td>
+<td>2d</td>
+<td>P0-T2, P0-T3</td>
+</tr>
+<tr>
+<td>P0-T5</td>
+<td>CI Pipeline for Submodule Matrix</td>
+<td>2d</td>
+<td>P0-T4</td>
+</tr>
+<tr>
+<td>P0-T6</td>
+<td>Document Submodule Relationships</td>
+<td>1d</td>
+<td>P0-T1</td>
+</tr>
+</tbody>
+</table>
+<h4 id="entry-criteria">Entry Criteria</h4>
+<ul>
+<li>SSH keys configured for GitHub access</li>
+<li>Go 1.26 installed</li>
+<li>Current HelixCode builds successfully</li>
+</ul>
+<h4 id="exit-criteria">Exit Criteria</h4>
+<ul>
+<li><code>git submodule status</code> shows all 11 submodules
+initialized</li>
+<li><code>go work sync</code> completes cleanly</li>
+<li><code>go build ./...</code> succeeds from root</li>
+<li>CI passes on Linux, macOS, Windows</li>
+</ul>
+<h3 id="phase-1-core-infrastructure">6.3 Phase 1: Core
+Infrastructure</h3>
+<h4 id="tasks-1">Tasks</h4>
+<table>
+<thead>
+<tr>
+<th>Task ID</th>
+<th>Name</th>
+<th>Effort</th>
+<th>Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1-T1</td>
+<td>HelixLLM Gateway Integration</td>
+<td>5d</td>
+<td>P0-T4</td>
+</tr>
+<tr>
+<td>P1-T2</td>
+<td>Provider Router Expansion (75+)</td>
+<td>4d</td>
+<td>P1-T1</td>
+</tr>
+<tr>
+<td>P1-T3</td>
+<td>HelixMemory Adapter</td>
+<td>3d</td>
+<td>P0-T4</td>
+</tr>
+<tr>
+<td>P1-T4</td>
+<td>Memory Backend Deployment</td>
+<td>2d</td>
+<td>P1-T3</td>
+</tr>
+<tr>
+<td>P1-T5</td>
+<td>HelixSpecifier Integration</td>
+<td>3d</td>
+<td>P0-T4</td>
+</tr>
+<tr>
+<td>P1-T6</td>
+<td>Spec Engine Command Loop</td>
+<td>2d</td>
+<td>P1-T5</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exit-criteria-1">Exit Criteria</h4>
+<ul>
+<li>LLM gateway routes to &gt;= 5 providers</li>
+<li>Memory system persists conversation context</li>
+<li>Spec engine decomposes prompts into subtasks</li>
+<li><blockquote>
+<p>= 90% unit test coverage for all three systems</p>
+</blockquote></li>
+</ul>
+<h3 id="phase-2-cli-agent-foundation">6.4 Phase 2: CLI Agent
+Foundation</h3>
+<h4 id="tasks-2">Tasks</h4>
+<table>
+<thead>
+<tr>
+<th>Task ID</th>
+<th>Name</th>
+<th>Effort</th>
+<th>Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P2-T1</td>
+<td>Tool Framework Expansion</td>
+<td>4d</td>
+<td>P1-T6</td>
+</tr>
+<tr>
+<td>P2-T2</td>
+<td>Context Auto-Compaction</td>
+<td>4d</td>
+<td>P1-T3</td>
+</tr>
+<tr>
+<td>P2-T3</td>
+<td>Smart File Edit System</td>
+<td>3d</td>
+<td>P2-T1</td>
+</tr>
+<tr>
+<td>P2-T4</td>
+<td>4-Layer Fuzzy Matching</td>
+<td>3d</td>
+<td>P2-T3</td>
+</tr>
+<tr>
+<td>P2-T5</td>
+<td>Session Transcript Persistence</td>
+<td>2d</td>
+<td>P1-T3</td>
+</tr>
+<tr>
+<td>P2-T6</td>
+<td>No-Flicker Rendering</td>
+<td>2d</td>
+<td>P2-T1</td>
+</tr>
+<tr>
+<td>P2-T7</td>
+<td>Tree-sitter Indexing</td>
+<td>2d</td>
+<td>P2-T2</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exit-criteria-2">Exit Criteria</h4>
+<ul>
+<li><blockquote>
+<p>= 10 tool types with registration/discovery</p>
+</blockquote></li>
+<li>Context auto-compaction reduces 2M tokens with &lt;5% semantic
+loss</li>
+<li>Smart file edit applies with &gt;= 99% accuracy</li>
+<li>Fuzzy matching resolves with &gt;= 95% success</li>
+</ul>
+<h3 id="phase-3-power-features">6.5 Phase 3: Power Features</h3>
+<h4 id="tasks-3">Tasks</h4>
+<table>
+<thead>
+<tr>
+<th>Task ID</th>
+<th>Name</th>
+<th>Effort</th>
+<th>Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P3-T1</td>
+<td>Plan/Act Dual-Mode</td>
+<td>4d</td>
+<td>P2-T1</td>
+</tr>
+<tr>
+<td>P3-T2</td>
+<td>Permission Rule System</td>
+<td>4d</td>
+<td>P3-T1</td>
+</tr>
+<tr>
+<td>P3-T3</td>
+<td>Sandboxed Shell Execution</td>
+<td>5d</td>
+<td>P2-T1</td>
+</tr>
+<tr>
+<td>P3-T4</td>
+<td>MCP Full Lifecycle</td>
+<td>5d</td>
+<td>P2-T1</td>
+</tr>
+<tr>
+<td>P3-T5</td>
+<td>Background Task System</td>
+<td>2d</td>
+<td>P3-T1</td>
+</tr>
+<tr>
+<td>P3-T6</td>
+<td>Hook-Based Extensibility</td>
+<td>3d</td>
+<td>P3-T1</td>
+</tr>
+<tr>
+<td>P3-T7</td>
+<td>Git Worktree Isolation</td>
+<td>2d</td>
+<td>P3-T3</td>
+</tr>
+<tr>
+<td>P3-T8</td>
+<td>Subagent Delegation</td>
+<td>3d</td>
+<td>P3-T5</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exit-criteria-3">Exit Criteria</h4>
+<ul>
+<li>Plan mode generates actionable plans with approval checkpoints</li>
+<li>Sandboxed shell executes with seccomp + namespace isolation</li>
+<li>MCP connects via all 4 transports with OAuth 2.1</li>
+<li>Permission system enforces 5 modes with wildcard patterns</li>
+<li>Background tasks run async with progress reporting</li>
+</ul>
+<h3 id="phase-4-uiux-tui">6.6 Phase 4: UI/UX &amp; TUI</h3>
+<h4 id="tasks-4">Tasks</h4>
+<table>
+<thead>
+<tr>
+<th>Task ID</th>
+<th>Name</th>
+<th>Effort</th>
+<th>Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P4-T1</td>
+<td>Streaming TUI</td>
+<td>4d</td>
+<td>P3-T5</td>
+</tr>
+<tr>
+<td>P4-T2</td>
+<td>Theme System</td>
+<td>2d</td>
+<td>P4-T1</td>
+</tr>
+<tr>
+<td>P4-T3</td>
+<td>AskUserQuestion with Previews</td>
+<td>2d</td>
+<td>P4-T1</td>
+</tr>
+<tr>
+<td>P4-T4</td>
+<td>Cumulative Diff Review</td>
+<td>3d</td>
+<td>P2-T4</td>
+</tr>
+<tr>
+<td>P4-T5</td>
+<td>Terminal Intellisense</td>
+<td>3d</td>
+<td>P4-T1</td>
+</tr>
+<tr>
+<td>P4-T6</td>
+<td>LSP Integration</td>
+<td>3d</td>
+<td>P4-T1</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exit-criteria-4">Exit Criteria</h4>
+<ul>
+<li>Streaming TUI renders token-by-token with &lt;50ms latency</li>
+<li>Theme system applies 6 platform themes + custom themes</li>
+<li>Terminal intellisense suggests with 85%+ relevance</li>
+<li>Cumulative diff review allows accept/reject per hunk</li>
+</ul>
+<h3 id="phase-5-testing-qa">6.7 Phase 5: Testing &amp; QA</h3>
+<h4 id="tasks-5">Tasks</h4>
+<table>
+<thead>
+<tr>
+<th>Task ID</th>
+<th>Name</th>
+<th>Effort</th>
+<th>Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P5-T1</td>
+<td>Unit Test Coverage (100%)</td>
+<td>5d</td>
+<td>P4-T6</td>
+</tr>
+<tr>
+<td>P5-T2</td>
+<td>helix_qa Challenge Sessions</td>
+<td>4d</td>
+<td>P5-T1</td>
+</tr>
+<tr>
+<td>P5-T3</td>
+<td>LLMsVerifier Integration</td>
+<td>3d</td>
+<td>P5-T1</td>
+</tr>
+<tr>
+<td>P5-T4</td>
+<td>containers Test Isolation</td>
+<td>3d</td>
+<td>P5-T1</td>
+</tr>
+<tr>
+<td>P5-T5</td>
+<td>Performance Benchmarking</td>
+<td>2d</td>
+<td>P5-T1</td>
+</tr>
+<tr>
+<td>P5-T6</td>
+<td>Security Audit</td>
+<td>3d</td>
+<td>P5-T1</td>
+</tr>
+<tr>
+<td>P5-T7</td>
+<td>Load Testing</td>
+<td>2d</td>
+<td>P5-T5</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exit-criteria-5">Exit Criteria</h4>
+<ul>
+<li><code>go test -cover</code> reports &gt;= 100% for new packages</li>
+<li>helix_qa completes &gt;= 50 challenges with &gt;90% pass rate</li>
+<li>LLMsVerifier validates with &lt;5% false positive</li>
+<li>Security audit of sandbox passes</li>
+<li>100 concurrent sessions stable for 1 hour</li>
+</ul>
+<h3 id="risk-register-top-5">6.8 Risk Register (Top 5)</h3>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 28%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Score</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Circular submodule dependency (HelixCode↔︎HelixAgent)</td>
+<td>20</td>
+<td>Non-recursive, read-only reference</td>
+</tr>
+<tr>
+<td>SSH auth fails in CI</td>
+<td>16</td>
+<td>Deploy keys + webfactory/ssh-agent</td>
+</tr>
+<tr>
+<td>Go module version conflicts</td>
+<td>16</td>
+<td>Centralized go.work sync</td>
+</tr>
+<tr>
+<td>Sandbox escape</td>
+<td>15</td>
+<td>Defense in depth: containers + seccomp + AppArmor</td>
+</tr>
+<tr>
+<td>Performance regression</td>
+<td>12</td>
+<td>Early load testing; circuit breakers</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="technical-documentation">7. TECHNICAL DOCUMENTATION</h2>
+<h3 id="architecture-diagrams">7.1 Architecture Diagrams</h3>
+<h4 id="overall-helixcode-system-architecture">Overall HelixCode System
+Architecture</h4>
+<pre><code>+---------------------+     +---------------------+     +---------------------+
+|   CLI Client        |     |   TUI Client        |     |   Web Client        |
+|   (Cobra/Viper)     |     |   (tview/Fyne)      |     |   (REST/WebSocket)  |
++----------+----------+     +----------+----------+     +----------+----------+
+           |                           |                           |
+           +---------------------------+---------------------------+
+                                       |
+                          +------------v------------+
+                          |    API Gateway (Gin)    |
+                          |  JWT, CORS, Rate Limit  |
+                          +------------+------------+
+                                       |
+              +------------------------+------------------------+
+              |                        |                        |
+    +---------v---------+   +---------v---------+   +---------v---------+
+    |  Agent System      |   |  LLM System      |   |  Tool System       |
+    |  (Actor Model)     |   |  (29+ Providers)   |   |  (20+ Tools)       |
+    |                    |   |                    |   |                    |
+    | - Coordinator      |   | - Provider Factory |   | - ToolRegistry     |
+    | - BaseAgent        |   | - ModelManager     |   | - MultiFileEditor  |
+    | - Task Queue       |   | - AutoLLMManager   |   | - PermissionGate   |
+    | - Circuit Breaker  |   | - Load Balancer    |   | - HookDispatcher   |
+    +---------+---------+   +---------+---------+   +---------+---------+
+              |                        |                        |
+              +------------------------+------------------------+
+                                       |
+                          +------------v------------+
+                          |    Memory &amp; Context     |
+                          |  (HelixMemory Adapter)  |
+                          |                         |
+                          | - PostgreSQL (persistent)|
+                          | - Redis (cache/ephemeral)|
+                          | - Embedding Search       |
+                          +------------+------------+
+                                       |
+                          +------------v------------+
+                          |  Specification Engine   |
+                          |   (HelixSpecifier)       |
+                          |                         |
+                          | - SpecKit Parser        |
+                          | - Superpowers Evaluator |
+                          | - GSD Execution Flow    |
+                          +-------------------------+</code></pre>
+<h4 id="session-lifecycle-state-machine">Session Lifecycle State
+Machine</h4>
+<pre><code>[INIT] --&gt; [AUTH] --&gt; [PLANNING] --&gt; [EXECUTING] --&gt; [REVIEWING]
+                                          |                |
+                                          v                |
+                                    [COMPACTING] &lt;---------+
+                                          |
+                                          v
+                                    [CHECKPOINT]
+                                          |
+                                          v
+                                    [COMPLETED] --&gt; [ARCHIVED]
+                                          |
+                                          v
+                                    [RESUMED] --&gt; [PLANNING]</code></pre>
+<h3 id="feature-porting-guides-condensed">7.2 Feature Porting Guides
+(Condensed)</h3>
+<h4 id="auto-compaction-system-claude-code">Auto-Compaction System
+(Claude Code)</h4>
+<p><strong>What</strong>: Automatically summarize conversation history
+when approaching context limits.</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// ContextCompactionMonitor monitors token usage and triggers compaction</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ContextCompactionMonitor <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    maxTokens      <span class="dt">int</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    threshold      <span class="dt">float64</span> <span class="co">// 0.8 = 80%</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    history        <span class="op">[]</span>Message</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    compactedRuns  <span class="dt">int</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    thrashingDetector <span class="op">*</span>ThrashingDetector</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>ContextCompactionMonitor<span class="op">)</span> ShouldCompact<span class="op">()</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    currentTokens <span class="op">:=</span> m<span class="op">.</span>countTokens<span class="op">()</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dt">float64</span><span class="op">(</span>currentTokens<span class="op">)</span> <span class="op">&gt;=</span> <span class="dt">float64</span><span class="op">(</span>m<span class="op">.</span>maxTokens<span class="op">)*</span>m<span class="op">.</span>threshold</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>ContextCompactionMonitor<span class="op">)</span> Compact<span class="op">()</span> <span class="op">(*</span>CompactionResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> m<span class="op">.</span>thrashingDetector<span class="op">.</span>IsThrashing<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrCompactionThrashing</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Summarize older turns, preserve essential context</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    summary <span class="op">:=</span> m<span class="op">.</span>summarizeHistory<span class="op">(</span>m<span class="op">.</span>history<span class="op">[:</span><span class="bu">len</span><span class="op">(</span>m<span class="op">.</span>history<span class="op">)/</span><span class="dv">2</span><span class="op">])</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>history <span class="op">=</span> <span class="bu">append</span><span class="op">([]</span>Message<span class="op">{</span>summary<span class="op">},</span> m<span class="op">.</span>history<span class="op">[</span><span class="bu">len</span><span class="op">(</span>m<span class="op">.</span>history<span class="op">)/</span><span class="dv">2</span><span class="op">:]...)</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>compactedRuns<span class="op">++</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>CompactionResult<span class="op">{</span>Summary<span class="op">:</span> summary<span class="op">,</span> RemainingTurns<span class="op">:</span> <span class="bu">len</span><span class="op">(</span>m<span class="op">.</span>history<span class="op">)},</span> <span class="ot">nil</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="permission-rule-system-claude-code">Permission Rule System
+(Claude Code)</h4>
+<p><strong>What</strong>: 5 permission modes with wildcard rules for
+tool approval.</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PermissionMode <span class="dt">int</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> <span class="op">(</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    PermissionDefault PermissionMode <span class="op">=</span> <span class="ot">iota</span> <span class="co">// Standard approval</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    PermissionAuto                           <span class="co">// Auto-approve safe commands</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    PermissionAcceptEdits                    <span class="co">// Auto-approve file edits</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    PermissionDontAsk                        <span class="co">// Auto-approve read-only</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    PermissionBypass                         <span class="co">// Auto-approve everything</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    PermissionPlan                           <span class="co">// Plan mode approval</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PermissionRule <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    Tool    <span class="dt">string</span> <span class="co">// &quot;Bash&quot;, &quot;Read&quot;, &quot;Edit&quot;, &quot;Write&quot;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    Pattern <span class="dt">string</span> <span class="co">// &quot;git status:*&quot;, &quot;rm -rf *&quot;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    Action  RuleAction <span class="co">// Allow, Deny, Ask</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PermissionEngine <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    DefaultMode PermissionMode</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    Rules       <span class="op">[]</span>PermissionRule</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>e <span class="op">*</span>PermissionEngine<span class="op">)</span> Evaluate<span class="op">(</span>tool <span class="dt">string</span><span class="op">,</span> command <span class="dt">string</span><span class="op">)</span> PermissionDecision <span class="op">{</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _<span class="op">,</span> rule <span class="op">:=</span> <span class="kw">range</span> e<span class="op">.</span>Rules <span class="op">{</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> rule<span class="op">.</span>Tool <span class="op">==</span> tool <span class="op">&amp;&amp;</span> matchWildcard<span class="op">(</span>rule<span class="op">.</span>Pattern<span class="op">,</span> command<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> PermissionDecision<span class="op">{</span>Action<span class="op">:</span> rule<span class="op">.</span>Action<span class="op">,</span> MatchedRule<span class="op">:</span> rule<span class="op">}</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> PermissionDecision<span class="op">{</span>Action<span class="op">:</span> Ask<span class="op">,</span> Reason<span class="op">:</span> <span class="st">&quot;No matching rule&quot;</span><span class="op">}</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="git-worktree-isolation-claude-code">Git Worktree Isolation
+(Claude Code)</h4>
+<p><strong>What</strong>: Spawn subagents in isolated git worktrees for
+parallel development.</p>
+<p><strong>Implementation</strong>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> WorktreeManager <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    baseRepo <span class="dt">string</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    worktrees <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>Worktree</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Worktree <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    Name       <span class="dt">string</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    Path       <span class="dt">string</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    Branch     <span class="dt">string</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    Isolated   <span class="dt">bool</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    Changes    <span class="op">[]</span>FileChange</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>WorktreeManager<span class="op">)</span> CreateWorktree<span class="op">(</span>name <span class="dt">string</span><span class="op">,</span> baseBranch <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>Worktree<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    path <span class="op">:=</span> filepath<span class="op">.</span>Join<span class="op">(</span>m<span class="op">.</span>baseRepo<span class="op">,</span> <span class="st">&quot;.worktrees&quot;</span><span class="op">,</span> name<span class="op">)</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">:=</span> exec<span class="op">.</span>Command<span class="op">(</span><span class="st">&quot;git&quot;</span><span class="op">,</span> <span class="st">&quot;worktree&quot;</span><span class="op">,</span> <span class="st">&quot;add&quot;</span><span class="op">,</span> <span class="st">&quot;-b&quot;</span><span class="op">,</span> name<span class="op">,</span> path<span class="op">,</span> baseBranch<span class="op">)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">:=</span> cmd<span class="op">.</span>Run<span class="op">();</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> fmt<span class="op">.</span>Errorf<span class="op">(</span><span class="st">&quot;create worktree: %w&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    wt <span class="op">:=</span> <span class="op">&amp;</span>Worktree<span class="op">{</span>Name<span class="op">:</span> name<span class="op">,</span> Path<span class="op">:</span> path<span class="op">,</span> Branch<span class="op">:</span> name<span class="op">,</span> Isolated<span class="op">:</span> <span class="ot">true</span><span class="op">}</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    m<span class="op">.</span>worktrees<span class="op">[</span>name<span class="op">]</span> <span class="op">=</span> wt</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> wt<span class="op">,</span> <span class="ot">nil</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>m <span class="op">*</span>WorktreeManager<span class="op">)</span> SpawnAgentInWorktree<span class="op">(</span>wt <span class="op">*</span>Worktree<span class="op">,</span> task Task<span class="op">)</span> <span class="op">(*</span>Agent<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Agent operates exclusively within worktree path</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    config <span class="op">:=</span> <span class="op">&amp;</span>AgentConfig<span class="op">{</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        WorkingDir<span class="op">:</span> wt<span class="op">.</span>Path<span class="op">,</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        Isolated<span class="op">:</span>   <span class="ot">true</span><span class="op">,</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        Permissions<span class="op">:</span> RestrictedPermissions<span class="op">(),</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> NewAgent<span class="op">(</span>config<span class="op">)</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="submodule-wiring-specifications">7.3 Submodule Wiring
+Specifications</h3>
+<h4 id="helixagent-integration">HelixAgent Integration</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// HelixAgent provides cli_agents analysis and agent orchestration</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> HelixAgentAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    cliAgentsDir <span class="dt">string</span> <span class="co">// Path to cli_agents/ directory</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    analyses     <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]*</span>CLIAgentAnalysis</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> CLIAgentAnalysis <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    Name        <span class="dt">string</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    Repository  <span class="dt">string</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    Features    <span class="op">[]</span>Feature</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    PortingPlan <span class="op">[]</span>PortingTask</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">// Integration point: Load all 60+ agent analyses at startup</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>HelixAgentAdapter<span class="op">)</span> LoadAnalyses<span class="op">()</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> filepath<span class="op">.</span>Walk<span class="op">(</span>a<span class="op">.</span>cliAgentsDir<span class="op">,</span> <span class="kw">func</span><span class="op">(</span>path <span class="dt">string</span><span class="op">,</span> info os<span class="op">.</span>FileInfo<span class="op">,</span> err <span class="dt">error</span><span class="op">)</span> <span class="dt">error</span> <span class="op">{</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> strings<span class="op">.</span>HasSuffix<span class="op">(</span>path<span class="op">,</span> <span class="st">&quot;.md&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>            analysis<span class="op">,</span> err <span class="op">:=</span> ParseAnalysisFile<span class="op">(</span>path<span class="op">)</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> err <span class="op">==</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>                a<span class="op">.</span>analyses<span class="op">[</span>analysis<span class="op">.</span>Name<span class="op">]</span> <span class="op">=</span> analysis</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="helixllm-integration">HelixLLM Integration</h4>
+<div class="sourceCode" id="cb11"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// HelixLLMGateway wraps the HelixLLM module for provider routing</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> HelixLLMGateway <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    client <span class="op">*</span>helixllm<span class="op">.</span>Client</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    router <span class="op">*</span>ProviderRouter</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> ProviderRouter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    providers <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>Provider</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    strategies <span class="kw">map</span><span class="op">[</span><span class="dt">string</span><span class="op">]</span>RoutingStrategy</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>g <span class="op">*</span>HelixLLMGateway<span class="op">)</span> RouteRequest<span class="op">(</span>req <span class="op">*</span>LLMRequest<span class="op">)</span> <span class="op">(*</span>LLMResponse<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Use HelixLLM&#39;s 6 operating modes: full, gateway, brain, knowledge, agents, control</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    mode <span class="op">:=</span> g<span class="op">.</span>selectMode<span class="op">(</span>req<span class="op">)</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> g<span class="op">.</span>client<span class="op">.</span>Generate<span class="op">(</span>req<span class="op">.</span>Context<span class="op">(),</span> req<span class="op">,</span> helixllm<span class="op">.</span>WithMode<span class="op">(</span>mode<span class="op">))</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="helixmemory-integration">HelixMemory Integration</h4>
+<div class="sourceCode" id="cb12"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// HelixMemoryAdapter implements the digital.vasic.memory interface</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> HelixMemoryAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    backends <span class="op">[]</span>MemoryBackend</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    primary  MemoryBackend</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> MemoryBackend <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    Store<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">,</span> value <span class="kw">interface</span><span class="op">{})</span> <span class="dt">error</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    Retrieve<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> key <span class="dt">string</span><span class="op">)</span> <span class="op">(</span><span class="kw">interface</span><span class="op">{},</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    Search<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> query <span class="dt">string</span><span class="op">,</span> limit <span class="dt">int</span><span class="op">)</span> <span class="op">([]</span>SearchResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Backends: Mem0, Cognee, Letta, Graphiti</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> NewMemoryAdapter<span class="op">(</span>cfg <span class="op">*</span>MemoryConfig<span class="op">)</span> <span class="op">(*</span>HelixMemoryAdapter<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> backends <span class="op">[]</span>MemoryBackend</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg<span class="op">.</span>Mem0<span class="op">.</span>Enabled <span class="op">{</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        backends <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>backends<span class="op">,</span> mem0<span class="op">.</span>NewClient<span class="op">(</span>cfg<span class="op">.</span>Mem0<span class="op">))</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cfg<span class="op">.</span>Cognee<span class="op">.</span>Enabled <span class="op">{</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        backends <span class="op">=</span> <span class="bu">append</span><span class="op">(</span>backends<span class="op">,</span> cognee<span class="op">.</span>NewClient<span class="op">(</span>cfg<span class="op">.</span>Cognee<span class="op">))</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... Letta, Graphiti</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>HelixMemoryAdapter<span class="op">{</span>backends<span class="op">:</span> backends<span class="op">,</span> primary<span class="op">:</span> backends<span class="op">[</span><span class="dv">0</span><span class="op">]},</span> <span class="ot">nil</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="helixspecifier-integration">HelixSpecifier Integration</h4>
+<div class="sourceCode" id="cb13"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// HelixSpecifier wraps the 3-pillar engine</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> HelixSpecifierAdapter <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    engine <span class="op">*</span>specifier<span class="op">.</span>Engine</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>a <span class="op">*</span>HelixSpecifierAdapter<span class="op">)</span> DecomposeTask<span class="op">(</span>input <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>TaskSpec<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pillar 1: SpecKit - Parse and validate input</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    spec<span class="op">,</span> err <span class="op">:=</span> a<span class="op">.</span>engine<span class="op">.</span>SpecKit<span class="op">.</span>Parse<span class="op">(</span>input<span class="op">)</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> err</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pillar 2: Superpowers - Evaluate capabilities needed</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    capabilities <span class="op">:=</span> a<span class="op">.</span>engine<span class="op">.</span>Superpowers<span class="op">.</span>Evaluate<span class="op">(</span>spec<span class="op">)</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pillar 3: GSD - Generate execution flow</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    flow <span class="op">:=</span> a<span class="op">.</span>engine<span class="op">.</span>GSD<span class="op">.</span>GenerateFlow<span class="op">(</span>spec<span class="op">,</span> capabilities<span class="op">)</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>TaskSpec<span class="op">{</span>Spec<span class="op">:</span> spec<span class="op">,</span> Capabilities<span class="op">:</span> capabilities<span class="op">,</span> Flow<span class="op">:</span> flow<span class="op">},</span> <span class="ot">nil</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h2 id="testing-strategy">8. TESTING STRATEGY</h2>
+<h3 id="test-pyramid">8.1 Test Pyramid</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Count</th>
+<th>Type</th>
+<th>Framework</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>3,000+</td>
+<td>Go test + testify</td>
+<td><code>go test</code></td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>800+</td>
+<td>Inter-module</td>
+<td><code>run_integration_tests.sh</code></td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>200+</td>
+<td>Full CLI workflows</td>
+<td>Docker Compose</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>100+</td>
+<td>Benchmarks</td>
+<td><code>benchmarks/</code> + pprof</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>232+</td>
+<td>Attack vectors</td>
+<td>Custom harness</td>
+</tr>
+<tr>
+<td>Challenges</td>
+<td>100+</td>
+<td>Capability verification</td>
+<td>Challenges framework</td>
+</tr>
+<tr>
+<td>QA Sessions</td>
+<td>800+</td>
+<td>helix_qa test banks</td>
+<td><code>cli-agents-test-*.json</code></td>
+</tr>
+<tr>
+<td>containers</td>
+<td>100+</td>
+<td>Isolation testing</td>
+<td>Docker/Podman/K8s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total: 5,245+ tests</strong></p>
+<h3 id="per-feature-test-matrix-examples">8.2 Per-Feature Test Matrix
+(Examples)</h3>
+<h4 id="permission-system-tests">Permission System Tests</h4>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 27%" />
+<col style="width: 19%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Scenario</th>
+<th>Input</th>
+<th>Expected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PERM-001</td>
+<td>Default mode asks for Bash</td>
+<td><code>Bash(&quot;ls&quot;)</code></td>
+<td>Ask permission</td>
+</tr>
+<tr>
+<td>PERM-002</td>
+<td>Auto mode allows safe command</td>
+<td><code>Bash(&quot;git status&quot;)</code> with rule</td>
+<td>Auto-allow</td>
+</tr>
+<tr>
+<td>PERM-003</td>
+<td>Wildcard matches git add</td>
+<td><code>Bash(&quot;git add file.go&quot;)</code> with
+<code>git add:*</code></td>
+<td>Allow</td>
+</tr>
+<tr>
+<td>PERM-004</td>
+<td>Compound command parsed</td>
+<td><code>Bash(&quot;ls &amp;&amp; git push&quot;)</code></td>
+<td>Ask for push part</td>
+</tr>
+<tr>
+<td>PERM-005</td>
+<td>Dangerous rm detected</td>
+<td><code>Bash(&quot;rm -rf /&quot;)</code></td>
+<td>Deny</td>
+</tr>
+<tr>
+<td>PERM-006</td>
+<td>Sandbox permission check</td>
+<td><code>Bash(&quot;curl ...&quot;)</code> in sandbox</td>
+<td>Ask</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total: 180 permission rule permutation tests</strong></p>
+<h4 id="context-compaction-tests">Context Compaction Tests</h4>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 27%" />
+<col style="width: 19%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Scenario</th>
+<th>Input</th>
+<th>Expected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>COMP-001</td>
+<td>80% threshold triggers</td>
+<td>800K/1M tokens</td>
+<td>Compaction runs</td>
+</tr>
+<tr>
+<td>COMP-002</td>
+<td>Thrashing detection (3x)</td>
+<td>3 compactions, no progress</td>
+<td>Error</td>
+</tr>
+<tr>
+<td>COMP-003</td>
+<td>Semantic preservation</td>
+<td>Compact 10-turn conversation</td>
+<td>Key facts retained</td>
+</tr>
+<tr>
+<td>COMP-004</td>
+<td>Empty entries skipped</td>
+<td>Hook entries with no content</td>
+<td>Removed</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<h4 id="tool-framework-tests">Tool Framework Tests</h4>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 27%" />
+<col style="width: 19%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Scenario</th>
+<th>Input</th>
+<th>Expected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TOOL-001</td>
+<td>Read with pagination</td>
+<td>Read file, offset=100, limit=50</td>
+<td>Correct chunk</td>
+</tr>
+<tr>
+<td>TOOL-002</td>
+<td>Write with diff output</td>
+<td>Write file, show diff</td>
+<td>Git-style diff</td>
+</tr>
+<tr>
+<td>TOOL-003</td>
+<td>Edit with fuzzy matching</td>
+<td>old_string close but not exact</td>
+<td>Match via difflib</td>
+</tr>
+<tr>
+<td>TOOL-004</td>
+<td>Bash background task</td>
+<td>run_in_background=true</td>
+<td>TaskID returned</td>
+</tr>
+<tr>
+<td>TOOL-005</td>
+<td>MCP stdio transport</td>
+<td>Connect to local MCP server</td>
+<td>Tools listed</td>
+</tr>
+<tr>
+<td>TOOL-006</td>
+<td>MCP SSE with OAuth</td>
+<td>OAuth flow + SSE transport</td>
+<td>Connection established</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total: 470 tool framework scenario tests</strong></p>
+<h3 id="coverage-requirements">8.3 Coverage Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Enforcement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Line Coverage</td>
+<td>100%</td>
+<td><code>go test -cover</code> gate in CI</td>
+</tr>
+<tr>
+<td>Branch Coverage</td>
+<td>100%</td>
+<td>Critical paths only</td>
+</tr>
+<tr>
+<td>Function Coverage</td>
+<td>100%</td>
+<td>All exported functions</td>
+</tr>
+<tr>
+<td>Tool Scenarios</td>
+<td>100%</td>
+<td>470 scenarios</td>
+</tr>
+<tr>
+<td>Permission Permutations</td>
+<td>100%</td>
+<td>180 optimized tests</td>
+</tr>
+<tr>
+<td>Security Attack Vectors</td>
+<td>100%</td>
+<td>232 tests</td>
+</tr>
+<tr>
+<td>Flaky Test Rate</td>
+<td>&lt;1%</td>
+<td>Quarantine + retry</td>
+</tr>
+<tr>
+<td>Performance Regression</td>
+<td>&lt;10%</td>
+<td>Benchmark comparison</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cicd-pipeline">8.4 CI/CD Pipeline</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># .github/workflows/helix-integration.yml</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> Helix Integration Pipeline</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">on</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">push</span><span class="kw">,</span><span class="at"> pull_request</span><span class="kw">]</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">phase0-build</span><span class="kw">:</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">submodules</span><span class="kw">:</span><span class="at"> recursive</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">ssh-key</span><span class="kw">:</span><span class="at"> ${{ secrets.SSH_PRIVATE_KEY }}</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Build All Modules</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">run</span><span class="kw">:</span><span class="at"> go work sync &amp;&amp; go build ./...</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">phase1-test</span><span class="kw">:</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">needs</span><span class="kw">:</span><span class="at"> phase0-build</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">strategy</span><span class="kw">:</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">matrix</span><span class="kw">:</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">test-type</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">unit</span><span class="kw">,</span><span class="at"> integration</span><span class="kw">,</span><span class="at"> e2e</span><span class="kw">]</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Run ${{ matrix.test-type }} tests</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">run</span><span class="kw">:</span><span class="at"> go test -cover -race ./...</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">phase2-security</span><span class="kw">:</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">needs</span><span class="kw">:</span><span class="at"> phase0-build</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Security Audit</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">run</span><span class="kw">:</span><span class="at"> ./scripts/security_audit.sh</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Sandbox Escape Tests</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">run</span><span class="kw">:</span><span class="at"> go test -tags=sandbox ./security/...</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">phase3-performance</span><span class="kw">:</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">needs</span><span class="kw">:</span><span class="at"> phase1-test</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Load Test</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">run</span><span class="kw">:</span><span class="at"> ./scripts/load_test.sh --duration=1h --sessions=100</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Benchmark</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">run</span><span class="kw">:</span><span class="at"> go test -bench=. ./benchmarks/...</span></span></code></pre></div>
+<hr />
+<h2 id="immediate-action-items">9. IMMEDIATE ACTION ITEMS</h2>
+<h3 id="today-day-0">9.1 Today (Day 0)</h3>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 33%" />
+<col style="width: 29%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Owner</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Run <code>integrate_submodules.sh</code> to add 4 missing submodules
+via SSH</td>
+<td>DevOps</td>
+<td>30 min</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Verify <code>git submodule status</code> shows all 11 submodules
+initialized</td>
+<td>DevOps</td>
+<td>10 min</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Create <code>go.work</code> and verify
+<code>go build ./...</code></td>
+<td>Backend</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Update CI pipeline with SSH deploy keys</td>
+<td>DevOps</td>
+<td>2 hours</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Review this document with engineering leads</td>
+<td>Tech Lead</td>
+<td>2 hours</td>
+</tr>
+</tbody>
+</table>
+<h3 id="week-1-phase-0-completion">9.2 Week 1 (Phase 0 Completion)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Complete submodule audit</td>
+<td><code>SUBMODULE_AUDIT.md</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Add 4 missing submodules</td>
+<td>All 11 submodules initialized</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Create unified Go workspace</td>
+<td><code>go.work</code> + clean build</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CI pipeline for submodule matrix</td>
+<td><code>.github/workflows/ci.yml</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Document submodule relationships</td>
+<td>Architecture diagram</td>
+</tr>
+</tbody>
+</table>
+<h3 id="month-1-phases-0-2">9.3 Month 1 (Phases 0-2)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>HelixLLM gateway operational</td>
+<td>5+ provider routing</td>
+</tr>
+<tr>
+<td>2</td>
+<td>HelixMemory adapter working</td>
+<td>Context persistence</td>
+</tr>
+<tr>
+<td>3</td>
+<td>HelixSpecifier command loop</td>
+<td>Task decomposition</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Tool framework expansion</td>
+<td>10+ tool types</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Context auto-compaction</td>
+<td>2M token handling</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Smart file editing</td>
+<td>99% accuracy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="month-2-phases-3-4">9.4 Month 2 (Phases 3-4)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Plan/Act dual-mode</td>
+<td>Model switching</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Permission system</td>
+<td>5 modes + wildcards</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Sandboxed execution</td>
+<td>seccomp + namespaces</td>
+</tr>
+<tr>
+<td>4</td>
+<td>MCP lifecycle</td>
+<td>4 transports + OAuth</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Streaming TUI</td>
+<td>&lt;50ms latency</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Theme system</td>
+<td>6 platform themes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="month-3-phase-5">9.5 Month 3 (Phase 5)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>100% test coverage</td>
+<td>Coverage report</td>
+</tr>
+<tr>
+<td>2</td>
+<td>helix_qa challenges</td>
+<td>&gt;90% pass rate</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Security audit</td>
+<td>Pass report</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Performance benchmarks</td>
+<td>p95 targets met</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Load testing</td>
+<td>100 concurrent sessions</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Production readiness</td>
+<td>Go-live approval</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="appendices">10. APPENDICES</h2>
+<h3 id="appendix-a-complete-feature-inventory">Appendix A: Complete
+Feature Inventory</h3>
+<p><em>(See full list in <code>stage3_gap_analysis.md</code> — 137
+features across 10 CLI agents)</em></p>
+<h3 id="appendix-b-submodule-urls">Appendix B: Submodule URLs</h3>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 28%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Submodule</th>
+<th>SSH URL</th>
+<th>Local Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HelixAgent</td>
+<td><code>git@github.com:HelixDevelopment/HelixAgent.git</code></td>
+<td><code>submodules/helix_agent</code></td>
+</tr>
+<tr>
+<td>HelixLLM</td>
+<td><code>git@github.com:HelixDevelopment/HelixLLM.git</code></td>
+<td><code>submodules/helix_llm</code></td>
+</tr>
+<tr>
+<td>HelixMemory</td>
+<td><code>git@github.com:HelixDevelopment/HelixMemory.git</code></td>
+<td><code>submodules/helix_memory</code></td>
+</tr>
+<tr>
+<td>HelixSpecifier</td>
+<td><code>git@github.com:HelixDevelopment/HelixSpecifier.git</code></td>
+<td><code>submodules/helix_specifier</code></td>
+</tr>
+<tr>
+<td>LLMsVerifier</td>
+<td><code>git@github.com:vasic-digital/LLMsVerifier.git</code></td>
+<td><code>submodules/llms_verifier</code></td>
+</tr>
+<tr>
+<td>helix_qa</td>
+<td><code>git@github.com:HelixDevelopment/HelixQA.git</code></td>
+<td><code>HelixQA</code></td>
+</tr>
+<tr>
+<td>Challenges</td>
+<td><code>git@github.com:vasic-digital/Challenges.git</code></td>
+<td><code>Challenges</code></td>
+</tr>
+<tr>
+<td>containers</td>
+<td><code>git@github.com:vasic-digital/Containers.git</code></td>
+<td><code>Containers</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="appendix-c-cli-agent-catalog">Appendix C: CLI Agent Catalog</h3>
+<p><em>(See full catalog in <code>stage2_cli_agents_catalog.md</code> —
+60+ agents with feature analysis)</em></p>
+<h3 id="appendix-d-technical-deep-dive">Appendix D: Technical Deep
+Dive</h3>
+<p><em>(See full documentation in
+<code>stage4_technical_documentation.md</code> — 14,752 lines, 29
+features)</em></p>
+<h3 id="appendix-e-testing-details">Appendix E: Testing Details</h3>
+<p><em>(See full strategy in <code>stage4_testing_strategy.md</code> —
+4,444 lines, 5,245+ tests)</em></p>
+<h3 id="appendix-f-integration-plan-detail">Appendix F: Integration Plan
+Detail</h3>
+<p><em>(See full plan in <code>stage4_integration_plan.md</code> — 1,347
+lines, 60 tasks)</em></p>
+<hr />
+<h2 id="document-control">DOCUMENT CONTROL</h2>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 18%" />
+<col style="width: 25%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Author</th>
+<th>Changes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>2026-05-04</td>
+<td>Helix Integration Team</td>
+<td>Initial comprehensive analysis and integration plan</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>END OF MASTER DOCUMENT</strong></p>
+</body>
+</html>

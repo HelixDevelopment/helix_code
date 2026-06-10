@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CLOSE-OUT-CAVEATS</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">CLOSE-OUT-CAVEATS</h1>
+</header>
+<h1 id="codegraph-incorporation-phase-c-close-out-caveat-resolution">CodeGraph
+incorporation — Phase C close-out: caveat resolution</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-05-20</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Verbatim 2026-05-19 operator mandate: <em>“all existing tests and
+Challenges do work in anti-bluff manner - they MUST confirm that all
+tested codebase really works as expected! We had been in position that
+all tests do execute with success and all Challenges as well, but in
+reality the most of the features does not work and can’t be used! This
+MUST NOT be the case and execution of tests and Challenges MUST
+guarantee the quality, the completition and full usability by end users
+of the product!”</em></p>
+</blockquote>
+<p>This document closes the three honest caveats left open after the
+CodeGraph (<code>@colbymchenry/codegraph</code> v0.7.12) incorporation
+into HelixCode. Authority: HelixCode root CLAUDE.md / CONSTITUTION.md —
+CONST-035, CONST-050(B), §11.4.3 topology-aware dispatch, §11.4.21
+operator-block details.</p>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#caveat-1--kimi-cli--qwen-code-true-end-to-end">Caveat 1 —
+Kimi CLI + Qwen Code true end-to-end</a></li>
+<li><a href="#caveat-2--helix_qa-autonomous-qa-session">Caveat 2 —
+helix_qa autonomous QA session</a></li>
+<li><a href="#caveat-3--anti-bluff-covenant-in-qwenmd-across-submodules">Caveat
+3 — anti-bluff covenant in QWEN.md across submodules</a></li>
+</ul>
+<h2 id="caveat-1-kimi-cli-qwen-code-true-end-to-end">Caveat 1 — Kimi CLI
++ Qwen Code true end-to-end</h2>
+<p>Both per-agent Challenges were re-driven non-interactively this
+session against the real CodeGraph MCP server (624,092-node graph of the
+HelixCode repo). Result: <strong>both agents are genuinely
+backend-blocked</strong> — reported HONESTLY, not faked.</p>
+<h3 id="kimi-cli-connect-only-tool-discovery-pass-end-to-end-operator-blocked">Kimi
+CLI — connect-only + tool-discovery PASS (end-to-end
+operator-blocked)</h3>
+<p><code>tools/codegraph/challenges/cg-challenge-05-kimi.sh</code>
+re-run. The transcript
+(<code>CG-CHALLENGE-05-kimi-transcript.txt</code>, 1935 bytes) proves
+Kimi’s MCP loader connected to the <code>codegraph</code> server and
+enumerated <strong>all 9</strong> <code>codegraph_*</code> tools:</p>
+<pre><code>MCPServerSnapshot(name=&#39;codegraph&#39;, status=&#39;connected&#39;, tools=(
+    &#39;codegraph_search&#39;, &#39;codegraph_context&#39;, &#39;codegraph_callers&#39;,
+    &#39;codegraph_callees&#39;, &#39;codegraph_impact&#39;, &#39;codegraph_node&#39;,
+    &#39;codegraph_explore&#39;, &#39;codegraph_status&#39;, &#39;codegraph_files&#39;))</code></pre>
+<p>The agent step then aborts:</p>
+<pre><code>Error code: 429 - {&#39;error&#39;: {&#39;message&#39;: &quot;You&#39;ve reached kimi monthly usage limit
+for this billing cycle. ...&quot;}}</code></pre>
+<p>This is the strongest available proof short of end-to-end: the MCP
+transport is fully functional and the tools are reachable; only the LLM
+backend quota blocks the final answer. Per §11.4.3 the connect-only
+fallback is reported as connect-only — NEVER as end-to-end.</p>
+<h3 id="qwen-code-connect-only-pass-end-to-end-operator-blocked">Qwen
+Code — connect-only PASS (end-to-end operator-blocked)</h3>
+<p><code>tools/codegraph/challenges/cg-challenge-07-qwen.sh</code>
+re-run. Transcript (<code>CG-CHALLENGE-07-qwen-transcript.txt</code>,
+136 bytes):</p>
+<pre><code>Qwen OAuth free tier was discontinued on 2026-04-15. Run /auth to switch to
+Coding Plan, OpenRouter, Fireworks AI, or another provider.</code></pre>
+<p>Connect-only PASS captured (config registers codegraph MCP server +
+binary reachable). End-to-end NOT proven.</p>
+<h3 id="honest-disposition">Honest disposition</h3>
+<p>End-to-end Kimi/Qwen verification is
+<strong>operator-blocked</strong>. Filed as <code>docs/Issues.md</code>
+→ <strong>HXC-010</strong> with
+<code>**Status:** Operator-blocked</code> +
+<code>**Operator-Block-Details:**</code> per constitution §11.4.21.
+UNBLOCK CONDITION: operator supplies Kimi API quota/credentials and/or
+Qwen Code LLM credentials, then re-runs the two Challenges. Claude Code,
+OpenCode, and Crush remain true-end-to-end verified (Phase C,
+unchanged).</p>
+<h2 id="caveat-2-helix_qa-autonomous-qa-session">Caveat 2 — helix_qa
+autonomous QA session</h2>
+<p>The codegraph Challenge bank
+(<code>tools/codegraph/challenges/codegraph-integration.bank.yaml</code>)
+was driven through the helix_qa runner this session.</p>
+<ul>
+<li><code>helix_qa/helixqa list -banks &lt;bank&gt;</code> → loads all 7
+test cases correctly.</li>
+<li><code>helix_qa/helixqa run -banks &lt;bank&gt; -platform desktop</code>
+→ the runner loads the 7 definitions (“Auto-wired runner with 7 bridged
+definitions”) but completes in ~700 ms and reports
+<code>0/7 passed</code> with every case <strong>SKIPPED</strong> (see
+<code>helixqa-session/qa-results/qa-report.md</code>). The runner’s
+<code>run</code> path is built for Android/UI-driven
+<code>dumpsys</code>-style platforms and does NOT shell out to a bank’s
+<code>action:</code> command on the <code>desktop</code> platform — it
+skips them and emits a hollow “Step Validation PASSED” metadata row
+(sub-microsecond durations). That hollow PASS is itself a §11.4
+PASS-bluff pattern and is NOT counted as evidence here.</li>
+</ul>
+<p><strong>Honest disposition.</strong> The real, anti-bluff
+autonomous-session evidence for the codegraph bank is the <strong>direct
+execution of every bank <code>action:</code> Challenge script</strong>,
+which each run real <code>codegraph</code> commands / real JSON-RPC /
+real agent invocations and FAIL LOUDLY on empty/zero/simulated results.
+Phase C captured that run:
+<code>tools/codegraph/challenges/run-all.sh</code> → 7/7 PASS with
+per-challenge wire evidence under this directory
+(<code>cg-challenge-01..07-*.log</code>,
+<code>cg-challenge-02-jsonrpc-wire.jsonl</code>, transcripts,
+connect-proofs). The bank YAML is registered and consumable by the
+helix_qa runner; what is NOT yet available is a helix_qa
+<code>run</code>-path that executes shell-<code>action</code> banks on
+the <code>desktop</code> platform. That runner-side gap is a helix_qa
+enhancement, tracked separately — it does not weaken the codegraph
+anti-bluff evidence, which stands on the direct Challenge-script run
+with captured wire transcripts.</p>
+<p>Captured this session: <code>helixqa-session/helixqa-run.log</code> +
+<code>helixqa-session/qa-results/qa-report.md</code> (the honest record
+of the runner’s desktop-platform skip behaviour).</p>
+<h2 id="caveat-3-anti-bluff-covenant-in-qwen.md-across-submodules">Caveat 3
+— anti-bluff covenant in QWEN.md across submodules</h2>
+<p>Assessment of <code>QWEN.md</code> presence + anti-bluff covenant
+across all owned submodules (run 2026-05-20):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scope</th>
+<th>QWEN.md present</th>
+<th>CLAUDE.md present</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code</code></td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>helix_qa</code></td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>challenges</code></td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>containers</code></td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>security</code></td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>dependencies/HelixDevelopment/*</code> (10 dirs)</td>
+<td>1 of 10 (<code>LLMsVerifier</code>)</td>
+<td>10 of 10</td>
+</tr>
+<tr>
+<td><code>dependencies/vasic-digital/*</code> (52 dirs)</td>
+<td>0 of 52</td>
+<td>52 of 52</td>
+</tr>
+<tr>
+<td><strong>Total dependency submodules</strong></td>
+<td><strong>1 of 62</strong></td>
+<td><strong>62 of 62</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Finding: <strong>QWEN.md is effectively absent fleet-wide.</strong>
+Only one of 67 owned submodules (<code>submodules/llms_verifier</code>)
+ships a <code>QWEN.md</code>; every owned submodule already carries a
+full <code>CLAUDE.md</code> with the anti-bluff covenant + CONST-035 /
+§11.4 anchors.</p>
+<p>Recommendation (NOT executed unilaterally — would mass-create 66+ new
+files): QWEN.md should be made a required consumer governance file
+fleet-wide ONLY if the <strong>constitution submodule</strong>
+designates it so (CONST-059 governs which files are required consumer
+files — currently the canonical trio is <code>CONSTITUTION.md</code> /
+<code>CLAUDE.md</code> / <code>AGENTS.md</code>, with
+<code>QWEN.md</code> / <code>CRUSH.md</code> named as sibling agent
+manuals at the meta-repo root by the project CLAUDE.md §1.1 but not
+mandated per-submodule). The single existing submodule QWEN.md
+(<code>LLMsVerifier</code>) was inspected — it already carries the
+anti-bluff covenant mirrored from its CLAUDE.md, so no covenant fix was
+required there.</p>
+<p>Disposition: no QWEN.md covenant fix needed (the one existing file is
+already compliant); fleet-wide QWEN.md creation deferred pending a
+constitution-submodule decision on whether QWEN.md is a required
+per-submodule consumer file.</p>
+</body>
+</html>
