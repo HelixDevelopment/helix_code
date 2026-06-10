@@ -49,7 +49,12 @@ These are concrete §11.4 anti-bluff / CONST violations found by the analysis su
 | D-6 | Stub CLI-agent packages return **hardcoded strings, never exec** the binary | `helix_agent/internal/clis/agents/qwencode/qwencode.go:101/115/137` | SP4 (CONST-035) |
 | D-7 | `helix_code/go.mod` lacks `replace dev.helix.agent` → can't import the real `clis`/`agentic` substrate | `helix_code/go.mod` | SP4/SP5 |
 | D-8 | Constitution `CLAUDE.md` Revision-table drift | `constitution/CLAUDE.md` | ~~SP0~~ resolved by sync (now Rev 21 @ f26368b) |
-| D-9 | **Pooled dispatch methods are stubs too** — return `"<Agent> execution completed"`, no exec | `helix_agent/internal/clis/instance_manager.go:906-942` (executeAider/ClaudeCode/Codex/Cline/OpenHands) | SP4 (CONST-035, widens D-6) |
+| D-9 | **Pooled dispatch methods are stubs too** — return `"<Agent> execution completed"`, no exec | `helix_agent/internal/clis/instance_manager.go:906-942` (executeAider/ClaudeCode/Codex/Cline/OpenHands) | ✅ FIXED (SP4, real os/exec, pin guards GREEN) |
+| D-6 | qwencode stub returns templated strings, never execs | `helix_agent/.../qwencode/qwencode.go:101` | ✅ FIXED (SP4, real os/exec) |
+| D-10 | 2 pre-existing flaky tests (nanosecond ID-collision) | `helix_agent` `TestCompletionHandler_IDGeneration`, `TestGenerateTeamID` | open (pre-existing, low-pri) |
+| D-11 | pre-existing `"For now, allow all types"` bluff | `helix_agent/internal/clis/instance_manager.go:389` (IsAgentTypeAvailable) | open (SP4 follow-up) |
+| D-12 | ~34 more `execute*` dispatch methods still stubbed | `helix_agent/internal/clis/instance_manager.go` (executeKiro…executeLlamaCode) | open (SP4 follow-up wave) |
+| D-13 | CONST-066 doc-export gap: 95+ `docs/**/*.md` (+ new specs/research) lack `.html`/`.pdf` siblings | repo-wide `docs/**` | open (D-13; F1 hook scoped too leniently — reconcile) |
 
 ## 2. Sub-program decomposition
 
