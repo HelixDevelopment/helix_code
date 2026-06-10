@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-impl-D18-review</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-impl-D18-review</h1>
+</header>
+<h1 id="d-18-code-review-claude_code-agentdeck-bridle-anti-bluff-fixes-11.4.125">D-18
+Code Review — claude_code / agentdeck / bridle anti-bluff fixes
+(§11.4.125)</h1>
+<p><strong>Reviewer:</strong> Independent code-review subagent
+<strong>Date:</strong> 2026-06-10 <strong>Scope:</strong> Uncommitted
+D-18 fixes in
+<code>submodules/helix_agent/internal/clis/agents/{claude_code,agentdeck,bridle}/</code>
+<strong>Disposition:</strong> READ-ONLY review (no edits/commits/push).
+One temporary mutation applied + restored for §1.1 genuineness; tree
+verified clean afterward.</p>
+<hr />
+<h2 id="verdict-go">Verdict: GO</h2>
+<p>Build/vet/test: <strong>OK</strong>. Blocking findings:
+<strong>0</strong>. Non-blocking findings: <strong>2</strong>
+(informational, both acceptable). Mutation genuineness:
+<strong>CONFIRMED</strong>. No secrets, scope clean.</p>
+<hr />
+<h2 id="build-vet-test-verified-captured">1. Build / vet / test
+(VERIFIED, captured)</h2>
+<pre><code>go build ./internal/clis/agents/{claude_code,agentdeck,bridle}/...   → BUILD_OK
+go vet   ./internal/clis/agents/{claude_code,agentdeck,bridle}/...   → VET_OK
+go test  -count=1 (3 pkgs, GREEN/RED_MODE unset):
+  ok  dev.helix.agent/internal/clis/agents/claude_code  3.477s
+  ok  dev.helix.agent/internal/clis/agents/agentdeck    1.247s
+  ok  dev.helix.agent/internal/clis/agents/bridle       0.982s</code></pre>
+<h2 id="anti-bluff-substance-verified-the-fixes-are-honest-not-relabeled-lies">2.
+Anti-bluff substance (VERIFIED — the fixes are HONEST, not relabeled
+lies)</h2>
+<ul>
+<li><strong>claude_code <code>handleMCP</code></strong> — the hardcoded
+fleet literal
+<code>&quot;Available MCP servers: filesystem, github, memory, fetch, puppeteer&quot;</code>
+and the fabricated <code>&quot;Called %s/%s via MCP&quot;</code> echo are GONE
+from non-test source. <code>list</code> now enumerates
+<code>c.mcp.GetServers()</code> (honest “No MCP servers configured” when
+empty, sorted real names otherwise). <code>call</code> routes through
+<code>MCPIntegration.CallTool</code> → wired <code>MCPTransport</code>,
+and returns the honest wrapped <code>ErrMCPClientNotWired</code> when no
+transport is installed (confirmed in
+<code>mcp_integration.go:207-221</code>:
+<code>if m.transport == nil { return …ErrMCPClientNotWired }</code> — no
+swallowed fabrication; on wired transport the real
+<code>*services.ToolCallResult</code> text flows through
+<code>mcpResultText</code>, <code>Success = !result.IsError</code>).
+This is a genuine real-dispatch seam, not a template.</li>
+<li><strong>agentdeck <code>orchestrate</code></strong> —
+<code>&quot;completed&quot;</code> → <code>&quot;planned&quot;</code>. Confirmed genuinely
+honest: the method only calls
+<code>createOrchestrationPlan(task, mode)</code> and returns the plan;
+<strong>no agent is executed</strong>, so “planned” accurately describes
+the state. The real plan is still returned.</li>
+<li><strong>bridle <code>runWorkflow</code></strong> —
+<code>&quot;completed&quot;</code> →
+<code>&quot;evaluated&quot;</code>/<code>&quot;blocked&quot;</code>. Confirmed honest: the
+loop only calls <code>checkGuardrails(step)</code>;
+<code>step.Action</code> is <strong>never dispatched</strong> (no action
+runner exists). Per-step is <code>&quot;evaluated&quot;</code> (or
+<code>&quot;blocked&quot;</code> on a strict-mode guardrail violation); overall is
+<code>&quot;blocked&quot;</code> if any step blocked, else
+<code>&quot;evaluated&quot;</code>. The strict-mode blocking path is
+preserved.</li>
+</ul>
+<h2 id="mutation-genuineness-verified-not-a-tautology">3. Mutation
+genuineness (VERIFIED — not a tautology)</h2>
+<p>Reverted bridle <code>&quot;evaluated&quot;</code>→<code>&quot;completed&quot;</code>
+(both per-step and workflow status) →
+<code>TestPin_RunWorkflow_NotFabricatedCompleted</code>
+<strong>FAILED</strong> as required:</p>
+<pre><code>expected: &quot;evaluated&quot;  actual: &quot;completed&quot;   (GREEN guard correctly trips)</code></pre>
+<p>Restored → guard passes (<code>ok … bridle 0.507s</code>);
+<code>git diff --stat</code> back to the original D-18
+17-insert/3-delete state. No residue.</p>
+<p>Additional cross-check (RED_MODE=1 vs the FIXED artifact, §11.4.115
+polarity): every RED assertion across all three packages FAILs because
+the defect is genuinely absent (e.g. agentdeck RED expects
+<code>completed</code>, gets <code>planned</code>; claude_code
+<code>call</code> RED expects the fabricated echo, gets the honest
+<code>ErrMCPClientNotWired</code>). This proves the guards track real
+behavior, not a self-agreeing fix.</p>
+<h2 id="reconciliation-verified-na-nothing-weakened">4. §11.4.120
+reconciliation (VERIFIED — N/A, nothing weakened)</h2>
+<p>No pre-existing test anywhere in <code>internal/clis/agents/</code>
+asserted the old fabricated strings (<code>Available MCP servers</code>
+/ <code>Called .. via MCP</code> / fabricated <code>completed</code>) —
+the only match is a doc-comment in the fixed source. No gate/test was
+weakened, deleted, or fake-passed; the new pin tests are pure
+additions.</p>
+<h2 id="scope-secrets-verified">5. Scope + secrets (VERIFIED)</h2>
+<p>Changed: exactly the 3 package <code>.go</code> files + 3 new
+<code>*_pin_test.go</code>. No <code>go.mod</code>/<code>go.sum</code>,
+no <code>instance_manager</code>, no <code>helix_code</code>, no other
+package touched. Secret scan of the diff: clean. Mutation-marker scan of
+the 3 dirs: clean (<code>§11.4.84</code>).</p>
+<hr />
+<h2 id="non-blocking-findings-informational-acceptable-do-not-block-go">Non-blocking
+findings (informational, acceptable — do NOT block GO)</h2>
+<ul>
+<li><strong>F1 (nit, claude_code.go <code>Initialize</code>):</strong>
+when <code>MCPConfigPath != &quot;&quot;</code>,
+<code>c.mcp = NewMCPIntegration(...)</code> is constructed twice (the
+<code>if c.mcp == nil</code> branch then the unconditional
+<code>if c.config.MCPConfigPath != &quot;&quot;</code> branch reassigns). Harmless
+— the second assignment wins and <code>LoadConfig()</code> runs on it —
+but the first construction is dead in that path. Cosmetic only; behavior
+is correct.</li>
+<li><strong>F2 (observation):</strong> the production wiring of a real
+<code>MCPTransport</code> via <code>SetTransport</code> is not exercised
+by these three packages (the stub lives in the unit test per
+CONST-050(A)). The fix correctly surfaces
+<code>ErrMCPClientNotWired</code> until a transport is installed —
+honest, not a bluff — but end-to-end MCP dispatch against a real server
+remains a separate integration concern, not in this batch’s scope.</li>
+</ul>
+<hr />
+<h2 id="summary-line">Summary line</h2>
+<p><strong>VERDICT: GO</strong> — build OK, vet OK, test OK (3/3 GREEN).
+Blocking findings: 0. Non-blocking findings: 2 (F1 cosmetic
+double-construct, F2 scope note). Mutation genuineness CONFIRMED (bridle
+evaluated→completed → guard FAILs; restored clean). RED-polarity
+confirmed against fixed artifact. §11.4.120 N/A (no weakened tests).
+Scope clean (3 pkg dirs only; no go.mod/instance_manager/helix_code), no
+secrets, no mutation residue.</p>
+</body>
+</html>
