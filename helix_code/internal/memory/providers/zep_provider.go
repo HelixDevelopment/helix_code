@@ -375,7 +375,7 @@ func (p *ZepProvider) Update(ctx context.Context, id string, vector *VectorData)
 			Fact:           fact,
 			FactName:       factName,
 			SourceNodeName: zep.String(sourceName),
-			TargetNodeName: targetName,
+			TargetNodeName: zep.String(targetName),
 		}
 
 		_, err = p.client.Graph.AddFactTriple(ctx, req)
@@ -868,7 +868,7 @@ func (p *ZepProvider) addFactTriple(ctx context.Context, userID, factID, fact st
 		FactName:       factName,
 		FactUUID:       zep.String(factID),
 		SourceNodeName: zep.String(sourceName),
-		TargetNodeName: targetName,
+		TargetNodeName: zep.String(targetName),
 	}
 
 	_, err := p.client.Graph.AddFactTriple(ctx, req)
