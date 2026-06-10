@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-impl-batch4-review</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-impl-batch4-review</h1>
+</header>
+<h1 id="wave-4-code-review-sp5-substrate-verifier-wiring-11.4.125-independent-review">Wave-4
+Code Review — SP5 substrate + verifier-wiring (§11.4.125 independent
+review)</h1>
+<p><strong>Date:</strong> 2026-06-10 <strong>Reviewer:</strong>
+Independent code-review subagent (§11.4.125 / §11.4.142)
+<strong>Scope:</strong> UNCOMMITTED wave-4 batch — <code>git diff</code>
+(root: helix_code go.mod/go.sum + new internal/substrate) +
+<code>git -C submodules/helix_agent diff</code> (verifier-wiring).
+<strong>Method:</strong> read-only build/test VERIFICATION run this
+session. No edits/commits/pushes (mutations applied then byte-restored
+from backup; trees verified clean).</p>
+<hr />
+<h2 id="verdict-go-with-fixes">VERDICT: GO-WITH-FIXES</h2>
+<p>The batch is functionally sound, anti-bluff genuine, and the gin
+1.11→1.12 bump is SAFE (every gin/HTTP/server/handler/middleware package
+PASSES; the only failing packages are pre-existing and gin-independent).
+The single must-fix is a process item, not a code defect: a pre-existing
+deterministic unit failure in <code>internal/secrets</code> exists in
+the tree regardless of this batch — it does not block this batch’s
+correctness but should be acknowledged/tracked so it is not mistaken for
+batch fallout at the release gate.</p>
+<hr />
+<h2 id="load-bearing-check-gin-1.111.12-bump-full-unit-sweep">LOAD-BEARING
+CHECK — gin 1.11→1.12 bump full unit sweep</h2>
+<p><code>cd helix_code &amp;&amp; go build ./...</code> → <strong>exit
+0</strong>, zero compile errors (only benign
+<code>ld: warning: ignoring duplicate libraries: &#39;-lobjc&#39;</code> on the
+three Fyne desktop apps — unrelated to gin).</p>
+<p><code>go test ./internal/... ./cmd/... -count=1</code> (full broad
+sweep):</p>
+<ul>
+<li><strong>ok packages: 141</strong></li>
+<li><strong>FAIL packages: 3 distinct</strong> —
+<code>internal/cognee</code>, <code>internal/helixqa</code>,
+<code>internal/secrets</code></li>
+<li>no-test-files (informational): 55</li>
+</ul>
+<p><strong>gin-bump safety is PROVEN — none of the 3 failures are
+gin/HTTP surface:</strong></p>
+<ul>
+<li>Every gin-surface package PASSES: <code>internal/server</code> ok,
+<code>cmd/server</code> ok, <code>internal/auth</code> ok,
+<code>internal/llm</code> (+ subpkgs) ok,
+<code>internal/provider</code>/<code>internal/providers</code> ok,
+<code>internal/server/i18n</code> ok.</li>
+<li><code>internal/cognee</code> and <code>internal/helixqa</code>
+<strong>PASS on isolated re-run</strong>
+(<code>go test ./internal/cognee/ ./internal/helixqa/</code> → both
+<code>ok</code>; cognee 21.7s vs 43.7s in the full sweep). Their
+full-sweep failures are real-infra contention/timeout flakes under
+parallel load (cognee hits real backends), NOT gin breakage. They are
+not in this batch’s diff.</li>
+<li><code>internal/secrets</code> is the only DETERMINISTIC failure:
+<code>TestLoadAPIKeys_GapFillPrecedence</code> —
+<code>gapfill_test.go:46: RED expected defect (FOO overridden to from_file), got FOO=&quot;from_shell&quot;</code>.
+<strong>Proven pre-existing and gin-independent:</strong> reverting
+<code>go.mod</code>/<code>go.sum</code> to HEAD (gin
+<strong>1.11.0</strong>) and re-running yields the IDENTICAL failure.
+<code>secrets</code> is not in this batch’s diff. (This is an
+env-precedence RED-polarity test, no HTTP surface.)</li>
+</ul>
+<p><strong>Sweep result: 141 ok / 3 FAIL — 0 of the FAILs attributable
+to the gin bump.</strong> <code>go mod verify</code> → all modules
+verified. <code>go.sum</code> consistent with the tidied require/replace
+set.</p>
+<hr />
+<h2 id="sp5-substrate-helix_codeinternalsubstrate">SP5 substrate
+(helix_code/internal/substrate)</h2>
+<ul>
+<li><code>go test ./internal/substrate/... -v -count=1</code> →
+<strong>5/5 PASS</strong> (DispatchUnitThroughConcurrencyPool,
+SchedulerPriorityOrdering, DrainRunsAllUnitsOnPool,
+CapabilityGateBlocksUnsatisfiableUnit, UnitErrorPropagates).</li>
+<li>Real wiring: the substrate genuinely imports
+<code>digital.vasic.concurrency/pkg/{pool,queue}</code> and runs Units
+on the real <code>pool.WorkerPool</code> (the test observes
+<code>ran==1</code> + the Execute return value through
+<code>SubmitWait</code>). The replace target
+<code>../submodules/concurrency</code> EXISTS with real
+<code>pkg/pool/pool.go</code> + <code>pkg/queue/queue.go</code> — not a
+dangling directive. This closes the D-7 “own-org concurrency unused” gap
+by REUSE (§11.4.74), not a fourth reimplementation.</li>
+<li><strong>§1.1 mutation reproduced:</strong>
+<code>Resolver.CanRun</code> → <code>return true</code> (always-true)
+makes <code>TestSubstrate_CapabilityGateBlocksUnsatisfiableUnit</code>
+FAIL (<code>An error is expected but got nil</code>); restored → ok.
+Genuine anti-bluff seam — the capability gate is a real error path, not
+a silent drop (<code>Dispatch</code> returns a real
+<code>fmt.Errorf</code> and the unit’s Execute does NOT run).</li>
+<li>No
+<code>simulated|for now|TODO implement|in production this would</code>
+in substrate.go. No secret logging.</li>
+</ul>
+<hr />
+<h2 id="verifier-wiring-submoduleshelix_agent">verifier-wiring
+(submodules/helix_agent)</h2>
+<ul>
+<li><code>go build ./internal/catalog/... ./internal/router/...</code> →
+exit 0; <code>go vet</code> → clean (no output).</li>
+<li><code>go test ./internal/catalog/ -count=1</code> → <strong>8
+PASS</strong> (the 6 wiring tests: NilIsHonestEmpty,
+StalenessAndVerifiedGate, ZeroVerifiedAtIsStale + the adjacent
+UnifiedList/HonestEmpty/NamingGrammar/CatalogRoute_Polarity/CatalogEndpoint).</li>
+<li>Real wiring confirmed: <code>router.go:783</code> now feeds
+<code>catalog.NewStartupVerifierSource(providerRegistry.GetStartupVerifier())</code>.
+<code>GetStartupVerifier()</code> is a real method on
+<code>*services.ProviderRegistry</code> returning
+<code>*verifier.StartupVerifier</code> (nil-able).
+<code>verifiedModelsFromProviders</code> reads real
+<code>verifier.UnifiedProvider.Models</code> /
+<code>UnifiedModel.{Verified,VerifiedAt,Score,Provider}</code> fields
+(all exist in <code>provider_types.go</code>). The router uses the SAME
+StartupVerifier already wired into the debate team (router.go:911/931) —
+internally consistent, no second source.</li>
+<li><strong>§1.1 mutation #1 (CONST-037 staleness gate):</strong>
+removing the <code>VerifiedAt.IsZero() || now.Sub &gt; ttl</code>
+continue →
+<code>TestStartupVerifierSource_StalenessAndVerifiedGate</code> FAILs
+(<code>stale (&gt;24h) verified model leaked</code>) AND
+<code>TestStartupVerifierSource_ZeroVerifiedAtIsStale</code> FAILs.
+Restored → ok. <strong>Genuine.</strong></li>
+<li><strong>§1.1 mutation #2 (CONST-036 Verified filter):</strong>
+removing the <code>if !m.Verified { continue }</code> → same test FAILs
+(<code>unverified model leaked past the CONST-036 Verified filter</code>).
+Restored → ok. <strong>Genuine.</strong></li>
+<li><strong>RED_MODE polarity:</strong> <code>RED_MODE=1</code>
+correctly reproduces the pre-fix honest-empty assertion (fresh verified
+models ABSENT) — proper §11.4.115 polarity switch.</li>
+</ul>
+<hr />
+<h2 id="anti-bluff-assessment-11.4-const-036-const-037">Anti-bluff
+assessment (§11.4 / CONST-036 / CONST-037)</h2>
+<ul>
+<li><strong>Guards genuine?</strong> YES — both constitutional gates are
+real, deterministic, pure-function-testable
+(<code>now</code>+<code>ttl</code> injected, §11.4.50), and each is
+individually mutation-proven to FAIL when removed.</li>
+<li><strong>Honest-empty correct?</strong> YES —
+<code>NewStartupVerifierSource(nil)</code> returns a nil
+<code>VerifiedModelSource</code>; the catalog emits NO
+<code>KindModel</code> entry (test asserts no fabricated model). An
+un-run real <code>StartupVerifier</code> likewise yields zero models. No
+hardcoded/fabricated working list.</li>
+<li><strong>CONST-037 24h gate real?</strong> YES — a model with zero
+<code>VerifiedAt</code> is treated as STALE/excluded (cannot prove
+recency, §11.4.6 no-guessing), and <code>&gt;24h</code> is excluded;
+only <code>Verified==true</code> AND within-24h is surfaced.</li>
+<li><strong>No bluff strings introduced.</strong>
+<code>simulated|for now|TODO implement|in production this would</code>
+scan on the changed files: the only <code>for now</code> hit is
+<code>router.go:458</code> — PROVEN pre-existing (git blame: commit
+08ab556, 2026-03-01), NOT in this batch’s diff, in an unrelated
+messaging block.</li>
+</ul>
+<hr />
+<h2 id="scope-sp5">Scope (SP5)</h2>
+<ul>
+<li><strong>No <code>dev.helix.agent</code> in
+helix_code/go.mod</strong> (grep count = 0). SP5 added ONLY the
+<code>digital.vasic.concurrency</code> require +
+<code>replace ... =&gt; ../submodules/concurrency</code>. Lanes disjoint
+— substrate (helix_code) and verifier-wiring (helix_agent) touch no
+shared files.</li>
+<li>go.mod tidy churn (gin 1.11→1.12 + transitive bumps:
+bytedance/sonic, validator, goccy, quic-go, ugorji, golang.org/x/arch,
+mongo-driver indirect, dropped go.uber.org/mock + x/mod + x/tools
+indirect) is consistent and <code>go mod verify</code>-clean.</li>
+<li>No secret logged in any new code.</li>
+</ul>
+<hr />
+<h2 id="ordered-must-fix">Ordered must-fix</h2>
+<ol type="1">
+<li><strong>(process, non-blocking for THIS batch)</strong>
+<code>helix_code/internal/secrets</code>
+<code>TestLoadAPIKeys_GapFillPrecedence</code> is a DETERMINISTIC
+pre-existing failure (identical on gin 1.11.0). It is unrelated to
+wave-4 and not in the diff, but it WILL turn the full
+<code>go test ./internal/...</code> sweep red at the release gate. Track
+it as a separate pre-existing-defect work item (it is an env-precedence
+RED-polarity test reporting <code>got FOO=&quot;from_shell&quot;</code>) so it is
+not misattributed to this batch and does not silently block the §11.4.40
+tag sweep. No edit to this batch required.</li>
+<li><strong>(advisory)</strong> <code>internal/cognee</code> /
+<code>internal/helixqa</code> are flaky under the full parallel sweep
+(real-infra contention) though green in isolation. Not introduced by
+this batch; consider serializing or <code>-p 1</code> for these
+real-infra packages in the release sweep to avoid false reds.</li>
+</ol>
+<hr />
+<h2 id="final-summary">Final summary</h2>
+<ul>
+<li><strong>VERDICT: GO-WITH-FIXES</strong> (must-fix is a pre-existing,
+gin-independent tracking item, not a wave-4 code defect).</li>
+<li><strong>gin-bump full-sweep: 141 ok / 3 FAIL — 0 FAILs attributable
+to the gin 1.11→1.12 bump.</strong> All 3 failing packages (cognee,
+helixqa, secrets) are outside the batch diff; cognee+helixqa pass in
+isolation (contention flakes); secrets fails identically on pre-bump gin
+1.11.0 (proven pre-existing).</li>
+<li><strong>Finding counts:</strong> Blocking-for-batch =
+<strong>0</strong>; Must-fix (process/tracking) = <strong>1</strong>;
+Advisory = <strong>1</strong>.</li>
+<li>Substrate 5/5 PASS + 1 genuine mutation; verifier-wiring 8 PASS (6
+wiring) + 2 genuine mutations + RED_MODE polarity correct; anti-bluff
+guards real; honest-empty correct; CONST-036/037 gates real; scope clean
+(no dev.helix.agent); <code>go mod verify</code> all-verified.</li>
+</ul>
+</body>
+</html>
