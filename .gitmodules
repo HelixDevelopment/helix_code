@@ -379,3 +379,9 @@
 [submodule "submodules/docs_chain"]
 	path = submodules/docs_chain
 	url = git@github.com:vasic-digital/docs_chain.git
+[submodule "submodules/dag_orchestrator"]
+	path = submodules/dag_orchestrator
+	url = git@github.com:HelixDevelopment/DagOrchestrator.git
+[submodule "submodules/pipeline_runtime"]
+	path = submodules/pipeline_runtime
+	url = git@github.com:HelixDevelopment/PipelineRuntime.git
