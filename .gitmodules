@@ -63,154 +63,154 @@
 	url = git@github.com:HelixDevelopment/HelixAgent.git
 [submodule "cli_agents/agent-deck"]
 	path = cli_agents/agent-deck
-	url = git@github.com:asheshgoplani/agent-deck.git
+	url = git@github.com:vasic-digital/caf-agent-deck.git
 [submodule "cli_agents/aiagent"]
 	path = cli_agents/aiagent
-	url = git@github.com:Xiaoccer/AIAgent.git
+	url = git@github.com:vasic-digital/caf-aiagent.git
 [submodule "cli_agents/aichat"]
 	path = cli_agents/aichat
-	url = git@github.com:sigoden/aichat.git
+	url = git@github.com:vasic-digital/caf-aichat.git
 [submodule "cli_agents/aichat-llm-functions"]
 	path = cli_agents/aichat-llm-functions
-	url = git@github.com:sigoden/llm-functions.git
+	url = git@github.com:vasic-digital/caf-aichat-llm-functions.git
 [submodule "cli_agents/aider"]
 	path = cli_agents/aider
-	url = git@github.com:Aider-AI/aider.git
+	url = git@github.com:vasic-digital/caf-aider.git
 [submodule "cli_agents/amazon-q"]
 	path = cli_agents/amazon-q
-	url = git@github.com:aws/amazon-q-developer-cli.git
+	url = git@github.com:vasic-digital/caf-amazon-q.git
 [submodule "cli_agents/bridle"]
 	path = cli_agents/bridle
-	url = git@github.com:jeremylongshore/claude-code-plugins-plus-skills.git
+	url = git@github.com:vasic-digital/caf-bridle.git
 [submodule "cli_agents/claude-code"]
 	path = cli_agents/claude-code
-	url = git@github.com:anthropics/claude-code.git
+	url = git@github.com:vasic-digital/caf-claude-code.git
 [submodule "cli_agents/claude-code-source"]
 	path = cli_agents/claude-code-source
 	url = git@gitlab.com:milos85vasic/ccode-private.git
 [submodule "cli_agents/claude-squad"]
 	path = cli_agents/claude-squad
-	url = git@github.com:smtg-ai/claude-squad.git
+	url = git@github.com:vasic-digital/caf-claude-squad.git
 [submodule "cli_agents/cli-agent"]
 	path = cli_agents/cli-agent
-	url = git@github.com:NathanGr33n/CLI_Tool.git
+	url = git@github.com:vasic-digital/caf-cli-agent.git
 [submodule "cli_agents/codai"]
 	path = cli_agents/codai
-	url = git@github.com:meysamhadeli/codai.git
+	url = git@github.com:vasic-digital/caf-codai.git
 [submodule "cli_agents/codename-goose"]
 	path = cli_agents/codename-goose
-	url = git@github.com:jgenerali/codename-goose.git
+	url = git@github.com:vasic-digital/caf-codename-goose.git
 [submodule "cli_agents/codex-skills"]
 	path = cli_agents/codex-skills
-	url = git@github.com:openai/skills.git
+	url = git@github.com:vasic-digital/caf-codex-skills.git
 [submodule "cli_agents/conduit"]
 	path = cli_agents/conduit
-	url = git@github.com:lostintangent/conduit-release.git
+	url = git@github.com:vasic-digital/caf-conduit.git
 [submodule "cli_agents/copilot-cli"]
 	path = cli_agents/copilot-cli
-	url = git@github.com:github/copilot-cli.git
+	url = git@github.com:vasic-digital/caf-copilot-cli.git
 [submodule "cli_agents/crush"]
 	path = cli_agents/crush
-	url = git@github.com:charmbracelet/crush.git
+	url = git@github.com:vasic-digital/caf-crush.git
 [submodule "cli_agents/deepseek-cli"]
 	path = cli_agents/deepseek-cli
-	url = git@github.com:holasoymalva/deepseek-cli.git
+	url = git@github.com:vasic-digital/caf-deepseek-cli.git
 [submodule "cli_agents/deepseek-cli-youkpan"]
 	path = cli_agents/deepseek-cli-youkpan
-	url = git@github.com:youkpan/deepseek-cli.git
+	url = git@github.com:vasic-digital/caf-deepseek-cli-youkpan.git
 [submodule "cli_agents/fauxpilot"]
 	path = cli_agents/fauxpilot
-	url = git@github.com:fauxpilot/fauxpilot.git
+	url = git@github.com:vasic-digital/caf-fauxpilot.git
 [submodule "cli_agents/forge"]
 	path = cli_agents/forge
-	url = git@github.com:antinomyhq/forge.git
+	url = git@github.com:vasic-digital/caf-forge.git
 [submodule "cli_agents/gemini-cli"]
 	path = cli_agents/gemini-cli
-	url = git@github.com:google-gemini/gemini-cli.git
+	url = git@github.com:vasic-digital/caf-gemini-cli.git
 [submodule "cli_agents/get-shit-done"]
 	path = cli_agents/get-shit-done
-	url = git@github.com:glittercowboy/get-shit-done.git
+	url = git@github.com:vasic-digital/caf-get-shit-done.git
 [submodule "cli_agents/git-mcp"]
 	path = cli_agents/git-mcp
-	url = git@github.com:idosal/git-mcp.git
+	url = git@github.com:vasic-digital/caf-git-mcp.git
 [submodule "cli_agents/gpt-engineer"]
 	path = cli_agents/gpt-engineer
-	url = git@github.com:AntonOsika/gpt-engineer.git
+	url = git@github.com:vasic-digital/caf-gpt-engineer.git
 [submodule "cli_agents/gptme"]
 	path = cli_agents/gptme
-	url = git@github.com:ErikBjare/gptme.git
+	url = git@github.com:vasic-digital/caf-gptme.git
 [submodule "cli_agents/junie"]
 	path = cli_agents/junie
-	url = git@github.com:JetBrains/junie.git
+	url = git@github.com:vasic-digital/caf-junie.git
 [submodule "cli_agents/mistral-code"]
 	path = cli_agents/mistral-code
-	url = git@github.com:Wylgrif/Mistral-code.git
+	url = git@github.com:vasic-digital/caf-mistral-code.git
 [submodule "cli_agents/multiagent-coding"]
 	path = cli_agents/multiagent-coding
-	url = git@github.com:Danau5tin/multi-agent-coding-system.git
+	url = git@github.com:vasic-digital/caf-multiagent-coding.git
 [submodule "cli_agents/nanocoder"]
 	path = cli_agents/nanocoder
-	url = git@github.com:Nano-Collective/nanocoder.git
+	url = git@github.com:vasic-digital/caf-nanocoder.git
 [submodule "cli_agents/noi"]
 	path = cli_agents/noi
-	url = git@github.com:lencx/Noi.git
+	url = git@github.com:vasic-digital/caf-noi.git
 [submodule "cli_agents/octogen"]
 	path = cli_agents/octogen
-	url = git@github.com:dbpunk-labs/octogen.git
+	url = git@github.com:vasic-digital/caf-octogen.git
 [submodule "cli_agents/open-interpreter"]
 	path = cli_agents/open-interpreter
-	url = git@github.com:KillianLucas/open-interpreter.git
+	url = git@github.com:vasic-digital/caf-open-interpreter.git
 [submodule "cli_agents/plandex"]
 	path = cli_agents/plandex
-	url = git@github.com:plandex-ai/plandex.git
+	url = git@github.com:vasic-digital/caf-plandex.git
 [submodule "cli_agents/postgres-mcp"]
 	path = cli_agents/postgres-mcp
-	url = git@github.com:timescale/pg-aiguide.git
+	url = git@github.com:vasic-digital/caf-postgres-mcp.git
 [submodule "cli_agents/qwen-code"]
 	path = cli_agents/qwen-code
-	url = git@github.com:QwenLM/qwen-code.git
+	url = git@github.com:vasic-digital/caf-qwen-code.git
 [submodule "cli_agents/shai"]
 	path = cli_agents/shai
-	url = git@github.com:ovh/shai.git
+	url = git@github.com:vasic-digital/caf-shai.git
 [submodule "cli_agents/snow-cli"]
 	path = cli_agents/snow-cli
-	url = git@github.com:MayDay-wpf/snow-cli.git
+	url = git@github.com:vasic-digital/caf-snow-cli.git
 [submodule "cli_agents/swe-agent"]
 	path = cli_agents/swe-agent
-	url = git@github.com:princeton-nlp/SWE-agent.git
+	url = git@github.com:vasic-digital/caf-swe-agent.git
 [submodule "cli_agents/taskweaver"]
 	path = cli_agents/taskweaver
-	url = git@github.com:microsoft/TaskWeaver.git
+	url = git@github.com:vasic-digital/caf-taskweaver.git
 [submodule "cli_agents/ui-ux-pro-max"]
 	path = cli_agents/ui-ux-pro-max
-	url = git@github.com:nextlevelbuilder/ui-ux-pro-max-skill.git
+	url = git@github.com:vasic-digital/caf-ui-ux-pro-max.git
 [submodule "cli_agents/vtcode"]
 	path = cli_agents/vtcode
-	url = git@github.com:vinhnx/vtcode.git
+	url = git@github.com:vasic-digital/caf-vtcode.git
 [submodule "cli_agents/warp"]
 	path = cli_agents/warp
-	url = git@github.com:warpdotdev/Warp.git
+	url = git@github.com:vasic-digital/caf-warp.git
 [submodule "cli_agents/x-cmd"]
 	path = cli_agents/x-cmd
-	url = git@github.com:x-cmd/x-cmd.git
+	url = git@github.com:vasic-digital/caf-x-cmd.git
 [submodule "cli_agents/xela-cli"]
 	path = cli_agents/xela-cli
-	url = git@github.com:xelauvas/codeclau.git
+	url = git@github.com:vasic-digital/caf-xela-cli.git
 [submodule "cli_agents/zeroshot"]
 	path = cli_agents/zeroshot
-	url = git@github.com:covibes/zeroshot.git
+	url = git@github.com:vasic-digital/caf-zeroshot.git
 [submodule "cli_agents/cline"]
 	path = cli_agents/cline
-	url = git@github.com:cline/cline.git
+	url = git@github.com:vasic-digital/caf-cline.git
 [submodule "cli_agents/codex"]
 	path = cli_agents/codex
-	url = git@github.com:openai/codex.git
+	url = git@github.com:vasic-digital/caf-codex.git
 [submodule "cli_agents/spec-kit"]
 	path = cli_agents/spec-kit
-	url = git@github.com:github/spec-kit.git
+	url = git@github.com:vasic-digital/caf-spec-kit.git
 [submodule "cli_agents/superset"]
 	path = cli_agents/superset
-	url = git@github.com:superset-sh/superset.git
+	url = git@github.com:vasic-digital/caf-superset.git
 [submodule "mcp_servers"]
 	path = mcp_servers
 	url = git@github.com:modelcontextprotocol/servers.git
