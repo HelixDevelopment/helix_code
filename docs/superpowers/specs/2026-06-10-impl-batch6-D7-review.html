@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-impl-batch6-D7-review</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-impl-batch6-D7-review</h1>
+</header>
+<h1 id="sp5-d7-part-2-independent-code-review-11.4.142-11.4.125">SP5-D7-part-2
+— Independent Code Review (§11.4.142 / §11.4.125)</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Created</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Last modified</td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Reviewer</td>
+<td>Independent code-review subagent</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Uncommitted SP5-D7-part-2 change (helix_code go.mod/go.sum +
+internal/agentbridge)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#verdict">Verdict</a></li>
+<li><a href="#change-under-review">Change under review</a></li>
+<li><a href="#verification-results">Verification results</a></li>
+<li><a href="#findings">Findings</a></li>
+<li><a href="#honesty-assessment-d-7-genuinely-closed">Honesty
+assessment (D-7 genuinely closed?)</a></li>
+<li><a href="#ordered-must-fix">Ordered must-fix</a></li>
+<li><a href="#evidence-summary">Evidence summary</a></li>
+</ul>
+<h2 id="verdict">Verdict</h2>
+<p><strong>GO-WITH-FIXES</strong> — the change is real, correct, builds
+clean, the agentbridge proves a genuine cross-module HTTP round-trip,
+and no dep-bump regression was introduced. The one must-fix is a
+scope/quiescence hygiene item (§11.4.84): an UNRELATED uncommitted
+change exists inside <code>submodules/helix_agent</code> that must NOT
+be swept into the same commit as the helix_code go.mod/agentbridge
+change. The technical change itself is clean; the verdict is
+GO-WITH-FIXES only to guard the commit boundary.</p>
+<h2 id="change-under-review">Change under review</h2>
+<ul>
+<li><code>helix_code/go.mod</code>:
+<code>+ require dev.helix.agent v0.0.0-…</code> +
+<code>replace dev.helix.agent =&gt; ../submodules/helix_agent</code>.
+MVS-driven transitive bumps: pgx 5.7.6→5.9.2, lib/pq 1.10.9→1.12.3,
+go-redis 9.17.2→9.18.0, otel otlptracehttp/stdouttrace 1.30→1.40,
+x-crypto 0.49→0.52 / x-net 0.52→0.54 / x-text 0.36→0.37 / x-sys
+0.43→0.45 / x-term 0.41→0.43, fatih/color 1.18→1.19, golang-jwt/v5
+5.2.1→5.3.1, plus indirects (go-colorable, segmentio/asm,
+go.uber.org/atomic added, multierr 1.10→1.11).</li>
+<li><code>helix_code/go.sum</code>: matching checksum updates.</li>
+<li>New
+<code>helix_code/internal/agentbridge/{bridge.go,bridge_test.go}</code>:
+<code>VerifierBridge</code> wraps the real
+<code>dev.helix.agent/pkg/sdk/go/verifier.Client</code>; the test
+round-trips <code>VerifyModel</code> against an <code>httptest</code>
+server.</li>
+</ul>
+<h2 id="verification-results">Verification results</h2>
+<p>All commands run read-only against the working tree (no
+edit/commit/push).</p>
+<ol type="1">
+<li><p><strong>Build stability (load-bearing) — PASS.</strong>
+<code>cd helix_code &amp;&amp; go build ./...</code> →
+<code>BUILD_EXIT=0</code>. Only benign macOS
+<code>ld: warning: ignoring duplicate libraries: &#39;-lobjc&#39;</code> on the
+three Fyne/cgo <code>applications/*</code> targets. <strong>gin stayed
+<code>v1.12.0</code></strong>
+(<code>go list -m github.com/gin-gonic/gin</code> →
+<code>v1.12.0</code>). <code>go mod verify</code> →
+<code>all modules verified</code>. <strong>No dependency
+conflict</strong>: <code>go mod tidy</code> is a NO-OP —
+<code>go.mod</code> and <code>go.sum</code> are byte-identical
+before/after (<code>GOMOD_CLEAN</code> / <code>GOSUM_CLEAN</code>),
+proving the <code>replace</code>-driven MVS resolution is already
+minimal and consistent.</p></li>
+<li><p><strong>agentbridge real round-trip — PASS
+(deterministic).</strong>
+<code>go test ./internal/agentbridge/... -v -count=1</code> →
+<code>--- PASS: TestVerifierBridge_RealRoundTrip</code>;
+<code>-count=3</code> → <code>ok</code> (stable, no flake). Cross-module
+import PROVEN:
+<code>go list -deps ./internal/agentbridge | grep dev.helix.agent</code>
+→ <code>dev.helix.agent/pkg/sdk/go/verifier</code>. The round-trip is
+GENUINELY HTTP, not a mock-only assertion: the real SDK’s
+<code>VerifyModel</code>
+(<code>submodules/helix_agent/pkg/sdk/go/verifier/client.go:74</code>)
+calls <code>doRequest(... &quot;POST&quot;, &quot;/api/v1/verifier/verify&quot; ...)</code>
+which at <code>client.go:363</code> builds
+<code>http.NewRequestWithContext</code> and at line 373 executes
+<code>c.httpClient.Do(req)</code> against the test’s
+<code>httptest.NewServer</code>. The test asserts on the wire: method
+<code>POST</code>, path <code>/api/v1/verifier/verify</code>,
+<code>Authorization: Bearer test-key-123</code>, the JSON-decoded
+request body, AND the decoded
+<code>agentverifier.VerificationResult</code> type — real cross-module
+type interchange. The <code>httptest</code> fixture is allowed for a
+unit test (the SDK client itself is not mocked).</p></li>
+<li><p><strong>No regression — PASS (vs known-good).</strong> Broad
+<code>go test ./internal/... ./cmd/... -count=1</code>: <strong>144 ok,
+1 FAIL package</strong> (<code>internal/cognee</code>). The 3 failing
+subtests — <code>TestProbeAMDGPU_ParsesRocmSmiJSON</code>,
+<code>TestProbeAMDGPU_HandlesMultiCard</code>,
+<code>TestProbeAppleGPU_HandlesWhitespaceVariants</code> — fail with the
+probe subprocess returning <code>signal: killed</code> → <code>-1</code>
+honest sentinel under heavy parallel load. <strong>Proven to be the
+documented cognee GPU-probe load-flake, NOT a dep-bump
+regression</strong>: rerun in isolation
+<code>go test ./internal/cognee/ -run &#39;…&#39; -count=1 -p 1</code> →
+<code>ok 0.753s</code>. This is the exact caveat behind recent commit
+<code>43521764 fix(cognee): HXC-064 — AMD-GPU parser tests load-robust</code>.
+The failure surface touches <code>os/exec</code> of
+<code>rocm-smi</code>/<code>ioreg</code> under load — zero overlap with
+the bumped deps (pgx/redis/otel/crypto/net/text/jwt). Baseline was 141
+ok; this run is 144 ok (agentbridge among the 3 net-new green), with
+only the pre-existing flake.</p></li>
+<li><p><strong>Scope — PASS for helix_code; FINDING for
+submodule.</strong> <code>git diff --stat</code> shows ONLY
+<code>helix_code/go.mod</code> + <code>helix_code/go.sum</code> changed;
+new untracked tree is <code>helix_code/internal/agentbridge/</code>
+only. <strong><code>submodules/helix_agent</code> is NOT modified by
+this change</strong> at the parent-pointer level:
+<code>git submodule status</code> shows clean <code></code> prefix
+(recorded SHA <code>7c89410c</code> == HEAD). No secret is logged
+anywhere in the new code (the test’s <code>test-key-123</code> is a
+fixture token, asserted but never a real credential). HOWEVER — see
+Finding F1 — the helix_agent working tree DOES carry an unrelated
+uncommitted change
+(<code>M internal/clis/agents/claude_code/claude_code.go</code> + new
+<code>claude_code_pin_test.go</code>, mtimes 16:32–16:33, a separate
+D-11/D-12 stream), which must not be co-committed.</p></li>
+<li><p><strong>Honesty — PASS.</strong> D-7 is genuinely closed; the
+agentbridge is NOT a token import (see below).</p></li>
+</ol>
+<h2 id="findings">Findings</h2>
+<p><strong>F1 (must-fix, §11.4.84 quiescence / CONST-051) — unrelated
+in-flight change inside the submodule.</strong>
+<code>submodules/helix_agent</code> has uncommitted work in a DIFFERENT
+area (<code>internal/clis/agents/claude_code/</code>), part of a
+separate CLI-dispatch stream, not part of SP5-D7-part-2. Because the
+parent shows <code>submodules/helix_agent</code> as a dir-level
+untracked marker, a careless <code>git add -A</code> at the parent OR an
+<code>git add -A</code> inside the submodule could sweep this unrelated
+change into the D-7 commit. The D-7 commit MUST stage ONLY
+<code>helix_code/go.mod</code>, <code>helix_code/go.sum</code>, and
+<code>helix_code/internal/agentbridge/</code>. The submodule change is
+its own separate commit in its own repo. (No technical defect in the D-7
+code — this is a commit-boundary guard.)</p>
+<p><strong>F2 (nit, non-blocking) — <code>baseURL</code> field is stored
+but unused.</strong> <code>VerifierBridge.baseURL</code>
+(bridge.go:27,46) is set in the constructor but never read (the SDK
+client owns the effective base URL). Harmless; either drop it or add an
+accessor. Not a blocker.</p>
+<p><strong>F3 (informational, NOT introduced here) — <code>clis</code>
+is module-internal, blocks the SP4 seam as currently shaped.</strong>
+The HelixAgent CLI-dispatch code lives at
+<code>submodules/helix_agent/internal/clis/...</code>, i.e. under
+<code>internal/</code>, so it is NOT importable cross-module from
+<code>dev.helix.code</code>. The agentbridge correctly imports only the
+public <code>pkg/sdk/go/verifier</code>. Confirmed no illegal
+cross-module internal import from helix_code
+(<code>grep dev.helix.agent/internal helix_code/</code> → empty — would
+not compile anyway). <strong>This means the SP4
+<code>CLIAgentProvider</code> cannot build on a <code>clis</code> import
+as-is</strong>; it needs either (a) a public SDK facade exported from
+helix_agent under <code>pkg/</code> (the verifier-bridge pattern,
+extended to CLI dispatch), or (b) the <code>clis</code> surface promoted
+out of <code>internal/</code>. The subagent flagged this correctly. The
+SP2 plan doc references <code>internal/clis/aider/repo_map.go</code> for
+the tree-sitter migration but does NOT explicitly document the
+“clis-is-internal blocks SP4 provider” constraint — recommend recording
+it in the SP4 plan / CONTINUATION so it is not re-discovered. This is a
+forward-looking design note, not a defect in D-7.</p>
+<h2 id="honesty-assessment-d-7-genuinely-closed">Honesty assessment (D-7
+genuinely closed?)</h2>
+<p><strong>Genuinely closed — real import proven, not a token
+import.</strong> The bridge constructs the real
+<code>agentverifier.NewClient</code> and the test drives a real
+<code>httptest</code> HTTP server through the real SDK’s
+<code>http.Client.Do</code>, asserting the wire request AND the decoded
+<code>VerificationResult</code> type. <code>go list -deps</code> proves
+the cross-module edge is in the real build graph, not a blank
+<code>_</code> import. The
+<code>replace =&gt; ../submodules/helix_agent</code> directive resolves
+and compiles the whole module. This satisfies the SP5-D7 goal: prove
+<code>dev.helix.code</code> can consume a real
+<code>dev.helix.agent</code> type end-to-end. The CONST-036/037
+rationale (route verifier access through the single-source-of-truth SDK
+rather than duplicate a client) is sound and documented in the package
+comment.</p>
+<p>The one honesty caveat the subagent correctly surfaced (F3) is NOT
+hidden: it is a forward limitation on the SP4 provider, not a D-7 bluff.
+D-7’s scope was the bridge seam, which is real and working.</p>
+<h2 id="ordered-must-fix">Ordered must-fix</h2>
+<ol type="1">
+<li><strong>(blocking) Commit boundary:</strong> stage and commit ONLY
+<code>helix_code/go.mod</code>, <code>helix_code/go.sum</code>,
+<code>helix_code/internal/agentbridge/{bridge.go,bridge_test.go}</code>.
+Do NOT co-commit the unrelated
+<code>submodules/helix_agent/internal/clis/agents/claude_code/</code>
+change (F1). Verify with <code>git diff --staged --stat</code> before
+commit per §11.4.84.</li>
+<li><strong>(recommended, non-blocking) Document the F3
+constraint</strong> in the SP4 plan / <code>docs/CONTINUATION.md</code>:
+<code>clis</code> is module-internal; SP4 <code>CLIAgentProvider</code>
+needs a public <code>pkg/</code> facade from helix_agent (or promotion
+of <code>clis</code> out of <code>internal/</code>) — do not assume a
+direct <code>clis</code> import.</li>
+<li><strong>(optional nit) F2:</strong> drop or expose the unused
+<code>VerifierBridge.baseURL</code> field.</li>
+</ol>
+<h2 id="evidence-summary">Evidence summary</h2>
+<ul>
+<li><code>go build ./...</code> → <strong>BUILD_EXIT=0</strong> (only
+benign <code>-lobjc</code> warnings).</li>
+<li>gin → <strong><code>github.com/gin-gonic/gin v1.12.0</code></strong>
+(unchanged).</li>
+<li><code>go mod tidy</code> → <strong>no-op</strong> (go.mod/go.sum
+byte-identical; no dep conflict). <code>go mod verify</code> → all
+modules verified.</li>
+<li><code>go test ./internal/agentbridge/... -count=1 -v</code> →
+<strong>PASS</strong>; <code>-count=3</code> → <strong>PASS</strong>
+(deterministic). Cross-module dep:
+<code>dev.helix.agent/pkg/sdk/go/verifier</code> present in
+<code>go list -deps</code>. Real HTTP via <code>httpClient.Do</code> at
+<code>client.go:373</code>.</li>
+<li>Broad sweep <code>go test ./internal/... ./cmd/... -count=1</code> →
+<strong>144 ok / 1 FAIL</strong> (<code>internal/cognee</code>). The 3
+cognee subtest failures are the documented GPU-probe load-flake
+(<code>signal: killed</code> → <code>-1</code> sentinel), confirmed by
+isolation rerun <code>-p 1</code> → <strong>ok 0.753s</strong>.
+<strong>No NEW failure attributable to the dep bumps.</strong></li>
+<li>Scope: only
+<code>helix_code/{go.mod,go.sum,internal/agentbridge}</code> touched;
+<code>submodules/helix_agent</code> parent pointer clean (recorded ==
+HEAD <code>7c89410c</code>); no secret logged.</li>
+</ul>
+<p><strong>VERDICT: GO-WITH-FIXES.</strong> Sweep: <strong>144 ok / 1
+FAIL</strong> (cognee GPU-probe load-flake only, pre-existing, passes in
+isolation; no dep-bump regression). gin confirmed
+<strong>v1.12.0</strong>. agentbridge proves a REAL cross-module HTTP
+round-trip (<code>dev.helix.agent/pkg/sdk/go/verifier</code>, real
+<code>httpClient.Do</code>); D-7 genuinely closed. Single blocking
+must-fix is the commit-boundary guard (F1) to keep the unrelated
+helix_agent <code>clis</code> change out of this commit.</p>
+</body>
+</html>
