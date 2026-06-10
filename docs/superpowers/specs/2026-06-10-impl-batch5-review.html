@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-impl-batch5-review</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-impl-batch5-review</h1>
+</header>
+<h1 id="wave-5-code-review-report-11.4.125-11.4.134">Wave-5 Code-Review
+Report (§11.4.125 / §11.4.134)</h1>
+<p><strong>Reviewer:</strong> Independent code-review subagent (Opus
+4.8) <strong>Date:</strong> 2026-06-10 <strong>Scope:</strong>
+UNCOMMITTED wave-5 batch — SP4-cont
+(<code>submodules/helix_agent/internal/clis</code>) + SP7
+(<code>helix_code/tests/{ddos,scaling,ux,ui}</code> +
+<code>scripts/{gates,tests}/*</code>) <strong>Mandate:</strong>
+read-only verification; no edits/commits/push. Mutations applied during
+review were reverted (restore confirmed byte-identical, working tree
+clean).</p>
+<hr />
+<h2 id="verdict-go">VERDICT: <strong>GO</strong></h2>
+<p>Zero BLOCKING findings. 2 NON-BLOCKING notes (advisory). All required
+builds/tests/gates/meta-tests run GREEN; every §1.1 mutation FAILed the
+guard as required; restores confirmed clean.</p>
+<ul>
+<li>BLOCKING (must-fix): <strong>0</strong></li>
+<li>NON-BLOCKING (advisory): <strong>2</strong></li>
+</ul>
+<hr />
+<h2 id="builds-vet-pass">1. Builds + vet (PASS)</h2>
+<pre><code>helix_agent: go build ./internal/clis/...   -&gt; EXIT=0  (PASS)
+helix_agent: go vet   ./internal/clis/...   -&gt; EXIT=0  (PASS)
+helix_code:  go vet ./tests/ddos/... ./tests/scaling/... ./tests/ux/... ./tests/ui/...  -&gt; EXIT=0 (PASS)
+helix_code:  go vet (re-run, full SP7)      -&gt; VET_OK  (PASS)</code></pre>
+<h2 id="sp4-cont-redgreen-1.1-mutations-pass">2. SP4-cont RED→GREEN +
+§1.1 mutations (PASS)</h2>
+<pre><code>helix_agent: go test ./internal/clis/... -count=1            -&gt; ok (all packages PASS)
+GREEN guards (default):
+  TestD12_RealExec_ExecsRealBinary               -&gt; PASS (qwencoder/github_copilot/gemini_assist exec real fake-binary, surface stdout marker)
+  TestD12_RealExec_AbsentBinaryIsHonestError     -&gt; PASS (absent binary =&gt; honest error)
+  TestD12_HonestError_NoFakeSuccess (40 agents)  -&gt; PASS (each returns honest error, never the literal)
+  TestD11_IsAgentTypeAvailable_RealLookPath      -&gt; PASS (real exec.LookPath; Kiro/Continue/HelixAgent/Cursor unavailable)
+RED reproductions (default =&gt; SKIP; PIN_STUB_BLUFF=1 =&gt; RUN):
+  TestD12_StubsAreBluffs        default -&gt; SKIP (SKIP-OK: ATM-SP4-D12);  PIN_STUB_BLUFF=1 -&gt; PASS (bluff gone on fixed artifact)
+  TestD11_AllowAllTypesBluff    default -&gt; SKIP (SKIP-OK: ATM-SP4-D11);  PIN_STUB_BLUFF=1 -&gt; PASS
+§1.1 mutation A (executeQwenCoder real-exec -&gt; &quot;Qwen Coder execution completed&quot; literal):
+  -&gt; TestD12_RealExec_ExecsRealBinary/qwencoder FAIL (&quot;did NOT exec the agent binary … BLUFF-003 reintroduced?&quot;)  ✓ guard fires
+  -&gt; restore -&gt; ok  ✓
+§1.1 mutation B (executeKiro honest-error -&gt; &quot;Kiro execution completed&quot; fake success):
+  -&gt; TestD12_HonestError_NoFakeSuccess/kiro FAIL (&quot;returned success with no headless CLI … BLUFF-003&quot;)  ✓ guard fires
+  -&gt; restore -&gt; ok  ✓
+Bluff-literal scan (non-test source):
+  grep &#39;execution completed&#39; internal/clis/*.go (non-test) -&gt; only //-comment CITATIONS of the removed bluff (lines 916,1071)  ✓ no live literal
+  grep &#39;simulated|for now|TODO implement|in production this would&#39; (non-test) -&gt; only //-comment lines (&quot;Honest error for now.&quot;, quote of &quot;For now, allow all types&quot;)  ✓ constitution smoke excludes //-comment citations</code></pre>
+<p>The D-11 split is correct and honest:
+<code>agentDefaultCommand</code> maps 8 agents to confirmed CLI binaries
+(aider/claude/codex/cline/openhands + qwen/copilot/gemini) and 40 to
+empty-command honest-error class; <code>IsAgentTypeAvailable</code> is a
+real <code>exec.LookPath</code> honoring
+<code>HELIX_AGENT_BIN_&lt;TYPE&gt;</code>. The 3 real-exec D-12 methods
+go through <code>runCLIAgent</code> → real
+<code>exec.CommandContext</code> with real exit-code + CombinedOutput
+(BLUFF-003 satisfied).</p>
+<h2 id="reconciled-tests-not-weakened-to-tautologies-pass">3. §11.4.120
+reconciled tests — NOT weakened to tautologies (PASS)</h2>
+<p><code>instance_manager_test.go</code>
+<code>TestInstanceManager_IsAgentTypeAvailable</code> was reconciled,
+not faked: - old <code>assert.True(...TypeKiro/TypeContinue)</code>
+rewritten to <code>assert.False(...)</code> matching the corrected
+honest contract (those agents genuinely have no resolvable binary); -
+real-CLI types proven available by injecting a real fake binary via
+<code>HELIX_AGENT_BIN_&lt;TYPE&gt;</code> (not a hardcoded true); -
+<code>CreateInstance</code> + benchmark reconciled to inject a fake
+aider binary since <code>CreateInstance</code> now gates on the real
+availability check.</p>
+<pre><code>TestInstanceManager_IsAgentTypeAvailable -&gt; PASS
+TestInstanceManager_CreateInstance       -&gt; PASS</code></pre>
+<h2 id="sp7-harnesses-meta-tests-pass">4. SP7 harnesses + meta-tests
+(PASS)</h2>
+<pre><code>helix_code: go test ./tests/ddos/... ./tests/scaling/... ./tests/ux/... ./tests/ui/... -count=1
+  ok dev.helix.code/tests/ddos      7.619s
+  ok dev.helix.code/tests/scaling   6.205s
+  ok dev.helix.code/tests/ux       18.139s
+  ok dev.helix.code/tests/ui        0.998s
+Go meta-tests (each plants a defect, asserts harness DETECTS it):
+  ddos:    Detects5xxStorm / DetectsLatencyBomb / DetectsNoServedResponses / LimiterModeDetectsNoRefusals / PositivePathWritesEvidence -&gt; all PASS
+  scaling: DetectsFlatThroughput / DetectsDegradation / RejectsBelowFloor / PositivePathWritesEvidence -&gt; all PASS
+  ux:      DetectsCannedString / DetectsLeakedID / DetectsEmptyAndTerse / DetectsDivergence / PositivePathWritesEvidence -&gt; all PASS
+  ui:      DetectsBlankRender / DetectsDeadKeyHandler / DetectsLeakedID / PositivePathWritesEvidence -&gt; all PASS
+Bash gates+meta-tests CONST-068 (bash -n on all 8): ALL OK (shebang #!/usr/bin/env bash)
+Bash meta-tests (gate FAILs bluff, PASSes real evidence):
+  CM-DDOS-HITS-HELIXCODE   META-TEST PASS (EXIT=0)
+  CM-SCALING-HITS-HELIXCODE META-TEST PASS (EXIT=0)
+  CM-UX-HITS-HELIXCODE     META-TEST PASS (EXIT=0)
+  CM-UI-HITS-HELIXCODE     META-TEST PASS (EXIT=0)</code></pre>
+<p>Verified the specific anti-bluff claims: - <strong>ux really shells
+the cli binary</strong> —
+<code>ux_journey_test.go:TestUX_CLIJourney_RealBinary</code> builds the
+real <code>./cmd/cli</code> then <code>exec.CommandContext</code>s it,
+asserting a per-run nonce echoes through real stdout (BLUFF-003 path);
+honest SKIP only when <code>go</code> toolchain absent or build fails. -
+<strong>scaling shows real N-scaling numbers (not hardcoded)</strong> —
+<code>scaling_harness.go</code> drives the REAL
+<code>internal/worker.WorkerPool</code> across N={1,2,4,8} via real
+<code>RegisterWorker</code>/<code>AssignTask</code>/<code>ReleaseWorker</code>/<code>GetPoolStats</code>;
+<code>GainAtMaxN</code> is computed from MEASURED throughput-per-second,
+FAILing if gain &lt; 1.5x (flat) or throughput degrades. Honest boundary
+documented (in-process concurrent-capacity scale-out; SSH horizontal
+scale-out is a separate integration-tagged path that SKIPs when no SSH
+workers configured). - <strong>ddos 429 assertion correctly gated
+OFF</strong> — <code>ddos_harness.go:18-19,288-294</code>:
+<code>internal/server</code> wires no rate-limit middleware today, so
+the 429-refusal assertion ships behind
+<code>DDOS_EXPECT_RATELIMIT=1</code> (OFF by default). Default
+assertions are graceful-degradation (zero 5xx, real served body-marker
+hits &gt; 0, bounded p99). It never asserts a 429 the code cannot
+produce. The integration driver (<code>//go:build integration</code>)
+boots the REAL <code>server.New</code> with real PG/Redis and honest
+SKIP when infra unreachable. - <strong>ui</strong> —
+<code>ui_harness.go</code> renders REAL tview/tcell components into a
+<code>tcell.SimulationScreen</code> cell grid and reads back exact
+composited cells (genuine pixel-equivalent evidence); Fyne native-pixel
+layer honestly tracked operator-attended.</p>
+<h2 id="anti-bluff-scope-pass">5. Anti-bluff + scope (PASS)</h2>
+<ul>
+<li>Honest errors genuinely returned (not swallowed):
+<code>noHeadlessCLIError</code> returns a real <code>error</code>;
+<code>runCLIAgent</code> surfaces non-zero exit / spawn failure as a
+real wrapped error with the binary’s actual output. ✓</li>
+<li>No NEW <code>simulated|for now|TODO implement</code> in production
+source — only pre-existing-style //-comment citations describing the
+removed bluff (constitution smoke excludes these). ✓</li>
+<li>§11.4.120 reconciled tests not weakened to tautologies (see §3).
+✓</li>
+<li><strong>No go.mod/go.sum edits</strong> in either repo. ✓</li>
+<li>SP4-cont touches only <code>helix_agent/internal/clis</code> (3
+files). ✓</li>
+<li>SP7 touches only <code>helix_code/tests/{ddos,scaling,ux,ui}/</code>
++ <code>scripts/{gates,tests}/</code>. ✓ <code>qa-results/</code> is
+gitignored. ✓</li>
+<li>No secrets logged — only test fixtures:
+<code>TEST_PG_PASSWORD</code> default “helix” (local stack), empty Redis
+pw, JWT literal explicitly
+<code>&quot;ddos-flood-test-secret-not-a-real-credential&quot;</code>. These are
+unit/integration test creds, permitted. ✓</li>
+<li>Working-tree quiescence (§11.4.84): after mutation experiments,
+restore is byte-identical; mutation-residue scan finds NO
+<code>MUTATION</code>/<code>always pass</code> markers. ✓</li>
+</ul>
+<hr />
+<h2 id="non-blocking-advisory-notes">NON-BLOCKING advisory notes</h2>
+<p><strong>N1 (advisory) — RED reproduction polarity is “skip-on-fixed /
+pass-on-pinned”, not literal RED-FAIL-on-broken-artifact.</strong>
+<code>TestD12_StubsAreBluffs</code> /
+<code>TestD11_AllowAllTypesBluff</code> (PIN_STUB_BLUFF=1) PASS on the
+fixed artifact via early-return-on-honest-error
+(<code>if err != nil { return // bluff gone }</code>). This is a valid
+§11.4.115 polarity-switch pattern — they would FAIL only if a stub
+re-emitted the literal — and the standing GREEN guards
+(<code>TestD12_RealExec_*</code>, <code>TestD12_HonestError_*</code>,
+<code>TestD11_IsAgentTypeAvailable_RealLookPath</code>) plus the
+confirmed §1.1 mutation FAILs are the real bug-catchers. No action
+required; noted only because the prompt framed the RED tests as “SKIP on
+fixed artifact” — under PIN they RUN and pass rather than skip, which is
+the correct §11.4.115 semantics.</p>
+<p><strong>N2 (advisory) —
+<code>TestD12_StubsAreBluffs/realexec/github_copilot</code> took ~25s
+under PIN_STUB_BLUFF=1</strong> because the host has a real
+<code>copilot</code> binary on PATH that <code>runCLIAgent</code>
+actually exec’d (the test injects no fake binary in the RED path, so the
+real CLI ran to its own timeout). Harmless (the reproduction still
+passes) but slow; if the suite runs in CI on a host with a real
+<code>copilot</code>/<code>qwen</code>/<code>gemini</code>, consider
+bounding via the instance <code>Config.Timeout</code> or injecting a
+fast fake in the RED path. Not a correctness defect.</p>
+<hr />
+<h2 id="captured-buildtest-pass-fail-summary">Captured build/test
+PASS-FAIL summary</h2>
+<pre><code>helix_agent  go build ./internal/clis/...                         PASS
+helix_agent  go vet   ./internal/clis/...                         PASS
+helix_agent  go test  ./internal/clis/... -count=1                PASS
+helix_agent  D11/D12 GREEN guards (default)                       PASS
+helix_agent  RED reproductions (PIN_STUB_BLUFF=1)                 PASS (run) / SKIP (default)
+helix_agent  §1.1 mutation A (qwen real-exec-&gt;literal)            FAIL-as-required, restore PASS
+helix_agent  §1.1 mutation B (kiro honest-error-&gt;fake)            FAIL-as-required, restore PASS
+helix_agent  reconciled instance_manager_test.go                  PASS
+helix_code   go vet ./tests/{ddos,scaling,ux,ui}/...              PASS
+helix_code   go test ./tests/{ddos,scaling,ux,ui}/... -count=1    PASS
+helix_code   go meta-tests (all 4 packages)                       PASS (each detects its planted defect)
+scripts      bash -n  (8 gate+meta scripts, CONST-068)            PASS
+scripts      4 bash meta-tests (CM-{DDOS,SCALING,UX,UI})          PASS (gate FAILs bluff, PASSes real)
+scope        no go.mod/go.sum edits; paths confined; no secrets   PASS</code></pre>
+<p><strong>FINAL VERDICT: GO</strong> — 0 blocking, 2 advisory. Batch is
+anti-bluff-sound and ready to proceed to pre-build sweep + main
+build.</p>
+</body>
+</html>
