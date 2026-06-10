@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"dev.helix.code/internal/hardware"
-	"dev.helix.code/internal/verifier"
 )
 
 // ModelDiscoveryEngine provides intelligent model recommendation and discovery
@@ -237,8 +236,15 @@ func (e *ModelDiscoveryEngine) GetRecommendations(ctx context.Context, req *Reco
 	// Get available models
 	models := e.getAvailableModels(ctx, req)
 
-	// Score and rank models
+	// Score and rank models. The result is always a usable (non-nil) slice —
+	// when no models are available (e.g. verifier cold + no local models, the
+	// CONST-036 honest-empty path) the response carries an EMPTY recommendation
+	// list rather than nil, so callers never see a "broken" nil while the
+	// honest meaning is simply "no working models right now".
 	recommendations := e.scoreAndRankModels(models, req)
+	if recommendations == nil {
+		recommendations = []*ModelRecommendation{}
+	}
 
 	// Generate alternatives
 	alternatives := e.generateAlternatives(recommendations, req)
@@ -727,10 +733,16 @@ func (e *ModelDiscoveryEngine) inferCapabilities(modelID string) []ModelCapabili
 }
 
 // fetchExternalModels returns models from external sources.
-// BLUFF-004 FIX: Uses LLMsVerifier as the single source of truth when available.
-// Falls back to the constitutional fallback list (CONST-035 compliance).
+//
+// CONST-036 / F6-D-5 (§11.4.115): LLMsVerifier is the single authoritative
+// source of external model metadata. When the verifier is unavailable (disabled,
+// unreachable, or returns nothing) we return HONEST-EMPTY rather than a hardcoded
+// fabricated list — presenting a hardcoded slice as "available working models"
+// is a §11.4 / CONST-035 PASS-bluff (the user would see models that were never
+// verified against any live provider). The verifier owns its own internal
+// fallback policy; this layer never manufactures a model list.
 func (e *ModelDiscoveryEngine) fetchExternalModels(ctx context.Context, req *RecommendationRequest) []*ModelInfo {
-	// Priority 1: LLMsVerifier adapter (CONST-036)
+	// Priority 1: LLMsVerifier adapter (CONST-036 — single source of truth).
 	if e.verifierSource != nil && e.verifierSource.IsAvailable() {
 		models, err := e.verifierSource.FetchModels(ctx)
 		if err == nil && len(models) > 0 {
@@ -738,8 +750,8 @@ func (e *ModelDiscoveryEngine) fetchExternalModels(ctx context.Context, req *Rec
 		}
 	}
 
-	// Priority 2: Constitutional fallback list
-	return ConvertVerifiedToModelInfo(verifier.FallbackModels)
+	// Verifier unavailable / cold: honest-empty (no fabricated hardcoded list).
+	return nil
 }
 
 func (e *ModelDiscoveryEngine) filterModelsByConstraints(models []*ModelInfo, req *RecommendationRequest) []*ModelInfo {

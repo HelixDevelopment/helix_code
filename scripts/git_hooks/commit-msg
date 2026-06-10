@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# scripts/git_hooks/commit-msg
+# §11.4.75 mechanical-enforcement layer (audit-trail seam for --no-verify).
+#
+# When a commit is created with `git commit --no-verify` (the deliberate
+# bypass route that skips the pre-commit hook), §11.4.75 requires the
+# bypass to be self-documenting: the commit message MUST carry a
+# `Bypass-rationale: <reason>` footer. A normal commit (pre-commit hook
+# ran) needs no footer and passes unconditionally.
+#
+# Detection of the bypass: the pre-commit hook drops a touch-file marker
+# (`.git/ATMO_LAST_BYPASS_ATTEMPT`) every time it runs; when --no-verify
+# is used the pre-commit hook is skipped so that marker is STALE/absent
+# relative to this commit. Because git provides no direct "was --no-verify
+# used" signal, we use the marker-freshness heuristic AND honour an
+# explicit environment override (`HELIX_COMMIT_NO_VERIFY=1`) that the
+# operator/wrapper can set to force the footer requirement on.
+#
+# This hook NEVER blocks a normal commit; it only blocks a detected
+# bypass that lacks the rationale footer.
+#
+# Inputs:   $1 = path to the commit-message file git passes in.
+# Outputs:  exit 0 = OK / exit 1 = BLOCKED (bypass without footer).
+# Side-effects: appends one line to docs/audit/bypass_events.md when a
+#   bypass-with-footer is accepted (audit trail; best-effort, never fatal).
+# Dependencies: git, grep, date, POSIX sh.
+# Cross-references: §11.4.75; scripts/git_hooks/{pre-commit,pre-push,post-commit};
+#   scripts/install_git_hooks.sh.
+
+set -uo pipefail
+
+MSG_FILE="${1:-}"
+[ -n "$MSG_FILE" ] || exit 0
+[ -f "$MSG_FILE" ] || exit 0
+
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+GITDIR=$(git rev-parse --git-dir 2>/dev/null || echo "$REPO_ROOT/.git")
+
+# The pre-commit hook drops this one-shot marker immediately before it runs.
+# This commit-msg hook CONSUMES (deletes) it. If the marker is absent when we
+# get here, the pre-commit hook did not run for THIS commit — i.e. it was
+# bypassed (--no-verify), which skips pre-commit but NOT commit-msg.
+MARKER="$GITDIR/ATMO_PRECOMMIT_RAN"
+
+bypass_detected=0
+if [ "${HELIX_COMMIT_NO_VERIFY:-0}" = "1" ]; then
+  bypass_detected=1
+elif [ ! -f "$MARKER" ]; then
+  bypass_detected=1
+fi
+# One-shot: consume the marker so it cannot mask a subsequent bypass commit.
+rm -f "$MARKER" 2>/dev/null || true
+
+has_footer() {
+  grep -qiE '^Bypass-rationale:[[:space:]]*[^[:space:]]' "$MSG_FILE"
+}
+
+if [ "$bypass_detected" -eq 1 ]; then
+  if ! has_footer; then
+    {
+      echo ""
+      echo "============================================================"
+      echo "BLOCKED by commit-msg hook (§11.4.75 bypass audit trail)"
+      echo "============================================================"
+      echo "This commit appears to bypass the pre-commit gate"
+      echo "(--no-verify / hooks not run). §11.4.75 requires the bypass"
+      echo "to be self-documenting. Add a footer line to the message:"
+      echo ""
+      echo "    Bypass-rationale: <why the gate was bypassed>"
+      echo ""
+      echo "Then re-commit. (A normal commit through the gate needs no"
+      echo "footer.)"
+      echo "============================================================"
+    } >&2
+    exit 1
+  fi
+
+  # Bypass WITH footer: accept + record the audit trail (best-effort).
+  audit="$REPO_ROOT/docs/audit/bypass_events.md"
+  if [ -d "$(dirname "$audit")" ]; then
+    reason=$(grep -iE '^Bypass-rationale:' "$MSG_FILE" | head -1 | sed 's/^[Bb]ypass-rationale:[[:space:]]*//')
+    {
+      printf -- '- %s — bypass accepted — rationale: %s\n' \
+        "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown-time)" \
+        "$reason"
+    } >> "$audit" 2>/dev/null || true
+  fi
+fi
+
+exit 0

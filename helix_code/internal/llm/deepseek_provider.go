@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"dev.helix.code/internal/llm/promptcache"
@@ -28,6 +29,10 @@ type DeepSeekProvider struct {
 	httpClient *http.Client
 	models     []ModelInfo
 	lastHealth *ProviderHealth
+
+	// catalogOnce/catalogMu guard the CONST-036 lazy live-catalog refresh.
+	catalogOnce sync.Once
+	catalogMu   sync.RWMutex
 
 	// prefixDetector watches the request prefix for mid-session drift.
 	// Speed programme P1-T05: DeepSeek performs IMPLICIT context caching
@@ -77,7 +82,33 @@ func NewDeepSeekProvider(config ProviderConfigEntry) (*DeepSeekProvider, error) 
 
 func (dp *DeepSeekProvider) GetType() ProviderType  { return ProviderTypeDeepSeek }
 func (dp *DeepSeekProvider) GetName() string        { return "DeepSeek" }
-func (dp *DeepSeekProvider) GetModels() []ModelInfo { return dp.models }
+// GetModels returns available models. CONST-036 / F6-D-5: refreshed LIVE from
+// DeepSeek's GET /models on first call (cached); seed list is offline fallback.
+func (dp *DeepSeekProvider) GetModels() []ModelInfo {
+	dp.refreshCatalogOnce()
+	dp.catalogMu.RLock()
+	defer dp.catalogMu.RUnlock()
+	return dp.models
+}
+
+func (dp *DeepSeekProvider) refreshCatalogOnce() {
+	dp.catalogOnce.Do(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		models, err := fetchOpenAICompatibleCatalog(ctx, dp.endpoint, dp.apiKey, dp.httpClient, ProviderTypeDeepSeek, 128000, 8192)
+		if err != nil {
+			log.Printf("⚠️  DeepSeek /models fetch failed (%v); keeping verified seed list", err)
+			return
+		}
+		for i := range models {
+			EnrichModelInfo(&models[i])
+		}
+		dp.catalogMu.Lock()
+		dp.models = models
+		dp.catalogMu.Unlock()
+		log.Printf("✅ DeepSeek catalog refreshed with %d models (live /models)", len(models))
+	})
+}
 
 func (dp *DeepSeekProvider) GetCapabilities() []ModelCapability {
 	return []ModelCapability{
@@ -175,6 +206,9 @@ func (dp *DeepSeekProvider) CountTokens(text string) (int, error) {
 }
 
 func (dp *DeepSeekProvider) initializeModels() {
+	// CONST-036 / F6-D-5: verified SEED only (no network at construction). The
+	// authoritative list is refreshed LIVE from GET /models on the first
+	// GetModels() call (see refreshCatalogOnce).
 	dp.models = []ModelInfo{
 		{
 			Name:        "deepseek-chat",

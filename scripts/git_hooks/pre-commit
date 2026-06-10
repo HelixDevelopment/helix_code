@@ -1,0 +1,232 @@
+#!/usr/bin/env bash
+# scripts/git_hooks/pre-commit
+# §11.4.75 mechanical-enforcement layer 1 (local pre-commit gate).
+#
+# Three staged-only invariants, evaluated against the index (what `git
+# commit` is about to write), NEVER against the whole tree:
+#
+#   1. §11.4.75 governance-doc sibling check — a staged GOVERNED `.md`
+#      MUST ship its `.html` + `.pdf` siblings in the SAME index. Scoped
+#      to the GOVERNED doc set ONLY (root manuals + tracker docs +
+#      Status docs); working specs under docs/{superpowers,research,
+#      guides,testing} are md-only by convention and are NOT checked.
+#   2. §11.4.30 / §11.4.10 forbidden-class check — no staged secret /
+#      build-artifact / private-key class file.
+#   3. §11.4.84 mutation-residue check — no staged file carrying a
+#      paired-mutation marker (`MUTATED for paired`, `// always pass`, …).
+#
+# This is a COURTESY GATE; the constitutional clauses are the actual
+# contract. On any genuine product/security risk it BLOCKS (exit 1);
+# benign tooling gaps (no staged files, detached index) degrade with a
+# WARN and exit 0 rather than blocking every commit.
+#
+# Bypass: `git commit --no-verify` skips this hook, but the commit-msg
+# hook then demands a `Bypass-rationale:` footer (§11.4.75 audit trail).
+#
+# Inputs:   the git index (staged files).
+# Outputs:  exit 0 = OK / exit 1 = BLOCKED. Diagnostics on stderr.
+# Side-effects: none (read-only over the index).
+# Dependencies: git, grep, POSIX sh utilities.
+# Cross-references: §11.4.75 / §11.4.30 / §11.4.10 / §11.4.84 / §11.4.65;
+#   scripts/git_hooks/{pre-push,post-commit,commit-msg};
+#   scripts/install_git_hooks.sh.
+
+set -uo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+cd "$REPO_ROOT" || exit 0
+
+# §11.4.75 — drop a freshness marker so the commit-msg hook can detect a
+# --no-verify bypass (which skips THIS hook, leaving the marker stale).
+GITDIR=$(git rev-parse --git-dir 2>/dev/null || echo "$REPO_ROOT/.git")
+: > "$GITDIR/ATMO_PRECOMMIT_RAN" 2>/dev/null || true
+
+block=0
+
+# ---------------------------------------------------------------------------
+# Collect the staged (Added/Copied/Modified/Renamed) path list once.
+# ---------------------------------------------------------------------------
+staged=$(git diff --cached --name-only --diff-filter=ACMR 2>/dev/null || true)
+
+if [ -z "$staged" ]; then
+  # Nothing staged (e.g. `git commit` on an empty index, or amend with no
+  # content change). Nothing for this hook to enforce.
+  exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# 1. §11.4.75 — GOVERNANCE-doc sibling check (scoped, NOT every .md).
+#
+#    A staged `.md` is GOVERNED iff:
+#      - it is a root manual: CLAUDE.md / AGENTS.md / CONSTITUTION.md /
+#        CRUSH.md / QWEN.md (repo-root only), OR
+#      - it is one of the 5 tracker docs at docs/ root
+#        (Issues / Issues_Summary / Fixed / Fixed_Summary / CONTINUATION), OR
+#      - it is a Status.md / Status_Summary.md anywhere under docs/.
+#
+#    Working specs (docs/superpowers/**, docs/research/**, docs/guides/**,
+#    docs/testing/**) are md-only by convention and are EXCLUDED — there
+#    are ~117 such files with no siblings; demanding siblings for them
+#    would be a §11.4.6 over-reach (guessing scope wider than the mandate).
+# ---------------------------------------------------------------------------
+is_governed_md() {
+  # $1 = repo-relative path ending in .md
+  case "$1" in
+    CLAUDE.md|AGENTS.md|CONSTITUTION.md|CRUSH.md|QWEN.md) return 0 ;;
+    docs/Issues.md|docs/Issues_Summary.md|docs/Fixed.md|docs/Fixed_Summary.md|docs/CONTINUATION.md) return 0 ;;
+    docs/*/Status.md|docs/*/Status_Summary.md|docs/*/*/Status.md|docs/*/*/Status_Summary.md) return 0 ;;
+  esac
+  return 1
+}
+
+# A staged path is "present in this commit" if it is staged OR already
+# tracked (sibling that exists in the tree and is not being deleted).
+sibling_present() {
+  # $1 = sibling path. Present if staged in this commit OR currently tracked
+  #      AND not staged-for-deletion.
+  local p="$1"
+  if printf '%s\n' "$staged" | grep -qxF "$p"; then
+    return 0
+  fi
+  if git ls-files --error-unmatch "$p" >/dev/null 2>&1; then
+    # tracked — ensure it is not being deleted in this same commit
+    if git diff --cached --name-only --diff-filter=D 2>/dev/null | grep -qxF "$p"; then
+      return 1
+    fi
+    return 0
+  fi
+  return 1
+}
+
+missing_siblings=""
+while IFS= read -r f; do
+  case "$f" in
+    *.md) : ;;
+    *) continue ;;
+  esac
+  is_governed_md "$f" || continue
+  base="${f%.md}"
+  for ext in html pdf; do
+    if ! sibling_present "${base}.${ext}"; then
+      missing_siblings="${missing_siblings}\n  ${f} -> missing ${base}.${ext}"
+    fi
+  done
+done <<EOF
+$staged
+EOF
+
+if [ -n "$missing_siblings" ]; then
+  {
+    echo ""
+    echo "============================================================"
+    echo "BLOCKED by pre-commit hook (§11.4.75 governance-doc siblings)"
+    echo "============================================================"
+    echo "A staged GOVERNED .md is missing its .html and/or .pdf sibling."
+    echo "Governed set: root manuals (CLAUDE/AGENTS/CONSTITUTION/CRUSH/QWEN),"
+    echo "docs/{Issues,Issues_Summary,Fixed,Fixed_Summary,CONTINUATION}.md,"
+    echo "and every docs/**/Status{,_Summary}.md."
+    printf '%b\n' "$missing_siblings"
+    echo ""
+    echo "Regenerate siblings, then re-stage:"
+    echo "  bash scripts/testing/sync_all_markdown_exports.sh   # if present"
+    echo "  # or your project's pandoc+weasyprint export pipeline"
+    echo "============================================================"
+  } >&2
+  block=1
+fi
+
+# ---------------------------------------------------------------------------
+# 2. §11.4.30 / §11.4.10 — forbidden-class staged files.
+#
+#    Secrets, private keys, real .env, build artifacts. `.env.example`,
+#    `.env.sample`, `.env.full-test`, and `*.pem` under fixtures/examples
+#    are NOT secrets (placeholders), so they are explicitly allowed.
+# ---------------------------------------------------------------------------
+forbidden=""
+while IFS= read -r f; do
+  base=$(basename "$f")
+  case "$f" in
+    # Allowed placeholders / fixtures first (skip).
+    *.env.example|*.env.sample|*.env.full-test|*/.env.example|*/.env.sample) continue ;;
+    *.example|*.sample) continue ;;
+  esac
+  case "$base" in
+    .env|.env.*|*.env) forbidden="${forbidden}\n  ${f}  (real .env — §11.4.10)" ;;
+    id_rsa|id_rsa.*|id_ed25519|id_ed25519.*|.netrc) forbidden="${forbidden}\n  ${f}  (private key / netrc — §11.4.10)" ;;
+    *.pem|*.key|*.crt) forbidden="${forbidden}\n  ${f}  (credential material — §11.4.10)" ;;
+    api_keys.sh) forbidden="${forbidden}\n  ${f}  (api keys — §11.4.10)" ;;
+  esac
+  case "$f" in
+    */bin/*|bin/*|*/build/*|build/*|*/dist/*|dist/*|*/out/*|out/*) ;;  # path-class artifacts: warn only below
+  esac
+  case "$base" in
+    *.so|*.dylib|*.exe|*.dll|*.class|*.pyc|*.o|*.a) forbidden="${forbidden}\n  ${f}  (build artifact — §11.4.30)" ;;
+  esac
+done <<EOF
+$staged
+EOF
+
+if [ -n "$forbidden" ]; then
+  {
+    echo ""
+    echo "============================================================"
+    echo "BLOCKED by pre-commit hook (§11.4.30/§11.4.10 forbidden class)"
+    echo "============================================================"
+    echo "A staged file matches a secret / build-artifact forbidden class:"
+    printf '%b\n' "$forbidden"
+    echo ""
+    echo "Un-stage it, add it to .gitignore, and (if a secret) rotate per"
+    echo "§11.4.10 / CONST-042 if it already reached a remote."
+    echo "============================================================"
+  } >&2
+  block=1
+fi
+
+# ---------------------------------------------------------------------------
+# 3. §11.4.84 — mutation-residue scan over STAGED CONTENT.
+#
+#    A paired §1.1 mutation must be serialised (mutate -> assert FAIL ->
+#    restore) so the working tree is clean before any unrelated commit. A
+#    staged mutation marker is the residue that leaked an `// always pass`
+#    JWT bypass into a logo commit (the forensic case behind §11.4.84).
+#
+#    This hook excludes ITSELF and its sibling hooks + their test (the
+#    markers appear here as documentation/test fixtures, not residue).
+# ---------------------------------------------------------------------------
+mutation_hits=""
+while IFS= read -r f; do
+  case "$f" in
+    scripts/git_hooks/*) continue ;;   # hook bodies + test legitimately name the markers
+  esac
+  [ -f "$f" ] || continue
+  # Scan the STAGED blob (index), not the worktree, so we catch exactly
+  # what is about to be committed.
+  blob=$(git show ":$f" 2>/dev/null) || continue
+  if printf '%s' "$blob" | grep -qE 'MUTATED for paired|// always pass|# always pass|MUTATION-RESIDUE|_mutated_'; then
+    mutation_hits="${mutation_hits}\n  ${f}"
+  fi
+done <<EOF
+$staged
+EOF
+
+if [ -n "$mutation_hits" ]; then
+  {
+    echo ""
+    echo "============================================================"
+    echo "BLOCKED by pre-commit hook (§11.4.84 mutation residue)"
+    echo "============================================================"
+    echo "A staged file carries a paired-mutation marker. A mutation gate"
+    echo "MUST be restored (mutate -> assert FAIL -> restore) before any"
+    echo "unrelated commit. Staged file(s):"
+    printf '%b\n' "$mutation_hits"
+    echo ""
+    echo "Restore the mutated file(s) and re-stage, then commit."
+    echo "============================================================"
+  } >&2
+  block=1
+fi
+
+if [ "$block" -eq 1 ]; then
+  exit 1
+fi
+exit 0

@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# scripts/git_hooks/post-commit
+# §11.4.75 mechanical-enforcement layer 4 (auto-repair, LOG-ONLY default).
+#
+# After a commit lands, scan the just-committed manifest for GOVERNED `.md`
+# files whose `.html`/`.pdf` siblings are missing or stale, and LOG them so
+# the operator (or a follow-up tooling run) can regenerate.
+#
+# SAFETY POSTURE: this stub does NOT auto-generate siblings and does NOT
+# create follow-up commits by default. Auto-generation here would surprise
+# the operator (spawning pandoc/weasyprint + an extra commit on every
+# commit). The §11.4.75 reference design's auto-export is opt-in via
+# `HELIX_POSTCOMMIT_AUTOREPAIR=1`, and even then only logs unless the
+# project's export pipeline is explicitly present. Idempotent +
+# recursion-guarded (a guard file prevents this hook from re-entering when
+# a future auto-repair commit fires).
+#
+# Inputs:   the HEAD commit's file manifest.
+# Outputs:  appends to docs/audit/postcommit_sibling_log.md (best-effort);
+#           always exits 0 (a post-commit hook's exit code is advisory —
+#           the commit already landed).
+# Side-effects: writes a log line; sets/clears a recursion-guard file.
+# Dependencies: git, grep, POSIX sh.
+# Cross-references: §11.4.75 / §11.4.65; scripts/git_hooks/{pre-commit,
+#   pre-push,commit-msg}; scripts/install_git_hooks.sh.
+
+set -uo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+cd "$REPO_ROOT" || exit 0
+GITDIR=$(git rev-parse --git-dir 2>/dev/null || echo "$REPO_ROOT/.git")
+
+# ---------------------------------------------------------------------------
+# Recursion guard — if we are already inside a post-commit auto-repair pass,
+# bail immediately so we never loop.
+# ---------------------------------------------------------------------------
+GUARD="$GITDIR/ATMO_POSTCOMMIT_GUARD"
+if [ -f "$GUARD" ]; then
+  exit 0
+fi
+: > "$GUARD" 2>/dev/null || true
+# Clear the guard on any exit path.
+trap 'rm -f "$GUARD" 2>/dev/null || true' EXIT
+
+is_governed_md() {
+  case "$1" in
+    CLAUDE.md|AGENTS.md|CONSTITUTION.md|CRUSH.md|QWEN.md) return 0 ;;
+    docs/Issues.md|docs/Issues_Summary.md|docs/Fixed.md|docs/Fixed_Summary.md|docs/CONTINUATION.md) return 0 ;;
+    docs/*/Status.md|docs/*/Status_Summary.md|docs/*/*/Status.md|docs/*/*/Status_Summary.md) return 0 ;;
+  esac
+  return 1
+}
+
+# Files touched by the just-landed commit. (diff-tree avoids the
+# `--name-only` + `-s` incompatibility that `git show` has.)
+committed=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null | grep -v '^$' || true)
+[ -n "$committed" ] || exit 0
+
+orphans=""
+while IFS= read -r f; do
+  case "$f" in *.md) : ;; *) continue ;; esac
+  is_governed_md "$f" || continue
+  [ -f "$f" ] || continue   # deleted in this commit; nothing to repair
+  base="${f%.md}"
+  for ext in html pdf; do
+    sib="${base}.${ext}"
+    if [ ! -f "$sib" ]; then
+      orphans="${orphans}\n  ${f} -> missing ${sib}"
+    fi
+  done
+done <<EOF
+$committed
+EOF
+
+[ -n "$orphans" ] || exit 0
+
+log="$REPO_ROOT/docs/audit/postcommit_sibling_log.md"
+if [ -d "$(dirname "$log")" ]; then
+  {
+    printf -- '- %s — HEAD %s — governed .md missing siblings:%b\n' \
+      "$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown-time)" \
+      "$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" \
+      "$orphans"
+  } >> "$log" 2>/dev/null || true
+fi
+
+{
+  echo "post-commit (§11.4.75): GOVERNED .md committed without up-to-date"
+  echo "  .html/.pdf siblings:"
+  printf '%b\n' "$orphans"
+  echo "  Regenerate via your export pipeline (e.g."
+  echo "  scripts/testing/sync_all_markdown_exports.sh) and commit the siblings."
+} >&2
+
+# Opt-in auto-generation is intentionally NOT performed by default (see the
+# safety note above). When HELIX_POSTCOMMIT_AUTOREPAIR=1 AND a known export
+# pipeline exists, a future revision may regenerate + create a guarded
+# follow-up commit. Today this stub stays log-only by design.
+
+exit 0

@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"dev.helix.code/internal/llm/promptcache"
@@ -24,6 +25,13 @@ type OpenAIProvider struct {
 	httpClient *http.Client
 	models     []ModelInfo
 	lastHealth *ProviderHealth
+
+	// catalogOnce/catalogMu guard the CONST-036 lazy live-catalog refresh.
+	// Construction seeds a verified static list (no network at construction —
+	// preserves the no-network-on-NewXProvider contract); the first GetModels()
+	// call refreshes from the provider's live GET /models exactly once.
+	catalogOnce sync.Once
+	catalogMu   sync.RWMutex
 
 	// prefixDetector watches the request prefix (system prompt + tool
 	// definitions) for mid-session drift. Speed programme P1-T05: OpenAI
@@ -82,9 +90,35 @@ func (op *OpenAIProvider) GetName() string {
 	return "OpenAI"
 }
 
-// GetModels returns available models
+// GetModels returns available models. CONST-036 / F6-D-5: the list is refreshed
+// LIVE from OpenAI's GET /models on first call (cached); the seed list set at
+// construction is only the offline fallback.
 func (op *OpenAIProvider) GetModels() []ModelInfo {
+	op.refreshCatalogOnce()
+	op.catalogMu.RLock()
+	defer op.catalogMu.RUnlock()
 	return op.models
+}
+
+// refreshCatalogOnce performs the live /models fetch exactly once. On failure it
+// leaves the verified seed in place (honest fallback, never a fabricated list).
+func (op *OpenAIProvider) refreshCatalogOnce() {
+	op.catalogOnce.Do(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		models, err := fetchOpenAICompatibleCatalog(ctx, op.endpoint, op.apiKey, op.httpClient, ProviderTypeOpenAI, 128000, 4096)
+		if err != nil {
+			log.Printf("⚠️  OpenAI /models fetch failed (%v); keeping verified seed list", err)
+			return
+		}
+		for i := range models {
+			EnrichModelInfo(&models[i])
+		}
+		op.catalogMu.Lock()
+		op.models = models
+		op.catalogMu.Unlock()
+		log.Printf("✅ OpenAI catalog refreshed with %d models (live /models)", len(models))
+	})
 }
 
 // GetCapabilities returns provider capabilities
@@ -199,7 +233,9 @@ func (op *OpenAIProvider) Close() error {
 // Helper methods
 
 func (op *OpenAIProvider) initializeModels() {
-	// Predefined OpenAI models with their capabilities
+	// CONST-036 / F6-D-5: this sets the verified SEED only (no network at
+	// construction). The authoritative list is refreshed LIVE from GET /models
+	// on the first GetModels() call (see refreshCatalogOnce).
 	op.models = []ModelInfo{
 		{
 			Name:        "gpt-4o",

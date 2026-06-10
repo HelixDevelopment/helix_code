@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,6 +27,10 @@ type MistralProvider struct {
 	httpClient *http.Client
 	models     []ModelInfo
 	lastHealth *ProviderHealth
+
+	// catalogOnce/catalogMu guard the CONST-036 lazy live-catalog refresh.
+	catalogOnce sync.Once
+	catalogMu   sync.RWMutex
 }
 
 // NewMistralProvider creates a new Mistral provider.
@@ -63,7 +68,33 @@ func NewMistralProvider(config ProviderConfigEntry) (*MistralProvider, error) {
 
 func (mp *MistralProvider) GetType() ProviderType { return ProviderTypeMistral }
 func (mp *MistralProvider) GetName() string       { return "Mistral" }
-func (mp *MistralProvider) GetModels() []ModelInfo { return mp.models }
+// GetModels returns available models. CONST-036 / F6-D-5: refreshed LIVE from
+// Mistral's GET /models on first call (cached); seed list is offline fallback.
+func (mp *MistralProvider) GetModels() []ModelInfo {
+	mp.refreshCatalogOnce()
+	mp.catalogMu.RLock()
+	defer mp.catalogMu.RUnlock()
+	return mp.models
+}
+
+func (mp *MistralProvider) refreshCatalogOnce() {
+	mp.catalogOnce.Do(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		models, err := fetchOpenAICompatibleCatalog(ctx, mp.endpoint, mp.apiKey, mp.httpClient, ProviderTypeMistral, 131072, 8192)
+		if err != nil {
+			log.Printf("⚠️  Mistral /models fetch failed (%v); keeping verified seed list", err)
+			return
+		}
+		for i := range models {
+			EnrichModelInfo(&models[i])
+		}
+		mp.catalogMu.Lock()
+		mp.models = models
+		mp.catalogMu.Unlock()
+		log.Printf("✅ Mistral catalog refreshed with %d models (live /models)", len(models))
+	})
+}
 
 func (mp *MistralProvider) GetCapabilities() []ModelCapability {
 	return []ModelCapability{
@@ -163,6 +194,9 @@ func (mp *MistralProvider) CountTokens(text string) (int, error) {
 }
 
 func (mp *MistralProvider) initializeModels() {
+	// CONST-036 / F6-D-5: verified SEED only (no network at construction). The
+	// authoritative list is refreshed LIVE from GET /models on the first
+	// GetModels() call (see refreshCatalogOnce).
 	mp.models = []ModelInfo{
 		{
 			Name:        "mistral-small-latest",

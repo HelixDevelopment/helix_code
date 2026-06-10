@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,6 +25,11 @@ type AnthropicProvider struct {
 	httpClient *http.Client
 	models     []ModelInfo
 	lastHealth *ProviderHealth
+
+	// catalogOnce/catalogMu guard the CONST-036 lazy live-catalog refresh from
+	// Anthropic's GET /v1/models (seed set at construction, no network there).
+	catalogOnce sync.Once
+	catalogMu   sync.RWMutex
 
 	// cacheAwareness tracks the wall-clock time of the most recent successful
 	// completion so callers can predict whether Anthropic's prompt-cache TTL
@@ -188,6 +194,77 @@ func NewAnthropicProvider(config ProviderConfigEntry) (*AnthropicProvider, error
 	return provider, nil
 }
 
+// anthropicModelsBase derives the `/v1/models` catalog URL from the configured
+// messages endpoint (which ends in `/v1/messages`). Falls back to the canonical
+// host when the endpoint shape is unexpected.
+func (ap *AnthropicProvider) anthropicModelsBase() string {
+	ep := ap.endpoint
+	if i := strings.LastIndex(ep, "/v1/"); i >= 0 {
+		return ep[:i] + "/v1/models"
+	}
+	return "https://api.anthropic.com/v1/models"
+}
+
+// fetchModelCatalog calls Anthropic's GET /v1/models and returns the live model
+// list (CONST-036). Returns nil (and no error surface) on any failure so the
+// caller falls back to the verified seed — model metadata is sourced live,
+// never invented.
+func (ap *AnthropicProvider) fetchModelCatalog(ctx context.Context) []ModelInfo {
+	req, err := http.NewRequestWithContext(ctx, "GET", ap.anthropicModelsBase(), nil)
+	if err != nil {
+		return nil
+	}
+	req.Header.Set("x-api-key", ap.apiKey)
+	req.Header.Set("anthropic-version", "2023-06-01")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := ap.httpClient.Do(req)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil
+	}
+
+	var cat struct {
+		Data []struct {
+			ID          string `json:"id"`
+			DisplayName string `json:"display_name"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&cat); err != nil {
+		return nil
+	}
+	if len(cat.Data) == 0 {
+		return nil
+	}
+
+	models := make([]ModelInfo, 0, len(cat.Data))
+	for _, m := range cat.Data {
+		if m.ID == "" {
+			continue
+		}
+		desc := m.DisplayName
+		if desc == "" {
+			desc = m.ID
+		}
+		mi := ModelInfo{
+			Name:        m.ID,
+			Provider:    ProviderTypeAnthropic,
+			ContextSize: 200000,
+			MaxTokens:   8192,
+			Description: desc,
+		}
+		EnrichModelInfo(&mi)
+		models = append(models, mi)
+	}
+	if len(models) == 0 {
+		return nil
+	}
+	return models
+}
+
 // CacheAwareness returns the provider's cache-coldness tracker. Callers may
 // consult IsCacheLikelyCold() to decide whether to skip explicit
 // cache_control markers on the next request (the entry is likely expired
@@ -303,9 +380,30 @@ func (ap *AnthropicProvider) GetName() string {
 	return "Anthropic"
 }
 
-// GetModels returns available models
+// GetModels returns available models. CONST-036 / F6-D-5: refreshed LIVE from
+// Anthropic's GET /v1/models on first call (cached); getAnthropicModels() seed
+// is the offline fallback.
 func (ap *AnthropicProvider) GetModels() []ModelInfo {
+	ap.refreshCatalogOnce()
+	ap.catalogMu.RLock()
+	defer ap.catalogMu.RUnlock()
 	return ap.models
+}
+
+func (ap *AnthropicProvider) refreshCatalogOnce() {
+	ap.catalogOnce.Do(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		live := ap.fetchModelCatalog(ctx)
+		if len(live) == 0 {
+			log.Printf("⚠️  Anthropic /v1/models fetch failed; keeping verified seed list")
+			return
+		}
+		ap.catalogMu.Lock()
+		ap.models = live
+		ap.catalogMu.Unlock()
+		log.Printf("✅ Anthropic catalog refreshed with %d models (live /v1/models)", len(live))
+	})
 }
 
 // GetCapabilities returns provider capabilities
