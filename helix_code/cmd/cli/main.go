@@ -38,6 +38,7 @@ import (
 	"dev.helix.code/internal/projectmemory"
 	"dev.helix.code/internal/render"
 	"dev.helix.code/internal/roocode"
+	"dev.helix.code/internal/secrets"
 	"dev.helix.code/internal/server"
 	"dev.helix.code/internal/session"
 	"dev.helix.code/internal/telemetry"
@@ -1356,9 +1357,14 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 	fmt.Println()
 	fmt.Println(tr(ctx, "cli_models_header", nil))
 
-	// Priority 1: LLMsVerifier adapter (CONST-036 single source of truth)
+	// Priority 1: LLMsVerifier adapter (CONST-036 single source of truth).
+	//
+	// D-2 (SP1): list only WORKING models — key-present provider ∧ Verified ∧
+	// status=="verified" ∧ score>=min. Presenting failed/pending/rate-limited or
+	// no-key models as available is a §11.4 / CONST-035 PASS-bluff (the user
+	// cannot actually use them).
 	if c.verifierAdapter != nil && c.verifierAdapter.IsEnabled() {
-		models, err := c.verifierAdapter.GetVerifiedModels(ctx)
+		models, err := c.verifierAdapter.GetWorkingModels(ctx, presentProviders(os.Getenv))
 		if err == nil && len(models) > 0 {
 			c.printVerifiedModels(models)
 			return nil
@@ -1383,24 +1389,100 @@ func (c *CLI) handleListModels(ctx context.Context) error {
 		}
 	}
 
-	// Priority 3: Constitutional fallback list (CONST-035 compliance)
-	c.printVerifiedModels(verifier.FallbackModels)
+	// Priority 3: Constitutional fallback list (CONST-035 compliance).
+	//
+	// D-2: fallback models are NOT verifier-confirmed "working" — they are an
+	// offline baseline. They MUST NOT be rendered through printVerifiedModels
+	// (which now asserts Verified+verified status), and MUST carry an explicit
+	// "unverified fallback" label so the user is never told they are verified.
+	c.printFallbackModels(verifier.FallbackModels)
 	fmt.Printf("ℹ️  %s\n", tr(ctx, "cli_models_fallback_notice", nil))
 	return nil
 }
 
+// printFallbackModels renders the offline fallback list with an explicit
+// unverified label (D-2 anti-bluff: never claim fallback == verified working).
+func (c *CLI) printFallbackModels(models []*verifier.VerifiedModel) {
+	for _, m := range models {
+		scoreStr := fmt.Sprintf("SC:%.1f", m.OverallScore)
+		fmt.Printf("%s\n\n", trc("cli_model_info_verified", map[string]any{
+			"ID":          m.ID,
+			"Name":        m.DisplayName,
+			"Provider":    m.Provider,
+			"Score":       scoreStr,
+			"ContextSize": m.ContextSize,
+			"Status":      "⚠ unverified fallback",
+		}))
+	}
+}
+
+// providerEnvAliases maps a verifier provider type to the environment-variable
+// aliases that supply that provider's API key. A non-empty, non-placeholder
+// value in ANY alias marks the provider key-present. Decoupled, data-only table
+// (lifted from helix_agent SupportedProviders.EnvVars per §11.4.74); converges
+// on the shared substrate when the replace dev.helix.agent wiring lands.
+var providerEnvAliases = map[string][]string{
+	"openai":     {"OPENAI_API_KEY"},
+	"anthropic":  {"ANTHROPIC_API_KEY", "CLAUDE_API_KEY"},
+	"gemini":     {"GEMINI_API_KEY", "GOOGLE_API_KEY"},
+	"deepseek":   {"DEEPSEEK_API_KEY"},
+	"groq":       {"GROQ_API_KEY"},
+	"mistral":    {"MISTRAL_API_KEY"},
+	"xai":        {"XAI_API_KEY", "GROK_API_KEY"},
+	"openrouter": {"OPENROUTER_API_KEY"},
+}
+
+// isPlaceholderKey reports whether a key value is an obvious placeholder that
+// must NOT count as a recognized key (e.g. ".env.example" stubs).
+func isPlaceholderKey(v string) bool {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return true
+	}
+	lower := strings.ToLower(v)
+	for _, p := range []string{"your-", "your_", "changeme", "placeholder", "xxx", "sk-...", "<", "example"} {
+		if strings.Contains(lower, p) {
+			return true
+		}
+	}
+	return false
+}
+
+// presentProviders returns the set of provider types for which a usable API key
+// was recognized in the environment (after D-3 secrets.LoadAPIKeys ran at
+// startup). getenv is injected for testability. This is the key-presence input
+// to the working-model funnel (D-2): only key-present providers' models display.
+func presentProviders(getenv func(string) string) map[string]bool {
+	present := make(map[string]bool, len(providerEnvAliases))
+	for provider, aliases := range providerEnvAliases {
+		for _, alias := range aliases {
+			if v := getenv(alias); !isPlaceholderKey(v) {
+				present[provider] = true
+				break
+			}
+		}
+	}
+	return present
+}
+
+// isWorkingForDisplay reports whether a model is usable enough to show in the
+// "available models" listing (D-2). A model is working iff it is Verified with
+// status "verified". failed / pending / rate-limited rows are NOT working and
+// MUST NOT be presented as available (§11.4 / CONST-035 — listing an unusable
+// model is a PASS-bluff at the model-listing layer).
+func isWorkingForDisplay(m *verifier.VerifiedModel) bool {
+	return m.Verified && m.VerificationStatus == "verified"
+}
+
 func (c *CLI) printVerifiedModels(models []*verifier.VerifiedModel) {
 	for _, m := range models {
+		// D-2 defensive gate: never render a non-working row, regardless of
+		// which caller supplied the list (the verifier funnel SHOULD already
+		// have filtered, but the printer must not be the place a bluff leaks).
+		if !isWorkingForDisplay(m) {
+			continue
+		}
 		status := "✓ verified"
-		if !m.Verified {
-			status = "○ pending"
-		}
-		if m.VerificationStatus == "failed" {
-			status = "✗ failed"
-		}
-		if m.VerificationStatus == "rate_limited" {
-			status = "⏳ rate-limited"
-		}
 		scoreStr := fmt.Sprintf("SC:%.1f", m.OverallScore)
 		fmt.Printf("%s\n\n", trc("cli_model_info_verified", map[string]any{
 			"ID":          m.ID,
@@ -2227,6 +2309,19 @@ func (c *CLI) showHelp(ctx context.Context) {
 	fmt.Println("--notify-priority - Notification priority (low/medium/high/urgent)")
 }
 
+// loadAPIKeysAtStartup wires the previously-dead secrets.LoadAPIKeys into the
+// CLI bootstrap (D-3 / SP1). It recognizes provider API keys from
+// $HOME/api_keys.sh or a walked-up .env and applies them to the process env via
+// gap-fill precedence (already-exported vars win — DECISION-1). A missing source
+// is non-fatal: returning false means no recognition source was found, which is
+// a legitimate state (the operator may have exported keys directly). The error
+// is intentionally swallowed (never logged — CONST-042) but the boolean is
+// returned so tests can assert the wiring is live (anti-bluff: this is the seam
+// that proves the loader is no longer dead code).
+func loadAPIKeysAtStartup() bool {
+	return secrets.LoadAPIKeys() == nil
+}
+
 func main() {
 	// P1-F15-T08: subagent helper-mode dispatch — MUST run BEFORE the F14
 	// sandbox helper-mode dispatch (per spec §3 anchor). A subagent helper
@@ -2260,6 +2355,16 @@ func main() {
 	if sandbox.IsHelperInvocation() {
 		os.Exit(sandbox.RunAsHelper())
 	}
+
+	// D-3 (SP1): recognize provider API keys from $HOME/api_keys.sh or a
+	// walked-up .env BEFORE any config / env read, so a key supplied only via
+	// those files becomes visible to config.Load() (viper AutomaticEnv) and the
+	// working-model funnel. Gap-fill precedence (DECISION-1): an already-exported
+	// shell var is NEVER overwritten — the file only fills gaps. A missing source
+	// is non-fatal (the operator may export keys directly). Values are never
+	// logged (CONST-042). This runs after the helper-mode early-exit dispatches
+	// (which never reach normal CLI logic) and before every config-reading path.
+	loadAPIKeysAtStartup()
 
 	// Minimal dispatcher: intercept the "permissions" subcommand group before
 	// flag.Parse() so that Cobra handles its own flag parsing.

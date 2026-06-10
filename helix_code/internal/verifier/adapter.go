@@ -223,6 +223,49 @@ func (a *Adapter) GetVerifiedModels(ctx context.Context) ([]*VerifiedModel, erro
 	return a.filterByProviderConfig(models), nil
 }
 
+// GetWorkingModels returns the subset of verifier models that are actually
+// usable by the end user (D-4 / SP1 working-model funnel). A model survives iff:
+//
+//	present[m.Provider]                            (key-presence gate — a key for
+//	                                                that provider was recognized)
+//	AND m.Verified == true                         (types.go Verified)
+//	AND m.VerificationStatus == "verified"         (types.go VerificationStatus)
+//	AND m.OverallScore >= a.GetMinAcceptableScore()(adapter.go:175 — now APPLIED)
+//	AND the provider is not disabled in config     (preserved via GetVerifiedModels)
+//
+// present maps a provider type (e.g. "anthropic", "openai") to whether a key
+// for it was recognized at startup. A nil/empty present map drops every model
+// (no key recognized ⇒ no working models — never a §11.4 / CONST-035 bluff).
+//
+// Anti-bluff (§11.4 / CONST-035): failed / pending / rate-limited / sub-threshold
+// / no-key models are NEVER returned — they are not usable, so presenting them
+// as available would be a PASS-bluff at the model-listing layer (D-2).
+//
+func (a *Adapter) GetWorkingModels(ctx context.Context, present map[string]bool) ([]*VerifiedModel, error) {
+	models, err := a.GetVerifiedModels(ctx)
+	if err != nil {
+		return nil, err
+	}
+	minScore := a.GetMinAcceptableScore()
+	working := make([]*VerifiedModel, 0, len(models))
+	for _, m := range models {
+		if !present[m.Provider] {
+			continue // key-presence gate
+		}
+		if !m.Verified {
+			continue
+		}
+		if m.VerificationStatus != "verified" {
+			continue
+		}
+		if m.OverallScore < minScore {
+			continue
+		}
+		working = append(working, m)
+	}
+	return working, nil
+}
+
 // GetProviderStatus returns the health and score status for a provider.
 func (a *Adapter) GetProviderStatus(providerType string) (*ProviderStatus, bool) {
 	a.mu.RLock()

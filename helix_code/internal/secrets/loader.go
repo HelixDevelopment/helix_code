@@ -75,7 +75,7 @@ func loadFromShell(path string) error {
 		}
 		key := line[:eq]
 		val := stripQuotes(line[eq+1:])
-		os.Setenv(key, val)
+		setIfAbsent(key, val)
 	}
 	return scanner.Err()
 }
@@ -100,9 +100,23 @@ func loadFromEnv(path string) error {
 		}
 		key := line[:eq]
 		val := stripQuotes(line[eq+1:])
-		os.Setenv(key, val)
+		setIfAbsent(key, val)
 	}
 	return scanner.Err()
+}
+
+// setIfAbsent applies DECISION-1 gap-fill precedence: a value already present
+// in the process environment (e.g. shell-exported) is NEVER overwritten by a
+// .env / api_keys.sh file value — the file only fills gaps. This matches the
+// "recognize if not already set" intent and is the least-surprising precedence.
+//
+// A var present-but-empty ("") is treated as a gap so an empty placeholder
+// export does not shadow a real file value. Values are NOT logged (CONST-042).
+func setIfAbsent(key, val string) {
+	if existing, ok := os.LookupEnv(key); ok && existing != "" {
+		return
+	}
+	os.Setenv(key, val)
 }
 
 func stripQuotes(s string) string {
