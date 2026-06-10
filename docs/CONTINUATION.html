@@ -48,23 +48,73 @@ text-decoration: line-through;
 </header>
 <h1 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-06-10 (close-out¹⁶² — LLMs-ACCESS
-PROGRAMME: WAVES 1–5 LANDED (~22 commits, autonomous-loop, all RED→GREEN
-+ §1.1-mutation-proven + per-wave independent §11.4.142 review GO).
-</strong>Model-access end-to-end<strong>: key recognition
+<p><strong>Last updated: 2026-06-10 (close-out¹⁶³ — LLMs-ACCESS
+PROGRAMME: WAVES 6–9 LANDED (~30 commits total, autonomous-loop, all
+RED→GREEN + §1.1-mutation-proven + per-batch independent §11.4.142
+review GO). </strong>D-7 fully closed**
+(<code>replace dev.helix.agent</code> clean — minimal
+<code>internal/agentbridge</code> real cross-module round-trip;
+helix_code consumes helix_agent’s public verifier SDK; gin stays 1.12).
+<strong>FULL per-agent CLI-bridge de-bluff (D-16+D-17+D-18)</strong> —
+the request’s CORE: all <strong>68
+<code>helix_agent/internal/clis/agents/*</code> packages</strong> were
+broadly fabricating responses (the §11.9 nightmare — incl. promptfoo’s
+always-green fake scorecard); now <strong>confirmed-CLI agents → real
+<code>os/exec</code></strong>
+(claude_code/qwencode/cody/amazonq/goose/crush/gemini/copilotcli/nanocoder/ollamacode/opencodecli/plandex/shai/snowcli/vtcode/speckit/kimi/gptme/junie/gitmcp),
+<strong>IDE/web/no-CLI agents → honest-error</strong>
+(cursor/cline/tabnine/windsurf/perplexity/promptfoo/smolagents/jetbrainsai/…),
+local-stores already-honest; <strong>zero live fabrication
+literals</strong>; whole-layer
+<code>go test ./internal/clis/... = 78 ok/0 FAIL</code>; exec-flags
+verified vs live <code>--help</code>. <strong>SDK bumps ALL
+landed</strong> (helix_code): zep v3.10→3.23 (1 <em>string fix), azcore
+1.16→1.22, <strong>azidentity 1.8→1.13.1 (security GO-2024-2918
+cleared)</strong>, aws-core 1.32→1.42, <strong>bedrockruntime
+1.23.1→1.53.5 (zero code change)</strong>; gin OP-5 skew already closed
+at 1.12; tree-sitter migration (step 5) DEFERRED (heavy 2-module epic).
+<strong>SP5 substrate</strong> <code>internal/substrate</code>
+(Unit/Scheduler/Dispatcher/Resolver) consumes own-org concurrency.
+<strong>49-fork SWAP committed</strong>
+(<code>.gitmodules</code>→<code>vasic-digital/caf-*</code>, forks
+confirmed to contain pinned commits); <strong>GitLab mirror-population
+IN-FLIGHT</strong> (49 repos, heavy). <strong>SP7</strong> 4 local
+harnesses (ddos/scaling/ux/ui). <strong>CONST-066</strong> full doc
+backfill (443 docs siblings). <strong>helix_qa</strong> → bca3b36.
+Defect ledger <strong>D-1..D-18, 16 fixed</strong>; open follow-ups:
+D-10 (helix_agent test flakes), lovable.saveProjects dead-code
+(§11.4.124), tree-sitter step-5, the 3 research-confirmed convertible
+agents now mostly absorbed into D-17. <strong>NOT pushed</strong>
+(operator authorized COMMIT-only — ~30 commits sit local across meta +
+helix_agent + constitution-pointer). <strong>AUTONOMOUS QUEUE NEAR-EMPTY
+— remaining work is OPERATOR/INFRA-GATED</strong>: (1) <strong>PUSH ~30
+commits to all upstreams</strong> (§2.1 multi-upstream, §11.4.71
+fetch-first, no-force §11.4.113) — the §11.4.126 “release published”
+terminal condition; (2) <strong>G-2</strong> create 2 HelixDevelopment
+repos dag_orchestrator+pipeline_runtime (per SP6 design); (3)
+<strong>boot infra</strong> (Ollama/server, possibly §12.6 memory-gated)
+for StartupVerifier real-flow into /v1/catalog + a full <strong>HelixQA
+autonomous session</strong>; (4) <strong>tree-sitter migration
+epic</strong> (operator-confirm — 30+ import sites, 2 modules). All
+planning + reviews under
+<code>docs/superpowers/specs/2026-06-10-*</code> (master roadmap Rev 3 +
+6 analyses + 8 SP plans + ~10 review docs). PRIOR close-out¹⁶² —
+LLMs-ACCESS PROGRAMME: WAVES 1–5 LANDED (~22 commits, autonomous-loop,
+all RED→GREEN + §1.1-mutation-proven + per-wave independent §11.4.142
+review GO). <strong>Model-access end-to-end</strong>: key recognition
 (.env/.api_keys/shell, multi-alias <code>keyrecognition.go</code>) →
 verifier funnel (<code>GetWorkingModels</code>: Verified ∧ status ∧
 score≥min) → wired into REAL CLI <code>handleListModels</code> + server
 <code>listLLMModels/Providers</code> (no-key providers hidden,
 failed/pending hidden); <code>secrets.LoadAPIKeys</code> wired at
-CLI+server startup (was dead). </strong>D-1..D-5 fixed** (hardcoded
-model lists ×11 providers → dynamic /models fetch or honest-empty;
-<code>completion.go:406</code> 3-model bluff → registry-sourced).
-<strong>Unified <code>GET /v1/catalog</code></strong> (helix_agent
-<code>internal/catalog</code>) joins ensemble + HelixLLM + every
-provider + REAL Verified models (StartupVerifier adapter, CONST-036/037
-24h gate; honest-empty when unwired). <strong>CLI-bridge FULLY
-de-bluffed</strong>: D-6/D-9/D-11/D-12 — qwencode + all 43
+CLI+server startup (was dead). <strong>D-1..D-5 fixed</strong>
+(hardcoded model lists ×11 providers → dynamic /models fetch or
+honest-empty; <code>completion.go:406</code> 3-model bluff →
+registry-sourced). <strong>Unified <code>GET /v1/catalog</code></strong>
+(helix_agent <code>internal/catalog</code>) joins ensemble + HelixLLM +
+every provider + REAL Verified models (StartupVerifier adapter,
+CONST-036/037 24h gate; honest-empty when unwired). <strong>CLI-bridge
+FULLY de-bluffed</strong>: D-6/D-9/D-11/D-12 — qwencode + all 43
 <code>instance_manager</code> dispatch methods → real
 <code>os/exec</code> (3: qwen/copilot/gemini) or honest
 noHeadlessCLIError (40 no-CLI agents); <code>IsAgentTypeAvailable</code>
@@ -428,7 +478,7 @@ subagent-driven. <strong>WRAP-UP STATE</strong>: tracker <strong>1 open
 (HXC-031) / 41 closed</strong>, DB 155 items validate-OK; meta HEAD
 <code>32fc6144</code> (theme cosmetic-color drift committed; theme.go
 only — assets/colors gitignored derivatives); ALL owned submodules
-committed+pushed to their org remotes (the 6 cli_agents_resources/*
+committed+pushed to their org remotes (the 6 cli_agents_resources/</em>
 “ahead” are third-party read-only refs, not ours); main repo pushed to
 gitlab + (github/origin/upstream via detached :443 catch-up —
 qa-results/wrapup_push.log); infra DOWN (8080/5432/6379 closed;
