@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-tree-sitter-migration-plan</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-tree-sitter-migration-plan</h1>
+</header>
+<h1 id="tree-sitter-migration-plan-smackergo-tree-sitter-tree-sittergo-tree-sitter">Tree-sitter
+Migration Plan: smacker/go-tree-sitter → tree-sitter/go-tree-sitter</h1>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><strong>Revision</strong></td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td><strong>Last modified</strong></td>
+<td>2026-06-10</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>active</td>
+</tr>
+<tr>
+<td><strong>Maintainer</strong></td>
+<td>HelixCode CLI-Agent Fusion programme</td>
+</tr>
+<tr>
+<td><strong>Verdict</strong></td>
+<td><strong>DEFERRED-with-plan</strong> — full swap is a genuine EPIC;
+both modules STAY on the working <code>smacker/go-tree-sitter</code> pin
+until the per-language gap + API-rewrite work is scheduled.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#1-verdict-tldr">1. Verdict (TL;DR)</a></li>
+<li><a href="#2-scope-every-smacker-import-site">2. Scope: every smacker
+import site</a></li>
+<li><a href="#3-api-surface-actually-used--11-mapping-to-the-official-lib">3.
+API surface actually used + 1:1 mapping to the official lib</a></li>
+<li><a href="#4-per-language-module-availability-table-the-blocker">4.
+Per-language module availability table (the blocker)</a></li>
+<li><a href="#5-why-this-is-an-epic-not-a-bounded-swap">5. Why this is
+an EPIC, not a bounded swap</a></li>
+<li><a href="#6-per-module-migration-steps-when-scheduled">6. Per-module
+migration steps (when scheduled)</a></li>
+<li><a href="#7-risk-register">7. Risk register</a></li>
+<li><a href="#8-sources-verified">8. Sources verified</a></li>
+</ul>
+<h2 id="verdict-tldr">1. Verdict (TL;DR)</h2>
+<p>A full swap from <code>github.com/smacker/go-tree-sitter</code>
+(dormant since 2024-08-27, pinned at
+<code>v0.0.0-20240827094217-dd81d9e9be82</code> in BOTH modules) to the
+official <code>github.com/tree-sitter/go-tree-sitter</code> is
+<strong>NOT a clean bounded swap</strong>. It is a genuine epic for two
+independent reasons:</p>
+<ol type="1">
+<li><p><strong>Per-language module gap.</strong> smacker bundles ~30
+grammars as in-repo sub-packages
+(<code>smacker/go-tree-sitter/&lt;lang&gt;</code>). The official binding
+ships <strong>zero</strong> grammars — each language is a
+<em>separate</em> Go-module dependency at
+<code>github.com/&lt;org&gt;/tree-sitter-&lt;lang&gt;/bindings/go</code>.
+Of the 30 languages HelixCode/helix_agent use, <strong>~6–8 have NO
+maintained official/first-party Go-module binding</strong> (dockerfile,
+elm, protobuf, svelte, and others are personal forks or have no
+<code>bindings/go</code> at all). A full swap would force adding
+unvetted personal-fork Go modules — which collides with the project’s
+catalogue-first / no-unvetted-dependency posture (§11.4.74) and the
+anti-bluff floor.</p></li>
+<li><p><strong>API-shape rewrite at every call site.</strong> The
+official lib is not a drop-in: package name, the grammar-loading idiom,
+the node accessor names (<code>Type()</code>→<code>Kind()</code>), the
+integer widths (<code>uint32</code>→<code>uint</code>), the
+<code>Parse</code> signature + return type (no <code>error</code>
+return), and the incremental-edit struct
+(<code>EditInput</code>→<code>InputEdit</code>, all fields renamed,
+value→pointer) all differ. Every one of the 4 production files + 1 test
+file must be rewritten, not re-imported.</p></li>
+</ol>
+<p><strong>Decision:</strong> leave both <code>go.mod</code> files on
+the smacker pin (it compiles and works today), do not force a
+half-migrated state (§11.4.101 — high-blast-radius change without the
+per-language groundwork). Schedule the epic per §6 when a maintainer
+owns the per-language vendoring + API-wrapper work.</p>
+<p>The working tree was left <strong>clean</strong> — this assessment
+made zero source edits.</p>
+<h2 id="scope-every-smacker-import-site">2. Scope: every smacker import
+site</h2>
+<p>Enumerated via <code>grep -rn &quot;smacker/go-tree-sitter&quot;</code> over
+<code>helix_code/</code> + <code>submodules/helix_agent/</code>.</p>
+<p><strong>Production code (4 files):</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Languages imported</th>
+<th>API used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix_code/internal/tools/mapping/treesitter_parsers.go</code></td>
+<td>26 langs: bash, c, cpp, csharp, css, dockerfile, elixir, elm,
+golang, hcl, html, java, javascript, lua, ocaml, php, protobuf, python,
+ruby, rust, scala, svelte, swift, toml, typescript (tsx + typescript),
+yaml</td>
+<td><code>sitter.NewParser/SetLanguage/ParseCtx</code>,
+<code>*sitter.Language</code>, <code>*sitter.Node</code>
+(<code>Type/StartByte/EndByte/StartPoint/EndPoint/ChildCount/Child/IsMissing</code>),
+<code>&lt;lang&gt;.GetLanguage()</code></td>
+</tr>
+<tr>
+<td><code>helix_code/internal/repomap/tree_sitter.go</code></td>
+<td>9 langs: c, cpp, golang, java, javascript, python, ruby, rust,
+typescript</td>
+<td><code>sitter.NewParser</code>, <code>SetLanguage</code>,
+<code>ParseCtx</code>, <code>*sitter.Tree</code>,
+<code>Tree.Edit</code>, <code>Tree.Copy</code>,
+<code>sitter.EditInput</code>, <code>sitter.Point</code></td>
+</tr>
+<tr>
+<td><code>helix_code/internal/repomap/tag_extractor.go</code></td>
+<td>(sitter root only)</td>
+<td><code>*sitter.Tree</code>, <code>*sitter.Node</code> walking</td>
+</tr>
+<tr>
+<td><code>submodules/helix_agent/internal/clis/aider/repo_map.go</code></td>
+<td>4 langs: golang, python, typescript/tsx, typescript</td>
+<td><code>*sitter.Parser</code>, <code>golang.GetLanguage()</code>
+etc.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Test code (1 file, also must migrate):</strong> -
+<code>helix_code/internal/repomap/incremental_p2t06_test.go</code> —
+exercises the incremental <code>EditInput</code> / <code>Copy</code> /
+<code>ParseContent</code> path; its assertions encode the smacker API
+and must be rewritten with the fix.</p>
+<p><strong>Doc-comment-only (no migration needed):</strong>
+<code>helix_code/internal/tools/mapping/doc.go</code> (lines 146–148)
+merely cites the import path in a <code>//</code> comment.</p>
+<p><strong>Both <code>go.mod</code> files pin</strong>
+<code>github.com/smacker/go-tree-sitter v0.0.0-20240827094217-dd81d9e9be82</code>
+(<code>helix_code/go.mod:42</code>,
+<code>submodules/helix_agent/go.mod:73</code>). Gin is already
+<code>v1.12.0</code> in both — no gin change is part of this epic.</p>
+<h2 id="api-surface-actually-used-11-mapping-to-the-official-lib">3. API
+surface actually used + 1:1 mapping to the official lib</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Concern</th>
+<th>smacker (current)</th>
+<th>tree-sitter/go-tree-sitter (target)</th>
+<th>Drop-in?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>package</td>
+<td><code>sitter &quot;github.com/smacker/go-tree-sitter&quot;</code></td>
+<td><code>tree_sitter &quot;github.com/tree-sitter/go-tree-sitter&quot;</code></td>
+<td>no — path + ident</td>
+</tr>
+<tr>
+<td>new parser</td>
+<td><code>sitter.NewParser()</code></td>
+<td><code>tree_sitter.NewParser()</code> (+
+<code>defer parser.Close()</code>)</td>
+<td>mechanical</td>
+</tr>
+<tr>
+<td>load grammar</td>
+<td><code>golang.GetLanguage()</code> →
+<code>*sitter.Language</code></td>
+<td><code>tree_sitter.NewLanguage(tree_sitter_go.Language())</code>
+(grammar <code>Language()</code> returns
+<code>unsafe.Pointer</code>)</td>
+<td>no — different idiom + per-lang module</td>
+</tr>
+<tr>
+<td>set language</td>
+<td><code>parser.SetLanguage(lang)</code></td>
+<td><code>parser.SetLanguage(lang)</code></td>
+<td>same name</td>
+</tr>
+<tr>
+<td>parse</td>
+<td><code>parser.ParseCtx(ctx, oldTree, content) (*Tree, error)</code></td>
+<td><code>parser.Parse(content, oldTree) *Tree</code> (no error; arg
+order <code>(text, oldTree)</code>; deprecated
+<code>ParseCtx(ctx, text, oldTree)</code>)</td>
+<td><strong>no</strong> — arg order + return shape</td>
+</tr>
+<tr>
+<td>node type</td>
+<td><code>node.Type() string</code></td>
+<td><code>node.Kind() string</code></td>
+<td><strong>no</strong> — renamed</td>
+</tr>
+<tr>
+<td>byte offsets</td>
+<td><code>node.StartByte() uint32</code> /
+<code>EndByte() uint32</code></td>
+<td><code>node.StartByte() uint</code> /
+<code>EndByte() uint</code></td>
+<td><strong>no</strong> — width <code>uint32</code>→<code>uint</code>;
+every <code>int(...)</code> cast changes</td>
+</tr>
+<tr>
+<td>points</td>
+<td><code>node.StartPoint()/EndPoint()</code> →
+<code>sitter.Point{Row,Column uint32}</code></td>
+<td><code>node.StartPosition()/EndPosition()</code> →
+<code>tree_sitter.Point{Row,Column uint}</code></td>
+<td><strong>no</strong> — renamed + width</td>
+</tr>
+<tr>
+<td>children</td>
+<td><code>node.ChildCount() uint32</code>,
+<code>node.Child(i) *Node</code></td>
+<td><code>node.ChildCount() uint</code>,
+<code>node.Child(i uint) *Node</code></td>
+<td>width differs</td>
+</tr>
+<tr>
+<td>missing</td>
+<td><code>node.IsMissing() bool</code></td>
+<td><code>node.IsMissing() bool</code></td>
+<td>same</td>
+</tr>
+<tr>
+<td>edit struct</td>
+<td><code>sitter.EditInput{StartIndex, OldEndIndex, NewEndIndex, StartPoint, OldEndPoint, OldEndPoint}</code></td>
+<td><code>tree_sitter.InputEdit{StartByte, OldEndByte, NewEndByte, StartPosition, OldEndPosition, NewEndPosition}</code></td>
+<td><strong>no</strong> — struct + all fields renamed</td>
+</tr>
+<tr>
+<td>edit apply</td>
+<td><code>tree.Edit(editValue)</code></td>
+<td><code>tree.Edit(&amp;inputEdit)</code> (pointer)</td>
+<td><strong>no</strong> — value→pointer</td>
+</tr>
+<tr>
+<td>tree copy</td>
+<td><code>tree.Copy() *Tree</code></td>
+<td>needs verification on target (<code>Tree.Copy</code> presence)
+before relying on it</td>
+<td><strong>verify</strong></td>
+</tr>
+<tr>
+<td>tree close</td>
+<td>(smacker <code>tree.Close()</code>)</td>
+<td><code>tree.Close()</code></td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>repomap</code> package’s incremental engine
+(<code>computeEditInput</code>, <code>IncrementalParser</code>, the
+<code>tree.Copy()</code>-per-retention design,
+<code>byteOffsetToPoint</code>) is the highest-touch surface: every
+<code>uint32</code> literal/cast and every <code>EditInput</code> field
+name changes, and the <code>Copy()</code> contract must be re-proven on
+the official lib before the incremental-vs-full equality tests can be
+re-greened.</p>
+<h2 id="per-language-module-availability-table-the-blocker">4.
+Per-language module availability table (the blocker)</h2>
+<p>For each of the 30 used grammars, the official-ecosystem Go-module
+path and maintenance status. “✅” = a maintained module with
+<code>bindings/go</code> exists under an official-ish org; “⚠️” =
+community-fork only / no first-party Go binding → would add an unvetted
+dependency.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Language</th>
+<th>Target Go module (if any)</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>go (golang)</td>
+<td><code>tree-sitter/tree-sitter-go/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>javascript</td>
+<td><code>tree-sitter/tree-sitter-javascript/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>typescript + tsx</td>
+<td><code>tree-sitter/tree-sitter-typescript/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>python</td>
+<td><code>tree-sitter/tree-sitter-python/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>rust</td>
+<td><code>tree-sitter/tree-sitter-rust/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>java</td>
+<td><code>tree-sitter/tree-sitter-java/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>c</td>
+<td><code>tree-sitter/tree-sitter-c/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>cpp</td>
+<td><code>tree-sitter/tree-sitter-cpp/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>csharp</td>
+<td><code>tree-sitter/tree-sitter-c-sharp/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>ruby</td>
+<td><code>tree-sitter/tree-sitter-ruby/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>php</td>
+<td><code>tree-sitter/tree-sitter-php/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>scala</td>
+<td><code>tree-sitter/tree-sitter-scala/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>ocaml</td>
+<td><code>tree-sitter/tree-sitter-ocaml/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>html</td>
+<td><code>tree-sitter/tree-sitter-html/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>css</td>
+<td><code>tree-sitter/tree-sitter-css/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>bash</td>
+<td><code>tree-sitter/tree-sitter-bash/bindings/go</code></td>
+<td>✅ official</td>
+</tr>
+<tr>
+<td>toml</td>
+<td><code>tree-sitter-grammars/tree-sitter-toml/bindings/go</code></td>
+<td>✅ community-official org</td>
+</tr>
+<tr>
+<td>hcl</td>
+<td><code>tree-sitter-grammars/tree-sitter-hcl/bindings/go</code></td>
+<td>✅ community-official org</td>
+</tr>
+<tr>
+<td>lua</td>
+<td><code>tree-sitter-grammars/tree-sitter-lua/bindings/go</code></td>
+<td>✅ community-official org (verify binding)</td>
+</tr>
+<tr>
+<td>yaml</td>
+<td><code>tree-sitter-grammars/tree-sitter-yaml/bindings/go</code></td>
+<td>⚠️ verify <code>bindings/go</code> present</td>
+</tr>
+<tr>
+<td>swift</td>
+<td><code>alex-pinkus/tree-sitter-swift</code></td>
+<td>⚠️ generated-parser repo, no clean <code>bindings/go</code>
+go-get</td>
+</tr>
+<tr>
+<td>elixir</td>
+<td><code>elixir-lang/tree-sitter-elixir</code></td>
+<td>⚠️ verify <code>bindings/go</code>; not in
+<code>tree-sitter/*</code></td>
+</tr>
+<tr>
+<td>elm</td>
+<td><code>elm-tooling/tree-sitter-elm</code></td>
+<td>⚠️ no first-party Go binding</td>
+</tr>
+<tr>
+<td>dockerfile</td>
+<td><code>camdencheek/tree-sitter-dockerfile</code></td>
+<td>⚠️ personal repo, no official Go binding</td>
+</tr>
+<tr>
+<td>protobuf</td>
+<td>only personal forks (<code>dgmcdona/...</code>,
+<code>zzctmac/...</code>, etc.)</td>
+<td>⚠️ unvetted fork only</td>
+</tr>
+<tr>
+<td>svelte</td>
+<td>only personal forks (<code>kyouheicf/...</code>)</td>
+<td>⚠️ unvetted fork only</td>
+</tr>
+</tbody>
+</table>
+<p><strong>~6–8 of 30 fall in the ⚠️ band.</strong> A full swap cannot
+ship without either (a) accepting unvetted third-party Go modules for
+those grammars (anti-bluff / §11.4.74 concern), or (b) vendoring the
+generated C parser + writing a thin local <code>bindings/go</code> shim
+per missing grammar (real engineering per language).</p>
+<h2 id="why-this-is-an-epic-not-a-bounded-swap">5. Why this is an EPIC,
+not a bounded swap</h2>
+<ul>
+<li><strong>Not all languages available</strong> → cannot do a one-shot
+<code>go.mod</code> line swap; the missing grammars each need a
+vendoring/shim decision.</li>
+<li><strong>API is not 1:1</strong> → <code>Type()→Kind()</code>,
+<code>uint32→uint</code> everywhere,
+<code>ParseCtx(ctx,old,text)→Parse(text,old)</code> with no error
+return, <code>EditInput→InputEdit</code> (renamed struct + fields +
+value→pointer). Every call site is a rewrite, and the
+<code>repomap</code> incremental engine + its equality tests are
+high-risk.</li>
+<li><strong>Two modules, recursively</strong> → <code>helix_code</code>
+(35 import lines across 3 prod files + 1 test) and
+<code>helix_agent</code> (4 import lines, 1 prod file) must both migrate
+and both keep building.</li>
+<li><strong>Anti-bluff cost</strong> → per §11.4.43/§11.4.115 the
+incremental-parse equality + symbol-extraction tests must go RED on the
+new API, then GREEN — the migration is only “done” with captured
+<code>go build ./...</code> exit-0 + the repomap/mapping unit tests
+green on the new lib, not a compile-only check.</li>
+</ul>
+<h2 id="per-module-migration-steps-when-scheduled">6. Per-module
+migration steps (when scheduled)</h2>
+<p>Recommended order: a thin internal adapter first, so the 30-language
+fan-out and the API-shape rewrite are isolated from each other.</p>
+<ol type="1">
+<li><strong>Adapter package</strong>
+(<code>internal/repomap/tsadapter</code> or similar): define
+HelixCode-local <code>Language</code>, <code>Parser</code>,
+<code>Node</code>, <code>Tree</code>, <code>EditInput</code> types that
+wrap the official lib and preserve the <em>current</em> call-site
+signatures (<code>Type()</code>, <code>uint32</code>,
+<code>ParseCtx</code>-style, value-<code>EditInput</code>). This
+localises the
+<code>Kind()</code>/<code>uint</code>/<code>Parse</code>/<code>InputEdit</code>
+translation to ONE file and keeps the 4 call-site files small diffs.
+Verify <code>Tree.Copy</code> exists on the target; if not, implement
+copy semantics in the adapter.</li>
+<li><strong>Grammar registry</strong>: a single
+<code>GetLanguage(name)</code> in the adapter that maps name→official
+grammar module. For each ⚠️ language (dockerfile, elm, protobuf, svelte,
+swift, elixir, yaml): decide vendor-generated-parser vs accept-fork vs
+drop-language-with-operator-approval (§11.4.122 — dropping a supported
+language is an operator-confirmed removal, never silent).</li>
+<li><strong>helix_code first</strong>: bump
+<code>helix_code/go.mod</code> to add
+<code>tree-sitter/go-tree-sitter</code> + each available grammar module;
+rewrite the 4 files through the adapter; <code>go mod tidy</code>;
+<code>go build ./...</code> exit 0;
+<code>go test ./internal/repomap/... ./internal/tools/mapping/...</code>
+green (incl. the rewritten <code>incremental_p2t06_test.go</code>).
+RED→GREEN on the incremental-equality assertions.</li>
+<li><strong>helix_agent second</strong>: same adapter pattern (or a copy
+of the adapter, since modules are decoupled per §11.4.28 — do NOT
+cross-import); rewrite <code>repo_map.go</code>; build + test
+green.</li>
+<li><strong>Remove smacker pin</strong> from both <code>go.mod</code>
+only after both build+test green; <code>go mod tidy</code>.</li>
+<li><strong>Capture evidence</strong>: pasted
+<code>go build ./...</code> + <code>go test</code> output per module per
+§11.4.5 / Rule 8.</li>
+</ol>
+<h2 id="risk-register">7. Risk register</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Severity</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⚠️ grammars force unvetted fork deps</td>
+<td>High</td>
+<td>adapter step 2 decision per language; operator-confirm any language
+drop (§11.4.122)</td>
+</tr>
+<tr>
+<td><code>uint32</code>→<code>uint</code> width change breaks
+<code>int(...)</code> casts silently</td>
+<td>Medium</td>
+<td>adapter normalises to the current types; build catches the rest</td>
+</tr>
+<tr>
+<td>incremental <code>Copy()</code> contract differs/absent on official
+lib</td>
+<td>Medium</td>
+<td>verify before relying; adapter shim if needed; equality tests are
+the proof</td>
+</tr>
+<tr>
+<td><code>cgo</code>/build-tag differences across the per-language
+modules</td>
+<td>Medium</td>
+<td><code>go build ./...</code> on each target platform in the
+matrix</td>
+</tr>
+<tr>
+<td>two modules drift if migrated unevenly</td>
+<td>Low</td>
+<td>migrate+build+test helix_code fully before helix_agent</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sources-verified">8. Sources verified</h2>
+<p>Sources verified 2026-06-10: - <a href="https://github.com/tree-sitter/go-tree-sitter" class="uri">https://github.com/tree-sitter/go-tree-sitter</a> — official
+binding, “none of the grammars are included”, per-language
+<code>go get</code>. - <a href="https://pkg.go.dev/github.com/tree-sitter/go-tree-sitter" class="uri">https://pkg.go.dev/github.com/tree-sitter/go-tree-sitter</a>
+— <code>Parse(text, oldTree)</code>, <code>Node.Kind()</code>,
+<code>uint</code> widths, <code>InputEdit{StartByte,...}</code>,
+<code>Point{Row,Column uint}</code>, <code>Tree.Edit(*InputEdit)</code>.
+- <a href="https://github.com/tree-sitter-grammars" class="uri">https://github.com/tree-sitter-grammars</a> —
+<code>tree-sitter-grammars/*</code> org hosts toml/hcl/lua/etc.
+<code>bindings/go</code>. - <a href="https://github.com/camdencheek/tree-sitter-dockerfile" class="uri">https://github.com/camdencheek/tree-sitter-dockerfile</a>,
+<a href="https://github.com/elm-tooling/tree-sitter-elm" class="uri">https://github.com/elm-tooling/tree-sitter-elm</a> —
+dockerfile/elm not under official org / no first-party Go binding. - <a href="https://pkg.go.dev/github.com/smacker/go-tree-sitter" class="uri">https://pkg.go.dev/github.com/smacker/go-tree-sitter</a> —
+current binding being replaced.</p>
+</body>
+</html>

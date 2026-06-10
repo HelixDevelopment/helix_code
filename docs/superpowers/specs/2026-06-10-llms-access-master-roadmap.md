@@ -2,9 +2,9 @@
 
 | Field | Value |
 |-------|-------|
-| Revision | 3 |
+| Revision | 4 |
 | Last modified | 2026-06-10 |
-| Status summary | PLANNING COMPLETE — 6 analyses + 5 SP plans written; constitution synced; SP3 plan + bundle code-review in flight; awaiting operator on decision register (G-1..G-5) |
+| Status summary | DELIVERED — SP0–SP7 implemented across 9 waves (~33 commits, all RED→GREEN + §1.1 + reviewed + pushed). Model-access end-to-end; unified `/v1/catalog` with real verified models; full per-agent CLI-bridge de-bluff (68 pkgs); 49 forks + swap + GitLab mirrors; SDK currency incl. security; substrate/D-7; 4 local harnesses; CONST-066 doc compliance; G-2 repos. Defects D-1..D-20 (18 fixed). Remaining: tree-sitter migration (in flight, feasibility-first) + boot-infra (§12.6 host-safety-gated). See `docs/CONTINUATION.md` close-out¹⁶²/¹⁶³ for the full resumption record. |
 | Source request | `docs/requests/helix_code_request_llms_access.txt` |
 | Delivery model | **Independent sub-programs** (operator decision 2026-06-10) — this doc is the index/roadmap; each sub-program gets its own spec → plan → release cycle |
 | Authority | Cascades from `constitution/` + root `CLAUDE.md`/`CONSTITUTION.md`; anti-bluff §11.4 family governs every closure |

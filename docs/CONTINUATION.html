@@ -48,15 +48,50 @@ text-decoration: line-through;
 </header>
 <h1 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-06-10 (close-out¹⁶³ — LLMs-ACCESS
-PROGRAMME: WAVES 6–9 LANDED (~30 commits total, autonomous-loop, all
-RED→GREEN + §1.1-mutation-proven + per-batch independent §11.4.142
-review GO). </strong>D-7 fully closed**
-(<code>replace dev.helix.agent</code> clean — minimal
-<code>internal/agentbridge</code> real cross-module round-trip;
-helix_code consumes helix_agent’s public verifier SDK; gin stays 1.12).
-<strong>FULL per-agent CLI-bridge de-bluff (D-16+D-17+D-18)</strong> —
-the request’s CORE: all <strong>68
+<p><strong>Last updated: 2026-06-10 (close-out¹⁶⁴ — LLMs-ACCESS
+PROGRAMME: AUTONOMOUS QUEUE EMPTIED + ALL PUSHED. Operator authorized
+push + “all of it”. </strong>PUSHED** all ~33+ commits to ALL upstreams
+(helix_agent + meta, ff, no-force §11.4.113, fetch-first §11.4.71) —
+durable everywhere. <strong>G-2 DONE</strong>: created
+<code>HelixDevelopment/DagOrchestrator</code>
+(<code>dev.helix.dag</code>, real ready-set DAG scheduler, 8 tests
+-race) + <code>HelixDevelopment/PipelineRuntime</code>
+(<code>dev.helix.pipeline</code>, real push-operators+FBP, 5 tests
+-race) — pushed (GitHub+GitLab) + added as submodules (meta 88c50ad3);
+wiring into helix_code/helix_agent go.mod is a tracked follow-up.
+<strong>D-20 FIXED</strong> (real production bug found via D-10): 17
+handler ID-generators used UnixNano → COLLIDED (173310/200k same-tick);
+converted to uuid/SecureRandomID (prefixes preserved, no consumer parses
+the suffix), RED→GREEN+§1.1 (helix_agent 07c83c59). <strong>§11.4.124
+lovable.saveProjects KEPT+tested</strong>; <strong>D-10 flakes</strong>
+deterministic (waitForClockTick). <strong>tree-sitter migration
+DEFERRED-with-plan</strong>
+(<code>docs/superpowers/specs/2026-06-10-tree-sitter-migration-plan.md</code>)
+— genuine epic: ~6-8/30 grammars lack maintained official Go bindings
+(would force unvetted deps §11.4.74) + full per-call-site API rewrite;
+both modules stay on the working smacker pin (§11.4.101). <strong>D-19
+GitLab mirrors 49/49 DONE</strong> (44 bulk + 5 stragglers;
+LFS-integrity pre-receive hook was the real root cause for
+warp/cline/superset — fixed via <code>git lfs fetch --all</code>+push;
+no force §11.4.113). Defect ledger <strong>D-1..D-20, 18 fixed</strong>.
+<strong>REMAINING (genuinely blocked, NOT autonomous)</strong>: (1)
+<strong>boot-infra</strong> for StartupVerifier real-flow into
+/v1/catalog + a full HelixQA autonomous session — <strong>§12.6
+HOST-SAFETY-GATED</strong> (54% free; Ollama+server+PG+Redis would risk
+the 60% ceiling; host-safety is unconditional, needs higher-memory host
+or freed RAM); (2) G-2 go.mod wiring; (3) tree-sitter epic (per the
+plan, when bindings mature). The request’s CORE (model-access end-to-end
++ unified catalog with real verified models + full per-agent CLI-bridge
+de-bluff + forks/swap + SDK currency + harnesses + doc compliance) is
+DELIVERED, VERIFIED (RED→GREEN+§1.1+independent §11.4.142 review per
+wave), and PUSHED. PRIOR close-out¹⁶³ — LLMs-ACCESS PROGRAMME: WAVES 6–9
+LANDED (~30 commits total, autonomous-loop, all RED→GREEN +
+§1.1-mutation-proven + per-batch independent §11.4.142 review GO).
+<strong>D-7 fully closed</strong> (<code>replace dev.helix.agent</code>
+clean — minimal <code>internal/agentbridge</code> real cross-module
+round-trip; helix_code consumes helix_agent’s public verifier SDK; gin
+stays 1.12). <strong>FULL per-agent CLI-bridge de-bluff
+(D-16+D-17+D-18)</strong> — the request’s CORE: all <strong>68
 <code>helix_agent/internal/clis/agents/*</code> packages</strong> were
 broadly fabricating responses (the §11.9 nightmare — incl. promptfoo’s
 always-green fake scorecard); now <strong>confirmed-CLI agents → real
