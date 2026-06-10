@@ -48,11 +48,78 @@ text-decoration: line-through;
 </header>
 <h1 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
-<p><strong>Last updated: 2026-06-10 (close-out¹⁶¹ — LLMs-ACCESS
+<p><strong>Last updated: 2026-06-10 (close-out¹⁶² — LLMs-ACCESS
+PROGRAMME: WAVES 1–5 LANDED (~22 commits, autonomous-loop, all RED→GREEN
++ §1.1-mutation-proven + per-wave independent §11.4.142 review GO).
+</strong>Model-access end-to-end<strong>: key recognition
+(.env/.api_keys/shell, multi-alias <code>keyrecognition.go</code>) →
+verifier funnel (<code>GetWorkingModels</code>: Verified ∧ status ∧
+score≥min) → wired into REAL CLI <code>handleListModels</code> + server
+<code>listLLMModels/Providers</code> (no-key providers hidden,
+failed/pending hidden); <code>secrets.LoadAPIKeys</code> wired at
+CLI+server startup (was dead). </strong>D-1..D-5 fixed** (hardcoded
+model lists ×11 providers → dynamic /models fetch or honest-empty;
+<code>completion.go:406</code> 3-model bluff → registry-sourced).
+<strong>Unified <code>GET /v1/catalog</code></strong> (helix_agent
+<code>internal/catalog</code>) joins ensemble + HelixLLM + every
+provider + REAL Verified models (StartupVerifier adapter, CONST-036/037
+24h gate; honest-empty when unwired). <strong>CLI-bridge FULLY
+de-bluffed</strong>: D-6/D-9/D-11/D-12 — qwencode + all 43
+<code>instance_manager</code> dispatch methods → real
+<code>os/exec</code> (3: qwen/copilot/gemini) or honest
+noHeadlessCLIError (40 no-CLI agents); <code>IsAgentTypeAvailable</code>
+→ real <code>exec.LookPath</code>; <strong>zero live
+<code>&quot;&lt;Agent&gt; execution completed&quot;</code> literals</strong>.
+<strong>G-1: 49 <code>caf-</code> GitHub forks + 49 GitLab repos
+created</strong>; <strong>fork-swap done</strong> (<code>8db9b5d4</code>
+— .gitmodules→caf- forks, forks confirmed to contain pinned commits;
+claude-code-source excluded); GitLab mirror population in-flight
+(subagent). <strong>SP5 substrate</strong>:
+<code>helix_code/internal/substrate</code>
+(Unit/Scheduler/Dispatcher/Resolver) consumes own-org
+<code>digital.vasic.concurrency</code> (replace added; closes
+concurrency half of D-7); <strong>gin OP-5 skew resolved</strong>
+(1.11→1.12, full sweep 141 ok/0-gin-FAIL). <strong>SP7</strong>: 4 LOCAL
+harnesses ddos/scaling/ux/ui (real worker-pool scale-out 536→3905 tps;
+real cli-binary shell; real tview headless) closing CONST-055 gaps.
+<strong>D-13</strong>: CONST-066 full backfill — all 443
+<code>docs/**/*.md</code> now have committed .html/.pdf siblings
+(~104MB, operator-approved) + authored the missing
+<code>sync_all_markdown_exports.sh</code> helper. <strong>D-14</strong>
+map.tsv dedup 80→49; <strong>D-15</strong> gapfill §11.4.115 polarity
+default flipped RED→GREEN (was leaving <code>go test ./...</code> red —
+caught by investigating, not trusting, the wave-4 review).
+<strong>F1</strong>: 3 missing §11.4.75 git hooks authored (27 PASS, NOT
+installed — operator-gated). <strong>helix_qa</strong> updated
+<code>4d2dcb2→bca3b36</code>. <strong>Constitution synced</strong>
+<code>60e2d66→f26368b</code> (rule-authoring DESCOPED per operator —
+“just fetch and pull”; fork scripts local at <code>scripts/caf/</code>).
+<strong>Defect ledger D-1..D-15, 13 fixed.</strong> Operator decisions:
+fork-ALL <code>caf-</code> (done), commit-all-siblings (done),
+execute-swap (done), one-provider-per-CLI-agent,
+independent-sub-programs. <strong>NOT pushed</strong> (operator
+authorized COMMIT only; push to upstreams pending operator go).
+<strong>RESUME-NEXT</strong>: (1) GitLab-population subagent finishing;
+(2) SP5 D-7 part-2 (the deferred <code>replace dev.helix.agent</code>,
+solo wave); (3) SP2 SDK-currency bumps (bedrockruntime v1.23→v1.53.5
+most stale, azidentity security GO-2024-2918, tree-sitter migration —
+per <code>docs/research/2026-06-10-sdk-cli-currency.md</code>); (4) wire
+StartupVerifier integration so REAL verified models flow into
+/v1/catalog (needs infra — Ollama cheapest); (5) SP6/G-2 OPERATOR-GATED:
+create 2 new HelixDevelopment repos dag_orchestrator+pipeline_runtime
+(per
+<code>docs/superpowers/specs/2026-06-10-SP6-new-submodules-design.md</code>);
+(6) research-blocked CLI agents (AmazonQ/Cody/SWEAgent + model-not-CLI
+ollama decision); (7) full HelixQA autonomous session; (8) §11.4.40
+full-suite retest + push to all upstreams before any version tag. Master
+roadmap:
+<code>docs/superpowers/specs/2026-06-10-llms-access-master-roadmap.md</code>
+(Rev 3); 6 analyses + 8 SP plans + 5 review docs under
+<code>docs/superpowers/specs/</code>. PRIOR close-out¹⁶¹ — LLMs-ACCESS
 PROGRAMME: PLANNING COMPLETE + IMPL-LOOP STARTED (operator request
 <code>docs/requests/helix_code_request_llms_access.txt</code>).
-Decomposed into 8 sub-programs SP0–SP7; </strong>13 subagents across 3
-waves** produced 6 file:line-cited analyses
+Decomposed into 8 sub-programs SP0–SP7; <strong>13 subagents across 3
+waves</strong> produced 6 file:line-cited analyses
 (<code>docs/superpowers/specs/analysis/2026-06-10-{A..F}</code>) + 6
 detailed phase/task TDD plans
 (<code>plans/2026-06-10-{SP1,SP2,SP3,SP4,SP5-SP6,SP7}</code>) + master
