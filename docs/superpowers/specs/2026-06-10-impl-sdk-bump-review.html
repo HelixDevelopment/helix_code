@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-10-impl-sdk-bump-review</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <style type="text/css">
+table {
+border-collapse: collapse;
+}
+table td,
+table th {
+border: 1px solid #cccccc;
+padding: 4px 8px;
+vertical-align: top;
+}
+
+tr.cell-status-obsolete > td {
+background-color: #E0E0E0;
+}
+
+tr.cell-status-obsolete > td:nth-child(2),
+tr.cell-status-obsolete > td:last-child {
+text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">2026-06-10-impl-sdk-bump-review</h1>
+</header>
+<h1 id="sdk-bump-code-review-independent-reviewer-11.4.125">SDK-Bump
+Code Review — Independent Reviewer (§11.4.125)</h1>
+<p><strong>Date:</strong> 2026-06-10 <strong>Repo:</strong> HelixCode
+(root <code>/Volumes/T7/Projects/HelixCode</code>); inner module
+<code>helix_code/</code> (<code>dev.helix.code</code>, go 1.26)
+<strong>Reviewer role:</strong> independent code-review subagent —
+VERIFY only, no edits/commits/pushes. <strong>Change under
+review:</strong> uncommitted SDK version bumps + one minimal
+API-adaptation fix.</p>
+<hr />
+<h2 id="scope-of-the-change-confirmed">1. Scope of the change
+(confirmed)</h2>
+<p><code>git status --short</code> shows exactly three modified files,
+all part of this change:</p>
+<ul>
+<li><code>helix_code/go.mod</code></li>
+<li><code>helix_code/go.sum</code></li>
+<li><code>helix_code/internal/memory/providers/zep_provider.go</code></li>
+</ul>
+<p>(<code>helix_agent</code> + docs appearing elsewhere in the broader
+tree are pre-existing and NOT part of this diff — confirmed: only the
+three files above are in <code>git status</code>.) No secret/credential
+present in the diff (api-key/secret/token/password/private-key scan over
+<code>git diff</code> returned empty).</p>
+<h3 id="source-bumps-in-go.mod-direct">Source bumps in go.mod
+(direct)</h3>
+<ul>
+<li><code>getzep/zep-go/v3</code> v3.10.0 →
+<strong>v3.23.0</strong></li>
+<li><code>Azure/azure-sdk-for-go/sdk/azcore</code> v1.16.0 →
+<strong>v1.22.0</strong></li>
+<li><code>Azure/azure-sdk-for-go/sdk/azidentity</code> v1.8.0 →
+<strong>v1.13.1</strong> (security advisory GO-2024-2918 line)</li>
+<li><code>aws/aws-sdk-go-v2</code> v1.32.7 → <strong>v1.42.0</strong> (+
+config v1.28.7→v1.32.24, credentials v1.17.48→v1.19.23, smithy-go
+v1.22.1→v1.27.2)</li>
+<li>transitive aws indirect deps aligned (imds, configsources,
+endpoints/v2, sso, ssooidc, sts, + new internal/v4a and service/signin);
+azure internal v1.10→v1.12, MSAL v1.2.2→v1.6.0;
+<code>golang.org/x/net</code> v0.54→v0.55 (pulled by the bumps).</li>
+<li><code>bedrockruntime</code> left at <strong>v1.23.1</strong> (step 4
+correctly deferred); <code>gin</code> left at
+<strong>v1.12.0</strong>.</li>
+</ul>
+<h3 id="source-fix-in-zep_provider.go-2-sites">Source fix in
+zep_provider.go (2 sites)</h3>
+<p>Lines 378 and 871: <code>TargetNodeName: targetName</code> →
+<code>TargetNodeName: zep.String(targetName)</code>.</p>
+<hr />
+<h2 id="verification-commands-run-this-session">2. Verification
+(commands run this session)</h2>
+<p><strong>Resolved versions — <code>go list -m</code>:</strong></p>
+<pre><code>github.com/getzep/zep-go/v3                       v3.23.0
+github.com/Azure/azure-sdk-for-go/sdk/azidentity  v1.13.1   &lt;-- security advisory line
+github.com/Azure/azure-sdk-for-go/sdk/azcore      v1.22.0
+github.com/aws/aws-sdk-go-v2                       v1.42.0
+github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.23.1 &lt;-- step 4 deferred, unchanged
+github.com/gin-gonic/gin                          v1.12.0   &lt;-- unchanged</code></pre>
+<p>All six match the claim exactly.</p>
+<p><strong><code>go mod verify</code>:</strong>
+<code>all modules verified</code>.</p>
+<p><strong>Build — <code>go build ./...</code>:</strong> exit 0. (Only
+output is pre-existing macOS linker noise
+<code>ld: warning: ignoring duplicate libraries: &#39;-lobjc&#39;</code> on the
+desktop/aurora_os/harmony_os Fyne apps — unrelated to the SDK bumps, not
+an error.)</p>
+<p><strong>Vet —
+<code>go vet ./internal/llm/... ./internal/memory/...</code>:</strong>
+exit 0, no diagnostics.</p>
+<p><strong>Tests —
+<code>go test ./internal/memory/... ./internal/llm/... -count=1</code>:</strong>
+<strong>ok</strong> for every package with tests:</p>
+<pre><code>ok  dev.helix.code/internal/memory                    2.378s
+ok  dev.helix.code/internal/memory/providers         31.644s
+ok  dev.helix.code/internal/llm                       63.972s
+ok  dev.helix.code/internal/llm/compression / compressioniface / i18n / litellm /
+    promptcache / providers/cerebras / providers/replicate / routing / vision   all ok</code></pre>
+<p>No FAIL. (Packages with no test files reported
+<code>[no test files]</code> — not a failure.)</p>
+<hr />
+<h2 id="zep_provider.go-fix-correctness-11.4.6-verified-as-fact-not-asserted">3.
+zep_provider.go fix correctness (§11.4.6 — verified as FACT, not
+asserted)</h2>
+<p>Inspected the resolved module source at
+<code>~/go/pkg/mod/github.com/getzep/zep-go/v3@v3.23.0</code>:</p>
+<ul>
+<li><code>graph.go:71  SourceNodeName *string</code> and
+<code>graph.go:86  TargetNodeName *string</code> — in v3.23
+<strong>both</strong> node-name fields are <code>*string</code>. (In
+v3.10 <code>TargetNodeName</code> was a plain <code>string</code>; the
+bump changed the type, which is exactly why the build forced this
+edit.)</li>
+<li><code>pointer.go:70  func String(s string) *string</code> —
+<code>zep.String</code> is the canonical pointer helper.</li>
+<li>Both call sites assign <code>targetName</code> from a plain
+<code>string</code> (<code>targetNode.GetName()</code> at the Update
+site; local <code>tn string</code> at <code>addFactTriple</code>), so
+<code>zep.String(targetName)</code> is type-correct.</li>
+<li>The edit makes <code>TargetNodeName</code> mirror the
+already-present <code>SourceNodeName: zep.String(sourceName)</code>
+sibling line at both sites.</li>
+</ul>
+<p><strong>Conclusion:</strong> pure type-adaptation to the v3.23
+<code>*string</code> field signature. No semantic/logic change — the
+wire payload (<code>target_node_name</code>, omitempty) is unchanged.
+Correct and minimal.</p>
+<hr />
+<h2 id="risk-assessment">4. Risk assessment</h2>
+<ul>
+<li><strong>azidentity v1.13.1</strong> lands the GO-2024-2918 fix —
+security-positive, the headline reason for the bump.</li>
+<li>aws-sdk core jump (v1.32→v1.42) is large but
+<code>bedrockruntime</code> (the only aws <em>service</em> client
+HelixCode consumes here) is held at v1.23.1, and the affected packages
+compile, vet clean, and pass tests against the new core — the deferral
+is sound and the surface is exercised by the passing
+<code>internal/llm</code> suite (Bedrock provider lives there).</li>
+<li>No production code imports changed beyond the single zep adaptation;
+no mock-from-production regression introduced.</li>
+<li><code>go.sum</code> updated consistently (<code>go mod verify</code>
+clean).</li>
+</ul>
+<p>No blocking findings. No warnings of substance (the
+<code>-lobjc</code> linker line is pre-existing host noise).</p>
+<hr />
+<h2 id="verdict-go">VERDICT: <strong>GO</strong></h2>
+<p><strong>Version-landed confirmations:</strong> - zep-go/v3
+<strong>v3.23.0</strong> ✓ - azidentity <strong>v1.13.1</strong> ✓
+(security advisory GO-2024-2918) - azcore <strong>v1.22.0</strong> ✓ -
+aws-sdk-go-v2 core <strong>v1.42.0</strong> ✓ - bedrockruntime
+<strong>v1.23.1</strong> (deferred, unchanged) ✓ - gin
+<strong>v1.12.0</strong> (unchanged) ✓</p>
+<p><strong>Build/vet/test:</strong> - <code>go build ./...</code> —
+<strong>exit 0</strong> (ok; only pre-existing <code>-lobjc</code>
+linker warnings) -
+<code>go vet ./internal/llm/... ./internal/memory/...</code> —
+<strong>exit 0</strong> (ok) -
+<code>go test ./internal/memory/... ./internal/llm/... -count=1</code> —
+<strong>ok</strong> (no FAIL) - <code>go mod verify</code> — <strong>all
+modules verified</strong></p>
+<p>zep fix at lines 378/871 confirmed correct (<code>*string</code>
+field + <code>zep.String</code> helper + SourceNodeName sibling
+pattern). Scope = only go.mod/go.sum/zep_provider.go. No secrets.</p>
+</body>
+</html>
