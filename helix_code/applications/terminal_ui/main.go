@@ -2316,6 +2316,12 @@ func (tui *TerminalUI) Close() error {
 func main() {
 	tui := NewTerminalUI()
 
+	// Install the real CONST-046 translator BEFORE Initialize() (setupUI
+	// resolves the sidebar title + status bar via tui.t(...)). Without this
+	// the standalone binary ran on NoopTranslator{} and leaked raw message-ID
+	// keys on the landing screen.
+	wireTranslator(tui)
+
 	if err := tui.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize Terminal UI: %v", err)
 	}

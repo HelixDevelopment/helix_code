@@ -48,6 +48,38 @@ text-decoration: line-through;
 </header>
 <h1 id="helixcode-cli-agent-fusion-programme-continuation-guide">HelixCode
 CLI-Agent Fusion — Programme Continuation Guide</h1>
+<p><strong>2026-06-12 session — helixcode self-boot infra + TUI i18n fix
+(operator task: boot system → capture TUI landing screenshot):</strong>
+Added <code>helix_code/internal/infraboot</code>
+(<code>EnsureInfra</code>) wired into
+<code>helix_code/cmd/server/main.go</code> so the <code>helixcode</code>
+binary boots its required Postgres+Redis containers
+<strong>out-of-the-box</strong> on startup (§11.4.76 on-demand-infra)
+via the existing <code>internal/adapters/containers</code> adapter, on
+<strong>dedicated host ports 55432/56379</strong> that deliberately
+avoid the conventional 5432/6379 so a host-native Postgres/Redis is
+never touched or latched onto; it rewrites the in-process config to the
+booted endpoints and gates on a <strong>real pgx-ping + go-redis-PING
+readiness probe</strong> (not just TCP-up). Opt-out
+<code>HELIX_AUTOBOOT_INFRA=false</code>. Root cause fixed:
+<code>cmd/server</code> never booted infra →
+<code>lookup redis: no such host</code> fatal. Also fixed the standalone
+<code>helix-tui</code> i18n bluff (raw message-ID leak —
+<code>terminal_ui_sidebar_title</code>/<code>terminal_ui_status_bar_default</code>
+— on the landing screen) by wiring the real translator at boot
+(<code>applications/terminal_ui/i18n/bundle.go</code> +
+<code>i18n_boot_wire.go</code>, mirroring <code>cmd/server/i18n</code>).
+Coverage: 11 infraboot unit tests + real-infra
+<strong>RED→GREEN</strong> integration test (real pg+redis,
+<code>-tags=integration</code>) + TUI i18n RED→GREEN tests; anti-bluff
+smoke clean; <strong>code-review GO</strong> after one remediation round
+(§11.4.125/§11.4.134 — fixed a Blocking Redis-port-6379 latch finding).
+Verified on the live binary: cold <code>./bin/helixcode</code>
+auto-boots <code>postgres:55432 redis:56379</code>, <code>/health</code>
+healthy; captured <code>~/Downloads/helixcode-tui-landing-*.png</code>
+from the running system. Partially addresses the previously-blocked
+“boot-infra” remaining item (full Ollama+HelixQA autonomous flow stays
+§12.6 host-safety-gated).</p>
 <p><strong>Last updated: 2026-06-10 (close-out¹⁶⁴ — LLMs-ACCESS
 PROGRAMME: AUTONOMOUS QUEUE EMPTIED + ALL PUSHED. Operator authorized
 push + “all of it”. </strong>PUSHED** all ~33+ commits to ALL upstreams

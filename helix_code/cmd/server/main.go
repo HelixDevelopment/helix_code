@@ -13,6 +13,7 @@ import (
 	"dev.helix.code/cmd/server/i18n"
 	"dev.helix.code/internal/config"
 	"dev.helix.code/internal/database"
+	"dev.helix.code/internal/infraboot"
 	"dev.helix.code/internal/redis"
 	"dev.helix.code/internal/secrets"
 	"dev.helix.code/internal/server"
@@ -104,6 +105,27 @@ func main() {
 	cfg, err := config.Get()
 	if err != nil {
 		log.Fatal(tr(ctx, "server_fatal_load_config", map[string]any{"Err": err}))
+	}
+
+	// §11.4.76 on-demand-infra: boot the required infrastructure containers
+	// (Postgres + Redis) out-of-the-box and repoint cfg at the booted
+	// endpoints, so a fresh `helixcode` run works without the operator first
+	// running `podman compose up`. Opt out with HELIX_AUTOBOOT_INFRA=false to
+	// use externally-provisioned infra.
+	//
+	// When auto-boot was ATTEMPTED (not disabled) and FAILED, fail fast with
+	// the actionable infraboot error: continuing would only hit the Redis
+	// init's cryptic `lookup redis: no such host` log.Fatal a moment later —
+	// the exact confusing crash this feature removes. The actionable error
+	// (and the opt-out hint) belongs here, not relocated downstream.
+	if res, berr := infraboot.EnsureInfra(ctx, cfg, nil); berr != nil {
+		log.Fatalf("❌ Infra auto-boot failed: %v\n   (set HELIX_AUTOBOOT_INFRA=false and configure external Postgres/Redis to skip auto-boot)", berr)
+	} else if res.Skipped {
+		log.Printf("ℹ️  Infra auto-boot disabled — using configured infrastructure")
+	} else if res.AlreadyRunning {
+		log.Printf("✅ Infra auto-boot: %s endpoints already healthy (postgres:%d redis:%d)", res.RuntimeName, res.PgPort, res.RedisPort)
+	} else {
+		log.Printf("✅ Infra auto-boot: %s booted postgres:%d redis:%d", res.RuntimeName, res.PgPort, res.RedisPort)
 	}
 
 	// Initialize database (optional for testing)

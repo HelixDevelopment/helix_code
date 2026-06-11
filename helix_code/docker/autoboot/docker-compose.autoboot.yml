@@ -1,0 +1,33 @@
+# HelixCode auto-boot infrastructure (§11.4.76 on-demand-infra).
+# Booted automatically by the helixcode server on startup when
+# HELIX_AUTOBOOT_INFRA is unset or true. Uses DEDICATED host ports
+# (Postgres 55432, Redis 56379) that deliberately AVOID the conventional
+# 5432/6379 so it never collides with — or latches the idempotent health
+# pre-check onto — a host-native Postgres or Redis. Credentials match the
+# helixcode default config (user=helix, db=helixcode_prod). No-password
+# Redis matches the empty default HELIX_REDIS_PASSWORD.
+services:
+  postgres:
+    image: docker.io/library/postgres:15
+    container_name: helixcode-autoboot-postgres
+    environment:
+      POSTGRES_DB: helixcode_prod
+      POSTGRES_USER: helix
+      POSTGRES_PASSWORD: helixpass
+    ports:
+      - "55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helix -d helixcode_prod"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: docker.io/library/redis:7-alpine
+    container_name: helixcode-autoboot-redis
+    ports:
+      - "56379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
