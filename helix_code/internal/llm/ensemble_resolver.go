@@ -140,12 +140,25 @@ func verifierCapabilitiesAreEmbeddingOnly(caps []string) bool {
 	return hasEmbedding && !hasChat
 }
 
-// catalogueChatCandidatesFor returns a member provider's chat-capable model ids
-// in deterministic order, derived ENTIRELY from the provider's OWN live
-// catalogue capability flags — never a hardcoded name/family list. This is the
-// honest offline fallback (§11.4.6) used when the verifier is not wired or
-// reports nothing for the provider: the model itself, via ModelInfo.Capabilities
-// / SupportsVision, tells us whether it can serve a chat prompt.
+// catalogueChatCandidatesFor returns a member provider's chat-capable model ids,
+// derived ENTIRELY from the provider's OWN live catalogue — never a hardcoded
+// name/family list. This is the honest offline fallback (§11.4.6) used when the
+// verifier is not wired or reports nothing for the provider: the model itself,
+// via ModelInfo.Capabilities / SupportsVision, tells us whether it can serve a
+// chat prompt.
+//
+// Ordering is PROVIDER-NATIVE — the order in which the provider's GetModels()
+// returns them is PRESERVED, NOT re-sorted alphabetically. This is load-bearing
+// and the real, dynamic signal that makes resolution ~1 call/member with no
+// discovery burst: every cloud provider in this codebase curates its catalogue so
+// its best WORKING chat model leads (the live OpenRouter /models fetch re-orders
+// free-tier defaults first; the seed lists lead with the flagship chat model —
+// deepseek-chat, llama-3.3-70b-versatile, mistral-small-latest, …). Alphabetical
+// sorting DESTROYS that curation and surfaces the catalogue's worst entry first
+// (decommissioned `gemma-7b-it`, paid-402 `ai21/jamba-large-1.7`), which is
+// exactly the multi-model discovery burst that trips free-tier rate limits. By
+// keeping the provider's own order we trust the live, provider-maintained
+// "working model first" signal — fully dynamic, zero hardcoded model names here.
 //
 // Inclusion rule (capability-driven, not name-driven):
 //   - a model is a chat candidate when it declares CapabilityTextGeneration,
@@ -171,9 +184,8 @@ func catalogueChatCandidatesFor(p Provider) []string {
 			continue
 		}
 		seen[id] = true
-		out = append(out, id)
+		out = append(out, id) // provider-native order preserved (no sort)
 	}
-	sort.Strings(out)
 	return out
 }
 

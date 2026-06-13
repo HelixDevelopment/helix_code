@@ -2,11 +2,91 @@ package llm
 
 import (
 	"context"
+	"os"
+	"sort"
 	"testing"
 	"time"
 
 	"dev.helix.code/internal/verifier"
 )
+
+// resolverRedMode reports whether the §11.4.115 RED polarity switch is active for
+// the native-ordering regression guard.
+//
+//	RED_MODE=1 (default): reproduce the DEFECT — assert that ALPHABETICAL sorting
+//	            of the catalogue surfaces the dead model first (the pre-fix
+//	            catalogueChatCandidatesFor did `sort.Strings`, which led with the
+//	            decommissioned/paid entry → discovery burst → free-tier rate-limit
+//	            → ensemble all-fail in the TUI).
+//	RED_MODE=0: the standing GREEN regression guard asserts the defect is ABSENT —
+//	            catalogueChatCandidatesFor preserves the provider's native
+//	            working-model-first order so the lead candidate is the working one.
+func resolverRedMode() bool {
+	v := os.Getenv("RED_MODE")
+	return v == "" || v == "1"
+}
+
+// TestCatalogueChatCandidates_PreservesProviderNativeOrder is the permanent
+// regression guard (§11.4.135) for the live TUI ensemble all-fail defect: the
+// provider's GetModels() leads with its WORKING chat model (real providers curate
+// it: deepseek-chat, llama-3.3-70b-versatile, mistral-small-latest, the live
+// OpenRouter free-tier re-order) and the catalogue's last entry is a
+// decommissioned/paid one. catalogueChatCandidatesFor MUST preserve that native
+// order — NOT alphabetically sort, which would surface the dead entry first.
+//
+// The fixture mirrors the captured live bug: "zzz-decommissioned" sorts FIRST
+// alphabetically but is the catalogue's LAST (worst) entry; the real working
+// model "aaa-working" is the catalogue's FIRST. The provider here puts the
+// working model first (real-provider behaviour) but in a non-alphabetical order.
+func TestCatalogueChatCandidates_PreservesProviderNativeOrder(t *testing.T) {
+	// Native catalogue order: working chat model FIRST, dead model LAST —
+	// exactly how the real cloud providers order their live catalogues. Note the
+	// ids are NOT in alphabetical order: "aaa-working" < "mmm-mid" <
+	// "zzz-decommissioned" alphabetically would coincidentally match here, so we
+	// pick ids whose native order DIFFERS from alphabetical to make the test
+	// discriminate: native = [working, dead, mid]; alphabetical = [dead?, mid, working].
+	stub := &modelAwareStub{
+		ptype: ProviderTypeGroq,
+		name:  "Groq",
+		// native order: the WORKING model leads; a paid/dead model and a mid model
+		// follow. Alphabetically this list would reorder to
+		// [a-paid-402, m-mid, z-working] — surfacing the dead "a-paid-402" first.
+		ids: []string{"z-working-chat", "a-paid-402", "m-mid-chat"},
+	}
+
+	got := catalogueChatCandidatesFor(stub)
+	if len(got) == 0 {
+		t.Fatalf("no candidates returned")
+	}
+
+	if resolverRedMode() {
+		// RED: prove the DEFECT — alphabetical sorting surfaces the paid/dead
+		// model first. (This is what the pre-fix code did and what tripped the
+		// burst.) We compute the alphabetical order the old code produced and
+		// assert it leads with the dead entry, demonstrating the defect is real.
+		alpha := append([]string(nil), got...)
+		sort.Strings(alpha)
+		if alpha[0] != "a-paid-402" {
+			t.Fatalf("RED expectation broken: alphabetical lead = %q, want the dead model %q", alpha[0], "a-paid-402")
+		}
+		// And prove the dead model leading is DIFFERENT from the native lead, i.e.
+		// the alphabetical-sort defect genuinely mis-orders.
+		if alpha[0] == got[0] {
+			t.Fatalf("RED expectation broken: alphabetical lead == native lead %q (fixture not discriminating)", got[0])
+		}
+		return
+	}
+
+	// GREEN: the production resolver preserves native order — the working model
+	// leads, the paid/dead model never leads. This is the standing guard.
+	if got[0] != "z-working-chat" {
+		t.Fatalf("native order not preserved: lead candidate = %q, want the provider's working-first model %q (alphabetical sort regression)", got[0], "z-working-chat")
+	}
+	// The dead/paid entry must NOT be first (it is the burst trigger).
+	if got[0] == "a-paid-402" {
+		t.Fatalf("dead/paid model surfaced first — the alphabetical-sort burst defect has regressed")
+	}
+}
 
 // ensemble_resolver_test.go — unit tests for the DYNAMIC, verifier-driven
 // per-member model resolver (CONST-036/040). Mocks/in-memory fixtures are

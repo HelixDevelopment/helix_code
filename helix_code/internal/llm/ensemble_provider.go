@@ -81,6 +81,13 @@ type EnsembleProvider struct {
 	// warmStarted is the sync.Once-style guard ensuring the WarmCache fan-out runs
 	// at most once for the provider's lifetime. Guarded by mu.
 	warmStarted bool
+	// memberCalls counts how many underlying p.Generate() attempts each member has
+	// made over the provider's lifetime (keyed by provider name). It is the
+	// observable that proves resolution is NOT doing a multi-model discovery burst:
+	// once a member's model is resolved (verifier-driven or cached), each prompt
+	// adds exactly ONE call. A cold member walking many dead catalogue models would
+	// show a large delta. Guarded by mu. Exposed read-only via MemberCallCounts.
+	memberCalls map[string]int
 }
 
 // ensembleMaxModelTries bounds how many chat-capable catalogue models a single
@@ -102,7 +109,7 @@ func NewEnsembleProvider(cfg EnsembleProviderConfig) *EnsembleProvider {
 	}
 	members := make([]Provider, 0, len(cfg.Members))
 	members = append(members, cfg.Members...)
-	return &EnsembleProvider{members: members, strategy: strategy, timeout: timeout, workingModel: map[string]string{}}
+	return &EnsembleProvider{members: members, strategy: strategy, timeout: timeout, workingModel: map[string]string{}, memberCalls: map[string]int{}}
 }
 
 // AddMember registers an additional member provider after construction.
@@ -369,6 +376,7 @@ func (e *EnsembleProvider) generateMemberResilient(ctx context.Context, p Provid
 			break
 		}
 		tried++
+		e.recordMemberCall(p.GetName())
 		reqCopy := base
 		reqCopy.Model = mdl
 		r, err := p.Generate(ctx, &reqCopy)
@@ -502,6 +510,71 @@ func (e *EnsembleProvider) rememberWorkingModel(providerName, model string) {
 	}
 	e.workingModel[providerName] = model
 	e.mu.Unlock()
+}
+
+// recordMemberCall increments the lifetime underlying-Generate call counter for a
+// member. Used to prove (via MemberCallCounts) that resolution does not perform a
+// multi-model discovery burst.
+func (e *EnsembleProvider) recordMemberCall(providerName string) {
+	e.mu.Lock()
+	if e.memberCalls == nil {
+		e.memberCalls = map[string]int{}
+	}
+	e.memberCalls[providerName]++
+	e.mu.Unlock()
+}
+
+// MemberCallCounts returns a snapshot of the lifetime per-member underlying
+// p.Generate() attempt counts (keyed by provider name). A member resolving its
+// model from the verifier (or a populated cache) adds exactly one call per prompt;
+// a member doing a cold catalogue discovery burst shows a large delta. This is the
+// observable that lets an operator/test verify the no-burst property (§11.4.5).
+func (e *EnsembleProvider) MemberCallCounts() map[string]int {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	out := make(map[string]int, len(e.memberCalls))
+	for k, v := range e.memberCalls {
+		out[k] = v
+	}
+	return out
+}
+
+// MemberResolution describes how one member's chat model is resolved, for
+// diagnostics. ProviderType is the member's provider type; VerifierModel is the
+// model id LLMsVerifier reports as the best verified chat model for that provider
+// ("" when the verifier is disabled/unreachable or reports nothing); Cached is the
+// already-discovered working model ("" before the first run/warm); Candidates is
+// the full ordered candidate list resolution will try (verifier entry first when
+// present, then the provider's own capability-filtered catalogue).
+type MemberResolution struct {
+	ProviderName  string
+	ProviderType  ProviderType
+	VerifierModel string
+	Cached        string
+	Candidates    []string
+}
+
+// MemberResolutions returns, per member, exactly how its chat model resolves —
+// the SAME orderedCandidates path the live fan-out uses (no duplicated logic). It
+// surfaces whether the verifier supplied the leading candidate, which is the
+// observable proving the TUI path is genuinely verifier-driven (§11.4.5). It makes
+// no network calls.
+func (e *EnsembleProvider) MemberResolutions(ctx context.Context) []MemberResolution {
+	members := e.snapshot()
+	out := make([]MemberResolution, 0, len(members))
+	for _, p := range members {
+		e.mu.RLock()
+		cached := e.workingModel[p.GetName()]
+		e.mu.RUnlock()
+		out = append(out, MemberResolution{
+			ProviderName:  p.GetName(),
+			ProviderType:  p.GetType(),
+			VerifierModel: ensembleVerifiedModelFor(ctx, p.GetType()),
+			Cached:        cached,
+			Candidates:    e.orderedCandidates(ctx, p),
+		})
+	}
+	return out
 }
 
 // excerpt returns up to n runes of s with an ellipsis when truncated.

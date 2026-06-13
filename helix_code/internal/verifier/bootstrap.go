@@ -42,8 +42,14 @@ func Bootstrap(cfg *config.VerifierConfig) (*BootstrapResult, error) {
 		log.Printf("✅ Embedded LLMsVerifier running at %s", endpoint)
 	}
 
-	if cfg.Mode != "remote" && cfg.Mode != "" {
-		return nil, fmt.Errorf("verifier mode %q not yet supported (only 'remote' is implemented)", cfg.Mode)
+	// "embedded" mode IS implemented — it is served by the in-process
+	// EmbeddedServer started above (triggered by an empty/"embedded" endpoint).
+	// "remote" talks to an external LLMsVerifier deployment. Any other mode is
+	// genuinely unsupported. Config validation (internal/config) already accepts
+	// only {"remote","embedded"}; this guard mirrors that closed set so an
+	// embedded-mode bootstrap no longer dies after the embedded server is up.
+	if cfg.Mode != "remote" && cfg.Mode != "embedded" && cfg.Mode != "" {
+		return nil, fmt.Errorf("verifier mode %q not yet supported (only 'remote' and 'embedded' are implemented)", cfg.Mode)
 	}
 
 	// Build adapter config from application config
