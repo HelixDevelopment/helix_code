@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>G-2 Live Boot QA</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">G-2 Live Boot QA</h1>
+</header>
+<h1 id="qa-evidence-live-helixcode-boot-end-to-end-user-flow">QA
+Evidence — Live helixcode boot + end-to-end user flow</h1>
+<p><strong>Run-id:</strong> g2-live-boot-20260613 <strong>Date:</strong>
+2026-06-13 <strong>Feature:</strong> helixcode self-boot infra (HEAD
+8f901bc2) + end-to-end REST API against real Postgres/Redis
+<strong>Operator request:</strong> “boot the system - run helixcode
+binary - continue” <strong>Anti-bluff basis:</strong> §11.4.5 / §11.4.13
+(sink-side) / §11.4.69 (<code>boot_service</code>) / §11.4.83 /
+§11.4.108 (user-visible). All HTTP codes + Postgres rows are captured
+from a real run this session — no metadata-only / simulated results.</p>
+<h2 id="pre-flight-11.4.82c">1. Pre-flight (§11.4.82(C))</h2>
+<ul>
+<li>Binary: <code>bin/helixcode</code> (46 MB) present.</li>
+<li>Host memory: 44% free / 56% used (under §12.6 60% ceiling).</li>
+<li>podman-machine-default: running (4 GiB, 150 GiB disk).</li>
+<li>Ports 55432 / 56379: free.</li>
+<li><code>HELIX_AUTOBOOT_INFRA</code>: unset (defaults on).</li>
+</ul>
+<h2 id="self-boot-.binhelixcode-pid-67282-captured-log">2. Self-boot
+(<code>./bin/helixcode</code>, PID 67282) — captured log</h2>
+<pre><code>2026/06/13 12:41:30 ✅ Infra auto-boot: podman booted postgres:55432 redis:56379
+2026/06/13 12:41:30 ✅ Database connection established successfully
+2026/06/13 12:41:30 ✅ Database schema already exists
+2026/06/13 12:41:30 🚀 Starting HelixCode server on 0.0.0.0:8080</code></pre>
+<p>Real podman containers (both <strong>healthy</strong>):</p>
+<pre><code>helixcode-autoboot-postgres  postgres:15      Up (healthy)  0.0.0.0:55432-&gt;5432/tcp
+helixcode-autoboot-redis     redis:7-alpine   Up (healthy)  0.0.0.0:56379-&gt;6379/tcp</code></pre>
+<p>Memory after boot: 45% free / 55% used (under ceiling).</p>
+<h2 id="health-auth-gating-captured">3. Health + auth gating
+(captured)</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Request</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /health</code></td>
+<td><code>200</code>
+<code>{"status":"healthy","version":"1.0.0"}</code></td>
+</tr>
+<tr>
+<td><code>GET /api/v1/health</code></td>
+<td><code>200</code> healthy</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/tasks</code> (no auth)</td>
+<td><code>401</code> (auth middleware live)</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/llm/models</code></td>
+<td><code>200</code> count=7, verifier-sourced models (CONST-036)</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/llm/providers</code></td>
+<td><code>200</code> 7 providers</td>
+</tr>
+</tbody>
+</table>
+<h2 id="end-to-end-user-flow-api-direct-postgres-sink-side-11.4.13">4.
+End-to-end user flow — API + direct Postgres (sink-side §11.4.13)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Step</th>
+<th>API result</th>
+<th>Real Postgres (<code>helixcode_prod</code>, direct
+<code>psql</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /api/v1/auth/register</code></td>
+<td><code>201</code> user <code>b1148d17-…</code></td>
+<td><code>users</code>:
+<code>demo_1781345386 \| …@example.com \| active=t</code></td>
+</tr>
+<tr>
+<td><code>POST /api/v1/auth/login</code></td>
+<td><code>200</code> JWT (283 chars)</td>
+<td><code>user_sessions</code> count = 2</td>
+</tr>
+<tr>
+<td><code>POST /api/v1/tasks</code> (authed)</td>
+<td><code>201</code> task <code>fc244a37-…</code></td>
+<td><code>distributed_tasks</code>:
+<code>fc244a37 \| pending \| 10</code></td>
+</tr>
+<tr>
+<td><code>GET /api/v1/tasks/:id</code></td>
+<td><code>200</code> same task</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>POST /api/v1/tasks/:id/start</code></td>
+<td><code>200</code> “started”</td>
+<td>status <code>pending → running</code></td>
+</tr>
+<tr>
+<td><code>POST /api/v1/tasks/:id/complete</code> (body)</td>
+<td><code>200</code> “completed”</td>
+<td>status <code>running → completed</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> the booted system persists real
+users/sessions/tasks to real Postgres and runs the full task lifecycle —
+confirmed by direct DB queries, not just API responses. The DB-backed
+<code>distributed_tasks</code> table (not an in-memory map) holds the
+task; state transitions are durable.</p>
+<h2 id="honest-observations-11.4.6-not-bluffed">5. Honest observations
+(§11.4.6 — not bluffed)</h2>
+<ul>
+<li><code>llm_models</code> / <code>llm_providers</code> DB tables are
+<strong>empty (0 rows)</strong> while <code>/api/v1/llm/models</code>
+serves 7 — the catalog is served from the <strong>LLMsVerifier cache
+(CONST-036 single-source-of-truth), not the DB</strong>. Consistent with
+CONST-036, not a defect.</li>
+<li>Real LLM generation (BLUFF-001 path) <strong>NOT</strong> exercised
+— Ollama not running; starting a ~2–3 GB model at 55% memory used would
+risk the §12.6 60% ceiling. Operator chose “hold” rather than start
+it.</li>
+</ul>
+<h2 id="api-surface-map-subagent-read-only">6. API-surface map
+(subagent, read-only)</h2>
+<p>26 production GET routes probed against the live server: - <strong>23
+live + working</strong> — 9 public <code>200</code>
+(<code>/health</code>, <code>/api/v1/health</code>,
+<code>/server/info</code>, <code>/metrics</code>,
+<code>/llm/{providers,models,providers/:id}</code>,
+<code>/memory/{systems,stats}</code>) + 14 auth-gated (401
+unauthenticated → 200/correct-404 with Bearer token:
+<code>/users/me</code>, <code>/tasks*</code>, <code>/projects*</code>,
+<code>/sessions*</code>, <code>/workers*</code>,
+<code>/system/{stats,status}</code>). - <strong>3
+feature-disabled-by-config</strong> — <code>/qa/sessions</code>,
+<code>/qa/session/:id/status</code>, <code>/screenshot/engines</code>
+return <code>503</code> (intentional graceful degradation, guarded by
+<code>qaEngine == nil || !Enabled()</code> in
+<code>qa_handlers.go:18-19</code>; QA engine not booted in this
+deployment — not a defect). - <strong>0 real 5xx defects.</strong>
+Server <code>version 1.0.0</code>, <code>database.connected:true</code>,
+uptime ~33m. Doc note: current-user route is
+<code>/api/v1/users/me</code> (not <code>/api/v1/auth/me</code>).</p>
+<h2 id="security-probe-subagent-non-destructive">7. Security probe
+(subagent, non-destructive)</h2>
+<p>All controls held — <strong>0 security findings:</strong> -
+Unauthenticated access to <code>/tasks</code>, <code>/projects</code>,
+<code>POST /tasks</code>, <code>/users/me</code> → all <code>401</code>
+(<code>Authorization header required</code>). - JWT tampering:
+flipped-signature → <code>401 signature is invalid</code>;
+<code>invalid.token.here</code> → <code>401</code>; <strong>alg=none
+forgery (3 variants) →
+<code>401 unexpected_signing_method</code></strong> (canonical
+alg-confusion defense). - SQL-injection-style login
+(<code>admin' OR '1'='1</code>, <code>' OR 1=1--</code>, SQLi in
+password) → clean <code>401 invalid credentials</code>, <strong>no
+bypass, no 500</strong> (parameterized/ORM query path). - Wrong password
+for valid user → <code>401</code>.</p>
+<h2
+id="codegraph-index-config-confirmed-runtime-probe-env-blocked-honest">8.
+§11.4.79 CodeGraph index — config-confirmed, runtime probe env-blocked
+(honest)</h2>
+<ul>
+<li><strong>Scope inclusion CONFIRMED at config level:</strong>
+<code>.codegraph/config.json</code> includes <code>**/*.go</code> with
+no <code>submodules/**</code> exclusion →
+<code>submodules/dag_orchestrator</code> +
+<code>submodules/pipeline_runtime</code> are in index scope per
+§11.4.79.</li>
+<li><strong>Runtime symbol-resolution probe NOT run (env-blocked, not
+faked):</strong> lumen’s embedding backend is Ollama on
+<code>:11434</code>, which is <strong>uninstalled</strong> (dangling
+<code>/usr/local/bin/ollama</code> symlink, <code>Ollama.app</code> +
+<code>~/.ollama</code> removed; LM Studio also removed). No embedding
+backend exists, so <code>semantic_search</code> returns “all embedding
+servers are unhealthy”. The subagent correctly did NOT fabricate a probe
+result (§11.4.6/§11.4.123). Re-validate after an operator reinstalls an
+embedding backend + pulls
+<code>ordis/jina-embeddings-v2-base-code</code>.</li>
+<li><strong>Resource note (operator):</strong> a stuck
+<code>codegraph sync</code> (PID 36072) has held
+<code>.codegraph/codegraph.lock</code> ~47 min with a 251 MB growing WAL
+(index DB 4.4 GB at repo root) — likely hung because the embedding
+backend is down; worth killing to free resources + the lock.</li>
+</ul>
+<h2 id="verdict">Verdict</h2>
+<p>The booted helixcode system is <strong>functional, persistent, and
+secure</strong> for the end user: full auth + task lifecycle against
+real Postgres (sink-side verified), 23/26 API routes live with 0
+defects, all auth/security controls held. Only the LLM-generation path
+(Ollama) and the CodeGraph runtime probe are environmentally unavailable
+(Ollama uninstalled) — both honestly reported, neither faked.</p>
+</body>
+</html>
