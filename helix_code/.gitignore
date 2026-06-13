@@ -220,3 +220,7 @@ reports/performance/
 /tests/e2e/local-llm
 /tests/e2e/local_llm
 /config/replica-*.yaml
+
+# Generated test catalog (build-derivative per CONST-053/§11.4.77).
+# Regenerate: cd helix_code && go run scripts/generate_test_catalog/generate-test-catalog.go
+docs/testing/Tests_Catalog.md
