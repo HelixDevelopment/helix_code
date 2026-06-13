@@ -92,6 +92,20 @@ terminal_ui_session_create_failed:
 terminal_ui_session_created:
   other: "Session created: {{.Name}}"
 
+# Degraded-mode (DB/Redis offline) startup messages. The TUI's
+# chat/LLM/model-picker surface does not depend on PostgreSQL or
+# Redis, so a failed DB/Redis connection at startup is NON-FATAL:
+# the TUI logs one of these warnings and continues in degraded mode
+# where DB-backed features (tasks/sessions) are honestly disabled.
+terminal_ui_db_offline_warning:
+  other: "⚠ Database offline ({{.Err}}) — starting in degraded mode: chat/LLM available, task/session persistence disabled."
+
+terminal_ui_redis_offline_warning:
+  other: "⚠ Redis offline ({{.Err}}) — starting in degraded mode: chat/LLM available, cache/queue features disabled."
+
+terminal_ui_db_status_offline:
+  other: "Offline (degraded mode)"
+
 terminal_ui_chat_no_provider_error:
   other: "Error: No LLM provider configured. Please configure a provider in Settings > System to enable AI responses, then try again."
 

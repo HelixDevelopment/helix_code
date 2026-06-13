@@ -427,6 +427,344 @@ func TestEnsembleProvider_WarmCache_IdempotentAndConcurrencySafe(t *testing.T) {
 	}
 }
 
+// modelCountingStub records, per model id, how many times Generate was called
+// with that id — the unforgeable evidence that a dead model is NOT re-walked on
+// later prompts. Its lead id ("gemma-7b-it") returns a real decommissioned-class
+// error; a later id ("llama-3.1-8b-instant") returns content.
+type modelCountingStub struct {
+	ptype     ProviderType
+	name      string
+	ids       []string
+	goodModel string
+	mu        sync.Mutex
+	perModel  map[string]int
+}
+
+func (s *modelCountingStub) GetType() ProviderType { return s.ptype }
+func (s *modelCountingStub) GetName() string        { return s.name }
+func (s *modelCountingStub) GetModels() []ModelInfo {
+	out := make([]ModelInfo, 0, len(s.ids))
+	for _, id := range s.ids {
+		out = append(out, ModelInfo{ID: id, Name: id, Provider: s.ptype, Capabilities: []ModelCapability{CapabilityTextGeneration}})
+	}
+	return out
+}
+func (s *modelCountingStub) GetCapabilities() []ModelCapability {
+	return []ModelCapability{CapabilityTextGeneration}
+}
+func (s *modelCountingStub) callsFor(id string) int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.perModel[id]
+}
+func (s *modelCountingStub) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+	s.mu.Lock()
+	if s.perModel == nil {
+		s.perModel = map[string]int{}
+	}
+	s.perModel[request.Model]++
+	s.mu.Unlock()
+	if request.Model == s.goodModel {
+		return &LLMResponse{ID: uuid.New(), RequestID: request.ID, Content: "Real answer from " + s.name + ".", FinishReason: "stop", CreatedAt: time.Now()}, nil
+	}
+	// Decommissioned-class definitive error (the live groq gemma-7b-it message).
+	return nil, errors.New("invalid request: The model `" + request.Model + "` has been decommissioned")
+}
+func (s *modelCountingStub) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+	r, err := s.Generate(ctx, request)
+	if err != nil {
+		return err
+	}
+	ch <- *r
+	close(ch)
+	return nil
+}
+func (s *modelCountingStub) IsAvailable(ctx context.Context) bool { return true }
+func (s *modelCountingStub) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+	return &ProviderHealth{Status: "healthy", ModelCount: len(s.ids)}, nil
+}
+func (s *modelCountingStub) Close() error                      { return nil }
+func (s *modelCountingStub) GetContextWindow() int             { return 8192 }
+func (s *modelCountingStub) CountTokens(t string) (int, error) { return len(t) / 4, nil }
+
+// TestEnsembleProvider_DeadModelSkippedOnSecondGenerate is the core dead-model
+// regression guard. Prompt 1 must discover the decommissioned lead model
+// ("gemma-7b-it"), record it dead, and reach the working model. Prompt 2 must
+// NOT re-attempt the dead lead model — proven by the per-model call counter: the
+// dead id is called EXACTLY ONCE across both prompts (discovered on prompt 1,
+// skipped on prompt 2), while the good model is called on each prompt.
+//
+// This is the live-TUI defect's unit-level mirror: cold prompts re-walking the
+// catalogue's leading dead model every time produced "all N member(s) failed".
+//
+// Paired §1.1 mutation: if markDead is a no-op OR orderedCandidates does not skip
+// dead models, prompt 2 re-walks the dead lead model → its call count becomes 2 →
+// the "exactly 1" assertion FAILs, proving the assertion genuinely catches the
+// regression.
+func TestEnsembleProvider_DeadModelSkippedOnSecondGenerate(t *testing.T) {
+	stub := &modelCountingStub{
+		ptype:     ProviderTypeGroq,
+		name:      "Groq",
+		ids:       []string{"gemma-7b-it", "llama-3.1-8b-instant"}, // dead lead, then working
+		goodModel: "llama-3.1-8b-instant",
+	}
+	ens := NewEnsembleProvider(EnsembleProviderConfig{Members: []Provider{stub}, Timeout: 10 * time.Second})
+	req := func() *LLMRequest {
+		return &LLMRequest{ID: uuid.New(), Model: EnsembleModelName, Messages: []Message{{Role: "user", Content: "Reply OK"}}}
+	}
+
+	// Prompt 1: discovers the dead lead model, records it dead, reaches the good one.
+	resp1, err := ens.Generate(context.Background(), req())
+	if err != nil {
+		t.Fatalf("prompt 1 must succeed past the dead lead model, got: %v", err)
+	}
+	if resp1 == nil || !strings.Contains(resp1.Content, "Real answer from Groq") {
+		t.Fatalf("prompt 1 expected working-model content, got %+v", resp1)
+	}
+	if dc := ens.DeadModelCount()["Groq"]; dc != 1 {
+		t.Fatalf("after prompt 1 the dead lead model must be recorded; DeadModelCount[Groq]=%d, want 1", dc)
+	}
+	deadCallsAfter1 := stub.callsFor("gemma-7b-it")
+	if deadCallsAfter1 != 1 {
+		t.Fatalf("prompt 1 should attempt the dead model exactly once; got %d", deadCallsAfter1)
+	}
+
+	// Prompt 2: MUST skip the now-known-dead lead model entirely.
+	resp2, err := ens.Generate(context.Background(), req())
+	if err != nil {
+		t.Fatalf("prompt 2 must succeed, got: %v", err)
+	}
+	if resp2 == nil || !strings.Contains(resp2.Content, "Real answer from Groq") {
+		t.Fatalf("prompt 2 expected working-model content, got %+v", resp2)
+	}
+
+	// The dead model's lifetime call count MUST still be 1 — proving prompt 2 did
+	// NOT re-walk it (the cross-prompt persistence that stops the per-prompt
+	// re-burn). The working model is called once per prompt.
+	if dead := stub.callsFor("gemma-7b-it"); dead != 1 {
+		t.Fatalf("dead model must be attempted EXACTLY ONCE across both prompts (no re-walk); got %d", dead)
+	}
+	if good := stub.callsFor("llama-3.1-8b-instant"); good != 2 {
+		t.Fatalf("working model must be called once per prompt (2 total); got %d", good)
+	}
+}
+
+// TestEnsembleProvider_TransientErrorDoesNotMarkDead proves a TRANSIENT failure
+// (rate-limit / timeout) does NOT poison a model: a model that 429s on prompt 1
+// is retried on prompt 2 (NOT recorded dead). Distinguishing DEAD (permanent)
+// from TRANSIENT (retryable) is mandatory per the task.
+//
+// Paired §1.1 mutation: if isDefinitiveModelError mis-classified a 429 as
+// definitive, the model would be recorded dead and prompt 2 would skip it →
+// DeadModelCount would be 1 and the model's retry would not happen → assertions
+// FAIL.
+func TestEnsembleProvider_TransientErrorDoesNotMarkDead(t *testing.T) {
+	// A single-model member that returns a 429 on the first attempt, content after.
+	stub := &transientThenOKStub{ptype: ProviderTypeGroq, name: "Groq", id: "llama-3.1-8b-instant", failFirst: 1}
+	ens := NewEnsembleProvider(EnsembleProviderConfig{Members: []Provider{stub}, Timeout: 10 * time.Second})
+	req := func() *LLMRequest {
+		return &LLMRequest{ID: uuid.New(), Model: EnsembleModelName, Messages: []Message{{Role: "user", Content: "Reply OK"}}}
+	}
+
+	// Prompt 1: the only candidate 429s → ensemble fails this prompt, but the model
+	// must NOT be recorded dead (transient).
+	_, _ = ens.Generate(context.Background(), req())
+	if dc := ens.DeadModelCount()["Groq"]; dc != 0 {
+		t.Fatalf("a 429/transient failure must NOT mark the model dead; DeadModelCount[Groq]=%d, want 0", dc)
+	}
+
+	// Prompt 2: the same model now returns content (transient cleared) — proving it
+	// was retried, not permanently skipped.
+	resp, err := ens.Generate(context.Background(), req())
+	if err != nil {
+		t.Fatalf("prompt 2 must retry the transiently-failed model and succeed, got: %v", err)
+	}
+	if resp == nil || !strings.Contains(resp.Content, "Real answer") {
+		t.Fatalf("prompt 2 expected content after transient cleared, got %+v", resp)
+	}
+}
+
+// transientThenOKStub fails its first `failFirst` calls with a 429 (transient),
+// then returns content — to prove transient failures are retried, not marked dead.
+type transientThenOKStub struct {
+	ptype     ProviderType
+	name      string
+	id        string
+	mu        sync.Mutex
+	calls     int
+	failFirst int
+}
+
+func (s *transientThenOKStub) GetType() ProviderType { return s.ptype }
+func (s *transientThenOKStub) GetName() string        { return s.name }
+func (s *transientThenOKStub) GetModels() []ModelInfo {
+	return []ModelInfo{{ID: s.id, Name: s.id, Provider: s.ptype, Capabilities: []ModelCapability{CapabilityTextGeneration}}}
+}
+func (s *transientThenOKStub) GetCapabilities() []ModelCapability {
+	return []ModelCapability{CapabilityTextGeneration}
+}
+func (s *transientThenOKStub) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+	s.mu.Lock()
+	s.calls++
+	fail := s.calls <= s.failFirst
+	s.mu.Unlock()
+	if fail {
+		return nil, errors.New("429 Too Many Requests: rate limit exceeded")
+	}
+	return &LLMResponse{ID: uuid.New(), RequestID: request.ID, Content: "Real answer from " + s.name + ".", FinishReason: "stop", CreatedAt: time.Now()}, nil
+}
+func (s *transientThenOKStub) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+	r, err := s.Generate(ctx, request)
+	if err != nil {
+		return err
+	}
+	ch <- *r
+	close(ch)
+	return nil
+}
+func (s *transientThenOKStub) IsAvailable(ctx context.Context) bool { return true }
+func (s *transientThenOKStub) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+	return &ProviderHealth{Status: "healthy", ModelCount: 1}, nil
+}
+func (s *transientThenOKStub) Close() error                      { return nil }
+func (s *transientThenOKStub) GetContextWindow() int             { return 8192 }
+func (s *transientThenOKStub) CountTokens(t string) (int, error) { return len(t) / 4, nil }
+
+// TestIsDefinitiveModelError_ClassifiesByErrorClass proves the DEAD/TRANSIENT
+// classifier keys off the error CLASS (not a hardcoded model name): real
+// provider decommissioned/not-found messages classify DEAD; real rate-limit /
+// timeout / network messages classify TRANSIENT.
+func TestIsDefinitiveModelError_ClassifiesByErrorClass(t *testing.T) {
+	dead := []string{
+		"invalid request: The model `gemma-7b-it` has been decommissioned",
+		"the model `gpt-x` does not exist",
+		"error code: model_not_found",
+		"openrouter: no endpoints found for foo/bar",
+		"model not found",
+		"unsupported model: whatever",
+		"is not a valid model id",
+	}
+	for _, m := range dead {
+		if !isDefinitiveModelError(errors.New(m)) {
+			t.Errorf("expected DEAD classification for %q", m)
+		}
+	}
+	transient := []string{
+		"429 Too Many Requests",
+		"rate limit exceeded",
+		"context deadline exceeded",
+		"dial tcp: i/o timeout",
+		"503 service unavailable",
+		"connection refused",
+		"the server is overloaded, please try again",
+	}
+	for _, m := range transient {
+		if isDefinitiveModelError(errors.New(m)) {
+			t.Errorf("expected TRANSIENT (not dead) classification for %q", m)
+		}
+	}
+}
+
+// streamSensitiveStub mirrors a real OpenAI-compatible cloud provider's
+// non-streaming Generate: when the request carries Stream=true, the provider
+// asks the API for an SSE stream ("stream":true) but then tries to JSON-decode
+// the single body — choking on the leading `data:` chunk with the exact live
+// error `invalid character 'd' looking for beginning of value`. When Stream is
+// false it returns real content. This is the unit-level mirror of the live-TUI
+// "all 4 member(s) failed" defect: the TUI sets Stream=true and the ensemble
+// forwarded it into each member's buffered Generate.
+type streamSensitiveStub struct {
+	ptype ProviderType
+	name  string
+	calls int32
+}
+
+func (s *streamSensitiveStub) GetType() ProviderType { return s.ptype }
+func (s *streamSensitiveStub) GetName() string        { return s.name }
+func (s *streamSensitiveStub) GetModels() []ModelInfo {
+	return []ModelInfo{{ID: string(s.ptype) + "-chat", Name: string(s.ptype) + "-chat", Provider: s.ptype, Capabilities: []ModelCapability{CapabilityTextGeneration}}}
+}
+func (s *streamSensitiveStub) GetCapabilities() []ModelCapability {
+	return []ModelCapability{CapabilityTextGeneration}
+}
+func (s *streamSensitiveStub) Generate(ctx context.Context, request *LLMRequest) (*LLMResponse, error) {
+	atomic.AddInt32(&s.calls, 1)
+	if request.Stream {
+		// A buffered Generate that received Stream=true gets an SSE body it cannot
+		// JSON-decode — the exact live failure mode.
+		return nil, errors.New(string(s.ptype) + " request failed: invalid character 'd' looking for beginning of value")
+	}
+	return &LLMResponse{ID: uuid.New(), RequestID: request.ID, Content: "Real buffered answer from " + s.name + ".", FinishReason: "stop", CreatedAt: time.Now()}, nil
+}
+func (s *streamSensitiveStub) GenerateStream(ctx context.Context, request *LLMRequest, ch chan<- LLMResponse) error {
+	r, err := s.Generate(ctx, request)
+	if err != nil {
+		return err
+	}
+	ch <- *r
+	close(ch)
+	return nil
+}
+func (s *streamSensitiveStub) IsAvailable(ctx context.Context) bool { return true }
+func (s *streamSensitiveStub) GetHealth(ctx context.Context) (*ProviderHealth, error) {
+	return &ProviderHealth{Status: "healthy", ModelCount: 1}, nil
+}
+func (s *streamSensitiveStub) Close() error                      { return nil }
+func (s *streamSensitiveStub) GetContextWindow() int             { return 8192 }
+func (s *streamSensitiveStub) CountTokens(t string) (int, error) { return len(t) / 4, nil }
+
+// TestEnsembleProvider_DoesNotForwardStreamToMembers is the regression guard for
+// the live-TUI "all N member(s) failed (... invalid character 'd' ...)" defect.
+// The TUI drives the ensemble via GenerateStream with Stream=true on the request;
+// the ensemble must call each member's buffered Generate with Stream=FALSE (it
+// votes on complete responses). If it forwards Stream=true, every member's
+// buffered Generate fails to decode the SSE body and the ensemble all-fails.
+//
+// Paired §1.1 mutation: removing `base.Stream = false` (and the
+// generateMemberResilient `reqCopy.Stream = false`) makes the stub return the
+// SSE-decode error for every member → the ensemble returns an error → this test
+// FAILs, proving the assertion catches the regression.
+func TestEnsembleProvider_DoesNotForwardStreamToMembers(t *testing.T) {
+	a := &streamSensitiveStub{ptype: ProviderTypeDeepSeek, name: "DeepSeek"}
+	b := &streamSensitiveStub{ptype: ProviderTypeGroq, name: "Groq"}
+	ens := NewEnsembleProvider(EnsembleProviderConfig{Members: []Provider{a, b}, Timeout: 10 * time.Second})
+
+	// (1) Explicit-model path: caller passes a concrete model + Stream=true.
+	req := &LLMRequest{ID: uuid.New(), Model: "DeepSeek-chat", Stream: true, Messages: []Message{{Role: "system", Content: "sys"}, {Role: "user", Content: "hi"}}}
+	resp, err := ens.Generate(context.Background(), req)
+	if err != nil {
+		t.Fatalf("ensemble must strip Stream before calling members; got error: %v", err)
+	}
+	if resp == nil || !strings.Contains(resp.Content, "Real buffered answer") {
+		t.Fatalf("expected a buffered member answer, got %+v", resp)
+	}
+
+	// (2) Sentinel/resilient path: model is the ensemble sentinel + Stream=true.
+	sreq := &LLMRequest{ID: uuid.New(), Model: EnsembleModelName, Stream: true, Messages: []Message{{Role: "system", Content: "sys"}, {Role: "user", Content: "hi"}}}
+	sresp, serr := ens.Generate(context.Background(), sreq)
+	if serr != nil {
+		t.Fatalf("sentinel+Stream=true path must also strip Stream; got error: %v", serr)
+	}
+	if sresp == nil || !strings.Contains(sresp.Content, "Real buffered answer") {
+		t.Fatalf("sentinel path expected a buffered member answer, got %+v", sresp)
+	}
+
+	// (3) Full streaming path the TUI uses: GenerateStream with Stream=true must
+	// emit the voted content as a chunk and close the channel — never error.
+	ch := make(chan LLMResponse, 4)
+	gerr := ens.GenerateStream(context.Background(), &LLMRequest{ID: uuid.New(), Model: EnsembleModelName, Stream: true, Messages: []Message{{Role: "user", Content: "hi"}}}, ch)
+	if gerr != nil {
+		t.Fatalf("GenerateStream(Stream=true) must succeed (TUI path), got: %v", gerr)
+	}
+	var streamed string
+	for c := range ch {
+		streamed += c.Content
+	}
+	if !strings.Contains(streamed, "Real buffered answer") {
+		t.Fatalf("streamed ensemble content expected a real buffered answer, got %q", streamed)
+	}
+}
+
 // defaultModelForLegacy reproduces the pre-fix models[0] selection for the RED
 // reproduction above (the bug the fix removed).
 func defaultModelForLegacy(p Provider) string {

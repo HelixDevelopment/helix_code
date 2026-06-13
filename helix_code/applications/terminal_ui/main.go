@@ -145,17 +145,30 @@ func (tui *TerminalUI) Initialize() error {
 	}
 	tui.helixConfig = helixCfg
 
-	// Initialize database
+	// Initialize database. The TUI's primary surface (chat / LLM /
+	// model picker) does NOT depend on PostgreSQL — only DB-backed
+	// features (task & session persistence, the API server's auth) do.
+	// So a failed DB connection at startup is NON-FATAL: log a clear,
+	// i18n-aware warning (CONST-046) and continue in DEGRADED mode with
+	// db == nil. task.NewTaskManager and server.New both tolerate a nil
+	// db, and the System status view honestly reports DB as offline
+	// rather than crashing or faking availability (anti-bluff §11.4).
 	db, err := database.New(cfg.Database)
 	if err != nil {
-		return fmt.Errorf("failed to initialize database: %v", err)
+		log.Printf("%s", tui.td("terminal_ui_db_offline_warning", map[string]any{"Err": err.Error()}))
+		db = nil
 	}
 	tui.db = db
 
-	// Initialize Redis
+	// Initialize Redis. Like the database, Redis is only needed by
+	// DB-backed task/cache/queue features — not by chat/LLM. A failed
+	// Redis connection is therefore NON-FATAL too: warn (i18n-aware)
+	// and continue with rds == nil. Downstream consumers
+	// (task.NewTaskManager, server.New) accept a nil Redis client.
 	rds, err := redis.NewClient(&cfg.Redis)
 	if err != nil {
-		return fmt.Errorf("failed to initialize Redis: %v", err)
+		log.Printf("%s", tui.td("terminal_ui_redis_offline_warning", map[string]any{"Err": err.Error()}))
+		rds = nil
 	}
 
 	// Initialize components
@@ -434,10 +447,14 @@ func (tui *TerminalUI) createSystemStatsView() tview.Primitive {
 	// Get real system stats from various managers
 	ctx := context.Background()
 
-	// Check database status
+	// Check database status. A nil db means the DB was unreachable at
+	// startup and the TUI is running in degraded mode (chat/LLM works,
+	// DB-backed task/session persistence is disabled). Report that
+	// honestly rather than implying the feature is merely "off"
+	// (anti-bluff §11.4 — a disabled feature must say it's unavailable).
 	dbStatus := "[green]Connected"
 	if tui.db == nil {
-		dbStatus = "[red]Not Connected"
+		dbStatus = "[red]" + tui.t("terminal_ui_db_status_offline")
 	}
 
 	// Check LLM provider status

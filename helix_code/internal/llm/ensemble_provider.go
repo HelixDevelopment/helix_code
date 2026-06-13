@@ -81,6 +81,22 @@ type EnsembleProvider struct {
 	// warmStarted is the sync.Once-style guard ensuring the WarmCache fan-out runs
 	// at most once for the provider's lifetime. Guarded by mu.
 	warmStarted bool
+	// deadModel records (provider name → model id → true) for every (provider,
+	// model) pair that has DEFINITIVELY failed with a non-retryable error
+	// (model-not-found / decommissioned / unsupported / 400/404-class "model does
+	// not exist"). Once recorded, orderedCandidates SKIPS that model for the
+	// remainder of the provider's lifetime — so a model that fails as
+	// decommissioned on the FIRST prompt (e.g. groq's catalogue-leading
+	// `gemma-7b-it`) is NEVER re-tried on later prompts. This bounds dead-model
+	// discovery to the first prompt and stops the per-prompt re-burn that produced
+	// "all N member(s) failed" under the live TUI streaming path (warm-cache not
+	// reliably completing before the first prompt). DEAD is permanent; TRANSIENT
+	// failures (rate-limit 429 / timeout / network) are NEVER recorded here so a
+	// model temporarily throttled is retried later. The key is the (provider,
+	// model) pair, NOT a hardcoded model name — membership is populated purely from
+	// the error CLASS observed at runtime (CONST-036/040: zero hardcoded names).
+	// Guarded by mu.
+	deadModel map[string]map[string]bool
 	// memberCalls counts how many underlying p.Generate() attempts each member has
 	// made over the provider's lifetime (keyed by provider name). It is the
 	// observable that proves resolution is NOT doing a multi-model discovery burst:
@@ -109,7 +125,7 @@ func NewEnsembleProvider(cfg EnsembleProviderConfig) *EnsembleProvider {
 	}
 	members := make([]Provider, 0, len(cfg.Members))
 	members = append(members, cfg.Members...)
-	return &EnsembleProvider{members: members, strategy: strategy, timeout: timeout, workingModel: map[string]string{}, memberCalls: map[string]int{}}
+	return &EnsembleProvider{members: members, strategy: strategy, timeout: timeout, workingModel: map[string]string{}, memberCalls: map[string]int{}, deadModel: map[string]map[string]bool{}}
 }
 
 // AddMember registers an additional member provider after construction.
@@ -208,6 +224,19 @@ func (e *EnsembleProvider) Generate(ctx context.Context, request *LLMRequest) (*
 			if base.ID == uuid.Nil {
 				base.ID = uuid.New()
 			}
+			// CRITICAL: the ensemble votes on COMPLETE member responses, so it ALWAYS
+			// calls each member's non-streaming Generate. The caller's request may
+			// carry Stream=true (the TUI sets it — it drives the ensemble through
+			// GenerateStream, which buffers via Generate). Forwarding Stream=true into
+			// a member's non-streaming Generate makes the provider request an SSE
+			// response ("stream":true) but then JSON-decode it as a single body — the
+			// decode chokes on the leading `data:` chunk with
+			// `invalid character 'd' looking for beginning of value`, failing EVERY
+			// member and surfacing "all N member(s) failed" in the chat. Forcing
+			// Stream=false on the per-member request is the fix: members are always
+			// invoked buffered, the ensemble buffers, and GenerateStream emits the
+			// voted result as one chunk.
+			base.Stream = false
 			// The ensemble sentinel model ("helix-agent-ensemble") is NOT a real
 			// cloud model — forwarding it would make every member's API reject the
 			// request (404 "model does not exist"). When the caller passes an
@@ -383,6 +412,15 @@ func (e *EnsembleProvider) generateMemberResilient(ctx context.Context, p Provid
 		if err == nil && r != nil && strings.TrimSpace(r.Content) != "" {
 			return r, nil, mdl
 		}
+		// A DEFINITIVE non-retryable failure (model decommissioned / not found /
+		// unsupported / 400/404-class "model does not exist") means this model id is
+		// permanently dead for this provider — record it so orderedCandidates skips
+		// it on every later prompt and the per-prompt re-burn of the catalogue's
+		// leading dead models stops. TRANSIENT failures (429 / timeout / network /
+		// context-cancel) are NOT recorded — the model may work next time.
+		if err != nil && isDefinitiveModelError(err) {
+			e.markDead(p.GetName(), mdl)
+		}
 		lastErr, lastResp = err, r
 	}
 	if lastErr == nil && (lastResp == nil || strings.TrimSpace(lastResp.Content) == "") {
@@ -403,15 +441,28 @@ func (e *EnsembleProvider) generateMemberResilient(ctx context.Context, p Provid
 //
 // Duplicates are de-duplicated preserving first-seen priority.
 func (e *EnsembleProvider) orderedCandidates(ctx context.Context, p Provider) []string {
+	name := p.GetName()
 	e.mu.RLock()
-	cached := e.workingModel[p.GetName()]
+	cached := e.workingModel[name]
+	// Copy the member's dead-model set under the read lock so candidate filtering
+	// uses a stable snapshot (the set only grows; a model recorded dead mid-walk
+	// simply won't be re-offered next prompt — never the current one).
+	dead := map[string]bool{}
+	for id := range e.deadModel[name] {
+		dead[id] = true
+	}
 	e.mu.RUnlock()
 
 	ordered := make([]string, 0, 8)
 	seen := map[string]bool{}
 	add := func(id string) {
 		id = strings.TrimSpace(id)
-		if id == "" || seen[id] {
+		// Skip empty, already-added, and KNOWN-DEAD models. Skipping dead models is
+		// the load-bearing fix: once a provider's catalogue-leading model failed as
+		// decommissioned/not-found on an earlier prompt, it is never offered again,
+		// so later prompts reach a working model in 1 call without re-walking the
+		// dead ones.
+		if id == "" || seen[id] || dead[id] {
 			return
 		}
 		seen[id] = true
@@ -500,6 +551,127 @@ func (e *EnsembleProvider) WarmCache(ctx context.Context) {
 		}(m)
 	}
 	wg.Wait()
+}
+
+// markDead records a (provider, model) pair as permanently dead so
+// orderedCandidates skips it for the remainder of the provider's lifetime. Idempotent.
+func (e *EnsembleProvider) markDead(providerName, model string) {
+	model = strings.TrimSpace(model)
+	if providerName == "" || model == "" {
+		return
+	}
+	e.mu.Lock()
+	if e.deadModel == nil {
+		e.deadModel = map[string]map[string]bool{}
+	}
+	if e.deadModel[providerName] == nil {
+		e.deadModel[providerName] = map[string]bool{}
+	}
+	e.deadModel[providerName][model] = true
+	// If the now-dead model was the cached working model (e.g. a provider
+	// decommissioned a model that previously worked), drop the stale cache so the
+	// next resolution re-discovers a live model instead of forwarding the dead one.
+	if e.workingModel[providerName] == model {
+		delete(e.workingModel, providerName)
+	}
+	e.mu.Unlock()
+}
+
+// DeadModelCount returns a snapshot of how many models have been recorded dead
+// per member (keyed by provider name). It is the observable that lets a test or
+// operator confirm the dead-model set is being populated from real definitive
+// failures (§11.4.5).
+func (e *EnsembleProvider) DeadModelCount() map[string]int {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	out := make(map[string]int, len(e.deadModel))
+	for name, set := range e.deadModel {
+		out[name] = len(set)
+	}
+	return out
+}
+
+// definitiveModelErrorMarkers are lowercased error-string CLASS markers that
+// indicate a PERMANENT, non-retryable model failure: the requested model id does
+// not exist / was decommissioned / is not supported by the provider. They are
+// error-CLASS phrases, NOT model names (CONST-036/040: zero hardcoded model
+// names) — every real cloud provider surfaces one of these substrings for a
+// dead-model request:
+//
+//	groq:       "the model `gemma-7b-it` has been decommissioned"
+//	openai-ish: "the model ... does not exist", "model_not_found"
+//	openrouter: "is not a valid model id", "no endpoints found for"
+//	mistral:    "invalid model", "model not found"
+//	generic:    HTTP 400/404 bodies "not supported", "unsupported model"
+//
+// A model that produced one of these is permanently dead for the provider; a
+// 429 / timeout / network error is TRANSIENT and is intentionally absent here.
+var definitiveModelErrorMarkers = []string{
+	"decommission",            // groq: "has been decommissioned"
+	"does not exist",          // openai-style "the model `x` does not exist"
+	"model_not_found",         // openai error code
+	"model not found",         // mistral / generic
+	"no longer supported",     // generic deprecation
+	"not supported",           // "model not supported" / "unsupported"
+	"unsupported model",       //
+	"invalid model",           // mistral / generic
+	"not a valid model",       // openrouter "is not a valid model id"
+	"unknown model",           //
+	"no endpoints found for",  // openrouter dead/removed model id
+	"has been deprecated",     //
+	"model has been removed",  //
+}
+
+// transientErrorMarkers are lowercased markers that indicate a TEMPORARY failure
+// (rate-limit / timeout / network / overload). They take precedence over the
+// definitive markers: a 429 body sometimes also names the model, but the model is
+// NOT dead — it is throttled — so it must NOT be recorded dead. Keeping this guard
+// explicit prevents a transient burst from poisoning a healthy model.
+var transientErrorMarkers = []string{
+	"rate limit",
+	"rate_limit",
+	"too many requests",
+	"429",
+	"timeout",
+	"timed out",
+	"deadline exceeded",
+	"context canceled",
+	"context cancelled",
+	"connection refused",
+	"connection reset",
+	"temporarily unavailable",
+	"service unavailable",
+	"503",
+	"overloaded",
+	"try again",
+	"i/o timeout",
+	"eof",
+	"no such host",
+}
+
+// isDefinitiveModelError reports whether err is a PERMANENT, non-retryable
+// model-level failure (model decommissioned / not found / unsupported) — the
+// signal that the (provider, model) pair should be recorded dead. It returns
+// false for transient failures (rate-limit / timeout / network), which take
+// precedence, so a temporarily-throttled model is never marked dead. Detection is
+// purely by error-CLASS substring, never by a hardcoded model-name list.
+func isDefinitiveModelError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	// Transient signals win: never mark a throttled/timed-out model dead.
+	for _, t := range transientErrorMarkers {
+		if strings.Contains(msg, t) {
+			return false
+		}
+	}
+	for _, d := range definitiveModelErrorMarkers {
+		if strings.Contains(msg, d) {
+			return true
+		}
+	}
+	return false
 }
 
 // rememberWorkingModel caches the model id that produced content for a member.
