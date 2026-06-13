@@ -59,6 +59,11 @@ type TerminalUI struct {
 	chatHistory []llm.Message
 	chatInput   *tview.InputField
 	chatOutput  *tview.TextView
+	// selectedModel is the model id chosen via the model picker. It is sent
+	// as LLMRequest.Model on every chat turn — without it the provider call
+	// goes out with an empty model id and the API rejects it (e.g. groq 404
+	// "The model `` does not exist").
+	selectedModel string
 
 	// Current state
 	currentUser    string
@@ -182,6 +187,12 @@ func (tui *TerminalUI) Initialize() error {
 	// env var is present and non-placeholder, so a no-key environment still
 	// honestly reports zero models rather than a fabricated list.
 	tui.llmManager = llm.NewModelManager()
+	// Wire LLMsVerifier (CONST-036/040) BEFORE registering providers so the
+	// Helix Agent ensemble resolves each member's model from verified,
+	// chat-capable catalogue entries — fully dynamic, no hardcoded model names.
+	if wireVerifierAdapter(tui.llmManager, cfg) {
+		log.Printf("✅ TUI: LLMsVerifier wired (ensemble model resolution is verifier-driven)")
+	}
 	if n := registerEnvProviders(tui.llmManager); n > 0 {
 		log.Printf("✅ TUI: registered %d cloud LLM provider(s) from environment keys", n)
 	}
@@ -1518,14 +1529,24 @@ func (tui *TerminalUI) sendChatMessage(message string) {
 	ctx := context.Background()
 	request := &llm.LLMRequest{
 		ID:          uuid.New(),
+		Model:       tui.selectedModel,
 		Messages:    append([]llm.Message(nil), tui.chatHistory...),
 		MaxTokens:   2048,
 		Temperature: 0.7,
 		Stream:      true,
 	}
 
+	// NOTE: do NOT call tui.app.Draw() here. sendChatMessage runs on the tview
+	// event loop (it is invoked from the chatInput SetDoneFunc handler). The
+	// synchronous Application.Draw() posts a draw to the event queue and blocks
+	// until it is serviced — but the loop cannot service it until this handler
+	// returns, so the call DEADLOCKS the handler (silently: tview does not
+	// recover a block, so the prompt never submits, the input never clears, and
+	// "Messages" never increments — exactly the headless-Enter bug). The
+	// just-set status + chat output are painted by the loop's redraw after this
+	// handler returns; every subsequent streamed update is funnelled through
+	// QueueUpdateDraw below, which schedules its own redraw. No Draw() needed.
 	tui.statusBar.SetText("[yellow]" + tui.t("terminal_ui_chat_generating"))
-	tui.app.Draw()
 
 	// Append the placeholder assistant turn the stream will grow in place.
 	tui.chatHistory = append(tui.chatHistory, llm.Message{Role: "assistant", Content: ""})
@@ -1700,6 +1721,9 @@ func (tui *TerminalUI) showModelSelector() {
 			list.AddItem(model.Name, fmt.Sprintf("Provider: %s, Context: %d", model.Provider, model.ContextSize), shortcut, func() {
 				tui.selectModel(modelInfo)
 				tui.pages.RemovePage("modelSelector")
+				if tui.chatInput != nil {
+					tui.app.SetFocus(tui.chatInput)
+				}
 			})
 		}
 	}
@@ -1730,7 +1754,21 @@ func (tui *TerminalUI) selectModel(model *llm.ModelInfo) {
 	}
 
 	tui.llmProvider = provider
+	tui.selectedModel = model.Name
 	tui.statusBar.SetText("[green]" + tui.td("terminal_ui_model_selected", map[string]any{"Name": model.Name, "Provider": model.Provider}))
+
+	// Warm the ensemble's per-member working-model cache the moment it is selected
+	// (a few seconds before the user types + submits), so the FIRST real prompt
+	// hits the cached working model (1 call/member) instead of triggering the
+	// cold-start discovery storm that made prompt-1 slow and caused concurrent
+	// "all N member(s) failed" in the TUI. Non-blocking (its own goroutine) and a
+	// no-op when the selected provider is not the ensemble. WarmCache is idempotent
+	// and panic-free, so a failed type assertion is simply skipped.
+	if provider.GetType() == llm.ProviderTypeEnsemble {
+		if ew, ok := provider.(*llm.EnsembleProvider); ok {
+			go ew.WarmCache(context.Background())
+		}
+	}
 
 	// Add system message about model selection
 	tui.chatHistory = append(tui.chatHistory, llm.Message{
@@ -2049,7 +2087,7 @@ func (tui *TerminalUI) showNewTaskForm() {
 			data,
 			priorityMap[taskPriority],
 			criticalityMap[taskCriticality],
-			[]uuid.UUID{}, // No dependencies for now
+			[]uuid.UUID{}, // UI-created tasks start with no dependencies
 		)
 
 		if err != nil {
