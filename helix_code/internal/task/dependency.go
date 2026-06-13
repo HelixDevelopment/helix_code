@@ -5,8 +5,63 @@ import (
 	"fmt"
 
 	"dev.helix.code/internal/database"
+	dag "dev.helix.dag"
 	"github.com/google/uuid"
 )
+
+// noopNodeFn is the Execute function for graph-validation-only nodes. The
+// DependencyManager uses dag.Build purely for its VALIDATION (cycle + unknown
+// dependency rejection); it never runs the DAG, so the node body is never
+// invoked. It returns nil so the contract is satisfied if ever called.
+func noopNodeFn(context.Context, dag.Inputs) (dag.Output, error) { return nil, nil }
+
+// buildGraphNodes walks the dependency graph reachable from rootID (whose
+// immediate dependencies are rootDeps) by querying the DB for each node's
+// dependency edges, and returns the full node set as []dag.Node suitable for
+// dag.Build. Every referenced node id is materialised as a node (leaves
+// included) so dag.Build never reports a dangling-dependency error during pure
+// cycle detection — only genuine cycles surface as Build errors.
+func (dm *DependencyManager) buildGraphNodes(rootID uuid.UUID, rootDeps []uuid.UUID) ([]dag.Node, error) {
+	edges := map[uuid.UUID][]string{
+		rootID: uuidsToStrings(rootDeps),
+	}
+
+	// Frontier of node ids whose edges still need to be fetched from the DB.
+	queue := append([]uuid.UUID{}, rootDeps...)
+	for len(queue) > 0 {
+		id := queue[0]
+		queue = queue[1:]
+		if _, done := edges[id]; done {
+			continue
+		}
+
+		deps, err := dm.getTaskDependencies(id)
+		if err != nil {
+			return nil, err
+		}
+		edges[id] = uuidsToStrings(deps)
+		queue = append(queue, deps...)
+	}
+
+	nodes := make([]dag.Node, 0, len(edges))
+	for id, deps := range edges {
+		nodes = append(nodes, &dag.FuncNode{
+			NodeID: id.String(),
+			Deps:   deps,
+			Fn:     noopNodeFn,
+		})
+	}
+	return nodes, nil
+}
+
+// uuidsToStrings converts a UUID slice to a string slice for dag node IDs.
+func uuidsToStrings(ids []uuid.UUID) []string {
+	out := make([]string, len(ids))
+	for i, id := range ids {
+		out[i] = id.String()
+	}
+	return out
+}
 
 // NewDependencyManager creates a new dependency manager
 func NewDependencyManager(db database.DatabaseInterface) *DependencyManager {
@@ -94,25 +149,30 @@ func (dm *DependencyManager) GetBlockingDependencies(dependencies []uuid.UUID) (
 	return blockingDeps, nil
 }
 
-// DetectCircularDependencies detects circular dependencies in the task graph
+// DetectCircularDependencies detects circular dependencies in the task graph.
+//
+// It builds the dependency graph reachable from taskID (whose proposed
+// immediate dependencies are `dependencies`) by traversing the DB-stored
+// dependency edges, then delegates cycle detection to the reusable
+// dev.helix.dag module's Build, which rejects any graph containing a cycle.
+// A non-nil Build error means a cycle was found and we return (true, nil),
+// preserving the existing public semantics: (circular bool, err error) where
+// err is reserved for DB-access failures during traversal.
 func (dm *DependencyManager) DetectCircularDependencies(taskID uuid.UUID, dependencies []uuid.UUID) (bool, error) {
 	if len(dependencies) == 0 {
 		return false, nil
 	}
 
-	// Build dependency graph
-	graph := make(map[uuid.UUID][]uuid.UUID)
+	nodes, err := dm.buildGraphNodes(taskID, dependencies)
+	if err != nil {
+		return false, err
+	}
 
-	// Add current task dependencies
-	graph[taskID] = dependencies
-
-	// Check each dependency for circular references
-	for _, depID := range dependencies {
-		if circular, err := dm.checkCircularDependency(depID, taskID, make(map[uuid.UUID]bool)); err != nil {
-			return false, err
-		} else if circular {
-			return true, nil
-		}
+	// dag.Build returns an error only on a cycle (every referenced node is
+	// materialised by buildGraphNodes, so dangling-dependency errors cannot
+	// occur here). A Build error therefore means a circular dependency.
+	if _, buildErr := dag.Build(nodes); buildErr != nil {
+		return true, nil
 	}
 
 	return false, nil
@@ -157,36 +217,6 @@ func (dm *DependencyManager) GetDependentTasks(taskID uuid.UUID) ([]uuid.UUID, e
 }
 
 // Helper methods
-
-func (dm *DependencyManager) checkCircularDependency(currentID uuid.UUID, targetID uuid.UUID, visited map[uuid.UUID]bool) (bool, error) {
-	if visited[currentID] {
-		return false, nil // Already visited this path
-	}
-
-	visited[currentID] = true
-
-	// Get dependencies of current task
-	dependencies, err := dm.getTaskDependencies(currentID)
-	if err != nil {
-		return false, err
-	}
-
-	// Check if target ID is in dependencies
-	for _, depID := range dependencies {
-		if depID == targetID {
-			return true, nil // Circular dependency found
-		}
-
-		// Recursively check dependencies
-		if circular, err := dm.checkCircularDependency(depID, targetID, visited); err != nil {
-			return false, err
-		} else if circular {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
 
 func (dm *DependencyManager) getTaskDependencies(taskID uuid.UUID) ([]uuid.UUID, error) {
 	ctx := context.Background()
