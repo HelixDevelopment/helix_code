@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -174,8 +175,16 @@ func (tui *TerminalUI) Initialize() error {
 		tui.qaEngine = qaEngine
 	}
 
-	// Initialize LLM manager
+	// Initialize LLM manager and register cloud providers discovered from
+	// environment API keys (CONST-036 / BLUFF-002). Without this, the chat
+	// showed "Available Models Total: 0" because no provider was ever
+	// registered. registerEnvProviders only registers a provider when its key
+	// env var is present and non-placeholder, so a no-key environment still
+	// honestly reports zero models rather than a fabricated list.
 	tui.llmManager = llm.NewModelManager()
+	if n := registerEnvProviders(tui.llmManager); n > 0 {
+		log.Printf("✅ TUI: registered %d cloud LLM provider(s) from environment keys", n)
+	}
 	tui.chatHistory = make([]llm.Message, 0)
 
 	// Initialize server for API calls
@@ -1661,8 +1670,16 @@ func (tui *TerminalUI) showModelSelector() {
 	list := tview.NewList()
 	list.SetBorder(true).SetTitle("Select Model")
 
-	// Get available models
+	// Get available models. Sort deterministically (provider, then name) so the
+	// picker order — and its 1-9 digit shortcuts — are stable across runs
+	// (GetAvailableModels iterates a map, so order would otherwise vary).
 	models := tui.llmManager.GetAvailableModels()
+	sort.Slice(models, func(i, j int) bool {
+		if models[i].Provider != models[j].Provider {
+			return models[i].Provider < models[j].Provider
+		}
+		return models[i].Name < models[j].Name
+	})
 
 	if len(models) == 0 {
 		list.AddItem(tui.t("terminal_ui_models_none_available"), tui.t("terminal_ui_models_configure_hint"), 0, nil)
