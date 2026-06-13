@@ -1405,8 +1405,11 @@ func (tui *TerminalUI) showLLM() {
 		AddItem(mainContent, 0, 1, true).
 		AddItem(actions, 3, 0, false)
 
-	tui.content.SwitchToPage("llm")
 	tui.content.AddPage("llm", llmView, true, true)
+	tui.content.SwitchToPage("llm")
+	// Give the chat input app-level focus so typed text (prompts, /model) goes
+	// to it — otherwise menu-letters in the text leak to the global hotkey nav.
+	tui.app.SetFocus(tui.chatInput)
 }
 
 // createLLMInfoPanel creates the LLM information panel
