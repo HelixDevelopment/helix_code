@@ -679,3 +679,32 @@ func TestStoreTaskInDB_PropagatesDBError(t *testing.T) {
 		"storeTaskInDB must propagate the underlying db error so callers can react "+
 			"(was: silent nil-return that hid every DB failure)")
 }
+
+// TestNewTaskManager_TypedNilDB_NoPanic is the §11.4.134 regression guard for
+// the degraded-mode typed-nil-interface crash: the TUI builds the manager via
+// NewTaskManager(db, rds) where db has static type *database.Database and is a
+// nil pointer when the DB is offline. A nil *database.Database assigned into the
+// database.DatabaseInterface parameter is a NON-nil interface wrapping a typed
+// nil, which (before the NewTaskManager normalization) defeated the
+// `tm.db == nil` guard and PANICKED on the first DB call. This asserts the
+// normalization makes persistence cleanly disabled (sentinel error, no panic) —
+// matching the EXACT production construction pattern, unlike the &TaskManager{}
+// tests above which build a true-nil field and so never reproduced the crash.
+func TestNewTaskManager_TypedNilDB_NoPanic(t *testing.T) {
+	var nilDB *database.Database // typed-nil pointer, exactly as main.go's `db` in degraded mode
+	tm := NewTaskManager(nilDB, nil)
+
+	// storeTaskInDB must surface the sentinel, not panic — proving the
+	// normalization turned the typed-nil interface into a true nil so the guard
+	// fires.
+	err := tm.storeTaskInDB(&Task{ID: uuid.New()})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrTaskPersistenceNotWired)
+
+	// CreateTask is the user-reachable path (the TUI "create task" form). In
+	// degraded mode it must return an error WITHOUT crashing the app.
+	require.NotPanics(t, func() {
+		_, cerr := tm.CreateTask(TaskTypePlanning, map[string]interface{}{"x": 1}, PriorityNormal, CriticalityLow, nil)
+		require.Error(t, cerr, "CreateTask in DB-degraded mode must error cleanly, not panic")
+	})
+}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"sync"
 	"time"
 
@@ -177,6 +178,18 @@ type SubtaskData struct {
 
 // NewTaskManager creates a new task manager
 func NewTaskManager(db database.DatabaseInterface, redisClient *redis.Client) *TaskManager {
+	// Normalize a typed-nil interface to a TRUE nil. A caller that passes a
+	// (*database.Database)(nil) (e.g. the TUI in DB-degraded mode) yields a
+	// NON-nil interface wrapping a typed nil; that would defeat every
+	// `db == nil` guard downstream (storeTaskInDB, CheckpointManager,
+	// DependencyManager) and panic on the first DB call instead of cleanly
+	// returning ErrTaskPersistenceNotWired. Persistence must be HONESTLY
+	// disabled, never crash (§11.4).
+	if db != nil {
+		if rv := reflect.ValueOf(db); rv.Kind() == reflect.Ptr && rv.IsNil() {
+			db = nil
+		}
+	}
 	return &TaskManager{
 		db:            db,
 		redis:         redisClient,

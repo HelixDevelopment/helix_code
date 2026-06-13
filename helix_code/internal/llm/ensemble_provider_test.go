@@ -657,6 +657,8 @@ func TestIsDefinitiveModelError_ClassifiesByErrorClass(t *testing.T) {
 		"503 service unavailable",
 		"connection refused",
 		"the server is overloaded, please try again",
+		"429 rate limit: model not found for your tier",
+		"503 service unavailable: model is not a valid model id right now",
 	}
 	for _, m := range transient {
 		if isDefinitiveModelError(errors.New(m)) {
@@ -720,8 +722,8 @@ func (s *streamSensitiveStub) CountTokens(t string) (int, error) { return len(t)
 // votes on complete responses). If it forwards Stream=true, every member's
 // buffered Generate fails to decode the SSE body and the ensemble all-fails.
 //
-// Paired §1.1 mutation: removing `base.Stream = false` (and the
-// generateMemberResilient `reqCopy.Stream = false`) makes the stub return the
+// Paired §1.1 mutation: removing the single `base.Stream = false` (the resilient
+// path's `reqCopy := base` inherits it) makes the stub return the
 // SSE-decode error for every member → the ensemble returns an error → this test
 // FAILs, proving the assertion catches the regression.
 func TestEnsembleProvider_DoesNotForwardStreamToMembers(t *testing.T) {
@@ -806,5 +808,37 @@ func TestEnsembleProvider_WarmCache_OnceGuardPreventsDoubleFanout(t *testing.T) 
 
 	if c := atomic.LoadInt32(&stub.calls); c != 1 {
 		t.Fatalf("once-guard: member probed %d times during concurrent WarmCache, want exactly 1", c)
+	}
+}
+
+// TestEnsembleProvider_OrderedCandidatesSkipsDeadModel is the W1 independent
+// guard: it asserts the dead-model skip in orderedCandidates is load-bearing
+// ON ITS OWN, with NO cached working model to mask it. (The
+// DeadModelSkippedOnSecondGenerate test is satisfied by the working-model cache
+// being tried first, so it does not exercise the orderedCandidates skip.)
+// Paired §1.1: removing the `dead[id]` skip in orderedCandidates makes the dead
+// model reappear in the candidate list -> this FAILs.
+func TestEnsembleProvider_OrderedCandidatesSkipsDeadModel(t *testing.T) {
+	stub := &modelAwareStub{ptype: ProviderTypeGroq, name: "Groq", ids: []string{"dead-1", "good-2"}, goodModel: "good-2"}
+	ens := NewEnsembleProvider(EnsembleProviderConfig{Members: []Provider{stub}, Timeout: 5 * time.Second})
+
+	// Mark the lead model dead WITHOUT ever caching a working model — so only
+	// the orderedCandidates dead-skip can exclude it.
+	ens.markDead("Groq", "dead-1")
+
+	cands := ens.orderedCandidates(context.Background(), stub)
+	for _, c := range cands {
+		if c == "dead-1" {
+			t.Fatalf("orderedCandidates MUST skip the dead model; got %v", cands)
+		}
+	}
+	found := false
+	for _, c := range cands {
+		if c == "good-2" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("orderedCandidates dropped a live model; got %v", cands)
 	}
 }

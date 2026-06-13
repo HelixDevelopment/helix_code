@@ -171,8 +171,18 @@ func (tui *TerminalUI) Initialize() error {
 		rds = nil
 	}
 
-	// Initialize components
-	tui.taskManager = task.NewTaskManager(db, rds)
+	// Initialize components. db has static type *database.Database; assigning a
+	// typed-nil pointer directly into the database.DatabaseInterface parameter
+	// would yield a NON-nil interface wrapping a typed nil, defeating the
+	// `tm.db == nil` guard in storeTaskInDB and panicking on the first DB call
+	// in degraded mode. Pass a TRUE nil interface so the guard fires and DB
+	// persistence is cleanly disabled (anti-bluff §11.4: honest unavailable,
+	// never a crash).
+	var dbIface database.DatabaseInterface
+	if db != nil {
+		dbIface = db
+	}
+	tui.taskManager = task.NewTaskManager(dbIface, rds)
 
 	// Initialize worker manager with in-memory repository for standalone UI
 	workerRepo := worker.NewInMemoryWorkerRepository()
