@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"dev.helix.dag"
+	pipeline "dev.helix.pipeline"
 
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/project"
@@ -368,7 +369,11 @@ func (e *Executor) gatherProjectContext(proj *project.Project) (*ProjectContext,
 		Dependencies: make([]string, 0),
 	}
 
-	// Walk project directory to collect file info
+	// Walk project directory to collect candidate files (paths + entry metadata).
+	// The filter (isSourceFile) and map (→ FileInfo) stages are expressed as a
+	// real dev.helix.pipeline streaming pipeline below, replacing the previous
+	// imperative filter/append loop.
+	candidates := make([]fileCandidate, 0)
 	err := filepath.WalkDir(proj.Path, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil // Skip files we can't access
@@ -383,23 +388,11 @@ func (e *Executor) gatherProjectContext(proj *project.Project) (*ProjectContext,
 			return nil
 		}
 
-		// Check for relevant source files
-		ext := filepath.Ext(path)
-		if isSourceFile(ext) {
-			relPath, _ := filepath.Rel(proj.Path, path)
-			info, _ := d.Info()
-			size := int64(0)
-			if info != nil {
-				size = info.Size()
-			}
-			ctx.Files = append(ctx.Files, FileInfo{
-				Path:    relPath,
-				Size:    size,
-				Type:    ext,
-				IsEntry: isEntryPoint(relPath, proj.Type),
-			})
+		size := int64(0)
+		if info, infoErr := d.Info(); infoErr == nil && info != nil {
+			size = info.Size()
 		}
-
+		candidates = append(candidates, fileCandidate{path: path, size: size})
 		return nil
 	})
 
@@ -407,10 +400,42 @@ func (e *Executor) gatherProjectContext(proj *project.Project) (*ProjectContext,
 		return nil, err
 	}
 
+	// Filter → Map → Collect via the reusable dev.helix.pipeline streaming runtime.
+	//   FromSlice(candidates) → Filter(isSourceFile) → Map(toFileInfo) → Collect
+	stream := pipeline.FromSlice(candidates)
+	filtered := pipeline.Filter(func(c fileCandidate) bool {
+		return isSourceFile(filepath.Ext(c.path))
+	})(stream)
+	mapped := pipeline.Map(func(c fileCandidate) (FileInfo, error) {
+		relPath, _ := filepath.Rel(proj.Path, c.path)
+		ext := filepath.Ext(c.path)
+		return FileInfo{
+			Path:    relPath,
+			Size:    c.size,
+			Type:    ext,
+			IsEntry: isEntryPoint(relPath, proj.Type),
+		}, nil
+	})(filtered)
+
+	files, err := pipeline.Collect(context.Background(), mapped)
+	if err != nil {
+		return nil, fmt.Errorf("pipeline collection failed: %w", err)
+	}
+	if files != nil {
+		ctx.Files = files
+	}
+
 	// Detect dependencies
 	ctx.Dependencies = e.detectDependencies(proj)
 
 	return ctx, nil
+}
+
+// fileCandidate is a walked file path plus its size, fed into the
+// dev.helix.pipeline filter/map stage in gatherProjectContext.
+type fileCandidate struct {
+	path string
+	size int64
 }
 
 // ProjectContext holds analysis context
