@@ -2285,11 +2285,80 @@ func (tui *TerminalUI) showStartQAForm() {
 	tui.pages.AddPage("startQAForm", modal, true, true)
 }
 
+// menuHotkeyTarget maps a key event to the sidebar page it should navigate to,
+// honouring focus: when a text field / form / list (chat input, model picker,
+// new-task form, the sidebar list itself) holds focus, the event is passed
+// through (returns "", false) so typing, picker selection, and the sidebar's
+// own shortcuts keep working. Otherwise a menu-hotkey rune resolves to its page.
+func menuHotkeyTarget(focus tview.Primitive, ev *tcell.EventKey) (string, bool) {
+	switch focus.(type) {
+	case *tview.InputField, *tview.TextArea, *tview.Form, *tview.List:
+		return "", false
+	}
+	if ev == nil || ev.Key() != tcell.KeyRune {
+		return "", false
+	}
+	switch ev.Rune() {
+	case 'd':
+		return "dashboard", true
+	case 't':
+		return "tasks", true
+	case 'w':
+		return "workers", true
+	case 'p':
+		return "projects", true
+	case 's':
+		return "sessions", true
+	case 'l':
+		return "llm", true
+	case 'q':
+		return "qa", true
+	case 'c':
+		return "settings", true
+	}
+	return "", false
+}
+
+// navigateTo dispatches to the show* function for a sidebar page name.
+func (tui *TerminalUI) navigateTo(page string) {
+	switch page {
+	case "dashboard":
+		tui.showDashboard()
+	case "tasks":
+		tui.showTasks()
+	case "workers":
+		tui.showWorkers()
+	case "projects":
+		tui.showProjects()
+	case "sessions":
+		tui.showSessions()
+	case "llm":
+		tui.showLLM()
+	case "qa":
+		tui.showQA()
+	case "settings":
+		tui.showSettings()
+	}
+}
+
 // Run starts the Terminal UI application
 func (tui *TerminalUI) Run() error {
 	// Setup signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Global menu-hotkey navigation: route the sidebar shortcuts
+	// (d/t/w/p/s/l/q/c) from anywhere, EXCEPT when a text field / form / list
+	// (chat input, model picker, forms) holds focus, so typing and pickers
+	// still work. Fixes the keyboard-navigation dead-end where focus left the
+	// sidebar and no key could return to it (the LLM chat was unreachable).
+	tui.app.SetInputCapture(func(ev *tcell.EventKey) *tcell.EventKey {
+		if page, ok := menuHotkeyTarget(tui.app.GetFocus(), ev); ok {
+			tui.navigateTo(page)
+			return nil
+		}
+		return ev
+	})
 
 	// Run the application in a goroutine
 	go func() {
