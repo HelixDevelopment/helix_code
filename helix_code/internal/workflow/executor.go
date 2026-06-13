@@ -346,7 +346,7 @@ func (e *Executor) executeStep(ctx context.Context, step *Step, proj *project.Pr
 // executeAnalysisStep executes an analysis step using LLM
 func (e *Executor) executeAnalysisStep(ctx context.Context, step *Step, proj *project.Project) (string, error) {
 	// Gather project context
-	projectContext, err := e.gatherProjectContext(proj)
+	projectContext, err := e.gatherProjectContext(ctx, proj)
 	if err != nil {
 		return "", fmt.Errorf("failed to gather project context: %w", err)
 	}
@@ -360,8 +360,10 @@ func (e *Executor) executeAnalysisStep(ctx context.Context, step *Step, proj *pr
 	return e.performStaticAnalysis(ctx, step, proj, projectContext)
 }
 
-// gatherProjectContext collects relevant context from the project
-func (e *Executor) gatherProjectContext(proj *project.Project) (*ProjectContext, error) {
+// gatherProjectContext collects relevant context from the project. reqCtx is
+// the caller's request/workflow context, propagated to the pipeline so a
+// cancelled workflow interrupts the file-collection stages.
+func (e *Executor) gatherProjectContext(reqCtx context.Context, proj *project.Project) (*ProjectContext, error) {
 	ctx := &ProjectContext{
 		ProjectPath:  proj.Path,
 		ProjectType:  proj.Type,
@@ -417,7 +419,7 @@ func (e *Executor) gatherProjectContext(proj *project.Project) (*ProjectContext,
 		}, nil
 	})(filtered)
 
-	files, err := pipeline.Collect(context.Background(), mapped)
+	files, err := pipeline.Collect(reqCtx, mapped)
 	if err != nil {
 		return nil, fmt.Errorf("pipeline collection failed: %w", err)
 	}

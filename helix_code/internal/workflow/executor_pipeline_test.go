@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"sort"
@@ -43,7 +44,7 @@ func TestGatherProjectContext_PipelineFilterMap(t *testing.T) {
 	proj := &project.Project{Path: root, Type: "go"}
 	e := NewExecutor(project.NewManager())
 
-	ctx, err := e.gatherProjectContext(proj)
+	ctx, err := e.gatherProjectContext(context.Background(), proj)
 	require.NoError(t, err)
 	require.NotNil(t, ctx)
 
