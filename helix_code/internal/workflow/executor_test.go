@@ -188,25 +188,32 @@ func TestExecuteStep_UnknownAction(t *testing.T) {
 	assert.Contains(t, err.Error(), "unknown step action")
 }
 
-func TestAreDependenciesCompleted(t *testing.T) {
+// TestDependencyResolution_InSliceOrder reconciles the former
+// TestAreDependenciesCompleted: dependency resolution is now performed by the
+// dev.helix.dag scheduler inside executeWorkflow, not by a standalone
+// areDependenciesCompleted method. It asserts that when a step's dependency
+// precedes it in the Steps slice (the easy case the old loop also handled),
+// every step still reaches StepStatusCompleted.
+func TestDependencyResolution_InSliceOrder(t *testing.T) {
 	projectManager := project.NewManager()
-	executor := NewExecutor(projectManager)
+	executor := NewExecutorWithLLM(projectManager, nil, &ExecutorConfig{MaxConcurrentSteps: 4})
 
-	workflow := &Workflow{
+	proj := &project.Project{Type: "generic", Path: "/tmp"}
+
+	wf := &Workflow{
+		ID:     "in-order",
+		Status: WorkflowStatusPending,
 		Steps: []Step{
-			{ID: "step1", Status: StepStatusCompleted},
-			{ID: "step2", Status: StepStatusPending},
+			{ID: "step1", Action: StepActionExecuteCommand, Description: "echo step1", Status: StepStatusPending},
+			{ID: "step2", Action: StepActionExecuteCommand, Description: "echo step2", Dependencies: []string{"step1"}, Status: StepStatusPending},
 		},
 	}
 
-	step := &Step{
-		Dependencies: []string{"step1"},
-	}
+	executor.executeWorkflow(context.Background(), wf, proj)
 
-	assert.True(t, executor.areDependenciesCompleted(workflow, step))
-
-	step.Dependencies = []string{"step1", "step2"}
-	assert.False(t, executor.areDependenciesCompleted(workflow, step))
+	assert.Equal(t, WorkflowStatusCompleted, wf.GetStatus())
+	assert.Equal(t, StepStatusCompleted, wf.getStepStatus(0))
+	assert.Equal(t, StepStatusCompleted, wf.getStepStatus(1))
 }
 
 // ========================================

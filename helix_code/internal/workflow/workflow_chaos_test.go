@@ -56,11 +56,17 @@ func TestWorkflow_Chaos_CancelDuringExecution(t *testing.T) {
 		func(ctx context.Context, rec *stresschaos.ChaosRecorder) {
 			// A workflow whose first step blocks in a real `sleep 30` command —
 			// long enough that the injected cancellation lands mid-execution.
+			// `after` DEPENDS ON `block`: under the DAG scheduler, independent
+			// steps may run concurrently, so the "after must not complete when
+			// block is killed" invariant only holds when `after` genuinely
+			// follows `block`. With the dependency edge the DAG cannot start
+			// `after` until `block` succeeds — and `block` is killed mid-run,
+			// so `after` is never dispatched (tainted/skipped under fail-fast).
 			wf := &Workflow{
 				ID: "long",
 				Steps: []Step{
 					{ID: "block", Description: "sleep 30", Action: StepActionExecuteCommand, Status: StepStatusPending},
-					{ID: "after", Description: "echo never", Action: StepActionExecuteCommand, Status: StepStatusPending},
+					{ID: "after", Description: "echo never", Action: StepActionExecuteCommand, Dependencies: []string{"block"}, Status: StepStatusPending},
 				},
 				Status: WorkflowStatusPending,
 			}

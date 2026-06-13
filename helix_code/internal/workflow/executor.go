@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"dev.helix.dag"
+
 	"dev.helix.code/internal/llm"
 	"dev.helix.code/internal/project"
 )
@@ -235,43 +237,89 @@ func (e *Executor) ExecuteRefactoringWorkflow(ctx context.Context, projectID str
 	return workflow, nil
 }
 
-// executeWorkflow executes a workflow.
+// executeWorkflow executes a workflow's steps as a DAG, honoring declared
+// step dependencies regardless of their order in the Steps slice and running
+// independent steps concurrently up to e.config.MaxConcurrentSteps.
 //
-// All writes to workflow.Status, workflow.UpdatedAt, and per-step
-// Status/Error go through the workflow's mutex so concurrent readers
-// (tests, status polling) do not race.
+// Scheduling is delegated to the reusable dev.helix.dag scheduler: one DAG
+// node is built per Step (NodeID = Step.ID, Deps = Step.Dependencies). The
+// scheduler computes the ready-set topologically, so a step whose dependency
+// appears LATER in the slice still runs after that dependency completes —
+// fixing the prior slice-order loop that permanently skipped such steps.
+//
+// Concurrency: each node's Fn may run on a separate goroutine, so EVERY write
+// to workflow.Status, workflow.UpdatedAt, and per-step Status/Error goes
+// through the workflow's mutex-guarded methods (setStepStatus / SetStatus).
+// Executor metrics are guarded by their own mutex inside executeStep.
 func (e *Executor) executeWorkflow(ctx context.Context, workflow *Workflow, proj *project.Project) {
 	workflow.SetStatus(WorkflowStatusRunning)
 
+	// Build one DAG node per step. The Fn closure captures the step index so
+	// it routes status writes through the mutex-guarded setStepStatus.
+	nodes := make([]dag.Node, 0, len(workflow.Steps))
 	for i := range workflow.Steps {
+		i := i // capture loop variable for the closure
 		step := &workflow.Steps[i]
-
-		// Check if all dependencies are completed
-		if !e.areDependenciesCompleted(workflow, step) {
-			workflow.setStepStatus(i, StepStatusSkipped, "")
-			continue
-		}
-
-		workflow.setStepStatus(i, StepStatusRunning, "")
-
-		// Execute step. executeStep reads/writes only fields of `step`
-		// that the executor goroutine owns at this point (no concurrent
-		// reader observes Step internals before completion), so passing
-		// the bare pointer is safe.
-		result, err := e.executeStep(ctx, step, proj)
-		if err != nil {
-			workflow.setStepStatus(i, StepStatusFailed, err.Error())
-			workflow.SetStatus(WorkflowStatusFailed)
-			return
-		}
-
-		// Step completed. The `result` check below preserves prior
-		// behaviour (re-asserting completed status when non-empty).
-		_ = result
-		workflow.setStepStatus(i, StepStatusCompleted, "")
+		nodes = append(nodes, &dag.FuncNode{
+			NodeID: step.ID,
+			Deps:   step.Dependencies,
+			Fn: func(fnCtx context.Context, _ dag.Inputs) (dag.Output, error) {
+				workflow.setStepStatus(i, StepStatusRunning, "")
+				result, err := e.executeStep(fnCtx, &workflow.Steps[i], proj)
+				if err != nil {
+					return nil, err
+				}
+				return result, nil
+			},
+		})
 	}
 
+	// Validate the graph: unique IDs, all deps exist, acyclic. A cycle or an
+	// unknown dependency is a real configuration error that the old slice-order
+	// loop silently mis-skipped — now it fails the workflow with the cause.
+	d, err := dag.Build(nodes)
+	if err != nil {
+		workflow.SetStatus(WorkflowStatusFailed)
+		return
+	}
+
+	// Run with fail-fast on first error (preserving prior behaviour: the old
+	// loop returned immediately on the first failed step).
+	res, runErr := dag.NewScheduler().Run(ctx, d, dag.Options{
+		Parallelism: e.config.MaxConcurrentSteps,
+		Failure:     dag.FailFast,
+	})
+
+	// Map results back onto step statuses under the workflow mutex.
+	for i := range workflow.Steps {
+		id := workflow.Steps[i].ID
+		switch {
+		case res != nil && res.Failed[id] != nil:
+			workflow.setStepStatus(i, StepStatusFailed, res.Failed[id].Error())
+		case res != nil && containsID(res.Skipped, id):
+			workflow.setStepStatus(i, StepStatusSkipped, "")
+		case res != nil:
+			if _, ok := res.Outputs[id]; ok {
+				workflow.setStepStatus(i, StepStatusCompleted, "")
+			}
+		}
+	}
+
+	if runErr != nil {
+		workflow.SetStatus(WorkflowStatusFailed)
+		return
+	}
 	workflow.SetStatus(WorkflowStatusCompleted)
+}
+
+// containsID reports whether id is present in ids.
+func containsID(ids []string, id string) bool {
+	for _, v := range ids {
+		if v == id {
+			return true
+		}
+	}
+	return false
 }
 
 // executeStep executes a single workflow step
@@ -955,23 +1003,6 @@ func (e *Executor) executeBuildStep(ctx context.Context, step *Step, proj *proje
 	}
 
 	return string(output), nil
-}
-
-// areDependenciesCompleted checks if all step dependencies are completed
-func (e *Executor) areDependenciesCompleted(workflow *Workflow, step *Step) bool {
-	for _, depID := range step.Dependencies {
-		depCompleted := false
-		for _, s := range workflow.Steps {
-			if s.ID == depID && s.Status == StepStatusCompleted {
-				depCompleted = true
-				break
-			}
-		}
-		if !depCompleted {
-			return false
-		}
-	}
-	return true
 }
 
 // createPlanningSteps creates steps for planning workflow

@@ -4,6 +4,7 @@ go 1.26
 
 require (
 	dev.helix.agent v0.0.0-00010101000000-000000000000
+	dev.helix.dag v0.0.0-00010101000000-000000000000
 	digital.vasic.concurrency v0.0.0-00010101000000-000000000000
 	digital.vasic.containers v0.0.0-00010101000000-000000000000
 	digital.vasic.debate v0.0.0-00010101000000-000000000000
@@ -217,3 +218,5 @@ replace digital.vasic.helixspecifier => ../submodules/helix_specifier
 replace digital.vasic.lazy => ../submodules/lazy
 
 replace dev.helix.agent => ../submodules/helix_agent
+
+replace dev.helix.dag => ../submodules/dag_orchestrator

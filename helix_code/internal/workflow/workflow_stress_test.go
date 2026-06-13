@@ -320,20 +320,28 @@ func TestWorkflow_Stress_BoundaryConditions(t *testing.T) {
 		}
 	})
 
-	// Off-by-one: a step depending on a non-existent dependency must be Skipped,
-	// and the workflow still completes (no deadlock waiting on a missing dep).
-	t.Run("missing_dependency_skips", func(t *testing.T) {
+	// Off-by-one: a step depending on a NON-EXISTENT dependency.
+	//
+	// Reconciled for the dev.helix.dag integration (§11.4.120): the former
+	// slice-order loop SILENTLY mis-skipped such a step and reported the
+	// workflow Completed — hiding a real graph-configuration error from the
+	// caller. The DAG validates the graph up front (dag.Build rejects an
+	// unknown dependency), so an unresolvable dependency now FAILS the
+	// workflow with the cause instead of being swept under a green status.
+	// This is the intended new, correct capability, not a regression.
+	t.Run("missing_dependency_fails_workflow", func(t *testing.T) {
 		wf := &Workflow{
 			ID:    "dep",
 			Steps: []Step{{ID: "a", Description: "echo a", Action: StepActionExecuteCommand, Status: StepStatusPending, Dependencies: []string{"does-not-exist"}}},
 			Status: WorkflowStatusPending,
 		}
 		exec.executeWorkflow(ctx, wf, proj)
-		if st := wf.getStepStatus(0); st != StepStatusSkipped {
-			t.Fatalf("step with missing dependency status = %s, want skipped", st)
+		if got := wf.GetStatus(); got != WorkflowStatusFailed {
+			t.Fatalf("workflow with an unknown step dependency status = %s, want failed (dag.Build rejects the graph)", got)
 		}
-		if got := wf.GetStatus(); got != WorkflowStatusCompleted {
-			t.Fatalf("workflow with all-skipped steps status = %s, want completed", got)
+		// The step must NOT be marked Completed — the invalid graph was never run.
+		if st := wf.getStepStatus(0); st == StepStatusCompleted {
+			t.Fatalf("step with unresolvable dependency must not complete; status = %s", st)
 		}
 	})
 
