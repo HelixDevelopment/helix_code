@@ -558,3 +558,14 @@ Backend /llm/generate and /llm/stream endpoints plus frontend wiring landed (com
 
 Live /debate e2e (debate_e2e_test.go) shows CONCLUSION/Summary print literal 'debate.orchestrator.consensus_conclusion' i18n message-key instead of resolved prose; per-agent LLM content is real, consensus synthesis layer in submodules/debate_orchestrator does not resolve the key. §11.4.118 discovery finding.
 
+## HXC-080 — /debate and /specify broken at runtime — single agent vs 2-min
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** cmd/cli+TUI register 2 agents; specify_e2e_test.go LIVE-PROVEN Success=true qualityScore=0.86 real output PASS 14.69s (conductor podman ollama)
+**Severity:** High
+**Created-By:** Claude
+**Assigned-To:** Claude
+
+handleDebate/handleSpecify (cmd/cli) + TUI registered ONE AgentSpec but orchestrator MinAgentsPerDebate=2; users hit 'insufficient agents (have 1, need 2)'. Round-7 debate proof used a 2-agent test, masking the 1-agent production gap (§11.4.108).
+
